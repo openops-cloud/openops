@@ -304,6 +304,7 @@ function TestRunLimitsForm({
                                           field.onChange(number ?? min);
                                         }}
                                         disabled={!isEnabled}
+                                        integerOnly={true}
                                         className="h-8 w-[64px] outline-none"
                                       />
                                     </FormControl>

@@ -16,6 +16,7 @@ export interface NumericInputProps
   min?: number;
   max?: number;
   step?: number;
+  integerOnly?: boolean;
 }
 
 const extractValue = (value: number | undefined): string => {
@@ -24,7 +25,17 @@ const extractValue = (value: number | undefined): string => {
 
 const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
   (
-    { className, value, onChange, min, max, step = 1, disabled, ...props },
+    {
+      className,
+      value,
+      onChange,
+      min,
+      max,
+      step = 1,
+      integerOnly = false,
+      disabled,
+      ...props
+    },
     ref,
   ) => {
     const [internalValue, setInternalValue] = useState<string>(
@@ -37,7 +48,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
 
     const handleChange = useCallback(
       (newValue: string) => {
-        const validPattern = /^-?\d*\.?\d*$/;
+        const validPattern = integerOnly ? /^-?\d*$/ : /^-?\d*\.?\d*$/;
         if (!validPattern.test(newValue)) {
           return;
         }
@@ -49,12 +60,14 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           return;
         }
 
-        const numValue = Number.parseFloat(newValue);
+        const numValue = integerOnly
+          ? Number.parseInt(newValue, 10)
+          : Number.parseFloat(newValue);
         if (!Number.isNaN(numValue)) {
           onChange?.(numValue);
         }
       },
-      [onChange],
+      [onChange, integerOnly],
     );
 
     const handleIncrement = useCallback(() => {
@@ -132,7 +145,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
       <div className="relative flex items-center">
         <Input
           type="text"
-          inputMode="decimal"
+          inputMode={integerOnly ? 'numeric' : 'decimal'}
           className={cn('pr-8 overflow-y-hidden', className)}
           ref={ref}
           value={internalValue}
