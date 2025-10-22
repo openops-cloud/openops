@@ -1,9 +1,7 @@
-import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
-import { buildServiceNowApiUrl } from '../lib/build-api-url';
-import { generateAuthHeader } from '../lib/generate-auth-header';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
+import { runDeleteRecordAction } from './action-runners';
 
 export const deleteRecordAction = createAction({
   auth: servicenowAuth,
@@ -20,24 +18,11 @@ export const deleteRecordAction = createAction({
     }),
   },
   async run(context) {
-    const auth = context.auth as ServiceNowAuth;
-    const { tableName, sysId } = context.propsValue;
-
-    await httpClient.sendRequest({
-      method: HttpMethod.DELETE,
-      url: buildServiceNowApiUrl(auth, `${tableName}/${sysId}`),
-      headers: {
-        ...generateAuthHeader({
-          username: auth.username,
-          password: auth.password,
-        }),
-        Accept: 'application/json',
-      },
+    return runDeleteRecordAction({
+      auth: context.auth as ServiceNowAuth,
+      tableName: context.propsValue.tableName as string,
+      sysId: context.propsValue.sysId as string,
+      recordType: 'record',
     });
-
-    return {
-      success: true,
-      message: `The record with id "${sysId}" was deleted`,
-    };
   },
 });
