@@ -95,7 +95,6 @@ describe('get_records action', () => {
           filters: [],
         },
         limit: 100,
-        offset: 0,
       },
     };
 
@@ -130,7 +129,6 @@ describe('get_records action', () => {
           filters: [],
         },
         limit: 100,
-        offset: 0,
       },
     };
 
@@ -171,7 +169,6 @@ describe('get_records action', () => {
           ],
         },
         limit: 100,
-        offset: 0,
       },
     };
 
@@ -210,7 +207,6 @@ describe('get_records action', () => {
           ],
         },
         limit: 100,
-        offset: 0,
       },
     };
 
@@ -249,7 +245,6 @@ describe('get_records action', () => {
           ],
         },
         limit: 100,
-        offset: 0,
       },
     };
 
