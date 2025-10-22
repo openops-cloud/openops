@@ -28,8 +28,6 @@ export function setLangfuseSessionId(
       ...(userId ? { userId } : {}),
       ...(input ? { input } : {}),
     });
-
-    logger.info(`Set Langfuse session ID: ${sessionId}`);
   } catch (error) {
     logger.error('Failed to set Langfuse session ID', error);
   }
@@ -56,15 +54,10 @@ export async function withLangfuseSession<T>(
   }
 
   try {
-    // Set session, user, and input on the active trace
-    // This must be called BEFORE the AI SDK creates its spans
     setLangfuseSessionId(sessionId, userId, input);
-
-    logger.info(`Started Langfuse session: ${sessionId}`);
-
     return await fn();
   } catch (error) {
-    logger.error('Error in Langfuse session', error);
+    logger.error('Error setting Langfuse session', error);
     throw error;
   }
 }

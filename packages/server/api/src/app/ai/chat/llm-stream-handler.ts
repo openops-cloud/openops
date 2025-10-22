@@ -74,9 +74,6 @@ export function getLLMAsyncStream(
       updateActiveObservation({
         output: outputText,
       });
-      updateActiveTrace({
-        output: outputText,
-      });
 
       await onFinish?.(result);
       trace.getActiveSpan()?.end();
