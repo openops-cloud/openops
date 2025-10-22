@@ -21,8 +21,7 @@ export function shouldRecalculateTestRunActionLimits(
     operation.type === FlowOperationType.DELETE_ACTION ||
     operation.type === FlowOperationType.UPDATE_ACTION ||
     operation.type === FlowOperationType.PASTE_ACTIONS ||
-    operation.type === FlowOperationType.IMPORT_FLOW ||
-    operation.type === FlowOperationType.USE_AS_DRAFT
+    operation.type === FlowOperationType.IMPORT_FLOW
   );
 }
 
