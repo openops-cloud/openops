@@ -1,6 +1,7 @@
 import { Type } from '@sinclair/typebox';
 import { PropertyContext } from '../../context';
-import { BasePropertySchema, TMandatoryPropertyValue } from './common';
+import { ValidationInputType } from '../../validators/types';
+import { BasePropertySchema, TPropertyValue } from './common';
 import {
   StaticDropdownProperty,
   StaticMultiSelectDropdownProperty,
@@ -28,7 +29,7 @@ export const DynamicProperties = Type.Composite([
     refreshers: Type.Array(Type.String()),
   }),
   BasePropertySchema,
-  TMandatoryPropertyValue(Type.Unknown(), PropertyType.DYNAMIC),
+  TPropertyValue(Type.Unknown(), PropertyType.DYNAMIC),
 ]);
 
 export type DynamicProperties<R extends boolean> = BasePropertySchema & {
@@ -37,4 +38,9 @@ export type DynamicProperties<R extends boolean> = BasePropertySchema & {
     ctx: PropertyContext,
   ) => Promise<Record<string, DynamicProp>>;
   refreshers: string[];
-} & TMandatoryPropertyValue<DynamicPropsValue, PropertyType.DYNAMIC>;
+} & TPropertyValue<
+    DynamicPropsValue,
+    PropertyType.DYNAMIC,
+    ValidationInputType.ANY,
+    true
+  >;

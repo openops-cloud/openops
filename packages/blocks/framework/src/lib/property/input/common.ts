@@ -16,26 +16,6 @@ export const SupportsAISchema = Type.Object({
 
 export type SupportsAISchema = Static<typeof SupportsAISchema>;
 
-export const TMandatoryPropertyValue = <
-  T extends TSchema,
-  U extends PropertyType,
->(
-  T: T,
-  propertyType: U,
-): TObject =>
-  Type.Object({
-    type: Type.Literal(propertyType),
-    required: Type.Literal(true),
-    defaultValue: Type.Optional(Type.Any()),
-  });
-
-export type TMandatoryPropertyValue<T, U extends PropertyType> = TPropertyValue<
-  T,
-  U,
-  ValidationInputType.ANY,
-  true
->;
-
 export const TPropertyValue = <T extends TSchema, U extends PropertyType>(
   T: T,
   propertyType: U,
