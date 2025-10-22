@@ -67,7 +67,7 @@ describe('advisorAction', () => {
       },
       filterByProperty: {
         type: 'DYNAMIC',
-        required: false,
+        required: true,
       },
     });
   });

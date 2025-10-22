@@ -13,7 +13,7 @@ const openopsCommonMock = {
       type: 'CHECKBOX',
     },
     waitForTimeInSecondsProperty: {
-      required: false,
+      required: true,
       type: 'DYNAMIC',
     },
   }),
@@ -47,7 +47,7 @@ describe('modify ebs volumes action', () => {
         type: 'CHECKBOX',
       },
       newVolumeType: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       changeVolumeSize: {
@@ -55,7 +55,7 @@ describe('modify ebs volumes action', () => {
         type: 'CHECKBOX',
       },
       newVolumeSize: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       changeVolumeIops: {
@@ -63,7 +63,7 @@ describe('modify ebs volumes action', () => {
         type: 'CHECKBOX',
       },
       newVolumeIops: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       changeVolumeThroughput: {
@@ -71,7 +71,7 @@ describe('modify ebs volumes action', () => {
         type: 'CHECKBOX',
       },
       newVolumeThroughput: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       dryRun: {
@@ -83,7 +83,7 @@ describe('modify ebs volumes action', () => {
         type: 'CHECKBOX',
       },
       waitForTimeInSecondsProperty: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
     });

@@ -45,7 +45,7 @@ export const advisorAction = createAction({
     }),
     filterByProperty: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['filterBySelection'],
       props: async ({ filterBySelection }) => {
         if (!filterBySelection) {
