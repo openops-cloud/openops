@@ -1,5 +1,7 @@
+import { updateActiveObservation, updateActiveTrace } from '@langfuse/tracing';
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfigParsed } from '@openops/shared';
+import { trace } from '@opentelemetry/api';
 import {
   LanguageModel,
   ModelMessage,
@@ -67,7 +69,15 @@ export function getLLMAsyncStream(
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
-    onFinish,
+    onFinish: async (result) => {
+      const outputText = result.text || '';
+      updateActiveObservation({
+        output: outputText,
+      });
+
+      await onFinish?.(result);
+      trace.getActiveSpan()?.end();
+    },
     onAbort,
     prepareStep: async ({ messages }) => {
       return {
@@ -77,6 +87,15 @@ export function getLLMAsyncStream(
     abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {
+      updateActiveObservation({
+        output: error,
+        level: 'ERROR',
+      });
+      updateActiveTrace({
+        output: error,
+      });
+
+      trace.getActiveSpan()?.end();
       throw error;
     },
   });
