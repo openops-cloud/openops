@@ -1,6 +1,6 @@
 import { Store } from '@openops/blocks-framework';
 import { getContext, logger } from '@openops/server-shared';
-import { ApplicationError, ErrorCode, isNil } from '@openops/shared';
+import { isNil } from '@openops/shared';
 
 interface TimebasedPolling<AuthValue, PropsValue> {
   strategy: DedupeStrategy.TIMEBASED;
@@ -201,9 +201,6 @@ function throwIfExecutionTimeExceeded(): void {
   const deadlineTimestamp = getContext()['deadlineTimestamp'];
   if (deadlineTimestamp && Date.now() > Number(deadlineTimestamp)) {
     logger.error('Engine execution time exceeded.');
-    throw new ApplicationError({
-      code: ErrorCode.EXECUTION_TIMEOUT,
-      params: {},
-    });
+    throw new Error('Engine execution time exceeded.');
   }
 }

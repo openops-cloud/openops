@@ -4,12 +4,10 @@ import {
   TriggerStrategy,
 } from '@openops/blocks-framework';
 import {
-  ApplicationError,
   assertEqual,
   assertNotNullOrUndefined,
   AUTHENTICATION_PROPERTY_NAME,
   BlockTrigger,
-  ErrorCode,
   EventPayload,
   ExecuteTriggerOperation,
   ExecuteTriggerResponse,
@@ -251,17 +249,13 @@ export const triggerHelper = {
             input: resolvedInput,
           };
         } catch (error) {
-          if (
-            error instanceof ApplicationError &&
-            error.error.code === ErrorCode.EXECUTION_TIMEOUT
-          ) {
-            return {
-              success: false,
-              message: 'Engine execution time exceeded.',
-            };
-          }
-
-          throw error;
+          return {
+            success: false,
+            message:
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (error as any).message ??
+              'Something failed when executing the trigger.',
+          };
         }
       }
     }
