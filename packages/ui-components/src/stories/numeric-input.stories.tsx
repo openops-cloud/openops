@@ -61,7 +61,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 /**
- * Use the `disabled` prop to make the input non-interactive and appears faded,
+ * Use the `disabled` prop to make the input non-interactive and appear faded,
  * indicating that input is not currently accepted.
  */
 export const Disabled: Story = {
