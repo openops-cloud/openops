@@ -1,6 +1,8 @@
 import { FlowRun, FlowRunStatus, isNil } from '@openops/shared';
 import { t } from 'i18next';
 
+const ACTION_LIMIT_REACHED_MESSAGE = 'Action limit reached';
+
 export function getRunMessage(
   run: FlowRun | null,
   retentionDays: number | null,
@@ -23,9 +25,16 @@ export function getRunMessage(
   return null;
 }
 
-export function getStatusText(status: FlowRunStatus, timeout: number): string {
+export function getStatusText(
+  status: FlowRunStatus,
+  timeout: number,
+  terminationReason?: string,
+): string {
   switch (status) {
     case FlowRunStatus.STOPPED:
+      if (terminationReason?.startsWith(ACTION_LIMIT_REACHED_MESSAGE)) {
+        return t('Run Stopped due to Action Limits');
+      }
       return t('Workflow Run was stopped');
     case FlowRunStatus.SUCCEEDED:
       return t('Run Succeeded');
