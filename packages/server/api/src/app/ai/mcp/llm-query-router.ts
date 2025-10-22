@@ -4,6 +4,7 @@ import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import { buildUIContextSection } from '../chat/prompts.service';
+import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
 
 const MAX_SELECTED_TOOLS = 128;
@@ -83,9 +84,10 @@ export async function routeQuery({
       model: languageModel,
       schema: coreWithReasoningSchema,
       system: getSystemPrompt(toolList, openopsTablesNames, uiContext),
-      messages,
+      messages: sanitizeMessages(messages),
       ...aiConfig.modelSettings,
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      experimental_repairText: async ({ text }) => repairText(text),
       abortSignal,
     });
 
@@ -146,14 +148,52 @@ const getSystemPrompt = (
     .join('\n');
   return (
     "Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. " +
-    `Default tables in the system: "Business units", "Tag-Owner mapping", "Idle EBS Volumes to delete", "Auto EC2 instances shutdown", "Resource BU tag assignment", "Opportunities", "Aggregated Costs", "Known cost types by application", "Auto instances shutdown" ` +
     `IMPORTANT: Tables tools should always be included in the output if the user asks a question involving those table names: ${openopsTablesNames.join(
       ', ',
     )}. ` +
-    "Additionally, classify the user's query into one or more of the provided categories. A single query can qualify for multiple categories. " +
-    'Include ALL relevant categories that apply to the query. ' +
+    "Classify the user's prompt into one or more of the provided categories. A single prompt can qualify for multiple categories. " +
+    'Include ALL relevant categories that apply. ' +
     `${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}
-    "Tools: ${toolsMessage}` +
-    'Return both the selected tool names and the array of query classifications.'
+    "Tools: ${toolsMessage}`
   );
+};
+
+function findFirstKeyInObject(
+  obj: Record<string, unknown>,
+  targetKey: string,
+): unknown {
+  for (const key in obj) {
+    if (key === targetKey) {
+      return obj[key];
+    }
+
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      const result: unknown = findFirstKeyInObject(
+        obj[key] as Record<string, unknown>,
+        targetKey,
+      );
+      if (result !== undefined) {
+        return result;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+const repairText = (text: string): string | null => {
+  try {
+    const parsedText = JSON.parse(text);
+
+    return JSON.stringify({
+      tool_names: findFirstKeyInObject(parsedText, 'tool_names'),
+      query_classification: findFirstKeyInObject(
+        parsedText,
+        'query_classification',
+      ),
+      reasoning: findFirstKeyInObject(parsedText, 'reasoning'),
+    });
+  } catch (error) {
+    return null;
+  }
 };
