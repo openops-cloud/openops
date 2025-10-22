@@ -1,23 +1,22 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { FilterType } from '@openops/common';
-import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
-import { servicenowFieldsDropdownProperty } from '../lib/fields-dropdown-property';
-import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
+import { servicenowAuth, ServiceNowAuth } from '../../lib/auth';
+import { servicenowFieldsDropdownProperty } from '../../lib/fields-dropdown-property';
 import {
   extractFiltersFromProps,
   limitProperty,
   runGetRecordsAction,
-} from './action-runners';
-import { createFiltersProperties } from './create-filters-properties';
+} from '../action-runners';
+import { createFiltersProperties } from '../create-filters-properties';
+import { TABLE_NAME } from './constants';
 
-export const getRecordsAction = createAction({
+export const getRequestsAction = createAction({
   auth: servicenowAuth,
-  name: 'get_records',
-  description: 'Retrieve records from a specified user table',
-  displayName: 'Get Records',
+  name: 'get_requests',
+  description: 'Retrieve request items from ServiceNow with optional filters.',
+  displayName: 'Get Requests',
   isWriteAction: false,
   props: {
-    tableName: servicenowTableDropdownProperty(),
     filterType: Property.StaticDropdown({
       displayName: 'Filter type',
       required: false,
@@ -38,22 +37,19 @@ export const getRecordsAction = createAction({
     filters: Property.DynamicProperties({
       displayName: '',
       required: true,
-      refreshers: ['auth', 'tableName'],
-      props: async ({ auth, tableName }) => {
-        if (!auth || !tableName) {
+      refreshers: ['auth'],
+      props: async ({ auth }) => {
+        if (!auth) {
           return {};
         }
-        return createFiltersProperties(
-          auth as ServiceNowAuth,
-          tableName as unknown as string,
-        );
+        return createFiltersProperties(auth as ServiceNowAuth, TABLE_NAME);
       },
     }),
     limit: limitProperty,
     fields: servicenowFieldsDropdownProperty(),
   },
   async run(context) {
-    const { tableName, limit, fields } = context.propsValue;
+    const { limit } = context.propsValue;
 
     const filtersProps = context.propsValue.filters?.['filters'];
     const filters = extractFiltersFromProps(filtersProps);
@@ -61,15 +57,12 @@ export const getRecordsAction = createAction({
     const filterType =
       (context.propsValue.filterType as FilterType) || FilterType.AND;
 
-    const selectedFields = (fields as { selected?: string[] })?.selected;
-
     return runGetRecordsAction({
       auth: context.auth as ServiceNowAuth,
-      tableName: tableName as string,
+      tableName: TABLE_NAME,
       filters,
       filterType,
       limit: limit as number | undefined,
-      fields: selectedFields,
     });
   },
 });
