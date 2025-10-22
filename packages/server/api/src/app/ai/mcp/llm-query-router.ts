@@ -159,6 +159,13 @@ const getSystemPrompt = (
   );
 };
 
+/**
+ * Finds the first key in an object and returns its value.
+ * Returns undefined if the key is not found.
+ * @param obj - The object to search in.
+ * @param targetKey - The key to search for.
+ * @returns The value of the first key in the object.
+ */
 function findFirstKeyInObject(
   obj: Record<string, unknown>,
   targetKey: string,
@@ -182,6 +189,10 @@ function findFirstKeyInObject(
   return undefined;
 }
 
+/**
+ * Attempts to repair a malformed JSON string by extracting the expected schema fields.
+ * Returns null if the input cannot be parsed or repaired, so then ai sdk will throw an error.
+ */
 const repairText = (text: string): string | null => {
   try {
     const parsedText = JSON.parse(text);
