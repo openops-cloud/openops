@@ -138,9 +138,8 @@ async function fetchMessages(
     .orderby('receivedDateTime desc')
     .headers(headers);
 
-  let shouldFetchAll = false;
-  if (lastFetchEpochMS !== 0) {
-    shouldFetchAll = true;
+  const shouldFetchAll = lastFetchEpochMS !== 0;
+  if (shouldFetchAll) {
     req = req.filter(
       `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
     );
