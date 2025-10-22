@@ -198,12 +198,10 @@ const repairText = (text: string): string | null => {
     const parsedText = JSON.parse(text);
 
     return JSON.stringify({
-      tool_names: findFirstKeyInObject(parsedText, 'tool_names'),
-      query_classification: findFirstKeyInObject(
-        parsedText,
-        'query_classification',
-      ),
-      reasoning: findFirstKeyInObject(parsedText, 'reasoning'),
+      tool_names: findFirstKeyInObject(parsedText, 'tool_names') || [],
+      query_classification:
+        findFirstKeyInObject(parsedText, 'query_classification') || [],
+      reasoning: findFirstKeyInObject(parsedText, 'reasoning') || '',
     });
   } catch (error) {
     return null;
