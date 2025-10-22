@@ -63,14 +63,20 @@ export function getLLMAsyncStream(
     availableTools.length > 0 ? `"${availableTools.join(', ')}"` : 'none';
 
   const cachedTools = addCacheControlToTools(tools);
-  const toolsProxy = new Proxy(cachedTools ?? ({} as ToolSet), {
-    get: (target, prop: string | symbol): unknown => {
-      if (typeof prop === 'string' && prop in target) {
-        return target[prop];
-      }
-      return createVoidTool(String(prop));
-    },
-  });
+  const toolsProxy =
+    cachedTools != null
+      ? new Proxy(cachedTools, {
+          get: (target, prop: string | symbol): unknown => {
+            if (typeof prop === 'symbol') {
+              return undefined;
+            }
+            if (prop in target) {
+              return target[prop];
+            }
+            return createVoidTool(prop);
+          },
+        })
+      : undefined;
 
   const { fullStream } = streamText({
     model: languageModel,

@@ -1,5 +1,5 @@
 import { tool, Tool } from 'ai';
-import z from 'zod';
+import { z } from 'zod';
 
 export const createVoidTool = (name: string): Tool => {
   return tool({
