@@ -24,7 +24,6 @@ type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
 }) => PromiseLike<void> | void;
 
 type AICallSettings = {
-  chatId: string;
   tools?: ToolSet;
   aiConfig: AiConfigParsed;
   systemPrompt: string;
@@ -44,7 +43,6 @@ export function getLLMAsyncStream(
   params: AICallSettings,
 ): AsyncIterable<TextStreamPart<ToolSet>> {
   const {
-    chatId: _chatId,
     maxRecursionDepth,
     languageModel,
     systemPrompt,
