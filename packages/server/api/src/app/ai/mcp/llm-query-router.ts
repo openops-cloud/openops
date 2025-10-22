@@ -153,8 +153,9 @@ const getSystemPrompt = (
     )}. ` +
     "Classify the user's prompt into one or more of the provided categories. A single prompt can qualify for multiple categories. " +
     'Include ALL relevant categories that apply. ' +
-    `${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}
-    "Tools: ${toolsMessage}`
+    `${
+      uiContext ? `${buildUIContextSection(uiContext)}\n` : ''
+    } Tools: ${toolsMessage}`
   );
 };
 
