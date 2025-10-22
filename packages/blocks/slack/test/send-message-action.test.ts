@@ -107,7 +107,7 @@ describe('send message', () => {
         type: 'CHECKBOX',
       },
       blocks: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       conversationId: {
@@ -119,11 +119,11 @@ describe('send message', () => {
         type: 'FILE',
       },
       headerText: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       text: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       threadTs: {

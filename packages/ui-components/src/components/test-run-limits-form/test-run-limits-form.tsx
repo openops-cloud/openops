@@ -6,7 +6,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { Form, FormControl, FormField, FormItem } from '../../ui/form';
-import { Input } from '../../ui/input';
+import { NumericInput } from '../../ui/numeric-input';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Switch } from '../../ui/switch';
 import { BlockIcon } from '../block-icon/block-icon';
@@ -86,6 +86,14 @@ type TestRunLimitsFormProps = {
    * Optional className to customize the outer container styling.
    */
   className?: string;
+  /**
+   * Minimum allowed value for action limits.
+   */
+  min?: number;
+  /**
+   * Maximum allowed value for action limits.
+   */
+  max?: number;
 };
 
 function TestRunLimitsForm({
@@ -94,6 +102,8 @@ function TestRunLimitsForm({
   blockActionMetaMap,
   isLoading,
   className,
+  min = 1,
+  max = 99,
 }: TestRunLimitsFormProps) {
   const form = useForm<TestRunLimitSettings>({
     defaultValues: {
@@ -286,26 +296,16 @@ function TestRunLimitsForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input
-                                        type="number"
-                                        min={0}
-                                        value={
-                                          Number.isFinite(field.value)
-                                            ? field.value
-                                            : 0
-                                        }
-                                        onChange={(e) => {
-                                          const raw = e.target.value;
-                                          const parsed = Number(raw);
-                                          field.onChange(
-                                            Number.isFinite(parsed) &&
-                                              parsed >= 0
-                                              ? parsed
-                                              : 0,
-                                          );
+                                      <NumericInput
+                                        min={min}
+                                        max={max}
+                                        value={field.value}
+                                        onChange={(number) => {
+                                          field.onChange(number ?? min);
                                         }}
                                         disabled={!isEnabled}
-                                        className="h-8 w-[64px]"
+                                        integerOnly={true}
+                                        className="h-8 w-[64px] outline-none"
                                       />
                                     </FormControl>
                                   </FormItem>

@@ -535,6 +535,7 @@
   "Check the Runs page for details": "Check the Runs page for details",
   "Configure limit": "Configure limit",
   "Set Action Limits": "Set Action Limits",
+  "Run Stopped due to Action Limits": "Run Stopped due to Action Limits",
   "Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.": "Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.",
   "Enable run limits": "Enable run limits",
   "Select all": "Select all",

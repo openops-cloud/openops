@@ -23,7 +23,7 @@ export const askAi = createAction({
   props: {
     model: Property.DynamicProperties({
       displayName: 'Model',
-      required: false,
+      required: true,
       refreshers: ['auth'],
       props: async ({ auth }) => {
         const fields: DynamicPropsValue = {};
