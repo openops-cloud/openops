@@ -219,7 +219,7 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <div className="h-48">
+            <div className="h-[100px]">
               <CodeEditor
                 value={field.value}
                 readonly={disabled}
