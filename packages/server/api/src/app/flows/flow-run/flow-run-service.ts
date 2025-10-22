@@ -412,7 +412,7 @@ export const flowRunService = {
     return this.start({
       projectId,
       flowVersionId,
-      payload,
+      payload: payload[0]?.output ?? {},
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
       synchronousHandlerId: webhookResponseWatcher.getServerId(),

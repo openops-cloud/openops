@@ -142,6 +142,30 @@ export async function calculateTestRunActionLimits(
   };
 }
 
+export function mergeTestRunLimits(
+  previous: TestRunLimitSettings,
+  calculated: TestRunLimitSettings,
+): TestRunLimitSettings {
+  const mergedLimits: TestRunLimit[] = calculated.limits.map((limit) => {
+    const existing = findTestRunLimit(
+      previous.limits,
+      limit.blockName,
+      limit.actionName,
+    );
+    return existing
+      ? {
+          ...limit,
+          isEnabled: existing.isEnabled,
+          limit: existing.limit,
+        }
+      : limit;
+  });
+  return {
+    ...calculated,
+    limits: mergedLimits,
+  };
+}
+
 async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
   const writeActionsMap = new Map<string, Set<string>>();
   const allBlocks = await fileBlocksUtils.findAllBlocks();

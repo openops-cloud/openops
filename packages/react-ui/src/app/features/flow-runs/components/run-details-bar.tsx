@@ -16,6 +16,8 @@ type RunDetailsBarProps = {
   isLoading: boolean;
 };
 
+const NO_TIMEOUT_SECONDS = -1;
+
 const RunDetailsBar = React.memo(
   ({ run, canExitRun, exitRun, isLoading }: RunDetailsBarProps) => {
     const { Icon, variant } = run
@@ -28,7 +30,11 @@ const RunDetailsBar = React.memo(
 
     const statusText = useMemo(() => {
       if (!run) return '';
-      return getStatusText(run.status, timeoutSeconds ?? -1);
+      return getStatusText(
+        run.status,
+        timeoutSeconds ?? NO_TIMEOUT_SECONDS,
+        run.terminationReason,
+      );
     }, [run, timeoutSeconds]);
 
     if (!run) {

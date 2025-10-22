@@ -86,6 +86,14 @@ type TestRunLimitsFormProps = {
    * Optional className to customize the outer container styling.
    */
   className?: string;
+  /**
+   * Minimum allowed value for action limits.
+   */
+  min?: number;
+  /**
+   * Maximum allowed value for action limits.
+   */
+  max?: number;
 };
 
 function TestRunLimitsForm({
@@ -94,6 +102,8 @@ function TestRunLimitsForm({
   blockActionMetaMap,
   isLoading,
   className,
+  min = 1,
+  max = 99,
 }: TestRunLimitsFormProps) {
   const form = useForm<TestRunLimitSettings>({
     defaultValues: {
@@ -288,20 +298,21 @@ function TestRunLimitsForm({
                                     <FormControl>
                                       <Input
                                         type="number"
-                                        min={0}
+                                        min={min}
+                                        max={max}
                                         value={
                                           Number.isFinite(field.value)
                                             ? field.value
-                                            : 0
+                                            : min
                                         }
                                         onChange={(e) => {
                                           const raw = e.target.value;
                                           const parsed = Number(raw);
                                           field.onChange(
                                             Number.isFinite(parsed) &&
-                                              parsed >= 0
-                                              ? parsed
-                                              : 0,
+                                              parsed >= min
+                                              ? Math.min(parsed, max)
+                                              : min,
                                           );
                                         }}
                                         disabled={!isEnabled}
