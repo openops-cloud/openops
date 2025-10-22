@@ -2,7 +2,11 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import { slackAuth } from '../common/authentication';
 import { getSlackIdFromPropertyInput } from '../common/get-slack-users';
-import { username, usersAndChannels } from '../common/props';
+import {
+  unfurlLinksAndMedia,
+  username,
+  usersAndChannels,
+} from '../common/props';
 import {
   createMessageBlocks,
   dynamicBlockKitProperties,
@@ -35,15 +39,19 @@ export const slackSendMessageAction = createAction({
       required: false,
     }),
     ...dynamicBlockKitProperties(),
+    unfurlLinksAndMedia,
   },
   async run(context) {
     const token = context.auth.access_token;
-    const { conversationId, username, file, threadTs } = context.propsValue;
+    const { conversationId, username, file, threadTs, unfurlLinksAndMedia } =
+      context.propsValue;
+
     let text = '';
     let blocks = [];
     const isBlock = context.propsValue['blockKitEnabled'];
 
     assertNotNullOrUndefined(conversationId, 'conversationId');
+
     if (!isBlock) {
       text = context.propsValue['text']['text'];
       const headerText = context.propsValue?.['headerText']?.['headerText'];
@@ -66,6 +74,7 @@ export const slackSendMessageAction = createAction({
       threadTs,
       file,
       blocks,
+      unfurlLinksAndMedia,
       eventPayload: {
         domain: context.server.publicUrl,
         isTest: context.run.isTest,

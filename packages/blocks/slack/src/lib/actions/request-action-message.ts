@@ -13,6 +13,7 @@ import {
   headerText,
   text,
   timeoutInDays,
+  unfurlLinksAndMedia,
   username,
   usersAndChannels,
 } from '../common/props';
@@ -34,6 +35,7 @@ export const requestActionMessageAction = createAction({
     headerText,
     text,
     actions,
+    unfurlLinksAndMedia,
     username,
     timeoutInDays,
   },
@@ -95,7 +97,8 @@ const sendMessageAskingForAction = async (
   const token = context.auth.access_token;
   assertNotNullOrUndefined(token, 'token');
 
-  const { text, username, conversationId, headerText } = context.propsValue;
+  const { text, username, conversationId, headerText, unfurlLinksAndMedia } =
+    context.propsValue;
 
   assertNotNullOrUndefined(text, 'text');
   assertNotNullOrUndefined(conversationId, 'conversationId');
@@ -138,6 +141,7 @@ const sendMessageAskingForAction = async (
     username,
     conversationId: userOrChannelId,
     blocks: blocks,
+    unfurlLinksAndMedia,
     eventPayload: {
       interactionsDisabled: !enableSlackInteractions,
       domain: context.server.publicUrl,

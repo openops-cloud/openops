@@ -19,6 +19,7 @@ export const slackSendMessage = async ({
   token,
   file,
   eventPayload,
+  unfurlLinksAndMedia,
 }: SlackSendMessageParams): Promise<MessageInfo> => {
   let response: HttpResponse;
   let request: HttpRequest;
@@ -51,6 +52,8 @@ export const slackSendMessage = async ({
         event_type: 'slack-message',
         event_payload: eventPayload,
       },
+      unfurl_links: unfurlLinksAndMedia ?? true,
+      unfurl_media: unfurlLinksAndMedia ?? true,
     };
 
     if (username) body['username'] = username;
@@ -138,6 +141,7 @@ type SlackSendMessageParams = {
   threadTs?: string;
   eventPayload?: Record<string, any>;
   sentMessageKitBlock?: boolean;
+  unfurlLinksAndMedia?: boolean;
 };
 
 type SlackUpdateMessageParams = {

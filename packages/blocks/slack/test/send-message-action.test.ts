@@ -100,7 +100,7 @@ describe('send message', () => {
 
   test('should create action with correct properties', () => {
     const props = slackSendMessageAction.props;
-    expect(Object.keys(props).length).toBe(8);
+    expect(Object.keys(props).length).toBe(9);
     expect(props).toMatchObject({
       blockKitEnabled: {
         required: false,
@@ -133,6 +133,10 @@ describe('send message', () => {
       username: {
         required: false,
         type: 'SHORT_TEXT',
+      },
+      unfurlLinksAndMedia: {
+        required: false,
+        type: 'CHECKBOX',
       },
     });
   });
