@@ -21,12 +21,14 @@ const telemetryCollectorUrl = system.get<string>(
 const logzioMetricToken = system.get<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
 );
+
+const isTelemetryEnabled = Boolean(telemetryCollectorUrl || logzioMetricToken);
 const version = system.get<string>(SharedSystemProp.VERSION);
 
 let environmentId: UUID | undefined;
 export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
-    if (!telemetryCollectorUrl && !logzioMetricToken) {
+    if (!isTelemetryEnabled) {
       logger.debug(
         'Telemetry is disabled. Because neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
       );
@@ -35,15 +37,17 @@ export const telemetry = {
 
     environmentId = await getEnvironmentId();
     if (telemetryCollectorUrl) {
+      logger.info('Using telemetry collector to save the telemetry events.');
       return;
     }
 
+    logger.info('Using Logz.io to save the telemetry events.');
     startMetricsCollector();
   },
   trackEvent(event: TelemetryEvent): void {
     isTelemetryEnabledForCurrentUser(event.labels.userId)
       .then((isEnable) => {
-        if (!isEnable) {
+        if (!isTelemetryEnabled || !isEnable) {
           return;
         }
 
@@ -60,14 +64,12 @@ export const telemetry = {
           return;
         }
 
-        if (logzioMetricToken) {
-          saveMetric(timeseries).catch((error) => {
-            logger.error('Error sending telemetry event to Logzio.', {
-              error,
-              event,
-            });
+        saveMetric(timeseries).catch((error) => {
+          logger.error('Error sending telemetry event to Logzio.', {
+            error,
+            event,
           });
-        }
+        });
       })
       .catch((error) => {
         logger.error(`Failed to track telemetry event [${event.name}]`, {

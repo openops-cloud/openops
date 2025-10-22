@@ -70,16 +70,6 @@ describe('telemetry', () => {
   });
 
   describe('start', () => {
-    it('should throw an error if telemetry is enabled but no URLs are provided', async () => {
-      systemMock.get.mockReturnValue(null);
-
-      telemetry = getSUT();
-
-      await expect(telemetry.start(getEnvironmentId)).rejects.toThrow(
-        'Telemetry is enabled, but neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
-      );
-    });
-
     it('should start metric collector if no telemetry URL is provided', async () => {
       systemMock.get.mockImplementation((key) =>
         key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
