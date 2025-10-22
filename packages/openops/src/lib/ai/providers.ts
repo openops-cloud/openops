@@ -1,3 +1,4 @@
+import { LangfuseSpanProcessor } from '@langfuse/otel';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import {
   AiConfigParsed,
@@ -6,11 +7,8 @@ import {
   ApplicationErrorParams,
   GetProvidersResponse,
 } from '@openops/shared';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { SpanExporter } from '@opentelemetry/sdk-trace-base';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { AISDKError, generateText, LanguageModel } from 'ai';
-import { LangfuseExporter } from 'langfuse-vercel';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -139,19 +137,41 @@ export const isLLMTelemetryEnabled = () =>
   !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
   !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
 
+let langfuseSpanProcessor: LangfuseSpanProcessor | undefined;
+let tracerProvider: NodeTracerProvider | undefined;
+
 export const getAiTelemetrySDK = () => {
-  return isLLMTelemetryEnabled()
-    ? new NodeSDK({
-        traceExporter: new LangfuseExporter({
-          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
-          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
-          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
-          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
-        }) as unknown as SpanExporter,
-        instrumentations: [getNodeAutoInstrumentations()],
-      })
-    : undefined;
+  if (!isLLMTelemetryEnabled()) {
+    return undefined;
+  }
+
+  // Return existing instance if already initialized
+  if (tracerProvider) {
+    return tracerProvider;
+  }
+
+  // Create span processor with Langfuse configuration
+  langfuseSpanProcessor = new LangfuseSpanProcessor({
+    secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
+    publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
+    baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
+    release: system.get(SharedSystemProp.ENVIRONMENT_NAME),
+  });
+
+  // Create tracer provider with the span processor
+  tracerProvider = new NodeTracerProvider({
+    spanProcessors: [langfuseSpanProcessor],
+  });
+
+  return tracerProvider;
 };
+
+/**
+ * Get the Langfuse span processor for manual flushing in Fastify routes.
+ * This is needed in short-lived environments to ensure traces are exported
+ * before the request completes.
+ */
+export const getLangfuseSpanProcessor = () => langfuseSpanProcessor;
 
 const invalidConfigError = (
   errorName: string,

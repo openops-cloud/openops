@@ -1,5 +1,7 @@
+import { updateActiveObservation, updateActiveTrace } from '@langfuse/tracing';
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfigParsed } from '@openops/shared';
+import { trace } from '@opentelemetry/api';
 import {
   LanguageModel,
   ModelMessage,
@@ -22,6 +24,7 @@ type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
 }) => PromiseLike<void> | void;
 
 type AICallSettings = {
+  chatId: string;
   tools?: ToolSet;
   aiConfig: AiConfigParsed;
   systemPrompt: string;
@@ -41,6 +44,7 @@ export function getLLMAsyncStream(
   params: AICallSettings,
 ): AsyncIterable<TextStreamPart<ToolSet>> {
   const {
+    chatId: _chatId,
     maxRecursionDepth,
     languageModel,
     systemPrompt,
@@ -67,7 +71,18 @@ export function getLLMAsyncStream(
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
-    onFinish,
+    onFinish: async (result) => {
+      const outputText = result.text || '';
+      updateActiveObservation({
+        output: outputText,
+      });
+      updateActiveTrace({
+        output: outputText,
+      });
+
+      await onFinish?.(result);
+      trace.getActiveSpan()?.end();
+    },
     onAbort,
     prepareStep: async ({ messages }) => {
       return {
@@ -77,6 +92,15 @@ export function getLLMAsyncStream(
     abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {
+      updateActiveObservation({
+        output: error,
+        level: 'ERROR',
+      });
+      updateActiveTrace({
+        output: error,
+      });
+
+      trace.getActiveSpan()?.end();
       throw error;
     },
   });

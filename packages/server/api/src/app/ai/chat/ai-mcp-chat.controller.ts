@@ -1,5 +1,10 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { validateAiProviderConfig } from '@openops/common';
+import { observe, updateActiveObservation } from '@langfuse/tracing';
+import {
+  getLangfuseSpanProcessor,
+  validateAiProviderConfig,
+  withLangfuseSession,
+} from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
@@ -180,23 +185,53 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
+  const handleNewMessage = observe(
+    async (request, reply) => {
+      const chatId = request.body.chatId;
+      const userId = request.principal.id;
+
+      const messageContent = await getUserMessage(request.body, reply);
+      if (messageContent === null) {
+        return; // Error response already sent
+      }
+
+      updateActiveObservation({
+        input: messageContent,
+      });
+
+      await withLangfuseSession(chatId, userId, messageContent, async () => {
+        const newMessage: ModelMessage = {
+          role: 'user',
+          content: messageContent,
+        };
+
+        await routeChatRequest({
+          app,
+          request,
+          newMessage,
+          reply,
+        });
+      });
+    },
+    {
+      name: 'openops-chat-message',
+      endOnExit: false,
+      captureInput: false,
+      captureOutput: false,
+    },
+  );
+
   app.post('/', NewMessageOptions, async (request, reply) => {
-    const messageContent = await getUserMessage(request.body, reply);
-    if (messageContent === null) {
-      return; // Error response already sent
+    try {
+      await handleNewMessage(request, reply);
+    } finally {
+      // Flush traces to Langfuse (critical for Fastify)
+      const spanProcessor = getLangfuseSpanProcessor();
+      if (spanProcessor) {
+        await spanProcessor.forceFlush();
+        logger.debug('Flushed Langfuse traces');
+      }
     }
-
-    const newMessage: ModelMessage = {
-      role: 'user',
-      content: messageContent,
-    };
-
-    await routeChatRequest({
-      app,
-      request,
-      newMessage,
-      reply,
-    });
   });
 
   app.post('/chat-name', ChatNameOptions, async (request, reply) => {
