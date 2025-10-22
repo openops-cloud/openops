@@ -122,7 +122,7 @@ export async function runGetRecordsAction(
     }
   }
 
-  if (limit !== undefined && limit !== null) {
+  if (limit !== undefined) {
     queryParams['sysparm_limit'] = String(limit);
   }
 
