@@ -83,7 +83,7 @@ export async function routeQuery({
     const { object: selectionResult } = await generateObject({
       model: languageModel,
       schema: coreWithReasoningSchema,
-      system: getSystemPrompt(toolList, openopsTablesNames, uiContext),
+      system: await getSystemPrompt(toolList, openopsTablesNames, uiContext),
       messages: sanitizeMessages(messages),
       ...aiConfig.modelSettings,
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
@@ -138,11 +138,11 @@ const getOpenOpsTablesNames = async (): Promise<string[]> => {
   }
 };
 
-const getSystemPrompt = (
+const getSystemPrompt = async (
   toolList: Array<{ name: string; description: string }>,
   openopsTablesNames: string[],
   uiContext?: ChatFlowContext,
-): string => {
+): Promise<string> => {
   const toolsMessage = toolList
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
@@ -154,7 +154,7 @@ const getSystemPrompt = (
     "Classify the user's prompt into one or more of the provided categories. A single prompt can qualify for multiple categories. " +
     'Include ALL relevant categories that apply. ' +
     `${
-      uiContext ? `${buildUIContextSection(uiContext)}\n` : ''
+      uiContext ? `${await buildUIContextSection(uiContext)}\n` : ''
     } Tools: ${toolsMessage}`
   );
 };
