@@ -30,7 +30,7 @@ export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
     if (!isTelemetryEnabled) {
       logger.debug(
-        'Telemetry is disabled. Because neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
+        'Telemetry is disabled because neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
       );
       return;
     }
