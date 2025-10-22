@@ -291,7 +291,6 @@ const selectFormComponentForProperty = ({
     case PropertyType.LONG_TEXT:
     case PropertyType.FILE:
     case PropertyType.NUMBER:
-    case PropertyType.SECRET_TEXT:
       return (
         <AutoFormFieldWrapper
           property={property}
@@ -312,12 +311,29 @@ const selectFormComponentForProperty = ({
               value={field.value}
               onChange={field.onChange}
               disabled={disabled}
-              type={
-                property.type === PropertyType.SECRET_TEXT ? 'password' : 'text'
-              }
+              type={'text'}
               autoComplete="new-password"
             ></Input>
           )}
+        </AutoFormFieldWrapper>
+      );
+    case PropertyType.SECRET_TEXT:
+      return (
+        <AutoFormFieldWrapper
+          property={property}
+          inputName={inputName}
+          field={field}
+          propertyName={propertyName}
+          disabled={disabled}
+          allowDynamicValues={false}
+        >
+          <Input
+            value={field.value}
+            onChange={field.onChange}
+            disabled={disabled}
+            type={'password'}
+            autoComplete="new-password"
+          ></Input>
         </AutoFormFieldWrapper>
       );
     case PropertyType.DYNAMIC:
