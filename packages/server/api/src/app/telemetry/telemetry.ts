@@ -27,9 +27,10 @@ let environmentId: UUID | undefined;
 export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
     if (!telemetryCollectorUrl && !logzioMetricToken) {
-      throw new Error(
-        'Telemetry is enabled, but neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
+      logger.debug(
+        'Telemetry is disabled. Because neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
       );
+      return;
     }
 
     environmentId = await getEnvironmentId();
@@ -59,12 +60,14 @@ export const telemetry = {
           return;
         }
 
-        saveMetric(timeseries).catch((error) => {
-          logger.error('Error sending telemetry event to Logzio.', {
-            error,
-            event,
+        if (logzioMetricToken) {
+          saveMetric(timeseries).catch((error) => {
+            logger.error('Error sending telemetry event to Logzio.', {
+              error,
+              event,
+            });
           });
-        });
+        }
       })
       .catch((error) => {
         logger.error(`Failed to track telemetry event [${event.name}]`, {
