@@ -169,6 +169,13 @@ export const timeoutInDays = Property.Number({
   validators: [Validators.minValue(1)],
 });
 
+export const unfurlLinksAndMedia = Property.Checkbox({
+  displayName: 'Unfurl links and media',
+  description: 'If enabled, Slack will unfurl links and media in the message.',
+  required: false,
+  defaultValue: true,
+});
+
 interface Option {
   label: string;
   value: string;
