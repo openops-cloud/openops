@@ -97,9 +97,7 @@ export const fetchWithTimeout = async (
   } catch (error: any) {
     if (timeoutController.signal.aborted && !init?.signal?.aborted) {
       throw new ConnectionTimeoutError(
-        t(
-          'Connection timeout: Unable to reach the server. Please check your internet connection.',
-        ),
+        'Connection timeout: Unable to reach the server. Please check your internet connection.',
       );
     }
 
