@@ -283,7 +283,7 @@ const CreateEditConnectionDialogContent = ({
               />
             )}
 
-            <DialogFooter className="mt-[60px]">
+            <DialogFooter className="mt-5">
               <Button
                 onClick={(e) => form.handleSubmit(() => mutate())(e)}
                 loading={isPending}
