@@ -6,7 +6,7 @@ type SideMenuCollapsedProps = {
 
 const SideMenuCollapsed = ({ children }: SideMenuCollapsedProps) => {
   return (
-    <div className="flex items-center justify-start bg-background h-[42px] rounded-xl shadow-editor overflow-hidden z-50 p-3 pr-0 max-w-[580px]">
+    <div className="[min-w-100px] flex items-center justify-start bg-background h-[42px] rounded-xl shadow-editor overflow-hidden p-3 pr-0">
       {children}
     </div>
   );
