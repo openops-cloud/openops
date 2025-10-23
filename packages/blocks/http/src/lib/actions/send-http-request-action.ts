@@ -185,7 +185,16 @@ export const httpSendRequestAction = createAction({
       return { ...auth, ...user };
     };
 
-    const authHeaders = (context.auth?.value as HttpHeaders) ?? {};
+    const authHeaders: HttpHeaders = Array.isArray(context.auth?.headers)
+      ? (
+          context.auth.headers as Array<{ key?: string; value?: string }>
+        ).reduce<HttpHeaders>((acc, item) => {
+          if (item.key && item.value) {
+            acc[item.key] = item.value;
+          }
+          return acc;
+        }, {})
+      : {};
 
     const request: HttpRequest = {
       method,

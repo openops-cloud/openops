@@ -15,11 +15,19 @@ export const httpAuth = BlockAuth.CustomAuth({
   required: false,
   description,
   props: {
-    value: Property.Object({
-      displayName: 'Auth Object',
+    headers: Property.Array({
+      displayName: 'Headers',
       required: false,
-      defaultValue: {
-        Authorization: 'Bearer ',
+      properties: {
+        key: Property.ShortText({
+          displayName: 'Header Key',
+          required: false,
+          defaultValue: 'Authorization',
+        }),
+        value: Property.ShortText({
+          displayName: 'Header Value',
+          required: false,
+        }),
       },
     }),
   },
