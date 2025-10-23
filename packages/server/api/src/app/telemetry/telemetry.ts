@@ -15,6 +15,7 @@ import {
 } from './logzio-collector';
 import { TelemetryEvent } from './telemetry-event';
 
+const telemetryMode = system.get<TelemetryMode>(AppSystemProp.TELEMETRY_MODE);
 const telemetryCollectorUrl = system.get<string>(
   AppSystemProp.TELEMETRY_COLLECTOR_URL,
 );
@@ -22,17 +23,40 @@ const logzioMetricToken = system.get<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
 );
 
-const isTelemetryEnabled = Boolean(telemetryCollectorUrl || logzioMetricToken);
 const version = system.get<string>(SharedSystemProp.VERSION);
 
+export enum TelemetryMode {
+  DISABLED = 'DISABLED',
+  COLLECTOR = 'COLLECTOR',
+  LOGZIO = 'LOGZIO',
+}
+
+let isTelemetryEnabled = true;
 let environmentId: UUID | undefined;
 export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
-    if (!isTelemetryEnabled) {
-      logger.debug(
-        'Telemetry is disabled because either TELEMETRY_COLLECTOR_URL or LOGZIO_METRICS_TOKEN is undefined.',
-      );
-      return;
+    switch (telemetryMode) {
+      case TelemetryMode.COLLECTOR: {
+        if (!telemetryCollectorUrl) {
+          throw new Error(
+            `System property OPS_${AppSystemProp.TELEMETRY_COLLECTOR_URL} is not defined, but telemetry mode is set to ${TelemetryMode.COLLECTOR}.`,
+          );
+        }
+        break;
+      }
+      case TelemetryMode.LOGZIO: {
+        if (!logzioMetricToken) {
+          throw new Error(
+            `System property OPS_${SharedSystemProp.LOGZIO_METRICS_TOKEN} is not defined, but telemetry mode is set to ${TelemetryMode.LOGZIO}.`,
+          );
+        }
+        break;
+      }
+      default: {
+        logger.debug('Telemetry is disabled.');
+        isTelemetryEnabled = false;
+        return;
+      }
     }
 
     environmentId = await getEnvironmentId();
