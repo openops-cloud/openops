@@ -173,18 +173,35 @@ const CreateEditConnectionDialogContent = ({
       } else if (api.isError(err)) {
         const apError = err.response?.data as ApplicationErrorParams;
         console.error(apError);
-        if (apError.code === ErrorCode.INVALID_CLOUD_CLAIM) {
-          setErrorMessage(
-            t(
-              'Could not claim the authorization code, make sure you have correct settings and try again.',
-            ),
-          );
-        } else if (apError.code === ErrorCode.INVALID_APP_CONNECTION) {
-          setErrorMessage(
-            t('Connection failed with error {msg}', {
-              msg: formatErrorObjectToString(apError.params.error),
-            }),
-          );
+        switch (apError.code) {
+          case ErrorCode.INVALID_CLOUD_CLAIM: {
+            setErrorMessage(
+              t(
+                'Could not claim the authorization code, make sure you have correct settings and try again.',
+              ),
+            );
+            break;
+          }
+          case ErrorCode.INVALID_APP_CONNECTION: {
+            setErrorMessage(
+              t('Connection failed with error {msg}', {
+                msg: formatErrorObjectToString(apError.params.error),
+              }),
+            );
+            break;
+          }
+          case ErrorCode.ENGINE_OPERATION_FAILURE: {
+            setErrorMessage(
+              t('Connection failed with error {msg}', {
+                msg: formatErrorObjectToString(apError.params.message),
+              }),
+            );
+            break;
+          }
+          default: {
+            toast(INTERNAL_ERROR_TOAST);
+            console.error(err);
+          }
         }
       } else {
         console.warn(err);

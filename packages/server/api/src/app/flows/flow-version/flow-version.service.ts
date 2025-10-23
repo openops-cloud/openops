@@ -42,6 +42,7 @@ import { FlowVersionEntity } from './flow-version-entity';
 import { flowVersionSideEffects } from './flow-version-side-effects';
 import {
   calculateTestRunActionLimits,
+  mergeTestRunLimits,
   shouldRecalculateTestRunActionLimits,
   tryIncrementalUpdate,
 } from './test-run-action-limits-calculator';
@@ -108,6 +109,8 @@ export const flowVersionService = {
         });
 
         operations = handleImportFlowOperation(flowVersion, previousVersion);
+        mutatedFlowVersion.testRunActionLimits =
+          previousVersion.testRunActionLimits;
         break;
       }
 
@@ -163,8 +166,13 @@ export const flowVersionService = {
       if (incrementalUpdate) {
         mutatedFlowVersion.testRunActionLimits = incrementalUpdate;
       } else {
-        mutatedFlowVersion.testRunActionLimits =
-          await calculateTestRunActionLimits(mutatedFlowVersion.trigger);
+        const recalculated = await calculateTestRunActionLimits(
+          mutatedFlowVersion.trigger,
+        );
+        mutatedFlowVersion.testRunActionLimits = mergeTestRunLimits(
+          mutatedFlowVersion.testRunActionLimits,
+          recalculated,
+        );
       }
     }
 

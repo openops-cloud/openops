@@ -21,8 +21,7 @@ export function shouldRecalculateTestRunActionLimits(
     operation.type === FlowOperationType.DELETE_ACTION ||
     operation.type === FlowOperationType.UPDATE_ACTION ||
     operation.type === FlowOperationType.PASTE_ACTIONS ||
-    operation.type === FlowOperationType.IMPORT_FLOW ||
-    operation.type === FlowOperationType.USE_AS_DRAFT
+    operation.type === FlowOperationType.IMPORT_FLOW
   );
 }
 
@@ -139,6 +138,30 @@ export async function calculateTestRunActionLimits(
   return {
     isEnabled: true,
     limits,
+  };
+}
+
+export function mergeTestRunLimits(
+  previous: TestRunLimitSettings,
+  calculated: TestRunLimitSettings,
+): TestRunLimitSettings {
+  const mergedLimits: TestRunLimit[] = calculated.limits.map((limit) => {
+    const existing = findTestRunLimit(
+      previous.limits,
+      limit.blockName,
+      limit.actionName,
+    );
+    return existing
+      ? {
+          ...limit,
+          isEnabled: existing.isEnabled,
+          limit: existing.limit,
+        }
+      : limit;
+  });
+  return {
+    ...calculated,
+    limits: mergedLimits,
   };
 }
 

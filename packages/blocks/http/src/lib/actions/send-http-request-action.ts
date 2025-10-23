@@ -67,7 +67,7 @@ export const httpSendRequestAction = createAction({
     body: Property.DynamicProperties({
       displayName: 'Body',
       refreshers: ['body_type'],
-      required: false,
+      required: true,
       props: async ({ body_type }) => {
         if (!body_type) return {};
 
@@ -109,7 +109,7 @@ export const httpSendRequestAction = createAction({
     proxy_settings: Property.DynamicProperties({
       displayName: 'Proxy Settings',
       refreshers: ['use_proxy'],
-      required: false,
+      required: true,
       props: async ({ use_proxy }) => {
         if (!use_proxy) return {};
 
