@@ -58,7 +58,7 @@ export const BuilderHeader = ({
       )}
     >
       <div
-        className={cn(' flex items-center gap-2 contain-layout', {
+        className={cn('flex items-center gap-2 contain-layout', {
           'min-w-[202px]': showOverview,
           'min-w-[150px]': !showOverview,
         })}
