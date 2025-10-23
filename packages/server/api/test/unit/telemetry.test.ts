@@ -98,7 +98,7 @@ describe('telemetry', () => {
       await expect(telemetry.start(getEnvironmentId)).rejects.toThrow(
         'System property OPS_TELEMETRY_COLLECTOR_URL is not defined, but telemetry mode is set to COLLECTOR.',
       );
-      expect(getEnvironmentId).not.toHaveBeenCalled();
+      expect(getEnvironmentId).toHaveBeenCalled();
       expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
     });
 
@@ -110,7 +110,7 @@ describe('telemetry', () => {
       await expect(telemetry.start(getEnvironmentId)).rejects.toThrow(
         'System property OPS_LOGZIO_METRICS_TOKEN is not defined, but telemetry mode is set to LOGZIO.',
       );
-      expect(getEnvironmentId).not.toHaveBeenCalled();
+      expect(getEnvironmentId).toHaveBeenCalled();
       expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
     });
   });
