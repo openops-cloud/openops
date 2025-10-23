@@ -35,6 +35,8 @@ let isTelemetryEnabled = true;
 let environmentId: UUID | undefined;
 export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
+    environmentId = await getEnvironmentId();
+
     switch (telemetryMode) {
       case TelemetryMode.COLLECTOR: {
         if (!telemetryCollectorUrl) {
@@ -42,7 +44,9 @@ export const telemetry = {
             `System property OPS_${AppSystemProp.TELEMETRY_COLLECTOR_URL} is not defined, but telemetry mode is set to ${TelemetryMode.COLLECTOR}.`,
           );
         }
-        break;
+
+        logger.info('Using telemetry collector to save the telemetry events.');
+        return;
       }
       case TelemetryMode.LOGZIO: {
         if (!logzioMetricToken) {
@@ -50,23 +54,16 @@ export const telemetry = {
             `System property OPS_${SharedSystemProp.LOGZIO_METRICS_TOKEN} is not defined, but telemetry mode is set to ${TelemetryMode.LOGZIO}.`,
           );
         }
-        break;
+
+        logger.info('Using Logz.io to save the telemetry events.');
+        startMetricsCollector();
+        return;
       }
       default: {
         logger.debug('Telemetry is disabled.');
         isTelemetryEnabled = false;
-        return;
       }
     }
-
-    environmentId = await getEnvironmentId();
-    if (telemetryMode === TelemetryMode.COLLECTOR) {
-      logger.info('Using telemetry collector to save the telemetry events.');
-      return;
-    }
-
-    logger.info('Using Logz.io to save the telemetry events.');
-    startMetricsCollector();
   },
   trackEvent(event: TelemetryEvent): void {
     isTelemetryEnabledForCurrentUser(event.labels.userId)
