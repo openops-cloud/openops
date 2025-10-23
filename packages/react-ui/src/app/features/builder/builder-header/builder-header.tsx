@@ -51,11 +51,11 @@ export const BuilderHeader = ({
   return (
     <div
       className={cn(
-        'w-full absolute z-10 top-[25px] px-4 flex gap-6 justify-between @container',
+        'w-full absolute z-10 top-[25px] px-2 flex gap-2 justify-between items-start @container',
         className,
       )}
     >
-      <div className="flex items-center gap-2 contain-layout">
+      <div className="min-w-[202px] flex items-center gap-2 contain-layout">
         <SideMenuCollapsed>
           <DetailsPanel />
         </SideMenuCollapsed>

@@ -42,33 +42,40 @@ const RunDetailsBar = React.memo(
     }
 
     return (
-      <div className="h-[42px] flex items-center justify-start gap-2 px-2 py-1 bg-background shadow-lg border rounded-lg contain-layout">
-        <Icon
-          className={cn('w-6 h-6', {
-            'text-foreground': variant === 'default',
-            'text-success': variant === 'success',
-            'text-destructive': variant === 'error',
-          })}
-        />
-        <div className="text-sm text-nowrap flex max-w-[180px]">
-          <OverflowTooltip text={statusText} tooltipPlacement={'bottom'} />
-        </div>
-        <div className="text-xs text-muted-foreground hidden @[950px]:block">
-          {run?.id ?? t('Unknown')}
+      <div className="w-[212px] min-w-[212px] h-[70px] flex flex-col items-center gap-1 pt-1 pb-2 bg-background shadow-lg border rounded-lg contain-layout z-[55]">
+        <div className="h-8 w-full flex items-center pl-3 pr-2">
+          <div className="w-6 h-6 flex items-center justify-center">
+            <Icon
+              className={cn('w-[14px] h-[14px]', {
+                'text-foreground': variant === 'default',
+                'text-success': variant === 'success',
+                'text-destructive': variant === 'error',
+              })}
+            />
+          </div>
+          <OverflowTooltip
+            text={statusText}
+            tooltipPlacement={'bottom'}
+            className="text-[13px] flex-1 min-w-0 "
+          />
+
+          {canExitRun && (
+            <Button
+              variant={'outline'}
+              onClick={() => exitRun()}
+              loading={isLoading}
+              onKeyboardShortcut={() => exitRun()}
+              keyboardShortcut="Esc"
+              className="h-8 w-[86px] ml-[5px]"
+            >
+              {t('Exit')}
+            </Button>
+          )}
         </div>
 
-        {canExitRun && (
-          <Button
-            variant={'outline'}
-            onClick={() => exitRun()}
-            loading={isLoading}
-            onKeyboardShortcut={() => exitRun()}
-            keyboardShortcut="Esc"
-            className="h-8"
-          >
-            {t('Exit')}
-          </Button>
-        )}
+        <div className="text-xs text-muted-foreground">
+          {run?.id ?? t('Unknown')}
+        </div>
       </div>
     );
   },
