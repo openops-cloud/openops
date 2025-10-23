@@ -321,10 +321,8 @@ async function getFlowResponse(
       };
     case FlowRunStatus.SUCCEEDED:
       return {
-        status: StatusCodes.OK,
-        body: {
-          message: 'The request took too long to reply',
-        },
+        status: StatusCodes.NO_CONTENT,
+        body: {},
         headers: {},
       };
     // Case that should be handled before
