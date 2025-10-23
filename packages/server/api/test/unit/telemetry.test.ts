@@ -70,9 +70,13 @@ describe('telemetry', () => {
   });
 
   describe('start', () => {
-    it('should start metric collector if no telemetry URL is provided', async () => {
+    it('should start metric collector if telemetry mode is LOGZIO and token is provided', async () => {
       systemMock.get.mockImplementation((key) =>
-        key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
+        key === 'LOGZIO_METRICS_TOKEN'
+          ? 'logzio-token'
+          : key === 'TELEMETRY_MODE'
+          ? 'LOGZIO'
+          : null,
       );
 
       telemetry = getSUT();
@@ -80,6 +84,50 @@ describe('telemetry', () => {
       await telemetry.start(getEnvironmentId);
       expect(getEnvironmentId).toHaveBeenCalled();
       expect(logzioCollectorMock.startMetricsCollector).toHaveBeenCalled();
+    });
+
+    it('should start metric collector if telemetry mode is COLLECTOR and url is provided', async () => {
+      systemMock.get.mockImplementation((key) =>
+        key === 'TELEMETRY_COLLECTOR_URL'
+          ? 'collector-url'
+          : key === 'TELEMETRY_MODE'
+          ? 'COLLECTOR'
+          : null,
+      );
+
+      telemetry = getSUT();
+
+      await telemetry.start(getEnvironmentId);
+      expect(getEnvironmentId).toHaveBeenCalled();
+      expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
+    });
+
+    it('should throw exception if telemetry mode is COLLECTOR and url is not provided', async () => {
+      systemMock.get.mockImplementation((key) =>
+        key === 'TELEMETRY_MODE' ? 'COLLECTOR' : null,
+      );
+
+      telemetry = getSUT();
+
+      await expect(telemetry.start(getEnvironmentId)).rejects.toThrow(
+        'System property OPS_TELEMETRY_COLLECTOR_URL is not defined, but telemetry mode is set to COLLECTOR.',
+      );
+      expect(getEnvironmentId).not.toHaveBeenCalled();
+      expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
+    });
+
+    it('should throw exception if telemetry mode is LOGZIO and the token is not provided', async () => {
+      systemMock.get.mockImplementation((key) =>
+        key === 'TELEMETRY_MODE' ? 'LOGZIO' : null,
+      );
+
+      telemetry = getSUT();
+
+      await expect(telemetry.start(getEnvironmentId)).rejects.toThrow(
+        'System property OPS_LOGZIO_METRICS_TOKEN is not defined, but telemetry mode is set to LOGZIO.',
+      );
+      expect(getEnvironmentId).not.toHaveBeenCalled();
+      expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
     });
   });
 
@@ -121,7 +169,14 @@ describe('telemetry', () => {
     });
 
     it('should send event to collector if URL is provided', async () => {
-      systemMock.get.mockReturnValue('https://collector.example.com');
+      systemMock.get.mockImplementation((key) =>
+        key === 'TELEMETRY_COLLECTOR_URL'
+          ? 'https://collector.example.com'
+          : key === 'TELEMETRY_MODE'
+          ? 'COLLECTOR'
+          : null,
+      );
+
       userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('true');
 
       telemetry = getSUT();
@@ -141,6 +196,10 @@ describe('telemetry', () => {
 
       systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockImplementation((key) => {
+        if (key === 'TELEMETRY_MODE') {
+          return 'LOGZIO';
+        }
+
         if (key === 'LOGZIO_METRICS_TOKEN') {
           return 'logzio-token';
         }
@@ -168,9 +227,17 @@ describe('telemetry', () => {
 
   describe('flush', () => {
     it('should flush metrics if Logzio is enabled', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
-      );
+      systemMock.get.mockImplementation((key) => {
+        if (key === 'TELEMETRY_MODE') {
+          return 'LOGZIO';
+        }
+
+        if (key === 'LOGZIO_METRICS_TOKEN') {
+          return 'logzio-token';
+        }
+
+        return null;
+      });
 
       telemetry = getSUT();
       await telemetry.flush();
@@ -179,7 +246,17 @@ describe('telemetry', () => {
     });
 
     it('should not flush metrics if telemetry collector URL is defined', async () => {
-      systemMock.get.mockReturnValue('https://collector.example.com');
+      systemMock.get.mockImplementation((key) => {
+        if (key === 'TELEMETRY_MODE') {
+          return 'COLLECTOR';
+        }
+
+        if (key === 'TELEMETRY_COLLECTOR_URL') {
+          return 'https://collector.example.com';
+        }
+
+        return null;
+      });
 
       telemetry = getSUT();
       await telemetry.flush();

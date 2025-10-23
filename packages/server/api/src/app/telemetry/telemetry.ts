@@ -60,7 +60,7 @@ export const telemetry = {
     }
 
     environmentId = await getEnvironmentId();
-    if (telemetryCollectorUrl) {
+    if (telemetryMode === TelemetryMode.COLLECTOR) {
       logger.info('Using telemetry collector to save the telemetry events.');
       return;
     }
@@ -77,9 +77,9 @@ export const telemetry = {
 
         const timeseries = enrichEventLabels(event);
 
-        if (telemetryCollectorUrl) {
+        if (telemetryMode === TelemetryMode.COLLECTOR) {
           // Send to OpenOps Collector
-          sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
+          sendToCollector(telemetryCollectorUrl!, timeseries).catch((error) => {
             logger.error(
               'Error sending telemetry event to OpenOps Collector.',
               { error, event },
