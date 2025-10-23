@@ -48,6 +48,8 @@ export const BuilderHeader = ({
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
   const socket = useSocket();
 
+  const showOverview = !readonly || flowVersion.description;
+
   return (
     <div
       className={cn(
@@ -55,11 +57,16 @@ export const BuilderHeader = ({
         className,
       )}
     >
-      <div className="min-w-[202px] flex items-center gap-2 contain-layout">
+      <div
+        className={cn(' flex items-center gap-2 contain-layout', {
+          'min-w-[202px]': showOverview,
+          'min-w-[150px]': !showOverview,
+        })}
+      >
         <SideMenuCollapsed>
           <DetailsPanel />
         </SideMenuCollapsed>
-        {(!readonly || flowVersion.description) && <WorkflowOverview />}
+        {showOverview && <WorkflowOverview />}
         <BuilderHeaderActionBar
           leftSidebar={leftSidebar}
           handleSidebarButtonClick={handleSidebarButtonClick}
