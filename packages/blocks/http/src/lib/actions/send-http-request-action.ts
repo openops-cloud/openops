@@ -170,36 +170,32 @@ export const httpSendRequestAction = createAction({
     await validateHost(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
-    const mergeHeaders = (
-      authHeaders: HttpHeaders,
-      userHeaders: HttpHeaders,
-    ) => {
-      const toLowerCaseKeys = (obj: HttpHeaders) =>
-        Object.fromEntries(
-          Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]),
-        );
+    const toLowerCaseKeys = (obj: HttpHeaders) =>
+      Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]),
+      );
 
-      const auth = toLowerCaseKeys(authHeaders);
-      const user = toLowerCaseKeys(userHeaders);
+    const authHeaders =
+      (
+        context.auth?.headers as
+          | Array<{ key?: string; value?: string }>
+          | undefined
+      )?.reduce<HttpHeaders>((acc, item) => {
+        if (item.key && item.value) {
+          acc[item.key] = item.value;
+        }
+        return acc;
+      }, {}) ?? {};
 
-      return { ...auth, ...user };
+    const mergedHeaders = {
+      ...toLowerCaseKeys(authHeaders),
+      ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
     };
-
-    const authHeaders: HttpHeaders = Array.isArray(context.auth?.headers)
-      ? (
-          context.auth.headers as Array<{ key?: string; value?: string }>
-        ).reduce<HttpHeaders>((acc, item) => {
-          if (item.key && item.value) {
-            acc[item.key] = item.value;
-          }
-          return acc;
-        }, {})
-      : {};
 
     const request: HttpRequest = {
       method,
       url,
-      headers: mergeHeaders(authHeaders, (headers ?? {}) as HttpHeaders),
+      headers: mergedHeaders,
       queryParams: (queryParams ?? {}) as QueryParams,
       timeout: timeout ? timeout * 1000 : 0,
     };

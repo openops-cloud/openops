@@ -9,7 +9,6 @@ import { DynamicProperties } from '../input/dynamic-prop';
 import { JsonProperty } from '../input/json-property';
 import { MarkDownProperty } from '../input/markdown-property';
 import { NumberProperty } from '../input/number-property';
-import { ObjectProperty } from '../input/object-property';
 import { PropertyType } from '../input/property-type';
 import {
   LongTextProperty,
@@ -29,7 +28,6 @@ const CustomAuthProps = Type.Record(
     StaticDropdownProperty,
     DynamicProperties,
     ArrayProperty,
-    ObjectProperty,
   ]),
 );
 
@@ -43,7 +41,6 @@ export type CustomAuthProps = Record<
   | DynamicProperties<boolean>
   | CheckboxProperty<boolean>
   | ArrayProperty<boolean>
-  | ObjectProperty<boolean>
   | MarkDownProperty
   | JsonProperty<boolean>
 >;
