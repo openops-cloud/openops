@@ -121,10 +121,11 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     if (
       progressUpdateType === ProgressUpdateType.WEBHOOK_RESPONSE &&
       workerHandlerId &&
-      executionCorrelationId
+      executionCorrelationId &&
+      isFlowStateTerminal(runDetails.status)
     ) {
       await webhookResponseWatcher.publish(
-        executionCorrelationId,
+        runId,
         workerHandlerId,
         await getFlowResponse(runDetails),
       );
@@ -288,19 +289,6 @@ async function getFlowResponse(
   result: FlowRunResponse,
 ): Promise<EngineHttpResponse> {
   switch (result.status) {
-    case FlowRunStatus.PAUSED:
-      if (result.pauseMetadata) {
-        return {
-          status: StatusCodes.OK,
-          body: result.pauseMetadata.response,
-          headers: {},
-        };
-      }
-      return {
-        status: StatusCodes.NO_CONTENT,
-        body: {},
-        headers: {},
-      };
     case FlowRunStatus.STOPPED:
       return {
         status: result.stopResponse?.status ?? StatusCodes.OK,
@@ -324,7 +312,6 @@ async function getFlowResponse(
         headers: {},
       };
     case FlowRunStatus.TIMEOUT:
-    case FlowRunStatus.RUNNING:
       return {
         status: StatusCodes.GATEWAY_TIMEOUT,
         body: {
@@ -334,10 +321,15 @@ async function getFlowResponse(
       };
     case FlowRunStatus.SUCCEEDED:
       return {
-        status: StatusCodes.NO_CONTENT,
-        body: {},
+        status: StatusCodes.OK,
+        body: {
+          message: 'The request took too long to reply',
+        },
         headers: {},
       };
+    // Case that should be handled before
+    default:
+      throw new Error(`Unexpected flow run status: ${result.status}`);
   }
 }
 

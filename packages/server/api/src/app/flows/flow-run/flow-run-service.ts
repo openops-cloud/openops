@@ -115,6 +115,24 @@ function returnHandlerId(
   }
 }
 
+function returnProgressUpdateType(
+  pauseMetadata: PauseMetadata | undefined,
+  executionCorrelationId: string,
+): ProgressUpdateType | undefined {
+  if (isNil(pauseMetadata)) {
+    return undefined;
+  }
+
+  if (
+    executionCorrelationId === pauseMetadata.executionCorrelationId &&
+    pauseMetadata.progressUpdateType
+  ) {
+    return pauseMetadata.progressUpdateType;
+  }
+
+  return undefined;
+}
+
 export const flowRunService = {
   async list({
     projectId,
@@ -279,7 +297,9 @@ export const flowRunService = {
         executionCorrelationId,
       ),
       executionCorrelationId,
-      progressUpdateType,
+      progressUpdateType:
+        returnProgressUpdateType(pauseMetadata, executionCorrelationId) ||
+        progressUpdateType,
       executionType,
       environment: RunEnvironment.PRODUCTION,
       triggerSource: flowRunToResume.triggerSource,
