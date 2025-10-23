@@ -29,6 +29,7 @@ openopsEnv:
   # Telemetry
   OPS_LOG_LEVEL: info
   OPS_LOG_PRETTY: "false"
+  OPS_TELEMETRY_MODE: COLLECTOR
   OPS_TELEMETRY_COLLECTOR_URL: https://telemetry.openops.com/save
 
   # Engine
@@ -89,7 +90,7 @@ engine:
 tables:
   name: openops-tables
   image: openops-tables
-  tag: "0.2.6"
+  tag: "0.2.7"
   replicas: 1
   env:
     BASEROW_PUBLIC_URL: "{{ .Values.openopsEnv.OPS_OPENOPS_TABLES_PUBLIC_URL }}"
