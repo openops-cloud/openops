@@ -148,12 +148,9 @@ export const SearchableSelect = <T extends React.Key>({
             data-testid="searchableSelectTrigger"
           >
             <span
-              className={cn(
-                'w-full text-start truncate select-none overflow-hidden',
-                {
-                  'mr-8': showRefresh,
-                },
-              )}
+              className={cn('w-full text-start truncate select-none', {
+                'mr-8': showRefresh,
+              })}
             >
               {selectedIndex > -1 && options[selectedIndex]
                 ? options[selectedIndex].label
