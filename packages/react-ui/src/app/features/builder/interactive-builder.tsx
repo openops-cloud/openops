@@ -94,6 +94,8 @@ const InteractiveBuilder = ({
           : undefined;
 
       onPaste(actionToPaste, location, selectedStep, branchNodeId);
+    } else {
+      onPaste(actionToPaste, StepLocationRelativeToParent.AFTER, null);
     }
   };
 
