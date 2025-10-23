@@ -71,13 +71,7 @@ describe('telemetry', () => {
 
   describe('start', () => {
     it('should start metric collector if telemetry mode is LOGZIO and token is provided', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'LOGZIO_METRICS_TOKEN'
-          ? 'logzio-token'
-          : key === 'TELEMETRY_MODE'
-          ? 'LOGZIO'
-          : null,
-      );
+      setupSystemMock('LOGZIO', 'logzio-token');
 
       telemetry = getSUT();
 
@@ -87,13 +81,7 @@ describe('telemetry', () => {
     });
 
     it('should start metric collector if telemetry mode is COLLECTOR and url is provided', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'TELEMETRY_COLLECTOR_URL'
-          ? 'collector-url'
-          : key === 'TELEMETRY_MODE'
-          ? 'COLLECTOR'
-          : null,
-      );
+      setupSystemMock('COLLECTOR', undefined, 'collector-url');
 
       telemetry = getSUT();
 
@@ -103,9 +91,7 @@ describe('telemetry', () => {
     });
 
     it('should throw exception if telemetry mode is COLLECTOR and url is not provided', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'TELEMETRY_MODE' ? 'COLLECTOR' : null,
-      );
+      setupSystemMock('COLLECTOR');
 
       telemetry = getSUT();
 
@@ -117,9 +103,7 @@ describe('telemetry', () => {
     });
 
     it('should throw exception if telemetry mode is LOGZIO and the token is not provided', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'TELEMETRY_MODE' ? 'LOGZIO' : null,
-      );
+      setupSystemMock('LOGZIO');
 
       telemetry = getSUT();
 
@@ -169,13 +153,7 @@ describe('telemetry', () => {
     });
 
     it('should send event to collector if URL is provided', async () => {
-      systemMock.get.mockImplementation((key) =>
-        key === 'TELEMETRY_COLLECTOR_URL'
-          ? 'https://collector.example.com'
-          : key === 'TELEMETRY_MODE'
-          ? 'COLLECTOR'
-          : null,
-      );
+      setupSystemMock('COLLECTOR', undefined, 'https://collector.example.com');
 
       userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('true');
 
@@ -195,20 +173,8 @@ describe('telemetry', () => {
       userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('true');
 
       systemMock.getBoolean.mockReturnValue(true);
-      systemMock.get.mockImplementation((key) => {
-        if (key === 'TELEMETRY_MODE') {
-          return 'LOGZIO';
-        }
 
-        if (key === 'LOGZIO_METRICS_TOKEN') {
-          return 'logzio-token';
-        }
-
-        if (key === 'VERSION') {
-          return '0.0.1';
-        }
-        return null;
-      });
+      setupSystemMock('LOGZIO', 'logzio-token');
 
       telemetry = getSUT();
 
@@ -227,17 +193,7 @@ describe('telemetry', () => {
 
   describe('flush', () => {
     it('should flush metrics if Logzio is enabled', async () => {
-      systemMock.get.mockImplementation((key) => {
-        if (key === 'TELEMETRY_MODE') {
-          return 'LOGZIO';
-        }
-
-        if (key === 'LOGZIO_METRICS_TOKEN') {
-          return 'logzio-token';
-        }
-
-        return null;
-      });
+      setupSystemMock('LOGZIO', 'logzio-token');
 
       telemetry = getSUT();
       await telemetry.flush();
@@ -246,17 +202,7 @@ describe('telemetry', () => {
     });
 
     it('should not flush metrics if telemetry collector URL is defined', async () => {
-      systemMock.get.mockImplementation((key) => {
-        if (key === 'TELEMETRY_MODE') {
-          return 'COLLECTOR';
-        }
-
-        if (key === 'TELEMETRY_COLLECTOR_URL') {
-          return 'https://collector.example.com';
-        }
-
-        return null;
-      });
+      setupSystemMock('COLLECTOR', undefined, 'https://collector.example.com');
 
       telemetry = getSUT();
       await telemetry.flush();
@@ -265,3 +211,29 @@ describe('telemetry', () => {
     });
   });
 });
+
+function setupSystemMock(
+  telemetryMode: string,
+  logzioToken?: string,
+  collectorUrl?: string,
+): void {
+  systemMock.get.mockImplementation((key) => {
+    if (key === 'TELEMETRY_MODE') {
+      return telemetryMode;
+    }
+
+    if (key === 'LOGZIO_METRICS_TOKEN') {
+      return logzioToken ?? null;
+    }
+
+    if (key === 'TELEMETRY_COLLECTOR_URL') {
+      return collectorUrl ?? null;
+    }
+
+    if (key === 'VERSION') {
+      return '0.0.1';
+    }
+
+    return null;
+  });
+}
