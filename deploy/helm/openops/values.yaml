@@ -29,6 +29,7 @@ openopsEnv:
   # Telemetry
   OPS_LOG_LEVEL: info
   OPS_LOG_PRETTY: "false"
+  OPS_TELEMETRY_MODE: COLLECTOR
   OPS_TELEMETRY_COLLECTOR_URL: https://telemetry.openops.com/save
 
   # Engine
