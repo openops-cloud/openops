@@ -1,11 +1,14 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 
 const description = `
-Provide optional HTTP headers. To authenticate, set the Authorization header.
+Provide optional HTTP headers as key-value pairs. To authenticate, add an Authorization header.
+
+Note: Headers defined in the step settings will override these auth headers if they have the same key.
 
 Examples:
-- Bearer token: { Authorization: 'Bearer <token>' }
-- Basic auth: { Authorization: 'Basic <base64(username:password)>' }
+- Bearer token: Key: 'Authorization', Value: 'Bearer <token>'
+- Basic auth: Key: 'Authorization', Value: 'Basic <base64(username:password)>'
+- API key: Key: 'X-API-Key', Value: '<api-key>'
 `;
 
 export const httpAuth = BlockAuth.CustomAuth({
@@ -24,7 +27,7 @@ export const httpAuth = BlockAuth.CustomAuth({
           required: false,
           defaultValue: 'Authorization',
         }),
-        value: Property.ShortText({
+        value: Property.SecretText({
           displayName: 'Header Value',
           required: false,
         }),
