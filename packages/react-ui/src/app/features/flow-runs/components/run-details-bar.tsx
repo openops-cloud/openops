@@ -56,7 +56,7 @@ const RunDetailsBar = React.memo(
           <OverflowTooltip
             text={statusText}
             tooltipPlacement={'bottom'}
-            className="text-[13px] flex-1 min-w-0 "
+            className="text-[13px] flex-1 min-w-0"
           />
 
           {canExitRun && (
