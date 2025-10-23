@@ -141,7 +141,7 @@ const BranchSingleCondition = ({
                   disabled={readonly}
                   initialValue={field.value ?? ''}
                   onChange={field.onChange}
-                  className={'px-1'}
+                  className="px-1"
                 ></TextInputWithMentions>
                 <FormMessage />
               </FormItem>
