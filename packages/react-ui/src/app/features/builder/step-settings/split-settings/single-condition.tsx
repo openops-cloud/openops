@@ -70,6 +70,7 @@ const SingleCondition = ({
                 placeholder={t('First value')}
                 onChange={field.onChange}
                 initialValue={field.value}
+                className={'px-1'}
               ></TextInputWithMentions>
               <FormMessage />
             </FormItem>
@@ -111,6 +112,7 @@ const SingleCondition = ({
                   disabled={readonly}
                   initialValue={field.value ?? ''}
                   onChange={field.onChange}
+                  className={'px-1'}
                 ></TextInputWithMentions>
                 <FormMessage />
               </FormItem>
