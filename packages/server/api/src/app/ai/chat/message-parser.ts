@@ -31,7 +31,7 @@ export function parseUserMessage(
     return {
       isValid: false,
       errorMessage:
-        'Last message must have a text content element as the first element.',
+        'Message must have either a text element as the first part or a tool-ui element as the last part.',
     };
   }
 
