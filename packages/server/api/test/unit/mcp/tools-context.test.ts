@@ -72,12 +72,6 @@ describe('getMCPToolsContext', () => {
       frontendTools: {},
     });
 
-    expect(result).toStrictEqual({
-      mcpClients: [],
-      filteredTools: {},
-      systemPrompt:
-        '\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.',
-    });
     expect(getMcpSystemPromptMock).toHaveBeenCalledWith({
       queryClassification: ['general'],
       selectedTools: undefined,

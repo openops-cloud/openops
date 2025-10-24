@@ -74,16 +74,12 @@ export async function getMCPToolsContext({
       abortSignal,
     });
 
-    let systemPrompt = await getMcpSystemPrompt({
+    const systemPrompt = await getMcpSystemPrompt({
       queryClassification,
       selectedTools: filteredTools,
       allTools: tools,
       uiContext: additionalContext,
     });
-
-    if (!filteredTools || Object.keys(filteredTools).length === 0) {
-      systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
-    }
 
     const openOpsTools =
       hasToolProvider(tools, 'openops') &&

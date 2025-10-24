@@ -57,6 +57,10 @@ export function getLLMAsyncStream(
   const toolChoice = hasTools ? 'auto' : 'none';
   const currentMessages = sanitizeMessages(chatHistory);
 
+  const availableTools = Object.keys(tools ?? {});
+  const availableToolsString =
+    availableTools.length > 0 ? `"${availableTools.join(', ')}"` : 'none';
+
   const { fullStream } = streamText({
     model: languageModel,
     system: systemPrompt,
@@ -71,6 +75,12 @@ export function getLLMAsyncStream(
     onAbort,
     prepareStep: async ({ messages }) => {
       return {
+        system:
+          systemPrompt +
+          '\n\n' +
+          'IMPORTANT: Only use the tools that are provided to you. Do not make up or suggest tools that are not provided to you, even if you see they were previously available in the history. ' +
+          'The **only available** tools are: ' +
+          availableToolsString,
         messages: addCacheControlToMessages(messages),
       };
     },
