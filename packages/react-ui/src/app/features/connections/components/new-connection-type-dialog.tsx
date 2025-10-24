@@ -1,5 +1,6 @@
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
+  BlockIcon,
   Button,
   Dialog,
   DialogClose,
@@ -108,11 +109,16 @@ const NewConnectionTypeDialog = React.memo(
                         className="border p-2 h-[150px] w-[150px] flex flex-col items-center justify-center hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg"
                       >
                         <div className="h-10 flex items-center justify-center">
-                          <img
-                            className="w-10"
-                            alt={block.auth?.authProviderDisplayName ?? ''}
-                            src={block.auth?.authProviderLogoUrl ?? ''}
-                          ></img>
+                          <BlockIcon
+                            logoUrl={block.auth?.authProviderLogoUrl}
+                            displayIcon={block.auth?.authProviderDisplayIcon}
+                            displayName={
+                              block.auth?.authProviderDisplayName ?? ''
+                            }
+                            showTooltip={false}
+                            size={'lg'}
+                            category={block.categories?.[0]}
+                          />
                         </div>
                         <div className="mt-2 text-center text-md">
                           {block.displayName}
