@@ -119,13 +119,9 @@ function returnProgressUpdateType(
   pauseMetadata: PauseMetadata | undefined,
   executionCorrelationId: string,
 ): ProgressUpdateType | undefined {
-  if (isNil(pauseMetadata)) {
-    return undefined;
-  }
-
   if (
-    executionCorrelationId === pauseMetadata.executionCorrelationId &&
-    pauseMetadata.progressUpdateType
+    pauseMetadata &&
+    pauseMetadata.executionCorrelationId === executionCorrelationId
   ) {
     return pauseMetadata.progressUpdateType;
   }
@@ -287,6 +283,11 @@ export const flowRunService = {
     });
 
     const pauseMetadata = flowRunToResume.pauseMetadata;
+
+    const previousProgressUpdateType =
+      returnProgressUpdateType(pauseMetadata, executionCorrelationId) ||
+      progressUpdateType;
+
     return flowRunService.start({
       payload,
       flowRunId: flowRunToResume.id,
@@ -297,9 +298,7 @@ export const flowRunService = {
         executionCorrelationId,
       ),
       executionCorrelationId,
-      progressUpdateType:
-        returnProgressUpdateType(pauseMetadata, executionCorrelationId) ||
-        progressUpdateType,
+      progressUpdateType: previousProgressUpdateType,
       executionType,
       environment: RunEnvironment.PRODUCTION,
       triggerSource: flowRunToResume.triggerSource,

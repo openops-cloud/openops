@@ -325,7 +325,6 @@ async function getFlowResponse(
         body: {},
         headers: {},
       };
-    // Case that should be handled before
     default:
       throw new Error(`Unexpected flow run status: ${result.status}`);
   }
