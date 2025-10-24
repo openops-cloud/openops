@@ -1,9 +1,9 @@
+import { SSE_HEARTBEAT_INTERVAL_MS } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
-import { SERVER_HEARTBEAT_INTERVAL_MS } from './constants';
 
-const RESPONSE_WARNING_MS = SERVER_HEARTBEAT_INTERVAL_MS + 1000;
-const SSE_MESSAGE_GAP_TIMEOUT_MS = SERVER_HEARTBEAT_INTERVAL_MS + 7000;
+const RESPONSE_WARNING_MS = SSE_HEARTBEAT_INTERVAL_MS + 1000;
+const SSE_MESSAGE_GAP_TIMEOUT_MS = SSE_HEARTBEAT_INTERVAL_MS + 7000;
 const GAP_CHECK_INTERVAL_MS = 2000;
 
 type ChatStatus = 'submitted' | 'streaming' | 'ready' | 'error';

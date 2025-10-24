@@ -1,6 +1,7 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { ConnectionTimeoutError } from './connection-timeout-error';
-import { SERVER_HEARTBEAT_INTERVAL_MS } from './constants';
+
+import { SSE_HEARTBEAT_INTERVAL_MS } from '@openops/shared';
 import { ChatMode } from './types';
 
 export const buildQueryKey = (
@@ -67,7 +68,7 @@ export const combineAbortSignals = (
   return controller.signal;
 };
 
-const CONNECTION_TIMEOUT_MS = 15000 + SERVER_HEARTBEAT_INTERVAL_MS;
+const CONNECTION_TIMEOUT_MS = 15000 + SSE_HEARTBEAT_INTERVAL_MS;
 
 /**
  * Custom fetch implementation with connection timeout.

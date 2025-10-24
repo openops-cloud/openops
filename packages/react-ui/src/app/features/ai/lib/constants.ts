@@ -1,1 +1,0 @@
-export const SERVER_HEARTBEAT_INTERVAL_MS = 15000;
