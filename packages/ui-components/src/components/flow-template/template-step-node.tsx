@@ -42,6 +42,7 @@ const TemplateStepNode = React.memo(
           <div className="flex flex-1 items-center gap-[6px]">
             <BlockIcon
               logoUrl={stepMetadata?.logoUrl}
+              displayIcon={stepMetadata?.displayIcon}
               displayName={stepMetadata?.displayName}
               showTooltip={false}
               size={'sm'}

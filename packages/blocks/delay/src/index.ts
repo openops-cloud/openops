@@ -7,7 +7,7 @@ export const delay = createBlock({
   displayName: 'Delay',
   description: 'Use it to delay the execution of the next action',
   minimumSupportedRelease: '0.5.0',
-  logoUrl: 'https://static.openops.com/blocks/delay.png',
+  displayIcon: 'Hourglass',
   authors: [
     'Nilesh',
     'kishanprmr',

@@ -16,7 +16,8 @@ export class Block<BlockAuth extends BlockAuthProperty = BlockAuthProperty>
 
   constructor(
     public readonly displayName: string,
-    public readonly logoUrl: string,
+    public readonly logoUrl: string | undefined,
+    public readonly displayIcon: string | undefined,
     public readonly authors: string[],
     public readonly events: BlockEventProcessors | undefined,
     actions: Action<BlockAuth>[],
@@ -35,6 +36,7 @@ export class Block<BlockAuth extends BlockAuthProperty = BlockAuthProperty>
     return {
       displayName: this.displayName,
       logoUrl: this.logoUrl,
+      displayIcon: this.displayIcon,
       actions: this._actions,
       triggers: this._triggers,
       categories: this.categories,
@@ -69,6 +71,7 @@ export const createBlock = <BlockAuth extends BlockAuthProperty>(
   return new Block(
     params.displayName,
     params.logoUrl,
+    params.displayIcon,
     params.authors ?? [],
     params.events,
     params.actions,
@@ -85,7 +88,8 @@ type CreateBlockParams<
   BlockAuth extends BlockAuthProperty = BlockAuthProperty,
 > = {
   displayName: string;
-  logoUrl: string;
+  logoUrl?: string;
+  displayIcon?: string;
   authors: string[];
   description?: string;
   auth: BlockAuth | undefined;

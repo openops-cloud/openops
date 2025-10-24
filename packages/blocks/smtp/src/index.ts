@@ -83,7 +83,7 @@ export const smtp = createBlock({
   displayName: 'SMTP',
   description: 'Send emails using Simple Mail Transfer Protocol',
   minimumSupportedRelease: '0.5.0',
-  logoUrl: 'https://static.openops.com/blocks/smtp.png',
+  displayIcon: 'Mail',
   categories: [BlockCategory.COLLABORATION],
   authors: [
     'tahboubali',

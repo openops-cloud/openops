@@ -32,6 +32,7 @@ const keysWithinPath = (path: string) => {
 
 type MentionNodeAttrs = {
   logoUrl?: string;
+  displayIcon?: string;
   displayText: string;
   serverValue: string;
 };

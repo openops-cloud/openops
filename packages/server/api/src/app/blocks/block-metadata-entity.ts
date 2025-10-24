@@ -38,6 +38,10 @@ export const BlockMetadataEntity =
         type: String,
         nullable: false,
       },
+      displayIcon: {
+        type: String,
+        nullable: true,
+      },
       projectUsage: {
         type: Number,
         nullable: false,

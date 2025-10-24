@@ -32,6 +32,7 @@ const columns: ColumnDef<RowDataWithActions<BlockMetadataModelSummary>>[] = [
             border={true}
             displayName={row.original.displayName}
             logoUrl={row.original.logoUrl}
+            displayIcon={row.original.displayIcon}
             showTooltip={false}
           />
         </div>

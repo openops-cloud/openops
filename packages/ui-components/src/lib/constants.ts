@@ -3,13 +3,13 @@ import { ActionType, TriggerType } from '@openops/shared';
 export const PRIMITIVE_STEP_METADATA = {
   [ActionType.CODE]: {
     displayName: 'Code',
-    logoUrl: 'https://static.openops.com/blocks/code.svg',
+    displayIcon: 'Code',
     description: 'Powerful Node.js & TypeScript code with npm',
     type: ActionType.CODE,
   },
   [ActionType.LOOP_ON_ITEMS]: {
     displayName: 'Loop on Items',
-    logoUrl: 'https://static.openops.com/blocks/loop.svg',
+    displayIcon: 'RotateCw',
     description: 'Iterate over a list of items',
     type: ActionType.LOOP_ON_ITEMS,
   },
@@ -21,7 +21,7 @@ export const PRIMITIVE_STEP_METADATA = {
   },
   [ActionType.SPLIT]: {
     displayName: 'Split',
-    logoUrl: 'https://static.openops.com/blocks/split.svg',
+    displayIcon: 'Network',
     description:
       'Split the flow into multiple branches depending on condition(s). Only one branch will be executed.',
     type: ActionType.SPLIT,

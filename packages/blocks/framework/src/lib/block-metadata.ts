@@ -48,7 +48,8 @@ export const BlockBaseDetails = Type.Composite([
 ]);
 
 export type BlockBaseDetails = BlockBase & {
-  logoUrl: string;
+  logoUrl?: string;
+  displayIcon?: string;
   projectId?: ProjectId;
   organizationId?: string;
   authors: string[];

@@ -34,6 +34,7 @@ const connectionsPickerTableColumns: ColumnDef<
         <div className="flex items-center gap-4">
           <BlockIcon
             logoUrl={row.original.integration.logoUrl}
+            displayIcon={row.original.integration.displayIcon}
             displayName={row.original.integration.displayName}
             showTooltip={false}
             size={'lg'}

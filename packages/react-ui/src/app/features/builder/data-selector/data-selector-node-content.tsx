@@ -90,6 +90,7 @@ const DataSelectorNodeContent = ({
             <BlockIcon
               displayName={stepMetadata.displayName}
               logoUrl={stepMetadata.logoUrl}
+              displayIcon={stepMetadata.displayIcon}
               showTooltip={false}
               circle={false}
               border={false}

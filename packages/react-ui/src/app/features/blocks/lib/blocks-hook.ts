@@ -117,7 +117,7 @@ export const blocksHooks = {
   },
   useStepLogos: (
     props: UseStepsMetadata,
-  ): { displayName: string; logoUrl: string }[] => {
+  ): { displayName: string; logoUrl?: string; displayIcon?: string }[] => {
     return useQueries({
       queries: props.map((step) => stepMetadataQueryBuilder(step)),
     })
@@ -127,12 +127,17 @@ export const blocksHooks = {
         return {
           displayName: stepMetadata.displayName,
           logoUrl: stepMetadata.logoUrl,
+          displayIcon: stepMetadata.displayIcon,
+          category:
+            'categories' in stepMetadata
+              ? stepMetadata.categories?.[0]
+              : undefined,
         };
       });
   },
   useIntegrationStepLogos: (
     props: UseStepsMetadata,
-  ): { displayName: string; logoUrl: string }[] => {
+  ): { displayName: string; logoUrl?: string; displayIcon?: string }[] => {
     const notCommonSteps = props.filter(
       (step) =>
         step.type === ActionType.BLOCK || step.type === TriggerType.BLOCK,
@@ -151,6 +156,11 @@ export const blocksHooks = {
         return {
           displayName: stepMetadata.displayName,
           logoUrl: stepMetadata.logoUrl,
+          displayIcon: stepMetadata.displayIcon,
+          category:
+            'categories' in stepMetadata
+              ? stepMetadata.categories?.[0]
+              : undefined,
         };
       });
   },

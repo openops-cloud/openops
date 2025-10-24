@@ -21,6 +21,7 @@ export enum AiScopeType {
 export type AiScopeItem = {
   displayName: string;
   logoUrl: string;
+  displayIcon?: string;
   id: string;
   type: AiScopeType;
 };
@@ -47,6 +48,7 @@ const AiScopeBadge = ({
     >
       <BlockIcon
         logoUrl={item.logoUrl}
+        displayIcon={item.displayIcon}
         displayName={item.displayName}
         showTooltip={false}
         size={'sm'}
@@ -155,6 +157,7 @@ const AiScopeSelector = ({
                     >
                       <BlockIcon
                         logoUrl={scope.logoUrl}
+                        displayIcon={scope.displayIcon}
                         displayName={scope.displayName}
                         showTooltip={false}
                         size={'sm'}

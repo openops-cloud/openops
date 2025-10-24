@@ -9,7 +9,7 @@ export const approval = createBlock({
 
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/approval.svg',
+  displayIcon: 'CircleCheckBig',
   authors: ['kishanprmr', 'MoShizzle', 'khaledmashaly', 'abuaboud'],
   categories: [BlockCategory.CORE],
   actions: [waitForApprovalLink, createApprovalLink],

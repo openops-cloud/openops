@@ -4,6 +4,7 @@ export const BaseBlockAuthSchema = Type.Object({
   authProviderKey: Type.String(),
   authProviderDisplayName: Type.String(),
   authProviderLogoUrl: Type.String(),
+  authProviderIcon: Type.Optional(Type.String()),
   displayName: Type.String(),
   description: Type.Optional(Type.String()),
 });
@@ -11,7 +12,8 @@ export const BaseBlockAuthSchema = Type.Object({
 export type BaseBlockAuthSchema<AuthValueSchema> = {
   authProviderKey: string;
   authProviderDisplayName: string;
-  authProviderLogoUrl: string;
+  authProviderLogoUrl?: string;
+  authProviderIcon?: string;
   displayName: string;
   description?: string;
   validate?: (params: {

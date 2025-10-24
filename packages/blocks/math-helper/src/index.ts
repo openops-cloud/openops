@@ -21,8 +21,8 @@ export const math = createBlock({
   description: markdownDescription,
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.9.0',
-  logoUrl: 'https://static.openops.com/blocks/math-helper.svg',
   categories: [BlockCategory.CORE],
+  displayIcon: 'Superscript',
   authors: ['kishanprmr', 'MoShizzle', 'abuaboud'],
   actions: [
     addition,
