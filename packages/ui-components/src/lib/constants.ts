@@ -15,13 +15,13 @@ export const PRIMITIVE_STEP_METADATA = {
   },
   [ActionType.BRANCH]: {
     displayName: 'Condition',
-    logoUrl: 'https://static.openops.com/blocks/branch.svg',
+    displayIcon: 'Network',
     description: 'Split the flow into two branches depending on condition(s)',
     type: ActionType.BRANCH,
   },
   [ActionType.SPLIT]: {
     displayName: 'Split',
-    displayIcon: 'Network',
+    displayIcon: 'BranchIcon',
     description:
       'Split the flow into multiple branches depending on condition(s). Only one branch will be executed.',
     type: ActionType.SPLIT,

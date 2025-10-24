@@ -16,10 +16,12 @@ import {
   Wand,
 } from 'lucide-react';
 import React from 'react';
+import { BranchIcon } from '../components/block-icon/branch-icon';
 
 export const ICON_MAPPING: Record<string, React.ElementType> = {
   Wand: Wand,
   RotateCw: RotateCw,
+  BranchIcon: BranchIcon,
   Code: Code,
   Network: Network,
   CircleCheckBig: CircleCheckBig,
