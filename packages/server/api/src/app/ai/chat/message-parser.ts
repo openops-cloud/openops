@@ -20,7 +20,7 @@ export function parseUserMessage(
   }
 
   const firstContentElement = message.parts[0];
-  const lastContentElement = message.parts[message.parts.length - 1];
+  const lastContentElement = message.parts.at(-1);
 
   if (
     !firstContentElement ||

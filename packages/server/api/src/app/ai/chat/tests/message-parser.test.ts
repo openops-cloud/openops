@@ -1,4 +1,4 @@
-import { MessageParseResult, parseUserMessage } from '../message-parser';
+import { parseUserMessage } from '../message-parser';
 
 describe('parseUserMessage', () => {
   describe('valid string messages', () => {
