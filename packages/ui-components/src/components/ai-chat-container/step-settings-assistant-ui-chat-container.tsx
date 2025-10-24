@@ -34,6 +34,8 @@ type StepSettingsAssistantUiChatContainerProps = {
   theme: Theme;
   handleInject: (code: string | SourceCode) => void;
   showFullWidth: boolean;
+  isShowingSlowWarning?: boolean;
+  connectionError?: string | null;
 };
 
 const StepSettingsAssistantUiChatContainer = ({
@@ -53,6 +55,8 @@ const StepSettingsAssistantUiChatContainer = ({
   theme,
   handleInject,
   showFullWidth,
+  isShowingSlowWarning,
+  connectionError,
 }: StepSettingsAssistantUiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -100,6 +104,8 @@ const StepSettingsAssistantUiChatContainer = ({
         availableModels={availableModels}
         theme={theme}
         title={t('AI Chat')}
+        isShowingSlowWarning={isShowingSlowWarning}
+        connectionError={connectionError}
       >
         <div
           className="text-md dark:text-primary items-center font-bold flex"

@@ -83,7 +83,7 @@ const MermaidRendererImpl = ({
         ref={containerRef}
         className={cn(
           'border border-solid rounded bg-background p-4',
-          'flex items-center justify-center overflow-auto',
+          'flex items-start justify-center overflow-auto',
           'min-h-[120px] max-h-[200px]',
           className,
         )}
