@@ -8,7 +8,7 @@ import { toast } from '@openops/components/ui';
 import { flowHelper } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
-import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
+import { DefaultChatTransport, TextUIPart, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
@@ -17,8 +17,6 @@ import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode } from './types';
-
-const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 type UseAssistantChatContext = {
   flowId: string;
@@ -190,7 +188,6 @@ export const useAssistantChat = ({
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
     chatId,
-    message: PLACEHOLDER_MESSAGE_INTEROP,
     additionalContext,
   });
 
@@ -199,7 +196,6 @@ export const useAssistantChat = ({
   useEffect(() => {
     bodyRef.current = {
       chatId,
-      message: PLACEHOLDER_MESSAGE_INTEROP,
       additionalContext,
     };
   }, [chatId, additionalContext]);
@@ -211,10 +207,13 @@ export const useAssistantChat = ({
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      body: () => ({
-        ...bodyRef.current,
-        messages: messagesRef.current,
-        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+      prepareSendMessagesRequest: ({ messages, requestMetadata }) => ({
+        body: {
+          ...(requestMetadata as Record<string, unknown>),
+          ...bodyRef.current,
+          message: messages.at(-1),
+          tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+        },
       }),
     }),
     onError: (error) => {
