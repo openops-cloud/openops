@@ -115,6 +115,21 @@ function returnHandlerId(
   }
 }
 
+function getEffectiveProgressUpdateType(
+  pauseMetadata: PauseMetadata | undefined,
+  progressUpdateType: ProgressUpdateType,
+  executionCorrelationId: string,
+): ProgressUpdateType {
+  if (
+    pauseMetadata &&
+    pauseMetadata.executionCorrelationId === executionCorrelationId
+  ) {
+    return pauseMetadata.progressUpdateType || progressUpdateType;
+  }
+
+  return progressUpdateType;
+}
+
 export const flowRunService = {
   async list({
     projectId,
@@ -269,6 +284,13 @@ export const flowRunService = {
     });
 
     const pauseMetadata = flowRunToResume.pauseMetadata;
+
+    const progressUpdateTypeToUse = getEffectiveProgressUpdateType(
+      pauseMetadata,
+      progressUpdateType,
+      executionCorrelationId,
+    );
+
     return flowRunService.start({
       payload,
       flowRunId: flowRunToResume.id,
@@ -279,7 +301,7 @@ export const flowRunService = {
         executionCorrelationId,
       ),
       executionCorrelationId,
-      progressUpdateType,
+      progressUpdateType: progressUpdateTypeToUse,
       executionType,
       environment: RunEnvironment.PRODUCTION,
       triggerSource: flowRunToResume.triggerSource,

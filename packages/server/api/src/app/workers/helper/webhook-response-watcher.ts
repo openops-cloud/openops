@@ -16,60 +16,77 @@ export const webhookResponseWatcher = {
     return SERVER_ID;
   },
   async init(): Promise<void> {
-    logger.info('[engineWatcher#init] Initializing engine run watcher');
     await pubsub().subscribe(
       `engine-run:sync:${SERVER_ID}`,
       (_channel, message) => {
         const parsedMessage: EngineResponseWithId = JSON.parse(message);
-        const listener = listeners.get(parsedMessage.executionCorrelationId);
+        const listener = listeners.get(parsedMessage.flowRunId);
+
+        logger.info('Webhook response received.', {
+          flowRunId: parsedMessage.flowRunId,
+        });
+
         if (listener) {
           listener(parsedMessage);
         }
-        logger.info(
-          { executionCorrelationId: parsedMessage.executionCorrelationId },
-          '[engineWatcher#init]',
-        );
       },
     );
+
+    logger.info('Webhook response watcher initialized successfully.', {
+      serverId: SERVER_ID,
+    });
   },
   async oneTimeListener(
-    executionCorrelationId: string,
+    flowRunId: string,
     timeoutRequest: boolean,
   ): Promise<EngineHttpResponse> {
-    logger.info({ executionCorrelationId }, '[engineWatcher#listen]');
     return new Promise((resolve) => {
       let timeout: NodeJS.Timeout;
       if (timeoutRequest) {
         const defaultResponse: EngineHttpResponse = {
-          status: StatusCodes.NO_CONTENT,
-          body: {},
+          status: StatusCodes.REQUEST_TIMEOUT,
+          body: {
+            message: 'Request timed out',
+          },
           headers: {},
         };
+
         timeout = setTimeout(() => {
-          listeners.delete(executionCorrelationId);
+          listeners.delete(flowRunId);
           resolve(defaultResponse);
         }, WEBHOOK_TIMEOUT_MS);
       }
+
       const responseHandler = (flowResponse: EngineResponseWithId) => {
         if (timeout) {
           clearTimeout(timeout);
         }
-        listeners.delete(executionCorrelationId);
+
+        listeners.delete(flowRunId);
         resolve(flowResponse.httpResponse);
       };
-      listeners.set(executionCorrelationId, responseHandler);
+
+      logger.info(`Add listener for the flow run ${flowRunId}.`, {
+        flowRunId,
+      });
+
+      listeners.set(flowRunId, responseHandler);
     });
   },
   async publish(
-    executionCorrelationId: string,
+    flowRunId: string,
     workerServerId: string,
     httpResponse: EngineHttpResponse,
   ): Promise<void> {
-    logger.info({ executionCorrelationId }, '[engineWatcher#publish]');
+    logger.info(`Publishing webhook response for flow run ${flowRunId}.`, {
+      flowRunId,
+    });
+
     const message: EngineResponseWithId = {
-      executionCorrelationId,
+      flowRunId,
       httpResponse,
     };
+
     await pubsub().publish(
       `engine-run:sync:${workerServerId}`,
       JSON.stringify(message),
@@ -81,6 +98,6 @@ export const webhookResponseWatcher = {
 };
 
 export type EngineResponseWithId = {
-  executionCorrelationId: string;
   httpResponse: EngineHttpResponse;
+  flowRunId: string;
 };
