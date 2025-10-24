@@ -76,6 +76,8 @@ export const Thread = ({
 
         <ThreadPrimitive.Messages components={messageComponents} />
 
+        {isShowingSlowWarning && <ConnectionSlowWarning />}
+
         <ThreadPrimitive.If running>
           <div className="w-full mb-2">
             <div className="flex items-center text-slate-800 dark:text-slate-50">
@@ -85,8 +87,6 @@ export const Thread = ({
             </div>
           </div>
         </ThreadPrimitive.If>
-
-        {isShowingSlowWarning && <ConnectionSlowWarning />}
 
         {connectionError && <ConnectionError error={connectionError} />}
 
