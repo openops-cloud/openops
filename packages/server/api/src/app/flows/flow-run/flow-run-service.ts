@@ -115,18 +115,19 @@ function returnHandlerId(
   }
 }
 
-function returnProgressUpdateType(
+function getEffectiveProgressUpdateType(
   pauseMetadata: PauseMetadata | undefined,
+  progressUpdateType: ProgressUpdateType,
   executionCorrelationId: string,
-): ProgressUpdateType | undefined {
+): ProgressUpdateType {
   if (
     pauseMetadata &&
     pauseMetadata.executionCorrelationId === executionCorrelationId
   ) {
-    return pauseMetadata.progressUpdateType;
+    return pauseMetadata.progressUpdateType || progressUpdateType;
   }
 
-  return undefined;
+  return progressUpdateType;
 }
 
 export const flowRunService = {
@@ -284,9 +285,11 @@ export const flowRunService = {
 
     const pauseMetadata = flowRunToResume.pauseMetadata;
 
-    const previousProgressUpdateType =
-      returnProgressUpdateType(pauseMetadata, executionCorrelationId) ||
-      progressUpdateType;
+    const progressUpdateTypeToUse = getEffectiveProgressUpdateType(
+      pauseMetadata,
+      progressUpdateType,
+      executionCorrelationId,
+    );
 
     return flowRunService.start({
       payload,
@@ -298,7 +301,7 @@ export const flowRunService = {
         executionCorrelationId,
       ),
       executionCorrelationId,
-      progressUpdateType: previousProgressUpdateType,
+      progressUpdateType: progressUpdateTypeToUse,
       executionType,
       environment: RunEnvironment.PRODUCTION,
       triggerSource: flowRunToResume.triggerSource,
