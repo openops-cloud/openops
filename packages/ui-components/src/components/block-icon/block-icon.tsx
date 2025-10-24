@@ -54,6 +54,20 @@ export const getCategoryFromType = (
   }
 };
 
+export const getCategoryFromMetadata = (metadata: any): string | undefined => {
+  if (!metadata) return undefined;
+
+  if ('blockName' in metadata && metadata.categories) {
+    return metadata.categories[0];
+  }
+
+  if (metadata.type) {
+    return getCategoryFromType(metadata.type as any);
+  }
+
+  return undefined;
+};
+
 const CATEGORY_COLORS = {
   [BlockCategory.FINOPS]: 'text-fuchsia-600',
   [BlockCategory.CLOUD]: 'text-green-500',

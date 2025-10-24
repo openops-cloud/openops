@@ -6,7 +6,7 @@ import {
   CardList,
   CardListItem,
   CardListItemSkeleton,
-  getCategoryFromType,
+  getCategoryFromMetadata,
   Input,
   INTERNAL_ERROR_TOAST,
   ItemListMetadata,
@@ -379,11 +379,7 @@ const BlockSelector = ({
                       <BlockIcon
                         logoUrl={blockMetadata.logoUrl}
                         displayIcon={blockMetadata.displayIcon}
-                        category={
-                          blockMetadata && 'blockName' in blockMetadata
-                            ? blockMetadata.categories?.[0]
-                            : getCategoryFromType(blockMetadata?.type as any)
-                        }
+                        category={getCategoryFromMetadata(blockMetadata)}
                         displayName={blockMetadata.displayName}
                         showTooltip={false}
                         size={'sm'}
@@ -453,14 +449,9 @@ const BlockSelector = ({
                             <BlockIcon
                               logoUrl={selectedBlockMetadata.logoUrl}
                               displayIcon={selectedBlockMetadata.displayIcon}
-                              category={
-                                selectedBlockMetadata &&
-                                'blockName' in selectedBlockMetadata
-                                  ? selectedBlockMetadata.categories?.[0]
-                                  : getCategoryFromType(
-                                      selectedBlockMetadata?.type as any,
-                                    )
-                              }
+                              category={getCategoryFromMetadata(
+                                selectedBlockMetadata,
+                              )}
                               displayName={selectedBlockMetadata.displayName}
                               showTooltip={false}
                               size={'sm'}

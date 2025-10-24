@@ -1,4 +1,8 @@
-import { BlockIcon, Button } from '@openops/components/ui';
+import {
+  BlockIcon,
+  Button,
+  getCategoryFromMetadata,
+} from '@openops/components/ui';
 import { t } from 'i18next';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -91,6 +95,7 @@ const DataSelectorNodeContent = ({
               displayName={stepMetadata.displayName}
               logoUrl={stepMetadata.logoUrl}
               displayIcon={stepMetadata.displayIcon}
+              category={getCategoryFromMetadata(stepMetadata)}
               showTooltip={false}
               circle={false}
               border={false}

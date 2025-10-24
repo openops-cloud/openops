@@ -52,6 +52,7 @@ type BlockActionLimitMetadata = Record<
     logoUrl: string;
     displayIcon: string;
     actions: Record<string, string>;
+    category?: string;
   }
 >;
 
@@ -269,6 +270,9 @@ function TestRunLimitsForm({
                                 displayIcon={
                                   blockActionMetaMap[item.blockName]
                                     ?.displayIcon
+                                }
+                                category={
+                                  blockActionMetaMap[item.blockName]?.category
                                 }
                                 showTooltip={false}
                                 size={'sm'}

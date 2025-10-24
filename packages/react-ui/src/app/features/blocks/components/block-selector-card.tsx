@@ -1,6 +1,7 @@
 import {
   BlockIcon,
   cn,
+  getCategoryFromMetadata,
   StepMetadata,
   StepTemplateMetadata,
 } from '@openops/components/ui';
@@ -37,6 +38,7 @@ const BlockCardInfo: React.FC<BlockCardInfoProps> = ({
         showTooltip
         border={false}
         size={'sm'}
+        category={getCategoryFromMetadata(stepMetadata)}
       ></BlockIcon>
     </div>
 

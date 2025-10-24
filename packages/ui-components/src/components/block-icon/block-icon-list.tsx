@@ -10,6 +10,7 @@ type BlockIconListMetadata = {
   logoUrl?: string;
   displayIcon?: string;
   category?: string;
+  categories?: string[];
 };
 
 type BlockIconListProps = {
@@ -71,7 +72,7 @@ export function BlockIconList({
               size={size ?? 'md'}
               border={true}
               displayName={metadata.displayName}
-              category={metadata.category}
+              category={metadata.category || metadata.categories?.[0]}
               key={index}
             />
           ))}
