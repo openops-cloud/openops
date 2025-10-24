@@ -18,6 +18,9 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { httpAuth } from '../common/auth';
 import { httpMethodDropdown } from '../common/props';
 
+const toLowerCaseKeys = (obj: HttpHeaders) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+
 export const httpSendRequestAction = createAction({
   name: 'send_request',
   displayName: 'Send HTTP request',
@@ -170,22 +173,16 @@ export const httpSendRequestAction = createAction({
     await validateHost(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
-    const toLowerCaseKeys = (obj: HttpHeaders) =>
-      Object.fromEntries(
-        Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]),
-      );
-
-    const authHeaders =
-      (
-        context.auth?.headers as
-          | Array<{ key?: string; value?: string }>
-          | undefined
-      )?.reduce<HttpHeaders>((acc, item) => {
-        if (item.key && item.value) {
-          acc[item.key] = item.value;
-        }
-        return acc;
-      }, {}) ?? {};
+    const headersArray =
+      (context.auth?.headers as
+        | Array<{ key?: string; value?: string }>
+        | undefined) ?? [];
+    const authHeaders: HttpHeaders = {};
+    for (const item of headersArray) {
+      if (item.key && item.value) {
+        authHeaders[item.key] = item.value;
+      }
+    }
 
     const mergedHeaders = {
       ...toLowerCaseKeys(authHeaders),
