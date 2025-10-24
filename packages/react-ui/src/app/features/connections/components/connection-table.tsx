@@ -50,6 +50,7 @@ const BlockIconWithBlockName = ({
 
   const displayName = connectionModel?.authProviderDisplayName;
   const logoUrl = connectionModel?.authProviderLogoUrl;
+  const displayIcon = connectionModel?.authProviderDisplayIcon;
 
   return (
     <BlockIcon
@@ -58,6 +59,7 @@ const BlockIconWithBlockName = ({
       border={true}
       displayName={displayName}
       logoUrl={logoUrl}
+      displayIcon={displayIcon}
       showTooltip={true}
     />
   );

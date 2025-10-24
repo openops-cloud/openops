@@ -158,6 +158,7 @@ const toBlockMetadataModel = ({
     displayName: blockMetadata.displayName,
     description: blockMetadata.description,
     logoUrl: blockMetadata.logoUrl,
+    displayIcon: blockMetadata.displayIcon,
     version: blockMetadata.version,
     auth: blockMetadata.auth,
     projectUsage: 0,

@@ -47,6 +47,8 @@ export const useTestRunLimitsDialog = () => {
         map[blockName] = {
           displayName: blockMeta?.displayName ?? blockName,
           logoUrl: blockMeta?.logoUrl ?? '',
+          displayIcon: blockMeta?.displayIcon ?? '',
+          category: blockMeta?.categories?.[0] ?? '',
           actions: {},
         };
       }

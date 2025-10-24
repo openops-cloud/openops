@@ -10,7 +10,8 @@ import {
 
 type BaseStepMetadata = {
   displayName: string;
-  logoUrl: string;
+  logoUrl?: string;
+  displayIcon?: string;
   description: string;
 };
 

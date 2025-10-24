@@ -2,18 +2,18 @@ import { cn } from '@openops/components/ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 const tagVariants = cva(
-  'text-xs font-semibold me-2 px-2.5 py-0.5 rounded-full cursor-pointer border border-transparent dark:border-[2px]',
+  'text-xs font-medium me-2 px-2.5 py-0.5 rounded-full cursor-pointer border-[2px] border-transparent',
   {
     variants: {
       variant: {
-        pink: 'bg-pink-50 text-pink-800 hover:border-pink-400 data-[selected=true]:border-pink-400',
+        pink: 'bg-fuchsia-600/20 text-primary-800 hover:border-fuchsia-500 data-[selected=true]:border-fuchsia-500',
         yellow:
-          'bg-yellow-50 text-yellow-800 hover:border-yellow-400 data-[selected=true]:border-yellow-400',
-        purple:
-          'bg-purple-50 text-purple-800 hover:border-purple-400 data-[selected=true]:border-purple-400',
-        blue: 'bg-blue-50 text-blue-800 hover:border-blue-400 data-[selected=true]:border-blue-400',
+          'bg-yellow-500/20 text-primary-800 hover:border-yellow-500 data-[selected=true]:border-yellow-500',
+        indigo:
+          'bg-indigo-600/20 text-primary-800 hover:border-indigo-500 data-[selected=true]:border-indigo-500',
+        blue: 'bg-blue-500/20 text-primary-800 hover:border-blue-500 data-[selected=true]:border-blue-500',
         green:
-          'bg-green-50 text-green-800 hover:border-green-400 data-[selected=true]:border-green-400',
+          'bg-green-500/20 text-primary-800 hover:border-green-500 data-[selected=true]:border-green-500',
       },
     },
   },

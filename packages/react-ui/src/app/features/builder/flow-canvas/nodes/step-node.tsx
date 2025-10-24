@@ -3,6 +3,7 @@ import {
   BlockIcon,
   cn,
   DRAGGED_STEP_TAG,
+  getCategoryFromMetadata,
   InvalidStepIcon,
   LoadingSpinner,
   OPS_NODE_SIZE,
@@ -238,7 +239,9 @@ const WorkflowStepNode = React.memo(
                     <div className="flex flex-1 items-center gap-[6px]">
                       <BlockIcon
                         logoUrl={stepMetadata?.logoUrl}
+                        displayIcon={stepMetadata?.displayIcon}
                         displayName={stepMetadata?.displayName}
+                        category={getCategoryFromMetadata(stepMetadata)}
                         showTooltip={false}
                         size={'sm'}
                       ></BlockIcon>

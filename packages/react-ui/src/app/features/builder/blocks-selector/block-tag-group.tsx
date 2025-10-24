@@ -11,40 +11,40 @@ const tags: Record<
   TagKey,
   {
     title: string;
-    color: 'green' | 'blue' | 'purple' | 'yellow' | 'pink';
+    color: 'green' | 'blue' | 'indigo' | 'yellow' | 'pink';
   }
 > = {
   [ALL_KEY]: {
     title: 'All',
-    color: 'blue',
+    color: 'indigo',
   },
   [BlockCategory.FINOPS]: {
     title: 'FinOps',
-    color: 'green',
+    color: 'pink',
   },
   [BlockCategory.CLOUD]: {
     title: 'Cloud',
-    color: 'purple',
+    color: 'green',
   },
   [BlockCategory.WORKFLOW]: {
     title: 'Workflow',
-    color: 'yellow',
+    color: 'blue',
   },
   [BlockCategory.COLLABORATION]: {
     title: 'Collaboration',
-    color: 'pink',
+    color: 'yellow',
   },
   [BlockCategory.DATA_SOURCES]: {
     title: 'Data Sources',
-    color: 'blue',
+    color: 'indigo',
   },
   [BlockCategory.DEVOPS]: {
     title: 'DevOps',
-    color: 'purple',
+    color: 'pink',
   },
   [BlockCategory.CORE]: {
     title: 'Utils',
-    color: 'yellow',
+    color: 'green',
   },
 };
 type BlockTagGroupProps = {

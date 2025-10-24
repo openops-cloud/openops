@@ -6,6 +6,7 @@ import {
   CardList,
   CardListItem,
   CardListItemSkeleton,
+  getCategoryFromMetadata,
   Input,
   INTERNAL_ERROR_TOAST,
   ItemListMetadata,
@@ -376,6 +377,8 @@ const BlockSelector = ({
                     <div className="flex gap-2 items-center">
                       <BlockIcon
                         logoUrl={blockMetadata.logoUrl}
+                        displayIcon={blockMetadata.displayIcon}
+                        category={getCategoryFromMetadata(blockMetadata)}
                         displayName={blockMetadata.displayName}
                         showTooltip={false}
                         size={'sm'}
@@ -446,6 +449,10 @@ const BlockSelector = ({
                           <div>
                             <BlockIcon
                               logoUrl={selectedBlockMetadata.logoUrl}
+                              displayIcon={selectedBlockMetadata.displayIcon}
+                              category={getCategoryFromMetadata(
+                                selectedBlockMetadata,
+                              )}
                               displayName={selectedBlockMetadata.displayName}
                               showTooltip={false}
                               size={'sm'}

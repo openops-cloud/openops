@@ -29,7 +29,7 @@ const PROVIDER_OPTIONS = Object.values(AiProviderEnum).map((provider) => ({
 export const aiAuth = BlockAuth.CustomAuth({
   authProviderKey: 'AI',
   authProviderDisplayName: 'AI',
-  authProviderLogoUrl: `https://static.openops.com/blocks/ai-logo.png`,
+  authProviderDisplayIcon: 'Wand',
   description:
     'Configure your AI provider credentials. Supports OpenAI, Anthropic, Google, and more.',
   required: true,

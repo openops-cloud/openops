@@ -7,7 +7,10 @@ import { BlockIcon } from './block-icon';
 
 type BlockIconListMetadata = {
   displayName: string;
-  logoUrl: string;
+  logoUrl?: string;
+  displayIcon?: string;
+  category?: string;
+  categories?: string[];
 };
 
 type BlockIconListProps = {
@@ -63,11 +66,13 @@ export function BlockIconList({
           {visibleBlocks.map((metadata, index) => (
             <BlockIcon
               logoUrl={metadata.logoUrl}
+              displayIcon={metadata.displayIcon}
               showTooltip={false}
               circle={true}
               size={size ?? 'md'}
               border={true}
               displayName={metadata.displayName}
+              category={metadata.category || metadata.categories?.[0]}
               key={index}
             />
           ))}

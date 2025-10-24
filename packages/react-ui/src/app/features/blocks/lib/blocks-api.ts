@@ -49,6 +49,7 @@ export const blocksApi = {
     return {
       displayName: block.displayName,
       logoUrl: block.logoUrl,
+      displayIcon: block.displayIcon,
       description: block.description,
       type: type === 'action' ? ActionType.BLOCK : TriggerType.BLOCK,
       blockType: block.blockType,
