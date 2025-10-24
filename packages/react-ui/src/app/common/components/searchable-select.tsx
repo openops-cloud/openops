@@ -140,14 +140,18 @@ export const SearchableSelect = <T extends React.Key>({
             role="combobox"
             loading={loading}
             aria-expanded={open}
-            className="w-full justify-between w-full"
+            className="w-full justify-between"
             onClick={(e) => {
               setOpen((prev) => !prev);
               e.preventDefault();
             }}
             data-testid="searchableSelectTrigger"
           >
-            <span className="flex w-full truncate select-none">
+            <span
+              className={cn('w-full text-start truncate select-none', {
+                'mr-8': showRefresh,
+              })}
+            >
               {selectedIndex > -1 && options[selectedIndex]
                 ? options[selectedIndex].label
                 : placeholder}
