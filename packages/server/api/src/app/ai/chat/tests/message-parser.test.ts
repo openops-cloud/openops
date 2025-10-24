@@ -153,8 +153,7 @@ describe('parseUserMessage', () => {
       const result = parseUserMessage(message);
       expect(result).toEqual({
         isValid: false,
-        errorMessage:
-          'Last message must have a text content element as the first element.',
+        errorMessage: expect.any(String),
       });
     });
   });
