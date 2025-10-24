@@ -36,6 +36,8 @@ import {
 import { routeChatRequest } from './chat-request-router';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
+import { parseUserMessage } from './message-parser';
+import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
@@ -185,16 +187,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     if (messageContent === null) {
       return; // Error response already sent
     }
-
-    const newMessage: ModelMessage = {
-      role: 'user',
-      content: messageContent,
-    };
-
     await routeChatRequest({
       app,
       request,
-      newMessage,
+      newMessage: createUserMessage(messageContent),
       reply,
     });
   });
@@ -226,6 +222,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
     const userId = request.principal.id;
+    const messageContent = await getUserMessage(request.body, reply);
+    if (messageContent === null) {
+      return;
+    }
 
     try {
       const conversationResult = await getConversation(
@@ -253,10 +253,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       const { languageModel } = await getLLMConfig(projectId, contextModel);
 
-      conversationResult.chatHistory.push({
-        role: 'user',
-        content: request.body.message,
-      });
+      conversationResult.chatHistory.push(createUserMessage(messageContent));
 
       const { chatContext, chatHistory } = conversationResult;
 
@@ -480,45 +477,14 @@ async function getUserMessage(
   body: NewMessageRequest,
   reply: FastifyReply,
 ): Promise<string | null> {
-  if (body.messages) {
-    if (body.messages.length === 0) {
-      await reply.code(400).send({
-        message:
-          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-      });
-      return null;
-    }
+  const result = parseUserMessage(body.message);
 
-    const lastMessage = body.messages[body.messages.length - 1];
-    if (
-      !lastMessage.parts ||
-      !Array.isArray(lastMessage.parts) ||
-      lastMessage.parts.length === 0
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have valid content array with at least one element.',
-      });
-      return null;
-    }
-
-    const firstContentElement = lastMessage.parts[0];
-    const lastContentElement = lastMessage.parts[lastMessage.parts.length - 1];
-    if (
-      !firstContentElement ||
-      typeof firstContentElement !== 'object' ||
-      (!('text' in firstContentElement) &&
-        !lastContentElement?.type.includes('tool-ui'))
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have a text content element as the first element.',
-      });
-      return null;
-    }
-
-    return String(firstContentElement.text ?? 'continue');
-  } else {
-    return body.message;
+  if (!result.isValid) {
+    await reply.code(400).send({
+      message: result.errorMessage,
+    });
+    return null;
   }
+
+  return result.content;
 }

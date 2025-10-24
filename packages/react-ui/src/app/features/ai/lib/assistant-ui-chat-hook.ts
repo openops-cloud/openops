@@ -20,7 +20,6 @@ import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
 import { useConnectionMonitoring } from './use-connection-monitoring';
 
-const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 const TIMEOUT_ERROR_TOAST_DURATION = 8000;
 const DEFAULT_ERROR_TOAST_DURATION = 10000;
 
@@ -179,7 +178,6 @@ export const useAssistantChat = ({
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
     chatId,
-    message: PLACEHOLDER_MESSAGE_INTEROP,
     additionalContext,
   });
 
@@ -188,7 +186,6 @@ export const useAssistantChat = ({
   useEffect(() => {
     bodyRef.current = {
       chatId,
-      message: PLACEHOLDER_MESSAGE_INTEROP,
       additionalContext,
     };
   }, [chatId, additionalContext]);
@@ -200,10 +197,13 @@ export const useAssistantChat = ({
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      body: () => ({
-        ...bodyRef.current,
-        messages: messagesRef.current,
-        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+      prepareSendMessagesRequest: ({ messages, requestMetadata }) => ({
+        body: {
+          ...(requestMetadata as Record<string, unknown>),
+          ...bodyRef.current,
+          message: messages.at(-1),
+          tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+        },
       }),
       fetch: fetchWithTimeout,
     }),

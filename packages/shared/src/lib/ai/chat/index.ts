@@ -62,19 +62,17 @@ export type ChatFlowContext = Static<typeof ChatFlowContext>;
 
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
-  message: Type.String(),
-  messages: Type.Optional(
-    Type.Array(
-      Type.Object({
-        role: Type.Union([
-          Type.Literal('user'),
-          Type.Literal('assistant'),
-          Type.Literal('tool'),
-        ]),
-        parts: Type.Any(),
-      }),
-    ),
-  ),
+  message: Type.Union([
+    Type.String({}),
+    Type.Object({
+      role: Type.Union([
+        Type.Literal('user'),
+        Type.Literal('assistant'),
+        Type.Literal('tool'),
+      ]),
+      parts: Type.Any(),
+    }),
+  ]),
   additionalContext: Type.Optional(ChatFlowContext),
   tools: Type.Optional(Type.Record(Type.String(), Type.Any())),
 });
