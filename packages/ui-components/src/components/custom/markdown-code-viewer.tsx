@@ -6,10 +6,12 @@ const MarkdownCodeViewer = ({
   content,
   theme,
   className,
+  codeMaxHeight,
 }: {
   content: string;
   theme: Theme;
   className?: string;
+  codeMaxHeight?: string;
 }) => {
   const metadata = parseCodeBlockMetadata(className);
 
@@ -20,7 +22,7 @@ const MarkdownCodeViewer = ({
         readonly={true}
         showLineNumbers={false}
         className="border border-solid rounded"
-        height={metadata.height}
+        height={metadata.height || codeMaxHeight}
         theme={theme}
         language={getLanguageExtensionForCode(className)}
         showTabs={typeof content !== 'string' && 'packageJson' in content}
