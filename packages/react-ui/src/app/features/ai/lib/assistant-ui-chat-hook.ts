@@ -21,6 +21,8 @@ import { ChatMode, UseAssistantChatProps } from './types';
 import { useConnectionMonitoring } from './use-connection-monitoring';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
+const TIMEOUT_ERROR_TOAST_DURATION = 8000;
+const DEFAULT_ERROR_TOAST_DURATION = 10000;
 
 export const useAssistantChat = ({
   chatId,
@@ -217,7 +219,9 @@ export const useAssistantChat = ({
               'There was an error while processing your request, please try again or open a new chat',
             ),
         variant: 'destructive' as const,
-        duration: isTimeoutError ? 8000 : 10000,
+        duration: isTimeoutError
+          ? TIMEOUT_ERROR_TOAST_DURATION
+          : DEFAULT_ERROR_TOAST_DURATION,
       };
       toast(errorToast);
     },
