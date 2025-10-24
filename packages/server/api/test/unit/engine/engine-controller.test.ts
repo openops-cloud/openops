@@ -576,7 +576,7 @@ describe('Engine Controller - update-run endpoint', () => {
 
           if (!['RUNNING', 'SUCCEEDED', 'PAUSED', 'STOPPED'].includes(status)) {
             expect(webhookResponseWatcher.publish).toHaveBeenCalledWith(
-              'test-correlation-id',
+              'test-run-id',
               'test-handler-id',
               expected,
             );
