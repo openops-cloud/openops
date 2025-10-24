@@ -15,13 +15,18 @@ import { assertNotNullOrUndefined } from '@openops/shared';
 import axios from 'axios';
 import FormData from 'form-data';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { httpAuth } from '../common/auth';
 import { httpMethodDropdown } from '../common/props';
+
+const toLowerCaseKeys = (obj: HttpHeaders) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
 
 export const httpSendRequestAction = createAction({
   name: 'send_request',
   displayName: 'Send HTTP request',
   description: 'Send HTTP request',
   isWriteAction: true,
+  auth: httpAuth,
   props: {
     method: httpMethodDropdown,
     url: Property.ShortText({
@@ -168,11 +173,27 @@ export const httpSendRequestAction = createAction({
     await validateHost(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
+    const headersArray =
+      (context.auth?.headers as
+        | Array<{ key?: string; value?: string }>
+        | undefined) ?? [];
+    const authHeaders: HttpHeaders = {};
+    for (const item of headersArray) {
+      if (item.key && item.value) {
+        authHeaders[item.key] = item.value;
+      }
+    }
+
+    const mergedHeaders = {
+      ...toLowerCaseKeys(authHeaders),
+      ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
+    };
+
     const request: HttpRequest = {
       method,
       url,
-      headers: headers as HttpHeaders,
-      queryParams: queryParams as QueryParams,
+      headers: mergedHeaders,
+      queryParams: (queryParams ?? {}) as QueryParams,
       timeout: timeout ? timeout * 1000 : 0,
     };
     if (body) {

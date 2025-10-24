@@ -18,13 +18,18 @@ import { MarkDownProperty } from './markdown-property';
 import { NumberProperty } from './number-property';
 import { ObjectProperty } from './object-property';
 import { PropertyType } from './property-type';
-import { LongTextProperty, ShortTextProperty } from './text-property';
+import {
+  LongTextProperty,
+  SecretTextProperty,
+  ShortTextProperty,
+} from './text-property';
 
 export const ArraySubProps = Type.Record(
   Type.String(),
   Type.Union([
     ShortTextProperty,
     LongTextProperty,
+    SecretTextProperty,
     StaticDropdownProperty,
     MultiSelectDropdownProperty,
     StaticMultiSelectDropdownProperty,
@@ -52,6 +57,7 @@ export type ArraySubProps<R extends boolean> = Record<
   string,
   | ShortTextProperty<R>
   | LongTextProperty<R>
+  | SecretTextProperty<R>
   | StaticDropdownProperty<any, R>
   | MultiSelectDropdownProperty<any, R>
   | StaticMultiSelectDropdownProperty<any, R>
