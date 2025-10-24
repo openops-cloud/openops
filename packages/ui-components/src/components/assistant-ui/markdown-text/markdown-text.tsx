@@ -64,18 +64,18 @@ const CodeViewer = memo(
     codeContent,
     theme,
     className,
-    codeMaxHeight,
+    codeHeight,
   }: {
     codeContent: string;
     theme: Theme;
     className?: string;
-    codeMaxHeight?: string;
+    codeHeight?: string;
   }) => (
     <MarkdownCodeViewer
       content={codeContent}
       theme={theme}
       className={className}
-      codeMaxHeight={codeMaxHeight}
+      codeHeight={codeHeight}
     />
   ),
 );
@@ -88,7 +88,7 @@ const CodeComponent = ({
   codeVariation,
   onInjectCode,
   status,
-  codeMaxHeight,
+  codeHeight,
   ...props
 }: {
   className?: string;
@@ -97,7 +97,7 @@ const CodeComponent = ({
   codeVariation: CodeVariations;
   onInjectCode: (codeContent: string) => void;
   status?: { type: string; reason?: string };
-  codeMaxHeight?: string;
+  codeHeight?: string;
   [key: string]: any;
 }) => {
   const isCodeBlock = useIsMarkdownCodeBlock();
@@ -137,7 +137,7 @@ const CodeComponent = ({
           codeContent={codeContent}
           theme={theme}
           className={className}
-          codeMaxHeight={codeMaxHeight}
+          codeHeight={codeHeight}
         />
       )}
       {!isStreaming &&
@@ -176,7 +176,7 @@ type MarkdownTextProps = {
   listClassName?: string;
   linkClassName?: string;
   status?: { type: string; reason?: string };
-  codeMaxHeight?: string;
+  codeHeight?: string;
 };
 
 const MarkdownTextImpl = ({
@@ -187,7 +187,7 @@ const MarkdownTextImpl = ({
   listClassName,
   linkClassName,
   status,
-  codeMaxHeight,
+  codeHeight,
 }: MarkdownTextProps) => {
   const onInjectCode = useCallback(
     (codeContent: string) => {
@@ -207,11 +207,11 @@ const MarkdownTextImpl = ({
           codeVariation={codeVariation}
           onInjectCode={onInjectCode}
           status={status}
-          codeMaxHeight={codeMaxHeight}
+          codeHeight={codeHeight}
         />
       );
     },
-    [theme, codeVariation, onInjectCode, status, codeMaxHeight],
+    [theme, codeVariation, onInjectCode, status, codeHeight],
   );
 
   const components = {
