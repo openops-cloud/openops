@@ -6,10 +6,17 @@ const RESPONSE_WARNING_MS = SSE_HEARTBEAT_INTERVAL_MS + 1000;
 const SSE_MESSAGE_GAP_TIMEOUT_MS = SSE_HEARTBEAT_INTERVAL_MS + 7000;
 const GAP_CHECK_INTERVAL_MS = 2000;
 
-type ChatStatus = 'submitted' | 'streaming' | 'ready' | 'error';
+export enum ChatStatus {
+  Submitted = 'submitted',
+  Streaming = 'streaming',
+  Ready = 'ready',
+  Error = 'error',
+}
+
+export type ChatStatusType = ChatStatus | `${ChatStatus}`;
 
 interface UseConnectionMonitoringProps {
-  chatStatus: ChatStatus;
+  chatStatus: ChatStatusType;
   messages: any[];
   stopChat: () => void;
 }
@@ -21,8 +28,8 @@ interface UseConnectionMonitoringReturn {
 }
 
 interface MonitorInitialConnectionParams {
-  currentStatus: ChatStatus;
-  previousStatus: ChatStatus;
+  currentStatus: ChatStatusType;
+  previousStatus: ChatStatusType;
   warningTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
   lastMessageTimeRef: React.MutableRefObject<number>;
   setIsShowingSlowWarning: (value: boolean) => void;
@@ -47,7 +54,7 @@ export const useConnectionMonitoring = ({
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const lastMessageTimeRef = useRef<number>(Date.now());
-  const previousStatusRef = useRef<ChatStatus>(chatStatus);
+  const previousStatusRef = useRef<ChatStatusType>(chatStatus);
   const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const gapMonitorTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -115,15 +122,18 @@ export const useConnectionMonitoring = ({
   };
 };
 
-function isSubmittedOrStreaming(status: ChatStatus): boolean {
-  return status === 'submitted' || status === 'streaming';
+function isSubmittedOrStreaming(status: ChatStatusType): boolean {
+  return status === ChatStatus.Submitted || status === ChatStatus.Streaming;
 }
 
 function isConnectionEstablished(
-  previousStatus: ChatStatus,
-  currentStatus: ChatStatus,
+  previousStatus: ChatStatusType,
+  currentStatus: ChatStatusType,
 ): boolean {
-  return previousStatus === 'submitted' && currentStatus === 'streaming';
+  return (
+    previousStatus === ChatStatus.Submitted &&
+    currentStatus === ChatStatus.Streaming
+  );
 }
 
 function clearWarningTimer(
@@ -202,7 +212,7 @@ function monitorInitialConnection({
     currentStatus,
   );
 
-  if (currentStatus === 'submitted') {
+  if (currentStatus === ChatStatus.Submitted) {
     handleSubmittedStatus(
       warningTimerRef,
       lastMessageTimeRef,
@@ -214,7 +224,7 @@ function monitorInitialConnection({
       lastMessageTimeRef,
       setIsShowingSlowWarning,
     );
-  } else if (currentStatus === 'streaming') {
+  } else if (currentStatus === ChatStatus.Streaming) {
     handleStreamingStatus(lastMessageTimeRef);
   } else {
     handleIdleStatus(warningTimerRef, setIsShowingSlowWarning);
