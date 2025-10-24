@@ -36,6 +36,7 @@ const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
       theme={theme}
       codeVariation={codeVariation}
       handleInject={handleInject}
+      codeHeight="200px"
     />
   );
 });
