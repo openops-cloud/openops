@@ -7,6 +7,7 @@ import {
   File,
   Globe,
   Hourglass,
+  LetterText,
   List,
   Mail,
   Network,
@@ -35,6 +36,7 @@ export const ICON_MAPPING: Record<string, React.ElementType> = {
   Mail: Mail,
   Hourglass: Hourglass,
   CircleX: CircleX,
+  LetterText: LetterText,
 };
 
 export const getIconComponent = (
