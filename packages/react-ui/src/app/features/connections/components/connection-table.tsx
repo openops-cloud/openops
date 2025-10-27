@@ -51,6 +51,7 @@ const BlockIconWithBlockName = ({
   const displayName = connectionModel?.authProviderDisplayName;
   const logoUrl = connectionModel?.authProviderLogoUrl;
   const displayIcon = connectionModel?.authProviderDisplayIcon;
+  const category = connectionModel?.categories?.[0];
 
   return (
     <BlockIcon
@@ -60,6 +61,7 @@ const BlockIconWithBlockName = ({
       displayName={displayName}
       logoUrl={logoUrl}
       displayIcon={displayIcon}
+      category={category}
       showTooltip={true}
     />
   );

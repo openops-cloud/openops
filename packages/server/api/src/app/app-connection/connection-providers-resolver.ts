@@ -44,6 +44,7 @@ export async function resolveProvidersForBlocks(
 
 type ProviderMetadata = BlockAuthProperty & {
   supportedBlocks: string[];
+  categories?: string[];
 };
 
 export async function getProviderMetadataForAllBlocks(
@@ -64,6 +65,7 @@ export async function getProviderMetadataForAllBlocks(
       providerMetadata[authProvider.authProviderKey] ??= {
         ...authProvider,
         supportedBlocks: [],
+        categories: block.categories,
       };
 
       providerMetadata[authProvider.authProviderKey]?.supportedBlocks.push(
