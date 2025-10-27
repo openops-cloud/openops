@@ -20,8 +20,8 @@ function calculateEveryDayCron(hourOfTheDay: number, runOnWeekends: boolean) {
 
 function getEveryDayData(
   hourOfTheDay: number,
-  timezone = 'UTC',
   runOnWeekends: boolean,
+  timezone = 'UTC',
 ) {
   const { validatedHour, cronExpression } = calculateEveryDayCron(
     hourOfTheDay,
@@ -81,15 +81,15 @@ export const everyDayTrigger = createTrigger({
   test(ctx) {
     return getEveryDayData(
       ctx.propsValue.hour_of_the_day,
-      ctx.propsValue.timezone,
       ctx.propsValue.run_on_weekends,
+      ctx.propsValue.timezone,
     );
   },
   run(ctx) {
     return getEveryDayData(
       ctx.propsValue.hour_of_the_day,
-      ctx.propsValue.timezone,
       ctx.propsValue.run_on_weekends,
+      ctx.propsValue.timezone,
     );
   },
   onDisable: async () => {
