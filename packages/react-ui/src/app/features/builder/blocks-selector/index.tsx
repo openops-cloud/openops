@@ -46,7 +46,6 @@ import {
   FlowOperationType,
   isNil,
   openOpsId,
-  supportUrl,
   Trigger,
   TriggerType,
 } from '@openops/shared';
@@ -408,11 +407,13 @@ const BlockSelector = ({
                     </div>
                     {showRequestBlockButton && (
                       <Link
-                        to={`${supportUrl}/c/feature-requests/9`}
+                        to={`https://get.openops.com/request-an-integration`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Button className="h-8 px-2 ">Request Block</Button>
+                        <Button className="h-8 px-2 ">
+                          {t('Request an Integration')}
+                        </Button>
                       </Link>
                     )}
                   </div>

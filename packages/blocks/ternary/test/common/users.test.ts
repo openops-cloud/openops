@@ -10,6 +10,7 @@ jest.mock('@openops/blocks-framework', () => ({
   Property: {
     MultiSelectDropdown: jest.fn().mockReturnValue('mocked-property'),
   },
+  TriggerStrategy: {},
 }));
 
 describe('getUsersIDsDropdownProperty', () => {

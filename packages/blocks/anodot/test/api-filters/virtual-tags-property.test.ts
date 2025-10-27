@@ -10,7 +10,7 @@ describe('virtualTagsProperty', () => {
         type: 'CHECKBOX',
       },
       virtualTag: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
     });

@@ -34,7 +34,7 @@ describe('Apply CloudFormation template', () => {
         type: 'CHECKBOX',
       },
       waitForTimeInSecondsProperty: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       dryRun: {

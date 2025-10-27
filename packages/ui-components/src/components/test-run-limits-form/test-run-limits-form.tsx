@@ -6,7 +6,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { Form, FormControl, FormField, FormItem } from '../../ui/form';
-import { Input } from '../../ui/input';
+import { NumericInput } from '../../ui/numeric-input';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Switch } from '../../ui/switch';
 import { BlockIcon } from '../block-icon/block-icon';
@@ -305,27 +305,16 @@ function TestRunLimitsForm({
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input
-                                        type="number"
+                                      <NumericInput
                                         min={min}
                                         max={max}
-                                        value={
-                                          Number.isFinite(field.value)
-                                            ? field.value
-                                            : min
-                                        }
-                                        onChange={(e) => {
-                                          const raw = e.target.value;
-                                          const parsed = Number(raw);
-                                          field.onChange(
-                                            Number.isFinite(parsed) &&
-                                              parsed >= min
-                                              ? Math.min(parsed, max)
-                                              : min,
-                                          );
+                                        value={field.value}
+                                        onChange={(number) => {
+                                          field.onChange(number ?? min);
                                         }}
                                         disabled={!isEnabled}
-                                        className="h-8 w-[64px]"
+                                        integerOnly={true}
+                                        className="h-8 w-[64px] outline-none"
                                       />
                                     </FormControl>
                                   </FormItem>

@@ -40,7 +40,7 @@ export const customAzureApiCallAction = createCustomApiCallAction({
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: [
         'auth',
         'useHostSession',

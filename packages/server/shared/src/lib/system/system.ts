@@ -96,6 +96,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
   [AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION]: '100',
   [AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS]: '86400', // 24 hours
+  [AppSystemProp.TELEMETRY_MODE]: 'COLLECTOR',
+  [AppSystemProp.TELEMETRY_COLLECTOR_URL]: 'https://telemetry.openops.com/save',
 };
 
 export const system = {

@@ -13,11 +13,7 @@ import { foldersHooks } from '@/app/features/folders/lib/folders-hooks';
 import { FlowVersionState, UNCATEGORIZED_FOLDER_ID } from '@openops/shared';
 import { FlowActionMenu } from './flow-actions-menu';
 
-type Props = {
-  wrapNavItems?: boolean;
-};
-
-const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
+const FlowDetailsPanel = () => {
   const navigate = useNavigate();
 
   const [flow, flowVersion, renameFlowClientSide, moveToFolderClientSide] =
@@ -39,12 +35,11 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
   const folderName = folderData?.displayName ?? t('Uncategorized');
 
   return (
-    <div className="flex items-center w-full overlfow-hidden">
+    <div className="w-full min-w-[88px] flex items-center overflow-hidden">
       <div
-        className={cn('flex items-center gap-1 whitespace-nowrap', {
-          'flex-wrap': wrapNavItems,
-          'min-w-0': wrapNavItems,
-        })}
+        className={cn(
+          'min-w-[56px] flex-1 flex items-center gap-1 whitespace-nowrap overflow-hidden',
+        )}
       >
         <Tooltip>
           <TooltipTrigger
@@ -56,13 +51,9 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
                 }).toString(),
               })
             }
-            className="items-center gap-1 min-w-0 hidden @[1000px]:flex"
+            className="items-center gap-1 min-w-0 hidden @[900px]:flex"
           >
-            <div
-              className={cn('max-w-36 truncate font-medium text-sm', {
-                'max-w-64': wrapNavItems,
-              })}
-            >
+            <div className={'max-w-36 truncate font-medium text-sm'}>
               {folderData?.displayName ?? t('Uncategorized')}
             </div>
             <span>{' / '}</span>
@@ -72,12 +63,8 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger className="min-w-0">
-            <div
-              className={cn('font-medium text-sm max-w-72 truncate', {
-                'max-w-64': wrapNavItems,
-              })}
-            >
+          <TooltipTrigger className="flex-1 min-w-[50px]">
+            <div className="w-full font-medium text-sm truncate">
               {flowVersion.displayName}
             </div>
           </TooltipTrigger>

@@ -127,24 +127,25 @@ async function fetchMessages(
   const messages: Message[] = [];
   const baseUrl = `/me/mailFolders/${folderId || 'inbox'}/messages`;
 
-  const filter =
-    lastFetchEpochMS === 0
-      ? '$top=10'
-      : `$filter=receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`;
-
   const headers: Record<string, string> = {
     ConsistencyLevel: 'eventual',
     Prefer: 'outlook.body-content-type="html"',
   };
 
-  let response: PageCollection = await client
-    .api(`${baseUrl}?${filter}&$select=${SELECT_FIELDS}`)
+  let req = client
+    .api(baseUrl)
+    .select(SELECT_FIELDS)
     .orderby('receivedDateTime desc')
-    .headers(headers)
-    .get();
+    .headers(headers);
 
   const shouldFetchAll = lastFetchEpochMS !== 0;
+  if (shouldFetchAll) {
+    req = req.filter(
+      `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
+    );
+  }
 
+  let response: PageCollection = await req.get();
   do {
     messages.push(...(response.value as Message[]));
 

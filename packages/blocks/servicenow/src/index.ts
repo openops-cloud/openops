@@ -3,6 +3,10 @@ import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordAction } from './actions/get-record-action';
+import { getRecordsAction } from './actions/get-records-action';
+import { getRequestsAction, upsertRequestAction } from './actions/requests';
+import { deleteRequestAction } from './actions/requests/delete-request-action';
+import { upsertRecordAction } from './actions/upsert-record-action';
 import { servicenowAuth } from './lib/auth';
 import { generateAuthHeader } from './lib/generate-auth-header';
 
@@ -14,8 +18,13 @@ export const servicenow = createBlock({
   authors: [],
   categories: [BlockCategory.COLLABORATION],
   actions: [
+    getRecordsAction,
     getRecordAction,
+    upsertRecordAction,
     deleteRecordAction,
+    getRequestsAction,
+    upsertRequestAction,
+    deleteRequestAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) =>
         `https://${auth.instanceName}.service-now.com/api/`,

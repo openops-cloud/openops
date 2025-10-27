@@ -112,7 +112,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
                     connectionToEdit={reconnectConnection ?? null}
-                    reconnect={true}
+                    reconnect={!!reconnectConnectionId}
                     key={reconnectConnection?.name || 'newConnection'}
                     authProviderKey={params.providerKey}
                     onConnectionSaved={async (connectionName) => {
