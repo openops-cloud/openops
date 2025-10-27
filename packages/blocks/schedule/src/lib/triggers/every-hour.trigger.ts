@@ -5,6 +5,19 @@ import {
 } from '@openops/blocks-framework';
 import { getTriggerData } from '../common';
 
+function calculateEveryHourCron(runOnWeekends: boolean) {
+  const cronExpression = runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
+  return { cronExpression };
+}
+
+function getEveryHourData(runOnWeekends: boolean) {
+  const { cronExpression } = calculateEveryHourCron(runOnWeekends);
+  return getTriggerData('UTC', {
+    cron_expression: cronExpression,
+    timezone: 'UTC',
+  });
+}
+
 export const everyHourTrigger = createTrigger({
   name: 'every_hour',
   displayName: 'Every Hour',
@@ -19,31 +32,19 @@ export const everyHourTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 * * * *`
-      : `0 * * * 1-5`;
+    const { cronExpression } = calculateEveryHourCron(
+      ctx.propsValue.run_on_weekends,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: 'UTC',
     });
   },
   test(ctx) {
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 * * * *`
-      : `0 * * * 1-5`;
-    return getTriggerData('UTC', {
-      cron_expression: cronExpression,
-      timezone: 'UTC',
-    });
+    return getEveryHourData(ctx.propsValue.run_on_weekends);
   },
   run(ctx) {
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 * * * *`
-      : `0 * * * 1-5`;
-    return getTriggerData('UTC', {
-      cron_expression: cronExpression,
-      timezone: 'UTC',
-    });
+    return getEveryHourData(ctx.propsValue.run_on_weekends);
   },
   onDisable: async () => {
     console.log('onDisable');

@@ -1,9 +1,23 @@
 import {
+  createTrigger,
   Property,
   TriggerStrategy,
-  createTrigger,
 } from '@openops/blocks-framework';
 import { getTriggerData } from '../common';
+
+function calculateEveryXMinutesCron(minutes: number) {
+  const cronExpression = `*/${minutes} * * * *`;
+  return { cronExpression };
+}
+
+function getEveryXMinutesData(minutes: number) {
+  const { cronExpression } = calculateEveryXMinutesCron(minutes);
+  return getTriggerData('UTC', {
+    minutes: minutes,
+    cron_expression: cronExpression,
+    timezone: 'UTC',
+  });
+}
 
 export const everyXMinutesTrigger = createTrigger({
   name: 'every_x_minutes',
@@ -27,25 +41,19 @@ export const everyXMinutesTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const cronExpression = `*/${ctx.propsValue.minutes} * * * *`;
+    const { cronExpression } = calculateEveryXMinutesCron(
+      ctx.propsValue.minutes,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: 'UTC',
     });
   },
   test(ctx) {
-    const cronExpression = `*/${ctx.propsValue.minutes} * * * *`;
-    return getTriggerData('UTC', {
-      minutes: ctx.propsValue.minutes,
-      cron_expression: cronExpression,
-    });
+    return getEveryXMinutesData(ctx.propsValue.minutes);
   },
   run(ctx) {
-    const cronExpression = `*/${ctx.propsValue.minutes} * * * *`;
-    return getTriggerData('UTC', {
-      cron_expression: cronExpression,
-      timezone: 'UTC',
-    });
+    return getEveryXMinutesData(ctx.propsValue.minutes);
   },
   onDisable: async () => {
     console.log('onDisable');
