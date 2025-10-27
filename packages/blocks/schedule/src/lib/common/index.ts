@@ -37,6 +37,32 @@ export function validateMonthDays(days: number) {
   return dayofTheMonth;
 }
 
+export function getTriggerData(
+  timezone = 'UTC',
+  additionalData?: Record<string, any>,
+) {
+  const date = new Date();
+
+  const startTime = date
+    .toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+    .replace(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/, '$3-$1-$2T$4:$5:$6');
+  return Promise.resolve([
+    {
+      startTime,
+      ...additionalData,
+    },
+  ]);
+}
+
 export const timezoneOptions = [
   {
     label: '(GMT-11:00) Pacific, Midway',

@@ -3,6 +3,7 @@ import {
   TriggerStrategy,
   createTrigger,
 } from '@openops/blocks-framework';
+import { getTriggerData } from '../common';
 
 export const everyXMinutesTrigger = createTrigger({
   name: 'every_x_minutes',
@@ -32,14 +33,19 @@ export const everyXMinutesTrigger = createTrigger({
       timezone: 'UTC',
     });
   },
+  test(ctx) {
+    const cronExpression = `*/${ctx.propsValue.minutes} * * * *`;
+    return getTriggerData('UTC', {
+      minutes: ctx.propsValue.minutes,
+      cron_expression: cronExpression,
+    });
+  },
   run(ctx) {
     const cronExpression = `*/${ctx.propsValue.minutes} * * * *`;
-    return Promise.resolve([
-      {
-        cron_expression: cronExpression,
-        timezone: 'UTC',
-      },
-    ]);
+    return getTriggerData('UTC', {
+      cron_expression: cronExpression,
+      timezone: 'UTC',
+    });
   },
   onDisable: async () => {
     console.log('onDisable');

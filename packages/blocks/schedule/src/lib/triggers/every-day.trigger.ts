@@ -3,7 +3,12 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import { DAY_HOURS, timezoneOptions, validateHours } from '../common';
+import {
+  DAY_HOURS,
+  getTriggerData,
+  timezoneOptions,
+  validateHours,
+} from '../common';
 
 export const everyDayTrigger = createTrigger({
   name: 'every_day',
@@ -49,17 +54,25 @@ export const everyDayTrigger = createTrigger({
       timezone: ctx.propsValue.timezone,
     });
   },
+  test(ctx) {
+    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
+    return getTriggerData(ctx.propsValue.timezone, {
+      hour_of_the_day: hourOfTheDay,
+      timezone: ctx.propsValue.timezone,
+      cron_expression: ctx.propsValue.run_on_weekends
+        ? `0 ${hourOfTheDay} * * *`
+        : `0 ${hourOfTheDay} * * 1-5`,
+    });
+  },
   run(ctx) {
     const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    return Promise.resolve([
-      {
-        hour_of_the_day: hourOfTheDay,
-        timezone: ctx.propsValue.timezone,
-        cron_expression: ctx.propsValue.run_on_weekends
-          ? `0 ${hourOfTheDay} * * *`
-          : `0 ${hourOfTheDay} * * 1-5`,
-      },
-    ]);
+    return getTriggerData(ctx.propsValue.timezone, {
+      hour_of_the_day: hourOfTheDay,
+      timezone: ctx.propsValue.timezone,
+      cron_expression: ctx.propsValue.run_on_weekends
+        ? `0 ${hourOfTheDay} * * *`
+        : `0 ${hourOfTheDay} * * 1-5`,
+    });
   },
   onDisable: async () => {
     console.log('onDisable');

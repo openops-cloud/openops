@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { getTriggerData } from '../common';
 
 export const everyHourTrigger = createTrigger({
   name: 'every_hour',
@@ -26,16 +27,23 @@ export const everyHourTrigger = createTrigger({
       timezone: 'UTC',
     });
   },
+  test(ctx) {
+    const cronExpression = ctx.propsValue.run_on_weekends
+      ? `0 * * * *`
+      : `0 * * * 1-5`;
+    return getTriggerData('UTC', {
+      cron_expression: cronExpression,
+      timezone: 'UTC',
+    });
+  },
   run(ctx) {
     const cronExpression = ctx.propsValue.run_on_weekends
       ? `0 * * * *`
       : `0 * * * 1-5`;
-    return Promise.resolve([
-      {
-        cron_expression: cronExpression,
-        timezone: 'UTC',
-      },
-    ]);
+    return getTriggerData('UTC', {
+      cron_expression: cronExpression,
+      timezone: 'UTC',
+    });
   },
   onDisable: async () => {
     console.log('onDisable');

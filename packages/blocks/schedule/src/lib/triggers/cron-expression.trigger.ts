@@ -4,7 +4,7 @@ import {
   TriggerStrategy,
 } from '@openops/blocks-framework';
 import { isValidCron } from 'cron-validator';
-import { timezoneOptions } from '../common';
+import { getTriggerData, timezoneOptions } from '../common';
 
 export const cronExpressionTrigger = createTrigger({
   name: 'cron_expression',
@@ -38,10 +38,10 @@ export const cronExpressionTrigger = createTrigger({
     if (!isValidCron(context.propsValue.cronExpression)) {
       return [`Invalid cron expression: ${context.propsValue.cronExpression}`];
     }
-    return [{}];
+    return getTriggerData(context.propsValue.timezone);
   },
   async run(context) {
-    return [{}];
+    return getTriggerData(context.propsValue.timezone);
   },
   onDisable: async () => {
     console.log('onDisable');

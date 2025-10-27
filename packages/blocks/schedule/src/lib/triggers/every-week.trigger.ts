@@ -5,6 +5,7 @@ import {
 } from '@openops/blocks-framework';
 import {
   DAY_HOURS,
+  getTriggerData,
   timezoneOptions,
   validateHours,
   validateWeekDays,
@@ -60,18 +61,27 @@ export const everyWeekTrigger = createTrigger({
       timezone: ctx.propsValue.timezone,
     });
   },
+  test(ctx) {
+    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
+    const dayOfTheWeek = validateWeekDays(ctx.propsValue.day_of_the_week);
+    const cronExpression = `0 ${hourOfTheDay} * * ${dayOfTheWeek}`;
+    return getTriggerData(ctx.propsValue.timezone, {
+      hour_of_the_day: hourOfTheDay,
+      day_of_the_week: dayOfTheWeek,
+      cron_expression: cronExpression,
+      timezone: ctx.propsValue.timezone,
+    });
+  },
   run(ctx) {
     const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
     const dayOfTheWeek = validateWeekDays(ctx.propsValue.day_of_the_week);
     const cronExpression = `0 ${hourOfTheDay} * * ${dayOfTheWeek}`;
-    return Promise.resolve([
-      {
-        hour_of_the_day: hourOfTheDay,
-        day_of_the_week: dayOfTheWeek,
-        cron_expression: cronExpression,
-        timezone: ctx.propsValue.timezone,
-      },
-    ]);
+    return getTriggerData(ctx.propsValue.timezone, {
+      hour_of_the_day: hourOfTheDay,
+      day_of_the_week: dayOfTheWeek,
+      cron_expression: cronExpression,
+      timezone: ctx.propsValue.timezone,
+    });
   },
   onDisable: async () => {
     console.log('onDisable');
