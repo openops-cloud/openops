@@ -13,6 +13,8 @@ type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   toolComponents?: Record<string, ReactNode>;
   handleInject?: (codeContent: string | SourceCode) => void;
+  isShowingSlowWarning?: boolean;
+  connectionError?: string | null;
 } & AssistantTopBarProps &
   ThreadProps;
 
@@ -29,6 +31,8 @@ const AssistantUiChatContainer = ({
   children,
   handleInject,
   toolComponents,
+  isShowingSlowWarning,
+  connectionError,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -55,6 +59,8 @@ const AssistantUiChatContainer = ({
             selectedModel={selectedModel}
             isModelSelectorLoading={isModelSelectorLoading}
             theme={theme}
+            isShowingSlowWarning={isShowingSlowWarning}
+            connectionError={connectionError}
           />
         </ThreadExtraContextProvider>
       </AssistantRuntimeProvider>
