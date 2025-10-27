@@ -64,15 +64,18 @@ const CodeViewer = memo(
     codeContent,
     theme,
     className,
+    codeHeight,
   }: {
     codeContent: string;
     theme: Theme;
     className?: string;
+    codeHeight?: string;
   }) => (
     <MarkdownCodeViewer
       content={codeContent}
       theme={theme}
       className={className}
+      codeHeight={codeHeight}
     />
   ),
 );
@@ -85,6 +88,7 @@ const CodeComponent = ({
   codeVariation,
   onInjectCode,
   status,
+  codeHeight,
   ...props
 }: {
   className?: string;
@@ -93,6 +97,7 @@ const CodeComponent = ({
   codeVariation: CodeVariations;
   onInjectCode: (codeContent: string) => void;
   status?: { type: string; reason?: string };
+  codeHeight?: string;
   [key: string]: any;
 }) => {
   const isCodeBlock = useIsMarkdownCodeBlock();
@@ -132,6 +137,7 @@ const CodeComponent = ({
           codeContent={codeContent}
           theme={theme}
           className={className}
+          codeHeight={codeHeight}
         />
       )}
       {!isStreaming &&
@@ -170,6 +176,7 @@ type MarkdownTextProps = {
   listClassName?: string;
   linkClassName?: string;
   status?: { type: string; reason?: string };
+  codeHeight?: string;
 };
 
 const MarkdownTextImpl = ({
@@ -180,6 +187,7 @@ const MarkdownTextImpl = ({
   listClassName,
   linkClassName,
   status,
+  codeHeight,
 }: MarkdownTextProps) => {
   const onInjectCode = useCallback(
     (codeContent: string) => {
@@ -199,10 +207,11 @@ const MarkdownTextImpl = ({
           codeVariation={codeVariation}
           onInjectCode={onInjectCode}
           status={status}
+          codeHeight={codeHeight}
         />
       );
     },
-    [theme, codeVariation, onInjectCode, status],
+    [theme, codeVariation, onInjectCode, status, codeHeight],
   );
 
   const components = {
