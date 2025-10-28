@@ -59,7 +59,6 @@ export * from './lib/platform-metadata';
 export * from './lib/project';
 export * from './lib/store-entry/dto/store-entry-request';
 export * from './lib/store-entry/store-entry';
-export * from './lib/support-url';
 export * from './lib/tag';
 export * from './lib/user';
 export * from './lib/user-settings';

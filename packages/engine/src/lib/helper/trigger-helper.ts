@@ -224,26 +224,39 @@ export const triggerHelper = {
             };
           }
         }
-        const items = await trigger.run({
-          ...context,
-          files: createFilesService({
-            apiUrl: constants.internalApiUrl,
-            engineToken: params.engineToken!,
-            flowId: params.flowVersion.flowId,
-            stepName: triggerName,
-            type: 'db',
-          }),
-        });
-        if (!Array.isArray(items)) {
-          throw new Error(
-            `Trigger run should return an array of items, but returned ${typeof items}`,
-          );
+
+        try {
+          const items = await trigger.run({
+            ...context,
+            files: createFilesService({
+              apiUrl: constants.internalApiUrl,
+              engineToken: params.engineToken!,
+              flowId: params.flowVersion.flowId,
+              stepName: triggerName,
+              type: 'db',
+            }),
+          });
+
+          if (!Array.isArray(items)) {
+            throw new Error(
+              `Trigger run should return an array of items, but returned ${typeof items}`,
+            );
+          }
+
+          return {
+            success: true,
+            output: items,
+            input: resolvedInput,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message:
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (error as any).message ??
+              'Something failed when executing the trigger.',
+          };
         }
-        return {
-          success: true,
-          output: items,
-          input: resolvedInput,
-        };
       }
     }
   },
