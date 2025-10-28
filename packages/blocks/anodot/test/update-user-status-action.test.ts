@@ -52,7 +52,7 @@ describe('updateUserStatusAction', () => {
         type: 'STATIC_DROPDOWN',
       },
       actionParams: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
     });

@@ -25,7 +25,7 @@ describe('tagsProperty', () => {
       propertyName: {
         displayName: 'a property display name',
         description: 'a property description',
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
     });

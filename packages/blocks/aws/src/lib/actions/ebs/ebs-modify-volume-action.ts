@@ -30,7 +30,7 @@ export const ebsModifyVolumeAction = createAction({
     }),
     newVolumeType: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['changeVolumeType'],
       props: async ({ changeVolumeType }) => {
         if (!changeVolumeType) {
@@ -57,7 +57,7 @@ export const ebsModifyVolumeAction = createAction({
     }),
     newVolumeSize: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['changeVolumeSize'],
       props: async ({ changeVolumeSize }) => {
         if (!changeVolumeSize) {
@@ -78,7 +78,7 @@ export const ebsModifyVolumeAction = createAction({
     }),
     newVolumeIops: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['changeVolumeIops'],
       props: async ({ changeVolumeIops }) => {
         if (!changeVolumeIops) {
@@ -99,7 +99,7 @@ export const ebsModifyVolumeAction = createAction({
     }),
     newVolumeThroughput: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['changeVolumeThroughput'],
       props: async ({ changeVolumeThroughput }) => {
         if (!changeVolumeThroughput) {

@@ -12,7 +12,7 @@ export function waitForProperties(): any {
     }),
     waitForTimeInSecondsProperty: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['shouldWaitForOperation'],
       props: async ({ shouldWaitForOperation }) => {
         if (!shouldWaitForOperation) {

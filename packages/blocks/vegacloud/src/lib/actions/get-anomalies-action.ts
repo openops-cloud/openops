@@ -25,7 +25,7 @@ export const getAnomaliesAction = createAction({
       displayName: 'Additional filters',
       description:
         'Additional filters to apply to the search. See more at https://docs.vegacloud.io/docs/api/data_api#filtering-data',
-      required: false,
+      required: true,
       refreshers: ['auth'],
       props: async ({ auth }) => {
         if (!auth) {

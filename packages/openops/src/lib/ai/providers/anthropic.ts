@@ -4,6 +4,7 @@ import { AiProvider } from '../providers';
 
 const anthropicModels = [
   'claude-sonnet-4-5-20250929',
+  'claude-haiku-4-5-20251001',
   'claude-4-opus-20250514',
   'claude-4-sonnet-20250514',
   'claude-3-7-sonnet-20250219',
