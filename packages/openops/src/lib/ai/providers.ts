@@ -150,7 +150,6 @@ export const getAiTelemetrySDK = () => {
     return tracerProvider;
   }
 
-  // Create span processor with Langfuse configuration
   langfuseSpanProcessor = new LangfuseSpanProcessor({
     secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
     publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
@@ -158,7 +157,6 @@ export const getAiTelemetrySDK = () => {
     release: system.get(SharedSystemProp.ENVIRONMENT_NAME),
   });
 
-  // Create tracer provider with the span processor
   tracerProvider = new NodeTracerProvider({
     spanProcessors: [langfuseSpanProcessor],
   });
