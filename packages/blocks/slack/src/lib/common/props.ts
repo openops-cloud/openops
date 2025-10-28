@@ -171,7 +171,8 @@ export const timeoutInDays = Property.Number({
 
 export const unfurlLinksAndMedia = Property.Checkbox({
   displayName: 'Unfurl links and media',
-  description: 'When enabled, Slack will automatically expand links and show media previews in the message. Disable to prevent link and media unfurling.',
+  description:
+    'When enabled, Slack will automatically expand links and show media previews in the message. Disable to prevent link and media unfurling.',
   required: false,
   defaultValue: true,
 });
