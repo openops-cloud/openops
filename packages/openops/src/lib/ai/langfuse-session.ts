@@ -16,18 +16,26 @@ import { isLLMTelemetryEnabled } from './providers';
 export function setLangfuseSessionId(
   sessionId: string,
   userId?: string,
-  input?: string,
+  input?: unknown,
 ): void {
   if (!isLLMTelemetryEnabled()) {
     return;
   }
 
   try {
-    updateActiveTrace({
+    const traceUpdate: Record<string, unknown> = {
       sessionId,
-      ...(userId ? { userId } : {}),
-      ...(input ? { input } : {}),
-    });
+    };
+
+    if (userId) {
+      traceUpdate['userId'] = userId;
+    }
+
+    if (input) {
+      traceUpdate['input'] = input;
+    }
+
+    updateActiveTrace(traceUpdate);
   } catch (error) {
     logger.error('Failed to set Langfuse session ID', error);
   }
@@ -46,7 +54,7 @@ export function setLangfuseSessionId(
 export async function withLangfuseSession<T>(
   sessionId: string,
   userId: string | undefined,
-  input: string | undefined,
+  input: unknown,
   fn: () => Promise<T> | T,
 ): Promise<T> {
   if (!isLLMTelemetryEnabled()) {
