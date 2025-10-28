@@ -8,7 +8,7 @@ const SMTPPorts = [25, 465, 587, 2525];
 export const smtpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SMTP',
   authProviderDisplayName: 'SMTP',
-  authProviderLogoUrl: `/smtp.svg`,
+  authProviderLogoUrl: 'https://static.openops.com/blocks/smtp.svg',
   required: true,
   props: {
     host: Property.ShortText({
