@@ -193,31 +193,21 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
 
-    it('should extract message content from messages array when provided', async () => {
-      const requestWithMessages = {
+    it('should extract message content from UIMessage format', async () => {
+      const requestWithUIMessage = {
         ...mockRequest,
         body: {
           chatId: 'test-chat-id',
-          messages: [
-            {
-              role: 'user',
-              parts: [{ type: 'text', text: 'first message' }],
-            },
-            {
-              role: 'assistant',
-              parts: [{ type: 'text', text: 'assistant response' }],
-            },
-            {
-              role: 'user',
-              parts: [{ type: 'text', text: 'latest message' }],
-            },
-          ],
+          message: {
+            role: 'user',
+            parts: [{ type: 'text', text: 'latest message' }],
+          },
         },
       };
 
       const postHandler = handlers['/'];
       await postHandler(
-        requestWithMessages as FastifyRequest,
+        requestWithUIMessage as FastifyRequest,
         mockReply as unknown as FastifyReply,
       );
 
@@ -231,59 +221,35 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
     });
 
-    it('should handle messages with tool role in request body', async () => {
-      const requestWithToolMessages = {
+    it('should handle UIMessage with tool-ui parts', async () => {
+      const requestWithToolUI = {
         ...mockRequest,
         body: {
           chatId: 'test-chat-id',
-          messages: [
-            {
-              role: 'user',
-              parts: [{ type: 'text', text: 'user question' }],
-            },
-            {
-              role: 'assistant',
-              parts: [
-                {
-                  type: 'tool-call',
-                  toolCallId: 'call_123',
-                  name: 'get_weather',
-                  args: {},
-                },
-              ],
-            },
-            {
-              role: 'tool',
-              parts: [
-                {
-                  type: 'tool-result',
-                  toolCallId: 'call_123',
-                  result: { temperature: 72 },
-                },
-              ],
-            },
-            {
-              role: 'user',
-              parts: [{ type: 'text', text: 'latest message' }],
-            },
-          ],
+          message: {
+            role: 'user',
+            parts: [
+              { type: 'text', text: 'Use this tool' },
+              { type: 'tool-ui-call', toolName: 'ui-search' },
+            ],
+          },
         },
       };
 
       const postHandler = handlers['/'];
       await postHandler(
-        requestWithToolMessages as FastifyRequest,
+        requestWithToolUI as FastifyRequest,
         mockReply as unknown as FastifyReply,
       );
 
       expect(routeChatRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          newMessage: { role: 'user', content: 'latest message' },
+          newMessage: { role: 'user', content: 'Use this tool' },
         }),
       );
     });
 
-    it('should fall back to message field when messages array is not provided', async () => {
+    it('should handle string message format', async () => {
       const requestWithMessageOnly = {
         ...mockRequest,
         body: {
@@ -305,51 +271,43 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
     });
 
-    it('should handle empty messages array gracefully', async () => {
-      const requestWithEmptyMessages = {
+    it('should handle empty parts array gracefully', async () => {
+      const requestWithEmptyParts = {
         ...mockRequest,
         body: {
           chatId: 'test-chat-id',
-          messages: [],
+          message: {
+            role: 'user',
+            parts: [],
+          },
         },
       };
 
       const postHandler = handlers['/'];
 
       await postHandler(
-        requestWithEmptyMessages as FastifyRequest,
+        requestWithEmptyParts as FastifyRequest,
         mockReply as unknown as FastifyReply,
       );
 
-      if (routeChatRequestMock.mock.calls.length === 0) {
-        expect(mockReply.code).toHaveBeenCalledWith(400);
-        expect(mockReply.send).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message:
-              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-          }),
-        );
-      } else {
-        expect(routeChatRequestMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            newMessage: { role: 'user', content: 'latest message' },
-          }),
-        );
-      }
+      expect(routeChatRequestMock).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+        }),
+      );
     });
 
-    it('should handle invalid content structure in last message', async () => {
+    it('should handle invalid content structure in message', async () => {
       const requestWithInvalidContent = {
         ...mockRequest,
         body: {
           chatId: 'test-chat-id',
-          messages: [
-            {
-              role: 'user',
-              parts: [{ type: 'text', text: 'valid message' }],
-            },
-            { role: 'user', parts: [] },
-          ],
+          message: {
+            role: 'user',
+            parts: [{ type: 'other', data: 'no-text' }],
+          },
         },
       };
 
@@ -360,11 +318,11 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
+      expect(routeChatRequestMock).not.toHaveBeenCalled();
       expect(mockReply.code).toHaveBeenCalledWith(400);
       expect(mockReply.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          message:
-            'Last message must have valid content array with at least one element.',
+          message: expect.any(String),
         }),
       );
     });
