@@ -5,7 +5,6 @@ import {
 } from '@openops/blocks-framework';
 import {
   DAY_HOURS,
-  getTriggerData,
   MONTH_DAYS,
   timezoneOptions,
   validateHours,
@@ -26,12 +25,15 @@ function getEveryMonthData(
 ) {
   const { validatedHour, validatedDay, cronExpression } =
     calculateEveryMonthCron(hourOfTheDay, dayOfTheMonth);
-  return getTriggerData(timezone, {
-    hour_of_the_day: validatedHour,
-    day_of_the_month: validatedDay,
-    cron_expression: cronExpression,
-    timezone: timezone,
-  });
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      day_of_the_month: validatedDay,
+      cron_expression: cronExpression,
+      timezone: timezone,
+      startDate: new Date(),
+    },
+  ]);
 }
 
 export const everyMonthTrigger = createTrigger({

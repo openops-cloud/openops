@@ -3,7 +3,6 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import { getTriggerData } from '../common';
 
 function calculateEveryHourCron(runOnWeekends: boolean) {
   const cronExpression = runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
@@ -12,10 +11,13 @@ function calculateEveryHourCron(runOnWeekends: boolean) {
 
 function getEveryHourData(runOnWeekends: boolean) {
   const { cronExpression } = calculateEveryHourCron(runOnWeekends);
-  return getTriggerData('UTC', {
-    cron_expression: cronExpression,
-    timezone: 'UTC',
-  });
+  return Promise.resolve([
+    {
+      cron_expression: cronExpression,
+      timezone: 'UTC',
+      startDate: new Date(),
+    },
+  ]);
 }
 
 export const everyHourTrigger = createTrigger({

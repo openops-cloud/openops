@@ -3,7 +3,6 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import { getTriggerData } from '../common';
 
 function calculateEveryXMinutesCron(minutes: number) {
   const cronExpression = `*/${minutes} * * * *`;
@@ -12,11 +11,13 @@ function calculateEveryXMinutesCron(minutes: number) {
 
 function getEveryXMinutesData(minutes: number) {
   const { cronExpression } = calculateEveryXMinutesCron(minutes);
-  return getTriggerData('UTC', {
-    minutes: minutes,
-    cron_expression: cronExpression,
-    timezone: 'UTC',
-  });
+  return Promise.resolve([
+    {
+      minutes: minutes,
+      cron_expression: cronExpression,
+      startDate: new Date(),
+    },
+  ]);
 }
 
 export const everyXMinutesTrigger = createTrigger({

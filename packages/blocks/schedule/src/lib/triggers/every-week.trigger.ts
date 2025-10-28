@@ -5,7 +5,6 @@ import {
 } from '@openops/blocks-framework';
 import {
   DAY_HOURS,
-  getTriggerData,
   timezoneOptions,
   validateHours,
   validateWeekDays,
@@ -26,12 +25,15 @@ function getEveryWeekData(
 ) {
   const { validatedHour, validatedDay, cronExpression } =
     calculateEveryWeekCron(hourOfTheDay, dayOfTheWeek);
-  return getTriggerData(timezone, {
-    hour_of_the_day: validatedHour,
-    day_of_the_week: validatedDay,
-    cron_expression: cronExpression,
-    timezone: timezone,
-  });
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      day_of_the_week: validatedDay,
+      cron_expression: cronExpression,
+      timezone: timezone,
+      startDate: new Date(),
+    },
+  ]);
 }
 
 export const everyWeekTrigger = createTrigger({

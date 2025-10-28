@@ -3,12 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import {
-  DAY_HOURS,
-  getTriggerData,
-  timezoneOptions,
-  validateHours,
-} from '../common';
+import { DAY_HOURS, timezoneOptions, validateHours } from '../common';
 
 function calculateEveryDayCron(hourOfTheDay: number, runOnWeekends: boolean) {
   const validatedHour = validateHours(hourOfTheDay);
@@ -27,11 +22,14 @@ function getEveryDayData(
     hourOfTheDay,
     runOnWeekends,
   );
-  return getTriggerData(timezone, {
-    hour_of_the_day: validatedHour,
-    timezone: timezone,
-    cron_expression: cronExpression,
-  });
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      timezone: timezone,
+      cron_expression: cronExpression,
+      startDate: new Date(),
+    },
+  ]);
 }
 
 export const everyDayTrigger = createTrigger({
