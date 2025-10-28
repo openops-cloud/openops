@@ -2,7 +2,7 @@ import { cn } from '@openops/components/ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 const tagVariants = cva(
-  'text-xs font-medium me-2 px-2.5 py-0.5 rounded-full cursor-pointer border-[2px] border-transparent',
+  'text-xs font-medium me-2 px-2.5 py-0.5 rounded-lg cursor-pointer border-[2px] border-transparent',
   {
     variants: {
       variant: {
