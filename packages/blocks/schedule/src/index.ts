@@ -9,7 +9,7 @@ import { everyXMinutesTrigger } from './lib/triggers/every-x-minutes.trigger';
 
 export const schedule = createBlock({
   displayName: 'Schedule',
-  logoUrl: 'https://static.openops.com/blocks/schedule.png',
+  logoUrl: 'https://static.openops.com/blocks/openops-schedule.svg',
   description: 'Trigger flow with fixed schedule',
   categories: [BlockCategory.CORE],
   auth: BlockAuth.None(),
