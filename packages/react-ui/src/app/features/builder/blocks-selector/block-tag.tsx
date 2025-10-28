@@ -6,11 +6,11 @@ const tagVariants = cva(
   {
     variants: {
       variant: {
-        pink: 'bg-fuchsia-600/20 text-primary-800 hover:border-fuchsia-500 data-[selected=true]:border-fuchsia-500',
+        pink: 'bg-fuchsia-600/20 text-primary-800 hover:border-fuchsia-500 data-[selected=true]:border-fuchsia-600',
         yellow:
           'bg-yellow-500/20 text-primary-800 hover:border-yellow-500 data-[selected=true]:border-yellow-500',
         indigo:
-          'bg-indigo-600/20 text-primary-800 hover:border-indigo-500 data-[selected=true]:border-indigo-500',
+          'bg-indigo-600/20 text-primary-800 hover:border-indigo-500 data-[selected=true]:border-indigo-600',
         blue: 'bg-blue-500/20 text-primary-800 hover:border-blue-500 data-[selected=true]:border-blue-500',
         green:
           'bg-green-500/20 text-primary-800 hover:border-green-500 data-[selected=true]:border-green-500',
