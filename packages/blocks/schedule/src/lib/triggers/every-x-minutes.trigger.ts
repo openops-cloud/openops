@@ -13,7 +13,6 @@ function getEveryXMinutesData(minutes: number) {
   const { cronExpression } = calculateEveryXMinutesCron(minutes);
   return Promise.resolve([
     {
-      minutes: minutes,
       cron_expression: cronExpression,
       startDate: new Date(),
     },

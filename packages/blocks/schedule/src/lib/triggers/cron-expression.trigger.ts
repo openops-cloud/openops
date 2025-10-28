@@ -40,17 +40,13 @@ export const cronExpressionTrigger = createTrigger({
     }
     return [
       {
-        cron_expression: context.propsValue.cronExpression,
-        timezone: context.propsValue.timezone,
         startDate: new Date(),
       },
     ];
   },
-  async run(context) {
+  async run() {
     return [
       {
-        cron_expression: context.propsValue.cronExpression,
-        timezone: context.propsValue.timezone,
         startDate: new Date(),
       },
     ];
