@@ -1,1 +1,0 @@
-export const SSE_HEARTBEAT_INTERVAL_MS = 15000;

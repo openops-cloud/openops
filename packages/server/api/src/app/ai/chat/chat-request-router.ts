@@ -1,10 +1,5 @@
 import { logger } from '@openops/server-shared';
-import {
-  CODE_BLOCK_NAME,
-  NewMessageRequest,
-  Principal,
-  SSE_HEARTBEAT_INTERVAL_MS,
-} from '@openops/shared';
+import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { IncomingMessage, ServerResponse } from 'node:http';
@@ -135,7 +130,7 @@ function isResponseOpen(res: ServerResponse): boolean {
 
 function startSSEHeartbeat(
   res: ServerResponse,
-  intervalMs = SSE_HEARTBEAT_INTERVAL_MS,
+  intervalMs = 15000,
 ): NodeJS.Timeout {
   const heartbeat = setInterval(() => {
     if (isResponseOpen(res)) {
