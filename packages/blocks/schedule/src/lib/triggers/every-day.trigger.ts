@@ -5,6 +5,33 @@ import {
 } from '@openops/blocks-framework';
 import { DAY_HOURS, timezoneOptions, validateHours } from '../common';
 
+function calculateEveryDayCron(hourOfTheDay: number, runOnWeekends: boolean) {
+  const validatedHour = validateHours(hourOfTheDay);
+  const cronExpression = runOnWeekends
+    ? `0 ${validatedHour} * * *`
+    : `0 ${validatedHour} * * 1-5`;
+  return { validatedHour, cronExpression };
+}
+
+function getEveryDayData(
+  hourOfTheDay: number,
+  runOnWeekends: boolean,
+  timezone = 'UTC',
+) {
+  const { validatedHour, cronExpression } = calculateEveryDayCron(
+    hourOfTheDay,
+    runOnWeekends,
+  );
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      timezone: timezone,
+      cron_expression: cronExpression,
+      startDate: new Date(),
+    },
+  ]);
+}
+
 export const everyDayTrigger = createTrigger({
   name: 'every_day',
   displayName: 'Every Day',
@@ -40,26 +67,28 @@ export const everyDayTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 ${hourOfTheDay} * * *`
-      : `0 ${hourOfTheDay} * * 1-5`;
+    const { cronExpression } = calculateEveryDayCron(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.run_on_weekends,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: ctx.propsValue.timezone,
     });
   },
+  test(ctx) {
+    return getEveryDayData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.run_on_weekends,
+      ctx.propsValue.timezone,
+    );
+  },
   run(ctx) {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    return Promise.resolve([
-      {
-        hour_of_the_day: hourOfTheDay,
-        timezone: ctx.propsValue.timezone,
-        cron_expression: ctx.propsValue.run_on_weekends
-          ? `0 ${hourOfTheDay} * * *`
-          : `0 ${hourOfTheDay} * * 1-5`,
-      },
-    ]);
+    return getEveryDayData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.run_on_weekends,
+      ctx.propsValue.timezone,
+    );
   },
   onDisable: async () => {
     console.log('onDisable');

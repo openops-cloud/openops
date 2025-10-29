@@ -11,6 +11,31 @@ import {
   validateMonthDays,
 } from '../common';
 
+function calculateEveryMonthCron(hourOfTheDay: number, dayOfTheMonth: number) {
+  const validatedHour = validateHours(hourOfTheDay);
+  const validatedDay = validateMonthDays(dayOfTheMonth);
+  const cronExpression = `0 ${validatedHour} ${validatedDay} * *`;
+  return { validatedHour, validatedDay, cronExpression };
+}
+
+function getEveryMonthData(
+  hourOfTheDay: number,
+  dayOfTheMonth: number,
+  timezone = 'UTC',
+) {
+  const { validatedHour, validatedDay, cronExpression } =
+    calculateEveryMonthCron(hourOfTheDay, dayOfTheMonth);
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      day_of_the_month: validatedDay,
+      cron_expression: cronExpression,
+      timezone: timezone,
+      startDate: new Date(),
+    },
+  ]);
+}
+
 export const everyMonthTrigger = createTrigger({
   name: 'every_month',
   displayName: 'Every Month',
@@ -52,26 +77,28 @@ export const everyMonthTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    const dayOfTheMonth = validateMonthDays(ctx.propsValue.day_of_the_month);
-    const cronExpression = `0 ${hourOfTheDay} ${dayOfTheMonth} * *`;
+    const { cronExpression } = calculateEveryMonthCron(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_month,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: ctx.propsValue.timezone,
     });
   },
+  test(ctx) {
+    return getEveryMonthData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_month,
+      ctx.propsValue.timezone,
+    );
+  },
   run(ctx) {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    const dayOfTheMonth = validateMonthDays(ctx.propsValue.day_of_the_month);
-    const cronExpression = `0 ${hourOfTheDay} ${dayOfTheMonth} * *`;
-    return Promise.resolve([
-      {
-        hour_of_the_day: hourOfTheDay,
-        day_of_the_month: dayOfTheMonth,
-        cron_expression: cronExpression,
-        timezone: ctx.propsValue.timezone,
-      },
-    ]);
+    return getEveryMonthData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_month,
+      ctx.propsValue.timezone,
+    );
   },
   onDisable: async () => {
     console.log('onDisable');

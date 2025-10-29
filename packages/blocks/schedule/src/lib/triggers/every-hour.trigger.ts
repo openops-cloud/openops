@@ -4,6 +4,21 @@ import {
   TriggerStrategy,
 } from '@openops/blocks-framework';
 
+function calculateEveryHourCron(runOnWeekends: boolean) {
+  return runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
+}
+
+function getEveryHourData(runOnWeekends: boolean) {
+  const cronExpression = calculateEveryHourCron(runOnWeekends);
+  return Promise.resolve([
+    {
+      cron_expression: cronExpression,
+      timezone: 'UTC',
+      startDate: new Date(),
+    },
+  ]);
+}
+
 export const everyHourTrigger = createTrigger({
   name: 'every_hour',
   displayName: 'Every Hour',
@@ -18,24 +33,19 @@ export const everyHourTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 * * * *`
-      : `0 * * * 1-5`;
+    const cronExpression = calculateEveryHourCron(
+      ctx.propsValue.run_on_weekends,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: 'UTC',
     });
   },
+  test(ctx) {
+    return getEveryHourData(ctx.propsValue.run_on_weekends);
+  },
   run(ctx) {
-    const cronExpression = ctx.propsValue.run_on_weekends
-      ? `0 * * * *`
-      : `0 * * * 1-5`;
-    return Promise.resolve([
-      {
-        cron_expression: cronExpression,
-        timezone: 'UTC',
-      },
-    ]);
+    return getEveryHourData(ctx.propsValue.run_on_weekends);
   },
   onDisable: async () => {
     console.log('onDisable');
