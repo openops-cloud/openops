@@ -27,6 +27,7 @@ import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 import { ConnectionError } from './connection-error';
 import { ConnectionSlowWarning } from './connection-slow-warning';
+import { ReasoningPart } from './reasoning-part';
 
 const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
   const { codeVariation, handleInject } = useThreadExtraContext();
@@ -234,6 +235,7 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   const messageComponents = useMemo(
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
+      Reasoning: (props: any) => <ReasoningPart {...props} />,
       tools: {
         Fallback: (props: any) => <ToolFallback {...props} theme={theme} />,
         by_name: {

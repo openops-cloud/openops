@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ReactNode, useState } from 'react';
+import { cn } from '../lib/cn';
 
 type ExpandableContentProps = {
   fullContent: string;
@@ -47,7 +48,7 @@ export const ExpandableContent = ({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`${defaultButtonClass} ${buttonClassName}`}
+        className={cn(defaultButtonClass, buttonClassName)}
       >
         {isExpanded ? (
           <>
