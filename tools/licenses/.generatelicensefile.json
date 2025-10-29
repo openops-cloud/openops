@@ -5,7 +5,9 @@
   "ci": true,
   "append": ["./THIRD_PARTY_LICENSES_ADDITIONAL.txt"],
   "replace": {
-    "sax": "https://raw.githubusercontent.com/isaacs/sax-js/refs/heads/main/LICENSE",
+    "sax": "./node_modules/sax/LICENSE",
+    "mailsplit": "./node_modules/mailsplit/LICENSE.MIT",
+    "import-in-the-middle": "./node_modules/import-in-the-middle/LICENSE",
     "type-fest": "https://raw.githubusercontent.com/sindresorhus/type-fest/refs/heads/main/license-mit",
     "through": "https://raw.githubusercontent.com/dominictarr/through/refs/heads/master/LICENSE.MIT",
     "jsonlint-mod": "https://raw.githubusercontent.com/circlecell/jsonlint/refs/heads/main/license.txt",
