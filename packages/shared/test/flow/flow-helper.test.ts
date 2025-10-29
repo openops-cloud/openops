@@ -3617,3 +3617,337 @@ describe('flowHelper.isChildOf', () => {
     expect(flowHelper.isChildOf(splitAction, 'notAChild')).toBe(false);
   });
 });
+
+describe('flowHelper.addStepIndices', () => {
+  it.each([
+    {
+      description: 'simple sequential steps',
+      createTrigger: (): Trigger => ({
+        id: 'trigger_id',
+        name: 'trigger',
+        type: TriggerType.EMPTY,
+        valid: true,
+        displayName: 'Trigger',
+        settings: {},
+        nextAction: {
+          name: 'step_1',
+          id: 'id1',
+          type: ActionType.CODE,
+          valid: true,
+          displayName: 'First Step',
+          settings: {
+            input: {},
+            sourceCode: { code: '', packageJson: '{}' },
+            inputUiInfo: { customizedInputs: {} },
+          },
+          nextAction: {
+            name: 'step_2',
+            id: 'id2',
+            type: ActionType.CODE,
+            valid: true,
+            displayName: 'Second Step',
+            settings: {
+              input: {},
+              sourceCode: { code: '', packageJson: '{}' },
+              inputUiInfo: { customizedInputs: {} },
+            },
+          },
+        },
+      }),
+      assertions: (result: any): void => {
+        expect(result.stepIndex).toBe(1);
+        expect(result.nextAction.stepIndex).toBe(2);
+        expect(result.nextAction.nextAction.stepIndex).toBe(3);
+      },
+    },
+    {
+      description: 'steps inside a loop',
+      createTrigger: (): Trigger => ({
+        id: 'trigger_id',
+        name: 'trigger',
+        type: TriggerType.EMPTY,
+        valid: true,
+        displayName: 'Trigger',
+        settings: {},
+        nextAction: {
+          name: 'step_1',
+          id: 'id1',
+          type: ActionType.LOOP_ON_ITEMS,
+          valid: true,
+          displayName: 'Loop',
+          settings: {
+            items: '[]',
+            inputUiInfo: { customizedInputs: {} },
+          },
+          firstLoopAction: {
+            name: 'step_2',
+            id: 'id2',
+            type: ActionType.CODE,
+            valid: true,
+            displayName: 'Inside Loop',
+            settings: {
+              input: {},
+              sourceCode: { code: '', packageJson: '{}' },
+              inputUiInfo: { customizedInputs: {} },
+            },
+          },
+        },
+      }),
+      assertions: (result: any): void => {
+        expect(result.stepIndex).toBe(1);
+        expect(result.nextAction.stepIndex).toBe(2);
+        expect(result.nextAction.firstLoopAction.stepIndex).toBe(3);
+      },
+    },
+    {
+      description: 'branch steps',
+      createTrigger: (): Trigger => ({
+        id: 'trigger_id',
+        name: 'trigger',
+        type: TriggerType.EMPTY,
+        valid: true,
+        displayName: 'Trigger',
+        settings: {},
+        nextAction: {
+          name: 'step_1',
+          id: 'id1',
+          type: ActionType.BRANCH,
+          valid: true,
+          displayName: 'Branch',
+          settings: {
+            conditions: [[]],
+            inputUiInfo: { customizedInputs: {} },
+          },
+          onSuccessAction: {
+            name: 'step_2',
+            id: 'id2',
+            type: ActionType.CODE,
+            valid: true,
+            displayName: 'Success Branch',
+            settings: {
+              input: {},
+              sourceCode: { code: '', packageJson: '{}' },
+              inputUiInfo: { customizedInputs: {} },
+            },
+          },
+          onFailureAction: {
+            name: 'step_3',
+            id: 'id3',
+            type: ActionType.CODE,
+            valid: true,
+            displayName: 'Failure Branch',
+            settings: {
+              input: {},
+              sourceCode: { code: '', packageJson: '{}' },
+              inputUiInfo: { customizedInputs: {} },
+            },
+          },
+        },
+      }),
+      assertions: (result: any): void => {
+        expect(result.stepIndex).toBe(1);
+        expect(result.nextAction.stepIndex).toBe(2);
+        expect(result.nextAction.onSuccessAction.stepIndex).toBe(3);
+        expect(result.nextAction.onFailureAction.stepIndex).toBe(4);
+      },
+    },
+    {
+      description: 'split branches',
+      createTrigger: (): Trigger => ({
+        id: 'trigger_id',
+        name: 'trigger',
+        type: TriggerType.EMPTY,
+        valid: true,
+        displayName: 'Trigger',
+        settings: {},
+        nextAction: {
+          name: 'step_1',
+          id: 'id1',
+          type: ActionType.SPLIT,
+          valid: true,
+          displayName: 'Split',
+          settings: {
+            options: [],
+            defaultBranch: 'opt1',
+            inputUiInfo: { customizedInputs: {} },
+          },
+          branches: [
+            {
+              optionId: 'opt1',
+              nextAction: {
+                name: 'step_2',
+                id: 'id2',
+                type: ActionType.CODE,
+                valid: true,
+                displayName: 'Branch 1',
+                settings: {
+                  input: {},
+                  sourceCode: { code: '', packageJson: '{}' },
+                  inputUiInfo: { customizedInputs: {} },
+                },
+              },
+            },
+            {
+              optionId: 'opt2',
+              nextAction: {
+                name: 'step_3',
+                id: 'id3',
+                type: ActionType.CODE,
+                valid: true,
+                displayName: 'Branch 2',
+                settings: {
+                  input: {},
+                  sourceCode: { code: '', packageJson: '{}' },
+                  inputUiInfo: { customizedInputs: {} },
+                },
+              },
+            },
+          ],
+        },
+      }),
+      assertions: (result: any): void => {
+        expect(result.stepIndex).toBe(1);
+        expect(result.nextAction.stepIndex).toBe(2);
+        expect(result.nextAction.branches[0].nextAction.stepIndex).toBe(3);
+        expect(result.nextAction.branches[1].nextAction.stepIndex).toBe(4);
+      },
+    },
+  ])(
+    'should add stepIndex to $description',
+    ({ createTrigger, assertions }) => {
+      const trigger = createTrigger();
+      const result: any = flowHelper.addStepIndices(trigger);
+      assertions(result);
+    },
+  );
+
+  it('should handle complex nested structure', () => {
+    const trigger: Trigger = {
+      id: 'trigger_id',
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      valid: true,
+      displayName: 'Trigger',
+      settings: {},
+      nextAction: {
+        name: 'step_1',
+        id: 'id1',
+        type: ActionType.CODE,
+        valid: true,
+        displayName: 'First',
+        settings: {
+          input: {},
+          sourceCode: { code: '', packageJson: '{}' },
+          inputUiInfo: { customizedInputs: {} },
+        },
+        nextAction: {
+          name: 'step_2',
+          id: 'id2',
+          type: ActionType.LOOP_ON_ITEMS,
+          valid: true,
+          displayName: 'Loop',
+          settings: {
+            items: '[]',
+            inputUiInfo: { customizedInputs: {} },
+          },
+          firstLoopAction: {
+            name: 'step_3',
+            id: 'id3',
+            type: ActionType.BRANCH,
+            valid: true,
+            displayName: 'Branch in Loop',
+            settings: {
+              conditions: [[]],
+              inputUiInfo: { customizedInputs: {} },
+            },
+            onSuccessAction: {
+              name: 'step_4',
+              id: 'id4',
+              type: ActionType.CODE,
+              valid: true,
+              displayName: 'Inside Branch',
+              settings: {
+                input: {},
+                sourceCode: { code: '', packageJson: '{}' },
+                inputUiInfo: { customizedInputs: {} },
+              },
+            },
+          },
+          nextAction: {
+            name: 'step_5',
+            id: 'id5',
+            type: ActionType.CODE,
+            valid: true,
+            displayName: 'After Loop',
+            settings: {
+              input: {},
+              sourceCode: { code: '', packageJson: '{}' },
+              inputUiInfo: { customizedInputs: {} },
+            },
+          },
+        },
+      },
+    };
+
+    const result: any = flowHelper.addStepIndices(trigger);
+
+    expect(result.stepIndex).toBe(1);
+    expect(result.nextAction.stepIndex).toBe(2);
+    expect(result.nextAction.nextAction.stepIndex).toBe(3);
+    expect(result.nextAction.nextAction.firstLoopAction.stepIndex).toBe(4);
+    expect(
+      result.nextAction.nextAction.firstLoopAction.onSuccessAction.stepIndex,
+    ).toBe(5);
+    expect(result.nextAction.nextAction.nextAction.stepIndex).toBe(6);
+  });
+
+  it('should handle trigger without nextAction', () => {
+    const trigger: Trigger = {
+      id: 'trigger_id',
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      valid: true,
+      displayName: 'Trigger',
+      settings: {},
+    };
+
+    const result: any = flowHelper.addStepIndices(trigger);
+
+    expect(result.stepIndex).toBe(1);
+    expect(result.nextAction).toBeUndefined();
+  });
+
+  it('should preserve original action properties', () => {
+    const trigger: Trigger = {
+      id: 'trigger_id',
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      valid: true,
+      displayName: 'Trigger',
+      settings: {},
+      nextAction: {
+        name: 'step_1',
+        id: 'id1',
+        type: ActionType.CODE,
+        valid: true,
+        displayName: 'Test Step',
+        settings: {
+          input: { someInput: 'value' },
+          sourceCode: { code: 'test code', packageJson: '{"test": true}' },
+          inputUiInfo: { customizedInputs: {} },
+        },
+      },
+    };
+
+    const result: any = flowHelper.addStepIndices(trigger);
+
+    expect(result.stepIndex).toBe(1);
+    expect(result.nextAction.name).toBe('step_1');
+    expect(result.nextAction.id).toBe('id1');
+    expect(result.nextAction.type).toBe(ActionType.CODE);
+    expect(result.nextAction.displayName).toBe('Test Step');
+    expect(result.nextAction.settings.input.someInput).toBe('value');
+    expect(result.nextAction.settings.sourceCode.code).toBe('test code');
+    expect(result.nextAction.stepIndex).toBe(2);
+  });
+});
