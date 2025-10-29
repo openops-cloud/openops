@@ -9,7 +9,7 @@ function calculateEveryHourCron(runOnWeekends: boolean) {
 }
 
 function getEveryHourData(runOnWeekends: boolean) {
-  const { cronExpression } = calculateEveryHourCron(runOnWeekends);
+  const cronExpression = calculateEveryHourCron(runOnWeekends);
   return Promise.resolve([
     {
       cron_expression: cronExpression,
@@ -33,7 +33,7 @@ export const everyHourTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const { cronExpression } = calculateEveryHourCron(
+    const cronExpression = calculateEveryHourCron(
       ctx.propsValue.run_on_weekends,
     );
     ctx.setSchedule({
