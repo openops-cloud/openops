@@ -249,7 +249,10 @@ export const flowService = {
 
     return {
       ...flow,
-      version: flowVersion,
+      version: {
+        ...flowVersion,
+        trigger: flowHelper.addStepIndices(flowVersion.trigger),
+      },
     };
   },
 
