@@ -2,15 +2,8 @@ import { LoaderPinwheelIcon } from 'lucide-react';
 import { FC } from 'react';
 import { ExpandableContent } from '../../expandable-markdown';
 
-export enum ReasoningStatus {
-  COMPLETE = 'complete',
-  RUNNING = 'running',
-  INCOMPLETE = 'incomplete',
-}
-
 type ReasoningPartProps = {
   text: string;
-  status?: { type: ReasoningStatus };
 };
 
 export const ReasoningPart: FC<ReasoningPartProps> = ({ text }) => {
