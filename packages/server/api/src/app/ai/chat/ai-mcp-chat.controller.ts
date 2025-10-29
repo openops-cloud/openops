@@ -202,15 +202,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
 
       await withLangfuseSession(chatId, userId, messageContent, async () => {
-        const newMessage: ModelMessage = {
-          role: 'user',
-          content: messageContent,
-        };
-
         await routeChatRequest({
           app,
           request,
-          newMessage,
+          newMessage: createUserMessage(messageContent),
           reply,
         });
       });

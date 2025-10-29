@@ -1,5 +1,5 @@
 import { updateActiveTrace } from '@langfuse/tracing';
-import { logger } from '@openops/server-shared';
+import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { isLLMTelemetryEnabled } from './providers';
 
 /**
@@ -33,6 +33,9 @@ export function setLangfuseSessionId(
 
     if (input) {
       traceUpdate['input'] = input;
+      traceUpdate['environment'] = system.get(
+        SharedSystemProp.ENVIRONMENT_NAME,
+      );
     }
 
     updateActiveTrace(traceUpdate);

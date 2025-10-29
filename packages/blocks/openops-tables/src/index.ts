@@ -9,7 +9,7 @@ export const openopsTables = createBlock({
   displayName: 'OpenOps Tables',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/tables.svg',
+  logoUrl: 'https://static.openops.com/blocks/openops-tables.svg',
   authors: [],
   categories: [BlockCategory.DATA_SOURCES],
   actions: [
