@@ -1,5 +1,7 @@
+import { updateActiveObservation } from '@langfuse/tracing';
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
+import { trace } from '@opentelemetry/api';
 import { ModelMessage } from 'ai';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
@@ -133,6 +135,11 @@ export async function handleCodeGenerationRequest(
   } = params;
 
   const newMessageId = generateMessageId();
+  const userMessageText = getMessageText(newMessage);
+
+  updateActiveObservation({
+    input: userMessageText,
+  });
 
   try {
     serverResponse.write(startMessagePart);
@@ -142,7 +149,7 @@ export async function handleCodeGenerationRequest(
     initializeToolCall({
       toolCallId,
       toolName: GENERATE_CODE_TOOL_NAME,
-      message: getMessageText(newMessage),
+      message: userMessageText,
       serverResponse,
     });
 
@@ -167,6 +174,11 @@ export async function handleCodeGenerationRequest(
     }
 
     const finalCodeResult = result.object;
+
+    const outputText = finalCodeResult.textAnswer || '';
+    updateActiveObservation({
+      output: outputText,
+    });
 
     const toolResult = {
       toolCallId,
@@ -235,7 +247,15 @@ export async function handleCodeGenerationRequest(
       toolResultMessage,
       assistantToolResultMessage,
     ]);
+
+    trace.getActiveSpan()?.end();
   } catch (error) {
+    updateActiveObservation({
+      output: error,
+      level: 'ERROR',
+    });
+    trace.getActiveSpan()?.end();
+
     await handleCodeGenerationError(error, {
       messageId: newMessageId,
       chatId,
