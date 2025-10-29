@@ -14,6 +14,7 @@ function getEveryXMinutesData(minutes: number) {
   return Promise.resolve([
     {
       cron_expression: cronExpression,
+      timezone: 'UTC',
       startDate: new Date(),
     },
   ]);
