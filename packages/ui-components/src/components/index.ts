@@ -15,6 +15,7 @@ export * from './confirmation-dialog/confirmation-dialog';
 export * from './custom';
 export * from './dashboard-overview';
 export * from './dismissible-panel/dismissible-panel';
+export * from './expandable-markdown';
 export * from './explore-templates';
 export * from './flow-canvas/ai-widget';
 export * from './flow-canvas/canvas-context';
