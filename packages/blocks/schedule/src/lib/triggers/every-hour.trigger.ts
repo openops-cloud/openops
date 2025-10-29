@@ -5,8 +5,7 @@ import {
 } from '@openops/blocks-framework';
 
 function calculateEveryHourCron(runOnWeekends: boolean) {
-  const cronExpression = runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
-  return { cronExpression };
+  return runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
 }
 
 function getEveryHourData(runOnWeekends: boolean) {
