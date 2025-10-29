@@ -1,5 +1,7 @@
+import { updateActiveObservation, updateActiveTrace } from '@langfuse/tracing';
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfigParsed } from '@openops/shared';
+import { trace } from '@opentelemetry/api';
 import {
   LanguageModel,
   ModelMessage,
@@ -12,6 +14,7 @@ import {
   ToolSet,
 } from 'ai';
 import { sanitizeMessages } from '../mcp/tool-utils';
+import { createVoidTool } from '../mcp/void-tool';
 import {
   addCacheControlToMessages,
   addCacheControlToTools,
@@ -57,26 +60,69 @@ export function getLLMAsyncStream(
   const toolChoice = hasTools ? 'auto' : 'none';
   const currentMessages = sanitizeMessages(chatHistory);
 
+  const availableTools = Object.keys(tools ?? {});
+  const availableToolsString =
+    availableTools.length > 0 ? `"${availableTools.join(', ')}"` : 'none';
+
+  const cachedTools = addCacheControlToTools(tools);
+  const toolsProxy =
+    cachedTools != null
+      ? new Proxy(cachedTools, {
+          get: (target, prop: string | symbol): unknown => {
+            if (typeof prop === 'symbol') {
+              return undefined;
+            }
+            if (prop in target) {
+              return target[prop];
+            }
+            return createVoidTool(prop);
+          },
+        })
+      : undefined;
+
   const { fullStream } = streamText({
     model: languageModel,
     system: systemPrompt,
     messages: currentMessages,
     ...aiConfig.modelSettings,
-    tools: addCacheControlToTools(tools),
+    tools: toolsProxy,
     toolChoice,
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
-    onFinish,
+    onFinish: async (result) => {
+      const outputText = result.text || '';
+      updateActiveObservation({
+        output: outputText,
+      });
+
+      await onFinish?.(result);
+      trace.getActiveSpan()?.end();
+    },
     onAbort,
     prepareStep: async ({ messages }) => {
       return {
+        system:
+          systemPrompt +
+          '\n\n' +
+          'IMPORTANT: Only use the tools that are provided to you. Do not make up or suggest tools that are not provided to you, even if you see they were previously available in the history. ' +
+          'The **only available** tools are: ' +
+          availableToolsString,
         messages: addCacheControlToMessages(messages),
       };
     },
     abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {
+      updateActiveObservation({
+        output: error,
+        level: 'ERROR',
+      });
+      updateActiveTrace({
+        output: error,
+      });
+
+      trace.getActiveSpan()?.end();
       throw error;
     },
   });
