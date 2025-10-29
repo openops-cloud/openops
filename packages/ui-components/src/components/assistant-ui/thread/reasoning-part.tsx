@@ -14,7 +14,7 @@ export const ReasoningPart: FC<ReasoningPartProps> = ({ text }) => {
         buttonClassName="text-sm ml-6 font-normal"
       >
         {(content) => (
-          <div className="flex items-start gap-2 pt-2">
+          <div className="flex items-center gap-2 pt-2">
             <LoaderPinwheelIcon className="h-4 w-4 flex-shrink-0 text-border-300 dark:text-blue-400 mt-0.5" />
             <div className="flex-grow">
               <div className="text-sm text-primary-700 dark:text-blue-100 whitespace-pre-wrap">
