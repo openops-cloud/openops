@@ -99,6 +99,7 @@ const BranchSingleCondition = ({
                 placeholder={t('First value')}
                 onChange={field.onChange}
                 initialValue={field.value}
+                className={'px-1'}
               ></TextInputWithMentions>
               <FormMessage />
             </FormItem>
@@ -140,6 +141,7 @@ const BranchSingleCondition = ({
                   disabled={readonly}
                   initialValue={field.value ?? ''}
                   onChange={field.onChange}
+                  className="px-1"
                 ></TextInputWithMentions>
                 <FormMessage />
               </FormItem>
