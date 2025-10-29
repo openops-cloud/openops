@@ -1,7 +1,7 @@
 import { getAiTelemetrySDK } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
-import { NodeSDK } from '@opentelemetry/sdk-node';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { Static, Type } from '@sinclair/typebox';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
@@ -31,11 +31,11 @@ function installCodeBlockDependencies(): void {
   );
 }
 
-let telemetrySDK: NodeSDK | undefined;
+let telemetrySDK: NodeTracerProvider | undefined;
 
 function initTelemetry(): void {
   telemetrySDK = getAiTelemetrySDK();
-  telemetrySDK?.start();
+  telemetrySDK?.register();
 }
 
 initTelemetry();

@@ -1,6 +1,12 @@
 import { MenuLink, RunsIcon } from '@openops/components/ui';
 import { t } from 'i18next';
-import { Home, LucideBarChart2, Share2, Table2, Workflow } from 'lucide-react';
+import {
+  Home,
+  LucideBarChart2,
+  Share2,
+  TableProperties,
+  Workflow,
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 /**
@@ -36,7 +42,7 @@ export const useMenuLinks = () => {
       {
         to: '/tables',
         label: t('Tables'),
-        icon: Table2,
+        icon: TableProperties,
       },
       {
         to: '/analytics',

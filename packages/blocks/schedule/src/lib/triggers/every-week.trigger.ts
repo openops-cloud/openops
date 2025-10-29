@@ -11,6 +11,31 @@ import {
   WEEK_DAYS,
 } from '../common';
 
+function calculateEveryWeekCron(hourOfTheDay: number, dayOfTheWeek: number) {
+  const validatedHour = validateHours(hourOfTheDay);
+  const validatedDay = validateWeekDays(dayOfTheWeek);
+  const cronExpression = `0 ${validatedHour} * * ${validatedDay}`;
+  return { validatedHour, validatedDay, cronExpression };
+}
+
+function getEveryWeekData(
+  hourOfTheDay: number,
+  dayOfTheWeek: number,
+  timezone = 'UTC',
+) {
+  const { validatedHour, validatedDay, cronExpression } =
+    calculateEveryWeekCron(hourOfTheDay, dayOfTheWeek);
+  return Promise.resolve([
+    {
+      hour_of_the_day: validatedHour,
+      day_of_the_week: validatedDay,
+      cron_expression: cronExpression,
+      timezone: timezone,
+      startDate: new Date(),
+    },
+  ]);
+}
+
 export const everyWeekTrigger = createTrigger({
   name: 'every_week',
   displayName: 'Every Week',
@@ -52,26 +77,28 @@ export const everyWeekTrigger = createTrigger({
     }),
   },
   onEnable: async (ctx) => {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    const dayOfTheWeek = validateWeekDays(ctx.propsValue.day_of_the_week);
-    const cronExpression = `0 ${hourOfTheDay} * * ${dayOfTheWeek}`;
+    const { cronExpression } = calculateEveryWeekCron(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_week,
+    );
     ctx.setSchedule({
       cronExpression: cronExpression,
       timezone: ctx.propsValue.timezone,
     });
   },
+  test(ctx) {
+    return getEveryWeekData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_week,
+      ctx.propsValue.timezone,
+    );
+  },
   run(ctx) {
-    const hourOfTheDay = validateHours(ctx.propsValue.hour_of_the_day);
-    const dayOfTheWeek = validateWeekDays(ctx.propsValue.day_of_the_week);
-    const cronExpression = `0 ${hourOfTheDay} * * ${dayOfTheWeek}`;
-    return Promise.resolve([
-      {
-        hour_of_the_day: hourOfTheDay,
-        day_of_the_week: dayOfTheWeek,
-        cron_expression: cronExpression,
-        timezone: ctx.propsValue.timezone,
-      },
-    ]);
+    return getEveryWeekData(
+      ctx.propsValue.hour_of_the_day,
+      ctx.propsValue.day_of_the_week,
+      ctx.propsValue.timezone,
+    );
   },
   onDisable: async () => {
     console.log('onDisable');

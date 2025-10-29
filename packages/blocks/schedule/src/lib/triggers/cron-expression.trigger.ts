@@ -38,10 +38,18 @@ export const cronExpressionTrigger = createTrigger({
     if (!isValidCron(context.propsValue.cronExpression)) {
       return [`Invalid cron expression: ${context.propsValue.cronExpression}`];
     }
-    return [{}];
+    return [
+      {
+        startDate: new Date(),
+      },
+    ];
   },
-  async run(context) {
-    return [{}];
+  async run() {
+    return [
+      {
+        startDate: new Date(),
+      },
+    ];
   },
   onDisable: async () => {
     console.log('onDisable');

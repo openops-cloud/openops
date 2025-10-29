@@ -69,8 +69,8 @@ import { workerModule } from './workers/worker-module';
 export const setupApp = async (
   app: FastifyInstance,
 ): Promise<FastifyInstance> => {
-  const otelSDK = getAiTelemetrySDK();
-  otelSDK?.start();
+  const tracerProvider = getAiTelemetrySDK();
+  tracerProvider?.register();
 
   await app.register(swagger, {
     hideUntagged: false,
@@ -253,7 +253,7 @@ export const setupApp = async (
     await flowConsumer.close();
     await systemJobsSchedule.close();
     await webhookResponseWatcher.shutdown();
-    await otelSDK?.shutdown();
+    await tracerProvider?.shutdown();
   });
 
   await app.register(cookie, {

@@ -96,8 +96,8 @@ export async function handleUserMessage(
   try {
     const newMessages = await streamLLMResponse(
       {
-        userId,
         chatId,
+        userId,
         projectId,
         aiConfig,
         chatHistory,
