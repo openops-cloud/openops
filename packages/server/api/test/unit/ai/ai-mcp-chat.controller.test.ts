@@ -94,6 +94,14 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
 
 jest.mock('@openops/common', () => ({
   validateAiProviderConfig: jest.fn(),
+  getLangfuseSpanProcessor: jest.fn().mockReturnValue(undefined),
+  withLangfuseSession: jest.fn((_sessionId, _userId, _input, fn) => fn()),
+}));
+
+jest.mock('@langfuse/tracing', () => ({
+  observe: jest.fn((fn) => fn),
+  updateActiveObservation: jest.fn(),
+  updateActiveTrace: jest.fn(),
 }));
 
 const { validateAiProviderConfig: validateAiProviderConfigMock } =
