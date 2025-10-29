@@ -9,7 +9,7 @@ type ReasoningPartProps = {
 export const ReasoningPart: FC<ReasoningPartProps> = ({ text }) => {
   return (
     <div className="my-2">
-      <ExpandableContent fullContent={text} className="">
+      <ExpandableContent fullContent={text}>
         {(content) => (
           <div className="flex items-start gap-2 pt-2">
             <LoaderPinwheelIcon className="h-4 w-4 flex-shrink-0 text-border-300 dark:text-blue-400 mt-0.5" />
