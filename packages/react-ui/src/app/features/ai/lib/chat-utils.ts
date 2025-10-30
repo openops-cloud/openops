@@ -1,7 +1,4 @@
 import { QueryKeys } from '@/app/constants/query-keys';
-import { ConnectionTimeoutError } from './connection-timeout-error';
-
-import { SSE_HEARTBEAT_INTERVAL_MS } from '@openops/shared';
 import { ChatMode } from './types';
 
 export const buildQueryKey = (
@@ -27,83 +24,4 @@ export const buildQueryKey = (
   }
 
   return baseKey;
-};
-
-/**
- * Combines multiple AbortSignals into one.
- * Uses AbortSignal.any() if available, otherwise provides a polyfill.
- */
-export const combineAbortSignals = (
-  signals: (AbortSignal | undefined | null)[],
-): AbortSignal => {
-  const validSignals = signals.filter(
-    (signal): signal is AbortSignal => signal !== undefined && signal !== null,
-  );
-
-  if (validSignals.length === 0) {
-    return new AbortController().signal;
-  }
-
-  if (validSignals.length === 1) {
-    return validSignals[0];
-  }
-
-  if ('any' in AbortSignal && typeof AbortSignal.any === 'function') {
-    return AbortSignal.any(validSignals);
-  }
-
-  const controller = new AbortController();
-
-  for (const signal of validSignals) {
-    if (signal.aborted) {
-      controller.abort();
-      return controller.signal;
-    }
-
-    signal.addEventListener('abort', () => {
-      controller.abort();
-    });
-  }
-
-  return controller.signal;
-};
-
-const CONNECTION_TIMEOUT_MS = 15000 + SSE_HEARTBEAT_INTERVAL_MS;
-
-/**
- * Custom fetch implementation with connection timeout.
- * Aborts the request if no response is received within the timeout period.
- */
-export const fetchWithTimeout = async (
-  input: RequestInfo | URL,
-  init?: RequestInit,
-): Promise<Response> => {
-  const timeoutController = new AbortController();
-  const timeoutId = setTimeout(() => {
-    timeoutController.abort();
-  }, CONNECTION_TIMEOUT_MS);
-
-  try {
-    const combinedSignal = combineAbortSignals([
-      init?.signal,
-      timeoutController.signal,
-    ]);
-
-    const response = await fetch(input, {
-      ...init,
-      signal: combinedSignal,
-    });
-
-    return response;
-  } catch (error: any) {
-    if (timeoutController.signal.aborted && !init?.signal?.aborted) {
-      throw new ConnectionTimeoutError(
-        'Connection timeout: Unable to reach the server. Please check your internet connection.',
-      );
-    }
-
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-  }
 };
