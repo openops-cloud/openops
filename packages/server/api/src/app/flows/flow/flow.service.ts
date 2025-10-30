@@ -191,7 +191,10 @@ export const flowService = {
     const populatedFlowPromises = paginationResult.data.map(async (flow) => {
       return {
         ...flow,
-        version: flow.versions[0],
+        version: {
+          ...flow.versions[0],
+          trigger: flowHelper.addStepIndices(flow.versions[0].trigger),
+        },
       };
     });
 
@@ -393,7 +396,10 @@ export const flowService = {
 
       return {
         ...updatedFlow,
-        version: lockedFlowVersion,
+        version: {
+          ...lockedFlowVersion,
+          trigger: flowHelper.addStepIndices(lockedFlowVersion.trigger),
+        },
       };
     });
   },
@@ -542,7 +548,10 @@ async function create({
 
   return {
     ...savedFlow,
-    version: savedFlowVersion,
+    version: {
+      ...savedFlowVersion,
+      trigger: flowHelper.addStepIndices(savedFlowVersion.trigger),
+    },
   };
 }
 
@@ -673,10 +682,13 @@ const lockFlowVersionIfNotLocked = async ({
   entityManager,
 }: LockFlowVersionIfNotLockedParams): Promise<FlowVersion> => {
   if (flowVersion.state === FlowVersionState.LOCKED) {
-    return flowVersion;
+    return {
+      ...flowVersion,
+      trigger: flowHelper.addStepIndices(flowVersion.trigger),
+    };
   }
 
-  return flowVersionService.applyOperation({
+  const lockedVersion = await flowVersionService.applyOperation({
     userId,
     projectId,
     flowVersion,
@@ -688,6 +700,11 @@ const lockFlowVersionIfNotLocked = async ({
     },
     entityManager,
   });
+
+  return {
+    ...lockedVersion,
+    trigger: flowHelper.addStepIndices(lockedVersion.trigger),
+  };
 };
 
 const assertFlowIsNotNull: <T extends Flow>(
