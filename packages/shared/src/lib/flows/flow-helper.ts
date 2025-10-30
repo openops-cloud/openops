@@ -1179,7 +1179,7 @@ function addStepIndices(trigger: Trigger): Trigger {
     if (stepIndex) {
       return {
         ...step,
-        ...{ stepIndex },
+        stepIndex,
       };
     }
 
