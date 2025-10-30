@@ -7,6 +7,10 @@ type ReasoningPartProps = {
 };
 
 export const ReasoningPart: FC<ReasoningPartProps> = ({ text }) => {
+  if (!text) {
+    return null;
+  }
+
   return (
     <div className="my-2">
       <ExpandableContent
