@@ -7,7 +7,7 @@ type ReasoningPartProps = {
 };
 
 export const ReasoningPart: FC<ReasoningPartProps> = ({ text }) => {
-  if(!text) {
+  if (!text) {
     return null;
   }
   
