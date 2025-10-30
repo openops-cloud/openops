@@ -12,6 +12,7 @@ const MAX_SELECTED_TOOLS = 128;
 export type ToolsAndQueryResult = {
   tools?: ToolSet;
   queryClassification: QueryClassification[];
+  reasoning?: string;
 };
 
 const queryClassificationDescriptions: Record<QueryClassification, string> = {
@@ -44,6 +45,11 @@ const coreWithReasoningSchema = z.object({
     .describe(
       'The reasoning for the tool selection and classification. Fill this field first',
     ),
+  user_facing_reasoning: z
+    .string()
+    .describe(
+      'Short non-technical description to show the next steps to the user',
+    ),
   tool_names: z.array(z.string()).describe('Array of selected tool names'),
   query_classification: z
     .array(queryClassificationUnionSchema)
@@ -69,6 +75,7 @@ export async function routeQuery({
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
+      reasoning: undefined,
     };
   }
 
@@ -114,6 +121,7 @@ export async function routeQuery({
     return {
       queryClassification,
       tools: selectedTools,
+      reasoning: selectionResult.user_facing_reasoning,
     };
   } catch (error) {
     const isAbortError = error instanceof Error && error.name === 'AbortError';
@@ -123,6 +131,7 @@ export async function routeQuery({
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
+      reasoning: undefined,
     };
   }
 }

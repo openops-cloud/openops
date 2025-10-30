@@ -1,4 +1,5 @@
 import {
+  ExpandableContent,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +18,6 @@ import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { PropertyType } from '@openops/blocks-framework';
 import { useSafeBuilderStateContext } from '../../builder-hooks';
-import { ExpandableContent } from '../expandable-markdown';
 import { CodeEditior } from './code-editior';
 
 const markdown = `

@@ -25,8 +25,7 @@ import { MarkdownText } from '../markdown-text';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
-import { ConnectionError } from './connection-error';
-import { ConnectionSlowWarning } from './connection-slow-warning';
+import { ReasoningPart } from './reasoning-part';
 
 const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
   const { codeVariation, handleInject } = useThreadExtraContext();
@@ -49,8 +48,6 @@ AssistantMessageWrapper.displayName = 'AssistantMessageWrapper';
 
 export type ThreadProps = {
   theme: Theme;
-  isShowingSlowWarning?: boolean;
-  connectionError?: string | null;
 } & ComposerProps;
 
 export const Thread = ({
@@ -59,8 +56,6 @@ export const Thread = ({
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
-  isShowingSlowWarning,
-  connectionError,
 }: ThreadProps) => {
   const messageComponents = useMemo(
     () => ({
@@ -77,8 +72,6 @@ export const Thread = ({
 
         <ThreadPrimitive.Messages components={messageComponents} />
 
-        {isShowingSlowWarning && <ConnectionSlowWarning />}
-
         <ThreadPrimitive.If running>
           <div className="w-full mb-2">
             <div className="flex items-center text-slate-800 dark:text-slate-50">
@@ -88,8 +81,6 @@ export const Thread = ({
             </div>
           </div>
         </ThreadPrimitive.If>
-
-        {connectionError && <ConnectionError error={connectionError} />}
 
         <ThreadPrimitive.If empty={false}>
           <div className="min-h-8 flex-grow" />
@@ -102,7 +93,6 @@ export const Thread = ({
             selectedModel={selectedModel}
             onModelSelected={onModelSelected}
             isModelSelectorLoading={isModelSelectorLoading}
-            connectionError={connectionError}
           />
         </div>
       </ThreadPrimitive.Viewport>
@@ -138,19 +128,14 @@ const ThreadWelcome: FC = () => {
   );
 };
 
-type ComposerProps = AiModelSelectorProps & {
-  connectionError?: string | null;
-};
+type ComposerProps = AiModelSelectorProps;
 
 const Composer = ({
   availableModels,
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
-  connectionError,
 }: ComposerProps) => {
-  const isDisabled = !!connectionError;
-
   return (
     <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in pb-9">
       <ComposerPrimitive.Input
@@ -158,9 +143,8 @@ const Composer = ({
         autoFocus
         placeholder={t('Write a message...')}
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
-        disabled={isDisabled}
       />
-      <ComposerAction isDisabled={isDisabled} />
+      <ComposerAction />
 
       <AiModelSelector
         availableModels={availableModels}
@@ -173,7 +157,7 @@ const Composer = ({
   );
 };
 
-const ComposerAction: FC<{ isDisabled?: boolean }> = ({ isDisabled }) => {
+const ComposerAction: FC = () => {
   return (
     <>
       <ThreadPrimitive.If running={false}>
@@ -182,7 +166,6 @@ const ComposerAction: FC<{ isDisabled?: boolean }> = ({ isDisabled }) => {
             tooltip="Send"
             variant="default"
             className="my-2.5 size-8 p-2 transition-opacity ease-in"
-            disabled={isDisabled}
           >
             <SendHorizontalIcon />
           </TooltipIconButton>
@@ -234,6 +217,7 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   const messageComponents = useMemo(
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
+      Reasoning: (props: any) => <ReasoningPart {...props} />,
       tools: {
         Fallback: (props: any) => <ToolFallback {...props} theme={theme} />,
         by_name: {

@@ -90,3 +90,35 @@ export function sendTextMessageToStream(
   responseStream.write(buildTextDeltaPart(message, messageId));
   responseStream.write(buildTextEndMessage(messageId));
 }
+
+function buildReasoningStartPart(id: string): string {
+  return createStreamMessage({
+    type: 'reasoning-start',
+    id,
+  });
+}
+
+function buildReasoningDeltaPart(delta: string, id: string): string {
+  return createStreamMessage({
+    type: 'reasoning-delta',
+    id,
+    delta,
+  });
+}
+
+function buildReasoningEndPart(id: string): string {
+  return createStreamMessage({
+    type: 'reasoning-end',
+    id,
+  });
+}
+
+export function sendReasoningToStream(
+  responseStream: NodeJS.WritableStream,
+  reasoning: string,
+  messageId: string,
+): void {
+  responseStream.write(buildReasoningStartPart(messageId));
+  responseStream.write(buildReasoningDeltaPart(reasoning, messageId));
+  responseStream.write(buildReasoningEndPart(messageId));
+}
