@@ -5,13 +5,15 @@ import {
   DocumentKeyValuesFilter,
   DocumentVersionInfo,
   ListDocumentsCommand,
-  ListDocumentsCommandOutput,
   ListDocumentVersionsCommand,
-  ListDocumentVersionsCommandOutput,
   SSMClient,
 } from '@aws-sdk/client-ssm';
 import { createAction, Property } from '@openops/blocks-framework';
-import { amazonAuth, getCredentialsForAccount } from '@openops/common';
+import {
+  amazonAuth,
+  getCredentialsForAccount,
+  makeAwsRequest,
+} from '@openops/common';
 import { RiskLevel } from '@openops/shared';
 
 function resolveRegion(context: any): string {
@@ -99,18 +101,15 @@ export const ssmGenerateRunbookLinkAction = createAction({
             filters.push({ Key: 'Owner', Values: [ownerValue] });
           }
 
-          let nextToken: string | undefined = undefined;
-          const docs: DocumentIdentifier[] = [];
-          do {
-            const resp: ListDocumentsCommandOutput = await client.send(
-              new ListDocumentsCommand({
-                Filters: filters,
-                NextToken: nextToken,
-              }),
-            );
-            docs.push(...(resp.DocumentIdentifiers || []));
-            nextToken = resp.NextToken;
-          } while (nextToken);
+          const command = new ListDocumentsCommand({
+            Filters: filters,
+          });
+
+          const pages = await makeAwsRequest(client, command);
+
+          const docs: DocumentIdentifier[] = pages.flatMap(
+            (p) => p.DocumentIdentifiers || [],
+          );
 
           if (!docs.length) {
             return {
@@ -167,19 +166,16 @@ export const ssmGenerateRunbookLinkAction = createAction({
             },
           });
 
-          let nextToken: string | undefined = undefined;
-          const versions: DocumentVersionInfo[] = [];
-          do {
-            const resp: ListDocumentVersionsCommandOutput = await client.send(
-              new ListDocumentVersionsCommand({
-                Name: runbookName,
-                NextToken: nextToken,
-                MaxResults: 50,
-              }),
-            );
-            versions.push(...(resp.DocumentVersions || []));
-            nextToken = resp.NextToken;
-          } while (nextToken);
+          const command = new ListDocumentVersionsCommand({
+            Name: runbookName,
+            MaxResults: 50,
+          }) as any;
+
+          const pages = (await makeAwsRequest(client as any, command)) as any[];
+
+          const versions: DocumentVersionInfo[] = pages.flatMap(
+            (p) => p.DocumentVersions || [],
+          );
 
           if (!versions.length) {
             return {
