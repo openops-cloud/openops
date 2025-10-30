@@ -1164,16 +1164,26 @@ function getUsedConnections(step: Trigger | Action) {
 function addStepIndices(trigger: Trigger): Trigger {
   const allSteps = getAllSteps(trigger);
   const stepIndexMap = new Map<string, number>();
+
+  const getStepKey = (step: TriggerWithOptionalId | Action): string => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return `${step.id!}-${step.name}`;
+  };
+
   allSteps.forEach((step, index) => {
-    stepIndexMap.set(step.name, index + 1);
+    stepIndexMap.set(getStepKey(step), index + 1);
   });
 
   return transferStep(trigger, (step: Step) => {
-    const stepIndex = stepIndexMap.get(step.name);
-    return {
-      ...step,
-      ...(stepIndex !== undefined && { stepIndex }),
-    } as Step;
+    const stepIndex = stepIndexMap.get(getStepKey(step));
+    if (stepIndex) {
+      return {
+        ...step,
+        ...{ stepIndex },
+      };
+    }
+
+    return step;
   }) as Trigger;
 }
 
