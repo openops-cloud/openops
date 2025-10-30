@@ -24,12 +24,12 @@ export const httpAuth = BlockAuth.CustomAuth({
       properties: {
         key: Property.ShortText({
           displayName: 'Header Key',
-          required: false,
+          required: true,
           defaultValue: 'Authorization',
         }),
         value: Property.SecretText({
           displayName: 'Header Value',
-          required: false,
+          required: true,
         }),
       },
     }),
