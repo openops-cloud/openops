@@ -189,17 +189,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
             };
           }
 
-          // Sort by numeric DocumentVersion descending if possible
-          const sorted = versions.slice().sort((a, b) => {
-            const av = Number(a.DocumentVersion);
-            const bv = Number(b.DocumentVersion);
-            if (Number.isFinite(av) && Number.isFinite(bv)) return bv - av;
-            return String(b.DocumentVersion || '').localeCompare(
-              String(a.DocumentVersion || ''),
-            );
-          });
-
-          const opts = sorted.map((v) => {
+          const opts = versions.map((v) => {
             const ver = v.DocumentVersion || '';
             const name = v.VersionName ? ` - ${v.VersionName}` : '';
             const def = v.IsDefaultVersion ? ' (default)' : '';
@@ -209,7 +199,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
           return {
             disabled: false,
             options: opts,
-            placeholder: 'Select version (optional)',
+            placeholder: 'Select version',
           };
         } catch (error) {
           return {
