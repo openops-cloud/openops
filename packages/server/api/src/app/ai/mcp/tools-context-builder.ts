@@ -3,10 +3,12 @@ import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { MCPChatContext } from '../chat/ai-chat.service';
+import { generateMessageId } from '../chat/ai-id-generators';
 import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
+import { sendReasoningToStream } from '../chat/stream-message-builder';
 import { routeQuery } from './llm-query-router';
 import {
   collectToolsByProvider,
@@ -65,7 +67,11 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    const { tools: filteredTools, queryClassification } = await routeQuery({
+    const {
+      tools: filteredTools,
+      queryClassification,
+      reasoning,
+    } = await routeQuery({
       messages,
       tools,
       languageModel,
@@ -73,6 +79,11 @@ export async function getMCPToolsContext({
       uiContext: additionalContext,
       abortSignal,
     });
+
+    if (reasoning && stream) {
+      const messageId = generateMessageId();
+      sendReasoningToStream(stream, reasoning, messageId);
+    }
 
     const systemPrompt = await getMcpSystemPrompt({
       queryClassification,
