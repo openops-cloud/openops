@@ -1,5 +1,5 @@
-import { UIMessage } from '@ai-sdk/ui-utils'; // Fix this
 import { OpenChatResponse } from '@openops/shared';
+import { ChatStatus as AIChatStatus, UIMessage } from 'ai';
 
 export type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
 export type MessageType = ServerMessage | UIMessage;
@@ -24,12 +24,12 @@ export interface UseAssistantChatProps {
   context: UseAssistantChatContext | undefined;
 }
 
-export enum ChatStatus {
-  Submitted = 'submitted',
-  Streaming = 'streaming',
-  Ready = 'ready',
-  Error = 'error',
-}
+export const ChatStatus = {
+  Submitted: 'submitted',
+  Streaming: 'streaming',
+  Ready: 'ready',
+  Error: 'error',
+} as const satisfies Record<string, AIChatStatus>;
 
 export type Timeout = ReturnType<typeof setTimeout>;
 export enum ConnectionCheckType {
@@ -37,7 +37,7 @@ export enum ConnectionCheckType {
   Error = 'error',
 }
 
-export type ChatStatusType = ChatStatus;
+export type ChatStatusType = AIChatStatus;
 
 export interface UseConnectionMonitoringProps {
   chatStatus: ChatStatusType;

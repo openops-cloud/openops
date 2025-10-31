@@ -268,7 +268,7 @@ export const useAssistantChat = ({
 
   const { isShowingSlowWarning, connectionError, clearConnectionState } =
     useConnectionMonitoring({
-      chatStatus: chat.status as any,
+      chatStatus: chat.status,
       messages: chat.messages,
       stopChat: chat.stop,
     });
