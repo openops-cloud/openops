@@ -3,6 +3,15 @@ import { logger } from '@openops/server-shared';
 import { amazonAuth } from '../auth';
 import { getSsmDescribeDocumentInfo } from './get-ssm-describe-document-info';
 
+const enum ParameterType {
+  String = 'String',
+  StringList = 'StringList',
+  Integer = 'Integer',
+  Boolean = 'Boolean',
+  StringMap = 'StringMap',
+  MapList = 'MapList',
+}
+
 export const runbookParametersProperty = Property.DynamicProperties({
   displayName: 'Parameters',
   required: true,
@@ -44,7 +53,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
           );
         }
 
-        if (/^List<[^>]+>$/.test(type) || type === 'StringList') {
+        if (/^List<[^>]+>$/.test(type) || type === ParameterType.StringList) {
           result[key] = Property.Array({
             displayName: key,
             required: false,
@@ -57,7 +66,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
         }
 
         switch (type) {
-          case 'Integer': {
+          case ParameterType.Integer: {
             const n =
               typeof defaultValue === 'number'
                 ? defaultValue
@@ -70,7 +79,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
             });
             break;
           }
-          case 'Boolean': {
+          case ParameterType.Boolean: {
             const b =
               typeof defaultValue === 'boolean'
                 ? defaultValue
@@ -83,7 +92,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
             });
             break;
           }
-          case 'StringMap': {
+          case ParameterType.StringMap: {
             result[key] = Property.Object({
               displayName: key,
               required: false,
@@ -97,7 +106,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
             });
             break;
           }
-          case 'MapList': {
+          case ParameterType.MapList: {
             result[key] = Property.Json({
               displayName: key,
               required: false,
