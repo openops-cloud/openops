@@ -12,6 +12,88 @@ const enum ParameterType {
   MapList = 'MapList',
 }
 
+function safeParseDefault(raw?: string): unknown {
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    logger.warn(
+      'Failed to parse AWS Document default input value, error is ',
+      error,
+    );
+    return undefined;
+  }
+}
+
+function isListType(type: string): boolean {
+  return /^List<[^>]+>$/.test(type) || type === ParameterType.StringList;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function coerceNumber(value: unknown): number | undefined {
+  const n = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function coerceBoolean(value: unknown): boolean | undefined {
+  const b =
+    typeof value === 'boolean' ? value : String(value).toLowerCase() === 'true';
+  return typeof b === 'boolean' ? b : undefined;
+}
+
+function createPropertyForParam(p: any, type: string, defaultValue: unknown) {
+  const key = p.Name as string;
+  const base = {
+    displayName: key,
+    required: false,
+    description: p?.Description,
+  } as const;
+
+  if (isListType(type)) {
+    return Property.Array({
+      ...base,
+      defaultValue: Array.isArray(defaultValue)
+        ? (defaultValue as unknown[])
+        : undefined,
+    });
+  }
+
+  switch (type) {
+    case ParameterType.Integer:
+      return Property.Number({
+        ...base,
+        defaultValue: coerceNumber(defaultValue),
+      });
+
+    case ParameterType.Boolean:
+      return Property.Checkbox({
+        ...base,
+        defaultValue: coerceBoolean(defaultValue),
+      });
+
+    case ParameterType.StringMap:
+      return Property.Object({
+        ...base,
+        defaultValue: isPlainObject(defaultValue) ? defaultValue : undefined,
+      });
+
+    case ParameterType.MapList:
+      return Property.Json({
+        ...base,
+        defaultValue: defaultValue ?? [],
+      });
+
+    default:
+      return Property.ShortText({
+        ...base,
+        defaultValue: defaultValue ? String(defaultValue) : undefined,
+      });
+  }
+}
+
 export const runbookParametersProperty = Property.DynamicProperties({
   displayName: 'Parameters',
   required: true,
@@ -36,94 +118,13 @@ export const runbookParametersProperty = Property.DynamicProperties({
       });
 
       for (const p of parameters) {
-        const key = p.Name;
+        const key = p?.Name as string | undefined;
         if (!key) continue;
 
         const type = String(p?.Type || '');
-        let defaultValue: unknown;
+        const defaultValue = safeParseDefault(p?.DefaultValue);
 
-        try {
-          if (p?.DefaultValue) {
-            defaultValue = JSON.parse(p.DefaultValue);
-          }
-        } catch (error) {
-          logger.warn(
-            'Failed to parse AWS Document default input value, error is ',
-            error,
-          );
-        }
-
-        if (/^List<[^>]+>$/.test(type) || type === ParameterType.StringList) {
-          result[key] = Property.Array({
-            displayName: key,
-            required: false,
-            description: p?.Description,
-            defaultValue: Array.isArray(defaultValue)
-              ? defaultValue
-              : undefined,
-          });
-          continue;
-        }
-
-        switch (type) {
-          case ParameterType.Integer: {
-            const n =
-              typeof defaultValue === 'number'
-                ? defaultValue
-                : Number(defaultValue);
-            result[key] = Property.Number({
-              displayName: key,
-              required: false,
-              description: p?.Description,
-              defaultValue: Number.isFinite(n) ? n : undefined,
-            });
-            break;
-          }
-          case ParameterType.Boolean: {
-            const b =
-              typeof defaultValue === 'boolean'
-                ? defaultValue
-                : String(defaultValue).toLowerCase() === 'true';
-            result[key] = Property.Checkbox({
-              displayName: key,
-              required: false,
-              description: p?.Description,
-              defaultValue: typeof b === 'boolean' ? b : undefined,
-            });
-            break;
-          }
-          case ParameterType.StringMap: {
-            result[key] = Property.Object({
-              displayName: key,
-              required: false,
-              description: p?.Description,
-              defaultValue:
-                defaultValue &&
-                typeof defaultValue === 'object' &&
-                !Array.isArray(defaultValue)
-                  ? defaultValue
-                  : undefined,
-            });
-            break;
-          }
-          case ParameterType.MapList: {
-            result[key] = Property.Json({
-              displayName: key,
-              required: false,
-              description: p?.Description,
-              defaultValue: defaultValue ?? [],
-            });
-            break;
-          }
-          default: {
-            result[key] = Property.ShortText({
-              displayName: key,
-              required: false,
-              description: p?.Description,
-              defaultValue: defaultValue ? String(defaultValue) : undefined,
-            });
-          }
-        }
+        result[key] = createPropertyForParam(p, type, defaultValue);
       }
     } catch (e) {
       logger.warn(e);
