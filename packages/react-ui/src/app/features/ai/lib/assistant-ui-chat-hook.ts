@@ -312,7 +312,7 @@ export const useAssistantChat = ({
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, onChatIdChange, getBuilderState]);
+  }, [chatId, chat, getBuilderState, chatMode, onChatIdChange]);
 
   return {
     runtime,
