@@ -1,6 +1,7 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
+  DocumentOwner,
   runbookNameProperty,
   runbookParametersProperty,
   runbookVersionProperty,
@@ -27,12 +28,12 @@ export const ssmGenerateRunbookLinkAction = createAction({
       required: true,
       options: {
         options: [
-          { label: 'Owned by Amazon', value: 'Amazon' },
-          { label: 'Owned by me', value: 'Self' },
-          { label: 'Shared with me', value: 'Private' },
-          { label: 'Public', value: 'Public' },
-          { label: 'Third Party', value: 'ThirdParty' },
-          { label: 'All runbooks', value: 'All' },
+          { label: 'Owned by Amazon', value: DocumentOwner.Amazon },
+          { label: 'Owned by me', value: DocumentOwner.Self },
+          { label: 'Shared with me', value: DocumentOwner.Private },
+          { label: 'Public', value: DocumentOwner.Public },
+          { label: 'Third Party', value: DocumentOwner.ThirdParty },
+          { label: 'All runbooks', value: DocumentOwner.All },
         ],
       },
       defaultValue: 'Private',
@@ -42,9 +43,8 @@ export const ssmGenerateRunbookLinkAction = createAction({
     parameters: runbookParametersProperty,
   },
   async run({ propsValue, auth }) {
-    const awsRegion = (propsValue.region ||
-      auth.defaultRegion) as unknown as string;
-    const runbook = String(propsValue.runbook);
+    const awsRegion = propsValue.region || auth.defaultRegion;
+    const runbook = propsValue.runbook;
 
     if (!runbook) {
       throw new Error('Runbook is required');
@@ -66,31 +66,10 @@ export const ssmGenerateRunbookLinkAction = createAction({
     for (const [key, value] of entries) {
       if (value === undefined || value === null) continue;
 
-      let encodedValue: string | undefined;
-      if (Array.isArray(value)) {
-        const joined = value
-          .map((v) => (v === undefined || v === null ? '' : JSON.stringify(v)))
-          .filter((s) => s.length > 0)
-          .join(', ');
-        if (joined.length) {
-          encodedValue = encodeURIComponent(joined);
-        }
-      } else if (typeof value === 'object') {
-        try {
-          encodedValue = encodeURIComponent(JSON.stringify(value));
-        } catch {
-          encodedValue = encodeURIComponent(String(value));
-        }
-      } else if (
-        typeof value === 'boolean' ||
-        typeof value === 'number' ||
-        typeof value === 'string'
-      ) {
-        encodedValue = encodeURIComponent(value);
-      }
+      const encodedValue = encodeURIComponent(JSON.stringify(value));
 
       if (encodedValue) {
-        hashParts.push(`${encodeURIComponent(String(key))}=${encodedValue}`);
+        hashParts.push(`${encodeURIComponent(key)}=${encodedValue}`);
       }
     }
 

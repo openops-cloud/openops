@@ -9,6 +9,7 @@ import { BlockPropValueSchema } from '@openops/blocks-framework';
 import { amazonAuth, getCredentialsForAccount } from '../auth';
 import { makeAwsRequest } from '../aws-client-wrapper';
 import { getAwsClient } from '../get-client';
+import { DocumentOwner } from './document-owner';
 
 export const getSsmDocuments = async ({
   auth,
@@ -18,7 +19,7 @@ export const getSsmDocuments = async ({
 }: {
   auth: BlockPropValueSchema<typeof amazonAuth>;
   region: string;
-  owner?: string;
+  owner?: DocumentOwner;
   type?: string;
 }): Promise<DocumentIdentifier[]> => {
   const credentials = await getCredentialsForAccount(auth);
@@ -28,7 +29,7 @@ export const getSsmDocuments = async ({
     { Key: 'DocumentType', Values: [type] },
   ];
 
-  if (owner && owner !== 'All') {
+  if (owner && owner !== DocumentOwner.All) {
     filters.push({ Key: 'Owner', Values: [owner] });
   }
 

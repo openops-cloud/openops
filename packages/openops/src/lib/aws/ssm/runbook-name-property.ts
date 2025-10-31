@@ -1,6 +1,7 @@
 import { DocumentIdentifier } from '@aws-sdk/client-ssm';
 import { BlockPropValueSchema, Property } from '@openops/blocks-framework';
 import { amazonAuth } from '../auth';
+import { DocumentOwner } from './document-owner';
 import { getSsmDocuments } from './get-ssm-documents';
 
 export const runbookNameProperty = Property.Dropdown({
@@ -31,13 +32,13 @@ export const runbookNameProperty = Property.Dropdown({
       const docs = await getSsmDocuments({
         auth: awsAuth,
         region: awsRegion,
-        owner: owner as string,
+        owner: owner as DocumentOwner,
       });
 
       return {
         disabled: false,
         options: docs.map((d: DocumentIdentifier) => ({
-          label: d.Name || d.DocumentVersion || 'Unknown',
+          label: d.Name || 'Unknown',
           value: d.Name,
         })),
       };

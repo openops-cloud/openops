@@ -22,6 +22,7 @@ export * from './lib/aws/rds/rds-delete-instance';
 export * from './lib/aws/rds/rds-delete-snapshot';
 export * from './lib/aws/rds/rds-describe';
 export * from './lib/aws/regions';
+export * from './lib/aws/ssm/document-owner';
 export * from './lib/aws/ssm/get-ssm-describe-document-info';
 export * from './lib/aws/ssm/get-ssm-document-versions';
 export * from './lib/aws/ssm/get-ssm-documents';
