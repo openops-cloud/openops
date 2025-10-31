@@ -67,7 +67,7 @@ export const combineAbortSignals = (
   return controller.signal;
 };
 
-const CONNECTION_TIMEOUT_MS = 15000 + SSE_HEARTBEAT_INTERVAL_MS;
+const CONNECTION_TIMEOUT_MS = SSE_HEARTBEAT_INTERVAL_MS * 2;
 
 let sseActivityCallback: (() => void) | null = null;
 
