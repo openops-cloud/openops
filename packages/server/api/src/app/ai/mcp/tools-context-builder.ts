@@ -14,13 +14,9 @@ import {
 } from '../chat/prompts.service';
 import { sendReasoningToStream } from '../chat/stream-message-builder';
 import { routeQuery } from './llm-query-router';
-import {
-  collectToolsByProvider,
-  formatFrontendTools,
-  hasToolProvider,
-} from './tool-utils';
+import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { AssistantUITools, QueryClassification } from './types';
+import { AssistantUITools } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -79,7 +75,6 @@ export async function getMCPToolsContext({
       tools: filteredTools,
       queryClassification,
       reasoning,
-      selectedToolNames,
     } = await routeQuery({
       messages,
       tools,
@@ -97,62 +92,38 @@ export async function getMCPToolsContext({
 
     const systemPrompt = await getMcpSystemPrompt({
       queryClassification,
-      selectedTools: filteredTools,
+      selectedTools: filteredTools ?? {},
       allTools: tools,
       uiContext: additionalContext,
     });
 
-    // Apply append-only logic for OpenOps tools as well
-    const allOpenOpsTools =
-      hasToolProvider(tools, 'openops') &&
-      queryClassification.includes(QueryClassification.openops)
-        ? collectToolsByProvider(tools, 'openops')
-        : {};
+    const finalToolNames = Array.from(
+      new Set([...previousToolNames, ...Object.keys(filteredTools ?? {})]),
+    ).filter((name) => Object.keys(tools).includes(name));
 
-    // Only include OpenOps tools that are either:
-    // 1. In the filtered tools from the query router (selectedToolNames)
-    // 2. Were in the previous tools list (previousToolNames)
-    const openOpsToolNames = Object.keys(allOpenOpsTools);
-    const allowedOpenOpsToolNames = openOpsToolNames.filter(
-      (toolName) =>
-        selectedToolNames.includes(toolName) ||
-        previousToolNames.includes(toolName),
-    );
-
-    const openOpsTools = Object.fromEntries(
-      Object.entries(allOpenOpsTools).filter(([name]) =>
-        allowedOpenOpsToolNames.includes(name),
-      ),
-    );
-
-    const combinedTools = {
-      ...filteredTools,
-      ...openOpsTools,
-    };
-
-    // Get the final tool names including filtered openOpsTools for append-only tracking
-    const finalToolNames = Object.keys(combinedTools);
-
-    // Save the combined tool names (including openOpsTools) back to Redis
     if (userId && chatId) {
       await saveChatTools(chatId, userId, projectId, finalToolNames);
     }
 
-    const finalTools =
+    const finalCombinedTools = Object.fromEntries(
+      Object.entries(tools).filter(([name]) => finalToolNames.includes(name)),
+    );
+
+    const toolsToUse =
       userId && chatId && stream
-        ? wrapToolsWithApproval(combinedTools, () => ({
+        ? wrapToolsWithApproval(finalCombinedTools, () => ({
             userId,
             projectId,
             chatId,
             stream,
           }))
-        : combinedTools;
+        : finalCombinedTools;
 
     return {
       mcpClients,
       systemPrompt,
       filteredTools: {
-        ...finalTools,
+        ...toolsToUse,
         ...formatFrontendTools(frontendTools),
       },
     };
