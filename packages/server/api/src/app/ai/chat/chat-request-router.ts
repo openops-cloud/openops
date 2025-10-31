@@ -1,5 +1,10 @@
 import { logger } from '@openops/server-shared';
-import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
+import {
+  CODE_BLOCK_NAME,
+  NewMessageRequest,
+  Principal,
+  SSE_HEARTBEAT_INTERVAL_MS,
+} from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { IncomingMessage, ServerResponse } from 'node:http';
@@ -10,6 +15,7 @@ import {
   getLLMConfig,
 } from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
+import { createStreamMessage } from './stream-message-builder';
 import { handleUserMessage } from './user-message-handler';
 
 export type ChatRequestContext = {
@@ -130,12 +136,12 @@ function isResponseOpen(res: ServerResponse): boolean {
 
 function startSSEHeartbeat(
   res: ServerResponse,
-  intervalMs = 15000,
+  intervalMs = SSE_HEARTBEAT_INTERVAL_MS,
 ): NodeJS.Timeout {
   const heartbeat = setInterval(() => {
     if (isResponseOpen(res)) {
       try {
-        res.write(`: heartbeat\n\n`);
+        res.write(createStreamMessage({ type: 'data-heartbeat' }));
       } catch {
         clearInterval(heartbeat);
       }

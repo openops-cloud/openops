@@ -14,9 +14,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
-import { buildQueryKey } from './chat-utils';
+import { buildQueryKey, fetchWithTimeout } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
+import { useConnectionMonitoring } from './use-connection-monitoring';
 
 export const useAssistantChat = ({
   chatId,
@@ -200,6 +201,7 @@ export const useAssistantChat = ({
           tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
         },
       }),
+      fetch: fetchWithTimeout,
     }),
     onError: (error) => {
       console.error('chat error', error);
@@ -264,6 +266,13 @@ export const useAssistantChat = ({
   const runtime = useAISDKRuntime(chat);
   runtimeRef.current = runtime;
 
+  const { isShowingSlowWarning, connectionError, clearConnectionState } =
+    useConnectionMonitoring({
+      chatStatus: chat.status as any,
+      messages: chat.messages,
+      stopChat: chat.stop,
+    });
+
   const lastConnectionRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -289,6 +298,7 @@ export const useAssistantChat = ({
 
     try {
       chat.stop();
+      clearConnectionState();
 
       if (oldChatId) {
         const context = getBuilderState();
@@ -308,7 +318,7 @@ export const useAssistantChat = ({
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, onChatIdChange, getBuilderState]);
+  }, [chatId, chat, clearConnectionState, getBuilderState, onChatIdChange]);
 
   return {
     runtime,
@@ -317,5 +327,7 @@ export const useAssistantChat = ({
     provider,
     model,
     chatId,
+    isShowingSlowWarning,
+    connectionError,
   };
 };
