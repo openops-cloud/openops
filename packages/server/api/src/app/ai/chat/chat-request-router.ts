@@ -15,7 +15,6 @@ import {
   getLLMConfig,
 } from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
-import { createStreamMessage } from './stream-message-builder';
 import { handleUserMessage } from './user-message-handler';
 
 export type ChatRequestContext = {
