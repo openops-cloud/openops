@@ -84,6 +84,11 @@ export const ChatNameRequest = Type.Object({
 });
 export type ChatNameRequest = Static<typeof ChatNameRequest>;
 
+export const RenameChatRequest = Type.Object({
+  chatId: Type.String(),
+});
+export type RenameChatRequest = Static<typeof RenameChatRequest>;
+
 export const ChatsSummary = Type.Object({
   chatId: Type.String(),
   chatName: Type.String(),

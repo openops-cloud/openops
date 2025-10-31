@@ -3,12 +3,16 @@ import { AI_ASSISTANT_SS_KEY } from '@/app/constants/ai';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { useBuilderStoreOutsideProviderWithSubscription } from '@/app/features/builder/builder-state-provider';
-import { AssistantUiChatContainer } from '@openops/components/ui';
+import {
+  AssistantUiChatContainer,
+  AssistantUiHistory,
+} from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { ChatMode } from '../lib/types';
+import { useAssistantChatHistory } from '../lib/use-ai-assistant-chat-history';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -26,6 +30,7 @@ const AssistantUiChat = ({
   const toolComponents = useMemo(() => {
     return createFrontendTools();
   }, []);
+  const [showHistory, setShowHistory] = useState(false);
 
   const [chatId, setChatId] = useState<string | null>(
     sessionStorage.getItem(AI_ASSISTANT_SS_KEY),
@@ -66,6 +71,45 @@ const AssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector({ chatId, provider, model });
 
+  const {
+    chats,
+    isLoading: isHistoryLoading,
+    deleteChat,
+    renameChat,
+    refetch,
+  } = useAssistantChatHistory();
+
+  const onChatSelected = useCallback(
+    (id: string) => {
+      onChatIdChange(id);
+      setShowHistory(false);
+    },
+    [onChatIdChange],
+  );
+
+  const onChatDeleted = useCallback(
+    async (id: string) => {
+      await deleteChat(id);
+      if (chatId === id) {
+        onChatIdChange(null);
+      }
+    },
+    [chatId, deleteChat, onChatIdChange],
+  );
+
+  const onChatRenamed = useCallback(
+    async (id: string, newName: string) => {
+      await renameChat({ chatId: id, chatName: newName });
+    },
+    [renameChat],
+  );
+
+  const onNewChatClick = useCallback(async () => {
+    await createNewChat();
+    await refetch();
+    setShowHistory(false);
+  }, [createNewChat, refetch]);
+
   if (isLoading) {
     return (
       <div className="w-full flex h-full items-center justify-center bg-background">
@@ -77,21 +121,36 @@ const AssistantUiChat = ({
   }
 
   return (
-    <AssistantUiChatContainer
-      onClose={onClose}
-      runtime={runtime}
-      onNewChat={createNewChat}
-      title={title}
-      availableModels={availableModels}
-      onModelSelected={onModelSelected}
-      isModelSelectorLoading={isModelSelectorLoading}
-      selectedModel={selectedModel}
-      theme={theme}
-      handleInject={handleInject}
-      toolComponents={toolComponents}
-    >
-      {children}
-    </AssistantUiChatContainer>
+    <div className="w-full h-full flex">
+      <AssistantUiChatContainer
+        onClose={onClose}
+        runtime={runtime}
+        onNewChat={onNewChatClick}
+        title={title}
+        availableModels={availableModels}
+        onModelSelected={onModelSelected}
+        isModelSelectorLoading={isModelSelectorLoading}
+        selectedModel={selectedModel}
+        theme={theme}
+        handleInject={handleInject}
+        toolComponents={toolComponents}
+        onToggleHistory={() => setShowHistory(!showHistory)}
+        isHistoryOpen={showHistory}
+      >
+        {showHistory && (
+          <AssistantUiHistory
+            onNewChat={onNewChatClick}
+            newChatDisabled={isLoading || isHistoryLoading}
+            onChatSelected={onChatSelected}
+            onChatDeleted={onChatDeleted}
+            onChatRenamed={onChatRenamed}
+            chatItems={chats}
+            selectedItemId={chatId ?? undefined}
+          />
+        )}
+        {children}
+      </AssistantUiChatContainer>
+    </div>
   );
 };
 

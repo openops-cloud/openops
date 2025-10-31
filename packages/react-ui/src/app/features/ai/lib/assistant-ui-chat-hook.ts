@@ -7,16 +7,19 @@ import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
+import { aiAssistantChatHistoryApi } from './ai-assistant-chat-history-api';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
+
+export const MAX_MESSAGES_BEFORE_NAME_GENERATION = 3;
 
 export const useAssistantChat = ({
   chatId,
@@ -29,6 +32,8 @@ export const useAssistantChat = ({
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
+  const qc = useQueryClient();
+  const hasAttemptedNameGenerationRef = useRef<Record<string, boolean>>({});
 
   const [provider, setProvider] = useState<string | undefined>();
   const [model, setModel] = useState<string | undefined>();
@@ -212,6 +217,25 @@ export const useAssistantChat = ({
         duration: 10000,
       };
       toast(errorToast);
+    },
+    onFinish: async () => {
+      if (!chatId || hasAttemptedNameGenerationRef.current[chatId]) {
+        return;
+      }
+
+      if (messagesRef.current.length >= MAX_MESSAGES_BEFORE_NAME_GENERATION) {
+        setTimeout(async () => {
+          try {
+            hasAttemptedNameGenerationRef.current[chatId] = true;
+            await aiAssistantChatHistoryApi.generateName(chatId);
+            qc.invalidateQueries({ queryKey: ['assistant-history'] });
+          } catch (error) {
+            console.error('Failed to generate chat name', error);
+            hasAttemptedNameGenerationRef.current[chatId] = false;
+            qc.invalidateQueries({ queryKey: ['assistant-history'] });
+          }
+        }, 500);
+      }
     },
     // https://github.com/assistant-ui/assistant-ui/issues/2327
     // handle frontend tool calls manually until this is fixed
