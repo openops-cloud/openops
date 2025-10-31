@@ -14,7 +14,7 @@ type AssistantUiHistoryItemProps = {
 };
 
 const ICON_CLASS_NAME =
-  'text-primary cursor-pointer hover:bg-gray-300 rounded-xs';
+  'text-primary cursor-pointer hover:bg-gray-300 hover:text-outline rounded-xs';
 
 const AssistantUiHistoryItem = ({
   displayName,

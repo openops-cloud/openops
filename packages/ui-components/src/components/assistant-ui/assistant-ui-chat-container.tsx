@@ -29,6 +29,8 @@ const AssistantUiChatContainer = ({
   children,
   handleInject,
   toolComponents,
+  onToggleHistory,
+  isHistoryOpen,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -38,26 +40,38 @@ const AssistantUiChatContainer = ({
 
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      <AssistantTopBar onClose={onClose} onNewChat={onNewChat} title={title}>
-        {children}
+      <AssistantTopBar
+        onClose={onClose}
+        onNewChat={onNewChat}
+        title={title}
+        onToggleHistory={onToggleHistory}
+        isHistoryOpen={isHistoryOpen}
+      >
+        <></>
       </AssistantTopBar>
-      <AssistantRuntimeProvider runtime={runtime}>
-        {Object.entries(toolComponents || {}).map(([key, tool]) => (
-          <div key={key}>{tool}</div>
-        ))}
-        <ThreadExtraContextProvider
-          codeVariation={codeVariation}
-          handleInject={handleInject}
-        >
-          <Thread
-            availableModels={availableModels}
-            onModelSelected={onModelSelected}
-            selectedModel={selectedModel}
-            isModelSelectorLoading={isModelSelectorLoading}
-            theme={theme}
-          />
-        </ThreadExtraContextProvider>
-      </AssistantRuntimeProvider>
+      {isHistoryOpen ? (
+        <div className="flex-1 overflow-hidden bg-secondary">{children}</div>
+      ) : (
+        <AssistantRuntimeProvider runtime={runtime}>
+          {Object.entries(toolComponents || {}).map(([key, tool]) => (
+            <div key={key}>{tool}</div>
+          ))}
+          <ThreadExtraContextProvider
+            codeVariation={codeVariation}
+            handleInject={handleInject}
+          >
+            <div className="flex-1 overflow-hidden">
+              <Thread
+                availableModels={availableModels}
+                onModelSelected={onModelSelected}
+                selectedModel={selectedModel}
+                isModelSelectorLoading={isModelSelectorLoading}
+                theme={theme}
+              />
+            </div>
+          </ThreadExtraContextProvider>
+        </AssistantRuntimeProvider>
+      )}
     </div>
   );
 };

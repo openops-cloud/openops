@@ -1,4 +1,7 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
 import { observe, updateActiveObservation } from '@langfuse/tracing';
 import {
   getLangfuseSpanProcessor,
@@ -17,6 +20,7 @@ import {
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  RenameChatRequest,
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
@@ -25,7 +29,7 @@ import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
   createChatContext,
-  deleteChatHistory,
+  deleteChat,
   generateChatId,
   generateChatIdForMCP,
   generateChatName,
@@ -45,7 +49,7 @@ import { parseUserMessage } from './message-parser';
 import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
-const DEFAULT_CHAT_NAME = 'New Chat';
+export const DEFAULT_CHAT_NAME = 'New Chat';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -254,6 +258,20 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 
+  app.patch('/:chatId/name', RenameChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
+    const { chatName } = request.body;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      await updateChatName(chatId, userId, projectId, chatName);
+      return await reply.code(200).send({ chatName });
+    } catch (error) {
+      return handleError(error, reply, 'rename chat');
+    }
+  });
+
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
@@ -396,10 +414,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const projectId = request.principal.projectId;
 
     try {
-      await deleteChatHistory(chatId, userId, projectId);
+      await deleteChat(chatId, userId, projectId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
-      return handleError(error, reply, 'delete chat history');
+      return handleError(error, reply, 'delete chat');
     }
   });
 };
@@ -436,6 +454,20 @@ const ChatNameOptions = {
     tags: ['ai', 'ai-chat-mcp'],
     description: 'Generate a chat name using LLM based on chat history.',
     body: ChatNameRequest,
+  },
+};
+
+const RenameChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Rename a chat session with a user provided name.',
+    params: RenameChatRequest,
+    body: Type.Object({
+      chatName: Type.String(),
+    }),
   },
 };
 
