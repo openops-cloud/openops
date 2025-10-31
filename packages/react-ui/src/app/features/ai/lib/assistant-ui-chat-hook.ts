@@ -292,7 +292,11 @@ export const useAssistantChat = ({
 
       if (oldChatId) {
         const context = getBuilderState();
-        if (context?.selectedStep && context?.flowVersion) {
+        if (
+          context?.selectedStep &&
+          context?.flowVersion &&
+          chatMode === ChatMode.StepSettings
+        ) {
           await aiChatApi.delete(oldChatId);
           chat.setMessages([]);
         } else {
