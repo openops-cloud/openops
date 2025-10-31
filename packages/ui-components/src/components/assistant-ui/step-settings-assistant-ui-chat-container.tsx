@@ -6,9 +6,13 @@ import { ExpandIcon, MinimizeIcon } from 'lucide-react';
 import { useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
-import { AssistantUiChatContainer } from '../assistant-ui/assistant-ui-chat-container';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  AiCliChatContainerSizeState,
+} from '../ai-chat-container/types';
 import { TooltipWrapper } from '../tooltip-wrapper';
-import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
+import { AssistantUiChatContainer } from './assistant-ui-chat-container';
+import { ConnectionStatusProps } from './types';
 
 const COLLAPSED_HEIGHT = 57;
 const DOCKED_HEIGHT = 450;
@@ -34,9 +38,7 @@ type StepSettingsAssistantUiChatContainerProps = {
   theme: Theme;
   handleInject: (code: string | SourceCode) => void;
   showFullWidth: boolean;
-  isShowingSlowWarning?: boolean;
-  connectionError?: string | null;
-};
+} & ConnectionStatusProps;
 
 const StepSettingsAssistantUiChatContainer = ({
   parentHeight,

@@ -8,14 +8,14 @@ import { MarkdownCodeVariations } from '../custom';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
 import { Thread, ThreadProps } from './thread';
 import { ThreadExtraContextProvider } from './thread-extra-context';
+import { ConnectionStatusProps } from './types';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   toolComponents?: Record<string, ReactNode>;
   handleInject?: (codeContent: string | SourceCode) => void;
-  isShowingSlowWarning?: boolean;
-  connectionError?: string | null;
-} & AssistantTopBarProps &
+} & ConnectionStatusProps &
+  AssistantTopBarProps &
   ThreadProps;
 
 const AssistantUiChatContainer = ({

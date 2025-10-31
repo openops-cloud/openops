@@ -25,6 +25,7 @@ import { MarkdownText } from '../markdown-text';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
+import { ConnectionStatusProps } from '../types';
 import { ConnectionError } from './connection-error';
 import { ConnectionSlowWarning } from './connection-slow-warning';
 import { ReasoningPart } from './reasoning-part';
@@ -50,9 +51,8 @@ AssistantMessageWrapper.displayName = 'AssistantMessageWrapper';
 
 export type ThreadProps = {
   theme: Theme;
-  isShowingSlowWarning?: boolean;
-  connectionError?: string | null;
-} & ComposerProps;
+} & ConnectionStatusProps &
+  ComposerProps;
 
 export const Thread = ({
   theme,
