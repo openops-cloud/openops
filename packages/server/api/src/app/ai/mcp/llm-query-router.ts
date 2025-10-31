@@ -13,6 +13,7 @@ export type ToolsAndQueryResult = {
   tools?: ToolSet;
   queryClassification: QueryClassification[];
   reasoning?: string;
+  selectedToolNames: string[];
 };
 
 const queryClassificationDescriptions: Record<QueryClassification, string> = {
@@ -63,6 +64,7 @@ export async function routeQuery({
   aiConfig,
   uiContext,
   abortSignal,
+  previousToolNames = [],
 }: {
   messages: ModelMessage[];
   tools: ToolSet;
@@ -70,12 +72,14 @@ export async function routeQuery({
   aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
+  previousToolNames?: string[];
 }): Promise<ToolsAndQueryResult> {
   if (!tools || Object.keys(tools).length === 0) {
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
+      selectedToolNames: previousToolNames,
     };
   }
 
@@ -101,20 +105,34 @@ export async function routeQuery({
     let selectedToolNames = selectionResult.tool_names;
     const queryClassification = selectionResult.query_classification;
 
+    logger.info('[QUERY ROUTER] LLM selected tools', { selectedToolNames });
+    logger.info('[QUERY ROUTER] Previous tools', { previousToolNames });
+
     const validToolNames = Object.keys(tools);
     const invalidToolNames = selectedToolNames.filter(
       (name) => !validToolNames.includes(name),
     );
 
     if (invalidToolNames.length > 0) {
+      logger.info('[QUERY ROUTER] Invalid tools removed', { invalidToolNames });
       selectedToolNames = selectedToolNames.filter((name) =>
         validToolNames.includes(name),
       );
     }
 
+    // Merge with previous tools (append-only approach)
+    // This ensures tools are never removed once added to prevent LLM hallucinations
+    const mergedToolNames = Array.from(
+      new Set([...previousToolNames, ...selectedToolNames]),
+    ).filter((name) => validToolNames.includes(name));
+
+    logger.info('[QUERY ROUTER] Merged tools (append-only)', {
+      mergedToolNames,
+    });
+
     const selectedTools = Object.fromEntries(
       Object.entries(tools)
-        .filter(([name]) => selectedToolNames.includes(name))
+        .filter(([name]) => mergedToolNames.includes(name))
         .slice(0, MAX_SELECTED_TOOLS),
     );
 
@@ -122,6 +140,7 @@ export async function routeQuery({
       queryClassification,
       tools: selectedTools,
       reasoning: selectionResult.user_facing_reasoning,
+      selectedToolNames: mergedToolNames,
     };
   } catch (error) {
     const isAbortError = error instanceof Error && error.name === 'AbortError';
@@ -132,6 +151,7 @@ export async function routeQuery({
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
+      selectedToolNames: previousToolNames,
     };
   }
 }

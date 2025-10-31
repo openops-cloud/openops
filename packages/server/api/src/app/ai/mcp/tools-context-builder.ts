@@ -1,8 +1,13 @@
 import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
+import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { MCPChatContext } from '../chat/ai-chat.service';
+import {
+  getChatTools,
+  MCPChatContext,
+  saveChatTools,
+} from '../chat/ai-chat.service';
 import { generateMessageId } from '../chat/ai-id-generators';
 import {
   getBlockSystemPrompt,
@@ -67,10 +72,22 @@ export async function getMCPToolsContext({
       projectId,
     );
 
+    // Fetch previous tool names from Redis (append-only approach)
+    const previousToolNames =
+      userId && chatId ? await getChatTools(chatId, userId, projectId) : [];
+
+    logger.info('[TOOL DEBUG] Previous tools from Redis', {
+      previousToolNames,
+    });
+    logger.info('[TOOL DEBUG] All available tools', {
+      allTools: Object.keys(tools),
+    });
+
     const {
       tools: filteredTools,
       queryClassification,
       reasoning,
+      selectedToolNames,
     } = await routeQuery({
       messages,
       tools,
@@ -78,6 +95,14 @@ export async function getMCPToolsContext({
       aiConfig,
       uiContext: additionalContext,
       abortSignal,
+      previousToolNames,
+    });
+
+    logger.info('[TOOL DEBUG] Selected tools after merge', {
+      selectedToolNames,
+    });
+    logger.info('[TOOL DEBUG] Filtered tools keys', {
+      filteredToolsKeys: Object.keys(filteredTools ?? {}),
     });
 
     if (reasoning && stream) {
@@ -92,16 +117,47 @@ export async function getMCPToolsContext({
       uiContext: additionalContext,
     });
 
-    const openOpsTools =
+    // Apply append-only logic for OpenOps tools as well
+    const allOpenOpsTools =
       hasToolProvider(tools, 'openops') &&
       queryClassification.includes(QueryClassification.openops)
         ? collectToolsByProvider(tools, 'openops')
         : {};
 
+    // Only include OpenOps tools that are either:
+    // 1. In the filtered tools from the query router (selectedToolNames)
+    // 2. Were in the previous tools list (previousToolNames)
+    const openOpsToolNames = Object.keys(allOpenOpsTools);
+    const allowedOpenOpsToolNames = openOpsToolNames.filter(
+      (toolName) =>
+        selectedToolNames.includes(toolName) ||
+        previousToolNames.includes(toolName),
+    );
+
+    const openOpsTools = Object.fromEntries(
+      Object.entries(allOpenOpsTools).filter(([name]) =>
+        allowedOpenOpsToolNames.includes(name),
+      ),
+    );
+
     const combinedTools = {
       ...filteredTools,
       ...openOpsTools,
     };
+
+    // Get the final tool names including filtered openOpsTools for append-only tracking
+    const finalToolNames = Object.keys(combinedTools);
+
+    logger.info('[TOOL DEBUG] Combined tools after adding openOpsTools', {
+      totalOpenOpsTools: openOpsToolNames.length,
+      allowedOpenOpsToolNames,
+      finalToolNames,
+    });
+
+    // Save the combined tool names (including openOpsTools) back to Redis
+    if (userId && chatId) {
+      await saveChatTools(chatId, userId, projectId, finalToolNames);
+    }
 
     const finalTools =
       userId && chatId && stream
