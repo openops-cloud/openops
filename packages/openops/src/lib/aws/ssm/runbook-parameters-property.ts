@@ -66,7 +66,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
               displayName: key,
               required: false,
               description: p?.Description,
-              defaultValue: Number.isFinite(n) ? (n as number) : undefined,
+              defaultValue: Number.isFinite(n) ? n : undefined,
             });
             break;
           }

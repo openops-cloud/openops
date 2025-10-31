@@ -29,7 +29,7 @@ export const getSsmDocuments = async ({
   ];
 
   if (owner && owner !== 'All') {
-    filters.push({ Key: 'Owner', Values: [owner as string] });
+    filters.push({ Key: 'Owner', Values: [owner] });
   }
 
   const command = new ListDocumentsCommand({
