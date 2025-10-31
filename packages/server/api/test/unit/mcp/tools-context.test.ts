@@ -19,6 +19,13 @@ jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
   getBlockSystemPrompt: getBlockSystemPromptMock,
 }));
 
+const getChatToolsMock = jest.fn();
+const saveChatToolsMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
+  getChatTools: getChatToolsMock,
+  saveChatTools: saveChatToolsMock,
+}));
+
 import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builder';
 
 describe('getMCPToolsContext', () => {
@@ -61,7 +68,7 @@ describe('getMCPToolsContext', () => {
       queryClassification: ['general'],
     });
 
-    const result = await getMCPToolsContext({
+    await getMCPToolsContext({
       app: mockApp,
       projectId: 'projectId',
       authToken: 'authToken',
@@ -74,7 +81,7 @@ describe('getMCPToolsContext', () => {
 
     expect(getMcpSystemPromptMock).toHaveBeenCalledWith({
       queryClassification: ['general'],
-      selectedTools: undefined,
+      selectedTools: {},
       allTools: {},
       uiContext: undefined,
     });
@@ -165,5 +172,178 @@ describe('getMCPToolsContext', () => {
         }),
       );
     });
+  });
+
+  describe('Append-only tool tracking', () => {
+    const mockTools: ToolSet = {
+      tool1: { description: 'Tool 1' },
+      tool2: { description: 'Tool 2' },
+      tool3: { description: 'Tool 3' },
+    };
+
+    beforeEach(() => {
+      startMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+      getMcpSystemPromptMock.mockResolvedValue('System prompt');
+      getChatToolsMock.mockResolvedValue([]);
+      saveChatToolsMock.mockResolvedValue(undefined);
+    });
+
+    it.each([
+      {
+        description:
+          'should save new tools to Redis when userId and chatId are provided',
+        previousTools: [],
+        filteredTools: { tool1: mockTools.tool1 },
+        expectedSavedTools: ['tool1'],
+      },
+      {
+        description: 'should merge previous tools with new tools (append-only)',
+        previousTools: ['tool1'],
+        filteredTools: { tool2: mockTools.tool2 },
+        expectedSavedTools: expect.arrayContaining(['tool1', 'tool2']),
+      },
+      {
+        description: 'should deduplicate tools in the final list',
+        previousTools: ['tool1', 'tool2'],
+        filteredTools: {
+          tool1: mockTools.tool1,
+          tool2: mockTools.tool2,
+          tool3: mockTools.tool3,
+        },
+        expectedSavedTools: expect.arrayContaining(['tool1', 'tool2', 'tool3']),
+      },
+    ])(
+      '$description',
+      async ({ previousTools, filteredTools, expectedSavedTools }) => {
+        getChatToolsMock.mockResolvedValue(previousTools);
+        routeQueryMock.mockResolvedValue({
+          tools: filteredTools,
+          queryClassification: ['general'],
+        });
+
+        await getMCPToolsContext({
+          app: mockApp,
+          projectId: 'test-project',
+          authToken: 'authToken',
+          aiConfig: mockAiConfig,
+          messages: mockMessages,
+          chatContext: {},
+          languageModel: mockLanguageModel,
+          frontendTools: {},
+          userId: 'test-user',
+          chatId: 'test-chat',
+        });
+
+        expect(getChatToolsMock).toHaveBeenCalledWith(
+          'test-chat',
+          'test-user',
+          'test-project',
+        );
+        expect(saveChatToolsMock).toHaveBeenCalledWith(
+          'test-chat',
+          'test-user',
+          'test-project',
+          expectedSavedTools,
+        );
+      },
+    );
+
+    it('should pass previousToolNames to routeQuery', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'tool2']);
+      routeQueryMock.mockResolvedValue({
+        tools: { tool3: mockTools.tool3 },
+        queryClassification: ['general'],
+      });
+
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'test-project',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: {},
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+        userId: 'test-user',
+        chatId: 'test-chat',
+      });
+
+      expect(routeQueryMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          previousToolNames: ['tool1', 'tool2'],
+        }),
+      );
+    });
+
+    it('should filter out tools that are no longer available', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'nonexistent-tool']);
+      routeQueryMock.mockResolvedValue({
+        tools: { tool2: mockTools.tool2 },
+        queryClassification: ['general'],
+      });
+
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'test-project',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: {},
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+        userId: 'test-user',
+        chatId: 'test-chat',
+      });
+
+      const savedTools = saveChatToolsMock.mock.calls[0][3];
+      expect(savedTools).toContain('tool1');
+      expect(savedTools).toContain('tool2');
+      expect(savedTools).not.toContain('nonexistent-tool');
+    });
+
+    it.each([
+      {
+        description: 'missing userId',
+        userId: undefined,
+        chatId: 'test-chat',
+      },
+      {
+        description: 'missing chatId',
+        userId: 'test-user',
+        chatId: undefined,
+      },
+      {
+        description: 'missing both userId and chatId',
+        userId: undefined,
+        chatId: undefined,
+      },
+    ])(
+      'should not call Redis functions when $description',
+      async ({ userId, chatId }) => {
+        routeQueryMock.mockResolvedValue({
+          tools: { tool1: mockTools.tool1 },
+          queryClassification: ['general'],
+        });
+
+        await getMCPToolsContext({
+          app: mockApp,
+          projectId: 'test-project',
+          authToken: 'authToken',
+          aiConfig: mockAiConfig,
+          messages: mockMessages,
+          chatContext: {},
+          languageModel: mockLanguageModel,
+          frontendTools: {},
+          userId,
+          chatId,
+        });
+
+        expect(getChatToolsMock).not.toHaveBeenCalled();
+        expect(saveChatToolsMock).not.toHaveBeenCalled();
+      },
+    );
   });
 });

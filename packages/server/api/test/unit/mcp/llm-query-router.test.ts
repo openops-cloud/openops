@@ -68,6 +68,8 @@ describe('selectToolsAndQuery', () => {
       expect(result).toEqual({
         tools: undefined,
         queryClassification: ['general'],
+        reasoning: undefined,
+        selectedToolNames: [],
       });
       expect(generateObject).not.toHaveBeenCalled();
     });
@@ -84,6 +86,7 @@ describe('selectToolsAndQuery', () => {
         object: {
           tool_names: ['tool1', 'tool2'],
           query_classification: ['general'],
+          user_facing_reasoning: 'test reasoning',
         },
       });
 
@@ -97,6 +100,8 @@ describe('selectToolsAndQuery', () => {
       expect(result).toEqual({
         tools: mockTools,
         queryClassification: ['general'],
+        reasoning: 'test reasoning',
+        selectedToolNames: ['tool1', 'tool2'],
       });
       expect(generateObject).toHaveBeenCalled();
     });
@@ -127,7 +132,12 @@ describe('selectToolsAndQuery', () => {
         aiConfig: mockAiConfig,
       });
 
-      expect(result).toEqual({ tools: {}, queryClassification: ['general'] });
+      expect(result).toEqual({
+        tools: {},
+        queryClassification: ['general'],
+        reasoning: undefined,
+        selectedToolNames: [],
+      });
       expect(generateObject).toHaveBeenCalled();
     });
 
@@ -145,6 +155,7 @@ describe('selectToolsAndQuery', () => {
         object: {
           tool_names: ['tool1', 'nonexistent_tool'],
           query_classification: ['general'],
+          user_facing_reasoning: 'test reasoning',
         },
       });
 
@@ -162,6 +173,8 @@ describe('selectToolsAndQuery', () => {
           },
         },
         queryClassification: ['general'],
+        reasoning: 'test reasoning',
+        selectedToolNames: ['tool1'],
       });
     });
 
@@ -179,6 +192,7 @@ describe('selectToolsAndQuery', () => {
         object: {
           tool_names: ['invalid1', 'invalid2'],
           query_classification: ['general'],
+          user_facing_reasoning: 'test reasoning',
         },
       });
 
@@ -189,7 +203,12 @@ describe('selectToolsAndQuery', () => {
         aiConfig: mockAiConfig,
       });
 
-      expect(result).toEqual({ tools: {}, queryClassification: ['general'] });
+      expect(result).toEqual({
+        tools: {},
+        queryClassification: ['general'],
+        reasoning: 'test reasoning',
+        selectedToolNames: [],
+      });
     });
 
     it('should properly handle a mix of valid and invalid tool names', async () => {
@@ -209,6 +228,7 @@ describe('selectToolsAndQuery', () => {
         object: {
           tool_names: ['tool1', 'invalid_tool', 'tool3'],
           query_classification: ['general'],
+          user_facing_reasoning: 'test reasoning',
         },
       });
 
@@ -229,6 +249,8 @@ describe('selectToolsAndQuery', () => {
           },
         },
         queryClassification: ['general'],
+        reasoning: 'test reasoning',
+        selectedToolNames: ['tool1', 'tool3'],
       });
     });
 
@@ -255,6 +277,8 @@ describe('selectToolsAndQuery', () => {
       expect(result).toEqual({
         tools: undefined,
         queryClassification: ['general'],
+        reasoning: undefined,
+        selectedToolNames: [],
       });
       expect(logger.error).toHaveBeenCalledWith(
         'Error selecting tools and query classification',
@@ -311,6 +335,7 @@ describe('selectToolsAndQuery', () => {
         object: {
           tool_names: ['tool1'],
           query_classification: ['general'],
+          user_facing_reasoning: 'test reasoning',
         },
       });
 
@@ -324,6 +349,8 @@ describe('selectToolsAndQuery', () => {
       expect(result).toEqual({
         tools: mockTools,
         queryClassification: ['general'],
+        reasoning: 'test reasoning',
+        selectedToolNames: ['tool1'],
       });
       expect(generateObject).toHaveBeenCalledWith(
         expect.objectContaining({
