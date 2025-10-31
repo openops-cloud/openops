@@ -83,19 +83,16 @@ const wrapResponseForSSETracking = (response: Response): Response => {
   const reader = response.body.getReader();
   const stream = new ReadableStream({
     async start(controller) {
-      let isReading = true;
-
       try {
-        while (isReading) {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
           const { done, value } = await reader.read();
 
           if (done) {
             controller.close();
-            isReading = false;
             break;
           }
 
-          // Track any SSE activity (including heartbeats)
           if (sseActivityCallback) {
             sseActivityCallback();
           }
