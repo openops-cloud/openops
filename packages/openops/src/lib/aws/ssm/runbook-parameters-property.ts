@@ -21,6 +21,9 @@ function safeParseDefault(raw?: string): unknown {
       'Failed to parse AWS Document default input value, error is ',
       error,
     );
+    if (typeof raw === 'string') {
+      return raw;
+    }
     return undefined;
   }
 }
@@ -89,7 +92,7 @@ function createPropertyForParam(p: any, type: string, defaultValue: unknown) {
     default:
       return Property.ShortText({
         ...base,
-        defaultValue: defaultValue ? JSON.stringify(defaultValue) : undefined,
+        defaultValue: (defaultValue as string) ?? undefined,
       });
   }
 }
