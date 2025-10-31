@@ -1,5 +1,4 @@
 import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
-import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
@@ -76,13 +75,6 @@ export async function getMCPToolsContext({
     const previousToolNames =
       userId && chatId ? await getChatTools(chatId, userId, projectId) : [];
 
-    logger.info('[TOOL DEBUG] Previous tools from Redis', {
-      previousToolNames,
-    });
-    logger.info('[TOOL DEBUG] All available tools', {
-      allTools: Object.keys(tools),
-    });
-
     const {
       tools: filteredTools,
       queryClassification,
@@ -96,13 +88,6 @@ export async function getMCPToolsContext({
       uiContext: additionalContext,
       abortSignal,
       previousToolNames,
-    });
-
-    logger.info('[TOOL DEBUG] Selected tools after merge', {
-      selectedToolNames,
-    });
-    logger.info('[TOOL DEBUG] Filtered tools keys', {
-      filteredToolsKeys: Object.keys(filteredTools ?? {}),
     });
 
     if (reasoning && stream) {
@@ -147,12 +132,6 @@ export async function getMCPToolsContext({
 
     // Get the final tool names including filtered openOpsTools for append-only tracking
     const finalToolNames = Object.keys(combinedTools);
-
-    logger.info('[TOOL DEBUG] Combined tools after adding openOpsTools', {
-      totalOpenOpsTools: openOpsToolNames.length,
-      allowedOpenOpsToolNames,
-      finalToolNames,
-    });
 
     // Save the combined tool names (including openOpsTools) back to Redis
     if (userId && chatId) {

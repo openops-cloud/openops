@@ -105,16 +105,12 @@ export async function routeQuery({
     let selectedToolNames = selectionResult.tool_names;
     const queryClassification = selectionResult.query_classification;
 
-    logger.info('[QUERY ROUTER] LLM selected tools', { selectedToolNames });
-    logger.info('[QUERY ROUTER] Previous tools', { previousToolNames });
-
     const validToolNames = Object.keys(tools);
     const invalidToolNames = selectedToolNames.filter(
       (name) => !validToolNames.includes(name),
     );
 
     if (invalidToolNames.length > 0) {
-      logger.info('[QUERY ROUTER] Invalid tools removed', { invalidToolNames });
       selectedToolNames = selectedToolNames.filter((name) =>
         validToolNames.includes(name),
       );
@@ -125,10 +121,6 @@ export async function routeQuery({
     const mergedToolNames = Array.from(
       new Set([...previousToolNames, ...selectedToolNames]),
     ).filter((name) => validToolNames.includes(name));
-
-    logger.info('[QUERY ROUTER] Merged tools (append-only)', {
-      mergedToolNames,
-    });
 
     const selectedTools = Object.fromEntries(
       Object.entries(tools)

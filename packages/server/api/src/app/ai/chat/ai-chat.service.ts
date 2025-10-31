@@ -239,12 +239,6 @@ export const saveChatTools = async (
   projectId: string,
   toolNames: string[],
 ): Promise<void> => {
-  // eslint-disable-next-line no-console
-  console.log('[REDIS] Saving tools to Redis:', {
-    chatId,
-    toolCount: toolNames.length,
-    tools: toolNames,
-  });
   const chatExpireTime = system.getNumberOrThrow(
     AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
   );
@@ -267,12 +261,6 @@ export const getChatTools = async (
   const toolNames = await cacheWrapper.getSerializedObject<string[]>(
     chatToolsKey(chatId, userId, projectId),
   );
-  // eslint-disable-next-line no-console
-  console.log('[REDIS] Retrieved tools from Redis:', {
-    chatId,
-    toolCount: toolNames?.length ?? 0,
-    tools: toolNames ?? [],
-  });
   return toolNames ?? [];
 };
 

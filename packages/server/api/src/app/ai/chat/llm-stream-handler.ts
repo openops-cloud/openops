@@ -13,7 +13,6 @@ import {
   TextStreamPart,
   ToolSet,
 } from 'ai';
-import fs from 'fs';
 import { sanitizeMessages } from '../mcp/tool-utils';
 import { createVoidTool } from '../mcp/void-tool';
 import {
@@ -64,30 +63,6 @@ export function getLLMAsyncStream(
   const availableTools = Object.keys(tools ?? {});
   const availableToolsString =
     availableTools.length > 0 ? `"${availableTools.join(', ')}"` : 'none';
-
-  fs.writeFileSync(
-    'prompt.txt',
-    systemPrompt +
-      '\n\n' +
-      'IMPORTANT: Only use the tools that are provided to you. Do not make up or suggest tools that are not provided to you, even if you see they were previously available in the history. ' +
-      'The **only available** tools are: ' +
-      availableToolsString,
-  );
-
-  // write the tools to a json file with timestamp
-  const timestamp = new Date().toISOString();
-  fs.writeFileSync(
-    `tools_${timestamp}.json`,
-    JSON.stringify(
-      {
-        timestamp,
-        toolsCount: Object.keys(tools ?? {}).length,
-        tools: Object.keys(tools ?? {}),
-      },
-      null,
-      2,
-    ),
-  );
 
   const cachedTools = addCacheControlToTools(tools);
   const toolsProxy =
