@@ -89,7 +89,7 @@ function createPropertyForParam(p: any, type: string, defaultValue: unknown) {
     default:
       return Property.ShortText({
         ...base,
-        defaultValue: defaultValue ? String(defaultValue) : undefined,
+        defaultValue: defaultValue ? JSON.stringify(defaultValue) : undefined,
       });
   }
 }
