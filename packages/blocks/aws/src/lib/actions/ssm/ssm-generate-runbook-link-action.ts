@@ -69,7 +69,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
       let encodedValue: string | undefined;
       if (Array.isArray(value)) {
         const joined = value
-          .map((v) => (v === undefined || v === null ? '' : String(v)))
+          .map((v) => (v === undefined || v === null ? '' : JSON.stringify(v)))
           .filter((s) => s.length > 0)
           .join(', ');
         if (joined.length) {
@@ -79,7 +79,6 @@ export const ssmGenerateRunbookLinkAction = createAction({
         try {
           encodedValue = encodeURIComponent(JSON.stringify(value));
         } catch {
-          // Fallback to string coercion
           encodedValue = encodeURIComponent(String(value));
         }
       } else if (
@@ -87,10 +86,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
         typeof value === 'number' ||
         typeof value === 'string'
       ) {
-        const s = String(value);
-        if (s.length) {
-          encodedValue = encodeURIComponent(s);
-        }
+        encodedValue = encodeURIComponent(value);
       }
 
       if (encodedValue) {
