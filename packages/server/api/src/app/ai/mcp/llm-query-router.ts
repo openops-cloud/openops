@@ -211,6 +211,8 @@ const repairText = (text: string): string | null => {
       query_classification:
         findFirstKeyInObject(parsedText, 'query_classification') || [],
       reasoning: findFirstKeyInObject(parsedText, 'reasoning') || '',
+      user_facing_reasoning:
+        findFirstKeyInObject(parsedText, 'user_facing_reasoning') || '',
     });
   } catch (error) {
     return null;
