@@ -141,7 +141,7 @@ function startSSEHeartbeat(
   const heartbeat = setInterval(() => {
     if (isResponseOpen(res)) {
       try {
-        res.write(createStreamMessage({ type: 'data-heartbeat' }));
+        res.write(`: heartbeat\n\n`);
       } catch {
         clearInterval(heartbeat);
       }
