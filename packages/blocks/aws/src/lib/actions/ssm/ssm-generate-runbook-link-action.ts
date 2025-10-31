@@ -1,24 +1,10 @@
-import {
-  DescribeDocumentCommand,
-  DescribeDocumentCommandOutput,
-  DescribeDocumentRequest,
-  DocumentIdentifier,
-  DocumentVersionInfo,
-  SSMClient,
-} from '@aws-sdk/client-ssm';
-import {
-  BlockPropValueSchema,
-  createAction,
-  Property,
-} from '@openops/blocks-framework';
+import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
-  getAwsClient,
-  getCredentialsForAccount,
-  getSsmDocuments,
-  getSsmDocumentVersions,
+  runbookNameProperty,
+  runbookParametersProperty,
+  runbookVersionProperty,
 } from '@openops/common';
-import { logger } from '@openops/server-shared';
 import { RiskLevel } from '@openops/shared';
 
 export const ssmGenerateRunbookLinkAction = createAction({
@@ -51,231 +37,9 @@ export const ssmGenerateRunbookLinkAction = createAction({
       },
       defaultValue: 'Private',
     }),
-    runbook: Property.Dropdown({
-      displayName: 'Runbook',
-      description: 'Select an SSM Automation document (runbook).',
-      required: true,
-      refreshers: ['auth', 'owner', 'region'],
-      options: async ({ auth, owner, region }) => {
-        const awsAuth = auth as BlockPropValueSchema<typeof amazonAuth>;
-        if (!awsAuth) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Please authenticate first',
-          };
-        }
-
-        const awsRegion = (region || awsAuth.defaultRegion) as string;
-        if (!awsRegion) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Please provide a region',
-          };
-        }
-
-        try {
-          const docs = await getSsmDocuments({
-            auth: awsAuth,
-            region: awsRegion,
-            owner: owner as string,
-          });
-
-          return {
-            disabled: false,
-            options: docs.map((d: DocumentIdentifier) => ({
-              label: d.Name || d.DocumentVersion || 'Unknown',
-              value: d.Name,
-            })),
-          };
-        } catch (error) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Failed to load runbooks',
-            error: String(error),
-          };
-        }
-      },
-    }),
-    version: Property.Dropdown({
-      displayName: 'Runbook version',
-      description:
-        'Optional specific document version to execute (omit to use default).',
-      required: false,
-      refreshers: ['auth', 'region', 'runbook'],
-      options: async ({ auth, region, runbook }) => {
-        const awsAuth = auth as BlockPropValueSchema<typeof amazonAuth>;
-        const runbookName = runbook as string;
-        const awsRegion = (region || awsAuth.defaultRegion) as string;
-
-        if (!awsAuth || !runbookName || !awsRegion) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Select runbook first',
-          };
-        }
-
-        try {
-          const versions: DocumentVersionInfo[] = await getSsmDocumentVersions({
-            auth: awsAuth,
-            region: awsRegion,
-            runbookName,
-          });
-
-          const opts = versions.map((v) => {
-            const ver = v.DocumentVersion || '';
-            const name = v.VersionName ? ` - ${v.VersionName}` : '';
-            const def = v.IsDefaultVersion ? ' (default)' : '';
-            return { label: `${ver}${name}${def}`, value: ver };
-          });
-
-          return {
-            disabled: false,
-            options: opts,
-            placeholder: 'Select version',
-          };
-        } catch (error) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Failed to load versions',
-            error: String(error),
-          };
-        }
-      },
-    }),
-    parameters: Property.DynamicProperties({
-      displayName: 'Parameters',
-      required: true,
-      refreshers: ['auth', 'owner', 'region', 'runbook', 'version'],
-      props: async ({ auth, region, runbook, version }) => {
-        const result: Record<string, any> = {};
-
-        const awsAuth = auth as BlockPropValueSchema<typeof amazonAuth>;
-        const runbookName = runbook as unknown as string;
-        const awsRegion = (region ||
-          awsAuth.defaultRegion) as unknown as string;
-
-        if (!awsAuth || !runbookName || !awsRegion) {
-          return result;
-        }
-
-        try {
-          const credentials = await getCredentialsForAccount(awsAuth);
-          const client = getAwsClient(SSMClient, credentials, awsRegion);
-
-          const filters: DescribeDocumentRequest = { Name: runbookName };
-
-          if (version) {
-            filters.DocumentVersion = version as unknown as string;
-          }
-
-          const doc = (await client.send(
-            new DescribeDocumentCommand(filters),
-          )) as DescribeDocumentCommandOutput;
-
-          const parameters = doc.Document?.Parameters || [];
-
-          for (const p of parameters) {
-            const key = p.Name;
-            if (!key) continue;
-
-            const type = String(p?.Type || '');
-            let defaultValue: unknown;
-
-            try {
-              if (p?.DefaultValue) {
-                defaultValue = JSON.parse(p.DefaultValue);
-              }
-            } catch (error) {
-              logger.warn(
-                'Failed to parse AWS Document default input value, error is ',
-                error,
-              );
-            }
-
-            if (/^List<[^>]+>$/.test(type) || type === 'StringList') {
-              result[key] = Property.Array({
-                displayName: key,
-                required: false,
-                description: p?.Description,
-                defaultValue: Array.isArray(defaultValue)
-                  ? defaultValue
-                  : undefined,
-              });
-              continue;
-            }
-
-            switch (type) {
-              case 'Integer': {
-                const n =
-                  typeof defaultValue === 'number'
-                    ? defaultValue
-                    : Number(defaultValue);
-                result[key] = Property.Number({
-                  displayName: key,
-                  required: false,
-                  description: p?.Description,
-                  defaultValue: Number.isFinite(n) ? (n as number) : undefined,
-                });
-                break;
-              }
-              case 'Boolean': {
-                const b =
-                  typeof defaultValue === 'boolean'
-                    ? defaultValue
-                    : String(defaultValue).toLowerCase() === 'true';
-                result[key] = Property.Checkbox({
-                  displayName: key,
-                  required: false,
-                  description: p?.Description,
-                  defaultValue: typeof b === 'boolean' ? b : undefined,
-                });
-                break;
-              }
-              case 'StringMap': {
-                result[key] = Property.Object({
-                  displayName: key,
-                  required: false,
-                  description: p?.Description,
-                  defaultValue:
-                    defaultValue &&
-                    typeof defaultValue === 'object' &&
-                    !Array.isArray(defaultValue)
-                      ? defaultValue
-                      : undefined,
-                });
-                break;
-              }
-              case 'MapList': {
-                result[key] = Property.Json({
-                  displayName: key,
-                  required: false,
-                  description: p?.Description,
-                  defaultValue: defaultValue ?? [],
-                });
-                break;
-              }
-              default: {
-                result[key] = Property.ShortText({
-                  displayName: key,
-                  required: false,
-                  description: p?.Description,
-                  defaultValue: defaultValue ? String(defaultValue) : undefined,
-                });
-              }
-            }
-          }
-        } catch (e) {
-          logger.warn(e);
-        }
-
-        return result;
-      },
-    }),
+    runbook: runbookNameProperty,
+    version: runbookVersionProperty,
+    parameters: runbookParametersProperty,
   },
   async run({ propsValue, auth }) {
     const awsRegion = (propsValue.region ||
@@ -286,7 +50,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
       throw new Error('Runbook is required');
     }
 
-    const version = propsValue.version ? String(propsValue.version) : undefined;
+    const version = propsValue.version ?? undefined;
 
     const base = `https://${awsRegion}.console.aws.amazon.com/systems-manager/automation/execute/${encodeURIComponent(
       runbook,
