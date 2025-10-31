@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ConnectionSlowWarning } from './connection-slow-warning';
+import { ThemeAwareDecorator } from '../../../.storybook/decorators';
+import { ConnectionSlowWarning } from '../../components/assistant-ui/thread/connection-slow-warning';
 
 const meta: Meta<typeof ConnectionSlowWarning> = {
   title: 'Assistant UI/Thread/ConnectionSlowWarning',
@@ -8,6 +9,7 @@ const meta: Meta<typeof ConnectionSlowWarning> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  decorators: [ThemeAwareDecorator],
 };
 
 export default meta;

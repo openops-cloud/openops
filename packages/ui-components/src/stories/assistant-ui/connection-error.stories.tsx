@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ConnectionError } from './connection-error';
+import { ThemeAwareDecorator } from '../../../.storybook/decorators';
+import { ConnectionError } from '../../components/assistant-ui/thread/connection-error';
 
 const meta: Meta<typeof ConnectionError> = {
   title: 'Assistant UI/Thread/ConnectionError',
@@ -8,6 +9,7 @@ const meta: Meta<typeof ConnectionError> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  decorators: [ThemeAwareDecorator],
 };
 
 export default meta;
