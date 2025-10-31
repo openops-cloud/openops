@@ -36,8 +36,16 @@ const StepSettingsAssistantUiChat = ({
     state.applyMidpanelAction,
   ]);
 
-  const { runtime, createNewChat, onInject, chatId, provider, model } =
-    useStepSettingsAssistantChat(flowVersion, selectedStep);
+  const {
+    runtime,
+    createNewChat,
+    onInject,
+    chatId,
+    provider,
+    model,
+    isShowingSlowWarning,
+    connectionError,
+  } = useStepSettingsAssistantChat(flowVersion, selectedStep);
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -87,6 +95,8 @@ const StepSettingsAssistantUiChat = ({
       availableModels={availableModels}
       theme={theme}
       runtime={runtime}
+      isShowingSlowWarning={isShowingSlowWarning}
+      connectionError={connectionError}
       className={cn('right-0 static', {
         'children:transition-none':
           showDataSelector &&

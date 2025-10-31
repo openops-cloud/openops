@@ -49,13 +49,20 @@ const AssistantUiChat = ({
     showSettingsAIChat: state.midpanelState.showAiChat,
   }));
 
-  const { runtime, isLoading, createNewChat, provider, model } =
-    useAssistantChat({
-      chatId,
-      onChatIdChange,
-      chatMode: ChatMode.Agent,
-      context,
-    });
+  const {
+    runtime,
+    isLoading,
+    createNewChat,
+    provider,
+    model,
+    isShowingSlowWarning,
+    connectionError,
+  } = useAssistantChat({
+    chatId,
+    onChatIdChange,
+    chatMode: ChatMode.Agent,
+    context,
+  });
 
   const { theme } = useTheme();
 
@@ -89,6 +96,8 @@ const AssistantUiChat = ({
       theme={theme}
       handleInject={handleInject}
       toolComponents={toolComponents}
+      isShowingSlowWarning={isShowingSlowWarning}
+      connectionError={connectionError}
     >
       {children}
     </AssistantUiChatContainer>
