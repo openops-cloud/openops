@@ -3,12 +3,7 @@ import {
   DescribeDocumentCommandOutput,
   DescribeDocumentRequest,
   DocumentIdentifier,
-  DocumentKeyValuesFilter,
   DocumentVersionInfo,
-  ListDocumentsCommand,
-  ListDocumentsCommandOutput,
-  ListDocumentVersionsCommand,
-  ListDocumentVersionsResult,
   SSMClient,
 } from '@aws-sdk/client-ssm';
 import {
@@ -20,7 +15,8 @@ import {
   amazonAuth,
   getAwsClient,
   getCredentialsForAccount,
-  makeAwsRequest,
+  getSsmDocuments,
+  getSsmDocumentVersions,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { RiskLevel } from '@openops/shared';
@@ -80,37 +76,11 @@ export const ssmGenerateRunbookLinkAction = createAction({
         }
 
         try {
-          const credentials = await getCredentialsForAccount(awsAuth);
-          const client = getAwsClient(SSMClient, credentials, awsRegion);
-
-          const filters: DocumentKeyValuesFilter[] = [
-            { Key: 'DocumentType', Values: ['Automation'] },
-          ];
-
-          if (owner !== 'All') {
-            filters.push({ Key: 'Owner', Values: [owner as string] });
-          }
-
-          const command = new ListDocumentsCommand({
-            Filters: filters,
+          const docs = await getSsmDocuments({
+            auth: awsAuth,
+            region: awsRegion,
+            owner: owner as string,
           });
-
-          const pages = (await makeAwsRequest(
-            client,
-            command,
-          )) as ListDocumentsCommandOutput[];
-
-          const docs: DocumentIdentifier[] = pages.flatMap(
-            (p) => p.DocumentIdentifiers || [],
-          );
-
-          if (!docs.length) {
-            return {
-              disabled: true,
-              options: [],
-              placeholder: 'No runbooks found',
-            };
-          }
 
           return {
             disabled: false,
@@ -149,29 +119,11 @@ export const ssmGenerateRunbookLinkAction = createAction({
         }
 
         try {
-          const credentials = await getCredentialsForAccount(awsAuth);
-          const client = getAwsClient(SSMClient, credentials, awsRegion);
-
-          const command = new ListDocumentVersionsCommand({
-            Name: runbookName,
+          const versions: DocumentVersionInfo[] = await getSsmDocumentVersions({
+            auth: awsAuth,
+            region: awsRegion,
+            runbookName,
           });
-
-          const pages = (await makeAwsRequest(
-            client,
-            command,
-          )) as ListDocumentVersionsResult[];
-
-          const versions: DocumentVersionInfo[] = pages.flatMap(
-            (p) => p.DocumentVersions || [],
-          );
-
-          if (!versions.length) {
-            return {
-              disabled: false,
-              options: [],
-              placeholder: 'No versions found (default will be used)',
-            };
-          }
 
           const opts = versions.map((v) => {
             const ver = v.DocumentVersion || '';
@@ -197,8 +149,6 @@ export const ssmGenerateRunbookLinkAction = createAction({
     }),
     parameters: Property.DynamicProperties({
       displayName: 'Parameters',
-      description:
-        'Key-value parameters for the runbook. Keys may be prefilled based on the selected runbook.',
       required: true,
       refreshers: ['auth', 'owner', 'region', 'runbook', 'version'],
       props: async ({ auth, region, runbook, version }) => {

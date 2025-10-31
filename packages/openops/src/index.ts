@@ -22,6 +22,8 @@ export * from './lib/aws/rds/rds-delete-instance';
 export * from './lib/aws/rds/rds-delete-snapshot';
 export * from './lib/aws/rds/rds-describe';
 export * from './lib/aws/regions';
+export * from './lib/aws/ssm/get-ssm-document-versions';
+export * from './lib/aws/ssm/get-ssm-documents';
 export * from './lib/aws/sts-common';
 export * from './lib/aws/tags/tag-resources';
 export * from './lib/aws/tags/tags';
