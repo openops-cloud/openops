@@ -78,6 +78,8 @@ describe('getMCPToolsContext', () => {
       chatContext: mockChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(getMcpSystemPromptMock).toHaveBeenCalledWith({
@@ -117,6 +119,8 @@ describe('getMCPToolsContext', () => {
       chatContext: mockChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(result.filteredTools).toEqual(mockTools);
@@ -146,6 +150,8 @@ describe('getMCPToolsContext', () => {
       chatContext: completeChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(result.mcpClients).toEqual([]);
@@ -172,6 +178,8 @@ describe('getMCPToolsContext', () => {
         languageModel: mockLanguageModel,
         frontendTools: {},
         abortSignal,
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(routeQueryMock).toHaveBeenCalledWith(
