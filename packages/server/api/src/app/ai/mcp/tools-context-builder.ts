@@ -24,8 +24,8 @@ type MCPToolsContextParams = {
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
   additionalContext?: ChatFlowContext;
-  userId?: string;
-  chatId?: string;
+  userId: string;
+  chatId: string;
   stream?: NodeJS.WritableStream;
   abortSignal?: AbortSignal;
 };
