@@ -92,27 +92,22 @@ export async function getMCPToolsContext({
       uiContext: additionalContext,
     });
 
-    // Save the tool names returned by routeQuery (already includes append-only merge)
-    if (userId && chatId) {
-      await saveChatTools(chatId, userId, projectId, selectedToolNames);
-    }
+    await saveChatTools(chatId, userId, projectId, selectedToolNames);
 
-    // Use the merged tool names from routeQuery
     const finalCombinedTools = Object.fromEntries(
       Object.entries(tools).filter(([name]) =>
         selectedToolNames.includes(name),
       ),
     );
 
-    const toolsToUse =
-      userId && chatId && stream
-        ? wrapToolsWithApproval(finalCombinedTools, () => ({
-            userId,
-            projectId,
-            chatId,
-            stream,
-          }))
-        : finalCombinedTools;
+    const toolsToUse = stream
+      ? wrapToolsWithApproval(finalCombinedTools, () => ({
+          userId,
+          projectId,
+          chatId,
+          stream,
+        }))
+      : finalCombinedTools;
 
     return {
       mcpClients,
