@@ -19,7 +19,7 @@ import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
 
-export const MAX_MESSAGES_BEFORE_NAME_GENERATION = 3;
+export const MAX_MESSAGES_BEFORE_NAME_GENERATION = 1;
 
 export const useAssistantChat = ({
   chatId,

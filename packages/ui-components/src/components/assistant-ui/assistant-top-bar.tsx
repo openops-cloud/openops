@@ -25,7 +25,10 @@ const AssistantTopBar = ({
     <div className="flex justify-between items-center px-4 py-2 gap-2 h-[61px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200">
       <div className="flex items-center gap-2">
         {onToggleHistory && (
-          <TooltipWrapper tooltipText={t('History')}>
+          <TooltipWrapper
+            tooltipText={isHistoryOpen ? t('Close history') : t('Open history')}
+            align="start"
+          >
             <Button
               onClick={(e) => {
                 e.stopPropagation();

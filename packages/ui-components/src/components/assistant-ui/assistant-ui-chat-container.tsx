@@ -53,29 +53,34 @@ const AssistantUiChatContainer = ({
       >
         <></>
       </AssistantTopBar>
-      {isHistoryOpen ? (
-        <div className="flex-1 overflow-hidden bg-secondary">{children}</div>
-      ) : (
-        <AssistantRuntimeProvider runtime={runtime}>
-          {Object.entries(toolComponents || {}).map(([key, tool]) => (
-            <div key={key}>{tool}</div>
-          ))}
+      <AssistantRuntimeProvider runtime={runtime}>
+        {Object.entries(toolComponents || {}).map(([key, tool]) => (
+          <div key={key}>{tool}</div>
+        ))}
+        <div className="flex flex-1 overflow-hidden">
+          {isHistoryOpen ? (
+            <div className="shrink-0 w-[220px] border-r border-border overflow-hidden bg-secondary">
+              {children}
+            </div>
+          ) : null}
           <ThreadExtraContextProvider
             codeVariation={codeVariation}
             handleInject={handleInject}
           >
-            <Thread
-              availableModels={availableModels}
-              onModelSelected={onModelSelected}
-              selectedModel={selectedModel}
-              isModelSelectorLoading={isModelSelectorLoading}
-              theme={theme}
-              isShowingSlowWarning={isShowingSlowWarning}
-              connectionError={connectionError}
-            />
+            <div className="flex-1 overflow-hidden">
+              <Thread
+                availableModels={availableModels}
+                onModelSelected={onModelSelected}
+                selectedModel={selectedModel}
+                isModelSelectorLoading={isModelSelectorLoading}
+                theme={theme}
+                isShowingSlowWarning={isShowingSlowWarning}
+                connectionError={connectionError}
+              />
+            </div>
           </ThreadExtraContextProvider>
-        </AssistantRuntimeProvider>
-      )}
+        </div>
+      </AssistantRuntimeProvider>
     </div>
   );
 };

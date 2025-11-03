@@ -13,8 +13,7 @@ type AssistantUiHistoryItemProps = {
   onRename?: (newName: string) => void;
 };
 
-const ICON_CLASS_NAME =
-  'text-primary cursor-pointer hover:bg-gray-300 hover:text-outline rounded-xs';
+const ICON_CLASS_NAME = 'text-primary cursor-pointer hover:text-outline';
 
 const AssistantUiHistoryItem = ({
   displayName,
@@ -88,27 +87,31 @@ const AssistantUiHistoryItem = ({
             autoFocus
           />
           <TooltipWrapper tooltipText={t('Confirm')}>
-            <Check
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleRename();
-              }}
-            />
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <Check
+                role="button"
+                size={13}
+                className={ICON_CLASS_NAME}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleRename();
+                }}
+              />
+            </div>
           </TooltipWrapper>
           <TooltipWrapper tooltipText={t('Cancel')}>
-            <X
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditedName(displayName);
-                setIsEditing(false);
-              }}
-            />
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <X
+                role="button"
+                size={13}
+                className={ICON_CLASS_NAME}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setEditedName(displayName);
+                  setIsEditing(false);
+                }}
+              />
+            </div>
           </TooltipWrapper>
         </div>
       ) : (
@@ -125,29 +128,33 @@ const AssistantUiHistoryItem = ({
         >
           {onRename && (
             <TooltipWrapper tooltipText={t('Rename')}>
-              <Pencil
+              <div className="p-[2px] rounded-xs hover:bg-gray-300">
+                <Pencil
+                  role="button"
+                  size={13}
+                  className={ICON_CLASS_NAME}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setEditedName(displayName);
+                    setIsEditing(true);
+                  }}
+                />
+              </div>
+            </TooltipWrapper>
+          )}
+
+          <TooltipWrapper tooltipText={t('Delete')}>
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <X
                 role="button"
                 size={13}
                 className={ICON_CLASS_NAME}
                 onClick={(event) => {
                   event.stopPropagation();
-                  setEditedName(displayName);
-                  setIsEditing(true);
+                  onDelete();
                 }}
               />
-            </TooltipWrapper>
-          )}
-
-          <TooltipWrapper tooltipText={t('Delete')}>
-            <X
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                onDelete();
-              }}
-            />
+            </div>
           </TooltipWrapper>
         </div>
       )}

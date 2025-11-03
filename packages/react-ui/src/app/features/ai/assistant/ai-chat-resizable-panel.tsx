@@ -61,7 +61,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 shadow-sidebar', {
-          'min-w-[300px] max-w-[500px] z-[11]': showChat,
+          'min-w-[520px] max-w-[720px] z-[11]': showChat,
         })}
         minSize={size}
         maxSize={size}
