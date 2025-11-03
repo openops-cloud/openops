@@ -33,6 +33,12 @@ const commonActionProps = {
   displayName: Type.String({
     description: 'Human-readable name for the action, intended for UI display',
   }),
+  stepIndex: Type.Optional(
+    Type.Number({
+      description:
+        'The sequential index of the step displayed in the user interface',
+    }),
+  ),
 };
 
 export const InputsSchema = Type.Object(
