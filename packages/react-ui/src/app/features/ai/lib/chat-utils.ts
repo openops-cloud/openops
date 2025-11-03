@@ -67,49 +67,18 @@ export const combineAbortSignals = (
   return controller.signal;
 };
 
-const CONNECTION_TIMEOUT_MS = SSE_HEARTBEAT_INTERVAL_MS * 2;
+const SSE_MESSAGE_GAP_TIMEOUT_MS = SSE_HEARTBEAT_INTERVAL_MS * 4;
+const RESPONSE_WARNING_MS = SSE_HEARTBEAT_INTERVAL_MS * 2;
 
 let sseActivityCallback: (() => void) | null = null;
+let sseWarningCallback: (() => void) | null = null;
 
 export const setSSEActivityCallback = (callback: (() => void) | null): void => {
   sseActivityCallback = callback;
 };
 
-const wrapResponseForSSETracking = (response: Response): Response => {
-  if (!response.body || !sseActivityCallback) {
-    return response;
-  }
-
-  const reader = response.body.getReader();
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            controller.close();
-            break;
-          }
-
-          if (sseActivityCallback) {
-            sseActivityCallback();
-          }
-
-          controller.enqueue(value);
-        }
-      } catch (error) {
-        controller.error(error);
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: response.headers,
-    status: response.status,
-    statusText: response.statusText,
-  });
+export const setSSEWarningCallback = (callback: (() => void) | null): void => {
+  sseWarningCallback = callback;
 };
 
 export const fetchWithTimeout = async (
@@ -117,9 +86,30 @@ export const fetchWithTimeout = async (
   init?: RequestInit,
 ): Promise<Response> => {
   const timeoutController = new AbortController();
-  const timeoutId = setTimeout(() => {
-    timeoutController.abort();
-  }, CONNECTION_TIMEOUT_MS);
+  let timeoutId: NodeJS.Timeout | null = null;
+  let warningTimeoutId: NodeJS.Timeout | null = null;
+
+  const resetTimeouts = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (warningTimeoutId) clearTimeout(warningTimeoutId);
+
+    warningTimeoutId = setTimeout(() => {
+      if (sseWarningCallback) {
+        sseWarningCallback();
+      }
+    }, RESPONSE_WARNING_MS);
+
+    timeoutId = setTimeout(() => {
+      timeoutController.abort();
+    }, SSE_MESSAGE_GAP_TIMEOUT_MS);
+  };
+
+  const clearTimeouts = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (warningTimeoutId) clearTimeout(warningTimeoutId);
+  };
+
+  resetTimeouts();
 
   try {
     const combinedSignal = combineAbortSignals([
@@ -132,16 +122,56 @@ export const fetchWithTimeout = async (
       signal: combinedSignal,
     });
 
-    return wrapResponseForSSETracking(response);
+    if (response.body) {
+      const reader = response.body.getReader();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+              const { done, value } = await reader.read();
+
+              if (done) {
+                clearTimeouts();
+                controller.close();
+                break;
+              }
+
+              resetTimeouts();
+              if (sseActivityCallback) {
+                sseActivityCallback();
+              }
+
+              controller.enqueue(value);
+            }
+          } catch (error) {
+            clearTimeouts();
+            controller.error(error);
+          }
+        },
+        cancel() {
+          clearTimeouts();
+          reader.cancel();
+        },
+      });
+
+      return new Response(stream, {
+        headers: response.headers,
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+
+    return response;
   } catch (error: any) {
+    clearTimeouts();
+
     if (timeoutController.signal.aborted && !init?.signal?.aborted) {
       throw new ConnectionTimeoutError(
-        'Connection timeout: Unable to reach the server. Please check your internet connection.',
+        'Connection timeout: No response from server.',
       );
     }
 
     throw error;
-  } finally {
-    clearTimeout(timeoutId);
   }
 };

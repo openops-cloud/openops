@@ -15,6 +15,7 @@ import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey, fetchWithTimeout } from './chat-utils';
+import { ConnectionTimeoutError } from './connection-timeout-error';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
 import { useConnectionMonitoring } from './use-connection-monitoring';
@@ -205,6 +206,13 @@ export const useAssistantChat = ({
     }),
     onError: (error) => {
       console.error('chat error', error);
+
+      if (error instanceof ConnectionTimeoutError) {
+        setConnectionErrorMessage();
+        chat.stop();
+        return;
+      }
+
       const errorToast = {
         title: t('AI Chat Error'),
         description: t(
@@ -266,12 +274,12 @@ export const useAssistantChat = ({
   const runtime = useAISDKRuntime(chat);
   runtimeRef.current = runtime;
 
-  const { isShowingSlowWarning, connectionError, clearConnectionState } =
-    useConnectionMonitoring({
-      chatStatus: chat.status,
-      messages: chat.messages,
-      stopChat: chat.stop,
-    });
+  const {
+    isShowingSlowWarning,
+    connectionError,
+    clearConnectionState,
+    setConnectionErrorMessage,
+  } = useConnectionMonitoring();
 
   const lastConnectionRef = useRef<string | undefined>(undefined);
 

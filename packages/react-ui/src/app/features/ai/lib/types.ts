@@ -31,40 +31,11 @@ export const ChatStatus = {
   Error: 'error',
 } as const satisfies Record<string, AIChatStatus>;
 
-export type Timeout = ReturnType<typeof setTimeout>;
-export enum ConnectionCheckType {
-  Warning = 'warning',
-  Error = 'error',
-}
-
 export type ChatStatusType = AIChatStatus;
-
-export interface UseConnectionMonitoringProps {
-  chatStatus: ChatStatusType;
-  messages: any[];
-  stopChat: () => void;
-}
 
 export interface UseConnectionMonitoringReturn {
   isShowingSlowWarning: boolean;
   connectionError: string | null;
   clearConnectionState: () => void;
-}
-
-export interface MonitorInitialConnectionParams {
-  currentStatus: ChatStatusType;
-  previousStatus: ChatStatusType;
-  warningTimerRef: React.MutableRefObject<Timeout | null>;
-  lastMessageTimeRef: React.MutableRefObject<number>;
-  setIsShowingSlowWarning: (value: boolean) => void;
-}
-
-export interface StartGapMonitoringParams {
-  gapMonitorTimerRef: React.MutableRefObject<Timeout | null>;
-  lastMessageTimeRef: React.MutableRefObject<number>;
-  isShowingSlowWarningRef: React.MutableRefObject<boolean>;
-  connectionErrorRef: React.MutableRefObject<string | null>;
-  setIsShowingSlowWarning: (value: boolean) => void;
-  setConnectionError: (value: string | null) => void;
-  stopChat: () => void;
+  setConnectionErrorMessage: () => void;
 }
