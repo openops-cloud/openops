@@ -8,12 +8,14 @@ import { MarkdownCodeVariations } from '../custom';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
 import { Thread, ThreadProps } from './thread';
 import { ThreadExtraContextProvider } from './thread-extra-context';
+import { ConnectionStatusProps } from './types';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   toolComponents?: Record<string, ReactNode>;
   handleInject?: (codeContent: string | SourceCode) => void;
-} & AssistantTopBarProps &
+} & ConnectionStatusProps &
+  AssistantTopBarProps &
   ThreadProps;
 
 const AssistantUiChatContainer = ({
@@ -29,6 +31,8 @@ const AssistantUiChatContainer = ({
   children,
   handleInject,
   toolComponents,
+  isShowingSlowWarning,
+  connectionError,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -55,6 +59,8 @@ const AssistantUiChatContainer = ({
             selectedModel={selectedModel}
             isModelSelectorLoading={isModelSelectorLoading}
             theme={theme}
+            isShowingSlowWarning={isShowingSlowWarning}
+            connectionError={connectionError}
           />
         </ThreadExtraContextProvider>
       </AssistantRuntimeProvider>
