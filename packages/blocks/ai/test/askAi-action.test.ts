@@ -8,10 +8,11 @@ jest.mock('@openops/common', () => ({
 
 jest.mock('ai', () => ({
   generateObject: jest.fn(),
+  generateText: jest.fn(),
 }));
 
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
-import { generateObject } from 'ai';
+import { generateObject, generateText } from 'ai';
 import { askAi } from '../src/lib/actions/askAi';
 
 describe('analyze action', () => {
@@ -225,6 +226,34 @@ describe('analyze action', () => {
       );
     },
   );
+
+  test('should fall back to generateText when structured generation fails', async () => {
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('lm');
+    (generateObject as jest.Mock).mockRejectedValue(
+      new Error('No object generated: response did not match schema.'),
+    );
+    (generateText as jest.Mock).mockResolvedValue({ text: 'fallback answer' });
+
+    const auth = {
+      provider: AiProviderEnum.OPENAI,
+      model: 'gpt',
+      apiKey: 'k',
+      providerSettings: {},
+      modelSettings: { temperature: 0 },
+    };
+
+    const context = createContext(auth, { prompt: 'Q' });
+
+    const result = await askAi.run(context as any);
+
+    expect(generateText).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'lm', prompt: 'Q' }),
+    );
+    expect(result).toEqual({ textAnswer: 'fallback answer' });
+  });
 });
 
 function createContext(auth?: unknown, props?: unknown): unknown {
