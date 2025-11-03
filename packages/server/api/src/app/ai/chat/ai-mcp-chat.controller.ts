@@ -20,7 +20,7 @@ import {
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import { ModelMessage, UserModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -244,7 +244,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       }
 
       const userMessages = chatHistory.filter(
-        (msg): msg is ModelMessage =>
+        (msg): msg is UserModelMessage =>
           msg &&
           typeof msg === 'object' &&
           'role' in msg &&
