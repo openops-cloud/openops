@@ -65,8 +65,13 @@ export const ssmGenerateRunbookLinkAction = createAction({
     const hashParts: string[] = [];
     for (const [key, value] of entries) {
       if (value === undefined || value === null) continue;
+      let encodedValue: string | undefined;
 
-      const encodedValue = encodeURIComponent(JSON.stringify(value));
+      if (typeof value === 'string') {
+        encodedValue = encodeURIComponent(value);
+      } else {
+        encodedValue = encodeURIComponent(JSON.stringify(value));
+      }
 
       if (encodedValue) {
         hashParts.push(`${encodeURIComponent(key)}=${encodedValue}`);
