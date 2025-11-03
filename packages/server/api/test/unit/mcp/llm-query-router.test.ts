@@ -8,6 +8,7 @@ import {
   UserModelMessage,
 } from 'ai';
 
+import { getChatTools } from '../../../src/app/ai/chat/ai-chat.service';
 import { routeQuery } from '../../../src/app/ai/mcp/llm-query-router';
 
 type MockTool = {
@@ -35,10 +36,11 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-const getChatToolsMock = jest.fn();
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
-  getChatTools: getChatToolsMock,
+  getChatTools: jest.fn(),
 }));
+
+const getChatToolsMock = getChatTools as jest.Mock;
 
 describe('selectToolsAndQuery', () => {
   beforeEach(() => {

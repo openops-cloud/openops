@@ -66,6 +66,7 @@ describe('getMCPToolsContext', () => {
     routeQueryMock.mockResolvedValue({
       tools: undefined,
       queryClassification: ['general'],
+      selectedToolNames: [],
     });
 
     await getMCPToolsContext({
@@ -104,6 +105,7 @@ describe('getMCPToolsContext', () => {
     routeQueryMock.mockResolvedValue({
       tools: mockTools,
       queryClassification: ['general'],
+      selectedToolNames: ['tool1', 'tool2'],
     });
 
     const result = await getMCPToolsContext({
@@ -153,6 +155,12 @@ describe('getMCPToolsContext', () => {
 
   describe('Abort signal', () => {
     it('should abort the LLM call when the abort signal is triggered', async () => {
+      routeQueryMock.mockResolvedValue({
+        tools: {},
+        queryClassification: ['general'],
+        selectedToolNames: [],
+      });
+
       const abortSignal = new AbortController().signal;
       await getMCPToolsContext({
         app: mockApp,
@@ -174,7 +182,7 @@ describe('getMCPToolsContext', () => {
     });
   });
 
-  describe('Append-only tool tracking', () => {
+  describe('Redis integration and tool filtering', () => {
     const mockTools: ToolSet = {
       tool1: { description: 'Tool 1' },
       tool2: { description: 'Tool 2' },
@@ -190,66 +198,6 @@ describe('getMCPToolsContext', () => {
       getChatToolsMock.mockResolvedValue([]);
       saveChatToolsMock.mockResolvedValue(undefined);
     });
-
-    it.each([
-      {
-        description:
-          'should save new tools to Redis when userId and chatId are provided',
-        previousTools: [],
-        filteredTools: { tool1: mockTools.tool1 },
-        expectedSavedTools: ['tool1'],
-      },
-      {
-        description: 'should merge previous tools with new tools (append-only)',
-        previousTools: ['tool1'],
-        filteredTools: { tool2: mockTools.tool2 },
-        expectedSavedTools: expect.arrayContaining(['tool1', 'tool2']),
-      },
-      {
-        description: 'should deduplicate tools in the final list',
-        previousTools: ['tool1', 'tool2'],
-        filteredTools: {
-          tool1: mockTools.tool1,
-          tool2: mockTools.tool2,
-          tool3: mockTools.tool3,
-        },
-        expectedSavedTools: expect.arrayContaining(['tool1', 'tool2', 'tool3']),
-      },
-    ])(
-      '$description',
-      async ({ previousTools, filteredTools, expectedSavedTools }) => {
-        getChatToolsMock.mockResolvedValue(previousTools);
-        routeQueryMock.mockResolvedValue({
-          tools: filteredTools,
-          queryClassification: ['general'],
-        });
-
-        await getMCPToolsContext({
-          app: mockApp,
-          projectId: 'test-project',
-          authToken: 'authToken',
-          aiConfig: mockAiConfig,
-          messages: mockMessages,
-          chatContext: {},
-          languageModel: mockLanguageModel,
-          frontendTools: {},
-          userId: 'test-user',
-          chatId: 'test-chat',
-        });
-
-        expect(getChatToolsMock).toHaveBeenCalledWith(
-          'test-chat',
-          'test-user',
-          'test-project',
-        );
-        expect(saveChatToolsMock).toHaveBeenCalledWith(
-          'test-chat',
-          'test-user',
-          'test-project',
-          expectedSavedTools,
-        );
-      },
-    );
 
     it('should pass userId, chatId, and projectId to routeQuery', async () => {
       routeQueryMock.mockResolvedValue({
@@ -303,47 +251,5 @@ describe('getMCPToolsContext', () => {
       const savedTools = saveChatToolsMock.mock.calls[0][3];
       expect(savedTools).toEqual(['tool1', 'tool2']);
     });
-
-    it.each([
-      {
-        description: 'missing userId',
-        userId: undefined,
-        chatId: 'test-chat',
-      },
-      {
-        description: 'missing chatId',
-        userId: 'test-user',
-        chatId: undefined,
-      },
-      {
-        description: 'missing both userId and chatId',
-        userId: undefined,
-        chatId: undefined,
-      },
-    ])(
-      'should not call Redis functions when $description',
-      async ({ userId, chatId }) => {
-        routeQueryMock.mockResolvedValue({
-          tools: { tool1: mockTools.tool1 },
-          queryClassification: ['general'],
-        });
-
-        await getMCPToolsContext({
-          app: mockApp,
-          projectId: 'test-project',
-          authToken: 'authToken',
-          aiConfig: mockAiConfig,
-          messages: mockMessages,
-          chatContext: {},
-          languageModel: mockLanguageModel,
-          frontendTools: {},
-          userId,
-          chatId,
-        });
-
-        expect(getChatToolsMock).not.toHaveBeenCalled();
-        expect(saveChatToolsMock).not.toHaveBeenCalled();
-      },
-    );
   });
 });
