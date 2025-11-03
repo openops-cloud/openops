@@ -129,10 +129,14 @@ export const useAssistantChat = ({
           stepDetails &&
           flowId
         ) {
+          const stepId =
+            flowHelper.getStep(context.flowVersion, context.selectedStep)?.id ??
+            context.selectedStep;
+
           return await aiChatApi.open(
             flowId,
             getBlockName(stepDetails),
-            context.selectedStep,
+            stepId,
             getActionName(stepDetails),
           );
         }
