@@ -45,7 +45,7 @@ import { parseUserMessage } from './message-parser';
 import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
-const DEFAULT_CHAT_NAME = 'New Chat';
+const DEFAULT_CHAT_NAME = 'Undefined Chat';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -243,7 +243,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(chatHistory, projectId);
+      const userMessages = chatHistory.filter(
+        (msg): msg is ModelMessage =>
+          msg &&
+          typeof msg === 'object' &&
+          'role' in msg &&
+          msg.role === 'user',
+      );
+
+      if (userMessages.length === 0) {
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      }
+
+      const rawChatName = await generateChatName(userMessages, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);

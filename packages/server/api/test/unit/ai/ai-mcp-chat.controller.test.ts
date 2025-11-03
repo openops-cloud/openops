@@ -374,9 +374,19 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       expect(mockReply.send).toHaveBeenCalledWith({
         chatName: 'AWS Cost Optimization',
       });
+      expect(generateChatName).toHaveBeenCalledWith(
+        [{ role: 'user', content: 'How do I optimize AWS costs?' }],
+        'test-project-id',
+      );
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'AWS Cost Optimization',
+      );
     });
 
-    it('should return "New Chat" for empty messages', async () => {
+    it('should return "Undefined Chat" for empty chatHistory', async () => {
       (getConversation as jest.Mock).mockResolvedValue({ chatHistory: [] });
 
       await postHandler(
@@ -385,10 +395,102 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Undefined Chat',
+      });
+      expect(generateChatName).not.toHaveBeenCalled();
+      expect(updateChatName).not.toHaveBeenCalled();
     });
 
-    it('should return "New Chat" if LLM returns empty', async () => {
+    it('should return "Undefined Chat" when chatHistory has no user messages', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'assistant', content: 'Some response' },
+          { role: 'system', content: 'System message' },
+          {
+            role: 'tool',
+            content: [{ type: 'tool-result', toolCallId: '123' }],
+          },
+        ],
+      });
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Undefined Chat',
+      });
+      expect(generateChatName).not.toHaveBeenCalled();
+      expect(updateChatName).not.toHaveBeenCalled();
+    });
+
+    it('should filter out invalid message objects without role property', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'user', content: 'Valid message' },
+          { content: 'Invalid message object' },
+          { type: 'reasoning', text: 'Some reasoning' },
+          { role: 'user', content: 'Another valid message' },
+          { role: 'assistant', content: 'Response' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue('Filtered Name');
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Filtered Name',
+      });
+      expect(generateChatName).toHaveBeenCalledWith(
+        [
+          { role: 'user', content: 'Valid message' },
+          { role: 'user', content: 'Another valid message' },
+        ],
+        'test-project-id',
+      );
+    });
+
+    it('should call generateChatName with all user messages (filtered)', async () => {
+      const mockChatHistory = [
+        { role: 'user', content: 'First question' },
+        { role: 'assistant', content: 'First answer' },
+        { role: 'user', content: 'Second question' },
+        { role: 'assistant', content: 'Second answer' },
+        { role: 'user', content: 'Third question' },
+      ];
+
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: mockChatHistory,
+      });
+      (generateChatName as jest.Mock).mockResolvedValue('Multi-Question Chat');
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(generateChatName).toHaveBeenCalledWith(
+        [
+          { role: 'user', content: 'First question' },
+          { role: 'user', content: 'Second question' },
+          { role: 'user', content: 'Third question' },
+        ],
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Multi-Question Chat',
+      });
+    });
+
+    it('should return "Undefined Chat" if LLM returns empty/whitespace', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [
           { role: 'user', content: 'Hello?' },
@@ -403,7 +505,32 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Undefined Chat',
+      });
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'Undefined Chat',
+      );
+    });
+
+    it('should return "Undefined Chat" if LLM returns empty string', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [{ role: 'user', content: 'Test question' }],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue('');
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'Undefined Chat',
+      });
     });
 
     it('should persist chatName in chat context', async () => {
@@ -416,21 +543,45 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (generateChatName as jest.Mock).mockResolvedValue(
         'OpenOps Platform Overview',
       );
-      const postHandler = handlers['/chat-name'];
+
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
         mockReply as unknown as FastifyReply,
       );
+
       expect(updateChatName).toHaveBeenCalledWith(
         'test-chat-id',
         'test-user-id',
         'test-project-id',
         'OpenOps Platform Overview',
       );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'OpenOps Platform Overview',
+      });
     });
 
     it('should handle errors gracefully', async () => {
       (getConversation as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Internal server error' }),
+      );
+    });
+
+    it('should handle generateChatName errors gracefully', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [{ role: 'user', content: 'Test question' }],
+      });
+      (generateChatName as jest.Mock).mockRejectedValue(
+        new Error('LLM API error'),
+      );
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
