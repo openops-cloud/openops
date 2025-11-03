@@ -19,6 +19,12 @@ const commonProps = {
   displayName: Type.String({
     description: 'User friendly name for the trigger',
   }),
+  stepIndex: Type.Optional(
+    Type.Number({
+      description:
+        'The sequential index of the step in the workflow execution order',
+    }),
+  ),
   nextAction: Type.Optional(Type.Any()),
 };
 
