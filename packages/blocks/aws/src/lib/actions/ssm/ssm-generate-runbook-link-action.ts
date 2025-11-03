@@ -69,6 +69,21 @@ export const ssmGenerateRunbookLinkAction = createAction({
 
       if (typeof value === 'string') {
         encodedValue = encodeURIComponent(value);
+      } else if (Array.isArray(value)) {
+        const allPrimitives = value.every(
+          (v) =>
+            typeof v === 'string' ||
+            typeof v === 'number' ||
+            typeof v === 'boolean',
+        );
+        if (allPrimitives) {
+          const joined = value
+            .map((v) => (v === null || v === undefined ? '' : String(v)))
+            .join(', ');
+          encodedValue = encodeURIComponent(joined);
+        } else {
+          encodedValue = encodeURIComponent(JSON.stringify(value));
+        }
       } else {
         encodedValue = encodeURIComponent(JSON.stringify(value));
       }
