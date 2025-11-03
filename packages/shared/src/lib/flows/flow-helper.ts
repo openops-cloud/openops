@@ -1161,6 +1161,31 @@ function getUsedConnections(step: Trigger | Action) {
     }, {});
 }
 
+function addStepIndices(trigger: Trigger): Trigger {
+  const allSteps = getAllSteps(trigger);
+  const stepIndexMap = new Map<string, number>();
+
+  const getStepKey = (step: TriggerWithOptionalId | Action): string => {
+    return `${step.id}-${step.name}`;
+  };
+
+  allSteps.forEach((step, index) => {
+    stepIndexMap.set(getStepKey(step), index + 1);
+  });
+
+  return transferStep(trigger, (step: Step) => {
+    const stepIndex = stepIndexMap.get(getStepKey(step));
+    if (stepIndex) {
+      return {
+        ...step,
+        stepIndex,
+      };
+    }
+
+    return step;
+  }) as Trigger;
+}
+
 export const flowHelper = {
   isValid,
   apply(
@@ -1260,4 +1285,5 @@ export const flowHelper = {
   truncateFlow,
   getUsedConnections,
   createTrigger,
+  addStepIndices,
 };
