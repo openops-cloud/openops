@@ -47,11 +47,16 @@ function coerceBoolean(value: unknown): boolean | undefined {
   return typeof b === 'boolean' ? b : undefined;
 }
 
-function createPropertyForParam(p: any, type: string, defaultValue: unknown) {
+function createPropertyForParam(
+  p: any,
+  type: string,
+  defaultValue: unknown,
+  required: boolean,
+) {
   const key = p.Name as string;
   const base = {
+    required,
     displayName: key,
-    required: false,
     description: p?.Description,
   } as const;
 
@@ -127,7 +132,12 @@ export const runbookParametersProperty = Property.DynamicProperties({
         const type = String(p?.Type || '');
         const defaultValue = safeParseDefault(p?.DefaultValue);
 
-        result[key] = createPropertyForParam(p, type, defaultValue);
+        result[key] = createPropertyForParam(
+          p,
+          type,
+          defaultValue,
+          !('DefaultValue' in p),
+        );
       }
     } catch (e) {
       logger.warn(e);
