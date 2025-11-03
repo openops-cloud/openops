@@ -8,6 +8,34 @@ import {
 } from '@openops/common';
 import { RiskLevel } from '@openops/shared';
 
+function encodeParamValue(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+
+  if (typeof value === 'string') {
+    return encodeURIComponent(value);
+  }
+
+  if (Array.isArray(value)) {
+    const allPrimitives = value.every(
+      (v) =>
+        typeof v === 'string' ||
+        typeof v === 'number' ||
+        typeof v === 'boolean',
+    );
+
+    if (allPrimitives) {
+      const joined = value
+        .map((v) => (v === null || v === undefined ? '' : String(v)))
+        .join(', ');
+      return encodeURIComponent(joined);
+    }
+
+    return encodeURIComponent(JSON.stringify(value));
+  }
+
+  return encodeURIComponent(JSON.stringify(value));
+}
+
 export const ssmGenerateRunbookLinkAction = createAction({
   auth: amazonAuth,
   name: 'ssm_generate_runbook_execution_link',
@@ -64,30 +92,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
 
     const hashParts: string[] = [];
     for (const [key, value] of entries) {
-      if (value === undefined || value === null) continue;
-      let encodedValue: string | undefined;
-
-      if (typeof value === 'string') {
-        encodedValue = encodeURIComponent(value);
-      } else if (Array.isArray(value)) {
-        const allPrimitives = value.every(
-          (v) =>
-            typeof v === 'string' ||
-            typeof v === 'number' ||
-            typeof v === 'boolean',
-        );
-        if (allPrimitives) {
-          const joined = value
-            .map((v) => (v === null || v === undefined ? '' : String(v)))
-            .join(', ');
-          encodedValue = encodeURIComponent(joined);
-        } else {
-          encodedValue = encodeURIComponent(JSON.stringify(value));
-        }
-      } else {
-        encodedValue = encodeURIComponent(JSON.stringify(value));
-      }
-
+      const encodedValue = encodeParamValue(value);
       if (encodedValue) {
         hashParts.push(`${encodeURIComponent(key)}=${encodedValue}`);
       }
