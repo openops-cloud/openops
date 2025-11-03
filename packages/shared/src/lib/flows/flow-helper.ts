@@ -1166,8 +1166,7 @@ function addStepIndices(trigger: Trigger): Trigger {
   const stepIndexMap = new Map<string, number>();
 
   const getStepKey = (step: TriggerWithOptionalId | Action): string => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return `${step.id!}-${step.name}`;
+    return `${step.id}-${step.name}`;
   };
 
   allSteps.forEach((step, index) => {
