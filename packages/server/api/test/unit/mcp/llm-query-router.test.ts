@@ -75,6 +75,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -108,6 +110,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -144,6 +148,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -179,6 +185,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -217,6 +225,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -254,6 +264,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -290,6 +302,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -329,6 +343,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(Object.keys(result?.tools || {}).length).toBe(128);
@@ -364,6 +380,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result).toEqual({
@@ -409,6 +427,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: aiConfigWithSettings,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(generateObject).toHaveBeenCalledWith(
@@ -435,6 +455,8 @@ describe('selectToolsAndQuery', () => {
         aiConfig: mockAiConfig,
         projectId: 'test-project',
         abortSignal,
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(generateObject).toHaveBeenCalledWith(
@@ -467,6 +489,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result.queryClassification).toEqual(['analytics']);
@@ -494,6 +518,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result.queryClassification).toEqual(['tables']);
@@ -521,6 +547,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result.queryClassification).toEqual(['openops']);
@@ -547,6 +575,8 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result.queryClassification).toEqual(['aws_cost']);
@@ -573,10 +603,236 @@ describe('selectToolsAndQuery', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
         projectId: 'test-project',
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(result.queryClassification).toEqual(['general']);
       expect(result.tools).toEqual(mockTools);
+    });
+  });
+
+  describe('Append-only tool tracking', () => {
+    const mockTools: ToolSet = {
+      tool1: { description: 'Tool 1' },
+      tool2: { description: 'Tool 2' },
+      tool3: { description: 'Tool 3' },
+      tool4: { description: 'Tool 4' },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should merge previous tools with newly selected tools (append-only)', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'tool2']);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool3'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(
+        expect.arrayContaining(['tool1', 'tool2', 'tool3']),
+      );
+      expect(result.selectedToolNames).toHaveLength(3);
+      expect(result.tools).toEqual({
+        tool1: { description: 'Tool 1' },
+        tool2: { description: 'Tool 2' },
+        tool3: { description: 'Tool 3' },
+      });
+    });
+
+    it('should deduplicate tools when LLM selects a tool that was previously selected', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'tool2']);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool2', 'tool3'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(
+        expect.arrayContaining(['tool1', 'tool2', 'tool3']),
+      );
+      expect(result.selectedToolNames).toHaveLength(3);
+    });
+
+    it('should filter out invalid tools from previous selection', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'invalid_tool']);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool2'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(
+        expect.arrayContaining(['tool1', 'tool2']),
+      );
+      expect(result.selectedToolNames).toHaveLength(2);
+      expect(result.selectedToolNames).not.toContain('invalid_tool');
+    });
+
+    it('should call getChatTools with correct parameters', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1']);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool2'],
+          query_classification: ['general'],
+        },
+      });
+
+      await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'project-789',
+      });
+
+      expect(getChatToolsMock).toHaveBeenCalledWith(
+        'chat-456',
+        'user-123',
+        'project-789',
+      );
+    });
+
+    it('should handle empty previous tools list', async () => {
+      getChatToolsMock.mockResolvedValue([]);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool1', 'tool2'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(['tool1', 'tool2']);
+    });
+
+    it('should preserve previous tools even when LLM selects no new tools', async () => {
+      getChatToolsMock.mockResolvedValue(['tool1', 'tool2']);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: [],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      // Should still have the previous tools
+      expect(result.selectedToolNames).toEqual(
+        expect.arrayContaining(['tool1', 'tool2']),
+      );
+      expect(result.selectedToolNames).toHaveLength(2);
+      expect(result.tools).toEqual({
+        tool1: { description: 'Tool 1' },
+        tool2: { description: 'Tool 2' },
+      });
+    });
+
+    it('should handle getChatTools returning null', async () => {
+      getChatToolsMock.mockResolvedValue(null);
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool1'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(['tool1']);
+    });
+
+    it('should handle getChatTools throwing an error', async () => {
+      getChatToolsMock.mockRejectedValue(new Error('Redis error'));
+
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: {
+          tool_names: ['tool1'],
+          query_classification: ['general'],
+        },
+      });
+
+      const result = await routeQuery({
+        messages: mockMessages,
+        tools: mockTools,
+        languageModel: mockLanguageModel,
+        aiConfig: mockAiConfig,
+        userId: 'user-123',
+        chatId: 'chat-456',
+        projectId: 'test-project',
+      });
+
+      expect(result.selectedToolNames).toEqual(['tool1']);
     });
   });
 });

@@ -75,19 +75,22 @@ export async function routeQuery({
   aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
-  userId?: string;
-  chatId?: string;
+  userId: string;
+  chatId: string;
   projectId: string;
 }): Promise<ToolsAndQueryResult> {
-  const previousToolNames =
-    userId && chatId ? await getChatTools(chatId, userId, projectId) : [];
+  const previousTools = await getPreviousToolsForChat(
+    userId,
+    chatId,
+    projectId,
+  );
 
   if (!tools || Object.keys(tools).length === 0) {
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
-      selectedToolNames: previousToolNames,
+      selectedToolNames: previousTools,
     };
   }
 
@@ -125,7 +128,7 @@ export async function routeQuery({
     }
 
     const mergedToolNames = Array.from(
-      new Set([...previousToolNames, ...selectedToolNames]),
+      new Set([...previousTools, ...selectedToolNames]),
     ).filter((name) => validToolNames.includes(name));
 
     const selectedTools = Object.fromEntries(
@@ -149,10 +152,24 @@ export async function routeQuery({
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
-      selectedToolNames: previousToolNames,
+      selectedToolNames: previousTools,
     };
   }
 }
+
+const getPreviousToolsForChat = async (
+  userId: string,
+  chatId: string,
+  projectId: string,
+): Promise<string[]> => {
+  try {
+    const tools = await getChatTools(chatId, userId, projectId);
+    return tools || [];
+  } catch (error) {
+    logger.error('Error fetching previous chat tools', { error });
+    return [];
+  }
+};
 
 const getOpenOpsTablesNames = async (): Promise<string[]> => {
   try {
