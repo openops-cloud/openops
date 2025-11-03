@@ -35,7 +35,16 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+const getChatToolsMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
+  getChatTools: getChatToolsMock,
+}));
+
 describe('selectToolsAndQuery', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getChatToolsMock.mockResolvedValue([]);
+  });
   const mockLanguageModel = {} as LanguageModel;
   const mockAiConfig = {
     provider: AiProviderEnum.ANTHROPIC,
@@ -63,6 +72,7 @@ describe('selectToolsAndQuery', () => {
         tools: emptyTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -95,6 +105,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -130,6 +141,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -164,6 +176,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -201,6 +214,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -237,6 +251,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -272,6 +287,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -310,6 +326,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(Object.keys(result?.tools || {}).length).toBe(128);
@@ -344,6 +361,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result).toEqual({
@@ -388,6 +406,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: aiConfigWithSettings,
+        projectId: 'test-project',
       });
 
       expect(generateObject).toHaveBeenCalledWith(
@@ -412,6 +431,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
         abortSignal,
       });
 
@@ -444,6 +464,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result.queryClassification).toEqual(['analytics']);
@@ -470,6 +491,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result.queryClassification).toEqual(['tables']);
@@ -496,6 +518,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result.queryClassification).toEqual(['openops']);
@@ -521,6 +544,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result.queryClassification).toEqual(['aws_cost']);
@@ -546,6 +570,7 @@ describe('selectToolsAndQuery', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        projectId: 'test-project',
       });
 
       expect(result.queryClassification).toEqual(['general']);

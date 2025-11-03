@@ -251,11 +251,11 @@ describe('getMCPToolsContext', () => {
       },
     );
 
-    it('should pass previousToolNames to routeQuery', async () => {
-      getChatToolsMock.mockResolvedValue(['tool1', 'tool2']);
+    it('should pass userId, chatId, and projectId to routeQuery', async () => {
       routeQueryMock.mockResolvedValue({
         tools: { tool3: mockTools.tool3 },
         queryClassification: ['general'],
+        selectedToolNames: ['tool3'],
       });
 
       await getMCPToolsContext({
@@ -273,16 +273,18 @@ describe('getMCPToolsContext', () => {
 
       expect(routeQueryMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          previousToolNames: ['tool1', 'tool2'],
+          userId: 'test-user',
+          chatId: 'test-chat',
+          projectId: 'test-project',
         }),
       );
     });
 
-    it('should filter out tools that are no longer available', async () => {
-      getChatToolsMock.mockResolvedValue(['tool1', 'nonexistent-tool']);
+    it('should use selectedToolNames from routeQuery', async () => {
       routeQueryMock.mockResolvedValue({
         tools: { tool2: mockTools.tool2 },
         queryClassification: ['general'],
+        selectedToolNames: ['tool1', 'tool2'], // routeQuery handles append-only merge
       });
 
       await getMCPToolsContext({
@@ -299,9 +301,7 @@ describe('getMCPToolsContext', () => {
       });
 
       const savedTools = saveChatToolsMock.mock.calls[0][3];
-      expect(savedTools).toContain('tool1');
-      expect(savedTools).toContain('tool2');
-      expect(savedTools).not.toContain('nonexistent-tool');
+      expect(savedTools).toEqual(['tool1', 'tool2']);
     });
 
     it.each([

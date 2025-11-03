@@ -2,11 +2,7 @@ import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
-import {
-  getChatTools,
-  MCPChatContext,
-  saveChatTools,
-} from '../chat/ai-chat.service';
+import { MCPChatContext, saveChatTools } from '../chat/ai-chat.service';
 import { generateMessageId } from '../chat/ai-id-generators';
 import {
   getBlockSystemPrompt,
@@ -67,14 +63,11 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    // Fetch previous tool names from Redis (append-only approach)
-    const previousToolNames =
-      userId && chatId ? await getChatTools(chatId, userId, projectId) : [];
-
     const {
       tools: filteredTools,
       queryClassification,
       reasoning,
+      selectedToolNames,
     } = await routeQuery({
       messages,
       tools,
@@ -82,7 +75,9 @@ export async function getMCPToolsContext({
       aiConfig,
       uiContext: additionalContext,
       abortSignal,
-      previousToolNames,
+      userId,
+      chatId,
+      projectId,
     });
 
     if (reasoning && stream) {
@@ -97,16 +92,16 @@ export async function getMCPToolsContext({
       uiContext: additionalContext,
     });
 
-    const finalToolNames = Array.from(
-      new Set([...previousToolNames, ...Object.keys(filteredTools ?? {})]),
-    ).filter((name) => Object.keys(tools).includes(name));
-
+    // Save the tool names returned by routeQuery (already includes append-only merge)
     if (userId && chatId) {
-      await saveChatTools(chatId, userId, projectId, finalToolNames);
+      await saveChatTools(chatId, userId, projectId, selectedToolNames);
     }
 
+    // Use the merged tool names from routeQuery
     const finalCombinedTools = Object.fromEntries(
-      Object.entries(tools).filter(([name]) => finalToolNames.includes(name)),
+      Object.entries(tools).filter(([name]) =>
+        selectedToolNames.includes(name),
+      ),
     );
 
     const toolsToUse =

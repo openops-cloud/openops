@@ -3,6 +3,7 @@ import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
+import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
@@ -64,7 +65,9 @@ export async function routeQuery({
   aiConfig,
   uiContext,
   abortSignal,
-  previousToolNames = [],
+  userId,
+  chatId,
+  projectId,
 }: {
   messages: ModelMessage[];
   tools: ToolSet;
@@ -72,8 +75,13 @@ export async function routeQuery({
   aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
-  previousToolNames?: string[];
+  userId?: string;
+  chatId?: string;
+  projectId: string;
 }): Promise<ToolsAndQueryResult> {
+  const previousToolNames =
+    userId && chatId ? await getChatTools(chatId, userId, projectId) : [];
+
   if (!tools || Object.keys(tools).length === 0) {
     return {
       tools: undefined,
@@ -116,8 +124,6 @@ export async function routeQuery({
       );
     }
 
-    // Merge with previous tools (append-only approach)
-    // This ensures tools are never removed once added to prevent LLM hallucinations
     const mergedToolNames = Array.from(
       new Set([...previousToolNames, ...selectedToolNames]),
     ).filter((name) => validToolNames.includes(name));
