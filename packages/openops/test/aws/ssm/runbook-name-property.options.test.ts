@@ -8,16 +8,8 @@ jest.mock('../../../src/lib/aws/ssm/get-ssm-documents', () => ({
 import type { PropertyContext } from '@openops/blocks-framework';
 import { runbookNameProperty } from '../../../src/lib/aws/ssm/runbook-name-property';
 
-function createCtx(): PropertyContext {
-  return {
-    getRefresher: jest.fn(),
-    getValue: jest.fn(),
-    setValue: jest.fn(),
-  } as unknown as PropertyContext;
-}
-
 describe('runbookNameProperty.options', () => {
-  const ctx = createCtx();
+  const ctx = {} as PropertyContext;
   beforeEach(() => {
     jest.clearAllMocks();
   });
