@@ -16,7 +16,7 @@ export const TestRunLimit = Type.Object(
     }),
     limit: Type.Number({
       description:
-        'Maximum number of write operations allowed for this action in a single test run.',
+        'Maximum number of times this action will be executed in a single test run.',
     }),
   },
   {
