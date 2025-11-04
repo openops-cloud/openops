@@ -68,6 +68,7 @@ const AssistantTopBar = ({
               align="start"
               side="bottom"
               sideOffset={8}
+              onCloseAutoFocus={(e) => e.preventDefault()}
             >
               {historyContent}
             </PopoverContent>
