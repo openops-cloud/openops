@@ -2,7 +2,7 @@ import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { MCPChatContext } from '../chat/ai-chat.service';
+import { MCPChatContext, saveChatTools } from '../chat/ai-chat.service';
 import { generateMessageId } from '../chat/ai-id-generators';
 import {
   getBlockSystemPrompt,
@@ -10,13 +10,9 @@ import {
 } from '../chat/prompts.service';
 import { sendReasoningToStream } from '../chat/stream-message-builder';
 import { routeQuery } from './llm-query-router';
-import {
-  collectToolsByProvider,
-  formatFrontendTools,
-  hasToolProvider,
-} from './tool-utils';
+import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { AssistantUITools, QueryClassification } from './types';
+import { AssistantUITools } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -28,8 +24,8 @@ type MCPToolsContextParams = {
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
   additionalContext?: ChatFlowContext;
-  userId?: string;
-  chatId?: string;
+  userId: string;
+  chatId: string;
   stream?: NodeJS.WritableStream;
   abortSignal?: AbortSignal;
 };
@@ -71,6 +67,7 @@ export async function getMCPToolsContext({
       tools: filteredTools,
       queryClassification,
       reasoning,
+      selectedToolNames,
     } = await routeQuery({
       messages,
       tools,
@@ -78,6 +75,9 @@ export async function getMCPToolsContext({
       aiConfig,
       uiContext: additionalContext,
       abortSignal,
+      userId,
+      chatId,
+      projectId,
     });
 
     if (reasoning && stream) {
@@ -87,37 +87,33 @@ export async function getMCPToolsContext({
 
     const systemPrompt = await getMcpSystemPrompt({
       queryClassification,
-      selectedTools: filteredTools,
+      selectedTools: filteredTools ?? {},
       allTools: tools,
       uiContext: additionalContext,
     });
 
-    const openOpsTools =
-      hasToolProvider(tools, 'openops') &&
-      queryClassification.includes(QueryClassification.openops)
-        ? collectToolsByProvider(tools, 'openops')
-        : {};
+    await saveChatTools(chatId, userId, projectId, selectedToolNames);
 
-    const combinedTools = {
-      ...filteredTools,
-      ...openOpsTools,
-    };
+    const finalCombinedTools = Object.fromEntries(
+      Object.entries(tools).filter(([name]) =>
+        selectedToolNames.includes(name),
+      ),
+    );
 
-    const finalTools =
-      userId && chatId && stream
-        ? wrapToolsWithApproval(combinedTools, () => ({
-            userId,
-            projectId,
-            chatId,
-            stream,
-          }))
-        : combinedTools;
+    const toolsToUse = stream
+      ? wrapToolsWithApproval(finalCombinedTools, () => ({
+          userId,
+          projectId,
+          chatId,
+          stream,
+        }))
+      : finalCombinedTools;
 
     return {
       mcpClients,
       systemPrompt,
       filteredTools: {
-        ...finalTools,
+        ...toolsToUse,
         ...formatFrontendTools(frontendTools),
       },
     };

@@ -19,6 +19,13 @@ jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
   getBlockSystemPrompt: getBlockSystemPromptMock,
 }));
 
+const getChatToolsMock = jest.fn();
+const saveChatToolsMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
+  getChatTools: getChatToolsMock,
+  saveChatTools: saveChatToolsMock,
+}));
+
 import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builder';
 
 describe('getMCPToolsContext', () => {
@@ -59,9 +66,10 @@ describe('getMCPToolsContext', () => {
     routeQueryMock.mockResolvedValue({
       tools: undefined,
       queryClassification: ['general'],
+      selectedToolNames: [],
     });
 
-    const result = await getMCPToolsContext({
+    await getMCPToolsContext({
       app: mockApp,
       projectId: 'projectId',
       authToken: 'authToken',
@@ -70,11 +78,13 @@ describe('getMCPToolsContext', () => {
       chatContext: mockChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(getMcpSystemPromptMock).toHaveBeenCalledWith({
       queryClassification: ['general'],
-      selectedTools: undefined,
+      selectedTools: {},
       allTools: {},
       uiContext: undefined,
     });
@@ -97,6 +107,7 @@ describe('getMCPToolsContext', () => {
     routeQueryMock.mockResolvedValue({
       tools: mockTools,
       queryClassification: ['general'],
+      selectedToolNames: ['tool1', 'tool2'],
     });
 
     const result = await getMCPToolsContext({
@@ -108,6 +119,8 @@ describe('getMCPToolsContext', () => {
       chatContext: mockChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(result.filteredTools).toEqual(mockTools);
@@ -137,6 +150,8 @@ describe('getMCPToolsContext', () => {
       chatContext: completeChatContext,
       languageModel: mockLanguageModel,
       frontendTools: {},
+      userId: 'user-123',
+      chatId: 'chat-456',
     });
 
     expect(result.mcpClients).toEqual([]);
@@ -146,6 +161,12 @@ describe('getMCPToolsContext', () => {
 
   describe('Abort signal', () => {
     it('should abort the LLM call when the abort signal is triggered', async () => {
+      routeQueryMock.mockResolvedValue({
+        tools: {},
+        queryClassification: ['general'],
+        selectedToolNames: [],
+      });
+
       const abortSignal = new AbortController().signal;
       await getMCPToolsContext({
         app: mockApp,
@@ -157,6 +178,8 @@ describe('getMCPToolsContext', () => {
         languageModel: mockLanguageModel,
         frontendTools: {},
         abortSignal,
+        userId: 'user-123',
+        chatId: 'chat-456',
       });
 
       expect(routeQueryMock).toHaveBeenCalledWith(
@@ -164,6 +187,77 @@ describe('getMCPToolsContext', () => {
           abortSignal,
         }),
       );
+    });
+  });
+
+  describe('Redis integration and tool filtering', () => {
+    const mockTools: ToolSet = {
+      tool1: { description: 'Tool 1' },
+      tool2: { description: 'Tool 2' },
+      tool3: { description: 'Tool 3' },
+    };
+
+    beforeEach(() => {
+      startMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+      getMcpSystemPromptMock.mockResolvedValue('System prompt');
+      getChatToolsMock.mockResolvedValue([]);
+      saveChatToolsMock.mockResolvedValue(undefined);
+    });
+
+    it('should pass userId, chatId, and projectId to routeQuery', async () => {
+      routeQueryMock.mockResolvedValue({
+        tools: { tool3: mockTools.tool3 },
+        queryClassification: ['general'],
+        selectedToolNames: ['tool3'],
+      });
+
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'test-project',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: {},
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+        userId: 'test-user',
+        chatId: 'test-chat',
+      });
+
+      expect(routeQueryMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'test-user',
+          chatId: 'test-chat',
+          projectId: 'test-project',
+        }),
+      );
+    });
+
+    it('should use selectedToolNames from routeQuery', async () => {
+      routeQueryMock.mockResolvedValue({
+        tools: { tool2: mockTools.tool2 },
+        queryClassification: ['general'],
+        selectedToolNames: ['tool1', 'tool2'], // routeQuery handles append-only merge
+      });
+
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'test-project',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: {},
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+        userId: 'test-user',
+        chatId: 'test-chat',
+      });
+
+      const savedTools = saveChatToolsMock.mock.calls[0][3];
+      expect(savedTools).toEqual(['tool1', 'tool2']);
     });
   });
 });
