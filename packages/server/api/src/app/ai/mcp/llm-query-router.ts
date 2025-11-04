@@ -3,6 +3,7 @@ import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
+import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
@@ -13,6 +14,7 @@ export type ToolsAndQueryResult = {
   tools?: ToolSet;
   queryClassification: QueryClassification[];
   reasoning?: string;
+  selectedToolNames: string[];
 };
 
 const queryClassificationDescriptions: Record<QueryClassification, string> = {
@@ -63,6 +65,9 @@ export async function routeQuery({
   aiConfig,
   uiContext,
   abortSignal,
+  userId,
+  chatId,
+  projectId,
 }: {
   messages: ModelMessage[];
   tools: ToolSet;
@@ -70,12 +75,22 @@ export async function routeQuery({
   aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
+  userId: string;
+  chatId: string;
+  projectId: string;
 }): Promise<ToolsAndQueryResult> {
+  const previousTools = await getPreviousToolsForChat(
+    userId,
+    chatId,
+    projectId,
+  );
+
   if (!tools || Object.keys(tools).length === 0) {
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
+      selectedToolNames: previousTools,
     };
   }
 
@@ -112,9 +127,13 @@ export async function routeQuery({
       );
     }
 
+    const mergedToolNames = Array.from(
+      new Set([...previousTools, ...selectedToolNames]),
+    ).filter((name) => validToolNames.includes(name));
+
     const selectedTools = Object.fromEntries(
       Object.entries(tools)
-        .filter(([name]) => selectedToolNames.includes(name))
+        .filter(([name]) => mergedToolNames.includes(name))
         .slice(0, MAX_SELECTED_TOOLS),
     );
 
@@ -122,6 +141,7 @@ export async function routeQuery({
       queryClassification,
       tools: selectedTools,
       reasoning: selectionResult.user_facing_reasoning,
+      selectedToolNames: mergedToolNames,
     };
   } catch (error) {
     const isAbortError = error instanceof Error && error.name === 'AbortError';
@@ -132,9 +152,24 @@ export async function routeQuery({
       tools: undefined,
       queryClassification: [QueryClassification.general],
       reasoning: undefined,
+      selectedToolNames: previousTools,
     };
   }
 }
+
+const getPreviousToolsForChat = async (
+  userId: string,
+  chatId: string,
+  projectId: string,
+): Promise<string[]> => {
+  try {
+    const tools = await getChatTools(chatId, userId, projectId);
+    return tools || [];
+  } catch (error) {
+    logger.error('Error fetching previous chat tools', { error });
+    return [];
+  }
+};
 
 const getOpenOpsTablesNames = async (): Promise<string[]> => {
   try {
