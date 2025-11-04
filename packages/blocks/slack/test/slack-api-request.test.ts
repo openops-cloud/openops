@@ -13,7 +13,7 @@ jest.mock('@openops/blocks-common', () => ({
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
-    error: jest.fn(),
+    warn: jest.fn(),
     info: jest.fn(),
   },
 }));

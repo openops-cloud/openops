@@ -5,7 +5,7 @@ import { sendTernaryRequest } from '../../src/lib/common/send-ternary-request';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
-    error: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
