@@ -79,6 +79,14 @@ const AssistantUiChat = ({
     refetch,
   } = useAssistantChatHistory();
 
+  const currentChatTitle = useMemo(() => {
+    if (chatId) {
+      const currentChat = chats.find((chat) => chat.id === chatId);
+      return currentChat?.displayName || title;
+    }
+    return title;
+  }, [chatId, chats, title]);
+
   const onChatSelected = useCallback(
     (id: string) => {
       onChatIdChange(id);
@@ -126,7 +134,7 @@ const AssistantUiChat = ({
         onClose={onClose}
         runtime={runtime}
         onNewChat={onNewChatClick}
-        title={title}
+        title={currentChatTitle}
         availableModels={availableModels}
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}
