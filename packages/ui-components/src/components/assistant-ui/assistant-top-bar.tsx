@@ -91,7 +91,7 @@ const AssistantTopBar = ({
             <SquarePen size={13} />
           </Button>
         </TooltipWrapper>
-        {animatedTitle}
+        <span className="min-w-0 max-w-[240px] truncate">{animatedTitle}</span>
       </div>
       <div className="flex items-center gap-2">
         {children}
