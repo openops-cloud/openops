@@ -39,6 +39,15 @@ RUN <<-```
   # Install Azure CLI
   curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
+  # Configure Azure CLI extensions
+  az config set extension.use_dynamic_install=yes_without_prompt
+  az extension add --name reservation --only-show-errors || true
+  az extension add --name resource-graph --only-show-errors || true
+  az extension add --name costmanagement --only-show-errors || true
+  az extension add --name billing-benefits --only-show-errors || true
+  az extension add --name quotas --only-show-errors || true
+  az extension add --name ssh --only-show-errors || true
+
   # Install Google Cloud CLI
   curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
   mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
