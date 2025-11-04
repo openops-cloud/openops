@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import { History, SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
 import { ReactNode } from 'react';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
+import { useTypingAnimation } from '../../hooks/use-typing-animation';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
@@ -14,7 +15,10 @@ type AssistantTopBarProps = {
   isHistoryOpen?: boolean;
   historyContent?: ReactNode;
   children: ReactNode;
+  chatId?: string | null;
 };
+
+const AI_ASSISTANT_DEFAULT_TITLE = 'AI Assistant';
 
 const AssistantTopBar = ({
   onNewChat,
@@ -24,7 +28,16 @@ const AssistantTopBar = ({
   isHistoryOpen,
   historyContent,
   children,
+  chatId,
 }: AssistantTopBarProps) => {
+  const animatedTitle = useTypingAnimation({
+    text: title || AI_ASSISTANT_DEFAULT_TITLE,
+    speed: 50,
+    fromText: AI_ASSISTANT_DEFAULT_TITLE,
+    defaultText: AI_ASSISTANT_DEFAULT_TITLE,
+    chatId: chatId,
+  });
+
   return (
     <div className="flex justify-between items-center px-4 py-2 gap-2 h-[61px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200">
       <div className="flex items-center gap-2">
@@ -72,7 +85,7 @@ const AssistantTopBar = ({
             <SquarePen size={13} />
           </Button>
         </TooltipWrapper>
-        {title}
+        {animatedTitle}
       </div>
       <div className="flex items-center gap-2">
         {children}

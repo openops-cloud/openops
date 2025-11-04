@@ -144,6 +144,7 @@ const AssistantUiChat = ({
         toolComponents={toolComponents}
         onHistoryOpenChange={setShowHistory}
         isHistoryOpen={showHistory}
+        chatId={chatId}
       >
         {showHistory && (
           <AssistantUiHistory

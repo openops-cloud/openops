@@ -35,6 +35,7 @@ const AssistantUiChatContainer = ({
   isHistoryOpen,
   isShowingSlowWarning,
   connectionError,
+  chatId,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -51,6 +52,7 @@ const AssistantUiChatContainer = ({
         onHistoryOpenChange={onHistoryOpenChange}
         isHistoryOpen={isHistoryOpen}
         historyContent={children}
+        chatId={chatId}
       >
         {null}
       </AssistantTopBar>
