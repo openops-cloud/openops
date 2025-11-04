@@ -38,7 +38,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
   auth: amazonAuth,
   name: 'ssm_generate_runbook_execution_link',
   description:
-    'Generate an AWS Console link to execute an SSM Automation Runbook, with optional prefilled parameters.',
+    'Generate an AWS Console link to execute an SSM Automation Runbook',
   displayName: 'Generate Runbook Execution Link',
   isWriteAction: false,
   riskLevel: RiskLevel.LOW,
