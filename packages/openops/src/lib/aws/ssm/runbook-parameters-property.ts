@@ -21,10 +21,8 @@ function safeParseDefault(raw?: string): unknown {
       'Failed to parse AWS Document default input value, error is ',
       error,
     );
-    if (typeof raw === 'string') {
-      return raw;
-    }
-    return undefined;
+
+    return typeof raw === 'string' ? raw : undefined;
   }
 }
 
@@ -44,7 +42,7 @@ function coerceNumber(value: unknown): number | undefined {
 function coerceBoolean(value: unknown): boolean | undefined {
   const b =
     typeof value === 'boolean' ? value : String(value).toLowerCase() === 'true';
-  return typeof b === 'boolean' ? b : undefined;
+  return b;
 }
 
 function createPropertyForParam(

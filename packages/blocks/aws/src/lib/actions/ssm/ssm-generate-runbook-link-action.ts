@@ -24,9 +24,7 @@ function encodeParamValue(value: unknown): string | undefined {
     );
 
     if (allPrimitives) {
-      const joined = value
-        .map((v) => (v === null || v === undefined ? '' : String(v)))
-        .join(', ');
+      const joined = value.map((v) => String(v)).join(', ');
       return encodeURIComponent(joined);
     }
 
