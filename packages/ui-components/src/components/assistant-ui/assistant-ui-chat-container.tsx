@@ -4,6 +4,7 @@ import {
 } from '@assistant-ui/react';
 import { SourceCode } from '@openops/shared';
 import { ReactNode, useMemo } from 'react';
+import { Popover, PopoverAnchor, PopoverContent } from '../../ui/popover';
 import { MarkdownCodeVariations } from '../custom';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
 import { Thread, ThreadProps } from './thread';
@@ -31,7 +32,7 @@ const AssistantUiChatContainer = ({
   children,
   handleInject,
   toolComponents,
-  onToggleHistory,
+  onHistoryOpenChange,
   isHistoryOpen,
   isShowingSlowWarning,
   connectionError,
@@ -43,26 +44,34 @@ const AssistantUiChatContainer = ({
   }, [handleInject]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-background overflow-hidden relative">
+      <Popover open={isHistoryOpen} onOpenChange={onHistoryOpenChange}>
+        <PopoverAnchor asChild>
+          <div className="absolute left-4 top-[18.5px] w-[24px] h-[24px] pointer-events-none" />
+        </PopoverAnchor>
+        <PopoverContent
+          className="w-[272px] h-[265px] p-0"
+          align="start"
+          side="bottom"
+          sideOffset={8}
+        >
+          {children}
+        </PopoverContent>
+      </Popover>
       <AssistantTopBar
         onClose={onClose}
         onNewChat={onNewChat}
         title={title}
-        onToggleHistory={onToggleHistory}
+        onHistoryOpenChange={onHistoryOpenChange}
         isHistoryOpen={isHistoryOpen}
       >
-        <></>
+        {null}
       </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>
         {Object.entries(toolComponents || {}).map(([key, tool]) => (
           <div key={key}>{tool}</div>
         ))}
         <div className="flex flex-1 overflow-hidden">
-          {isHistoryOpen ? (
-            <div className="shrink-0 w-[220px] border-r border-border overflow-hidden bg-secondary">
-              {children}
-            </div>
-          ) : null}
           <ThreadExtraContextProvider
             codeVariation={codeVariation}
             handleInject={handleInject}

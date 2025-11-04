@@ -1,14 +1,15 @@
 import { t } from 'i18next';
-import { PanelLeft, SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
+import { History, SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
 import { ReactNode } from 'react';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
+import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 
 type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
   title?: string;
-  onToggleHistory?: () => void;
+  onHistoryOpenChange?: (open?: boolean) => void;
   isHistoryOpen?: boolean;
   children: ReactNode;
 };
@@ -17,14 +18,14 @@ const AssistantTopBar = ({
   onNewChat,
   onClose,
   title,
-  onToggleHistory,
+  onHistoryOpenChange,
   isHistoryOpen,
   children,
 }: AssistantTopBarProps) => {
   return (
     <div className="flex justify-between items-center px-4 py-2 gap-2 h-[61px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200">
       <div className="flex items-center gap-2">
-        {onToggleHistory && (
+        {onHistoryOpenChange && (
           <TooltipWrapper
             tooltipText={isHistoryOpen ? t('Close history') : t('Open history')}
             align="start"
@@ -32,13 +33,16 @@ const AssistantTopBar = ({
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                onToggleHistory();
+                onHistoryOpenChange?.(!isHistoryOpen);
               }}
               variant="secondary"
               size="icon"
-              className="text-outline size-[24px] rounded-xs"
+              className={cn(
+                'text-outline size-[24px] rounded-xs',
+                isHistoryOpen && 'bg-gray-200',
+              )}
             >
-              <PanelLeft size={13} />
+              <History size={13} />
             </Button>
           </TooltipWrapper>
         )}

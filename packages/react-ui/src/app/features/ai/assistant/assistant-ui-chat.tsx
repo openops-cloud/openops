@@ -134,7 +134,13 @@ const AssistantUiChat = ({
         theme={theme}
         handleInject={handleInject}
         toolComponents={toolComponents}
-        onToggleHistory={() => setShowHistory(!showHistory)}
+        onHistoryOpenChange={(open) => {
+          if (open !== undefined) {
+            setShowHistory(open);
+          } else {
+            setShowHistory((prev) => !prev);
+          }
+        }}
         isHistoryOpen={showHistory}
       >
         {showHistory && (

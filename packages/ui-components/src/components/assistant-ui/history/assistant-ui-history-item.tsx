@@ -13,7 +13,7 @@ type AssistantUiHistoryItemProps = {
   onRename?: (newName: string) => void;
 };
 
-const ICON_CLASS_NAME = 'text-primary cursor-pointer hover:text-outline';
+const ICON_CLASS_NAME = 'text-[#0F0830] cursor-pointer hover:opacity-70';
 
 const AssistantUiHistoryItem = ({
   displayName,
@@ -66,9 +66,10 @@ const AssistantUiHistoryItem = ({
       role="option"
       tabIndex={isEditing ? -1 : 0}
       className={cn(
-        'flex justify-between items-center gap-2 py-[9px] pl-[9px] pr-2 rounded-sm overflow-hidden cursor-pointer hover:bg-input hover:dark:bg-muted-foreground/80 group',
+        'flex justify-between items-center gap-2 h-[38px] pl-[9px] pr-2 rounded-[8px] overflow-hidden cursor-pointer group',
         {
-          'bg-input': isActive,
+          'bg-gray-200': isActive,
+          'hover:bg-gray-200/50': !isActive && !isEditing,
         },
       )}
       onClick={isEditing ? undefined : onClick}
@@ -83,7 +84,7 @@ const AssistantUiHistoryItem = ({
             onChange={(e) => setEditedName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal dark:text-primary text-sm leading-snug"
+            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal text-black text-[14px] leading-[20px]"
             autoFocus
           />
           <TooltipWrapper tooltipText={t('Confirm')}>
@@ -117,7 +118,7 @@ const AssistantUiHistoryItem = ({
       ) : (
         <OverflowTooltip
           text={displayName}
-          className="flex-1 font-normal dark:text-primary text-sm leading-snug truncate select-none"
+          className="flex-1 font-normal text-black text-[14px] leading-[20px] truncate select-none"
         />
       )}
       {!isEditing && (

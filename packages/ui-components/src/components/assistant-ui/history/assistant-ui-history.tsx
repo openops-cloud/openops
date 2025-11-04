@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { ScrollArea } from '../../../ui/scroll-area';
 import { AssistantUiHistoryItem } from './assistant-ui-history-item';
@@ -26,12 +27,26 @@ const AssistantUiHistory = ({
   return (
     <div
       className={cn(
-        'flex-1 w-full flex flex-col gap-2 bg-secondary py-3 overflow-hidden',
+        'w-full h-full flex flex-col bg-gray-100 rounded-[8px] shadow-[0px_0px_7px_0px_rgba(187,193,218,0.5)] overflow-hidden',
         className,
       )}
     >
-      <ScrollArea className="flex-1">
-        <div className="flex flex-col gap-2 px-2">
+      <div className="px-4 pt-3 pb-2 flex-shrink-0">
+        <button
+          type="button"
+          onClick={onNewChat}
+          disabled={newChatDisabled}
+          className={cn(
+            'flex items-center gap-2 text-sm font-normal text-black cursor-pointer hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed',
+            'transition-opacity',
+          )}
+        >
+          <Plus size={16} className="text-black" />
+          <span className="text-[14px] leading-[20px]">New chat</span>
+        </button>
+      </div>
+      <ScrollArea className="flex-1 min-h-0 pl-[8px] pr-[13px] pb-2">
+        <div className="flex flex-col gap-[8px]">
           {chatItems.map((chatItem) => (
             <AssistantUiHistoryItem
               key={chatItem.id}
