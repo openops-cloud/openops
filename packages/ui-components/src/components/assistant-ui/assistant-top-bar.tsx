@@ -47,6 +47,7 @@ const AssistantTopBar = ({
               tooltipText={
                 isHistoryOpen ? t('Close history') : t('Open history')
               }
+              tooltipPlacement={isHistoryOpen ? 'right' : 'bottom'}
               align="start"
             >
               <PopoverTrigger asChild>
@@ -72,7 +73,11 @@ const AssistantTopBar = ({
             </PopoverContent>
           </Popover>
         )}
-        <TooltipWrapper tooltipText={t('New chat')}>
+        <TooltipWrapper
+          tooltipText={t('New chat')}
+          tooltipPlacement={isHistoryOpen ? 'right' : 'bottom'}
+          align="start"
+        >
           <Button
             onClick={(e) => {
               e.stopPropagation();
