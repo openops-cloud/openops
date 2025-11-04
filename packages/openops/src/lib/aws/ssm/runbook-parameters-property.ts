@@ -22,7 +22,7 @@ function safeParseDefault(raw?: string): unknown {
       error,
     );
 
-    return typeof raw === 'string' ? raw : undefined;
+    return raw;
   }
 }
 
