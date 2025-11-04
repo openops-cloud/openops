@@ -23,7 +23,7 @@ export const getDataIntegrations = createAction({
       });
       return response.body as object;
     } catch (error) {
-      logger.error('Error getting data integrations!', error);
+      logger.warn('Error getting data integrations!', error);
       throw error;
     }
   },

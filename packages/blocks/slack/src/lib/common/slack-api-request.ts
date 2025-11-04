@@ -86,7 +86,7 @@ export async function makeSlackRequest<T>(
     const response = await httpClient.sendRequest<BaseResponse>(request);
 
     if (response.body.ok === false) {
-      logger.error(`Error getting info from slack.`, {
+      logger.warn(`Error getting info from slack.`, {
         slackEndpoint: url,
         response: response.body,
         numberOfRequests: numberOfRequests,

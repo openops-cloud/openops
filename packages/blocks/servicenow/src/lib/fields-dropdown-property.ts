@@ -45,7 +45,7 @@ export function servicenowFieldsDropdownProperty() {
           defaultValue: defaultValues,
         });
       } catch (error) {
-        logger.error(
+        logger.warn(
           'Fetching ServiceNow table fields is not possible, omit field selector. Error:',
           { error },
         );

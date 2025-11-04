@@ -55,7 +55,7 @@ describe('getUserAccountsAction.run', () => {
       /An error occurred while fetching Umbrella user accounts: Error: fail/,
     );
 
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
         'An error occurred while fetching Umbrella user accounts: Error: fail',
       ),

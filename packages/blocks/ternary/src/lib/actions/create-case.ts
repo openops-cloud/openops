@@ -69,7 +69,7 @@ export const createCaseAction = createAction({
       });
       return response.body as any[];
     } catch (error) {
-      logger.error('Error creating a new case.', error);
+      logger.warn('Error creating a new case.', error);
       throw error;
     }
   },

@@ -201,7 +201,7 @@ function throwIfExecutionTimeExceeded(): void {
   const deadlineTimestamp = getContext()['deadlineTimestamp'];
   if (deadlineTimestamp && Date.now() > Number(deadlineTimestamp)) {
     const errorMessage = 'Engine execution time exceeded.';
-    logger.error(errorMessage);
+    logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
 }

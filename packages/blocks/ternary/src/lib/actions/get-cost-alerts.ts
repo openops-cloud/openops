@@ -74,7 +74,7 @@ export const getCostAlertsAction = createAction({
           return filteredByStatus;
       }
     } catch (e) {
-      logger.error('Error getting anomalies list.', e);
+      logger.warn('Error getting anomalies list.', e);
       throw e;
     }
   },
