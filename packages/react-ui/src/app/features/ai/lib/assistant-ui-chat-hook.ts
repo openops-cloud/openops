@@ -19,7 +19,7 @@ import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
 
-export const MAX_MESSAGES_BEFORE_NAME_GENERATION = 1;
+export const MIN_MESSAGES_BEFORE_NAME_GENERATION = 1;
 
 export const useAssistantChat = ({
   chatId,
@@ -227,7 +227,7 @@ export const useAssistantChat = ({
         return;
       }
 
-      if (messagesRef.current.length >= MAX_MESSAGES_BEFORE_NAME_GENERATION) {
+      if (messagesRef.current.length >= MIN_MESSAGES_BEFORE_NAME_GENERATION) {
         setTimeout(async () => {
           try {
             hasAttemptedNameGenerationRef.current[chatId] = true;
