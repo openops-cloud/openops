@@ -97,7 +97,7 @@ function createPropertyForParam(
     default:
       return Property.ShortText({
         ...base,
-        defaultValue: (defaultValue as string) ?? undefined,
+        defaultValue: defaultValue ? String(defaultValue) : undefined,
       });
   }
 }
