@@ -130,10 +130,14 @@ export const useAssistantChat = ({
           stepDetails &&
           flowId
         ) {
+          const stepId =
+            flowHelper.getStep(context.flowVersion, context.selectedStep)?.id ??
+            context.selectedStep;
+
           return await aiChatApi.open(
             flowId,
             getBlockName(stepDetails),
-            context.selectedStep,
+            stepId,
             getActionName(stepDetails),
           );
         }
@@ -302,7 +306,11 @@ export const useAssistantChat = ({
 
       if (oldChatId) {
         const context = getBuilderState();
-        if (context?.selectedStep && context?.flowVersion) {
+        if (
+          context?.selectedStep &&
+          context?.flowVersion &&
+          chatMode === ChatMode.StepSettings
+        ) {
           await aiChatApi.delete(oldChatId);
           chat.setMessages([]);
         } else {
@@ -318,7 +326,14 @@ export const useAssistantChat = ({
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, clearConnectionState, getBuilderState, onChatIdChange]);
+  }, [
+    chatId,
+    chat,
+    clearConnectionState,
+    getBuilderState,
+    onChatIdChange,
+    chatMode,
+  ]);
 
   return {
     runtime,
