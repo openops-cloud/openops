@@ -31,14 +31,15 @@ const AssistantUiHistory = ({
         className,
       )}
     >
-      <div className="px-4 pt-3 pb-2 flex-shrink-0">
+      <div className="px-2 pt-[10px] flex-shrink-0">
         <button
           type="button"
           onClick={onNewChat}
           disabled={newChatDisabled}
           className={cn(
-            'flex items-center gap-2 text-sm font-normal text-black cursor-pointer hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed',
-            'transition-opacity',
+            'flex items-center gap-2 h-[38px] px-[9px] w-full rounded-[8px] text-sm font-normal text-black cursor-pointer',
+            'hover:bg-gray-200/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+            'transition-colors',
           )}
         >
           <Plus size={16} className="text-black" />
@@ -46,7 +47,7 @@ const AssistantUiHistory = ({
         </button>
       </div>
       <ScrollArea className="flex-1 min-h-0 pl-[8px] pr-[13px] pb-2">
-        <div className="flex flex-col gap-[8px]">
+        <div className="flex flex-col gap-[4px]">
           {chatItems.map((chatItem) => (
             <AssistantUiHistoryItem
               key={chatItem.id}

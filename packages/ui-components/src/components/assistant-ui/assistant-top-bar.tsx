@@ -55,7 +55,7 @@ const AssistantTopBar = ({
                   variant="secondary"
                   size="icon"
                   className={cn(
-                    'text-outline size-[24px] rounded-xs',
+                    'text-outline size-[23px] rounded-xs bg-gray-100 enabled:hover:bg-gray-200',
                     isHistoryOpen && 'bg-gray-200',
                   )}
                 >
@@ -86,7 +86,7 @@ const AssistantTopBar = ({
             }}
             variant="secondary"
             size="icon"
-            className="text-outline size-[24px] rounded-xs"
+            className="text-outline size-[23px] rounded-xs bg-gray-100 enabled:hover:bg-gray-200"
           >
             <SquarePen size={13} />
           </Button>
