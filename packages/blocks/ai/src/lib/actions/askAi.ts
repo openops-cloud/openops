@@ -113,6 +113,7 @@ export const askAi = createAction({
         model: languageModel,
         prompt: composedPrompt,
         schema: analysisLLMSchema,
+        maxRetries: 0,
         ...((modelSettings as Record<string, unknown>) ?? {}),
         experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
       });
