@@ -10,7 +10,7 @@ type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
   title?: string;
-  onHistoryOpenChange?: (open?: boolean) => void;
+  onHistoryOpenChange?: (open: boolean) => void;
   isHistoryOpen?: boolean;
   historyContent?: ReactNode;
   children: ReactNode;
