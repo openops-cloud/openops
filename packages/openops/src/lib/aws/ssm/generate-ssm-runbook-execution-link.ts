@@ -39,8 +39,7 @@ export const generateBaseSSMRunbookExecutionLink = (
 export const generateSSMRunbookExecutionParams = (
   parameters: Record<string, unknown>,
 ) => {
-  const inputParams = parameters;
-  const entries = Object.entries(inputParams);
+  const entries = Object.entries(parameters);
 
   const hashParts: string[] = [];
   for (const [key, value] of entries) {
