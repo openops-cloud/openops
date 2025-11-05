@@ -37,10 +37,12 @@ export const runbookNameProperty = Property.Dropdown({
 
       return {
         disabled: false,
-        options: docs.map((d: DocumentIdentifier) => ({
-          label: d.Name || 'Unknown',
-          value: d.Name,
-        })),
+        options: docs
+          .filter((d: DocumentIdentifier) => Boolean(d.Name))
+          .map((d) => ({
+            label: d.Name!,
+            value: d.Name!,
+          })),
       };
     } catch (error) {
       return {
