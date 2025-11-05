@@ -21,6 +21,7 @@ import {
   openOpsId,
   PrincipalType,
   RenameChatRequest,
+  RenameChatRequestBody,
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
@@ -50,6 +51,7 @@ import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
+const MAX_CHAT_NAME_LENGTH = 100;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -264,9 +266,22 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const userId = request.principal.id;
     const projectId = request.principal.projectId;
 
+    const trimmedChatName = chatName.trim();
+    if (!trimmedChatName) {
+      return reply.code(400).send({
+        message: 'Chat name cannot be empty',
+      });
+    }
+
+    if (trimmedChatName.length > MAX_CHAT_NAME_LENGTH) {
+      return reply.code(400).send({
+        message: 'Chat name cannot exceed 100 characters',
+      });
+    }
+
     try {
-      await updateChatName(chatId, userId, projectId, chatName);
-      return await reply.code(200).send({ chatName });
+      await updateChatName(chatId, userId, projectId, trimmedChatName);
+      return await reply.code(200).send({ chatName: trimmedChatName });
     } catch (error) {
       return handleError(error, reply, 'rename chat');
     }
@@ -477,9 +492,7 @@ const RenameChatOptions = {
     tags: ['ai', 'ai-chat-mcp'],
     description: 'Rename a chat session with a user provided name.',
     params: RenameChatRequest,
-    body: Type.Object({
-      chatName: Type.String(),
-    }),
+    body: RenameChatRequestBody,
   },
 };
 

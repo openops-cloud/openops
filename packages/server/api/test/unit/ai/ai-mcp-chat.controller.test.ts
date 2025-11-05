@@ -943,10 +943,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
     });
 
-    it('should handle empty chat name', async () => {
-      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
-      (updateChatName as jest.Mock).mockResolvedValue(undefined);
-
+    it('should reject empty chat name', async () => {
       const request = {
         ...mockRequest,
         params: { chatId: 'test-chat-id' },
@@ -955,14 +952,27 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       await patchHandler(request, mockReply as unknown as FastifyReply);
 
-      expect(updateChatName).toHaveBeenCalledWith(
-        'test-chat-id',
-        'test-user-id',
-        'test-project-id',
-        '',
-      );
-      expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith({ chatName: '' });
+      expect(updateChatName).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Chat name cannot be empty',
+      });
+    });
+
+    it('should reject whitespace-only chat name', async () => {
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: '   ' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Chat name cannot be empty',
+      });
     });
 
     it('should handle chat names with special characters', async () => {
