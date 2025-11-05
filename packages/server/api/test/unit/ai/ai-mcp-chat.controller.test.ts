@@ -8,6 +8,7 @@ import {
 } from 'fastify';
 import {
   createChatContext,
+  deleteChat,
   generateChatName,
   getAllChats,
   getChatContext,
@@ -90,6 +91,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   generateChatName: jest.fn(),
   updateChatName: jest.fn(),
   getAllChats: jest.fn(),
+  deleteChat: jest.fn(),
 }));
 
 jest.mock('@openops/common', () => ({
@@ -988,6 +990,151 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       expect(mockReply.send).toHaveBeenCalledWith({
         chatName: specialName,
       });
+    });
+  });
+
+  describe('DELETE /:chatId (delete chat)', () => {
+    let deleteHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      deleteHandler = handlers['/:chatId'];
+    });
+
+    it('should successfully delete a chat', async () => {
+      (deleteChat as jest.Mock).mockResolvedValue(undefined);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalled();
+    });
+
+    it('should handle deletion of non-existent chat gracefully', async () => {
+      (deleteChat as jest.Mock).mockResolvedValue(undefined);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'non-existent-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        'non-existent-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalled();
+    });
+
+    it('should handle ApplicationError correctly', async () => {
+      const { ApplicationError, ErrorCode } = await import('@openops/shared');
+      const appError = new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          message: 'Chat not found',
+          entityType: 'Chat Session',
+          entityId: 'test-chat-id',
+        },
+      });
+
+      (deleteChat as jest.Mock).mockRejectedValue(appError);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.any(String) }),
+      );
+    });
+
+    it('should handle timeout errors', async () => {
+      (deleteChat as jest.Mock).mockRejectedValue(
+        new Error('Operation timed out'),
+      );
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should call deleteChat with correct user and project parameters', async () => {
+      (deleteChat as jest.Mock).mockResolvedValue(undefined);
+
+      const customRequest = {
+        ...mockRequest,
+        principal: {
+          id: 'different-user-id',
+          projectId: 'different-project-id',
+          type: PrincipalType.USER,
+        },
+        params: { chatId: 'custom-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(customRequest, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        'custom-chat-id',
+        'different-user-id',
+        'different-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+    });
+
+    it('should handle chat IDs with special characters', async () => {
+      (deleteChat as jest.Mock).mockResolvedValue(undefined);
+
+      const specialChatId = 'chat-id-with-special-chars-123!@#';
+      const request = {
+        ...mockRequest,
+        params: { chatId: specialChatId },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChat).toHaveBeenCalledWith(
+        specialChatId,
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
     });
   });
 });
