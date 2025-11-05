@@ -119,7 +119,10 @@ const ConnectionsPicker = ({
               return connection.name === usedConnectionNames[integration.name];
             })
           : null;
-        connections[integration.name] = usedConnection ?? options[0] ?? null;
+
+        const shouldPrefill = integration.auth?.required ?? false;
+        connections[integration.name] =
+          usedConnection ?? (shouldPrefill ? options[0] ?? null : null);
       });
 
       setSelectedConnections(connections);
@@ -139,15 +142,18 @@ const ConnectionsPicker = ({
   }, [groupedConnections, integrations, selectedConnections]);
 
   const isAllConnectionsSelected = useMemo(() => {
-    return (
-      Object.values(selectedConnections).filter((c) => !isNil(c)).length ===
-      integrations.length
+    const requiredIntegrations = integrations.filter(
+      (integration) => integration.auth?.required,
     );
+    const selectedRequiredConnections = requiredIntegrations.filter(
+      (integration) => !isNil(selectedConnections[integration.name]),
+    );
+    return selectedRequiredConnections.length === requiredIntegrations.length;
   }, [integrations, selectedConnections]);
 
   const onConnectionChange = (
     integrationName: string,
-    connection: AppConnectionWithoutSensitiveData,
+    connection: AppConnectionWithoutSensitiveData | null,
   ) => {
     setSelectedConnections((prev) => ({
       ...prev,

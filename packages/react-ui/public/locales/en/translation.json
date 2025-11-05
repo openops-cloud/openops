@@ -414,6 +414,7 @@
   "Close sidebar": "Close sidebar",
   "Settings": "Settings",
   "Change": "Change",
+  "No Connection (Optional)": "No Connection (Optional)",
   "By OpenOps": "By OpenOps",
   "Your new workflow requires the following connections. We recommend setting them up now.": "Your new workflow requires the following connections. We recommend setting them up now.",
   "You will not be able to run the workflow until all required connections are added": "You will not be able to run the workflow until all required connections are added",
