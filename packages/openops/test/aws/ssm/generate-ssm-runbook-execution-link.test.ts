@@ -12,7 +12,7 @@ describe('generateBaseSSMRunbookExecutionLink', () => {
     );
 
     expect(url).toBe(
-      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1#documentVersion=1',
+      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1#documentVersion=1&',
     );
   });
 
@@ -24,7 +24,7 @@ describe('generateBaseSSMRunbookExecutionLink', () => {
     );
 
     expect(url).toBe(
-      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1',
+      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1#',
     );
   });
 
@@ -36,7 +36,7 @@ describe('generateBaseSSMRunbookExecutionLink', () => {
     );
 
     expect(url).toBe(
-      'https://eu-west-1.console.aws.amazon.com/systems-manager/automation/execute/My%20Runbook%2FName?region=eu-west-1#documentVersion=3%24beta',
+      'https://eu-west-1.console.aws.amazon.com/systems-manager/automation/execute/My%20Runbook%2FName?region=eu-west-1#documentVersion=3%24beta&',
     );
   });
 });
@@ -57,7 +57,7 @@ describe('generateSSMRunbookExecutionParams', () => {
       DryRun: false,
     });
 
-    expect(hash).toBe('#InstanceId=i-123%20456&Count=2&DryRun=false');
+    expect(hash).toBe('InstanceId=i-123%20456&Count=2&DryRun=false');
   });
 
   it('encodes array of primitives as a comma+space separated string', () => {
@@ -65,7 +65,7 @@ describe('generateSSMRunbookExecutionParams', () => {
       InstanceIds: ['i-1', 'i-2', 'i 3'],
     });
 
-    expect(hash).toBe('#InstanceIds=i-1%2C%20i-2%2C%20i%203');
+    expect(hash).toBe('InstanceIds=i-1%2C%20i-2%2C%20i%203');
   });
 
   it('encodes arrays with non-primitive items as JSON', () => {
@@ -74,7 +74,7 @@ describe('generateSSMRunbookExecutionParams', () => {
 
     const hash = generateSSMRunbookExecutionParams({ Targets: value });
 
-    expect(hash).toBe(`#Targets=${expected}`);
+    expect(hash).toBe(`Targets=${expected}`);
   });
 
   it('encodes plain object values as JSON', () => {
@@ -83,7 +83,7 @@ describe('generateSSMRunbookExecutionParams', () => {
 
     const hash = generateSSMRunbookExecutionParams({ Options: value });
 
-    expect(hash).toBe(`#Options=${expected}`);
+    expect(hash).toBe(`Options=${expected}`);
   });
 
   it('encodes parameter names (keys) as well', () => {
@@ -91,6 +91,6 @@ describe('generateSSMRunbookExecutionParams', () => {
       'Param Name': 'value/1 2',
     });
 
-    expect(hash).toBe('#Param%20Name=value%2F1%202');
+    expect(hash).toBe('Param%20Name=value%2F1%202');
   });
 });
