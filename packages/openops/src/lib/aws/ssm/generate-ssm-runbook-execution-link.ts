@@ -32,7 +32,7 @@ export const generateBaseSSMRunbookExecutionLink = (
   return `https://${region}.console.aws.amazon.com/systems-manager/automation/execute/${encodeURIComponent(
     runbookName,
   )}?region=${encodeURIComponent(region)}${
-    version ? `#documentVersion=${encodeURIComponent(version)}` : ''
+    version ? `#documentVersion=${encodeURIComponent(version)}&` : '#'
   }`;
 };
 
@@ -49,5 +49,5 @@ export const generateSSMRunbookExecutionParams = (
     }
   }
 
-  return hashParts.length ? `#${hashParts.join('&')}` : '';
+  return hashParts.length ? `${hashParts.join('&')}` : '';
 };

@@ -20,7 +20,7 @@ describe('ssmGenerateRunbookLinkAction.run', () => {
     const result = (await ssmGenerateRunbookLinkAction.run(ctx)) as RunResult;
 
     expect(result.link).toBe(
-      'https://us-west-2.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-west-2',
+      'https://us-west-2.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-west-2#',
     );
   });
 
@@ -37,7 +37,7 @@ describe('ssmGenerateRunbookLinkAction.run', () => {
     const result = (await ssmGenerateRunbookLinkAction.run(ctx)) as RunResult;
 
     expect(result.link).toBe(
-      'https://eu-central-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=eu-central-1',
+      'https://eu-central-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=eu-central-1#',
     );
   });
 
@@ -54,7 +54,7 @@ describe('ssmGenerateRunbookLinkAction.run', () => {
     const result = (await ssmGenerateRunbookLinkAction.run(ctx)) as RunResult;
 
     expect(result.link).toBe(
-      'https://ap-south-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=ap-south-1#documentVersion=3',
+      'https://ap-south-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=ap-south-1#documentVersion=3&',
     );
   });
 
