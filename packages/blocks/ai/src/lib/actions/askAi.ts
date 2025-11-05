@@ -11,7 +11,7 @@ import {
   isLLMTelemetryEnabled,
 } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
-import { generateObject } from 'ai';
+import { generateObject, generateText } from 'ai';
 
 export const askAi = createAction({
   displayName: 'Ask AI',
@@ -108,13 +108,24 @@ export const askAi = createAction({
         ? `\n\nAdditional Input:\n${additionalInput.join(',')}`
         : '');
 
-    const result = await generateObject({
-      model: languageModel,
-      prompt: composedPrompt,
-      schema: analysisLLMSchema,
-      ...((modelSettings as Record<string, unknown>) ?? {}),
-      experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    });
-    return result.object;
+    try {
+      const result = await generateObject({
+        model: languageModel,
+        prompt: composedPrompt,
+        schema: analysisLLMSchema,
+        maxRetries: 0,
+        ...((modelSettings as Record<string, unknown>) ?? {}),
+        experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      });
+      return result.object;
+    } catch (e) {
+      const textResult = await generateText({
+        model: languageModel,
+        prompt: composedPrompt,
+        ...((modelSettings as Record<string, unknown>) ?? {}),
+        experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      });
+      return { textAnswer: textResult.text };
+    }
   },
 });
