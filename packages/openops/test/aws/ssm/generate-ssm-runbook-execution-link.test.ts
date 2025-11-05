@@ -12,7 +12,7 @@ describe('generateBaseSSMRunbookExecutionLink', () => {
     );
 
     expect(url).toBe(
-      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1&documentVersion=1',
+      'https://us-east-1.console.aws.amazon.com/systems-manager/automation/execute/AWS-RestartEC2Instance?region=us-east-1#documentVersion=1',
     );
   });
 
@@ -36,7 +36,7 @@ describe('generateBaseSSMRunbookExecutionLink', () => {
     );
 
     expect(url).toBe(
-      'https://eu-west-1.console.aws.amazon.com/systems-manager/automation/execute/My%20Runbook%2FName?region=eu-west-1&documentVersion=3%24beta',
+      'https://eu-west-1.console.aws.amazon.com/systems-manager/automation/execute/My%20Runbook%2FName?region=eu-west-1#documentVersion=3%24beta',
     );
   });
 });
