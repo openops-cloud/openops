@@ -29,12 +29,14 @@ export const runbookVersionProperty = Property.Dropdown({
         runbookName,
       });
 
-      const opts = versions.map((v) => {
-        const ver = v.DocumentVersion || '';
-        const name = v.VersionName ? ` - ${v.VersionName}` : '';
-        const def = v.IsDefaultVersion ? ' (default)' : '';
-        return { label: `${ver}${name}${def}`, value: ver };
-      });
+      const opts = versions
+        .map((v) => {
+          const ver = v.DocumentVersion || '';
+          const name = v.VersionName ? ` - ${v.VersionName}` : '';
+          const def = v.IsDefaultVersion ? ' (default)' : '';
+          return { label: `${ver}${name}${def}`, value: ver };
+        })
+        .filter((option) => Boolean(option.label));
 
       return {
         disabled: false,
