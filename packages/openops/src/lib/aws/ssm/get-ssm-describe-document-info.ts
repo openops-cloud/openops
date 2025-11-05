@@ -4,19 +4,16 @@ import {
   DocumentParameter,
   SSMClient,
 } from '@aws-sdk/client-ssm';
-import { BlockPropValueSchema } from '@openops/blocks-framework';
-import { amazonAuth, getCredentialsForAccount } from '../auth';
+import { getCredentialsForAccount } from '../auth';
 import { getAwsClient } from '../get-client';
+import { SsmRunbookParams } from './types';
 
 export const getSsmDescribeDocumentInfo = async ({
   auth,
   region,
   runbookName,
   version,
-}: {
-  auth: BlockPropValueSchema<typeof amazonAuth>;
-  region: string;
-  runbookName: string;
+}: SsmRunbookParams & {
   version?: string;
 }): Promise<DocumentParameter[]> => {
   const credentials = await getCredentialsForAccount(auth);
