@@ -8,7 +8,7 @@ import { listBranches } from './github-api';
 export function getBranchProperty(): DropdownProperty<string, true> {
   return Property.Dropdown({
     displayName: 'Branch',
-    description: 'The branch to run the workflow on',
+    description: '',
     required: true,
     refreshers: ['repository'],
     options: async ({ repository, auth }) => {

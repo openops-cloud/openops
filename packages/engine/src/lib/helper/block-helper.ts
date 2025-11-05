@@ -23,6 +23,7 @@ import {
 } from '@openops/shared';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
+import { propsProcessor } from '../variables/props-processor';
 import { createPropsResolver } from '../variables/props-resolver';
 import { blockLoader } from './block-loader';
 
@@ -110,6 +111,26 @@ export const blockHelper = {
         unresolvedInput: params.input,
         executionState,
       });
+
+      const { blockAction } = await blockLoader.getBlockAndActionOrThrow({
+        blockName: params.block.blockName,
+        blockVersion: params.block.blockVersion,
+        blocksSource,
+        actionName: params.actionOrTriggerName,
+      });
+
+      const { processedInput, errors } =
+        await propsProcessor.applyProcessorsAndValidators(
+          resolvedInput,
+          blockAction.props,
+          blockAction.props.auth,
+          blockAction.requireAuth,
+        );
+
+      if (Object.keys(errors).length > 0) {
+        throw new Error(JSON.stringify(errors));
+      }
+
       const ctx = {
         searchValue,
         flows: {
@@ -131,7 +152,7 @@ export const blockHelper = {
         input: params.input,
       };
 
-      return await evaluateProp(ctx, property, resolvedInput);
+      return await evaluateProp(ctx, property, processedInput);
     } catch (e) {
       console.error(e);
       return {
