@@ -1,4 +1,7 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
 import { observe, updateActiveObservation } from '@langfuse/tracing';
 import {
   getLangfuseSpanProcessor,
@@ -17,6 +20,7 @@ import {
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  RenameChatRequest,
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
@@ -254,6 +258,20 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 
+  app.patch('/:chatId/name', RenameChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
+    const { chatName } = request.body;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      await updateChatName(chatId, userId, projectId, chatName);
+      return await reply.code(200).send({ chatName });
+    } catch (error) {
+      return handleError(error, reply, 'rename chat');
+    }
+  });
+
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
@@ -448,6 +466,20 @@ const CodeGenerationOptions = {
     description:
       "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
+  },
+};
+
+const RenameChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Rename a chat session with a user provided name.',
+    params: RenameChatRequest,
+    body: Type.Object({
+      chatName: Type.String(),
+    }),
   },
 };
 
