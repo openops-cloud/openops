@@ -264,15 +264,6 @@ export const getChatTools = async (
   return toolNames ?? [];
 };
 
-export const deleteChat = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
-  await cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId));
-};
-
 export async function getLLMConfig(
   projectId: string,
   contextModel?: string,
