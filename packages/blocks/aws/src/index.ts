@@ -23,6 +23,7 @@ import { rdsDeleteInstanceAction } from './lib/actions/rds/rds-delete-instance-a
 import { rdsDeleteSnapshotAction } from './lib/actions/rds/rds-delete-snapshot-action';
 import { rdsGetInstancesAction } from './lib/actions/rds/rds-describe-instances-action';
 import { rdsGetSnapshotsAction } from './lib/actions/rds/rds-describe-snapshots-action';
+import { ssmGenerateRunbookLinkAction } from './lib/actions/ssm/ssm-generate-runbook-link-action';
 
 export const aws = createBlock({
   displayName: 'AWS',
@@ -53,6 +54,7 @@ export const aws = createBlock({
     rdsCreateSnapshotAction,
     rdsDeleteSnapshotAction,
     addTagsAction,
+    ssmGenerateRunbookLinkAction,
     awsCliAction,
   ],
   triggers: [],

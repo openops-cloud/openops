@@ -21,7 +21,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(aws.actions()).length).toBe(22);
+    expect(Object.keys(aws.actions()).length).toBe(23);
     expect(aws.actions()).toMatchObject({
       ebs_get_volumes: {
         name: 'ebs_get_volumes',
@@ -101,6 +101,10 @@ describe('block declaration tests', () => {
       },
       ec2_get_instances: {
         name: 'ec2_get_instances',
+        requireAuth: true,
+      },
+      ssm_generate_runbook_execution_link: {
+        name: 'ssm_generate_runbook_execution_link',
         requireAuth: true,
       },
       aws_cli: {
