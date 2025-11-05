@@ -2,37 +2,13 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
   DocumentOwner,
+  generateBaseSSMRunbookExecutionLink,
+  generateSSMRunbookExecutionParams,
   runbookNameProperty,
   runbookParametersProperty,
   runbookVersionProperty,
 } from '@openops/common';
 import { RiskLevel } from '@openops/shared';
-
-function encodeParamValue(value: unknown): string | undefined {
-  if (value === undefined || value === null) return undefined;
-
-  if (typeof value === 'string') {
-    return encodeURIComponent(value);
-  }
-
-  if (Array.isArray(value)) {
-    const allPrimitives = value.every(
-      (v) =>
-        typeof v === 'string' ||
-        typeof v === 'number' ||
-        typeof v === 'boolean',
-    );
-
-    if (allPrimitives) {
-      const joined = value.map((v) => String(v)).join(', ');
-      return encodeURIComponent(joined);
-    }
-
-    return encodeURIComponent(JSON.stringify(value));
-  }
-
-  return encodeURIComponent(JSON.stringify(value));
-}
 
 export const ssmGenerateRunbookLinkAction = createAction({
   auth: amazonAuth,
@@ -62,41 +38,29 @@ export const ssmGenerateRunbookLinkAction = createAction({
           { label: 'All runbooks', value: DocumentOwner.All },
         ],
       },
-      defaultValue: 'Private',
+      defaultValue: DocumentOwner.Private,
     }),
     runbook: runbookNameProperty,
     version: runbookVersionProperty,
     parameters: runbookParametersProperty,
   },
   async run({ propsValue, auth }) {
-    const awsRegion = propsValue.region || auth.defaultRegion;
-    const runbook = propsValue.runbook;
+    const { runbook, version, parameters, region } = propsValue;
+    const awsRegion = region || auth.defaultRegion;
 
     if (!runbook) {
       throw new Error('Runbook is required');
     }
 
-    const version = propsValue.version ?? undefined;
-
-    const base = `https://${awsRegion}.console.aws.amazon.com/systems-manager/automation/execute/${encodeURIComponent(
+    const base = generateBaseSSMRunbookExecutionLink(
+      awsRegion,
       runbook,
-    )}?region=${encodeURIComponent(awsRegion)}${
-      version ? `&documentVersion=${encodeURIComponent(version)}` : ''
-    }`;
+      version,
+    );
 
-    const inputParams =
-      (propsValue.parameters as Record<string, unknown>) || {};
-    const entries = Object.entries(inputParams || {});
-
-    const hashParts: string[] = [];
-    for (const [key, value] of entries) {
-      const encodedValue = encodeParamValue(value);
-      if (encodedValue) {
-        hashParts.push(`${encodeURIComponent(key)}=${encodedValue}`);
-      }
-    }
-
-    const fragment = hashParts.length ? `#${hashParts.join('&')}` : '';
+    const fragment = generateSSMRunbookExecutionParams(
+      (parameters as Record<string, unknown>) || {},
+    );
     const link = `${base}${fragment}`;
 
     return {

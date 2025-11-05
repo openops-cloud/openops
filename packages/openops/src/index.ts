@@ -23,6 +23,7 @@ export * from './lib/aws/rds/rds-delete-snapshot';
 export * from './lib/aws/rds/rds-describe';
 export * from './lib/aws/regions';
 export * from './lib/aws/ssm/document-owner';
+export * from './lib/aws/ssm/generate-ssm-runbook-execution-link';
 export * from './lib/aws/ssm/runbook-name-property';
 export * from './lib/aws/ssm/runbook-parameters-property';
 export * from './lib/aws/ssm/runbook-version-property';
