@@ -39,6 +39,14 @@ const chatHistoryKey = (
   return `${projectId}:${userId}:${chatId}:history`;
 };
 
+const chatToolsKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:tools`;
+};
+
 export type MCPChatContext = {
   chatId?: string;
   workflowId?: string;
@@ -213,7 +221,47 @@ export const deleteChatHistory = async (
   userId: string,
   projectId: string,
 ): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
+  await Promise.all([
+    cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId)),
+    cacheWrapper.deleteKey(chatToolsKey(chatId, userId, projectId)),
+    cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId)),
+  ]);
+};
+
+/**
+ * Save selected tool names for a chat session.
+ * This is used to maintain an append-only list of tools that have been
+ * selected throughout the conversation to prevent LLM hallucinations.
+ */
+export const saveChatTools = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+  toolNames: string[],
+): Promise<void> => {
+  const chatExpireTime = system.getNumberOrThrow(
+    AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
+  );
+  await cacheWrapper.setSerializedObject(
+    chatToolsKey(chatId, userId, projectId),
+    toolNames,
+    chatExpireTime,
+  );
+};
+
+/**
+ * Get the list of tool names that have been selected for this chat.
+ * Returns empty array if no tools have been saved yet.
+ */
+export const getChatTools = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): Promise<string[]> => {
+  const toolNames = await cacheWrapper.getSerializedObject<string[]>(
+    chatToolsKey(chatId, userId, projectId),
+  );
+  return toolNames ?? [];
 };
 
 export const deleteChat = async (

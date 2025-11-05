@@ -63,7 +63,9 @@ const connectionsPickerTableColumns: ColumnDef<
 
 type ConnectionPickerTableActions = {
   addConnection: (block: BlockMetadataModelSummary) => void;
-  onConnectionChange: (connection: AppConnectionWithoutSensitiveData) => void;
+  onConnectionChange: (
+    connection: AppConnectionWithoutSensitiveData | null,
+  ) => void;
 } & TemplateConnectionTableData;
 
 const ConnectionPickerTableActions = ({
@@ -73,7 +75,11 @@ const ConnectionPickerTableActions = ({
   addConnection,
   onConnectionChange,
 }: ConnectionPickerTableActions) => {
-  if (selectedConnection) {
+  const hasConnectionOptions =
+    connectionOptions && connectionOptions.length > 0;
+  const isOptional = !integration.auth?.required;
+
+  if (selectedConnection || hasConnectionOptions) {
     return (
       <DropdownMenu modal={true}>
         <DropdownMenuTrigger
@@ -95,6 +101,14 @@ const ConnectionPickerTableActions = ({
             <Plus size={16} />
             {t('Create Connection')}
           </DropdownMenuItem>
+          {isOptional && (
+            <DropdownMenuItem
+              onSelect={() => onConnectionChange(null)}
+              className="text-muted-foreground italic pb-2 mb-1"
+            >
+              {t('No Connection (Optional)')}
+            </DropdownMenuItem>
+          )}
           {connectionOptions?.map((connection) => {
             return (
               <DropdownMenuItem
