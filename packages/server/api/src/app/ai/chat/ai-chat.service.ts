@@ -216,19 +216,13 @@ export const deleteChatHistory = async (
   await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
 };
 
-const chatContextKeyFor = (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): string => `${projectId}:${userId}:${chatId}:context`;
-
 export const deleteChat = async (
   chatId: string,
   userId: string,
   projectId: string,
 ): Promise<void> => {
   await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
-  await cacheWrapper.deleteKey(chatContextKeyFor(chatId, userId, projectId));
+  await cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId));
 };
 
 export async function getLLMConfig(
