@@ -27,7 +27,7 @@ const encodeParamValue = (value: unknown): string | undefined => {
 export const generateBaseSSMRunbookExecutionLink = (
   region: string,
   runbookName: string,
-  version: string,
+  version?: string,
 ) => {
   return `https://${region}.console.aws.amazon.com/systems-manager/automation/execute/${encodeURIComponent(
     runbookName,
@@ -39,8 +39,8 @@ export const generateBaseSSMRunbookExecutionLink = (
 export const generateSSMRunbookExecutionParams = (
   parameters: Record<string, unknown>,
 ) => {
-  const inputParams = (parameters as Record<string, unknown>) || {};
-  const entries = Object.entries(inputParams || {});
+  const inputParams = parameters;
+  const entries = Object.entries(inputParams);
 
   const hashParts: string[] = [];
   for (const [key, value] of entries) {
