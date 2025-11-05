@@ -81,6 +81,8 @@ export const getBlockSystemPrompt = async (
       return loadPrompt('snowflake.txt');
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
+    case '@openops/block-cloudformation':
+      return loadPrompt('cloudformation.txt');
     case CODE_BLOCK_NAME: {
       let enhancedPrompt = '';
 

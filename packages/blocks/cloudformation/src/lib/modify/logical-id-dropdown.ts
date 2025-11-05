@@ -5,6 +5,7 @@ const ValidResourceTypes = [
   'AWS::EC2::Instance',
   'AWS::EC2::Volume',
   'AWS::RDS::DBInstance',
+  'AWS::S3::Bucket',
 ];
 
 export function getLogicalIdDropdown() {
