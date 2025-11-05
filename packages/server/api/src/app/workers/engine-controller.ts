@@ -320,9 +320,19 @@ async function getFlowResponse(
         headers: {},
       };
     case FlowRunStatus.SUCCEEDED:
+      if (result.stopResponse) {
+        return {
+          status: result.stopResponse?.status ?? StatusCodes.OK,
+          body: result.stopResponse?.body,
+          headers: result.stopResponse?.headers ?? {},
+        };
+      }
+
       return {
-        status: StatusCodes.NO_CONTENT,
-        body: {},
+        status: StatusCodes.OK,
+        body: {
+          message: 'Request completed.',
+        },
         headers: {},
       };
     default:
