@@ -1,6 +1,5 @@
 import { runCliCommand } from '@openops/common';
-import { mkdtempSync } from 'fs';
-import { tmpdir } from 'os';
+import { homedir } from 'os';
 import { join } from 'path';
 
 export async function runCommand(
@@ -19,8 +18,10 @@ export async function runCommand(
   }
 
   if (!shouldUseHostCredentials) {
-    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
-    envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
+    const persistentConfigDir = process.env['AZURE_CONFIG_DIR']
+      ? process.env['AZURE_CONFIG_DIR']
+      : join(homedir(), '.azure');
+    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
 
     await login(credentials, envVars);
   }

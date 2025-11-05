@@ -18,14 +18,23 @@ describe('azureCli', () => {
   });
 
   test('should call runCliCommand with the given arguments', async () => {
-    commonMock.runCliCommand.mockResolvedValueOnce('login result');
-    commonMock.runCliCommand.mockResolvedValueOnce('mock result');
+    commonMock.runCliCommand.mockResolvedValue('ok');
 
     const result = await runCommand('some command', credentials, false);
 
-    expect(result).toBe('mock result');
-    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(2);
-    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+    expect(result).toBe('ok');
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(3);
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      1,
+      'config set extension.use_dynamic_install=yes_without_prompt',
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      2,
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
       {
@@ -33,7 +42,8 @@ describe('azureCli', () => {
         AZURE_CONFIG_DIR: expect.any(String),
       },
     );
-    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      3,
       'some command',
       'az',
       {
@@ -44,9 +54,7 @@ describe('azureCli', () => {
   });
 
   test('should call set subscription if provided', async () => {
-    commonMock.runCliCommand.mockResolvedValueOnce('login result');
-    commonMock.runCliCommand.mockResolvedValueOnce('set subscription result');
-    commonMock.runCliCommand.mockResolvedValueOnce('mock result');
+    commonMock.runCliCommand.mockResolvedValue('ok');
 
     const result = await runCommand(
       'some command',
@@ -55,11 +63,11 @@ describe('azureCli', () => {
       'subscriptionId',
     );
 
-    expect(result).toBe('mock result');
-    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(3);
+    expect(result).toBe('ok');
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(4);
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       1,
-      `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
+      'config set extension.use_dynamic_install=yes_without_prompt',
       'az',
       {
         PATH: process.env['PATH'],
@@ -68,7 +76,7 @@ describe('azureCli', () => {
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       2,
-      'account set --subscription subscriptionId',
+      `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
       {
         PATH: process.env['PATH'],
@@ -77,6 +85,15 @@ describe('azureCli', () => {
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       3,
+      'account set --subscription subscriptionId',
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      4,
       'some command',
       'az',
       {
@@ -163,14 +180,26 @@ describe('azureCli', () => {
   });
 
   test('should throw an error if runCliCommand fails and return the whole error when command does not contain login credentials', async () => {
-    commonMock.runCliCommand.mockRejectedValue('error');
+    commonMock.runCliCommand
+      .mockResolvedValueOnce('ok')
+      .mockRejectedValueOnce('error');
 
     await expect(
       runCommand('some command', credentials, false),
     ).rejects.toThrow('Error while login into azure: error');
 
-    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(1);
-    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(2);
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      1,
+      'config set extension.use_dynamic_install=yes_without_prompt',
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      2,
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
       {
@@ -181,9 +210,9 @@ describe('azureCli', () => {
   });
 
   test('should throw an error if runCommand fails and return the redacted error when command contains login credentials', async () => {
-    commonMock.runCliCommand.mockRejectedValue(
-      'login --service-principal blah blah error',
-    );
+    commonMock.runCliCommand
+      .mockResolvedValueOnce('ok')
+      .mockRejectedValueOnce('login --service-principal blah blah error');
 
     await expect(
       runCommand('some command', credentials, false),
@@ -191,8 +220,18 @@ describe('azureCli', () => {
       'Error while login into azure: login --service-principal ***REDACTED***',
     );
 
-    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(1);
-    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(2);
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      1,
+      'config set extension.use_dynamic_install=yes_without_prompt',
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+    expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
+      2,
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
       {
