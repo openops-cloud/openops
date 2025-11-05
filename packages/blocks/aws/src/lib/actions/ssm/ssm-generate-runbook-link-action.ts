@@ -64,7 +64,7 @@ export const ssmGenerateRunbookLinkAction = createAction({
     const link = `${base}${fragment}`;
 
     return {
-      link,
+      link: `${base}${fragment}`,
     };
   },
 });
