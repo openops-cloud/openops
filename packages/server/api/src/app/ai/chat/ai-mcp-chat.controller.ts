@@ -272,7 +272,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
     if (trimmedChatName.length > MAX_CHAT_NAME_LENGTH) {
       return reply.code(400).send({
-        message: 'Chat name cannot exceed 100 characters',
+        message: `Chat name cannot exceed ${MAX_CHAT_NAME_LENGTH} characters`,
       });
     }
 
