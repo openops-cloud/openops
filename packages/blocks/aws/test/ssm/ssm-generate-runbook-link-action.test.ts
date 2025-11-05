@@ -54,7 +54,7 @@ describe('ssmGenerateRunbookLinkAction.run', () => {
     const result = (await ssmGenerateRunbookLinkAction.run(ctx)) as RunResult;
 
     expect(result.link).toBe(
-      'https://ap-south-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=ap-south-1&documentVersion=3',
+      'https://ap-south-1.console.aws.amazon.com/systems-manager/automation/execute/My-Runbook?region=ap-south-1#documentVersion=3',
     );
   });
 
