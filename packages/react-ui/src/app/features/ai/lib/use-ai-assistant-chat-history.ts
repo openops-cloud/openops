@@ -1,4 +1,6 @@
+import { toast } from '@openops/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { t } from 'i18next';
 import { aiAssistantChatHistoryApi } from './ai-assistant-chat-history-api';
 
 export function useAssistantChatHistory() {
@@ -21,12 +23,30 @@ export function useAssistantChatHistory() {
   const deleteMutation = useMutation({
     mutationFn: (chatId: string) => aiAssistantChatHistoryApi.delete(chatId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['assistant-history'] }),
+    onError: (error) => {
+      console.error('Failed to delete chat', error);
+      toast({
+        title: t('Error'),
+        variant: 'destructive',
+        description: t('Failed to delete chat. Please try again.'),
+        duration: 3000,
+      });
+    },
   });
 
   const renameMutation = useMutation({
     mutationFn: ({ chatId, chatName }: { chatId: string; chatName: string }) =>
       aiAssistantChatHistoryApi.rename(chatId, chatName),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['assistant-history'] }),
+    onError: (error) => {
+      console.error('Failed to rename chat', error);
+      toast({
+        title: t('Error'),
+        variant: 'destructive',
+        description: t('Failed to rename chat. Please try again.'),
+        duration: 3000,
+      });
+    },
   });
 
   return {
