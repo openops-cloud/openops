@@ -1,5 +1,7 @@
 import { BlockPropValueSchema, Property } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
+import { isObject } from '@openops/shared';
+import { tryParseJson } from '../../json-utils';
 import { amazonAuth } from '../auth';
 import { getSsmDescribeDocumentInfo } from './get-ssm-describe-document-info';
 
@@ -12,34 +14,16 @@ const enum ParameterType {
   MapList = 'MapList',
 }
 
-function safeParseDefault(raw?: string): unknown {
-  if (!raw) return undefined;
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    logger.warn(
-      'Failed to parse AWS Document default input value, error is ',
-      error,
-    );
-
-    return raw;
-  }
-}
-
 function isListType(type: string): boolean {
   return /^List<[^>]+>$/.test(type) || type === ParameterType.StringList;
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
-}
-
 function coerceNumber(value: unknown): number | undefined {
-  const n = typeof value === 'number' ? value : Number(value);
+  const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
 }
 
-function coerceBoolean(value: unknown): boolean | undefined {
+function coerceBoolean(value: unknown): boolean {
   const b =
     typeof value === 'boolean' ? value : String(value).toLowerCase() === 'true';
   return b;
@@ -83,7 +67,7 @@ function createPropertyForParam(
     case ParameterType.StringMap:
       return Property.Object({
         ...base,
-        defaultValue: isPlainObject(defaultValue) ? defaultValue : undefined,
+        defaultValue: isObject(defaultValue) ? defaultValue : undefined,
       });
 
     case ParameterType.MapList:
@@ -127,8 +111,8 @@ export const runbookParametersProperty = Property.DynamicProperties({
         const key = p?.Name as string | undefined;
         if (!key) continue;
 
-        const type = String(p?.Type || '');
-        const defaultValue = safeParseDefault(p?.DefaultValue);
+        const type = p?.Type || '';
+        const defaultValue = tryParseJson(p?.DefaultValue);
 
         result[key] = createPropertyForParam(
           p,
@@ -138,7 +122,7 @@ export const runbookParametersProperty = Property.DynamicProperties({
         );
       }
     } catch (e) {
-      logger.warn(e);
+      logger.warn('Failed to build runbook params', e);
     }
 
     return result;
