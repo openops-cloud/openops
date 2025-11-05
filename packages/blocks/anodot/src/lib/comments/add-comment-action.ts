@@ -53,7 +53,7 @@ export const addCommentAction = createAction({
     } catch (error) {
       const errorMsg = `An error occurred while adding a comment to Umbrella recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
 
-      logger.error(errorMsg);
+      logger.warn(errorMsg);
 
       throw new Error(errorMsg);
     }

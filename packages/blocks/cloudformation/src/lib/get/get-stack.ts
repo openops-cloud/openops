@@ -35,7 +35,7 @@ export const getStack = createAction({
       return await getCloudFormationTemplate(credentials, region, arn);
     } catch (error) {
       const message = `An error occurred while fetching cloudformation stack: ${arn}`;
-      logger.error(message, { error, arn });
+      logger.warn(message, { error, arn });
       throw new Error(message);
     }
   },

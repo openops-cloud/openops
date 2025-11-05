@@ -65,7 +65,7 @@ export const updateStack = createAction({
       const message = `An error occurred while updating cloudformation stack. Message: ${
         (error as Error).message
       }`;
-      logger.error(message, { arn, error });
+      logger.warn(message, { arn, error });
       throw new Error(message);
     }
   },

@@ -74,7 +74,7 @@ export const advisorAction = createAction({
         return result;
       }
     } catch (error) {
-      logger.error('Failed to fetch Azure cost recommendations', {
+      logger.warn('Failed to fetch Azure cost recommendations', {
         command: command,
         error: error,
       });

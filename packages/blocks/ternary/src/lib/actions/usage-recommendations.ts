@@ -23,7 +23,7 @@ export const getUsageRecommendations = createAction({
       });
       return response.body as object;
     } catch (e) {
-      logger.error('Error getting usage recommendations.', e);
+      logger.warn('Error getting usage recommendations.', e);
       throw e;
     }
   },

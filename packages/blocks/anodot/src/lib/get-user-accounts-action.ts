@@ -27,7 +27,7 @@ export const getUserAccountsAction = createAction({
     } catch (error) {
       const errorMsg = `An error occurred while fetching Umbrella user accounts: ${error}`;
 
-      logger.error(errorMsg);
+      logger.warn(errorMsg);
       throw new Error(errorMsg);
     }
   },

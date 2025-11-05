@@ -13,7 +13,7 @@ jest.mock('@openops/blocks-common', () => ({
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
-    error: jest.fn(),
+    warn: jest.fn(),
     info: jest.fn(),
   },
 }));
@@ -66,7 +66,7 @@ describe('Slack Service', () => {
         'Error getting info from slack: mock_error',
       );
       expect(httpClientMock).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 
@@ -248,7 +248,7 @@ describe('Slack Service', () => {
         makeSlackRequest(token, 'users.list', (body) => body.members),
       ).rejects.toThrow('Error getting info from slack: mock_error');
       expect(httpClientMock).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 });
