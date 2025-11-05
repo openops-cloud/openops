@@ -61,7 +61,6 @@ export const ssmGenerateRunbookLinkAction = createAction({
     const fragment = generateSSMRunbookExecutionParams(
       (parameters as Record<string, unknown>) || {},
     );
-    const link = `${base}${fragment}`;
 
     return {
       link: `${base}${fragment}`,
