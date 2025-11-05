@@ -89,11 +89,11 @@ describe('block declaration tests', () => {
       },
       build_arn: {
         name: 'build_arn',
-        requireAuth: true,
+        requireAuth: false,
       },
       parse_arn: {
         name: 'parse_arn',
-        requireAuth: true,
+        requireAuth: false,
       },
       ec2_terminate_instances: {
         name: 'ec2_terminate_instances',
