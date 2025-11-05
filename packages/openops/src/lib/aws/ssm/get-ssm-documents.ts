@@ -5,20 +5,18 @@ import {
   ListDocumentsCommandOutput,
   SSMClient,
 } from '@aws-sdk/client-ssm';
-import { BlockPropValueSchema } from '@openops/blocks-framework';
-import { amazonAuth, getCredentialsForAccount } from '../auth';
+import { getCredentialsForAccount } from '../auth';
 import { makeAwsRequest } from '../aws-client-wrapper';
 import { getAwsClient } from '../get-client';
 import { DocumentOwner } from './document-owner';
+import { AwsAuthRegionParams } from './types';
 
 export const getSsmDocuments = async ({
   auth,
   region,
   owner,
   type = 'Automation',
-}: {
-  auth: BlockPropValueSchema<typeof amazonAuth>;
-  region: string;
+}: AwsAuthRegionParams & {
   owner?: DocumentOwner;
   type?: string;
 }): Promise<DocumentIdentifier[]> => {
