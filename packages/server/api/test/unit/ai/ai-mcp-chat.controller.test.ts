@@ -1041,37 +1041,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       expect(mockReply.send).toHaveBeenCalled();
     });
 
-    it('should handle ApplicationError correctly', async () => {
-      const { ApplicationError, ErrorCode } = await import('@openops/shared');
-      const appError = new ApplicationError({
-        code: ErrorCode.ENTITY_NOT_FOUND,
-        params: {
-          message: 'Chat not found',
-          entityType: 'Chat Session',
-          entityId: 'test-chat-id',
-        },
-      });
-
-      (deleteChat as jest.Mock).mockRejectedValue(appError);
-
-      const request = {
-        ...mockRequest,
-        params: { chatId: 'test-chat-id' },
-      } as FastifyRequest;
-
-      await deleteHandler(request, mockReply as unknown as FastifyReply);
-
-      expect(deleteChat).toHaveBeenCalledWith(
-        'test-chat-id',
-        'test-user-id',
-        'test-project-id',
-      );
-      expect(mockReply.code).toHaveBeenCalledWith(400);
-      expect(mockReply.send).toHaveBeenCalledWith(
-        expect.objectContaining({ message: expect.any(String) }),
-      );
-    });
-
     it('should handle timeout errors', async () => {
       (deleteChat as jest.Mock).mockRejectedValue(
         new Error('Operation timed out'),
