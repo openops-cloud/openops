@@ -386,7 +386,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
     });
 
-    it('should return "Undefined Chat" for empty chatHistory', async () => {
+    it('should return "New Chat" for empty chatHistory', async () => {
       (getConversation as jest.Mock).mockResolvedValue({ chatHistory: [] });
 
       await postHandler(
@@ -396,13 +396,13 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Undefined Chat',
+        chatName: 'New Chat',
       });
       expect(generateChatName).not.toHaveBeenCalled();
       expect(updateChatName).not.toHaveBeenCalled();
     });
 
-    it('should return "Undefined Chat" when chatHistory has no user messages', async () => {
+    it('should return "New Chat" when chatHistory has no user messages', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [
           { role: 'assistant', content: 'Some response' },
@@ -421,7 +421,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Undefined Chat',
+        chatName: 'New Chat',
       });
       expect(generateChatName).not.toHaveBeenCalled();
       expect(updateChatName).not.toHaveBeenCalled();
@@ -490,7 +490,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
     });
 
-    it('should return "Undefined Chat" if LLM returns empty/whitespace', async () => {
+    it('should return "New Chat" if LLM returns empty/whitespace', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [
           { role: 'user', content: 'Hello?' },
@@ -506,17 +506,17 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Undefined Chat',
+        chatName: 'New Chat',
       });
       expect(updateChatName).toHaveBeenCalledWith(
         'test-chat-id',
         'test-user-id',
         'test-project-id',
-        'Undefined Chat',
+        'New Chat',
       );
     });
 
-    it('should return "Undefined Chat" if LLM returns empty string', async () => {
+    it('should return "New Chat" if LLM returns empty string', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [{ role: 'user', content: 'Test question' }],
       });
@@ -529,7 +529,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Undefined Chat',
+        chatName: 'New Chat',
       });
     });
 

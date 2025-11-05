@@ -45,7 +45,7 @@ import { parseUserMessage } from './message-parser';
 import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
-const DEFAULT_CHAT_NAME = 'Undefined Chat';
+const DEFAULT_CHAT_NAME = 'New Chat';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
