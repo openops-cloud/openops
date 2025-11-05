@@ -18,9 +18,7 @@ export async function runCommand(
   }
 
   if (!shouldUseHostCredentials) {
-    const persistentConfigDir = process.env['AZURE_CONFIG_DIR']
-      ? process.env['AZURE_CONFIG_DIR']
-      : join(homedir(), '.azure');
+    const persistentConfigDir = process.env['AZURE_CONFIG_DIR'] ?? join(homedir(), '.azure');
     envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
 
     await login(credentials, envVars);
