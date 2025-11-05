@@ -127,34 +127,38 @@ async function fetchMessages(
   const messages: Message[] = [];
   const baseUrl = `/me/mailFolders/${folderId || 'inbox'}/messages`;
 
-  const headers: Record<string, string> = {
-    ConsistencyLevel: 'eventual',
-    Prefer: 'outlook.body-content-type="html"',
-  };
+  try {
+    const headers: Record<string, string> = {
+      ConsistencyLevel: 'eventual',
+      Prefer: 'outlook.body-content-type="html"',
+    };
 
-  let req = client
-    .api(baseUrl)
-    .select(SELECT_FIELDS)
-    .orderby('receivedDateTime desc')
-    .headers(headers);
+    let req = client
+      .api(baseUrl)
+      .select(SELECT_FIELDS)
+      .orderby('receivedDateTime desc')
+      .headers(headers);
 
-  const shouldFetchAll = lastFetchEpochMS !== 0;
-  if (shouldFetchAll) {
-    req = req.filter(
-      `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
-    );
-  }
-
-  let response: PageCollection = await req.get();
-  do {
-    messages.push(...(response.value as Message[]));
-
-    if (!shouldFetchAll || !response['@odata.nextLink']) {
-      break;
+    const shouldFetchAll = lastFetchEpochMS !== 0;
+    if (shouldFetchAll) {
+      req = req.filter(
+        `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
+      );
     }
 
-    response = await client.api(response['@odata.nextLink']).get();
-  } while (response.value.length > 0);
+    let response: PageCollection = await req.get();
+    do {
+      messages.push(...(response.value as Message[]));
+
+      if (!shouldFetchAll || !response['@odata.nextLink']) {
+        break;
+      }
+
+      response = await client.api(response['@odata.nextLink']).get();
+    } while (response.value.length > 0);
+  } catch (error) {
+    console.warn('Failed to fetch outlook emails: ', error);
+  }
 
   return messages;
 }
