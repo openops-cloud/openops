@@ -23,7 +23,7 @@ export const getBudgets = createAction({
       });
       return response.body as any[];
     } catch (error) {
-      logger.error('Error getting budgets.', error);
+      logger.warn('Error getting budgets.', error);
       throw error;
     }
   },

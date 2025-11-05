@@ -10,7 +10,7 @@ jest.mock('../src/lib/common/users', () => ({
   getAnodotUsers: jest.fn(),
 }));
 jest.mock('@openops/server-shared', () => ({
-  logger: { error: jest.fn() },
+  logger: { warn: jest.fn() },
 }));
 
 describe('getUserAccountsAction.run', () => {
@@ -55,7 +55,7 @@ describe('getUserAccountsAction.run', () => {
       /An error occurred while fetching Umbrella user accounts: Error: fail/,
     );
 
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
         'An error occurred while fetching Umbrella user accounts: Error: fail',
       ),
