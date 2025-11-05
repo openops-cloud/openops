@@ -8,6 +8,7 @@ import {
 } from 'fastify';
 import {
   createChatContext,
+  deleteChatHistory,
   generateChatName,
   getAllChats,
   getChatContext,
@@ -90,6 +91,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   generateChatName: jest.fn(),
   updateChatName: jest.fn(),
   getAllChats: jest.fn(),
+  deleteChatHistory: jest.fn(),
 }));
 
 jest.mock('@openops/common', () => ({
@@ -844,6 +846,120 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           model: 'claude-3-opus',
         },
       );
+    });
+  });
+
+  describe('DELETE /:chatId (delete chat)', () => {
+    let deleteHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      deleteHandler = handlers['/:chatId'];
+    });
+
+    it('should successfully delete a chat', async () => {
+      (deleteChatHistory as jest.Mock).mockResolvedValue(undefined);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChatHistory).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalled();
+    });
+
+    it('should handle deletion of non-existent chat gracefully', async () => {
+      (deleteChatHistory as jest.Mock).mockResolvedValue(undefined);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'non-existent-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChatHistory).toHaveBeenCalledWith(
+        'non-existent-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalled();
+    });
+
+    it('should handle timeout errors', async () => {
+      (deleteChatHistory as jest.Mock).mockRejectedValue(
+        new Error('Operation timed out'),
+      );
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChatHistory).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should call deleteChatHistory with correct user and project parameters', async () => {
+      (deleteChatHistory as jest.Mock).mockResolvedValue(undefined);
+
+      const customRequest = {
+        ...mockRequest,
+        principal: {
+          id: 'different-user-id',
+          projectId: 'different-project-id',
+          type: PrincipalType.USER,
+        },
+        params: { chatId: 'custom-chat-id' },
+      } as FastifyRequest;
+
+      await deleteHandler(customRequest, mockReply as unknown as FastifyReply);
+
+      expect(deleteChatHistory).toHaveBeenCalledWith(
+        'custom-chat-id',
+        'different-user-id',
+        'different-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+    });
+
+    it('should handle chat IDs with special characters', async () => {
+      (deleteChatHistory as jest.Mock).mockResolvedValue(undefined);
+
+      const specialChatId = 'chat-id-with-special-chars-123!@#';
+      const request = {
+        ...mockRequest,
+        params: { chatId: specialChatId },
+      } as FastifyRequest;
+
+      await deleteHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(deleteChatHistory).toHaveBeenCalledWith(
+        specialChatId,
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
     });
   });
 });
