@@ -1,5 +1,5 @@
 import { runCliCommand } from '@openops/common';
-import { tmpdir } from 'os';
+import { homedir } from 'os';
 import { join } from 'path';
 
 export async function runCommand(
