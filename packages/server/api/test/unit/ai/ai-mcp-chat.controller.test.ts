@@ -123,6 +123,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       handlers[path] = handler;
       return mockApp;
     }),
+    patch: jest.fn((path: string, _: unknown, handler: RouteHandler) => {
+      handlers[path] = handler;
+      return mockApp;
+    }),
     delete: jest.fn((path: string, _: unknown, handler: RouteHandler) => {
       handlers[path] = handler;
       return mockApp;
@@ -997,6 +1001,156 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           model: 'claude-3-opus',
         },
       );
+    });
+  });
+
+  describe('PATCH /:chatId/name (rename chat)', () => {
+    let patchHandler: RouteHandler;
+
+    const mockChatContext = {
+      chatId: 'test-chat-id',
+      chatName: 'Old Chat Name',
+      provider: AiProviderEnum.ANTHROPIC,
+      model: 'claude-3-sonnet',
+    };
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      patchHandler = handlers['/:chatId/name'];
+    });
+
+    it('should successfully rename a chat', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
+      (updateChatName as jest.Mock).mockResolvedValue(undefined);
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: 'New Chat Name' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'New Chat Name',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'New Chat Name',
+      });
+    });
+
+    it('should return error when chat context not found', async () => {
+      (updateChatName as jest.Mock).mockRejectedValue(
+        new Error('Chat context not found'),
+      );
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'non-existent-chat-id' },
+        body: { chatName: 'New Name' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).toHaveBeenCalledWith(
+        'non-existent-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'New Name',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Internal server error' }),
+      );
+    });
+
+    it('should handle service errors gracefully', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
+      (updateChatName as jest.Mock).mockRejectedValue(
+        new Error('Database error'),
+      );
+
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: 'New Name' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'New Name',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Internal server error' }),
+      );
+    });
+
+    it('should reject empty chat name', async () => {
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: '' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Chat name cannot be empty',
+      });
+    });
+
+    it('should reject whitespace-only chat name', async () => {
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: '   ' },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Chat name cannot be empty',
+      });
+    });
+
+    it('should handle chat names with special characters', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
+      (updateChatName as jest.Mock).mockResolvedValue(undefined);
+
+      const specialName = 'Chat with & special chars: #1 @test';
+      const request = {
+        ...mockRequest,
+        params: { chatId: 'test-chat-id' },
+        body: { chatName: specialName },
+      } as FastifyRequest;
+
+      await patchHandler(request, mockReply as unknown as FastifyReply);
+
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        specialName,
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: specialName,
+      });
     });
   });
 
