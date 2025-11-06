@@ -8,7 +8,6 @@ import { listBranches } from './github-api';
 export function getBranchProperty(): DropdownProperty<string, true> {
   return Property.Dropdown({
     displayName: 'Branch',
-    description: '',
     required: true,
     refreshers: ['repository'],
     options: async ({ repository, auth }) => {
