@@ -15,19 +15,6 @@ RUN <<-```
     npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
-RUN <<-```
-    set -ex
-    if command -v az >/dev/null 2>&1; then
-        az config set extension.use_dynamic_install=yes_without_prompt
-        az extension add --name reservation --only-show-errors || true
-        az extension add --name resource-graph --only-show-errors || true
-        az extension add --name costmanagement --only-show-errors || true
-        az extension add --name billing-benefits --only-show-errors || true
-        az extension add --name quotas --only-show-errors || true
-        az extension add --name ssh --only-show-errors || true
-    fi
-```
-
 WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
