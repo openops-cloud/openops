@@ -1,5 +1,5 @@
 import { runCliCommand } from '@openops/common';
-import { homedir } from 'os';
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 export async function runCommand(
@@ -19,7 +19,7 @@ export async function runCommand(
 
   if (!shouldUseHostCredentials) {
     const persistentConfigDir =
-      process.env['AZURE_CONFIG_DIR'] ?? join(homedir(), '.azure');
+      process.env['AZURE_CONFIG_DIR'] ?? join(tmpdir(), 'azure');
     envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
 
     await login(credentials, envVars);
