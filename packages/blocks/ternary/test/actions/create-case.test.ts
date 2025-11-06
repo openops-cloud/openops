@@ -5,7 +5,7 @@ import { sendTernaryRequest } from '../../src/lib/common/send-ternary-request';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
-    error: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -170,7 +170,7 @@ describe('createCaseAction', () => {
       createCaseAction.run(createContext(mockAuth, propsValue)),
     ).rejects.toThrow('API error');
 
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       'Error creating a new case.',
       error,
     );

@@ -15,7 +15,7 @@ export const getCasesAction = createAction({
       const result = await getCases(auth);
       return result;
     } catch (e) {
-      logger.error('Error getting case management cases.', e);
+      logger.warn('Error getting case management cases.', e);
       throw e;
     }
   },

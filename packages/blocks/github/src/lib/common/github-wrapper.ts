@@ -134,7 +134,7 @@ async function errorHandling<T>(
       const bodyMessage =
         (error.response.body as { message: string }).message || '';
 
-      logger.error(errorMessage, {
+      logger.warn(errorMessage, {
         status: error.response.status,
         response: bodyMessage,
       });
