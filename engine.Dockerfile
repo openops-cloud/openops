@@ -39,13 +39,12 @@ RUN <<-```
 ```
 
 ENV LD_LIBRARY_PATH=""
-ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_CONFIG_DIR="/opt/azure/config"
 
 RUN <<-```
     set -ex
     pip3 install azure-cli==2.74.0
-    mkdir -p /tmp/azure
-    export AZURE_CONFIG_DIR=/tmp/azure
+    mkdir -p /opt/azure/config
     if command -v az >/dev/null 2>&1; then
         az config set extension.use_dynamic_install=yes_without_prompt
         az extension add --name reservation --only-show-errors || true
