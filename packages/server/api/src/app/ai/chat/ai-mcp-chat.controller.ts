@@ -17,6 +17,8 @@ import {
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  RenameChatRequest,
+  RenameChatRequestBody,
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
@@ -46,6 +48,7 @@ import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
+const MAX_CHAT_NAME_LENGTH = 100;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -266,6 +269,33 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 
+  app.patch('/:chatId/name', RenameChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
+    const { chatName } = request.body;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    const trimmedChatName = chatName.trim();
+    if (!trimmedChatName) {
+      return reply.code(400).send({
+        message: 'Chat name cannot be empty',
+      });
+    }
+
+    if (trimmedChatName.length > MAX_CHAT_NAME_LENGTH) {
+      return reply.code(400).send({
+        message: `Chat name cannot exceed ${MAX_CHAT_NAME_LENGTH} characters`,
+      });
+    }
+
+    try {
+      await updateChatName(chatId, userId, projectId, trimmedChatName);
+      return await reply.code(200).send({ chatName: trimmedChatName });
+    } catch (error) {
+      return handleError(error, reply, 'rename chat');
+    }
+  });
+
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
@@ -460,6 +490,18 @@ const CodeGenerationOptions = {
     description:
       "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
+  },
+};
+
+const RenameChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Rename a chat session with a user provided name.',
+    params: RenameChatRequest,
+    body: RenameChatRequestBody,
   },
 };
 
