@@ -20,7 +20,7 @@ import {
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import { ModelMessage, UserModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -243,7 +243,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(chatHistory, projectId);
+      const userMessages = chatHistory.filter(
+        (msg): msg is UserModelMessage =>
+          msg &&
+          typeof msg === 'object' &&
+          'role' in msg &&
+          msg.role === 'user',
+      );
+
+      if (userMessages.length === 0) {
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      }
+
+      const rawChatName = await generateChatName(userMessages, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
