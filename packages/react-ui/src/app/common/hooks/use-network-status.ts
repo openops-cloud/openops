@@ -30,19 +30,19 @@ export function useNetworkStatus() {
       }
     }
 
+    const handleOffline = () => setNetworkStatus('disconnected');
+
     checkConnection();
 
     intervalId = setInterval(checkConnection, INTERVAL_TIME_MS);
 
     window.addEventListener('online', checkConnection);
-    window.addEventListener('offline', () => setNetworkStatus('disconnected'));
+    window.addEventListener('offline', handleOffline);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
       window.removeEventListener('online', checkConnection);
-      window.removeEventListener('offline', () =>
-        setNetworkStatus('disconnected'),
-      );
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
