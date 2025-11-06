@@ -5,6 +5,7 @@ import { getResourceProperties } from './resource-properties';
 
 export const modifyTemplate = createAction({
   auth: BlockAuth.None(),
+  requireAuth: false,
   name: 'update_cloudformation_file',
   displayName: 'Update resource properties',
   description:
