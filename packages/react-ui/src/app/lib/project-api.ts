@@ -8,6 +8,7 @@ import { authenticationSession } from './authentication-session';
 
 export const projectApi = {
   current: async () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return projectApi.get(authenticationSession.getProjectId()!);
   },
   list(request: ListProjectRequestForUserQueryParams) {

@@ -8,6 +8,7 @@ import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useNetworkStatusWithWarning } from '../lib/hooks/use-network-status-with-warning';
 import { ChatMode } from '../lib/types';
 
 type AssistantUiChatProps = {
@@ -49,7 +50,7 @@ const AssistantUiChat = ({
     showSettingsAIChat: state.midpanelState.showAiChat,
   }));
 
-  const { runtime, isLoading, createNewChat, provider, model } =
+  const { runtime, isLoading, createNewChat, provider, model, chatStatus } =
     useAssistantChat({
       chatId,
       onChatIdChange,
@@ -65,6 +66,9 @@ const AssistantUiChat = ({
     onModelSelected,
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector({ chatId, provider, model });
+
+  const { isShowingSlowWarning, connectionError } =
+    useNetworkStatusWithWarning(chatStatus);
 
   if (isLoading) {
     return (
@@ -89,6 +93,8 @@ const AssistantUiChat = ({
       theme={theme}
       handleInject={handleInject}
       toolComponents={toolComponents}
+      isShowingSlowWarning={isShowingSlowWarning}
+      connectionError={connectionError}
     >
       {children}
     </AssistantUiChatContainer>
