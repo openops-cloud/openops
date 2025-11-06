@@ -53,7 +53,7 @@ export const deleteCommentAction = createAction({
     } catch (error) {
       const errorMsg = `An error occurred while deleting comment '${commentId}' from Umbrella recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
 
-      logger.error(errorMsg);
+      logger.warn(errorMsg);
 
       throw new Error(errorMsg);
     }
