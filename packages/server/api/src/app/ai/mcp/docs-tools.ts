@@ -34,8 +34,8 @@ IMPORTANT USAGE GUIDELINES:
 - ALWAYS use this tool when users ask about OpenOps platform features, integrations, blocks, or templates
 - When providing documentation links in responses, ensure they start with https://docs.openops.com/ in valid markdown format
 - Only provide links when contextually appropriate (e.g., don't provide links if user asks for code generation)
-- CRITICAL: NEVER suggest documentation links without first using this tool to verify they exist
-- CRITICAL: NEVER create or guess documentation URLs - only provide links that are explicitly returned by this tool
+- IMPORTANT: NEVER suggest documentation links without first using this tool to verify they exist
+- IMPORTANT: NEVER create or guess documentation URLs - only provide links that are explicitly returned by this tool
 Use this tool to find accurate, verified information before answering OpenOps-specific questions.`,
       inputSchema: z.object({
         query: z.string().describe('The search query'),
