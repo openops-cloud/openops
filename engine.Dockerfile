@@ -39,6 +39,7 @@ RUN <<-```
 ```
 
 ENV LD_LIBRARY_PATH=""
+ENV AZURE_CONFIG_DIR="/tmp/azure"
 
 RUN <<-```
     set -ex
@@ -55,8 +56,6 @@ RUN <<-```
         az extension add --name ssh --only-show-errors || true
     fi
 ```
-
-ENV AZURE_CONFIG_DIR="/tmp/azure"
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
