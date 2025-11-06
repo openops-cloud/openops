@@ -21,7 +21,7 @@ export async function getResources(
     commandResult.exitCode !== 0 ||
     commandResult.stdError
   ) {
-    logger.error('Failed to execute the command to get resources.', {
+    logger.warn('Failed to execute the command to get resources.', {
       commandResult,
     });
     throw new Error(
@@ -118,7 +118,7 @@ export async function deleteResource(
     commandResult.exitCode !== 0 ||
     commandResult.stdError
   ) {
-    logger.error('Failed to modify the template.', { commandResult });
+    logger.warn('Failed to modify the template.', { commandResult });
     throw new Error(
       `Failed to modify the template. ${JSON.stringify(commandResult)}`,
     );
@@ -165,7 +165,7 @@ async function updateTemplateCommand(
   const commandResult = await executeHclEditCommand(command);
 
   if (commandResult.exitCode !== 0 || commandResult.stdError) {
-    logger.error('Failed to modify the template.', { commandResult });
+    logger.warn('Failed to modify the template.', { commandResult });
     throw new Error(
       `Failed to modify the template. ${JSON.stringify(commandResult)}`,
     );
