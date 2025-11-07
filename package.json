@@ -147,7 +147,7 @@
     "@uiw/react-codemirror": "4.23.0",
     "@vercel/otel": "1.13.0",
     "@xyflow/react": "12.4.4",
-    "ai": "5.0.11",
+    "ai": "5.0.52",
     "ajv": "8.12.0",
     "async-mutex": "0.4.0",
     "aws-lambda": "1.0.7",
