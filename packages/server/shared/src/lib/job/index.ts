@@ -101,6 +101,25 @@ export const SubmitPayloadRequest = Type.Object({
 
 export type SubmitPayloadRequest = Static<typeof SubmitPayloadRequest>;
 
+export const RecordTriggerFailureRequest = Type.Object({
+  flowVersionId: Type.String(),
+  projectId: Type.String(),
+  reason: Type.Optional(Type.String()),
+  executionCorrelationId: Type.Optional(Type.String()),
+  triggerStepName: Type.Optional(Type.String()),
+  triggerStepId: Type.Optional(Type.String()),
+  triggerError: Type.Optional(
+    Type.Object({
+      message: Type.Optional(Type.String()),
+      code: Type.Optional(Type.String()),
+      details: Type.Optional(Type.Unknown()),
+    }),
+  ),
+});
+export type RecordTriggerFailureRequest = Static<
+  typeof RecordTriggerFailureRequest
+>;
+
 export const GetRunForWorkerRequest = Type.Object({
   runId: Type.String(),
 });
