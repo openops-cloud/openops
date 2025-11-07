@@ -3,10 +3,11 @@ import { Message, Recipient } from '@microsoft/microsoft-graph-types';
 import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
 import {
   BlockPropValueSchema,
+  createTrigger,
   Property,
   TriggerStrategy,
-  createTrigger,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { isEmpty, isString } from '@openops/shared';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
@@ -157,7 +158,7 @@ async function fetchMessages(
       response = await client.api(response['@odata.nextLink']).get();
     } while (response.value.length > 0);
   } catch (error) {
-    console.warn('Failed to fetch outlook emails: ', error);
+    logger.warn('Failed to fetch outlook emails: ', error);
   }
 
   return messages;
