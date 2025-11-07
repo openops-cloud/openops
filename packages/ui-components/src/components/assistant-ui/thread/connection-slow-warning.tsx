@@ -10,7 +10,9 @@ export const ConnectionSlowWarning: FC = () => {
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
         </div>
         <div className="flex-1 text-sm text-amber-800 dark:text-amber-200">
-          {t('The AI is taking a bit longer than expected. Please wait...')}
+          {t(
+            'Looks like your connection is a bit slow, this may cause delays in the AI responses.',
+          )}
         </div>
       </div>
     </div>
