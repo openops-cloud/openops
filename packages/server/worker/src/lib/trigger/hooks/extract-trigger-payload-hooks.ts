@@ -44,7 +44,24 @@ export async function extractPayloads(
         'Failed to execute trigger',
       );
       handleFailureFlow(flowVersion, projectId, engineToken, false);
-
+      if (!simulate) {
+        const triggerStepName = flowVersion.trigger.name;
+        const triggerStepId = flowVersion.trigger.id;
+        const triggerError = {
+          message:
+            result?.message ?? 'Trigger hook failed before runs were enqueued',
+        } as { message?: string };
+        rejectedPromiseHandler(
+          engineApiService(engineToken).recordTriggerFailure({
+            flowVersionId: flowVersion.id,
+            projectId,
+            reason: 'TRIGGER_HOOK_FAILED',
+            triggerStepName,
+            triggerStepId,
+            triggerError,
+          }),
+        );
+      }
       return [];
     }
   } catch (e) {
@@ -62,6 +79,24 @@ export async function extractPayloads(
         'Failed to execute trigger due to timeout',
       );
       handleFailureFlow(flowVersion, projectId, engineToken, false);
+      if (!simulate) {
+        const triggerStepName = flowVersion.trigger.name;
+        const triggerStepId = flowVersion.trigger.id;
+        const triggerError = {
+          message: 'Trigger execution timed out',
+          code: ErrorCode.EXECUTION_TIMEOUT,
+        } as { message?: string; code?: string };
+        rejectedPromiseHandler(
+          engineApiService(engineToken).recordTriggerFailure({
+            flowVersionId: flowVersion.id,
+            projectId,
+            reason: 'TRIGGER_TIMEOUT',
+            triggerStepName,
+            triggerStepId,
+            triggerError,
+          }),
+        );
+      }
       return [];
     }
     throw e;

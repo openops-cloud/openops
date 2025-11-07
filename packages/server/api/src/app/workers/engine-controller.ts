@@ -5,6 +5,7 @@ import {
 import {
   GetRunForWorkerRequest,
   logger,
+  RecordTriggerFailureRequest,
   SharedSystemProp,
   system,
   UpdateFailureCountRequest,
@@ -18,25 +19,35 @@ import {
   EnvironmentType,
   ErrorCode,
   ExecutionState,
+  FileCompression,
+  FileType,
   FlowRunId,
   FlowRunResponse,
   FlowRunStatus,
+  FlowRunTriggerSource,
   GetFlowVersionForWorkerRequest,
   GetFlowVersionForWorkerRequestType,
   isFlowStateTerminal,
   isNil,
+  openOpsId,
   PopulatedFlow,
   PrincipalType,
   ProgressUpdateType,
   RemoveStableJobEngineRequest,
+  RunEnvironment,
   StepOutput,
+  StepOutputStatus,
   UpdateRunProgressRequest,
   WebsocketClientEvent,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../authentication/authorization';
 import { fileService } from '../file/file.service';
-import { flowRunService } from '../flows/flow-run/flow-run-service';
+import {
+  flowRunRepo,
+  flowRunService,
+} from '../flows/flow-run/flow-run-service';
+import { logSerializer } from '../flows/flow-run/log-serializer';
 import { flowVersionService } from '../flows/flow-version/flow-version.service';
 import { flowService } from '../flows/flow/flow.service';
 import { triggerHooks } from '../flows/trigger';
@@ -187,6 +198,61 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         projectId: request.principal.projectId,
       }),
     };
+  });
+
+  app.post('/record-trigger-failure', RecordTriggerFailure, async (request) => {
+    const { flowVersionId, projectId, reason, triggerStepName, triggerError } =
+      request.body;
+    const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+    const flow = await flowService.getOneOrThrow({
+      id: flowVersion.flowId,
+      projectId,
+    });
+
+    const stepName = triggerStepName ?? flowVersion.trigger.name;
+    const errorMessage =
+      triggerError?.message ?? 'Trigger failed before runs were enqueued';
+
+    const executionState: ExecutionState = {
+      steps: {
+        [stepName]: {
+          type: flowVersion.trigger.type,
+          status: StepOutputStatus.FAILED,
+          input: {},
+          errorMessage,
+        },
+      },
+    };
+
+    const serializedLogs = await logSerializer.serialize({ executionState });
+    const logsFile = await fileService.save({
+      data: serializedLogs,
+      type: FileType.FLOW_RUN_LOG,
+      compression: FileCompression.GZIP,
+      projectId: flow.projectId,
+    });
+
+    const failedRun = {
+      id: openOpsId(),
+      projectId: flow.projectId,
+      flowId: flow.id,
+      flowVersionId: flowVersion.id,
+      environment: RunEnvironment.PRODUCTION,
+      flowDisplayName: flowVersion.displayName,
+      startTime: new Date().toISOString(),
+      finishTime: new Date().toISOString(),
+      status: FlowRunStatus.FAILED,
+      triggerSource: FlowRunTriggerSource.TRIGGERED,
+      terminationReason: reason ?? 'TRIGGER_FAILED',
+      tasks: 0,
+      duration: 0,
+      tags: [],
+      logsFileId: logsFile.id,
+    };
+
+    await flowRunRepo().save(failedRun);
+
+    return { id: failedRun.id };
   });
 
   app.post('/remove-stale-job', RemoveFlowRequest, async (request) => {
@@ -409,5 +475,16 @@ const RemoveFlowRequest = {
     description:
       'Remove a stale job from the queue. This endpoint allows the engine to clean up jobs that are no longer needed, helping to maintain queue health and prevent resource leaks.',
     body: RemoveStableJobEngineRequest,
+  },
+};
+
+const RecordTriggerFailure = {
+  config: {
+    allowedPrincipals: [PrincipalType.ENGINE],
+  },
+  schema: {
+    description:
+      'Record a failed flow run when trigger execution fails before runs are enqueued. Creates a FAILED run for observability.',
+    body: RecordTriggerFailureRequest,
   },
 };
