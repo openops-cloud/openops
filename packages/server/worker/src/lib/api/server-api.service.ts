@@ -95,7 +95,9 @@ export const engineApiService = (engineToken: string) => {
     ): Promise<void> {
       await client.post('/v1/engine/update-failure-count', request);
     },
-    async recordTriggerFailure(request: RecordTriggerFailureRequest): Promise<void> {
+    async recordTriggerFailure(
+      request: RecordTriggerFailureRequest,
+    ): Promise<void> {
       await client.post('/v1/engine/record-trigger-failure', request);
     },
     async getRun(request: GetRunForWorkerRequest): Promise<FlowRun> {
