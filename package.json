@@ -371,7 +371,7 @@
     "chalk": "4.1.2",
     "chromatic": "11.10.3",
     "concurrently": "8.2.1",
-    "esbuild": "0.25.0",
+    "esbuild": "0.25.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-import-resolver-alias": "1.1.2",
