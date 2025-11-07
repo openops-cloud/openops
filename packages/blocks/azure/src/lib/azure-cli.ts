@@ -14,15 +14,23 @@ export async function runCommand(
   };
 
   if (!shouldUseHostCredentials) {
-    const processAzureConfigDir = process.env['AZURE_CONFIG_DIR'];
-    if (processAzureConfigDir) {
-      envVars['AZURE_CONFIG_DIR'] = processAzureConfigDir;
-    } else {
-      const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
-      envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
+    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
+    envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
+
+    const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
+    if (persistentConfigDir) {
+      envVars['AZURE_EXTENSION_DIR'] = join(
+        persistentConfigDir,
+        'cliextensions',
+      );
     }
 
     await login(credentials, envVars);
+  } else {
+    const processAzureConfigDir = process.env['AZURE_CONFIG_DIR'];
+    if (processAzureConfigDir) {
+      envVars['AZURE_CONFIG_DIR'] = processAzureConfigDir;
+    }
   }
 
   if (subscription) {
