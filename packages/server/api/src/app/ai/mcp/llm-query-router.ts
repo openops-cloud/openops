@@ -5,6 +5,7 @@ import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
+import { getAdditionalQueryClassificationDescriptions } from './extensions';
 import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
 
@@ -17,17 +18,23 @@ export type ToolsAndQueryResult = {
   selectedToolNames: string[];
 };
 
-const queryClassificationDescriptions: Record<QueryClassification, string> = {
-  [QueryClassification.analytics]:
-    'requires data visualization, charts, dashboards, or Superset-related functionality',
-  [QueryClassification.tables]:
-    'requires database access, schema information, or table operations',
-  [QueryClassification.openops]:
-    'requires OpenOps-specific functionality like flows, runs, connections',
-  [QueryClassification.aws_cost]:
-    'involves AWS cost analysis, pricing information, or cost optimization',
-  [QueryClassification.general]:
-    "general queries that don't fit the other categories",
+const baseQueryClassificationDescriptions: Record<QueryClassification, string> =
+  {
+    [QueryClassification.analytics]:
+      'requires data visualization, charts, dashboards, or Superset-related functionality',
+    [QueryClassification.tables]:
+      'requires database access, schema information, or table operations',
+    [QueryClassification.openops]:
+      'requires OpenOps-specific functionality like flows, runs, connections',
+    [QueryClassification.aws_cost]:
+      'involves AWS cost analysis, pricing information, or cost optimization',
+    [QueryClassification.general]:
+      "general queries that don't fit the other categories",
+  };
+
+const queryClassificationDescriptions: Record<string, string> = {
+  ...baseQueryClassificationDescriptions,
+  ...getAdditionalQueryClassificationDescriptions(),
 };
 
 const createQueryClassificationSchema = (): z.ZodUnion<
