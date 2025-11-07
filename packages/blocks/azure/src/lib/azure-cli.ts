@@ -13,11 +13,12 @@ export async function runCommand(
     PATH: process.env['PATH'] || '',
   };
 
+  const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
+
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
 
-    const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
     if (persistentConfigDir) {
       envVars['AZURE_EXTENSION_DIR'] = join(
         persistentConfigDir,
@@ -26,11 +27,8 @@ export async function runCommand(
     }
 
     await login(credentials, envVars);
-  } else {
-    const processAzureConfigDir = process.env['AZURE_CONFIG_DIR'];
-    if (processAzureConfigDir) {
-      envVars['AZURE_CONFIG_DIR'] = processAzureConfigDir;
-    }
+  } else if (persistentConfigDir) {
+    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
   }
 
   if (subscription) {
