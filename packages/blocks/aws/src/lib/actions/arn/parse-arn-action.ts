@@ -3,6 +3,7 @@ import { parseArn } from '@openops/common';
 
 export const parseArnAction = createAction({
   auth: BlockAuth.None(),
+  requireAuth: false,
   name: 'parse_arn',
   description: 'Parse information from a given ARN (Amazon Resource Name) ',
   displayName: 'Parse ARN',

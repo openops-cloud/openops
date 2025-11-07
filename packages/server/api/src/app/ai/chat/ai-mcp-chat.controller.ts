@@ -17,10 +17,12 @@ import {
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  RenameChatRequest,
+  RenameChatRequestBody,
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import { ModelMessage, UserModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -46,6 +48,7 @@ import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
+const MAX_CHAT_NAME_LENGTH = 100;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -243,7 +246,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(chatHistory, projectId);
+      const userMessages = chatHistory.filter(
+        (msg): msg is UserModelMessage =>
+          msg &&
+          typeof msg === 'object' &&
+          'role' in msg &&
+          msg.role === 'user',
+      );
+
+      if (userMessages.length === 0) {
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      }
+
+      const rawChatName = await generateChatName(userMessages, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
@@ -251,6 +266,33 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return await reply.code(200).send({ chatName });
     } catch (error) {
       return handleError(error, reply, 'generate chat name');
+    }
+  });
+
+  app.patch('/:chatId/name', RenameChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
+    const { chatName } = request.body;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    const trimmedChatName = chatName.trim();
+    if (!trimmedChatName) {
+      return reply.code(400).send({
+        message: 'Chat name cannot be empty',
+      });
+    }
+
+    if (trimmedChatName.length > MAX_CHAT_NAME_LENGTH) {
+      return reply.code(400).send({
+        message: `Chat name cannot exceed ${MAX_CHAT_NAME_LENGTH} characters`,
+      });
+    }
+
+    try {
+      await updateChatName(chatId, userId, projectId, trimmedChatName);
+      return await reply.code(200).send({ chatName: trimmedChatName });
+    } catch (error) {
+      return handleError(error, reply, 'rename chat');
     }
   });
 
@@ -448,6 +490,18 @@ const CodeGenerationOptions = {
     description:
       "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
+  },
+};
+
+const RenameChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Rename a chat session with a user provided name.',
+    params: RenameChatRequest,
+    body: RenameChatRequestBody,
   },
 };
 
