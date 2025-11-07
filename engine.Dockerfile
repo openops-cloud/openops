@@ -39,7 +39,7 @@ RUN <<-```
 ```
 
 ENV LD_LIBRARY_PATH=""
-ENV AZURE_CONFIG_DIR="/opt/azure/config"
+ENV AZURE_CONFIG_DIR="/tmp/azure"
 
 RUN <<-```
     set -ex

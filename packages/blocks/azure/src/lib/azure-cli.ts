@@ -13,22 +13,16 @@ export async function runCommand(
     PATH: process.env['PATH'] || '',
   };
 
-  const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
+  const processAzureConfigDir = process.env['AZURE_CONFIG_DIR'];
+  if (processAzureConfigDir) {
+    envVars['AZURE_CONFIG_DIR'] = processAzureConfigDir;
+  }
 
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
 
-    if (persistentConfigDir) {
-      envVars['AZURE_EXTENSION_DIR'] = join(
-        persistentConfigDir,
-        'cliextensions',
-      );
-    }
-
     await login(credentials, envVars);
-  } else if (persistentConfigDir) {
-    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
   }
 
   if (subscription) {
