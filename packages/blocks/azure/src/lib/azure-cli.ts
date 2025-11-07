@@ -16,7 +16,7 @@ export async function runCommand(
   const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
 
   if (!shouldUseHostCredentials) {
-    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
+    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
 
     if (persistentConfigDir) {
