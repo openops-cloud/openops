@@ -288,7 +288,7 @@
     "tsconfig-paths": "4.2.0",
     "tslib": "2.6.2",
     "turndown": "7.2.0",
-    "typeorm": "0.3.18",
+    "typeorm": "0.3.26",
     "url": "0.11.3",
     "use-debounce": "10.0.1",
     "use-ripple-hook": "1.0.24",
