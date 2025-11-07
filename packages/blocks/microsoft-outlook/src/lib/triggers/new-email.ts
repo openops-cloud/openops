@@ -3,11 +3,10 @@ import { Message, Recipient } from '@microsoft/microsoft-graph-types';
 import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
 import {
   BlockPropValueSchema,
-  createTrigger,
   Property,
   TriggerStrategy,
+  createTrigger,
 } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import { isEmpty, isString } from '@openops/shared';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
@@ -128,38 +127,34 @@ async function fetchMessages(
   const messages: Message[] = [];
   const baseUrl = `/me/mailFolders/${folderId || 'inbox'}/messages`;
 
-  try {
-    const headers: Record<string, string> = {
-      ConsistencyLevel: 'eventual',
-      Prefer: 'outlook.body-content-type="html"',
-    };
+  const headers: Record<string, string> = {
+    ConsistencyLevel: 'eventual',
+    Prefer: 'outlook.body-content-type="html"',
+  };
 
-    let req = client
-      .api(baseUrl)
-      .select(SELECT_FIELDS)
-      .orderby('receivedDateTime desc')
-      .headers(headers);
+  let req = client
+    .api(baseUrl)
+    .select(SELECT_FIELDS)
+    .orderby('receivedDateTime desc')
+    .headers(headers);
 
-    const shouldFetchAll = lastFetchEpochMS !== 0;
-    if (shouldFetchAll) {
-      req = req.filter(
-        `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
-      );
+  const shouldFetchAll = lastFetchEpochMS !== 0;
+  if (shouldFetchAll) {
+    req = req.filter(
+      `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`,
+    );
+  }
+
+  let response: PageCollection = await req.get();
+  do {
+    messages.push(...(response.value as Message[]));
+
+    if (!shouldFetchAll || !response['@odata.nextLink']) {
+      break;
     }
 
-    let response: PageCollection = await req.get();
-    do {
-      messages.push(...(response.value as Message[]));
-
-      if (!shouldFetchAll || !response['@odata.nextLink']) {
-        break;
-      }
-
-      response = await client.api(response['@odata.nextLink']).get();
-    } while (response.value.length > 0);
-  } catch (error) {
-    logger.warn('Failed to fetch outlook emails: ', error);
-  }
+    response = await client.api(response['@odata.nextLink']).get();
+  } while (response.value.length > 0);
 
   return messages;
 }
