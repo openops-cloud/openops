@@ -13515,7 +13515,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - validator@13.12.0
+ - validator@13.15.20
 
 This package contains the following license:
 
