@@ -18,7 +18,7 @@ RUN <<-```
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_CONFIG_DIR="/opt/azure/config"
 
 RUN <<-```
   # Install yq
@@ -39,6 +39,7 @@ RUN <<-```
 
   # Install Azure CLI
   curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  mkdir -p /opt/azure/config
 
   # Configure Azure CLI extensions
   az config set extension.use_dynamic_install=yes_without_prompt
@@ -58,7 +59,6 @@ RUN <<-```
   rm /tmp/gcloud.tar.gz
 ```
 
-ENV AZURE_CONFIG_DIR="/tmp/azure"
 ENV PATH="/opt/google-cloud-sdk/bin:$PATH"
 
 SHELL ["/bin/bash", "-c"]
