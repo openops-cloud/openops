@@ -221,7 +221,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
           input: {},
           errorMessage,
         },
-      },
+      } as Record<string, StepOutput>,
     };
 
     const serializedLogs = await logSerializer.serialize({ executionState });
