@@ -359,6 +359,7 @@
       "@openops/shared": ["packages/shared/src/index.ts"],
       "@openops/ui-kit": ["packages/ui-kit/src/index.ts"],
       "Aminos": ["packages/blocks/Aminos/src/index.ts"],
+      "hyperglance": ["packages/blocks/hyperglance/src/index.ts"],
       "server-worker": ["packages/server/worker/src/index.ts"]
     },
     "resolveJsonModule": true
