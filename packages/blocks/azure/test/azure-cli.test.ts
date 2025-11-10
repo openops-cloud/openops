@@ -143,6 +143,7 @@ describe('azureCli', () => {
       ...originalEnv,
       PATH: '/mock/path',
       AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
     };
 
     commonMock.runCliCommand.mockResolvedValue('mock result');
@@ -157,7 +158,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: process.env['AZURE_CONFIG_DIR'],
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
       },
     );
     process.env = originalEnv;
@@ -169,6 +170,7 @@ describe('azureCli', () => {
       ...originalEnv,
       PATH: '/mock/path',
       AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
     };
 
     commonMock.runCliCommand.mockResolvedValueOnce('login result');
@@ -184,7 +186,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
@@ -193,15 +195,13 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
       },
     );
     process.env = originalEnv;
   });
 
   test('should throw an error if runCliCommand fails and return the whole error when command does not contain login credentials', async () => {
-    commonMock.runCliCommand.mockRejectedValue('error');
-
     await expect(
       runCommand('some command', credentials, false),
     ).rejects.toThrow('Error while login into azure: error');
@@ -213,6 +213,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -235,6 +236,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
