@@ -1,0 +1,33 @@
+{
+  "name": "blocks-hyperglance",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/hyperglance/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/blocks/hyperglance",
+        "tsConfig": "packages/blocks/hyperglance/tsconfig.lib.json",
+        "packageJson": "packages/blocks/hyperglance/package.json",
+        "main": "packages/blocks/hyperglance/src/index.ts",
+        "assets": ["packages/blocks/hyperglance/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/blocks/hyperglance/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  }
+}
