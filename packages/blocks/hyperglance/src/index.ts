@@ -1,13 +1,13 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { HGAuth, hyperglanceAuth } from './lib/auth';
-import {  getRecommendations} from './lib/actions/getRecommendations';
 import { exportTopologyForGroup } from './lib/actions/exportTopologyForGroup';
-import { searchTopology } from './lib/actions/searchTopology';
 import { getCollectorRecords } from './lib/actions/getCollectorRecords';
-import { getCollectorRecordStatus } from './lib/actions/getCollectorRecordStatus';
 import { getCollectorRecordStatistics } from './lib/actions/getCollectorRecordStatistics';
+import { getCollectorRecordStatus } from './lib/actions/getCollectorRecordStatus';
+import { getRecommendations } from './lib/actions/getRecommendations';
+import { searchTopology } from './lib/actions/searchTopology';
+import { HGAuth, hyperglanceAuth } from './lib/auth';
 
 export const hyperglance = createBlock({
   displayName: 'Hyperglance',
@@ -34,7 +34,7 @@ export const hyperglance = createBlock({
             'For more information, visit the [Hyperglance API documentation](https://support.hyperglance.com/knowledge/getting-started-with-the-hyperglance-api).',
         }),
       },
-      name:'customHgApiCall'
+      name: 'customHgApiCall',
     }),
   ],
   triggers: [],
