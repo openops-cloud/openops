@@ -25,6 +25,7 @@ export async function runCommand(
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
+    envVars['AZURE_EXTENSION_DIR'] = join(azureConfigDir, 'cliextensions');
 
     await login(credentials, envVars);
   }
