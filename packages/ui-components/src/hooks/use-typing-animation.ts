@@ -21,6 +21,7 @@ export function useTypingAnimation({
 
   useEffect(() => {
     let shouldAnimate = false;
+    let interval: NodeJS.Timeout | undefined;
 
     if (fromText !== undefined && defaultText !== undefined) {
       const isSameChat = prevChatIdRef.current === chatId;
@@ -37,7 +38,7 @@ export function useTypingAnimation({
       setDisplayedText('');
       let currentIndex = 0;
 
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if (currentIndex < text.length) {
           setDisplayedText(text.slice(0, currentIndex + 1));
           currentIndex++;
@@ -45,16 +46,18 @@ export function useTypingAnimation({
           clearInterval(interval);
         }
       }, speed);
-
-      return () => {
-        clearInterval(interval);
-      };
     } else {
       setDisplayedText(text);
     }
 
     prevTextRef.current = text;
     prevChatIdRef.current = chatId;
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [text, speed, fromText, chatId, defaultText]);
 
   return displayedText;
