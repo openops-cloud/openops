@@ -5,7 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper } from '@openops/shared';
+import { flowHelper, FlowVersion } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
@@ -129,14 +129,10 @@ export const useAssistantChat = ({
           stepDetails &&
           flowId
         ) {
-          const stepId =
-            flowHelper.getStep(context.flowVersion, context.selectedStep)?.id ??
-            context.selectedStep;
-
           return await aiChatApi.open(
             flowId,
             getBlockName(stepDetails),
-            stepId,
+            getStepId(context.flowVersion, context.selectedStep),
             getActionName(stepDetails),
           );
         }
@@ -314,7 +310,16 @@ export const useAssistantChat = ({
           chatMode === ChatMode.StepSettings
         ) {
           await aiChatApi.delete(oldChatId);
+
+          const conversation = await aiChatApi.open(
+            context.flowVersion.flowId,
+            getBlockName(stepDetails),
+            getStepId(context.flowVersion, context.selectedStep),
+            getActionName(stepDetails),
+          );
+
           chat.setMessages([]);
+          onChatIdChange(conversation.chatId);
         } else {
           onChatIdChange(null);
         }
@@ -328,7 +333,7 @@ export const useAssistantChat = ({
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, getBuilderState, chatMode, onChatIdChange]);
+  }, [chatId, chat, getBuilderState, chatMode, stepDetails, onChatIdChange]);
 
   return {
     runtime,
@@ -339,4 +344,8 @@ export const useAssistantChat = ({
     chatId,
     chatStatus: chat.status,
   };
+};
+
+const getStepId = (flowVersion: FlowVersion, selectedStep: string) => {
+  return flowHelper.getStep(flowVersion, selectedStep)?.id ?? selectedStep;
 };
