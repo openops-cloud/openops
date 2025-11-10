@@ -27,11 +27,11 @@ const AssistantUiHistory = ({
   return (
     <div
       className={cn(
-        'w-full h-full flex flex-col bg-gray-100 rounded-[8px] shadow-ai-history-popover overflow-hidden',
+        'w-full h-full flex flex-col bg-gray-100 rounded-sm shadow-ai-history-popover overflow-hidden gap-1',
         className,
       )}
     >
-      <div className="px-2 pt-[10px] flex-shrink-0">
+      <div className="pl-2 pr-[13px] pt-[10px] flex-shrink-0">
         <button
           type="button"
           onClick={onNewChat}
@@ -43,11 +43,11 @@ const AssistantUiHistory = ({
           )}
         >
           <Plus size={16} className="text-black" />
-          <span className="text-[14px] leading-[20px]">New chat</span>
+          <span className="text-sm">New chat</span>
         </button>
       </div>
-      <ScrollArea className="flex-1 min-h-0 pl-[8px] pr-[13px] pb-2">
-        <div className="flex flex-col gap-[4px]">
+      <ScrollArea className="flex-1 min-h-0 pl-2 pr-[13px] pb-2">
+        <div className="flex flex-col gap-1">
           {chatItems.map((chatItem) => (
             <AssistantUiHistoryItem
               key={chatItem.id}
