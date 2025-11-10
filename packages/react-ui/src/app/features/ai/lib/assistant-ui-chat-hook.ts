@@ -240,17 +240,15 @@ export const useAssistantChat = ({
       }
 
       if (messagesRef.current.length >= MIN_MESSAGES_BEFORE_NAME_GENERATION) {
-        setTimeout(async () => {
-          try {
-            hasAttemptedNameGenerationRef.current[chatId] = true;
-            await aiAssistantChatHistoryApi.generateName(chatId);
-            qc.invalidateQueries({ queryKey: ['assistant-history'] });
-          } catch (error) {
-            console.error('Failed to generate chat name', error);
-            hasAttemptedNameGenerationRef.current[chatId] = false;
-            qc.invalidateQueries({ queryKey: ['assistant-history'] });
-          }
-        }, 500);
+        try {
+          hasAttemptedNameGenerationRef.current[chatId] = true;
+          await aiAssistantChatHistoryApi.generateName(chatId);
+          qc.invalidateQueries({ queryKey: ['assistant-history'] });
+        } catch (error) {
+          console.error('Failed to generate chat name', error);
+          hasAttemptedNameGenerationRef.current[chatId] = false;
+          qc.invalidateQueries({ queryKey: ['assistant-history'] });
+        }
       }
     },
     // https://github.com/assistant-ui/assistant-ui/issues/2327
