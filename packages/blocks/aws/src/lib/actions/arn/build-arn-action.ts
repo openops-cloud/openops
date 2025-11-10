@@ -3,6 +3,7 @@ import { buildArn } from '@openops/common';
 
 export const buildArnAction = createAction({
   auth: BlockAuth.None(),
+  requireAuth: false,
   name: 'build_arn',
   description: 'Build ARN (Amazon Resource Name) from the given parameters',
   displayName: 'Build ARN',

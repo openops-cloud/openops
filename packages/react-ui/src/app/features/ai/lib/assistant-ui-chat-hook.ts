@@ -212,13 +212,25 @@ export const useAssistantChat = ({
     }),
     onError: (error) => {
       console.error('chat error', error);
+
+      if (
+        error?.message?.toLowerCase()?.includes('network error') ||
+        error?.message?.toLowerCase()?.includes('network timeout') ||
+        String(error)?.toLowerCase()?.includes('network error') ||
+        String(error)?.toLowerCase()?.includes('network timeout')
+      ) {
+        // we don't want to show a toast as we show directly in the chat UI
+        return;
+      }
+
       const errorToast = {
         title: t('AI Chat Error'),
         description: t(
           'There was an error while processing your request, please try again or open a new chat',
         ),
         variant: 'destructive' as const,
-        duration: 10000,
+        // 1 week
+        duration: 604800000,
       };
       toast(errorToast);
     },
@@ -349,5 +361,6 @@ export const useAssistantChat = ({
     provider,
     model,
     chatId,
+    chatStatus: chat.status,
   };
 };

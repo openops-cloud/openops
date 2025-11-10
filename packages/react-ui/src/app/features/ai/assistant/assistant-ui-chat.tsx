@@ -11,6 +11,7 @@ import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useNetworkStatusWithWarning } from '../lib/hooks/use-network-status-with-warning';
 import { ChatMode } from '../lib/types';
 import { useAssistantChatHistory } from '../lib/use-ai-assistant-chat-history';
 
@@ -54,7 +55,7 @@ const AssistantUiChat = ({
     showSettingsAIChat: state.midpanelState.showAiChat,
   }));
 
-  const { runtime, isLoading, createNewChat, provider, model } =
+  const { runtime, isLoading, createNewChat, provider, model, chatStatus } =
     useAssistantChat({
       chatId,
       onChatIdChange,
@@ -78,6 +79,9 @@ const AssistantUiChat = ({
     renameChat,
     refetch,
   } = useAssistantChatHistory();
+
+  const { isShowingSlowWarning, connectionError } =
+    useNetworkStatusWithWarning(chatStatus);
 
   const currentChatTitle = useMemo(() => {
     if (chatId) {
@@ -145,6 +149,8 @@ const AssistantUiChat = ({
         onHistoryOpenChange={setShowHistory}
         isHistoryOpen={showHistory}
         chatId={chatId}
+        isShowingSlowWarning={isShowingSlowWarning}
+        connectionError={connectionError}
       >
         {showHistory && (
           <AssistantUiHistory
