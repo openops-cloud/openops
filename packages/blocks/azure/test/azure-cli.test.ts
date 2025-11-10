@@ -143,6 +143,7 @@ describe('azureCli', () => {
       ...originalEnv,
       PATH: '/mock/path',
       AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/extension/dir',
     };
 
     commonMock.runCliCommand.mockResolvedValue('mock result');
@@ -157,18 +158,18 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: process.env['AZURE_CONFIG_DIR'],
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: process.env['AZURE_EXTENSION_DIR'],
       },
     );
     process.env = originalEnv;
   });
 
-  test('should use temp config dir but preserve extension dir when useHostSession is false and AZURE_CONFIG_DIR is set', async () => {
+  test('should use temp config dir but preserve extension dir when useHostSession is false and AZURE_EXTENSION_DIR is set', async () => {
     const originalEnv = process.env;
     process.env = {
       ...originalEnv,
       PATH: '/mock/path',
-      AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/extension/dir',
     };
 
     commonMock.runCliCommand.mockResolvedValueOnce('login result');
@@ -184,7 +185,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: '/mock/extension/dir',
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
@@ -193,7 +194,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: '/mock/config/dir/cliextensions',
+        AZURE_EXTENSION_DIR: '/mock/extension/dir',
       },
     );
     process.env = originalEnv;
