@@ -11,7 +11,7 @@ export async function makeGetRequest<T = unknown>(
     headers: {
       Authorization: `${authToken}`,
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*',
     },
     queryParams,
   });
@@ -19,9 +19,9 @@ export async function makeGetRequest<T = unknown>(
 }
 
 export async function makePostRequest<T = unknown>(
-    url: string,
-    authToken: string,
-    payload: any
+  url: string,
+  authToken: string,
+  payload: any,
 ): Promise<T> {
   const response = await httpClient.sendRequest<T>({
     method: HttpMethod.POST,
@@ -29,7 +29,7 @@ export async function makePostRequest<T = unknown>(
     headers: {
       Authorization: `${authToken}`,
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*',
     },
     body: payload,
   });
@@ -39,7 +39,7 @@ export async function makePostRequest<T = unknown>(
 //This will be used in future - delete credentials for example
 export async function makeDeleteRequest<T = unknown>(
   url: string,
-  authToken: string
+  authToken: string,
 ): Promise<T> {
   const response = await httpClient.sendRequest({
     method: HttpMethod.DELETE,
@@ -47,8 +47,8 @@ export async function makeDeleteRequest<T = unknown>(
     headers: {
       Authorization: `${authToken}`,
       'Content-Type': 'application/json',
-      'Accept': '*/*'
-    }
+      Accept: '*/*',
+    },
   });
   return response.body;
 }

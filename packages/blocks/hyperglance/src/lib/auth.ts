@@ -13,23 +13,27 @@ export const hyperglanceAuth = BlockAuth.CustomAuth({
       description: 'The instance URL for Hyperglance',
       required: true,
     }),
-     authToken: Property.SecretText({
+    authToken: Property.SecretText({
       displayName: 'Auth Token',
       description: 'The API auth token. E.g BASIC fhdhdhdbfbdb= ',
       required: true,
     }),
   },
   validate: async ({ auth }) => {
-      try {
-        await makeGetRequest(auth.instanceUrl+"/hgapi/", auth.authToken);
-        return { valid: true };
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.message || error?.response?.statusText || error?.message || 'Unknown error';
-        return {
-          valid: false,
-          error: errorMessage,
-       };
-      }
+    try {
+      await makeGetRequest(auth.instanceUrl + '/hgapi/', auth.authToken);
+      return { valid: true };
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.statusText ||
+        error?.message ||
+        'Unknown error';
+      return {
+        valid: false,
+        error: errorMessage,
+      };
+    }
   },
 });
 

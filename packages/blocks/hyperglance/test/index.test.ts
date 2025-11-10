@@ -41,7 +41,7 @@ describe('block declaration tests', () => {
       customHgApiCall: {
         name: 'customHgApiCall',
         requireAuth: true,
-      }
+      },
     });
   });
 });

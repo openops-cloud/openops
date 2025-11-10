@@ -1,7 +1,10 @@
 import { createAction } from '@openops/blocks-framework';
 import { hyperglanceAuth } from '../auth';
+import {
+  getAliasDropdownProp,
+  getRecordStatus,
+} from '../hgapi/collectorRecords';
 import { getDatasourceProp } from '../hgapi/common';
-import { getAliasDropdownProp, getRecordStatus } from '../hgapi/collectorRecords';
 
 export const getCollectorRecordStatus = createAction({
   auth: hyperglanceAuth,
@@ -9,12 +12,14 @@ export const getCollectorRecordStatus = createAction({
   displayName: 'Get Credential Status',
   description: 'Returns Collector Record Status',
   props: {
-    datasource: getDatasourceProp({description:'Get credential of this cloud provider'}),
-    alias: getAliasDropdownProp()
+    datasource: getDatasourceProp({
+      description: 'Get credential of this cloud provider',
+    }),
+    alias: getAliasDropdownProp(),
   },
   isWriteAction: false,
   async run(context) {
-    const {datasource="", alias} = context.propsValue;
+    const { datasource = '', alias } = context.propsValue;
     return await getRecordStatus(context.auth, datasource, alias);
   },
 });
