@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { toast } from '@openops/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -7,7 +8,7 @@ export function useAssistantChatHistory() {
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['assistant-history'],
+    queryKey: [QueryKeys.assistantHistory],
     queryFn: async () => {
       const res = await aiAssistantChatHistoryApi.list();
       return res.chats ?? [];
@@ -22,7 +23,8 @@ export function useAssistantChatHistory() {
 
   const deleteMutation = useMutation({
     mutationFn: (chatId: string) => aiAssistantChatHistoryApi.delete(chatId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['assistant-history'] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] }),
     onError: (error) => {
       console.error('Failed to delete chat', error);
       toast({
@@ -37,7 +39,8 @@ export function useAssistantChatHistory() {
   const renameMutation = useMutation({
     mutationFn: ({ chatId, chatName }: { chatId: string; chatName: string }) =>
       aiAssistantChatHistoryApi.rename(chatId, chatName),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['assistant-history'] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] }),
     onError: (error) => {
       console.error('Failed to rename chat', error);
       toast({
@@ -54,6 +57,7 @@ export function useAssistantChatHistory() {
     isLoading,
     deleteChat: deleteMutation.mutateAsync,
     renameChat: renameMutation.mutateAsync,
-    refetch: () => qc.invalidateQueries({ queryKey: ['assistant-history'] }),
+    refetch: () =>
+      qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] }),
   };
 }

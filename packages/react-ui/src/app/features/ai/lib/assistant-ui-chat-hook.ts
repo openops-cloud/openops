@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -243,11 +244,11 @@ export const useAssistantChat = ({
         try {
           hasAttemptedNameGenerationRef.current[chatId] = true;
           await aiAssistantChatHistoryApi.generateName(chatId);
-          qc.invalidateQueries({ queryKey: ['assistant-history'] });
+          qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] });
         } catch (error) {
           console.error('Failed to generate chat name', error);
           hasAttemptedNameGenerationRef.current[chatId] = false;
-          qc.invalidateQueries({ queryKey: ['assistant-history'] });
+          qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] });
         }
       }
     },
