@@ -3,6 +3,13 @@ import { mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
+function setEnvIfExists(envVars: Record<string, string>, key: string): void {
+  const value = process.env[key];
+  if (value) {
+    envVars[key] = value;
+  }
+}
+
 export async function runCommand(
   command: string,
   credentials: any,
@@ -13,11 +20,8 @@ export async function runCommand(
     PATH: process.env['PATH'] || '',
   };
 
-  const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
-  if (persistentConfigDir) {
-    envVars['AZURE_EXTENSION_DIR'] = join(persistentConfigDir, 'cliextensions');
-    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
-  }
+  setEnvIfExists(envVars, 'AZURE_CONFIG_DIR');
+  setEnvIfExists(envVars, 'AZURE_EXTENSION_DIR');
 
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));

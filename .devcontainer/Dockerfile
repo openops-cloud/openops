@@ -18,7 +18,8 @@ RUN <<-```
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-ENV AZURE_CONFIG_DIR="/opt/azure/config"
+ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 
 RUN <<-```
   # Install yq
@@ -39,7 +40,8 @@ RUN <<-```
 
   # Install Azure CLI
   curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-  mkdir -p /opt/azure/config
+  mkdir -p /tmp/azure
+  mkdir -p /opt/azure/config/cliextensions
 
   # Configure Azure CLI extensions
   az config set extension.use_dynamic_install=yes_without_prompt
