@@ -31,6 +31,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
@@ -39,6 +40,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -64,6 +66,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -73,6 +76,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -82,6 +86,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -105,6 +110,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -113,6 +119,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -132,6 +139,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     process.env = originalEnv;
