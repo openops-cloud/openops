@@ -18,7 +18,6 @@ export function useAssistantChatHistory() {
         id: c.chatId,
         displayName: c.chatName || 'New chat',
       })),
-    refetchOnWindowFocus: false,
   });
 
   const deleteMutation = useMutation({
