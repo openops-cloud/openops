@@ -13,8 +13,7 @@ type AssistantUiHistoryItemProps = {
   onRename?: (newName: string) => void;
 };
 
-const ICON_CLASS_NAME =
-  'text-primary cursor-pointer hover:bg-gray-300 rounded-xs';
+const ICON_CLASS_NAME = 'text-[#0F0830] cursor-pointer hover:opacity-70';
 
 const AssistantUiHistoryItem = ({
   displayName,
@@ -67,9 +66,10 @@ const AssistantUiHistoryItem = ({
       role="option"
       tabIndex={isEditing ? -1 : 0}
       className={cn(
-        'flex justify-between items-center gap-2 py-[9px] pl-[9px] pr-2 rounded-sm overflow-hidden cursor-pointer hover:bg-input hover:dark:bg-muted-foreground/80 group',
+        'flex justify-between items-center gap-2 h-[38px] pl-[9px] pr-2 rounded-sm overflow-hidden cursor-pointer group',
         {
-          'bg-input': isActive,
+          'bg-gray-200': isActive,
+          'hover:bg-gray-200/50': !isActive && !isEditing,
         },
       )}
       onClick={isEditing ? undefined : onClick}
@@ -84,37 +84,41 @@ const AssistantUiHistoryItem = ({
             onChange={(e) => setEditedName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal dark:text-primary text-sm leading-snug"
+            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal text-black text-sm"
             autoFocus
           />
           <TooltipWrapper tooltipText={t('Confirm')}>
-            <Check
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleRename();
-              }}
-            />
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <Check
+                role="button"
+                size={13}
+                className={ICON_CLASS_NAME}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleRename();
+                }}
+              />
+            </div>
           </TooltipWrapper>
           <TooltipWrapper tooltipText={t('Cancel')}>
-            <X
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditedName(displayName);
-                setIsEditing(false);
-              }}
-            />
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <X
+                role="button"
+                size={13}
+                className={ICON_CLASS_NAME}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setEditedName(displayName);
+                  setIsEditing(false);
+                }}
+              />
+            </div>
           </TooltipWrapper>
         </div>
       ) : (
         <OverflowTooltip
           text={displayName}
-          className="flex-1 font-normal dark:text-primary text-sm leading-snug truncate select-none"
+          className="flex-1 font-normal text-black text-sm truncate select-none"
         />
       )}
       {!isEditing && (
@@ -125,29 +129,33 @@ const AssistantUiHistoryItem = ({
         >
           {onRename && (
             <TooltipWrapper tooltipText={t('Rename')}>
-              <Pencil
+              <div className="p-[2px] rounded-xs hover:bg-gray-300">
+                <Pencil
+                  role="button"
+                  size={13}
+                  className={ICON_CLASS_NAME}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setEditedName(displayName);
+                    setIsEditing(true);
+                  }}
+                />
+              </div>
+            </TooltipWrapper>
+          )}
+
+          <TooltipWrapper tooltipText={t('Delete')}>
+            <div className="p-[2px] rounded-xs hover:bg-gray-300">
+              <X
                 role="button"
                 size={13}
                 className={ICON_CLASS_NAME}
                 onClick={(event) => {
                   event.stopPropagation();
-                  setEditedName(displayName);
-                  setIsEditing(true);
+                  onDelete();
                 }}
               />
-            </TooltipWrapper>
-          )}
-
-          <TooltipWrapper tooltipText={t('Delete')}>
-            <X
-              role="button"
-              size={13}
-              className={ICON_CLASS_NAME}
-              onClick={(event) => {
-                event.stopPropagation();
-                onDelete();
-              }}
-            />
+            </div>
           </TooltipWrapper>
         </div>
       )}

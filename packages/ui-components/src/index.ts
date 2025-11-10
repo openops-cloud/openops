@@ -81,6 +81,7 @@ export * from './lib/user-agent-utils';
 
 /* export hooks */
 export * from './hooks/use-copy-to-clipboard';
+export * from './hooks/use-typing-animation';
 
 /* export custom components */
 export * from './components';

@@ -175,6 +175,7 @@ module.exports = {
         'step-container': '0px 0px 22px hsl(var(--border))',
         'add-button': 'var(--add-button-shadow)',
         sidebar: '0px 0px 10px 0px rgba(var(--sidebar-shadow-color))',
+        'ai-history-popover': '0px 0px 7px 0px rgba(187,193,218,0.5)',
       },
       contain: {
         layout: 'layout',

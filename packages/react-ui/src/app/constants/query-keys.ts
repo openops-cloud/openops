@@ -10,6 +10,7 @@ export const QueryKeys = {
   mcpSettings: 'mcp-settings',
   aiSettingsProviders: 'ai-settings-providers',
   aiProviderModels: 'ai-provider-models',
+  assistantHistory: 'assistant-history',
 
   // Platform
   organization: 'organization',

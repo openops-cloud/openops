@@ -1,9 +1,6 @@
-import { t } from 'i18next';
 import { Plus } from 'lucide-react';
 import { cn } from '../../../lib/cn';
-import { Button } from '../../../ui/button';
 import { ScrollArea } from '../../../ui/scroll-area';
-import { TooltipWrapper } from '../../tooltip-wrapper';
 import { AssistantUiHistoryItem } from './assistant-ui-history-item';
 
 type AssistantUiHistoryProps = {
@@ -30,23 +27,27 @@ const AssistantUiHistory = ({
   return (
     <div
       className={cn(
-        'flex-1 w-full flex flex-col gap-2 bg-secondary py-3 overflow-hidden',
+        'w-full h-full flex flex-col bg-gray-100 rounded-sm shadow-ai-history-popover overflow-hidden gap-1',
         className,
       )}
     >
-      <TooltipWrapper tooltipText={'New chat'}>
-        <Button
-          className="w-full flex items-center justify-start gap-2 enabled:hover:bg-input enabled:hover:dark:bg-muted-foreground/80 dark:text-primary font-normal"
-          variant="ghost"
+      <div className="pl-2 pr-[13px] pt-[10px] flex-shrink-0">
+        <button
+          type="button"
           onClick={onNewChat}
           disabled={newChatDisabled}
+          className={cn(
+            'flex items-center gap-2 h-[38px] px-[9px] w-full rounded-[8px] text-sm font-normal text-black cursor-pointer',
+            'hover:bg-gray-200/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+            'transition-colors',
+          )}
         >
-          <Plus size={16}></Plus>
-          {t('New chat')}
-        </Button>
-      </TooltipWrapper>
-      <ScrollArea className="flex-1">
-        <div className="flex flex-col gap-2 px-2">
+          <Plus size={16} className="text-black" />
+          <span className="text-sm">New chat</span>
+        </button>
+      </div>
+      <ScrollArea className="flex-1 min-h-0 pl-2 pr-[13px] pb-2">
+        <div className="flex flex-col gap-1">
           {chatItems.map((chatItem) => (
             <AssistantUiHistoryItem
               key={chatItem.id}
