@@ -15,12 +15,12 @@ export async function runCommand(
 
   const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
   if (persistentConfigDir) {
-    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
     envVars['AZURE_EXTENSION_DIR'] = join(persistentConfigDir, 'cliextensions');
+    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
   }
 
   if (!shouldUseHostCredentials) {
-    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure'));
+    const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
 
     await login(credentials, envVars);
