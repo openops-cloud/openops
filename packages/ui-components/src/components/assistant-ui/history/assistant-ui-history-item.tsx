@@ -66,7 +66,7 @@ const AssistantUiHistoryItem = ({
       role="option"
       tabIndex={isEditing ? -1 : 0}
       className={cn(
-        'flex justify-between items-center gap-2 h-[38px] pl-[9px] pr-2 rounded-[8px] overflow-hidden cursor-pointer group',
+        'flex justify-between items-center gap-2 h-[38px] pl-[9px] pr-2 rounded-sm overflow-hidden cursor-pointer group',
         {
           'bg-gray-200': isActive,
           'hover:bg-gray-200/50': !isActive && !isEditing,
@@ -84,7 +84,7 @@ const AssistantUiHistoryItem = ({
             onChange={(e) => setEditedName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal text-black text-[14px] leading-[20px]"
+            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal text-black text-sm"
             autoFocus
           />
           <TooltipWrapper tooltipText={t('Confirm')}>
@@ -118,7 +118,7 @@ const AssistantUiHistoryItem = ({
       ) : (
         <OverflowTooltip
           text={displayName}
-          className="flex-1 font-normal text-black text-[14px] leading-[20px] truncate select-none"
+          className="flex-1 font-normal text-black text-sm truncate select-none"
         />
       )}
       {!isEditing && (

@@ -27,7 +27,7 @@ const AssistantUiHistory = ({
   return (
     <div
       className={cn(
-        'w-full h-full flex flex-col bg-gray-100 rounded-[8px] shadow-[0px_0px_7px_0px_rgba(187,193,218,0.5)] overflow-hidden',
+        'w-full h-full flex flex-col bg-gray-100 rounded-[8px] shadow-ai-history-popover overflow-hidden',
         className,
       )}
     >
