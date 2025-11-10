@@ -1,4 +1,5 @@
 import { runCliCommand } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -13,15 +14,30 @@ export async function runCommand(
     PATH: process.env['PATH'] || '',
   };
 
-  const persistentConfigDir = process.env['AZURE_CONFIG_DIR'];
-  if (persistentConfigDir) {
-    envVars['AZURE_CONFIG_DIR'] = persistentConfigDir;
-    envVars['AZURE_EXTENSION_DIR'] = join(persistentConfigDir, 'cliextensions');
+  const processAzureConfigDir = process.env['AZURE_CONFIG_DIR'];
+
+  if (processAzureConfigDir) {
+    envVars['AZURE_CONFIG_DIR'] = processAzureConfigDir;
+    envVars['AZURE_EXTENSION_DIR'] = join(
+      processAzureConfigDir,
+      'cliextensions',
+    );
   }
 
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure'));
     envVars['AZURE_CONFIG_DIR'] = azureConfigDir;
+    envVars['AZURE_EXTENSION_DIR'] = join(azureConfigDir, 'cliextensions');
+
+    const filesInAzureConfigDir = await runCliCommand(
+      `-la ${azureConfigDir}`,
+      'ls',
+      envVars,
+    );
+    logger.warn(`Temporary directory files & temporary directory path:`, {
+      files: filesInAzureConfigDir,
+      temporaryDirectory: azureConfigDir,
+    });
 
     await login(credentials, envVars);
   }
