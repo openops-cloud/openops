@@ -77,7 +77,7 @@ const AssistantUiChat = ({
     isLoading: isHistoryLoading,
     deleteChat,
     renameChat,
-    refetch,
+    refetchChatList,
   } = useAssistantChatHistory();
 
   const { isShowingSlowWarning, connectionError } =
@@ -118,9 +118,9 @@ const AssistantUiChat = ({
 
   const onNewChatClick = useCallback(async () => {
     await createNewChat();
-    await refetch();
+    refetchChatList();
     setShowHistory(false);
-  }, [createNewChat, refetch]);
+  }, [createNewChat, refetchChatList]);
 
   if (isLoading) {
     return (

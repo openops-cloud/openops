@@ -56,7 +56,7 @@ export function useAssistantChatHistory() {
     isLoading,
     deleteChat: deleteMutation.mutateAsync,
     renameChat: renameMutation.mutateAsync,
-    refetch: () =>
+    refetchChatList: () =>
       qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] }),
   };
 }
