@@ -18,6 +18,18 @@ export const cleanLogEvent = (logEvent: any) => {
 
   const eventData: any = {};
 
+  if (logEvent.event instanceof Error) {
+    const { stack, message, name, ...context } = logEvent.event;
+    eventData.stack = truncate(stack, 2000);
+    eventData.name = name;
+    if (!logEvent.message) {
+      logEvent.message = truncate(message);
+    } else {
+      eventData.message = truncate(message);
+    }
+    Object.assign(eventData, context);
+  }
+
   for (const key in logEvent.event) {
     const value = logEvent.event[key];
     if (value === null || value === undefined) {
@@ -31,11 +43,15 @@ export const cleanLogEvent = (logEvent: any) => {
       eventData.requestMethod = rawResponse.req.method;
       eventData.requestPath = truncate(rawResponse.req.url);
       eventData.statusCode = rawResponse.statusCode;
-      const responseTime = parseFloat(logEvent.event.responseTime).toFixed();
-      eventData.responseTime = responseTime;
-      logEvent[
-        'message'
-      ] = `Request completed [${eventData.requestMethod} ${eventData.requestPath} ${eventData.statusCode} ${responseTime}ms]`;
+      const responseTime = parseFloat(logEvent.event.responseTime);
+      // verify float type
+      if (!isNaN(responseTime)) {
+        eventData.responseTime = responseTime.ToFixed;
+      }
+
+      logEvent['message'] = `Request completed [${eventData.requestMethod} ${
+        eventData.requestPath
+      } ${eventData.statusCode} ${isNaN(responseTime) ? 0 : responseTime}ms]`;
       logEvent['level'] = 'debug';
       continue;
     }
@@ -58,17 +74,6 @@ export const cleanLogEvent = (logEvent: any) => {
     eventData[key] = truncate(value);
   }
 
-  if (logEvent.event instanceof Error) {
-    const { stack, message, name, ...context } = logEvent.event;
-    eventData.stack = truncate(stack, 2000);
-    eventData.name = name;
-    if (!logEvent.message) {
-      logEvent.message = truncate(message);
-    } else {
-      eventData.message = truncate(message);
-    }
-    Object.assign(eventData, context);
-  }
   logEvent.event = eventData;
   return logEvent;
 };
