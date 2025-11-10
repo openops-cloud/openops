@@ -43,7 +43,7 @@ export async function getServiceNowChoiceValues(
       })) || []
     );
   } catch (error) {
-    logger.error('Error fetching choice values', { error });
+    logger.warn('Error fetching choice values', { error });
     return [];
   }
 }

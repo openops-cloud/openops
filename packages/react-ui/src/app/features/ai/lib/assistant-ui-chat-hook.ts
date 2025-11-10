@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -7,16 +8,19 @@ import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
+import { aiAssistantChatHistoryApi } from './ai-assistant-chat-history-api';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
+
+export const MIN_MESSAGES_BEFORE_NAME_GENERATION = 1;
 
 export const useAssistantChat = ({
   chatId,
@@ -29,6 +33,8 @@ export const useAssistantChat = ({
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
+  const qc = useQueryClient();
+  const hasAttemptedNameGenerationRef = useRef<Record<string, boolean>>({});
 
   const [provider, setProvider] = useState<string | undefined>();
   const [model, setModel] = useState<string | undefined>();
@@ -207,15 +213,44 @@ export const useAssistantChat = ({
     }),
     onError: (error) => {
       console.error('chat error', error);
+
+      if (
+        error?.message?.toLowerCase()?.includes('network error') ||
+        error?.message?.toLowerCase()?.includes('network timeout') ||
+        String(error)?.toLowerCase()?.includes('network error') ||
+        String(error)?.toLowerCase()?.includes('network timeout')
+      ) {
+        // we don't want to show a toast as we show directly in the chat UI
+        return;
+      }
+
       const errorToast = {
         title: t('AI Chat Error'),
         description: t(
           'There was an error while processing your request, please try again or open a new chat',
         ),
         variant: 'destructive' as const,
-        duration: 10000,
+        // 1 week
+        duration: 604800000,
       };
       toast(errorToast);
+    },
+    onFinish: async () => {
+      if (!chatId || hasAttemptedNameGenerationRef.current[chatId]) {
+        return;
+      }
+
+      if (messagesRef.current.length >= MIN_MESSAGES_BEFORE_NAME_GENERATION) {
+        try {
+          hasAttemptedNameGenerationRef.current[chatId] = true;
+          await aiAssistantChatHistoryApi.generateName(chatId);
+          qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] });
+        } catch (error) {
+          console.error('Failed to generate chat name', error);
+          hasAttemptedNameGenerationRef.current[chatId] = false;
+          qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] });
+        }
+      }
     },
     // https://github.com/assistant-ui/assistant-ui/issues/2327
     // handle frontend tool calls manually until this is fixed
@@ -325,5 +360,6 @@ export const useAssistantChat = ({
     provider,
     model,
     chatId,
+    chatStatus: chat.status,
   };
 };

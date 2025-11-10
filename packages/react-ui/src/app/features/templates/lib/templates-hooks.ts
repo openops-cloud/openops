@@ -181,7 +181,9 @@ export const templatesHooks = {
     };
   },
 
-  useBlocksLookup: () => {
+  useBlocksLookupBase: (
+    filterFn: (blockMetadata: BlockMetadataModelSummary) => boolean,
+  ) => {
     const { blocks: blocksMetadata, isLoading } = blocksHooks.useBlocks({
       searchQuery: '',
     });
@@ -190,16 +192,29 @@ export const templatesHooks = {
       if (!blocksMetadata) return {};
       return blocksMetadata.reduce<Record<string, BlockMetadataModelSummary>>(
         (map, blockMetadata) => {
-          if (!blockMetadata.categories?.includes(BlockCategory.CORE)) {
+          if (filterFn(blockMetadata)) {
             map[blockMetadata.name] = blockMetadata;
           }
           return map;
         },
         {},
       );
-    }, [blocksMetadata]);
+    }, [blocksMetadata, filterFn]);
 
     return { blocksLookup, isLoading };
+  },
+
+  useBlocksLookup: () => {
+    return templatesHooks.useBlocksLookupBase(
+      (blockMetadata) =>
+        !blockMetadata.categories?.includes(BlockCategory.CORE),
+    );
+  },
+
+  useBlocksLookupForConnections: () => {
+    return templatesHooks.useBlocksLookupBase(
+      (blockMetadata) => !!blockMetadata.auth,
+    );
   },
 
   useTemplatesMetadataWithIntegrations: ({
@@ -249,7 +264,7 @@ export const templatesHooks = {
 
   useSetTemplateIntegrations: (template: FlowTemplateMetadata | null) => {
     const { blocksLookup, isLoading: isBlocksLoading } =
-      templatesHooks.useBlocksLookup();
+      templatesHooks.useBlocksLookupForConnections();
 
     const templateWithIntegrations: FlowTemplateMetadataWithIntegrations | null =
       useMemo(() => {

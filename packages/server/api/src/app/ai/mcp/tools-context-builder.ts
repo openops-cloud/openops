@@ -2,21 +2,23 @@ import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { MCPChatContext } from '../chat/ai-chat.service';
+import { MCPChatContext, saveChatTools } from '../chat/ai-chat.service';
 import { generateMessageId } from '../chat/ai-id-generators';
 import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
 import { sendReasoningToStream } from '../chat/stream-message-builder';
-import { routeQuery } from './llm-query-router';
 import {
-  collectToolsByProvider,
-  formatFrontendTools,
-  hasToolProvider,
-} from './tool-utils';
+  beforeToolRouting,
+  enhanceSystemPrompt,
+  getAdditionalTools,
+  processTools,
+} from './extensions';
+import { routeQuery } from './llm-query-router';
+import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { AssistantUITools, QueryClassification } from './types';
+import { AssistantUITools } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -28,8 +30,8 @@ type MCPToolsContextParams = {
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
   additionalContext?: ChatFlowContext;
-  userId?: string;
-  chatId?: string;
+  userId: string;
+  chatId: string;
   stream?: NodeJS.WritableStream;
   abortSignal?: AbortSignal;
 };
@@ -61,6 +63,11 @@ export async function getMCPToolsContext({
     !chatContext.stepId ||
     !chatContext.workflowId
   ) {
+    const context = { userId, chatId, projectId };
+
+    // Extension point: run any setup logic before routing
+    await beforeToolRouting({ messages, context });
+
     const { mcpClients, tools } = await startMCPTools(
       app,
       authToken,
@@ -71,6 +78,7 @@ export async function getMCPToolsContext({
       tools: filteredTools,
       queryClassification,
       reasoning,
+      selectedToolNames,
     } = await routeQuery({
       messages,
       tools,
@@ -78,6 +86,9 @@ export async function getMCPToolsContext({
       aiConfig,
       uiContext: additionalContext,
       abortSignal,
+      userId,
+      chatId,
+      projectId,
     });
 
     if (reasoning && stream) {
@@ -85,41 +96,69 @@ export async function getMCPToolsContext({
       sendReasoningToStream(stream, reasoning, messageId);
     }
 
-    const systemPrompt = await getMcpSystemPrompt({
+    const baseSystemPrompt = await getMcpSystemPrompt({
       queryClassification,
-      selectedTools: filteredTools,
+      selectedTools: filteredTools ?? {},
       allTools: tools,
       uiContext: additionalContext,
     });
 
-    const openOpsTools =
-      hasToolProvider(tools, 'openops') &&
-      queryClassification.includes(QueryClassification.openops)
-        ? collectToolsByProvider(tools, 'openops')
-        : {};
+    const hasTools = !!filteredTools && Object.keys(filteredTools).length > 0;
+    const systemPrompt = await enhanceSystemPrompt({
+      basePrompt: baseSystemPrompt,
+      queryClassification,
+      hasTools,
+      context,
+    });
+
+    const finalCombinedTools = Object.fromEntries(
+      Object.entries(tools).filter(([name]) =>
+        selectedToolNames.includes(name),
+      ),
+    );
+
+    const additionalTools = await getAdditionalTools({
+      queryClassification,
+      tools,
+      languageModel,
+      context,
+    });
 
     const combinedTools = {
-      ...filteredTools,
-      ...openOpsTools,
+      ...finalCombinedTools,
+      ...additionalTools,
     };
 
-    const finalTools =
-      userId && chatId && stream
-        ? wrapToolsWithApproval(combinedTools, () => ({
-            userId,
-            projectId,
-            chatId,
-            stream,
-          }))
-        : combinedTools;
+    const { tools: processedTools } = await processTools({
+      tools: combinedTools,
+      selectedToolNames: [
+        ...selectedToolNames,
+        ...Object.keys(additionalTools),
+      ],
+      queryClassification,
+      context,
+    });
+
+    const toolsWithApproval = stream
+      ? wrapToolsWithApproval(processedTools, () => ({
+          userId,
+          projectId,
+          chatId,
+          stream,
+        }))
+      : processedTools;
+
+    const toolsToUse = {
+      ...toolsWithApproval,
+      ...formatFrontendTools(frontendTools),
+    };
+
+    await saveChatTools(chatId, userId, projectId, Object.keys(toolsToUse));
 
     return {
       mcpClients,
       systemPrompt,
-      filteredTools: {
-        ...finalTools,
-        ...formatFrontendTools(frontendTools),
-      },
+      filteredTools: toolsToUse,
     };
   }
 

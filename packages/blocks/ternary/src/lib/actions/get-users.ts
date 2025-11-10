@@ -22,7 +22,7 @@ export const getUsers = createAction({
     try {
       return await getUsersList(auth, includeSettings);
     } catch (e) {
-      logger.error('Error getting users list.', e);
+      logger.warn('Error getting users list.', e);
       throw e;
     }
   },

@@ -58,6 +58,7 @@
     "@aws-sdk/client-rds": "3.635.0",
     "@aws-sdk/client-resource-groups-tagging-api": "3.635.0",
     "@aws-sdk/client-s3": "3.635.0",
+    "@aws-sdk/client-ssm": "3.919.0",
     "@aws-sdk/client-sts": "3.635.0",
     "@aws-sdk/util-arn-parser": "3.693.0",
     "@babel/core": "^7.14.5",

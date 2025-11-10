@@ -28,7 +28,7 @@ export const PRIMITIVE_STEP_METADATA = {
   },
   [TriggerType.EMPTY]: {
     displayName: 'Empty Trigger',
-    logoUrl: 'https://static.openops.com/blocks/empty-trigger.svg',
+    logoUrl: 'https://static.openops.com/blocks/openops-empty-trigger.svg',
     description: 'Empty Trigger',
     type: TriggerType.EMPTY,
   },
