@@ -33,41 +33,10 @@ export const cleanLogEvent = (logEvent: any) => {
     }
 
     if (key === 'res' && value && value.raw) {
-      const rawResponse = value.raw;
-      eventData.requestMethod = rawResponse.req.method;
-      eventData.requestPath = truncate(rawResponse.req.url);
-      eventData.statusCode = rawResponse.statusCode;
-      const responseTime = parseFloat(logEvent.event.responseTime);
-
-      if (!isNaN(responseTime)) {
-        eventData.responseTime = responseTime.toFixed();
-      }
-
-      logEvent['message'] = `Request completed [${eventData.requestMethod} ${
-        eventData.requestPath
-      } ${eventData.statusCode} ${eventData.responseTime ?? 0}ms]`;
-      logEvent['level'] = 'debug';
+      extractRequestFields(value, eventData, logEvent);
     } else if (value instanceof Error) {
-      const errorKey = key === 'err' ? 'error' : key;
-      const { stack, message, name, ...context } = value;
-      eventData[errorKey + 'Stack'] = truncate(stack);
-      if (message) {
-        eventData[errorKey + 'Message'] = truncate(message);
-        if (!logEvent.message) {
-          logEvent.message = truncate(message);
-        }
-      }
-      eventData[errorKey + 'Name'] = truncate(name);
-      if (value instanceof ApplicationError) {
-        eventData[errorKey + 'Code'] = truncate(value.error.code);
-        eventData[errorKey + 'Params'] = truncate(
-          JSON.stringify(value.error.params),
-        );
-      } else if (context && Object.keys(context).length) {
-        eventData[errorKey + 'Context'] = truncate(JSON.stringify(context));
-      }
+      extractErrorFields(key, value, eventData, logEvent);
     } else if (typeof value === 'number') {
-      // Max 2 decimal points
       eventData[key] = Math.round(value * 100) / 100;
     } else if (typeof value === 'object') {
       try {
@@ -83,3 +52,46 @@ export const cleanLogEvent = (logEvent: any) => {
   logEvent.event = eventData;
   return logEvent;
 };
+
+function extractRequestFields(value, eventData: any, logEvent: any) {
+  const rawResponse = value.raw;
+  eventData.requestMethod = rawResponse.req.method;
+  eventData.requestPath = truncate(rawResponse.req.url);
+  eventData.statusCode = rawResponse.statusCode;
+  const responseTime = parseFloat(logEvent.event.responseTime);
+
+  if (!isNaN(responseTime)) {
+    eventData.responseTime = responseTime.toFixed();
+  }
+
+  logEvent['message'] = `Request completed [${eventData.requestMethod} ${
+    eventData.requestPath
+  } ${eventData.statusCode} ${eventData.responseTime ?? 0}ms]`;
+  logEvent['level'] = 'debug';
+}
+
+function extractErrorFields(
+  key: string,
+  value: Error | ApplicationError,
+  eventData: any,
+  logEvent: any,
+) {
+  const errorKey = key === 'err' ? 'error' : key;
+  const { stack, message, name, ...context } = value;
+  eventData[errorKey + 'Stack'] = truncate(stack);
+  if (message) {
+    eventData[errorKey + 'Message'] = truncate(message);
+    if (!logEvent.message) {
+      logEvent.message = truncate(message);
+    }
+  }
+  eventData[errorKey + 'Name'] = truncate(name);
+  if (value instanceof ApplicationError) {
+    eventData[errorKey + 'Code'] = truncate(value.error.code);
+    eventData[errorKey + 'Params'] = truncate(
+      JSON.stringify(value.error.params),
+    );
+  } else if (context && Object.keys(context).length) {
+    eventData[errorKey + 'Context'] = truncate(JSON.stringify(context));
+  }
+}
