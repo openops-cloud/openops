@@ -40,9 +40,23 @@ RUN <<-```
 
 ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 
-RUN pip3 install azure-cli==2.74.0 && \
+RUN <<-```
+    set -ex
+    pip3 install azure-cli==2.74.0
     mkdir -p /tmp/azure
+    mkdir -p /opt/azure/config/cliextensions
+    if command -v az >/dev/null 2>&1; then
+        az config set extension.use_dynamic_install=yes_without_prompt
+        az extension add --name reservation --only-show-errors || true
+        az extension add --name resource-graph --only-show-errors || true
+        az extension add --name costmanagement --only-show-errors || true
+        az extension add --name billing-benefits --only-show-errors || true
+        az extension add --name quotas --only-show-errors || true
+        az extension add --name ssh --only-show-errors || true
+    fi
+```
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
