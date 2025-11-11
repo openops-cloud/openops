@@ -14,10 +14,13 @@ export async function updateResourceProperties(
     const updates = [];
     for (const modification of modifications) {
       const propertyName = modification.propertyName;
-      const propertyValue = modification.propertyValue;
+      const propertyValue =
+        typeof modification.propertyValue === 'string'
+          ? modification.propertyValue
+          : JSON.stringify(modification.propertyValue);
 
       updates.push(
-        `.Resources.${logicalId}.Properties.${propertyName} =c "${propertyValue}" | .Resources.${logicalId}.Properties.${propertyName} style=""`,
+        `.Resources.${logicalId}.Properties.${propertyName} =c ${propertyValue} | .Resources.${logicalId}.Properties.${propertyName} style=""`,
       );
     }
 
