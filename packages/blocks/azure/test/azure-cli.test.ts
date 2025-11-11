@@ -31,6 +31,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
@@ -39,6 +40,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -64,6 +66,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -73,6 +76,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -82,6 +86,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -105,6 +110,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
@@ -113,6 +119,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -132,6 +139,7 @@ describe('azureCli', () => {
       'az',
       {
         PATH: process.env['PATH'],
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
     process.env = originalEnv;
@@ -143,6 +151,7 @@ describe('azureCli', () => {
       ...originalEnv,
       PATH: '/mock/path',
       AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
     };
 
     commonMock.runCliCommand.mockResolvedValue('mock result');
@@ -157,6 +166,44 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: process.env['AZURE_CONFIG_DIR'],
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
+      },
+    );
+    process.env = originalEnv;
+  });
+
+  test('should use temp config dir but preserve extension dir when useHostSession is false and AZURE_CONFIG_DIR is set', async () => {
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      PATH: '/mock/path',
+      AZURE_CONFIG_DIR: '/mock/config/dir',
+      AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
+    };
+
+    commonMock.runCliCommand.mockResolvedValueOnce('login result');
+    commonMock.runCliCommand.mockResolvedValueOnce('mock result');
+
+    const result = await runCommand('some command', credentials, false);
+
+    expect(result).toBe('mock result');
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(2);
+    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+      `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
+      },
+    );
+    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+      'some command',
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
       },
     );
     process.env = originalEnv;
@@ -176,6 +223,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });
@@ -198,6 +246,7 @@ describe('azureCli', () => {
       {
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
+        AZURE_EXTENSION_DIR: expect.any(String),
       },
     );
   });

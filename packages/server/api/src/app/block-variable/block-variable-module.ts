@@ -9,7 +9,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
-import { accessTokenManager } from '../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../authentication/context/access-token-manager';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
 

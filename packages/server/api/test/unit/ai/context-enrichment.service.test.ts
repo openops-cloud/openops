@@ -12,7 +12,7 @@ import {
   enrichContext,
   IncludeOptions,
 } from '../../../src/app/ai/chat/context-enrichment.service';
-import { accessTokenManager } from '../../../src/app/authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../../src/app/authentication/context/access-token-manager';
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowStepTestOutputService } from '../../../src/app/flows/step-test-output/flow-step-test-output.service';
 
@@ -25,11 +25,14 @@ jest.mock('@openops/server-shared', () => ({
   }),
 }));
 
-jest.mock('../../../src/app/authentication/lib/access-token-manager', () => ({
-  accessTokenManager: {
-    generateEngineToken: jest.fn(),
-  },
-}));
+jest.mock(
+  '../../../src/app/authentication/context/access-token-manager',
+  () => ({
+    accessTokenManager: {
+      generateEngineToken: jest.fn(),
+    },
+  }),
+);
 
 jest.mock('../../../src/app/flows/flow/flow.service', () => ({
   flowService: {

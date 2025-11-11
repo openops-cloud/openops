@@ -15,7 +15,7 @@ import { QueryFailedError } from 'typeorm';
 import { flagService } from '../../flags/flag.service';
 import { openopsTables } from '../../openops-tables';
 import { userService } from '../../user/user-service';
-import { passwordHasher } from '../lib/password-hasher';
+import { passwordHasher } from '../basic/password-hasher';
 import { authenticationServiceHooks as hooks } from './hooks';
 import { Provider } from './hooks/authentication-service-hooks';
 

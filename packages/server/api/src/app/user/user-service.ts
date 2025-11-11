@@ -17,7 +17,7 @@ import {
   UserStatus,
 } from '@openops/shared';
 import dayjs from 'dayjs';
-import { passwordHasher } from '../authentication/lib/password-hasher';
+import { passwordHasher } from '../authentication/basic/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
 import { sendUserCreatedEvent } from '../telemetry/event-models';
 import { UserEntity } from './user-entity';
