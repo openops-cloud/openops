@@ -1,4 +1,4 @@
-import { accessTokenManager } from '../../../../src/app/authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../../../src/app/authentication/context/access-token-manager';
 
 const authUserMock = jest.fn().mockResolvedValue({
   token: 'token',

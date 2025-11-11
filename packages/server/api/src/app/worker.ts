@@ -7,7 +7,7 @@ import {
 import { isNil, WorkerMachineType } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { flowWorker } from 'server-worker';
-import { accessTokenManager } from './authentication/lib/access-token-manager';
+import { accessTokenManager } from './authentication/context/access-token-manager';
 
 export const setupWorker = async (app: FastifyInstance): Promise<void> => {
   const workerToken = await generateWorkerToken();

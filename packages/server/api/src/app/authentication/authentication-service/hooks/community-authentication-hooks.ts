@@ -16,7 +16,7 @@ import { openopsTables } from '../../../openops-tables';
 import { organizationService } from '../../../organization/organization.service';
 import { projectService } from '../../../project/project-service';
 import { userService } from '../../../user/user-service';
-import { accessTokenManager } from '../../lib/access-token-manager';
+import { accessTokenManager } from '../../context/access-token-manager';
 import { AuthenticationServiceHooks } from './authentication-service-hooks';
 
 export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
