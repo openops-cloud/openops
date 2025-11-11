@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { passwordHasher } from '../../../../src/app/authentication/lib/password-hasher';
+import { passwordHasher } from '../../../../src/app/authentication/basic/password-hasher';
 
 const SCRYPT_SEPARATOR = '~';
 

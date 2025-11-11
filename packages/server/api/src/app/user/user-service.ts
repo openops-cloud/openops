@@ -17,7 +17,7 @@ import {
   UserStatus,
 } from '@openops/shared';
 import dayjs from 'dayjs';
-import { passwordHasher } from '../authentication/lib/password-hasher';
+import { passwordHasher } from '../authentication/basic/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
 import { sendUserCreatedEvent } from '../telemetry/event-models';
 import { UserEntity } from './user-entity';
@@ -139,10 +139,14 @@ export const userService = {
   },
 
   async delete({ id, organizationId }: DeleteParams): Promise<void> {
-    await userRepo().delete({
-      id,
-      organizationId,
-    });
+    const organizationWhereQuery = organizationId ? { organizationId } : {};
+
+    await userRepo()
+      .createQueryBuilder()
+      .delete()
+      .where({ id })
+      .andWhere(organizationWhereQuery)
+      .execute();
   },
 
   async getUserByEmailOrFail({ email }: { email: string }): Promise<User> {
@@ -154,6 +158,11 @@ export const userService = {
       .createQueryBuilder()
       .andWhere('LOWER(email) = LOWER(:email)', { email })
       .getMany();
+  },
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const cleanedEmail = email.toLowerCase().trim();
+    return userRepo().findOneBy({ email: cleanedEmail });
   },
 
   async getByOrganizationAndEmail({
@@ -266,7 +275,7 @@ export const userService = {
 
 type DeleteParams = {
   id: UserId;
-  organizationId: OrganizationId;
+  organizationId: OrganizationId | null;
 };
 
 type ListParams = {

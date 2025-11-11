@@ -22,7 +22,7 @@ import {
   ProgressUpdateType,
   RunEnvironment,
 } from '@openops/shared';
-import { accessTokenManager } from '../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../authentication/context/access-token-manager';
 import { flowRunService } from '../flows/flow-run/flow-run-service';
 import { flowService } from '../flows/flow/flow.service';
 import { triggerEventService } from '../flows/trigger-events/trigger-event.service';

@@ -18,7 +18,7 @@ import {
 import dayjs from 'dayjs';
 import { engineRunner, webhookUtils } from 'server-worker';
 import { LessThan } from 'typeorm';
-import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { repoFactory } from '../../core/db/repo-factory';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
