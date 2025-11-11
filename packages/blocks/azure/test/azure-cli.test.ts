@@ -210,6 +210,8 @@ describe('azureCli', () => {
   });
 
   test('should throw an error if runCliCommand fails and return the whole error when command does not contain login credentials', async () => {
+    commonMock.runCliCommand.mockRejectedValue('error');
+
     await expect(
       runCommand('some command', credentials, false),
     ).rejects.toThrow('Error while login into azure: error');
