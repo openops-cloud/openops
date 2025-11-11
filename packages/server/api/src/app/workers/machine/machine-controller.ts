@@ -10,7 +10,7 @@ import {
   WorkerMachineType,
   WorkerPrincipal,
 } from '@openops/shared';
-import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { organizationService } from '../../organization/organization.service';
 import { machineService } from './machine-service';
 

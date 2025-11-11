@@ -13,7 +13,7 @@ import {
   UserId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
-import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';

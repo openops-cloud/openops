@@ -14,7 +14,7 @@ import {
 import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
 import { flowJobExecutor } from 'server-worker';
-import { accessTokenManager } from '../../../../../src/app/authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../../../../src/app/authentication/context/access-token-manager';
 import { databaseConnection } from '../../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../../src/app/server';
 import {
