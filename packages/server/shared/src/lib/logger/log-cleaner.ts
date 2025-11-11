@@ -32,7 +32,7 @@ export const cleanLogEvent = (logEvent: any) => {
       continue;
     }
 
-    if (key == 'res' && value && value.raw) {
+    if (key === 'res' && value && value.raw) {
       const rawResponse = value.raw;
       eventData.requestMethod = rawResponse.req.method;
       eventData.requestPath = truncate(rawResponse.req.url);
