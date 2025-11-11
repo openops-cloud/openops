@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ApplicationError } from '@openops/shared';
 
 export const maxFieldLength = 2048;
@@ -53,7 +55,7 @@ export const cleanLogEvent = (logEvent: any) => {
   return logEvent;
 };
 
-function extractRequestFields(value, eventData: any, logEvent: any) {
+function extractRequestFields(value: any, eventData: any, logEvent: any) {
   const rawResponse = value.raw;
   eventData.requestMethod = rawResponse.req.method;
   eventData.requestPath = truncate(rawResponse.req.url);
