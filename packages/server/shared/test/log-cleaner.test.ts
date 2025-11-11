@@ -261,5 +261,27 @@ describe('log-cleaner', () => {
         message: 'ENTITY_NOT_FOUND'
       });
     });
+
+    it ('should flatten error in correct fields by prefix', () => {
+      const logEvent = {
+        event: {
+          networkError: new Error("Can't connect")
+        },
+        level: 'info',
+        message: 'Completed with an error'
+      }
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        event: {
+          networkErrorStack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
+          networkErrorName: 'Error',
+          networkErrorMessage: "Can't connect"
+        },
+        level: 'info',
+        message: 'Completed with an error'
+      })
+    })
   });
 });
