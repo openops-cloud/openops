@@ -46,7 +46,7 @@ export const cleanLogEvent = (logEvent: any) => {
       const responseTime = parseFloat(logEvent.event.responseTime);
       // verify float type
       if (!isNaN(responseTime)) {
-        eventData.responseTime = responseTime.ToFixed();
+        eventData.responseTime = responseTime.toFixed();
       }
 
       logEvent['message'] = `Request completed [${eventData.requestMethod} ${
