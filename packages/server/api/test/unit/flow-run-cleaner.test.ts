@@ -1,6 +1,6 @@
 import { flowTimeoutSandbox, logger, QueueName } from '@openops/server-shared';
 import { FlowRunStatus } from '@openops/shared';
-import { accessTokenManager } from '../../src/app/authentication/tokens/access-token-manager';
+import { accessTokenManager } from '../../src/app/authentication/context/access-token-manager';
 import { flowRunService } from '../../src/app/flows/flow-run/flow-run-service';
 import { expiredFlowRunCleaner } from '../../src/app/workers/redis/flow-run-cleaner';
 import { redisQueue } from '../../src/app/workers/redis/redis-queue';
@@ -13,7 +13,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-jest.mock('../../src/app/authentication/tokens/access-token-manager', () => ({
+jest.mock('../../src/app/authentication/context/access-token-manager', () => ({
   accessTokenManager: {
     generateWorkerToken: jest.fn(),
   },

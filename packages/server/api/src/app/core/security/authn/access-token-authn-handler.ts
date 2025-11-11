@@ -6,9 +6,9 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
+import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 import { userService } from '../../../user/user-service';
 import { BaseSecurityHandler } from '../security-handler';
-import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   private static readonly HEADER_NAME = 'authorization';

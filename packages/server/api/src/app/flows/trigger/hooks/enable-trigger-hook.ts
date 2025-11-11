@@ -28,9 +28,9 @@ import {
   webhookUtils,
 } from 'server-worker';
 import { appEventRoutingService } from '../../../app-event-routing/app-event-routing.service';
+import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 import { flowQueue } from '../../../workers/queue';
 import { triggerUtils } from './trigger-utils';
-import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 
 const POLLING_FREQUENCY_CRON_EXPRESSON = constructEveryXMinuteCron(
   system.getNumber(AppSystemProp.TRIGGER_DEFAULT_POLL_INTERVAL) ?? 5,

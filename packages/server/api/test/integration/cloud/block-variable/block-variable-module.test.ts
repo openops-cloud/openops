@@ -28,7 +28,7 @@ const accessTokenManagerMock = {
   extractPrincipal: jest.fn(),
 };
 jest.mock(
-  '../../../../src/app/authentication/tokens/access-token-manager',
+  '../../../../src/app/authentication/context/access-token-manager',
   () => ({
     accessTokenManager: accessTokenManagerMock,
   }),

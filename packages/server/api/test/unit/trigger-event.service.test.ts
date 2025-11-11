@@ -5,7 +5,7 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { engineRunner, webhookUtils } from 'server-worker';
-import { accessTokenManager } from '../../src/app/authentication/tokens/access-token-manager';
+import { accessTokenManager } from '../../src/app/authentication/context/access-token-manager';
 import { triggerEventService } from '../../src/app/flows/trigger-events/trigger-event.service';
 
 const mockRepo = {
@@ -24,7 +24,7 @@ jest.mock('server-worker', () => ({
   webhookUtils: { getWebhookUrl: jest.fn() },
 }));
 
-jest.mock('../../src/app/authentication/tokens/access-token-manager', () => ({
+jest.mock('../../src/app/authentication/context/access-token-manager', () => ({
   accessTokenManager: { generateEngineToken: jest.fn() },
 }));
 
