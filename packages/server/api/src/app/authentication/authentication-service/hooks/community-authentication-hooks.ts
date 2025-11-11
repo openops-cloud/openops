@@ -2,10 +2,7 @@ import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ApplicationError,
-  assertValidEmail,
-  assertValidPassword,
   ErrorCode,
-  isEmpty,
   isNil,
   PrincipalType,
   Project,
@@ -17,65 +14,39 @@ import { organizationService } from '../../../organization/organization.service'
 import { projectService } from '../../../project/project-service';
 import { userService } from '../../../user/user-service';
 import { accessTokenManager } from '../../context/access-token-manager';
-import { AuthenticationServiceHooks } from './authentication-service-hooks';
 
-export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
-  async preSignIn() {
-    // Empty
-  },
-  async preSignUp({ email, password, name }) {
-    assertValidEmail(email);
-    assertValidPassword(password);
+export async function assignDefaultOrganization(user: User): Promise<void> {
+  let organization = await organizationService.getOldestOrganization();
 
-    if (isEmpty(name)) {
-      throw new ApplicationError({
-        code: ErrorCode.INVALID_NAME_FOR_USER,
-        params: {
-          name,
-          message: 'First name and last name were not provided correctly.',
-        },
-      });
-    }
-  },
-  async postSignUp({ user, tablesRefreshToken }) {
-    let organization = await organizationService.getOldestOrganization();
+  const adminUser = await userService.getUserByEmailOrFail({
+    email: system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL),
+  });
 
-    const adminUser = await userService.getUserByEmailOrFail({
-      email: system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL),
+  organization = !isNil(adminUser.organizationId)
+    ? await organizationService.getOne(adminUser.organizationId)
+    : organization;
+
+  if (!organization) {
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        message: 'Admin organization not found',
+      },
     });
+  }
 
-    organization = !isNil(adminUser.organizationId)
-      ? await organizationService.getOne(adminUser.organizationId)
-      : organization;
+  await userService.addUserToOrganization({
+    id: user.id,
+    organizationId: organization.id,
+  });
 
-    if (!organization) {
-      throw new ApplicationError({
-        code: ErrorCode.ENTITY_NOT_FOUND,
-        params: {
-          message: 'Admin organization not found',
-        },
-      });
-    }
+  await addUserToDefaultWorkspace({
+    email: user.email,
+    workspaceId: organization.tablesWorkspaceId,
+  });
+}
 
-    await userService.addUserToOrganization({
-      id: user.id,
-      organizationId: organization.id,
-    });
-
-    await addUserToDefaultWorkspace({
-      email: user.email,
-      workspaceId: organization.tablesWorkspaceId,
-    });
-
-    return getProjectAndToken(user, tablesRefreshToken);
-  },
-
-  async postSignIn({ user, tablesRefreshToken }) {
-    return getProjectAndToken(user, tablesRefreshToken);
-  },
-};
-
-async function getProjectAndToken(
+export async function getProjectAndToken(
   user: User,
   tablesRefreshToken: string,
 ): Promise<{
