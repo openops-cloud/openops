@@ -25,11 +25,14 @@ jest.mock('@openops/server-shared', () => ({
   }),
 }));
 
-jest.mock('../../../src/app/authentication/context/access-token-manager', () => ({
-  accessTokenManager: {
-    generateEngineToken: jest.fn(),
-  },
-}));
+jest.mock(
+  '../../../src/app/authentication/context/access-token-manager',
+  () => ({
+    accessTokenManager: {
+      generateEngineToken: jest.fn(),
+    },
+  }),
+);
 
 jest.mock('../../../src/app/flows/flow/flow.service', () => ({
   flowService: {
