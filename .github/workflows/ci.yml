@@ -226,10 +226,8 @@ jobs:
             ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-${{ matrix.platform }}
             ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-${{ matrix.platform }}
             ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}
-          cache-from: |
-            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}-cache
-            type=registry,ref=${{ env.REPOSITORY_URI }}:main-${{ matrix.platform }}-cache
-          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6.18.0
