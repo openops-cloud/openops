@@ -31,8 +31,11 @@ const AssistantUiChatContainer = ({
   children,
   handleInject,
   toolComponents,
+  onHistoryOpenChange,
+  isHistoryOpen,
   isShowingSlowWarning,
   connectionError,
+  chatId,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -41,28 +44,40 @@ const AssistantUiChatContainer = ({
   }, [handleInject]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      <AssistantTopBar onClose={onClose} onNewChat={onNewChat} title={title}>
-        {children}
+    <div className="h-full w-full flex flex-col bg-background overflow-hidden relative">
+      <AssistantTopBar
+        onClose={onClose}
+        onNewChat={onNewChat}
+        title={title}
+        onHistoryOpenChange={onHistoryOpenChange}
+        isHistoryOpen={isHistoryOpen}
+        historyContent={children}
+        chatId={chatId}
+      >
+        {null}
       </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>
         {Object.entries(toolComponents || {}).map(([key, tool]) => (
           <div key={key}>{tool}</div>
         ))}
-        <ThreadExtraContextProvider
-          codeVariation={codeVariation}
-          handleInject={handleInject}
-        >
-          <Thread
-            availableModels={availableModels}
-            onModelSelected={onModelSelected}
-            selectedModel={selectedModel}
-            isModelSelectorLoading={isModelSelectorLoading}
-            theme={theme}
-            isShowingSlowWarning={isShowingSlowWarning}
-            connectionError={connectionError}
-          />
-        </ThreadExtraContextProvider>
+        <div className="flex flex-1 overflow-hidden">
+          <ThreadExtraContextProvider
+            codeVariation={codeVariation}
+            handleInject={handleInject}
+          >
+            <div className="flex-1 overflow-hidden">
+              <Thread
+                availableModels={availableModels}
+                onModelSelected={onModelSelected}
+                selectedModel={selectedModel}
+                isModelSelectorLoading={isModelSelectorLoading}
+                theme={theme}
+                isShowingSlowWarning={isShowingSlowWarning}
+                connectionError={connectionError}
+              />
+            </div>
+          </ThreadExtraContextProvider>
+        </div>
       </AssistantRuntimeProvider>
     </div>
   );
