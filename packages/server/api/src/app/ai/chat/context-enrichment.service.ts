@@ -10,9 +10,9 @@ import {
   VariableContext,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
-import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { flowService } from '../../../app/flows/flow/flow.service';
 import { flowStepTestOutputService } from '../../../app/flows/step-test-output/flow-step-test-output.service';
+import { accessTokenManager } from '../../authentication/context/access-token-manager';
 
 type FlowData = {
   flow: PopulatedFlow;
