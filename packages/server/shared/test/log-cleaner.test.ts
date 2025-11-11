@@ -1,3 +1,4 @@
+import { ApplicationError, ErrorCode } from '@openops/shared';
 import { cleanLogEvent, maxFieldLength } from '../src/lib/logger/log-cleaner';
 
 // It's over 9000
@@ -150,9 +151,10 @@ describe('log-cleaner', () => {
 
       expect(result).toEqual({
         event: {
-          stack: expect.stringMatching(/^Error: test error\s+at Object/),
-          name: 'Error',
-          testContext: 'testContext',
+          errorStack: expect.stringMatching(/^Error: test error\s+at Object/),
+          errorName: 'Error',
+          errorContext: '{"testContext":"testContext"}',
+          errorMessage: 'test error',
         },
         message: 'test error',
       });
@@ -169,9 +171,9 @@ describe('log-cleaner', () => {
       expect(result).toEqual({
         message: 'existing message',
         event: {
-          stack: expect.stringMatching(/^Error: test error\s+at Object/),
-          name: 'Error',
-          message: 'test error',
+          errorStack: expect.stringMatching(/^Error: test error\s+at Object/),
+          errorName: 'Error',
+          errorMessage: 'test error',
         },
       });
     });
@@ -187,9 +189,9 @@ describe('log-cleaner', () => {
 
       const result = cleanLogEvent(logEvent);
 
-      expect(result.event.stack).toHaveLength(2000);
-      expect(result.event.stack).toMatch(/\.\.\.$/);
-      expect(result.event.name).toBe('Error');
+      expect(result.event.errorStack).toHaveLength(2048);
+      expect(result.event.errorStack).toMatch(/\.\.\.$/);
+      expect(result.event.errorName).toBe('Error');
       expect(result.message).toBe('test error');
     });
 
@@ -209,10 +211,11 @@ describe('log-cleaner', () => {
 
       expect(result).toEqual({
         event: {
-          stack: expect.stringMatching(
+          errorStack: expect.stringMatching(
             /^CustomError: custom error message\s+at Object/,
           ),
-          name: 'CustomError',
+          errorName: 'CustomError',
+          errorMessage: 'custom error message',
         },
         message: 'custom error message',
       });
@@ -228,10 +231,34 @@ describe('log-cleaner', () => {
 
       expect(result).toEqual({
         event: {
-          stack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
-          name: 'Error',
+          errorStack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
+          errorName: 'Error',
+        }
+      });
+    });
+
+    it('should flatten error context', () => {
+      const logEvent = {
+        event: new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: {
+            message: 'No Flow',
+            entityType: 'Flow',
+            entityId: '123'
+          }
+        }),
+      };
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        event: {
+          errorStack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
+          errorName: 'Error',
+          errorMessage: 'ENTITY_NOT_FOUND',
+          errorCode: 'ENTITY_NOT_FOUND',
+          errorParams: '{"message":"No Flow","entityType":"Flow","entityId":"123"}'
         },
-        message: '',
+        message: 'ENTITY_NOT_FOUND'
       });
     });
   });
