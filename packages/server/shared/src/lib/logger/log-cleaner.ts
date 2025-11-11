@@ -2,7 +2,10 @@ import { ApplicationError } from '@openops/shared';
 
 export const maxFieldLength = 2048;
 
-export const truncate = (value: string | undefined, maxLength: number = maxFieldLength) => {
+export const truncate = (
+  value: string | undefined,
+  maxLength: number = maxFieldLength,
+) => {
   return value && value.length > maxLength
     ? `${value.substring(0, maxLength - 3)}...`
     : value;
@@ -44,8 +47,7 @@ export const cleanLogEvent = (logEvent: any) => {
         eventData.requestPath
       } ${eventData.statusCode} ${eventData.responseTime ?? 0}ms]`;
       logEvent['level'] = 'debug';
-    }
-    else if (value instanceof Error) {
+    } else if (value instanceof Error) {
       const errorKey = key === 'err' ? 'error' : key;
       const { stack, message, name, ...context } = value;
       eventData[errorKey + 'Stack'] = truncate(stack);
@@ -58,24 +60,22 @@ export const cleanLogEvent = (logEvent: any) => {
       eventData[errorKey + 'Name'] = truncate(name);
       if (value instanceof ApplicationError) {
         eventData[errorKey + 'Code'] = truncate(value.error.code);
-        eventData[errorKey + 'Params'] = truncate(JSON.stringify(value.error.params));
-      }
-      else if (context && Object.keys(context).length){
+        eventData[errorKey + 'Params'] = truncate(
+          JSON.stringify(value.error.params),
+        );
+      } else if (context && Object.keys(context).length) {
         eventData[errorKey + 'Context'] = truncate(JSON.stringify(context));
       }
-    }
-    else if (typeof value === 'number') {
+    } else if (typeof value === 'number') {
       // Max 2 decimal points
       eventData[key] = Math.round(value * 100) / 100;
-    }
-    else if (typeof value === 'object') {
+    } else if (typeof value === 'object') {
       try {
         eventData[key] = truncate(JSON.stringify(value));
       } catch (error) {
         eventData[key] = `Logger error - could not stringify object. ${error}`;
       }
-    }
-    else {
+    } else {
       eventData[key] = truncate(value);
     }
   }

@@ -233,7 +233,7 @@ describe('log-cleaner', () => {
         event: {
           errorStack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
           errorName: 'Error',
-        }
+        },
       });
     });
 
@@ -244,8 +244,8 @@ describe('log-cleaner', () => {
           params: {
             message: 'No Flow',
             entityType: 'Flow',
-            entityId: '123'
-          }
+            entityId: '123',
+          },
         }),
       };
       const result = cleanLogEvent(logEvent);
@@ -256,20 +256,21 @@ describe('log-cleaner', () => {
           errorName: 'Error',
           errorMessage: 'ENTITY_NOT_FOUND',
           errorCode: 'ENTITY_NOT_FOUND',
-          errorParams: '{"message":"No Flow","entityType":"Flow","entityId":"123"}'
+          errorParams:
+            '{"message":"No Flow","entityType":"Flow","entityId":"123"}',
         },
-        message: 'ENTITY_NOT_FOUND'
+        message: 'ENTITY_NOT_FOUND',
       });
     });
 
-    it ('should flatten error in correct fields by prefix', () => {
+    it('should flatten error in correct fields by prefix', () => {
       const logEvent = {
         event: {
-          networkError: new Error("Can't connect")
+          networkError: new Error("Can't connect"),
         },
         level: 'info',
-        message: 'Completed with an error'
-      }
+        message: 'Completed with an error',
+      };
 
       const result = cleanLogEvent(logEvent);
 
@@ -277,11 +278,11 @@ describe('log-cleaner', () => {
         event: {
           networkErrorStack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
           networkErrorName: 'Error',
-          networkErrorMessage: "Can't connect"
+          networkErrorMessage: "Can't connect",
         },
         level: 'info',
-        message: 'Completed with an error'
-      })
-    })
+        message: 'Completed with an error',
+      });
+    });
   });
 });
