@@ -166,6 +166,7 @@ interface SlackElement {
 interface SlackText {
   type: string;
   text: string;
+  emoji?: boolean;
 }
 
 interface ConfirmationPrompt {
@@ -197,6 +198,7 @@ function createButton(action: SlackActionDefinition): SlackElement {
     text: {
       type: 'plain_text',
       text: buttonText,
+      emoji: false,
     },
     url,
   };
