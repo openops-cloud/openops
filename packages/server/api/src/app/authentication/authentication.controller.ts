@@ -16,7 +16,7 @@ import { analyticsDashboardService } from '../openops-analytics/analytics-dashbo
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
-import { authenticationService } from './authentication-service';
+import { authenticationService } from './basic/authentication-service';
 import {
   removeAuthCookiesAndReply,
   setAuthCookiesAndReply,
