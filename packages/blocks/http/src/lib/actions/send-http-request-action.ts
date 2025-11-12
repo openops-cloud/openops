@@ -24,7 +24,7 @@ const toLowerCaseKeys = (obj: HttpHeaders) =>
 export const httpSendRequestAction = createAction({
   name: 'send_request',
   displayName: 'Send Http Request',
-  description: 'Send HTTP request',
+  description: 'Send an HTTP request to a specified URL',
   isWriteAction: true,
   auth: httpAuth,
   props: {

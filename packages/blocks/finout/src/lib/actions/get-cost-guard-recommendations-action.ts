@@ -5,7 +5,8 @@ import { getScanRecommendations, getScans } from '../common/cost-guard';
 export const getCostGuardRecommendationsAction = createAction({
   name: 'finout_get_cost_guard_recommendations',
   displayName: 'Get CostGuard Recommendations',
-  description: 'Get CostGuard Recommendations',
+  description:
+    'Retrieve cost optimization recommendations from Finout CostGuard',
   auth: finoutAuth,
   isWriteAction: false,
   props: {

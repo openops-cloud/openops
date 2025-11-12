@@ -7,7 +7,7 @@ import { safeFetch } from '../common/safe-fetch';
 export const tagAssetAction = createAction({
   name: 'cloudhealth_tag_asset',
   displayName: 'Add or Update Asset Tags',
-  description: 'Add or Update Asset Tags',
+  description: 'Add or modify tags on CloudHealth assets',
   auth: cloudhealthAuth,
   isWriteAction: true,
   props: {

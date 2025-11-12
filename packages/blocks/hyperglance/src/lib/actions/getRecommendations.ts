@@ -10,7 +10,7 @@ export const getRecommendations = createAction({
   auth: hyperglanceAuth,
   name: 'getRecommendations',
   displayName: 'Get Recommendations',
-  description: 'Get Recommendations',
+  description: 'Retrieve cost optimization recommendations from Hyperglance',
   props: {
     datasource: getDatasourceProp({
       description: 'Fetch recommendations in regards to this cloud provider',

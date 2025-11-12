@@ -10,7 +10,7 @@ import {
 export const runAthenaQueryAction = createAction({
   auth: amazonAuth,
   name: 'athena_query',
-  description: 'Query Athena database',
+  description: 'Execute SQL queries on AWS Athena database',
   displayName: 'Query Athena Database',
   isWriteAction: false,
   props: {

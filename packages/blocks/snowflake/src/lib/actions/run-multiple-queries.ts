@@ -52,7 +52,7 @@ const props = {
 export const runMultipleQueries = createAction({
   name: 'runMultipleQueries',
   displayName: 'Run Multiple Queries',
-  description: 'Run Multiple Queries',
+  description: 'Execute multiple SQL queries on Snowflake',
   auth: customAuth,
   isWriteAction: true,
   props,

@@ -9,7 +9,7 @@ import { snoozeRecommendations, Vendor } from '../common/recommendations-api';
 export const snoozeRecommendationAction = createAction({
   name: `cloudability_snooze_recommendations`,
   displayName: `Snooze Recommendations`,
-  description: `Snooze Recommendations`,
+  description: `Temporarily suppress recommendations from appearing`,
   auth: cloudabilityAuth,
   isWriteAction: true,
   props: {

@@ -7,7 +7,7 @@ import { safeFetch } from '../common/safe-fetch';
 export const removeTagAssetAction = createAction({
   name: 'cloudhealth_remove_tag_asset',
   displayName: 'Remove Asset Tags',
-  description: 'Remove Asset Tags',
+  description: 'Remove tags from CloudHealth assets',
   auth: cloudhealthAuth,
   isWriteAction: true,
   props: {

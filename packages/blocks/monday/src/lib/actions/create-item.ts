@@ -22,7 +22,7 @@ export const createItemAction = createAction({
     group_id: mondayCommon.group_id(false),
     item_name: Property.ShortText({
       displayName: 'Item Name',
-      description: 'Item Name',
+      description: 'Name of the item to create',
       required: true,
     }),
     column_values: mondayCommon.columnValues,

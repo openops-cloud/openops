@@ -38,7 +38,7 @@ const props = {
 export const runQuery = createAction({
   name: 'runQuery',
   displayName: 'Run Query',
-  description: 'Run Query',
+  description: 'Execute a SQL query on Snowflake',
   auth: customAuth,
   isWriteAction: true,
   props,

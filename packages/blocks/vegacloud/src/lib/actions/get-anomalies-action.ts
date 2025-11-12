@@ -7,7 +7,7 @@ import { makeRequest } from '../common/make-request';
 export const getAnomaliesAction = createAction({
   name: `vegacloud_get_anomalies`,
   displayName: `Get Anomalies`,
-  description: `Get Anomalies`,
+  description: `Retrieve cost and usage anomalies from VegaCloud`,
   auth: vegacloudAuth,
   isWriteAction: false,
   props: {

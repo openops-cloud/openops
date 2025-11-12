@@ -65,7 +65,7 @@ export const newOrModifiedFile = createTrigger({
     }),
     ignoreHiddenFiles: Property.Checkbox({
       displayName: 'Ignore Hidden Files',
-      description: 'Ignore hidden files',
+      description: 'Skip files that start with a dot',
       required: false,
       defaultValue: false,
     }),
