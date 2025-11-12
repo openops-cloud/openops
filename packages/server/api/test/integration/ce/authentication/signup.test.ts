@@ -38,8 +38,6 @@ jest.mock('../../../../src/app/openops-tables/index', () => ({
 import { PrincipalType, UserStatus } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
-import { authenticationService } from '../../../../src/app/authentication/authentication-service';
-import { Provider } from '../../../../../../shared/src/lib/authentication/model/authentication-type';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';

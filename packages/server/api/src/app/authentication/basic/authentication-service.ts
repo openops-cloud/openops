@@ -4,26 +4,23 @@ import {
   AuthenticationResponse,
   ErrorCode,
   isNil,
-  Project,
   Provider,
-  removePasswordPropFromUser,
   User,
   UserStatus,
 } from '@openops/shared';
-import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
-import { createProjectAuthContext } from '../context/create-project-auth-context';
+import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
 import { assignDefaultOrganization } from '../new-user/organization-assignment';
 import { passwordHasher } from './password-hasher';
 
 export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
-    const { user, refreshToken } = await createUser(params);
+    const { user, tablesRefreshToken } = await createUser(params);
 
     await assignDefaultOrganization(user);
 
-    return this.authResponse(user, refreshToken);
+    return this.authResponse(user, tablesRefreshToken);
   },
 
   async signIn(request: SignInParams): Promise<AuthenticationResponse> {
@@ -51,13 +48,7 @@ export const authenticationService = {
     user: User,
     tablesRefreshToken: string,
   ): Promise<AuthenticationResponse> {
-    const projectContext = await createProjectAuthContext(
-      user,
-      tablesRefreshToken,
-      async (user): Promise<Project | null> => {
-        return projectService.getOneForUser(user);
-      },
-    );
+    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
 
     const userWithoutPassword = removePasswordPropFromUser(projectContext.user);
 
@@ -113,6 +104,11 @@ const assertPasswordMatches = async ({
       params: null,
     });
   }
+};
+
+const removePasswordPropFromUser = (user: User): Omit<User, 'password'> => {
+  const { password: _, ...filteredUser } = user;
+  return filteredUser;
 };
 
 type SignUpParams = {

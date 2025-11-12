@@ -28,7 +28,7 @@ type NewUserParams = {
 
 type NewUserResponse = {
   user: User;
-  refreshToken: string;
+  tablesRefreshToken: string;
 };
 
 const assertValidSignUpParams = async ({
@@ -118,7 +118,7 @@ export async function createUser(
   const user = await createEditorUser(params);
 
   try {
-    const refreshToken = await createTablesUser(
+    const tablesRefreshToken = await createTablesUser(
       name,
       params.email,
       params.password,
@@ -126,7 +126,7 @@ export async function createUser(
 
     return {
       user,
-      refreshToken,
+      tablesRefreshToken,
     };
   } catch (e: unknown) {
     await userService.delete({
@@ -156,7 +156,7 @@ export async function createUserWithRandomPassword(
   });
 
   try {
-    const refreshToken = await createTablesUser(
+    const tablesRefreshToken = await createTablesUser(
       name,
       params.email,
       randomPassword,
@@ -164,7 +164,7 @@ export async function createUserWithRandomPassword(
 
     return {
       user,
-      refreshToken,
+      tablesRefreshToken,
     };
   } catch (e: unknown) {
     await userService.delete({

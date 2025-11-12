@@ -1,8 +1,8 @@
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { EnvironmentType, Provider } from '@openops/shared';
+import { authenticationService } from '../../authentication/basic/authentication-service';
 import { FlagEntity } from '../../flags/flag.entity';
 import { databaseConnection } from '../database-connection';
-import { authenticationService } from '../../authentication/basic/authentication-service';
 
 const DEV_DATA_SEEDED_FLAG = 'DEV_DATA_SEEDED';
 

@@ -8,13 +8,13 @@ import {
   User,
 } from '@openops/shared';
 import { organizationService } from '../../organization/organization.service';
+import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 import { accessTokenManager } from './access-token-manager';
 
-export async function createProjectAuthContext(
+export async function getProjectAndToken(
   user: User,
   tablesRefreshToken: string,
-  getProjectStrategy: (user: User) => Promise<Project | null>,
 ): Promise<{
   user: User;
   project: Project;
@@ -24,8 +24,7 @@ export async function createProjectAuthContext(
 }> {
   const updatedUser = await userService.getOneOrFail({ id: user.id });
 
-  const project = await getProjectStrategy(updatedUser);
-
+  const project = await projectService.getOneForUser(updatedUser);
   if (isNil(project)) {
     throw new ApplicationError({
       code: ErrorCode.INVITATION_ONLY_SIGN_UP,
