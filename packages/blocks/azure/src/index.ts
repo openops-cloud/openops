@@ -3,6 +3,7 @@ import { azureAuth } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
 import { advisorAction } from './lib/actions/azure-advisor-action';
 import { azureCliAction } from './lib/actions/azure-cli-action';
+import { azureResourceGraphAction } from './lib/actions/azure-resource-graph-action';
 import { customAzureApiCallAction } from './lib/actions/custom-azure-api-action';
 
 export const azure = createBlock({
@@ -12,6 +13,11 @@ export const azure = createBlock({
   logoUrl: 'https://static.openops.com/blocks/azure.svg',
   authors: [],
   categories: [BlockCategory.CLOUD],
-  actions: [azureCliAction, advisorAction, customAzureApiCallAction],
+  actions: [
+    azureCliAction,
+    advisorAction,
+    azureResourceGraphAction,
+    customAzureApiCallAction,
+  ],
   triggers: [],
 });
