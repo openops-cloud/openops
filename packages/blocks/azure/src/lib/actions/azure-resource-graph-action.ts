@@ -9,7 +9,7 @@ import { AxiosHeaders } from 'axios';
 import { runCommand } from '../azure-cli';
 import { subDropdown } from '../common-properties';
 
-const RESOURCE_GRAPH_API_VERSION = '2021-03-01';
+const RESOURCE_GRAPH_API_VERSION = '2022-10-01';
 const BATCH_SIZE = 1000;
 
 interface ResourceGraphResponse {
@@ -113,14 +113,13 @@ export const azureResourceGraphAction = createAction({
     subscriptions: subDropdown,
     query: Property.LongText({
       displayName: 'KQL Query',
-      description:
-        'The Kusto Query Language (KQL) query to execute. Common tables: "resources" (all resources), "advisorresources" (Advisor recommendations - requires Azure Advisor), "resourcecontainers" (subscriptions, resource groups). Example: "resources | where type == \'microsoft.compute/virtualmachines\' | project name, location"',
+      description: 'The Kusto Query Language (KQL) query to execute.',
       required: true,
     }),
     querySubscriptions: Property.Array({
       displayName: 'Query Subscription IDs',
       description:
-        'Array of Azure subscription IDs to query. Leave empty to query all accessible subscriptions. Automatically batched in chunks of 1000.',
+        'Array of Azure subscription IDs to query. Leave empty to query all accessible subscriptions.',
       required: false,
     }),
     limitSubscriptions: Property.Checkbox({
@@ -157,6 +156,13 @@ export const azureResourceGraphAction = createAction({
       required: false,
       validators: [Validators.minValue(1), Validators.integer],
     }),
+    apiVersion: Property.ShortText({
+      displayName: 'API Version',
+      description:
+        'Azure Resource Graph API version. Leave empty to use the latest stable version (2022-10-01).',
+      required: false,
+      defaultValue: RESOURCE_GRAPH_API_VERSION,
+    }),
   },
   async run(context) {
     const {
@@ -167,6 +173,7 @@ export const azureResourceGraphAction = createAction({
       subscriptionLimit,
       query,
       maxResults,
+      apiVersion,
     } = context.propsValue;
 
     const kql = query?.trim();
@@ -195,7 +202,7 @@ export const azureResourceGraphAction = createAction({
       'Content-Type': 'application/json',
     });
 
-    const url = buildResourceGraphUrl(RESOURCE_GRAPH_API_VERSION);
+    const url = buildResourceGraphUrl(apiVersion || RESOURCE_GRAPH_API_VERSION);
 
     const batches: (string[] | undefined)[] = [];
     if (subscriptionList?.length) {
