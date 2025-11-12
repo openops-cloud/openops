@@ -28,7 +28,7 @@ import {
   webhookUtils,
 } from 'server-worker';
 import { appEventRoutingService } from '../../../app-event-routing/app-event-routing.service';
-import { accessTokenManager } from '../../../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 import { flowQueue } from '../../../workers/queue';
 import { triggerUtils } from './trigger-utils';
 

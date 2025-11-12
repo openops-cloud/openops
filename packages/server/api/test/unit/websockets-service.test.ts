@@ -1,5 +1,5 @@
 const extractPrincipalMock = jest.fn();
-jest.mock('../../src/app/authentication/lib/access-token-manager', () => ({
+jest.mock('../../src/app/authentication/context/access-token-manager', () => ({
   accessTokenManager: {
     extractPrincipal: extractPrincipalMock,
   },

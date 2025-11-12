@@ -6,7 +6,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
-import { accessTokenManager } from '../../../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 import { userService } from '../../../user/user-service';
 import { BaseSecurityHandler } from '../security-handler';
 
