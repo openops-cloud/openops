@@ -86,12 +86,12 @@ export const azureResourceGraphAction = createAction({
   displayName: 'Azure Resource Graph Query',
   isWriteAction: false,
   props: {
-    useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     query: Property.LongText({
       displayName: 'KQL Query',
       description: 'The Kusto Query Language (KQL) query to execute.',
       required: true,
     }),
+    useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     querySubscriptions: createSubscriptionDynamicProperty(
       {
         displayName: 'Query Subscriptions',
