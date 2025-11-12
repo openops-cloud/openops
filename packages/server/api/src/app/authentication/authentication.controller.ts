@@ -8,6 +8,7 @@ import {
   ALL_PRINCIPAL_TYPES,
   OpsEdition,
   PrincipalType,
+  Provider,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
@@ -16,7 +17,6 @@ import { resolveOrganizationIdForAuthnRequest } from '../organization/organizati
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
 import { authenticationService } from './authentication-service';
-import { Provider } from './authentication-service/hooks/authentication-service-hooks';
 import {
   removeAuthCookiesAndReply,
   setAuthCookiesAndReply,
