@@ -20,7 +20,6 @@ type NewUserParams = {
   newsLetter: boolean;
   verified: boolean;
   organizationId: string | null;
-  referringUserId?: string;
   provider: Provider;
 };
 
