@@ -8,6 +8,7 @@ export interface SubscriptionDropdownConfig {
   description: string;
   required: boolean;
   multiSelect: boolean;
+  preselectAll?: boolean;
 }
 
 const SINGLE_SELECT_CONFIG: SubscriptionDropdownConfig = {
@@ -42,12 +43,21 @@ function createSubscriptionDropdown(
     ? Property.StaticMultiSelectDropdown
     : Property.StaticDropdown;
 
-  return PropertyType({
+  const base = {
     displayName: config.displayName,
     description: config.description,
     required: config.required,
     options,
-  });
+  } as any;
+
+  if (config.multiSelect && config.preselectAll && options?.options?.length) {
+    return PropertyType({
+      ...base,
+      defaultValue: options.options.map((o: any) => o.value),
+    });
+  }
+
+  return PropertyType(base);
 }
 
 async function getSubscriptionsDropdown(
