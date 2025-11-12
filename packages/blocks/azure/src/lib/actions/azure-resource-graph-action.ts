@@ -7,7 +7,6 @@ import {
 } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 import { runCommand } from '../azure-cli';
-import { subDropdown } from '../common-properties';
 
 const RESOURCE_GRAPH_API_VERSION = '2024-04-01';
 const BATCH_SIZE = 1000;
@@ -110,7 +109,6 @@ export const azureResourceGraphAction = createAction({
   isWriteAction: false,
   props: {
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
-    subscriptions: subDropdown,
     query: Property.LongText({
       displayName: 'KQL Query',
       description: 'The Kusto Query Language (KQL) query to execute.',
@@ -167,7 +165,6 @@ export const azureResourceGraphAction = createAction({
   async run(context) {
     const {
       useHostSession,
-      subscriptions,
       querySubscriptions,
       limitSubscriptions,
       subscriptionLimit,
@@ -194,7 +191,7 @@ export const azureResourceGraphAction = createAction({
     }
 
     const token = useHostSession?.['useHostSessionCheckbox']
-      ? await getHostAccessToken(context.auth, subscriptions?.['subDropdown'])
+      ? await getHostAccessToken(context.auth)
       : (await authenticateUserWithAzure(context.auth)).access_token;
 
     const headers = new AxiosHeaders({
