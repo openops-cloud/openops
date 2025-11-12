@@ -25,12 +25,14 @@ export const getCommitmentsInventoryAction = createAction({
     }),
     startDate: Property.ShortText({
       displayName: 'Start Date',
-      description: 'The start date for the commitment inventory query (Format: yyyy-MM-dd)',
+      description:
+        'The start date for the commitment inventory query (Format: yyyy-MM-dd)',
       required: true,
     }),
     endDate: Property.ShortText({
       displayName: 'End Date',
-      description: 'The end date for the commitment inventory query (Format: yyyy-MM-dd)',
+      description:
+        'The end date for the commitment inventory query (Format: yyyy-MM-dd)',
       required: true,
     }),
     search: Property.ShortText({

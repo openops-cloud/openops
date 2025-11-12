@@ -22,7 +22,8 @@ export const runJob = createAction({
     }),
     timeout: Property.Number({
       displayName: 'Job Timeout',
-      description: 'Maximum number of seconds to wait for all task in the job to complete before timing out',
+      description:
+        'Maximum number of seconds to wait for all task in the job to complete before timing out',
       required: true,
       validators: [Validators.number, Validators.minValue(0)],
       defaultValue: 50,

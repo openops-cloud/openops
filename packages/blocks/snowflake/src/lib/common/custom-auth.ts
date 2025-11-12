@@ -49,12 +49,14 @@ export const customAuth = BlockAuth.CustomAuth({
     }),
     database: Property.ShortText({
       displayName: 'Database',
-      description: 'The default database to use for the session after connecting',
+      description:
+        'The default database to use for the session after connecting',
       required: false,
     }),
     role: Property.ShortText({
       displayName: 'Role',
-      description: 'The default security role to use for the session after connecting',
+      description:
+        'The default security role to use for the session after connecting',
       required: false,
     }),
     warehouse: Property.ShortText({

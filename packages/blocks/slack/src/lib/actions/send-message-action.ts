@@ -34,7 +34,8 @@ export const slackSendMessageAction = createAction({
     }),
     blockKitEnabled: Property.Checkbox({
       displayName: 'Create Your Message Manually Using Block Kit Blocks',
-      description: 'Enable to manually create message blocks using Slack Block Kit format',
+      description:
+        'Enable to manually create message blocks using Slack Block Kit format',
       defaultValue: false,
       required: false,
     }),

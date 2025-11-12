@@ -14,7 +14,8 @@ export const executeSqlStatement = createAction({
   name: 'executeSqlStatement',
   auth: databricksAuth,
   displayName: 'Execute Sql Statement',
-  description: 'Run a SQL query in a Databricks workspace and retrieve results using a specified warehouse',
+  description:
+    'Run a SQL query in a Databricks workspace and retrieve results using a specified warehouse',
   isWriteAction: true,
   props: {
     workspaceDeploymentName: workspaceDeploymentName,

@@ -11,7 +11,8 @@ export function getTeamReviewersProperty(): MultiSelectDropdownProperty<
 > {
   return Property.MultiSelectDropdown({
     displayName: 'Team Reviewers',
-    description: 'List of GitHub teams to be notified to review the pull request',
+    description:
+      'List of GitHub teams to be notified to review the pull request',
     required: false,
     refreshers: ['repository'],
     options: async ({ repository, auth }) => {

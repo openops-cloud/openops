@@ -29,7 +29,8 @@ enum AuthType {
 export const catchWebhook = createTrigger({
   name: CATCH_WEBHOOK,
   displayName: 'Catch Webhook',
-  description: 'Receive incoming HTTP/webhooks using any HTTP method such as GET, POST, PUT, DELETE, etc',
+  description:
+    'Receive incoming HTTP/webhooks using any HTTP method such as GET, POST, PUT, DELETE, etc',
   props: {
     markdown: Property.MarkDown({
       value: message,

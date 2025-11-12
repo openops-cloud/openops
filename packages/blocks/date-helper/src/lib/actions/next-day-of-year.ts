@@ -45,7 +45,8 @@ export const nextDayofYear = createAction({
     }),
     day: Property.Number({
       displayName: 'Day of Month',
-      description: 'The day of the month that you would like to get the date and time of',
+      description:
+        'The day of the month that you would like to get the date and time of',
       required: true,
       defaultValue: 1,
       validators: [Validators.minValue(1), Validators.maxValue(31)],
@@ -60,7 +61,8 @@ export const nextDayofYear = createAction({
     }),
     currentTime: Property.Checkbox({
       displayName: 'Use Current Time',
-      description: 'If checked, the current time will be used instead of the time specified above',
+      description:
+        'If checked, the current time will be used instead of the time specified above',
       required: false,
       defaultValue: false,
     }),

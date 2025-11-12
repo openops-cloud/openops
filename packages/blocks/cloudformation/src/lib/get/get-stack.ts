@@ -11,7 +11,8 @@ export const getStack = createAction({
   auth: amazonAuth,
   name: 'get_stack_template',
   displayName: 'Get Cloudformation Template',
-  description: 'Get the CloudFormation stack template that matches the given arn',
+  description:
+    'Get the CloudFormation stack template that matches the given arn',
   isWriteAction: false,
   props: {
     arn: Property.ShortText({

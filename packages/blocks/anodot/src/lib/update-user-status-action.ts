@@ -48,12 +48,14 @@ export const updateUserStatusAction = createAction({
             return {
               label_add: Property.LongText({
                 displayName: 'Add Labels',
-                description: 'A comma seperated list of labels to add to the recommendation',
+                description:
+                  'A comma seperated list of labels to add to the recommendation',
                 required: false,
               }),
               label_delete: Property.LongText({
                 displayName: 'Delete Labels',
-                description: 'A comma seperated list of labels to remove from the recommendation',
+                description:
+                  'A comma seperated list of labels to remove from the recommendation',
                 required: false,
               }),
             };

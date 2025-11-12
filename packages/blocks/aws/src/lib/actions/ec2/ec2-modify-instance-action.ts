@@ -124,7 +124,8 @@ function getPropertyWithAttributeName(attributeName: string) {
     case 'DisableApiStop': {
       return Property.Checkbox({
         displayName: 'Disable API Stop',
-        description: 'Indicates whether an instance is enabled for stop protection',
+        description:
+          'Indicates whether an instance is enabled for stop protection',
         required: true,
       });
     }
@@ -139,14 +140,16 @@ function getPropertyWithAttributeName(attributeName: string) {
     case 'EnaSupport': {
       return Property.Checkbox({
         displayName: 'Enable Ena Support',
-        description: 'Set to true to enable enhanced networking with ENA for the instance',
+        description:
+          'Set to true to enable enhanced networking with ENA for the instance',
         required: true,
       });
     }
     case 'SriovNetSupport': {
       return Property.Checkbox({
         displayName: 'Enable SR-IOV Net Support',
-        description: 'Sets the SR-IOV Net Support to simple to enable enhanced networking with the Intel 82599 Virtual Function interface for the instance',
+        description:
+          'Sets the SR-IOV Net Support to simple to enable enhanced networking with the Intel 82599 Virtual Function interface for the instance',
         required: true,
       });
     }

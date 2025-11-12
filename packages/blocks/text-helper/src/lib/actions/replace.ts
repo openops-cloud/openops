@@ -1,7 +1,8 @@
 import { Property, Validators, createAction } from '@openops/blocks-framework';
 
 export const replace = createAction({
-  description: 'Replaces all instances of any word, character or phrase in text, with another',
+  description:
+    'Replaces all instances of any word, character or phrase in text, with another',
   displayName: 'Replace',
   name: 'replace',
   errorHandlingOptions: {

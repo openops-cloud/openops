@@ -86,7 +86,8 @@ export function createCustomApiCallAction({
       }),
       headers: Property.Object({
         displayName: 'Headers',
-        description: 'Authorization headers are injected automatically from your connection',
+        description:
+          'Authorization headers are injected automatically from your connection',
         required: false,
       }),
       queryParams: Property.Object({

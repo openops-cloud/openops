@@ -4,7 +4,8 @@ import { common, getScopeAndKey } from './common';
 export const storageListAction = createAction({
   name: 'list',
   displayName: 'List',
-  description: 'List all keys and their values in storage with optional filtering',
+  description:
+    'List all keys and their values in storage with optional filtering',
   errorHandlingOptions: {
     continueOnFailure: {
       hide: true,

@@ -132,7 +132,8 @@ export const mondayCommon = {
   columnIds: (required = true) =>
     Property.MultiSelectDropdown({
       displayName: 'Column IDs',
-      description: 'Limit data output by specifying column IDs; leave empty to display all columns',
+      description:
+        'Limit data output by specifying column IDs; leave empty to display all columns',
       required,
       refreshers: ['board_id'],
       options: async ({ auth, board_id }) => {

@@ -7,7 +7,8 @@ import { createFieldsPropertiesForCreate } from './create-fields-properties';
 export const upsertRecordAction = createAction({
   auth: servicenowAuth,
   name: 'upsert_record',
-  description: 'Create a new record or update an existing record in a ServiceNow table',
+  description:
+    'Create a new record or update an existing record in a ServiceNow table',
   displayName: 'Add or Update Record',
   isWriteAction: true,
   props: {
