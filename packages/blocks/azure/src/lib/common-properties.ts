@@ -18,9 +18,8 @@ const SINGLE_SELECT_CONFIG: SubscriptionDropdownConfig = {
 };
 
 const MULTI_SELECT_CONFIG: SubscriptionDropdownConfig = {
-  displayName: 'Query Subscriptions',
-  description:
-    'Select subscriptions to query. Leave empty to query all accessible subscriptions.',
+  displayName: 'Subscriptions',
+  description: 'Select subscriptions to perform the action on',
   required: false,
   multiSelect: true,
 };
