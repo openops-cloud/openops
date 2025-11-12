@@ -27,11 +27,11 @@ export async function createFiltersProperties(
 
   const fieldNameProperty = hasError
     ? Property.ShortText({
-        displayName: 'Field name',
+        displayName: 'Field Name',
         required: true,
       })
     : Property.StaticDropdown<string>({
-        displayName: 'Field name',
+        displayName: 'Field Name',
         required: true,
         options: {
           options: tableFields.map((f) => ({
@@ -52,7 +52,7 @@ export async function createFiltersProperties(
       properties: {
         fieldName: fieldNameProperty,
         filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
-          displayName: 'Filter type',
+          displayName: 'Filter Type',
           required: true,
           options: {
             options: Object.keys(ViewFilterTypesEnum)
@@ -66,7 +66,7 @@ export async function createFiltersProperties(
           },
         }),
         value: Property.DynamicProperties({
-          displayName: 'Value to search for',
+          displayName: 'Value to Search for',
           required: true,
           refreshers: hasError ? ['filterType'] : ['fieldName', 'filterType'],
           props: async ({ fieldName, filterType }) => {

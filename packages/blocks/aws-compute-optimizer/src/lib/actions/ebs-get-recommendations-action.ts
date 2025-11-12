@@ -29,7 +29,7 @@ export const ebsGetRecommendationsAction = createAction({
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     recommendationType: Property.StaticDropdown({
-      displayName: 'Recommendations type',
+      displayName: 'Recommendations Type',
       description: 'Type of recommendations to collect',
       options: {
         options: [
@@ -59,7 +59,7 @@ export const ebsGetRecommendationsAction = createAction({
           const dropdownState = getRegionsDropdownState();
           props['regions'] = Property.StaticMultiSelectDropdown({
             displayName: 'Regions',
-            description: 'A list of AWS regions.',
+            description: 'A list of AWS regions',
             required: true,
             options: dropdownState,
           });

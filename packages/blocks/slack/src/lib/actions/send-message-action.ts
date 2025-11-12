@@ -22,7 +22,7 @@ export const slackSendMessageAction = createAction({
   props: {
     conversationId: usersAndChannels,
     threadTs: Property.ShortText({
-      displayName: 'Thread ts',
+      displayName: 'Thread Ts',
       description:
         'Provide the ts (timestamp) value of the **parent** message to make this message a reply. Do not use the ts value of the reply itself; use its parent instead. For example `1710304378.475129`.',
       required: false,
@@ -33,8 +33,8 @@ export const slackSendMessageAction = createAction({
       required: false,
     }),
     blockKitEnabled: Property.Checkbox({
-      displayName: 'Create your message manually using Block Kit blocks',
-      description: '',
+      displayName: 'Create Your Message Manually Using Block Kit Blocks',
+      description: 'Enable to manually create message blocks using Slack Block Kit format',
       defaultValue: false,
       required: false,
     }),

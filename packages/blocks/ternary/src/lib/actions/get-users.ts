@@ -11,7 +11,7 @@ export const getUsers = createAction({
   isWriteAction: false,
   props: {
     includeSettings: Property.Checkbox({
-      displayName: 'Include settings',
+      displayName: 'Include Settings',
       description: 'Include the tenant settings',
       required: false,
     }),

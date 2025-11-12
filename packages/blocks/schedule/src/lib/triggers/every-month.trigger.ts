@@ -44,7 +44,7 @@ export const everyMonthTrigger = createTrigger({
   sampleData: {},
   props: {
     day_of_the_month: Property.StaticDropdown({
-      displayName: 'Day of the month',
+      displayName: 'Day of the Month',
       options: {
         options: MONTH_DAYS.map((d, idx) => {
           return {
@@ -56,7 +56,7 @@ export const everyMonthTrigger = createTrigger({
       required: true,
     }),
     hour_of_the_day: Property.StaticDropdown({
-      displayName: 'Hour of the day',
+      displayName: 'Hour of the Day',
       options: {
         options: DAY_HOURS.map((d, idx) => {
           return {

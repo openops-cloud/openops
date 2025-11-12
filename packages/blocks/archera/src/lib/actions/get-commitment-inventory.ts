@@ -11,7 +11,7 @@ export const getCommitmentsInventoryAction = createAction({
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',
-      description: 'The cloud provider to fetch commitments for.',
+      description: 'The cloud provider to fetch commitments for',
       required: true,
       options: {
         options: [
@@ -25,24 +25,22 @@ export const getCommitmentsInventoryAction = createAction({
     }),
     startDate: Property.ShortText({
       displayName: 'Start Date',
-      description:
-        'The start date for the commitment inventory query (Format: yyyy-MM-dd).',
+      description: 'The start date for the commitment inventory query (Format: yyyy-MM-dd)',
       required: true,
     }),
     endDate: Property.ShortText({
       displayName: 'End Date',
-      description:
-        'The end date for the commitment inventory query (Format: yyyy-MM-dd).',
+      description: 'The end date for the commitment inventory query (Format: yyyy-MM-dd)',
       required: true,
     }),
     search: Property.ShortText({
       displayName: 'Search',
-      description: 'Search term to filter commitments.',
+      description: 'Search term to filter commitments',
       required: false,
     }),
     orderBy: Property.StaticDropdown({
-      displayName: 'Order By',
-      description: 'Field to order results by.',
+      displayName: 'Order by',
+      description: 'Field to order results by',
       required: false,
       options: {
         options: [
@@ -67,19 +65,19 @@ export const getCommitmentsInventoryAction = createAction({
     }),
     desc: Property.Checkbox({
       displayName: 'Descending Order',
-      description: 'Sort in descending order.',
+      description: 'Sort in descending order',
       required: false,
       defaultValue: true,
     }),
     page: Property.Number({
       displayName: 'Page',
-      description: 'Page number for pagination.',
+      description: 'Page number for pagination',
       required: false,
       defaultValue: 1,
     }),
     pageSize: Property.Number({
       displayName: 'Page Size',
-      description: 'Number of items per page (1-10000).',
+      description: 'Number of items per page (1-10000)',
       required: false,
       defaultValue: 10,
     }),

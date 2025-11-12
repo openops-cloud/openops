@@ -3,7 +3,7 @@ import { Property } from '@openops/blocks-framework';
 export function statusProperty() {
   return Property.StaticDropdown({
     displayName: 'Status',
-    description: 'Define what status of recommendations should be displayed.',
+    description: 'Define what status of recommendations should be displayed',
     options: {
       options: statusFilters,
     },

@@ -5,7 +5,7 @@ export function getVendorsProperty() {
   return {
     vendor: Property.StaticDropdown({
       displayName: 'Vendor Type',
-      description: 'The cloud vendor for which to fetch recommendations.',
+      description: 'The cloud vendor for which to fetch recommendations',
       required: true,
       options: {
         options: Object.values(Vendor).map((v) => ({
@@ -21,7 +21,7 @@ export function getRecommendationTypesProperty() {
   return {
     recommendationType: Property.Dropdown({
       displayName: 'Recommendation Type',
-      description: 'The type of recommendations to fetch.',
+      description: 'The type of recommendations to fetch',
       required: true,
       refreshers: ['vendor'],
       options: async ({ vendor }) => {

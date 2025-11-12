@@ -12,26 +12,26 @@ export const newEmail = createTrigger({
   auth: imapAuth,
   name: 'new_email',
   displayName: 'New Email',
-  description: 'Trigger when a new email is received.',
+  description: 'Trigger when a new email is received',
   props: {
     mailbox,
     senders: Property.Array({
       displayName: 'Sender (From)',
-      description: 'Matches at least one sender.',
+      description: 'Matches at least one sender',
       required: false,
     }),
     recipients: Property.Array({
       displayName: 'Recipients (To)',
-      description: 'Matches at least one recipient (To).',
+      description: 'Matches at least one recipient (To)',
       required: false,
     }),
     cc: Property.Array({
       displayName: 'CC',
-      description: 'Matches at least one CC address.',
+      description: 'Matches at least one CC address',
       required: false,
     }),
     subject: Property.ShortText({
-      displayName: 'Subject text contains',
+      displayName: 'Subject Text Contains',
       required: false,
     }),
   },

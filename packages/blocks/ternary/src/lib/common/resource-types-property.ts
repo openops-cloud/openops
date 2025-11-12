@@ -6,7 +6,7 @@ export function getResourceTypesProperty(): StaticDropdownProperty<
   true
 > {
   return Property.StaticDropdown({
-    displayName: 'Resource type',
+    displayName: 'Resource Type',
     required: true,
     options: {
       options: resourceTypes.map((value) => {

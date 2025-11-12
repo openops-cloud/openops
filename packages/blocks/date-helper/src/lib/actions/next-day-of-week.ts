@@ -24,8 +24,7 @@ export const nextDayofWeek = createAction({
   props: {
     weekday: Property.StaticDropdown({
       displayName: 'Weekday',
-      description:
-        'The weekday that you would like to get the date and time of.',
+      description: 'The weekday that you would like to get the date and time of',
       options: {
         options: [
           { label: 'Sunday', value: 0 },
@@ -49,8 +48,7 @@ export const nextDayofWeek = createAction({
     }),
     currentTime: Property.Checkbox({
       displayName: 'Use Current Time',
-      description:
-        'If checked, the current time will be used instead of the time specified above.',
+      description: 'If checked, the current time will be used instead of the time specified above',
       required: false,
       defaultValue: false,
     }),

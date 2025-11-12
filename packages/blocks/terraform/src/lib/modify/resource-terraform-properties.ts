@@ -8,8 +8,8 @@ import { Resource } from './resource-type';
 
 export function getTerraformResourceProperties() {
   return Property.DynamicProperties({
-    displayName: '',
-    description: '',
+    displayName: 'Resource Properties',
+    description: 'Terraform resource properties to modify',
     required: true,
     refreshers: ['template', 'resourceNameAndType'],
     props: async ({ template, resourceNameAndType }) => {
@@ -40,13 +40,13 @@ export function getTerraformResourceProperties() {
 
       return {
         updates: Property.Array({
-          displayName: 'Intended modifications',
+          displayName: 'Intended Modifications',
           required: true,
           properties: {
             propertyName: propertyNameDropdown,
             propertyValue: Property.ShortText({
-              displayName: 'Property value',
-              description: 'The new value for the property.',
+              displayName: 'Property Value',
+              description: 'The new value for the property',
               required: true,
             }),
           },

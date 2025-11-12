@@ -12,7 +12,7 @@ export const getActiveRecommendationsAction = createAction({
   props: {
     policySet: Property.Dropdown({
       displayName: 'Policy Set',
-      description: 'The policy set to use for getting recommendations.',
+      description: 'The policy set to use for getting recommendations',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }) => {
@@ -44,7 +44,7 @@ export const getActiveRecommendationsAction = createAction({
     }),
     provider: Property.StaticDropdown({
       displayName: 'Filter by Provider',
-      description: 'Filter recommendations by cloud provider.',
+      description: 'Filter recommendations by cloud provider',
       required: false,
       options: {
         options: [

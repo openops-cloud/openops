@@ -4,7 +4,7 @@ import { readFileAction } from './lib/actions/read-file';
 
 export const filesHelper = createBlock({
   displayName: 'File Operations',
-  description: 'Read file content and return it in different formats.',
+  description: 'Read file content and return it in different formats',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.9.0',
   logoUrl: 'https://static.openops.com/blocks/file-operations.svg',

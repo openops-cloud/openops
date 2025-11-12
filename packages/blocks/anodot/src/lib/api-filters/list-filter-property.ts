@@ -33,7 +33,7 @@ export function listFilterProperty(
 
           eq: Property.Array({
             displayName: `(${displayName}) Values`,
-            description: 'List of values ​​to be checked.',
+            description: 'List of values ​​to be checked',
             required: true,
           }),
         };

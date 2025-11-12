@@ -57,7 +57,7 @@ export const runWorkflowAction = createAction({
     branch: getBranchProperty(),
     inputs: Property.DynamicProperties({
       displayName: 'Inputs',
-      description: 'Input keys and values configured in the workflow file.',
+      description: 'Input keys and values configured in the workflow file',
       required: true,
       refreshers: ['workflow'],
       props: async ({ auth, repository, workflow }) => {

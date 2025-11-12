@@ -52,11 +52,11 @@ export type BlockProperty = InputProperty | BlockAuthProperty;
 
 export const BlockPropertyMap = Type.Record(
   Type.String({
-    description: 'Unique property name within the block.',
+    description: 'Unique property name within the block',
   }),
   BlockProperty,
   {
-    description: 'A mapping of property keys to their definitions.',
+    description: 'A mapping of property keys to their definitions',
   },
 );
 export interface BlockPropertyMap {

@@ -14,8 +14,8 @@ export const advisorAction = createAction({
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,
     filterBySelection: Property.StaticDropdown<any>({
-      displayName: 'Choose filter',
-      description: `Select whether to filter by resource group, resource IDs, or neither.`,
+      displayName: 'Choose Filter',
+      description: `Select whether to filter by resource group, resource IDs, or neither`,
       required: true,
       options: {
         options: [
@@ -25,7 +25,7 @@ export const advisorAction = createAction({
             value: {
               resourceIds: Property.Array({
                 displayName: 'Resource IDs',
-                description: 'One or more resource IDs (space-delimited).',
+                description: 'One or more resource IDs (space-delimited)',
                 required: true,
               }),
             },
@@ -35,7 +35,7 @@ export const advisorAction = createAction({
             value: {
               resourceGroup: Property.ShortText({
                 displayName: 'Resource Group',
-                description: 'Name of a resource group.',
+                description: 'Name of a resource group',
                 required: true,
               }),
             },

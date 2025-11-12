@@ -5,7 +5,7 @@ export const extractFromListAction = createAction({
   auth: BlockAuth.None(),
   name: 'extract_from_list_action',
   description: 'Extract items from a list with a given key',
-  displayName: 'Extract From List',
+  displayName: 'Extract from List',
   isWriteAction: false,
   props: {
     listItems: Property.LongText({

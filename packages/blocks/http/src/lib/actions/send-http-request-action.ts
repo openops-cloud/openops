@@ -23,7 +23,7 @@ const toLowerCaseKeys = (obj: HttpHeaders) =>
 
 export const httpSendRequestAction = createAction({
   name: 'send_request',
-  displayName: 'Send HTTP request',
+  displayName: 'Send Http Request',
   description: 'Send HTTP request',
   isWriteAction: true,
   auth: httpAuth,
@@ -38,7 +38,7 @@ export const httpSendRequestAction = createAction({
       required: false,
     }),
     queryParams: Property.Object({
-      displayName: 'Query params',
+      displayName: 'Query Params',
       required: false,
     }),
     body_type: Property.StaticDropdown({
@@ -142,7 +142,7 @@ export const httpSendRequestAction = createAction({
       },
     }),
     timeout: Property.Number({
-      displayName: 'Timeout(in seconds)',
+      displayName: 'Timeout(in Seconds)',
       required: false,
     }),
     failsafe: Property.Checkbox({

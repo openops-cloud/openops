@@ -15,13 +15,13 @@ import { cacheWrapper } from '@openops/server-shared';
 export const getRecordsAction = createAction({
   auth: BlockAuth.None(),
   name: 'get_records',
-  description: 'Get all records matching the provided filters.',
+  description: 'Get all records matching the provided filters',
   displayName: 'Get Records',
   isWriteAction: false,
   props: {
     tableName: openopsTablesDropdownProperty(),
     filterType: Property.StaticDropdown({
-      displayName: 'Filter type',
+      displayName: 'Filter Type',
       required: false,
       options: {
         options: [
@@ -52,11 +52,11 @@ export const getRecordsAction = createAction({
         );
 
         properties['filters'] = Property.Array({
-          displayName: 'Fields to filter by',
+          displayName: 'Fields to Filter by',
           required: false,
           properties: {
             fieldName: Property.StaticDropdown<string>({
-              displayName: 'Field name',
+              displayName: 'Field Name',
               required: true,
               options: {
                 options: tableFields.map((f) => ({
@@ -66,7 +66,7 @@ export const getRecordsAction = createAction({
               },
             }),
             filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
-              displayName: 'Filter type',
+              displayName: 'Filter Type',
               required: true,
               options: {
                 options: Object.keys(ViewFilterTypesEnum).map((key) => ({
@@ -82,7 +82,7 @@ export const getRecordsAction = createAction({
               },
             }),
             value: Property.DynamicProperties({
-              displayName: 'Value to search for',
+              displayName: 'Value to Search for',
               required: true,
               refreshers: ['fieldName', 'filterType'],
               props: async ({ fieldName, filterType }) => {

@@ -7,7 +7,7 @@ export const sendChatMessageAction = createAction({
   auth: microsoftTeamsAuth,
   name: 'microsoft_teams_send_chat_message',
   displayName: 'Send Chat Message',
-  description: 'Sends a message in an existing chat.',
+  description: 'Sends a message in an existing chat',
   isWriteAction: true,
   props: {
     chatId: chatId,

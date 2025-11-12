@@ -24,7 +24,7 @@ export const readFileAction = createAction({
       required: true,
     }),
     readOptions: Property.StaticDropdown({
-      displayName: 'Output format',
+      displayName: 'Output Format',
       description: 'The output format',
       required: true,
       options: {

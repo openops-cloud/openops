@@ -16,7 +16,7 @@ const props = {
 export const insertRow = createAction({
   name: 'insertRow',
   displayName: 'Insert Row',
-  description: 'Insert a row into a table.',
+  description: 'Insert a row into a table',
   auth: customAuth,
   isWriteAction: true,
   props,

@@ -16,12 +16,12 @@ export const truncate = createAction({
   isWriteAction: false,
   props: {
     number: Property.Number({
-      displayName: 'Number to truncate',
+      displayName: 'Number to Truncate',
       description: undefined,
       required: true,
     }),
     numberOfDecimalPlaces: Property.Number({
-      displayName: 'Number of decimal places',
+      displayName: 'Number of Decimal Places',
       description: undefined,
       required: true,
     }),

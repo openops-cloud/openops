@@ -7,13 +7,13 @@ export const modifyTemplate = createAction({
   auth: BlockAuth.None(),
   requireAuth: false,
   name: 'update_cloudformation_file',
-  displayName: 'Update resource properties',
+  displayName: 'Update Resource Properties',
   description:
     'Update properties of a resource in a given CloudFormation template',
   isWriteAction: true,
   props: {
     template: Property.LongText({
-      displayName: 'CloudFormation template',
+      displayName: 'Cloudformation Template',
       required: true,
     }),
 

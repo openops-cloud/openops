@@ -3,9 +3,9 @@ import { booleanProperty } from './property-helpers';
 
 export function customStatusProperty() {
   return Property.DynamicProperties({
-    displayName: 'Custom status properties',
+    displayName: 'Custom Status Properties',
     description:
-      'User defined conditions as set in the "is open" and "user status" fields, with logical "and" between them.',
+      'User defined conditions as set in the "is open" and "user status" fields, with logical "and" between them',
     required: true,
     refreshers: ['statusFilter'],
     props: async ({ statusFilter }): Promise<{ [key: string]: any }> => {

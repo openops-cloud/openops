@@ -21,12 +21,12 @@ export const ssmGenerateRunbookLinkAction = createAction({
   props: {
     region: Property.ShortText({
       displayName: 'Region',
-      description: 'AWS region (defaults to the region from authentication).',
+      description: 'AWS region (defaults to the region from authentication)',
       required: false,
     }),
     owner: Property.StaticDropdown({
       displayName: 'Owner',
-      description: 'Source/owner of the runbook (Automation document).',
+      description: 'Source/owner of the runbook (Automation document)',
       required: true,
       options: {
         options: [

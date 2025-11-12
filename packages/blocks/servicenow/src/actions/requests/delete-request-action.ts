@@ -6,13 +6,13 @@ import { TABLE_NAME } from './constants';
 export const deleteRequestAction = createAction({
   auth: servicenowAuth,
   name: 'delete_request',
-  description: 'Delete a request item from ServiceNow.',
+  description: 'Delete a request item from ServiceNow',
   displayName: 'Delete Request',
   isWriteAction: true,
   props: {
     sysId: Property.ShortText({
       displayName: 'System ID',
-      description: 'The sys_id of the request to delete.',
+      description: 'The sys_id of the request to delete',
       required: true,
     }),
   },

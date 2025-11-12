@@ -5,7 +5,7 @@ export const toMapAction = createAction({
   auth: BlockAuth.None(),
   name: 'to_map_action',
   description: 'Map items by a given key',
-  displayName: 'Map list items',
+  displayName: 'Map List Items',
   isWriteAction: false,
   props: {
     listItems: Property.LongText({

@@ -25,7 +25,7 @@ export const ebsModifyVolumeAction = createAction({
       required: true,
     }),
     changeVolumeType: Property.Checkbox({
-      displayName: 'Change volume type',
+      displayName: 'Change Volume Type',
       required: false,
     }),
     newVolumeType: Property.DynamicProperties({
@@ -39,7 +39,7 @@ export const ebsModifyVolumeAction = createAction({
 
         return {
           newVolumeType: Property.StaticDropdown({
-            displayName: 'New volume type',
+            displayName: 'New Volume Type',
             options: {
               options: Object.keys(VolumeType).map((x) => ({
                 label: x,
@@ -52,7 +52,7 @@ export const ebsModifyVolumeAction = createAction({
       },
     }),
     changeVolumeSize: Property.Checkbox({
-      displayName: 'Change volume size',
+      displayName: 'Change Volume Size',
       required: false,
     }),
     newVolumeSize: Property.DynamicProperties({
@@ -65,7 +65,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeSize: Property.Number({
-            displayName: 'New volume size (GB)',
+            displayName: 'New Volume Size (gb)',
             required: false,
             validators: [Validators.minValue(1), Validators.maxValue(70369)], // max size is 64 TiB
           }),
@@ -73,7 +73,7 @@ export const ebsModifyVolumeAction = createAction({
       },
     }),
     changeVolumeIops: Property.Checkbox({
-      displayName: 'Change volume IOPS',
+      displayName: 'Change Volume Iops',
       required: false,
     }),
     newVolumeIops: Property.DynamicProperties({
@@ -86,7 +86,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeIops: Property.Number({
-            displayName: 'New volume IOPS',
+            displayName: 'New Volume Iops',
             required: false,
             validators: [Validators.minValue(100), Validators.maxValue(256000)],
           }),
@@ -94,7 +94,7 @@ export const ebsModifyVolumeAction = createAction({
       },
     }),
     changeVolumeThroughput: Property.Checkbox({
-      displayName: 'Change volume throughput',
+      displayName: 'Change Volume Throughput',
       required: false,
     }),
     newVolumeThroughput: Property.DynamicProperties({
@@ -107,7 +107,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeThroughput: Property.Number({
-            displayName: 'New volume throughput (MB/s)',
+            displayName: 'New Volume Throughput (mb/s)',
             required: false,
             validators: [Validators.minValue(128), Validators.maxValue(1000)],
           }),

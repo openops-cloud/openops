@@ -25,7 +25,7 @@ export const updateCommentAction = createAction({
       required: true,
     }),
     comment: Property.LongText({
-      displayName: 'Comment text',
+      displayName: 'Comment Text',
       required: true,
     }),
   },

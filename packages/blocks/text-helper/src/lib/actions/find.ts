@@ -1,7 +1,7 @@
 import { Property, Validators, createAction } from '@openops/blocks-framework';
 
 export const find = createAction({
-  description: 'Find substring (Regex or Text).',
+  description: 'Find substring (Regex or Text)',
   displayName: 'Find',
   name: 'find',
   errorHandlingOptions: {
@@ -15,12 +15,12 @@ export const find = createAction({
   isWriteAction: false,
   props: {
     text: Property.ShortText({
-      displayName: 'text',
+      displayName: 'Text',
       required: true,
     }),
     expression: Property.ShortText({
       displayName: 'Expression',
-      description: 'Regex or text to search for.',
+      description: 'Regex or text to search for',
       required: true,
     }),
   },

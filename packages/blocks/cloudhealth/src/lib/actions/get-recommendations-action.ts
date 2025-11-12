@@ -15,7 +15,7 @@ export const getRecommendationsAction = createAction({
   props: {
     recommendationType: Property.StaticDropdown({
       displayName: 'Recommendation Type',
-      description: 'The type of recommendation to fetch.',
+      description: 'The type of recommendation to fetch',
       required: true,
       options: {
         options: Object.entries(ASSET_CONFIGS).map(([key, value]) => ({
@@ -26,7 +26,7 @@ export const getRecommendationsAction = createAction({
     }),
     evaluationDuration: Property.StaticDropdown({
       displayName: 'Evaluation Duration',
-      description: 'The duration for which to get the recommendations.',
+      description: 'The duration for which to get the recommendations',
       required: true,
       options: {
         options: [
@@ -41,7 +41,7 @@ export const getRecommendationsAction = createAction({
     }),
     limit: Property.Number({
       displayName: 'Limit',
-      description: 'The maximum number of recommendations to return.',
+      description: 'The maximum number of recommendations to return',
       required: false,
       defaultValue: undefined,
     }),

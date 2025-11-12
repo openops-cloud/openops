@@ -22,8 +22,7 @@ export const getRecommendationsAction = createAction({
     ...getRecommendationTypesProperty(),
     duration: Property.StaticDropdown({
       displayName: 'Look-Back Period',
-      description:
-        'The look back period in days, used for calculating the recommendations.',
+      description: 'The look back period in days, used for calculating the recommendations',
       required: true,
       defaultValue: Duration.TenDay,
       options: {
@@ -35,7 +34,7 @@ export const getRecommendationsAction = createAction({
     }),
     basis: Property.StaticDropdown({
       displayName: 'Cost Basis',
-      description: 'The cost basis for the recommendations.',
+      description: 'The cost basis for the recommendations',
       required: true,
       defaultValue: CostBasis.OnDemand,
       options: {
@@ -47,7 +46,7 @@ export const getRecommendationsAction = createAction({
     }),
     snoozedFilter: Property.StaticDropdown({
       displayName: 'Recommendations Status',
-      description: 'Whether to include recommendations that have been snoozed.',
+      description: 'Whether to include recommendations that have been snoozed',
       required: true,
       defaultValue: SnoozedFilter.NO_SNOOZED,
       options: {
@@ -63,7 +62,7 @@ export const getRecommendationsAction = createAction({
     }),
     limit: Property.ShortText({
       displayName: 'Limit',
-      description: 'The maximum number of recommendations to return.',
+      description: 'The maximum number of recommendations to return',
       required: false,
     }),
     additionalFilters: Property.Array({

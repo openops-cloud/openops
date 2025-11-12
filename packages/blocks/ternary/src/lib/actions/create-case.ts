@@ -33,7 +33,7 @@ export const createCaseAction = createAction({
     assigneeIDs: getUsersIDsDropdownProperty('Assignee IDs'),
     followerIDs: getUsersIDsDropdownProperty('Follower IDs'),
     linkToJira: Property.Checkbox({
-      displayName: 'Link case to Jira',
+      displayName: 'Link Case to Jira',
       description:
         'Indicates whether a Jira ticket should be created for this case',
       required: false,

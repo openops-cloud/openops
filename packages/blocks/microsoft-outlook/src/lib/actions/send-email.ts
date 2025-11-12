@@ -11,7 +11,7 @@ export const sendEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'send-email',
   displayName: 'Send Email',
-  description: 'Sends an email using Microsoft Outlook.',
+  description: 'Sends an email using Microsoft Outlook',
   isWriteAction: true,
   props: {
     recipients: Property.Array({

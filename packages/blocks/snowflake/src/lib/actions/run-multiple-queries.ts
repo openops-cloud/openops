@@ -11,7 +11,7 @@ type QueryResults = { query: string; result: QueryResult }[];
 
 const props = {
   sqlTexts: Property.Array({
-    displayName: 'SQL queries',
+    displayName: 'Sql Queries',
     description:
       'Array of SQL queries to execute in order, in the same transaction. Use :1, :2… placeholders to use binding parameters. ' +
       'Avoid using "?" to avoid unexpected behaviors when having multiple queries.',
@@ -34,16 +34,14 @@ const props = {
     defaultValue: false,
   }),
   timeout: Property.Number({
-    displayName: 'Query timeout (ms)',
-    description:
-      'An integer indicating the maximum number of milliseconds to wait for a query to complete before timing out.',
+    displayName: 'Query Timeout (ms)',
+    description: 'An integer indicating the maximum number of milliseconds to wait for a query to complete before timing out',
     required: false,
     defaultValue: DEFAULT_QUERY_TIMEOUT,
   }),
   application: Property.ShortText({
-    displayName: 'Application name',
-    description:
-      'A string indicating the name of the client application connecting to the server.',
+    displayName: 'Application Name',
+    description: 'A string indicating the name of the client application connecting to the server',
     required: false,
     defaultValue: DEFAULT_APPLICATION_NAME,
   }),

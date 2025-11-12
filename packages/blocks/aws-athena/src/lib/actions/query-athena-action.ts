@@ -11,12 +11,12 @@ export const runAthenaQueryAction = createAction({
   auth: amazonAuth,
   name: 'athena_query',
   description: 'Query Athena database',
-  displayName: 'Query Athena database',
+  displayName: 'Query Athena Database',
   isWriteAction: false,
   props: {
     query: Property.LongText({
       displayName: 'Query',
-      description: 'Query to run on the Athena database.',
+      description: 'Query to run on the Athena database',
       supportsAI: true,
       required: true,
     }),

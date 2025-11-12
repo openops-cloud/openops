@@ -12,7 +12,7 @@ export const updateIssueCommentAction = createAction({
   auth: jiraCloudAuth,
   name: 'update_issue_comment',
   displayName: 'Update Issue Comment',
-  description: 'Updates a comment to a specific issue.',
+  description: 'Updates a comment to a specific issue',
   isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),

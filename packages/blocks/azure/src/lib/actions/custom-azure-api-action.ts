@@ -29,7 +29,7 @@ const getHostAccessToken = async (
 export const customAzureApiCallAction = createCustomApiCallAction({
   auth: azureAuth,
   name: 'custom_azure_api_call',
-  description: 'Make a custom REST API call to Azure.',
+  description: 'Make a custom REST API call to Azure',
   displayName: 'Custom Azure API Call',
   baseUrl: () => 'https://management.azure.com/?api-version=2025-04-01',
   additionalProps: {

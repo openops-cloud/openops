@@ -10,7 +10,7 @@ const ValidResourceTypes = [
 export function getResourcesDropdown() {
   return Property.Dropdown({
     displayName: 'Resource Name',
-    description: 'Resource name of the resource to be deleted.',
+    description: 'Resource name of the resource to be deleted',
     refreshers: ['template'],
     required: true,
     options: async ({ template }) => {

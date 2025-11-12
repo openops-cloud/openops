@@ -7,12 +7,12 @@ import { getResourcesDropdown } from './resources-dropdown';
 export const modifyTemplate = createAction({
   auth: BlockAuth.None(),
   name: 'update_terraform_file',
-  displayName: 'Update resource properties',
+  displayName: 'Update Resource Properties',
   description: 'Update properties of a resource in a given Terraform template',
   isWriteAction: true,
   props: {
     template: Property.LongText({
-      displayName: 'Terraform template',
+      displayName: 'Terraform Template',
       required: true,
     }),
 

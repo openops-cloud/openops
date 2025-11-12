@@ -13,15 +13,14 @@ import { workspaceDeploymentName } from '../common/workspace-deployment-name';
 export const executeSqlStatement = createAction({
   name: 'executeSqlStatement',
   auth: databricksAuth,
-  displayName: 'Execute SQL statement',
-  description:
-    'Run a SQL query in a Databricks workspace and retrieve results using a specified warehouse.',
+  displayName: 'Execute Sql Statement',
+  description: 'Run a SQL query in a Databricks workspace and retrieve results using a specified warehouse',
   isWriteAction: true,
   props: {
     workspaceDeploymentName: workspaceDeploymentName,
     warehouseId: warehouseId,
     sqlText: Property.LongText({
-      displayName: 'SQL query',
+      displayName: 'Sql Query',
       required: true,
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
@@ -34,7 +33,7 @@ export const executeSqlStatement = createAction({
         'Optional parameter values to bind to the SQL query. Use a key-value structure where keys match named parameters or position indices.',
     }),
     timeout: Property.Number({
-      displayName: 'Query timeout',
+      displayName: 'Query Timeout',
       description:
         'Maximum number of seconds to wait for a query to complete before timing out. Min value is 5',
       required: true,

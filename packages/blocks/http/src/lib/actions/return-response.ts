@@ -9,7 +9,7 @@ import { StatusCodes } from 'http-status-codes';
 export const httpReturnResponse = createAction({
   name: 'return_response',
   displayName: 'Return Response',
-  description: 'return a response',
+  description: 'Return a response',
   isWriteAction: false,
   props: {
     status: Property.Number({

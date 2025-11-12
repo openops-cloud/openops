@@ -29,7 +29,7 @@ export const getRecommendationsCustomAction = createAction({
   auth: anadotAuth,
   name: 'get_recommendations',
   description: 'Get custom Umbrella recommendations',
-  displayName: 'Get Recommendations (custom settings)',
+  displayName: 'Get Recommendations (custom Settings)',
   isWriteAction: false,
   props: {
     accounts: accountProperty(),

@@ -14,14 +14,14 @@ import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 export const deleteRecordAction = createAction({
   auth: BlockAuth.None(),
   name: 'delete_record',
-  description: 'Delete a record in an OpenOps table.',
+  description: 'Delete a record in an OpenOps table',
   displayName: 'Delete Record',
   isWriteAction: true,
   props: {
     tableName: openopsTablesDropdownProperty(),
     rowPrimaryKey: Property.LongText({
       displayName: 'Record Primary Key Value',
-      description: '',
+      description: 'Primary key value of the record to delete',
       required: true,
     }),
   },

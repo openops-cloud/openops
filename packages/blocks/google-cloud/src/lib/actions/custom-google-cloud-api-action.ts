@@ -26,7 +26,7 @@ async function getAccessToken(
 export const customGoogleCloudApiCallAction = createCustomApiCallAction({
   auth: googleCloudAuth,
   name: 'google_custom_api_call',
-  description: 'Make a custom REST API call to Google Cloud.',
+  description: 'Make a custom REST API call to Google Cloud',
   displayName: 'Custom Google Cloud API Call',
   baseUrl: () => 'https://cloudresourcemanager.googleapis.com/v1',
   additionalProps: {

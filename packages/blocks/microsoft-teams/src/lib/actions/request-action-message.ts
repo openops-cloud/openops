@@ -48,11 +48,11 @@ export const requestActionMessageAction = createAction({
       ],
       properties: {
         buttonText: Property.ShortText({
-          displayName: 'Button text',
+          displayName: 'Button Text',
           required: true,
         }),
         buttonStyle: Property.StaticDropdown({
-          displayName: 'Button color',
+          displayName: 'Button Color',
           required: true,
           defaultValue: 'default',
           options: {
@@ -67,7 +67,7 @@ export const requestActionMessageAction = createAction({
     }),
     timeoutInDays: Property.Number({
       displayName: 'Wait Timeout in Days',
-      description: 'Number of days to wait for an action.',
+      description: 'Number of days to wait for an action',
       defaultValue: 3,
       required: true,
       validators: [Validators.minValue(1)],

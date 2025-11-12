@@ -4,8 +4,7 @@ import { common, getScopeAndKey } from './common';
 export const storageListAction = createAction({
   name: 'list',
   displayName: 'List',
-  description:
-    'List all keys and their values in storage with optional filtering.',
+  description: 'List all keys and their values in storage with optional filtering',
   errorHandlingOptions: {
     continueOnFailure: {
       hide: true,
@@ -17,7 +16,7 @@ export const storageListAction = createAction({
   isWriteAction: false,
   props: {
     keyFilter: Property.ShortText({
-      displayName: 'Key filter',
+      displayName: 'Key Filter',
       description:
         'Regex pattern to filter keys (optional). Leave empty to return all keys.',
       required: false,

@@ -6,12 +6,12 @@ import { getResourcesDropdown } from './resources-dropdown';
 export const deleteResourceFromTemplate = createAction({
   auth: BlockAuth.None(),
   name: 'delete_terraform_resource',
-  displayName: 'Delete resource',
+  displayName: 'Delete Resource',
   description: 'Delete a resource from a given Terraform template',
   isWriteAction: true,
   props: {
     template: Property.LongText({
-      displayName: 'Terraform template',
+      displayName: 'Terraform Template',
       required: true,
     }),
     resourceNameAndType: getResourcesDropdown(),

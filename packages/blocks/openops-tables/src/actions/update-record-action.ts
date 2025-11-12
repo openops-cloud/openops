@@ -18,7 +18,7 @@ const FLOAT_COMPARISON_EPSILON = 1e-9;
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
   name: 'update_record',
-  description: 'Add or update a record in an OpenOps table.',
+  description: 'Add or update a record in an OpenOps table',
   displayName: 'Add or Update Record',
   isWriteAction: true,
   props: {
@@ -57,8 +57,8 @@ export const updateRecordAction = createAction({
       },
     }),
     fieldsProperties: Property.DynamicProperties({
-      displayName: '',
-      description: '',
+      displayName: 'Fields Properties',
+      description: 'Fields to update in the table record',
       required: true,
       refreshers: ['tableName'],
       props: async ({ tableName }) => {
@@ -72,11 +72,11 @@ export const updateRecordAction = createAction({
 
         const properties: { [key: string]: any } = {};
         properties['fieldsProperties'] = Property.Array({
-          displayName: 'Fields to update',
+          displayName: 'Fields to Update',
           required: true,
           properties: {
             fieldName: Property.StaticDropdown<string>({
-              displayName: 'Field name',
+              displayName: 'Field Name',
               required: true,
               options: {
                 options: tableFields
@@ -85,7 +85,7 @@ export const updateRecordAction = createAction({
               },
             }),
             newFieldValue: Property.DynamicProperties({
-              displayName: 'New field value',
+              displayName: 'New Field Value',
               required: true,
               refreshers: ['fieldName'],
               props: async ({ fieldName }) => {

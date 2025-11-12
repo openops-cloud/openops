@@ -8,12 +8,12 @@ export const forwardEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'forwardEmail',
   displayName: 'Forward Email',
-  description: 'Forwards an email message.',
+  description: 'Forwards an email message',
   isWriteAction: true,
   props: {
     messageId: messageIdDropdown({
       displayName: 'Email',
-      description: 'Select the email message to forward.',
+      description: 'Select the email message to forward',
       required: true,
     }),
     recipients: Property.Array({
@@ -22,7 +22,7 @@ export const forwardEmailAction = createAction({
     }),
     comment: Property.LongText({
       displayName: 'Comment',
-      description: 'Optional comment to include with the forwarded message.',
+      description: 'Optional comment to include with the forwarded message',
       required: false,
     }),
   },

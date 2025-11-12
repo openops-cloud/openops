@@ -29,7 +29,7 @@ export const everyXMinutesTrigger = createTrigger({
   props: {
     minutes: Property.StaticDropdown({
       displayName: 'Minutes',
-      description: 'Valid value between 1 to 59.',
+      description: 'Valid value between 1 to 59',
       required: true,
       defaultValue: 1,
       options: {

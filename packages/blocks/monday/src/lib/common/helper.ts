@@ -47,7 +47,7 @@ export const convertMondayColumnToOpenOpsProp = (column: MondayColumn) => {
       return Property.DateTime({
         displayName: column.title,
         required: false,
-        description: 'Use YYYY-MM-DD HH:mm:ss format.',
+        description: 'Use YYYY-MM-DD HH:mm:ss format',
       });
     case MondayColumnType.DEPENDENCY:
       return Property.ShortText({
@@ -118,7 +118,7 @@ export const convertMondayColumnToOpenOpsProp = (column: MondayColumn) => {
       return Property.Number({
         displayName: column.title,
         required: false,
-        description: `A number between 1 and 5.For example, 3.`,
+        description: `A number between 1 and 5.For example, 3`,
         validators: [Validators.inRange(1, 5)],
       });
     case MondayColumnType.STATUS: {

@@ -10,8 +10,7 @@ export const runJob = createAction({
   name: 'runJob',
   auth: databricksAuth,
   displayName: 'Run Databricks Job',
-  description:
-    'Triggers an existing job in the specified Databricks workspace.',
+  description: 'Triggers an existing job in the specified Databricks workspace',
   isWriteAction: true,
   props: {
     workspaceDeploymentName: workspaceDeploymentName,
@@ -19,12 +18,11 @@ export const runJob = createAction({
     parameters: Property.Object({
       displayName: 'Parameters',
       required: false,
-      description: 'Optional parameter values to bind job.',
+      description: 'Optional parameter values to bind job',
     }),
     timeout: Property.Number({
-      displayName: 'Job timeout',
-      description:
-        'Maximum number of seconds to wait for all task in the job to complete before timing out.',
+      displayName: 'Job Timeout',
+      description: 'Maximum number of seconds to wait for all task in the job to complete before timing out',
       required: true,
       validators: [Validators.number, Validators.minValue(0)],
       defaultValue: 50,

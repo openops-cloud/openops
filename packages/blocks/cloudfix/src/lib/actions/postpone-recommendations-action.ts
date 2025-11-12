@@ -16,7 +16,7 @@ export const postponeRecommendationsAction = createAction({
       required: true,
     }),
     postponeUntil: Property.DateTime({
-      displayName: 'Postpone until',
+      displayName: 'Postpone Until',
       description:
         'The date and time until which to postpone the recommendations. Format ISO yyyy-mm-ddT00:00:00.000Z.',
       required: true,

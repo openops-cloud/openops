@@ -23,8 +23,8 @@ export const ec2ModifyInstanceAction = createAction({
       required: true,
     }),
     modifiers: Property.DynamicProperties({
-      displayName: '',
-      description: '',
+      displayName: 'Modifiers',
+      description: 'Configuration modifiers for the EC2 instance',
       required: true,
       refreshers: [],
       props: async () => {
@@ -34,7 +34,7 @@ export const ec2ModifyInstanceAction = createAction({
           required: true,
           properties: {
             attributeName: Property.StaticDropdown({
-              displayName: 'Attribute name',
+              displayName: 'Attribute Name',
               required: true,
               options: {
                 options: [
@@ -50,7 +50,7 @@ export const ec2ModifyInstanceAction = createAction({
               },
             }),
             attributeValue: Property.DynamicProperties({
-              displayName: 'New field value',
+              displayName: 'New Field Value',
               required: true,
               refreshers: ['attributeName'],
               props: async ({
@@ -124,8 +124,7 @@ function getPropertyWithAttributeName(attributeName: string) {
     case 'DisableApiStop': {
       return Property.Checkbox({
         displayName: 'Disable API Stop',
-        description:
-          'Indicates whether an instance is enabled for stop protection.',
+        description: 'Indicates whether an instance is enabled for stop protection',
         required: true,
       });
     }
@@ -139,23 +138,21 @@ function getPropertyWithAttributeName(attributeName: string) {
     }
     case 'EnaSupport': {
       return Property.Checkbox({
-        displayName: 'Enable ENA support',
-        description:
-          'Set to true to enable enhanced networking with ENA for the instance.',
+        displayName: 'Enable Ena Support',
+        description: 'Set to true to enable enhanced networking with ENA for the instance',
         required: true,
       });
     }
     case 'SriovNetSupport': {
       return Property.Checkbox({
         displayName: 'Enable SR-IOV Net Support',
-        description:
-          'Sets the SR-IOV Net Support to simple to enable enhanced networking with the Intel 82599 Virtual Function interface for the instance.',
+        description: 'Sets the SR-IOV Net Support to simple to enable enhanced networking with the Intel 82599 Virtual Function interface for the instance',
         required: true,
       });
     }
     case 'InstanceType': {
       return Property.StaticDropdown({
-        displayName: 'New instance type',
+        displayName: 'New Instance Type',
         options: {
           options: Object.entries(_InstanceType).map(([key, value]) => ({
             label: value,
@@ -193,7 +190,7 @@ function getPropertyWithAttributeName(attributeName: string) {
     }
     case 'RamDisk': {
       return Property.LongText({
-        displayName: 'New ram disk',
+        displayName: 'New Ram Disk',
         required: true,
       });
     }

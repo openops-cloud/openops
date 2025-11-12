@@ -7,7 +7,7 @@ import { getRepositoryProperty } from '../common/repository-property';
 export const getFileAction = createAction({
   auth: auth,
   name: 'get_file_action',
-  displayName: 'Get file content',
+  displayName: 'Get File Content',
   description: 'Get file content from a repository',
   requireAuth: true,
   isWriteAction: false,
@@ -15,8 +15,8 @@ export const getFileAction = createAction({
     repository: getRepositoryProperty(),
     branch: getBranchProperty(),
     filePath: Property.ShortText({
-      displayName: 'File path',
-      description: '',
+      displayName: 'File Path',
+      description: 'Path to the file in the repository',
       required: true,
     }),
   },

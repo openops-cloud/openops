@@ -10,7 +10,7 @@ const DEFAULT_DATABASE_ID = 1;
 export const getTableUrlAction = createAction({
   auth: BlockAuth.None(),
   name: 'get_table_url',
-  description: 'Get a shareable URL for the provided table.',
+  description: 'Get a shareable URL for the provided table',
   displayName: 'Get Table URL',
   isWriteAction: false,
   props: {

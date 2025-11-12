@@ -4,7 +4,7 @@ import { common, getScopeAndKey } from './common';
 
 export const storageAddtoList = createAction({
   name: 'add_to_list',
-  displayName: 'Add To List',
+  displayName: 'Add to List',
   description: 'Add Item to a list',
   isWriteAction: false,
   errorHandlingOptions: {
@@ -26,7 +26,7 @@ export const storageAddtoList = createAction({
       required: true,
     }),
     ignore_if_exists: Property.Checkbox({
-      displayName: 'Ignore if value exists',
+      displayName: 'Ignore If Value Exists',
       required: false,
     }),
     store_scope: common.store_scope,

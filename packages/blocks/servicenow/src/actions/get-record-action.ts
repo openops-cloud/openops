@@ -7,14 +7,14 @@ import { runGetRecordAction } from './action-runners';
 export const getRecordAction = createAction({
   auth: servicenowAuth,
   name: 'get_record',
-  description: 'Get a single record from a ServiceNow table by its sys_id.',
+  description: 'Get a single record from a ServiceNow table by its sys_id',
   displayName: 'Get Record',
   isWriteAction: false,
   props: {
     tableName: servicenowTableDropdownProperty(),
     sysId: Property.ShortText({
       displayName: 'System ID',
-      description: 'The sys_id of the record to retrieve.',
+      description: 'The sys_id of the record to retrieve',
       required: true,
     }),
     fields: servicenowFieldsDropdownProperty(),

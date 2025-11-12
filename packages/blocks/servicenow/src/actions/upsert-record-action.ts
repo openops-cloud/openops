@@ -7,8 +7,7 @@ import { createFieldsPropertiesForCreate } from './create-fields-properties';
 export const upsertRecordAction = createAction({
   auth: servicenowAuth,
   name: 'upsert_record',
-  description:
-    'Create a new record or update an existing record in a ServiceNow table.',
+  description: 'Create a new record or update an existing record in a ServiceNow table',
   displayName: 'Add or Update Record',
   isWriteAction: true,
   props: {
@@ -20,8 +19,8 @@ export const upsertRecordAction = createAction({
       required: false,
     }),
     fieldsProperties: Property.DynamicProperties({
-      displayName: '',
-      description: '',
+      displayName: 'Fields Properties',
+      description: 'Fields to set for the ServiceNow record',
       required: true,
       refreshers: ['auth', 'tableName'],
       props: async ({ auth, tableName }) => {

@@ -1,8 +1,7 @@
 import { Property, Validators, createAction } from '@openops/blocks-framework';
 
 export const replace = createAction({
-  description:
-    'Replaces all instances of any word, character or phrase in text, with another.',
+  description: 'Replaces all instances of any word, character or phrase in text, with another',
   displayName: 'Replace',
   name: 'replace',
   errorHandlingOptions: {
@@ -21,19 +20,19 @@ export const replace = createAction({
     }),
     searchValue: Property.ShortText({
       displayName: 'Search Value',
-      description: 'Can be plain text or a regex expression.',
+      description: 'Can be plain text or a regex expression',
       required: true,
       validators: [],
     }),
     replaceValue: Property.ShortText({
       displayName: 'Replace Value',
       required: false,
-      description: 'Leave empty to delete found results.',
+      description: 'Leave empty to delete found results',
     }),
     replaceOnlyFirst: Property.Checkbox({
       displayName: 'Replace Only First Match',
       required: false,
-      description: 'Only replaces the first instance of the search value.',
+      description: 'Only replaces the first instance of the search value',
     }),
   },
   run: async (ctx) => {

@@ -10,7 +10,7 @@ export const updateColumnValuesOfItemAction = createAction({
   auth: mondayAuth,
   name: 'monday_update_column_values_of_item',
   displayName: 'Update Column Values of Specific Item',
-  description: 'Updates multiple columns values of specific item.',
+  description: 'Updates multiple columns values of specific item',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),

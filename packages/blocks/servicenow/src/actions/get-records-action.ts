@@ -19,7 +19,7 @@ export const getRecordsAction = createAction({
   props: {
     tableName: servicenowTableDropdownProperty(),
     filterType: Property.StaticDropdown({
-      displayName: 'Filter type',
+      displayName: 'Filter Type',
       required: false,
       options: {
         options: [

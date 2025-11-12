@@ -12,17 +12,17 @@ export const getAnomaliesAction = createAction({
   isWriteAction: false,
   props: {
     fromDate: Property.ShortText({
-      displayName: 'From date',
+      displayName: 'From Date',
       description: 'The start date for fetching anomalies (format: YYYYMMDD)',
       required: true,
     }),
     toDate: Property.ShortText({
-      displayName: 'To date',
+      displayName: 'To Date',
       description: 'The end date for fetching anomalies (format: YYYYMMDD)',
       required: true,
     }),
     additionalFilters: Property.DynamicProperties({
-      displayName: 'Additional filters',
+      displayName: 'Additional Filters',
       description:
         'Additional filters to apply to the search. See more at https://docs.vegacloud.io/docs/api/data_api#filtering-data',
       required: true,
@@ -36,11 +36,11 @@ export const getAnomaliesAction = createAction({
         const filterFields = await getAnomalyFields(auth as VegaCloudAuth);
 
         properties['additionalFilters'] = Property.Array({
-          displayName: 'Fields to filter by',
+          displayName: 'Fields to Filter by',
           required: false,
           properties: {
             fieldName: Property.StaticDropdown<string>({
-              displayName: 'Field name',
+              displayName: 'Field Name',
               required: true,
               options: {
                 options: filterFields.map((f) => ({

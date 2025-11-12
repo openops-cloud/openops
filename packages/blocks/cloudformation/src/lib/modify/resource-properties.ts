@@ -7,8 +7,8 @@ import {
 
 export function getResourceProperties() {
   return Property.DynamicProperties({
-    displayName: '',
-    description: '',
+    displayName: 'Resource Properties',
+    description: 'CloudFormation resource properties to modify',
     required: true,
     refreshers: ['template', 'logicalId'],
     props: async ({ template, logicalId }) => {
@@ -35,13 +35,13 @@ export function getResourceProperties() {
 
       return {
         updates: Property.Array({
-          displayName: 'Intended modifications',
+          displayName: 'Intended Modifications',
           required: true,
           properties: {
             propertyName: propertyNameDropdown,
             propertyValue: Property.ShortText({
-              displayName: 'Property value',
-              description: 'The new value for the property.',
+              displayName: 'Property Value',
+              description: 'The new value for the property',
               required: true,
             }),
           },

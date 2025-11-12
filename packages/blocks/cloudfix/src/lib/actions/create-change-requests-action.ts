@@ -18,7 +18,7 @@ export const createChangeRequestsAction = createAction({
       required: true,
     }),
     executeOnSchedule: Property.Checkbox({
-      displayName: 'Execute on schedule',
+      displayName: 'Execute on Schedule',
       description: 'Whether to execute the change requests on schedule',
       required: false,
       defaultValue: false,

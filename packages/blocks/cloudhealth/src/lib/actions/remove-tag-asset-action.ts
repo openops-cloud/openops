@@ -13,7 +13,7 @@ export const removeTagAssetAction = createAction({
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',
-      description: 'The type of asset to tag.',
+      description: 'The type of asset to tag',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
@@ -43,7 +43,7 @@ export const removeTagAssetAction = createAction({
     }),
     assetId: Property.Number({
       displayName: 'Asset ID',
-      description: 'The ID of the asset to tag.',
+      description: 'The ID of the asset to tag',
       required: true,
     }),
     tags: Property.Array({

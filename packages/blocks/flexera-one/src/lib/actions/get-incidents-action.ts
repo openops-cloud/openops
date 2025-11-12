@@ -11,7 +11,7 @@ export const getIncidentAction = createAction({
   props: {
     incidentId: Property.ShortText({
       displayName: 'Incident ID',
-      description: 'The ID of the incident to get.',
+      description: 'The ID of the incident to get',
       required: true,
     }),
   },

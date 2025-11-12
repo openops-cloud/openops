@@ -6,12 +6,12 @@ export const deleteResourceFromTemplate = createAction({
   auth: BlockAuth.None(),
   requireAuth: false,
   name: 'delete_resource',
-  displayName: 'Delete resource',
+  displayName: 'Delete Resource',
   description: 'Delete a resource from a given CloudFormation template',
   isWriteAction: true,
   props: {
     template: Property.LongText({
-      displayName: 'CloudFormation template',
+      displayName: 'Cloudformation Template',
       required: true,
     }),
 

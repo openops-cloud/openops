@@ -38,7 +38,7 @@ async function createFieldsProperties(
       required: true,
       properties: {
         fieldName: Property.StaticDropdown<string>({
-          displayName: 'Field name',
+          displayName: 'Field Name',
           required: true,
           options: {
             options: mapFieldsToOptions(writableFields),

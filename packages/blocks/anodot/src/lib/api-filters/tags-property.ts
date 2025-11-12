@@ -33,19 +33,19 @@ export function tagsProperty(
 
           tag: Property.LongText({
             displayName: `(${propertyName}) Tag`,
-            description: '',
+            description: 'Tag name to filter by',
             required: true,
           }),
 
           eq: Property.Array({
-            displayName: `(${propertyName}) Equal values`,
-            description: 'List of values ​​to be checked for equality.',
+            displayName: `(${propertyname}) Equal Values`,
+            description: 'List of values ​​to be checked for equality',
             required: false,
           }),
 
           like: Property.Array({
-            displayName: `(${propertyName}) Like values`,
-            description: 'List of values ​​​​to check if they are like.',
+            displayName: `(${propertyname}) Like Values`,
+            description: 'List of values ​​​​to check if they are like',
             required: false,
           }),
 

@@ -29,8 +29,7 @@ enum AuthType {
 export const catchWebhook = createTrigger({
   name: CATCH_WEBHOOK,
   displayName: 'Catch Webhook',
-  description:
-    'Receive incoming HTTP/webhooks using any HTTP method such as GET, POST, PUT, DELETE, etc.',
+  description: 'Receive incoming HTTP/webhooks using any HTTP method such as GET, POST, PUT, DELETE, etc',
   props: {
     markdown: Property.MarkDown({
       value: message,
@@ -66,12 +65,12 @@ export const catchWebhook = createTrigger({
             fields = {
               username: Property.ShortText({
                 displayName: 'Username',
-                description: 'The username to use for authentication.',
+                description: 'The username to use for authentication',
                 required: true,
               }),
               password: Property.ShortText({
                 displayName: 'Password',
-                description: 'The password to use for authentication.',
+                description: 'The password to use for authentication',
                 required: true,
               }),
             };
@@ -80,13 +79,12 @@ export const catchWebhook = createTrigger({
             fields = {
               headerName: Property.ShortText({
                 displayName: 'Header Name',
-                description:
-                  'The name of the header to use for authentication.',
+                description: 'The name of the header to use for authentication',
                 required: true,
               }),
               headerValue: Property.ShortText({
                 displayName: 'Header Value',
-                description: 'The value to check against the header.',
+                description: 'The value to check against the header',
                 required: true,
               }),
             };

@@ -9,7 +9,7 @@ export const uploadFileToColumnAction = createAction({
   auth: mondayAuth,
   name: 'monday_upload_file_to_column',
   displayName: 'Upload File to Column',
-  description: 'Upload a file to a column in Monday.',
+  description: 'Upload a file to a column in Monday',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
@@ -47,7 +47,7 @@ export const uploadFileToColumnAction = createAction({
     }),
     file: Property.File({
       displayName: 'File',
-      description: 'The file URL or base64 to upload.',
+      description: 'The file URL or base64 to upload',
       required: true,
     }),
     file_name: Property.ShortText({

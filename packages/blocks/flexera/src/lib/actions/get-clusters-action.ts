@@ -11,7 +11,7 @@ export const getClustersAction = createAction({
   props: {
     accountId: Property.Dropdown({
       displayName: 'Account',
-      description: 'The account to get clusters from.',
+      description: 'The account to get clusters from',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {

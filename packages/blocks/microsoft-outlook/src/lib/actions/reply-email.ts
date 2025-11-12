@@ -13,12 +13,12 @@ export const replyEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'reply-email',
   displayName: 'Reply to Email',
-  description: 'Reply to an outlook email.',
+  description: 'Reply to an outlook email',
   isWriteAction: true,
   props: {
     messageId: Property.Dropdown({
       displayName: 'Email',
-      description: 'Select the email message to reply to.',
+      description: 'Select the email message to reply to',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }) => {
@@ -91,7 +91,7 @@ export const replyEmailAction = createAction({
     }),
     draft: Property.Checkbox({
       displayName: 'Create Draft',
-      description: 'If enabled, creates draft without sending.',
+      description: 'If enabled, creates draft without sending',
       required: true,
       defaultValue: false,
     }),

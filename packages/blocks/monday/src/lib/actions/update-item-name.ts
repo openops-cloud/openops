@@ -6,14 +6,14 @@ export const updateItemNameAction = createAction({
   auth: mondayAuth,
   name: 'monday_update_item_name',
   displayName: 'Update Item Name',
-  description: 'Updates an item name.',
+  description: 'Updates an item name',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),
     item_id: mondayCommon.item_id(true),
     name: Property.ShortText({
-      displayName: 'New Item name',
+      displayName: 'New Item Name',
       required: true,
     }),
   },

@@ -22,7 +22,7 @@ export const executeSqlQueryAction = createAction({
   auth: googleCloudAuth,
   name: 'google_execute_sql_query',
   displayName: 'Run BigQuery SQL Query',
-  description: 'Run a SQL query on BigQuery and return the results.',
+  description: 'Run a SQL query on BigQuery and return the results',
   isWriteAction: true,
   props: {
     useHostSession: getUseHostSessionProperty(
@@ -31,7 +31,7 @@ export const executeSqlQueryAction = createAction({
     ),
     project: projectCliDropdown,
     sqlText: Property.LongText({
-      displayName: 'SQL query',
+      displayName: 'Sql Query',
       required: true,
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
@@ -42,11 +42,11 @@ export const executeSqlQueryAction = createAction({
       required: false,
       properties: {
         paramName: Property.ShortText({
-          displayName: 'Parameter name',
+          displayName: 'Parameter Name',
           required: true,
         }),
         columnType: Property.StaticDropdown({
-          displayName: 'Column type',
+          displayName: 'Column Type',
           required: true,
           options: {
             options: Object.keys(BqColumnTypesEnum).map((key) => ({
@@ -56,7 +56,7 @@ export const executeSqlQueryAction = createAction({
           },
         }),
         value: Property.ShortText({
-          displayName: 'Parameter value',
+          displayName: 'Parameter Value',
           required: true,
         }),
       },
