@@ -3,7 +3,7 @@ import { getAzureSubscriptionsStaticDropdown } from '@openops/common';
 import { runCommand } from './azure-cli';
 import { getAzureErrorMessage } from './error-helper';
 
-interface SubscriptionDropdownConfig {
+export interface SubscriptionDropdownConfig {
   displayName: string;
   description: string;
   required: boolean;
@@ -74,7 +74,7 @@ async function getSubscriptionsDropdown(
   }
 }
 
-function createSubscriptionDynamicProperty(
+export function createSubscriptionDynamicProperty(
   config: SubscriptionDropdownConfig,
   propertyKey: string,
 ) {
@@ -102,14 +102,15 @@ function createSubscriptionDynamicProperty(
           };
         }
 
-        const dropdown = useHost
-          ? await getSubscriptionsDropdown(auth, config)
-          : config.multiSelect
-          ? createSubscriptionDropdown(
-              config,
-              (await getAzureSubscriptionsStaticDropdown(auth)).options,
-            )
-          : await getAzureSubscriptionsStaticDropdown(auth);
+        let dropdown;
+        if (useHost) {
+          dropdown = await getSubscriptionsDropdown(auth, config);
+        } else {
+          const staticDropdown = await getAzureSubscriptionsStaticDropdown(
+            auth,
+          );
+          dropdown = createSubscriptionDropdown(config, staticDropdown.options);
+        }
 
         return { [propertyKey]: dropdown };
       } catch (error) {
