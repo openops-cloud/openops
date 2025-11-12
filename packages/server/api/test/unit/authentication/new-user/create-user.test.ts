@@ -51,6 +51,7 @@ describe('create-user', () => {
     verified: true,
     organizationId: 'org-1',
     referringUserId: 'user-x',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provider: 'email' as any,
   };
 
