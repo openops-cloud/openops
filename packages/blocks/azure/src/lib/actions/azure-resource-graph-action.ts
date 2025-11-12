@@ -9,7 +9,7 @@ import { AxiosHeaders } from 'axios';
 import { runCommand } from '../azure-cli';
 import { subDropdown } from '../common-properties';
 
-const RESOURCE_GRAPH_API_VERSION = '2022-10-01';
+const RESOURCE_GRAPH_API_VERSION = '2024-04-01';
 const BATCH_SIZE = 1000;
 
 interface ResourceGraphResponse {
