@@ -25,8 +25,10 @@ interface ResourceGraphRequestBody {
   subscriptions?: string[];
 }
 
-const buildResourceGraphUrl = (apiVersion: string): string =>
-  `https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=${apiVersion}`;
+const buildResourceGraphUrl = (apiVersion?: string): string =>
+  `https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=${
+    apiVersion || RESOURCE_GRAPH_API_VERSION
+  }`;
 
 const buildRequestBody = (
   query: string,
@@ -147,36 +149,13 @@ export const azureResourceGraphAction = createAction({
       'Content-Type': 'application/json',
     });
 
-    const url = buildResourceGraphUrl(apiVersion || RESOURCE_GRAPH_API_VERSION);
-
-    const batches: (string[] | undefined)[] = [];
-    if (subscriptionList?.length) {
-      for (let i = 0; i < subscriptionList.length; i += BATCH_SIZE) {
-        batches.push(subscriptionList.slice(i, i + BATCH_SIZE));
-      }
-    } else {
-      batches.push(undefined);
-    }
-
-    const allResults: Record<string, unknown>[] = [];
-    let remaining = normalizedMax ?? Number.POSITIVE_INFINITY;
-
-    for (const batch of batches) {
-      if (remaining <= 0) {
-        break;
-      }
-
-      const batchResults = await queryBatch(
-        url,
-        headers,
-        kql,
-        batch,
-        Number.isFinite(remaining) ? remaining : undefined,
-      );
-
-      allResults.push(...batchResults);
-      remaining = Math.max(0, remaining - batchResults.length);
-    }
+    const allResults = await getQueryResults(
+      splitSubscriptionListIntoBatches(subscriptionList),
+      buildResourceGraphUrl(apiVersion),
+      headers,
+      kql,
+      normalizedMax,
+    );
 
     return {
       totalRecords: allResults.length,
@@ -186,3 +165,49 @@ export const azureResourceGraphAction = createAction({
     };
   },
 });
+
+function splitSubscriptionListIntoBatches(
+  subscriptionList?: string[],
+): (string[] | undefined)[] {
+  if (!subscriptionList?.length) {
+    return [undefined];
+  }
+
+  const batches: string[][] = [];
+  for (let i = 0; i < subscriptionList.length; i += BATCH_SIZE) {
+    const batch = subscriptionList.slice(i, i + BATCH_SIZE);
+    batches.push(batch);
+  }
+
+  return batches;
+}
+
+async function getQueryResults(
+  batches: (string[] | undefined)[],
+  url: string,
+  headers: AxiosHeaders,
+  query: string,
+  maxResults?: number,
+): Promise<Record<string, unknown>[]> {
+  const allResults: Record<string, unknown>[] = [];
+  let remaining = maxResults ?? Number.POSITIVE_INFINITY;
+
+  for (const batch of batches) {
+    if (remaining <= 0) {
+      break;
+    }
+
+    const batchResults = await queryBatch(
+      url,
+      headers,
+      query,
+      batch,
+      Number.isFinite(remaining) ? remaining : undefined,
+    );
+
+    allResults.push(...batchResults);
+    remaining = Math.max(0, remaining - batchResults.length);
+  }
+
+  return allResults;
+}
