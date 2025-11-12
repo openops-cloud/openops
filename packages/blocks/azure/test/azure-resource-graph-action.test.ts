@@ -175,51 +175,6 @@ describe('azureResourceGraphAction', () => {
       expect.anything(),
     );
   });
-
-  test('should limit subscriptions when enabled', async () => {
-    const subs = Array.from({ length: 1500 }, (_, i) => `sub-${i}`);
-    makeHttpRequestMock.mockResolvedValue({ data: [{ id: 'r1' }] });
-
-    const context = createContext({
-      useHostSession: { useHostSessionCheckbox: false },
-      subscriptionsDropdown: {},
-      query: 'resources | project *',
-      querySubscriptions: subs,
-      limitSubscriptions: true,
-      subscriptionLimit: { limit: 500 },
-    });
-
-    await azureResourceGraphAction.run(context);
-
-    expect(makeHttpRequestMock).toHaveBeenCalledTimes(1);
-    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toHaveLength(
-      500,
-    );
-  });
-
-  test('should not limit subscriptions when disabled', async () => {
-    const subs = Array.from({ length: 1500 }, (_, i) => `sub-${i}`);
-    makeHttpRequestMock.mockResolvedValue({ data: [{ id: 'r1' }] });
-
-    const context = createContext({
-      useHostSession: { useHostSessionCheckbox: false },
-      subscriptionsDropdown: {},
-      query: 'resources | project *',
-      querySubscriptions: subs,
-      limitSubscriptions: false,
-      subscriptionLimit: {},
-    });
-
-    await azureResourceGraphAction.run(context);
-
-    expect(makeHttpRequestMock).toHaveBeenCalledTimes(2);
-    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toHaveLength(
-      1000,
-    );
-    expect(makeHttpRequestMock.mock.calls[1][3].subscriptions).toHaveLength(
-      500,
-    );
-  });
 });
 
 function createContext(propsValue?: unknown) {

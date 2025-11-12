@@ -179,7 +179,7 @@ export const azureResourceGraphAction = createAction({
 
     return {
       totalRecords: allResults.length,
-      data: normalizedMax ? allResults.slice(0, normalizedMax) : allResults,
+      data: allResults,
       query: kql,
       querySubscriptions: subscriptionList,
     };
