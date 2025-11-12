@@ -3,28 +3,24 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import {
-  AppSystemProp,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
-  AuthenticationResponse,
   OpsEdition,
   PrincipalType,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
-import { FastifyReply } from 'fastify';
-import { jwtDecode } from 'jwt-decode';
-import { getSubDomain } from '../helper/sub-domain';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
 import { authenticationService } from './authentication-service';
 import { Provider } from './authentication-service/hooks/authentication-service-hooks';
+import {
+  removeAuthCookiesAndReply,
+  setAuthCookiesAndReply,
+} from './context/authentication-cookies';
 
 const edition = system.getEdition();
 const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
@@ -67,7 +63,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       provider: Provider.EMAIL,
     });
 
-    return sendResponse(reply, signUpResponse);
+    return setAuthCookiesAndReply(reply, signUpResponse);
   });
 
   app.post('/sign-in', SignInRequestOptions, async (request, reply) => {
@@ -83,8 +79,9 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       provider: Provider.EMAIL,
     });
 
-    return sendResponse(reply, signInResponse);
+    return setAuthCookiesAndReply(reply, signInResponse);
   });
+
   app.post(
     '/sign-out',
     {
@@ -94,17 +91,10 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request, reply) => {
-      return reply
-        .clearCookie('jwt_token', {
-          domain: getOpenOpsSubDomain(),
-          path: '/',
-        })
-        .clearCookie('token', {
-          path: '/',
-        })
-        .send('Cookies removed');
+      return removeAuthCookiesAndReply(reply);
     },
   );
+
   app.get('/analytics-embed-id', async (request, reply) => {
     const { access_token } = await analyticsAuthenticationService.signIn();
 
@@ -114,6 +104,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
 
     return reply.send(embedId);
   });
+
   app.get(
     '/analytics-guest-token',
     AnalyticsGuestTokenRequestOptions,
@@ -162,36 +153,3 @@ const SignInRequestOptions = {
     body: SignInRequest,
   },
 };
-
-function sendResponse(
-  reply: FastifyReply,
-  response: AuthenticationResponse,
-): FastifyReply {
-  const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
-  const cookieExpiryDate = new Date(date.exp * 1000);
-
-  return reply
-    .setCookie('jwt_token', response.tablesRefreshToken, {
-      domain: getOpenOpsSubDomain(),
-      path: '/',
-      signed: true,
-      httpOnly: false,
-      expires: cookieExpiryDate,
-    })
-    .setCookie('token', response.token, {
-      path: '/',
-      signed: true,
-      httpOnly: false,
-      expires: cookieExpiryDate,
-      sameSite: 'lax',
-    })
-    .send(response);
-}
-
-function getOpenOpsSubDomain(): string {
-  const frontendUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
-
-  const tablesUrl = system.getOrThrow(AppSystemProp.OPENOPS_TABLES_PUBLIC_URL);
-
-  return getSubDomain(frontendUrl, tablesUrl);
-}
