@@ -99,6 +99,7 @@ export const azureResourceGraphAction = createAction({
           'Select Azure subscriptions to query for Azure Resource Graph.',
         required: true,
         multiSelect: true,
+        preselectAll: true,
       },
       'querySubscriptions',
     ),
