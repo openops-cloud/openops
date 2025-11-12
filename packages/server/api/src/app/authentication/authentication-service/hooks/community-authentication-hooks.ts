@@ -37,7 +37,7 @@ export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
       });
     }
   },
-  async postSignUp({ user, tablesRefreshToken }) {
+  async postSignUp({ user }) {
     let organization = await organizationService.getOldestOrganization();
 
     const adminUser = await userService.getUserByEmailOrFail({
@@ -66,16 +66,14 @@ export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
       email: user.email,
       workspaceId: organization.tablesWorkspaceId,
     });
-
-    return getProjectAndToken(user, tablesRefreshToken);
   },
 
-  async postSignIn({ user, tablesRefreshToken }) {
-    return getProjectAndToken(user, tablesRefreshToken);
+  async postSignIn() {
+    // Empty
   },
 };
 
-async function getProjectAndToken(
+export async function getProjectAndToken(
   user: User,
   tablesRefreshToken: string,
 ): Promise<{
