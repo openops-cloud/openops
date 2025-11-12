@@ -12,7 +12,7 @@ import {
   UserSelection,
 } from './message-interactions';
 import { MessageInfo } from './message-result';
-import { slackUpdateMessage } from './utils';
+import { emojifyString, slackUpdateMessage } from './utils';
 
 export interface WaitForInteractionResult {
   user: string;
@@ -115,11 +115,13 @@ export async function onReceivedInteraction(
     resumePayload.userName,
   );
 
+  const emojifiedAction = Array.isArray(userSelection)
+    ? userSelection.map((opt) => emojifyString(opt.value))
+    : emojifyString(userSelection.value);
+
   return {
     user: resumePayload.userName,
-    action: Array.isArray(userSelection)
-      ? userSelection.map((opt) => opt.value)
-      : userSelection.value,
+    action: emojifiedAction,
     message: updatedMessage,
     userSelection,
     isExpired: false,

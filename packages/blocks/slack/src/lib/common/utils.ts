@@ -8,6 +8,7 @@ import {
 import { Property, WorkflowFile } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
 import { isEmpty } from '@openops/shared';
+import * as emoji from 'node-emoji';
 import { MessageInfo } from './message-result';
 
 export const slackSendMessage = async ({
@@ -449,4 +450,12 @@ export function createMessageBlocksWithActions(
       elements: actionElements,
     },
   ];
+}
+
+export function normalizeEmojiString(str: string): string {
+  return emoji.unemojify(str);
+}
+
+export function emojifyString(str: string): string {
+  return emoji.emojify(str);
 }

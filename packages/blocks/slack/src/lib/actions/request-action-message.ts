@@ -17,7 +17,7 @@ import {
   username,
   usersAndChannels,
 } from '../common/props';
-import { slackSendMessage } from '../common/utils';
+import { normalizeEmojiString, slackSendMessage } from '../common/utils';
 import {
   onReceivedInteraction,
   waitForInteraction,
@@ -72,7 +72,7 @@ export const requestActionMessageAction = createAction({
 
     const actions = context.propsValue.actions as SlackActionDefinition[];
     const actionLabels = actions.map((action) => {
-      return action.buttonText;
+      return normalizeEmojiString(action.buttonText);
     });
 
     return await onReceivedInteraction(
@@ -166,7 +166,6 @@ interface SlackElement {
 interface SlackText {
   type: string;
   text: string;
-  emoji?: boolean;
 }
 
 interface ConfirmationPrompt {
@@ -198,7 +197,6 @@ function createButton(action: SlackActionDefinition): SlackElement {
     text: {
       type: 'plain_text',
       text: buttonText,
-      emoji: false,
     },
     url,
   };
