@@ -1,12 +1,12 @@
 import { createAction, Property, Validators } from '@openops/blocks-framework';
 import {
-  authenticateUserWithAzure,
   azureAuth,
   getUseHostSessionProperty,
   makeHttpRequest,
 } from '@openops/common';
 import { AxiosHeaders } from 'axios';
-import { runCommand } from '../azure-cli';
+import { getAzureAccessToken } from '../auth/get-azure-access-token';
+import { createSubscriptionDynamicProperty } from '../common-properties';
 
 const RESOURCE_GRAPH_API_VERSION = '2024-04-01';
 const BATCH_SIZE = 1000;
@@ -27,28 +27,6 @@ interface ResourceGraphRequestBody {
 
 const buildResourceGraphUrl = (apiVersion: string): string =>
   `https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=${apiVersion}`;
-
-const parseAzAccessToken = (raw?: string | null): string => {
-  const parsed = JSON.parse(raw ?? '{}');
-  const token = parsed?.accessToken;
-  if (!token) {
-    throw new Error('Failed to obtain Azure access token');
-  }
-  return token;
-};
-
-const getHostAccessToken = async (
-  auth: unknown,
-  subscription?: string,
-): Promise<string> => {
-  const output = await runCommand(
-    'account get-access-token --resource https://management.azure.com --output json',
-    auth,
-    true,
-    subscription,
-  );
-  return parseAzAccessToken(output);
-};
 
 const buildRequestBody = (
   query: string,
@@ -114,39 +92,16 @@ export const azureResourceGraphAction = createAction({
       description: 'The Kusto Query Language (KQL) query to execute.',
       required: true,
     }),
-    querySubscriptions: Property.Array({
-      displayName: 'Query Subscription IDs',
-      description:
-        'Array of Azure subscription IDs to query. Leave empty to query all accessible subscriptions.',
-      required: false,
-    }),
-    limitSubscriptions: Property.Checkbox({
-      displayName: 'Limit Subscriptions',
-      description:
-        'Enable to limit the number of subscriptions queried. Azure Resource Graph has a limit of 1000 subscriptions per query.',
-      required: false,
-      defaultValue: true,
-    }),
-    subscriptionLimit: Property.DynamicProperties({
-      displayName: '',
-      required: true,
-      refreshers: ['limitSubscriptions'],
-      props: async ({ limitSubscriptions }) => {
-        if (limitSubscriptions) {
-          return {
-            limit: Property.Number({
-              displayName: 'Subscription Limit',
-              description:
-                'Maximum number of subscriptions to include in the query. Default is 1000 (Azure API limit).',
-              required: false,
-              defaultValue: 1000,
-              validators: [Validators.minValue(1), Validators.integer],
-            }),
-          } as any;
-        }
-        return {};
+    querySubscriptions: createSubscriptionDynamicProperty(
+      {
+        displayName: 'Query Subscriptions',
+        description:
+          'Select Azure subscriptions to query for Azure Resource Graph.',
+        required: true,
+        multiSelect: true,
       },
-    }),
+      'querySubscriptions',
+    ),
     maxResults: Property.Number({
       displayName: 'Maximum Results',
       description:
@@ -166,8 +121,6 @@ export const azureResourceGraphAction = createAction({
     const {
       useHostSession,
       querySubscriptions,
-      limitSubscriptions,
-      subscriptionLimit,
       query,
       maxResults,
       apiVersion,
@@ -181,18 +134,12 @@ export const azureResourceGraphAction = createAction({
     const normalizedMax =
       typeof maxResults === 'number' ? maxResults : undefined;
 
-    let subscriptionList = querySubscriptions as string[] | undefined;
+    const subscriptionList = querySubscriptions as string[] | undefined;
 
-    if (limitSubscriptions && subscriptionList) {
-      subscriptionList = subscriptionList.slice(
-        0,
-        subscriptionLimit?.['limit'],
-      );
-    }
-
-    const token = useHostSession?.['useHostSessionCheckbox']
-      ? await getHostAccessToken(context.auth)
-      : (await authenticateUserWithAzure(context.auth)).access_token;
+    const token = await getAzureAccessToken(
+      context.auth,
+      !!useHostSession?.['useHostSessionCheckbox'],
+    );
 
     const headers = new AxiosHeaders({
       Authorization: `Bearer ${token}`,
