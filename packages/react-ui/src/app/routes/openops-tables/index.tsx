@@ -19,9 +19,9 @@ const OpenOpsTablesPage = () => {
     (project as any)?.tablesWorkspaceId ?? organization?.tablesWorkspaceId;
 
   const parentDataObj = {
-    isCanduEnabled: isCanduEnabled ? true : undefined,
     userId: canduUserId ?? undefined,
     canduClientToken: canduClientToken ?? undefined,
+    ...(isCanduEnabled && { isCanduEnabled: true }),
     ...(workspaceId !== undefined && { workspaceId }),
   };
 
