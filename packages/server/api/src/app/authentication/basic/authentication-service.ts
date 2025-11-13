@@ -9,10 +9,10 @@ import {
   UserStatus,
 } from '@openops/shared';
 import { userService } from '../../user/user-service';
-import { passwordHasher } from '../basic/password-hasher';
 import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
 import { assignDefaultOrganization } from '../new-user/organization-assignment';
+import { passwordHasher } from './password-hasher';
 
 export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
