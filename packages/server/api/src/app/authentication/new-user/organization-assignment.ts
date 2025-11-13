@@ -3,6 +3,7 @@ import { AppSystemProp, system } from '@openops/server-shared';
 import { ApplicationError, ErrorCode, isNil, User } from '@openops/shared';
 import { openopsTables } from '../../openops-tables';
 import { organizationService } from '../../organization/organization.service';
+import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 
 export async function assignDefaultOrganization(user: User): Promise<void> {
@@ -30,10 +31,15 @@ export async function assignDefaultOrganization(user: User): Promise<void> {
     organizationId: organization.id,
   });
 
-  await addUserToDefaultWorkspace({
-    email: user.email,
-    workspaceId: organization.tablesWorkspaceId,
-  });
+  const updatedUser = await userService.getOneOrFail({ id: user.id });
+  const project = await projectService.getOneForUser(updatedUser);
+
+  if (!isNil(project)) {
+    await addUserToDefaultWorkspace({
+      email: user.email,
+      workspaceId: project.tablesWorkspaceId,
+    });
+  }
 }
 
 async function addUserToDefaultWorkspace(values: {

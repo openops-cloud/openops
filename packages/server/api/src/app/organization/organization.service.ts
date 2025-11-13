@@ -21,13 +21,12 @@ export const organizationService = {
     return count > 0;
   },
   async create(params: AddParams): Promise<Organization> {
-    const { ownerId, name, tablesWorkspaceId } = params;
+    const { ownerId, name } = params;
 
     const newOrganization: NewOrganization = {
       id: openOpsId(),
       ownerId,
       name,
-      tablesWorkspaceId,
     };
 
     const savedOrganization = await repo().save(newOrganization);
@@ -54,7 +53,6 @@ export const organizationService = {
       ...organization,
       ...spreadIfDefined('name', params.name),
       ...spreadIfDefined('ownerId', params.ownerId),
-      ...spreadIfDefined('tablesWorkspaceId', params.tablesWorkspaceId),
     };
 
     return repo().save(updatedOrganization);
@@ -91,7 +89,6 @@ export const organizationService = {
 type AddParams = {
   ownerId: UserId;
   name: string;
-  tablesWorkspaceId: number;
 };
 
 type NewOrganization = Omit<Organization, 'created' | 'updated'>;

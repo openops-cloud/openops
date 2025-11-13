@@ -52,6 +52,7 @@ export const projectService = {
         ...spreadIfDefined('displayName', request.displayName),
         ...spreadIfDefined('ownerId', request.ownerId),
         ...spreadIfDefined('tablesDatabaseId', request.tablesDatabaseId),
+        ...spreadIfDefined('tablesWorkspaceId', request.tablesWorkspaceId),
       },
     );
     return this.getOneOrThrow(projectId);
@@ -148,6 +149,7 @@ type UpdateParams = {
   displayName?: string;
   ownerId?: UserId;
   tablesDatabaseId?: number;
+  tablesWorkspaceId?: number;
 };
 
 type CreateParams = {
@@ -156,6 +158,7 @@ type CreateParams = {
   organizationId: string;
   externalId?: string;
   tablesDatabaseId: number;
+  tablesWorkspaceId: number;
 };
 
 type AddProjectToOrganizationParams = {
