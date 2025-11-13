@@ -38,7 +38,6 @@ describe('create-user', () => {
     newsLetter: false,
     verified: true,
     organizationId: 'org-1',
-    referringUserId: 'user-x',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provider: 'email' as any,
   };
@@ -100,7 +99,7 @@ describe('create-user', () => {
     );
 
     await expect(
-      createUser({ ...baseParams, password: 'abcas2esf' }),
+      createUser({ ...baseParams, password: 'P@ssw0rd' }),
     ).rejects.toMatchObject({
       error: {
         code: ErrorCode.EXISTING_USER,
@@ -121,7 +120,7 @@ describe('create-user', () => {
     createTablesUserMock.mockRejectedValue(new Error('tables down'));
 
     await expect(
-      createUser({ ...baseParams, password: 'ab122rwerc' }),
+      createUser({ ...baseParams, password: 'P@ssw0rd' }),
     ).rejects.toBeInstanceOf(Error);
 
     expect(deleteUserServiceMock).toHaveBeenCalledWith({
