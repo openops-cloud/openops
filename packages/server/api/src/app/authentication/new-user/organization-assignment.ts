@@ -39,6 +39,13 @@ export async function assignDefaultOrganization(user: User): Promise<void> {
       email: user.email,
       workspaceId: project.tablesWorkspaceId,
     });
+  } else {
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        message: 'No project found for user',
+      },
+    });
   }
 }
 
