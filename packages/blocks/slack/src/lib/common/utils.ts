@@ -455,7 +455,3 @@ export function createMessageBlocksWithActions(
 export function normalizeEmojiString(str: string): string {
   return emoji.unemojify(str);
 }
-
-export function emojifyString(str: string): string {
-  return emoji.emojify(str);
-}

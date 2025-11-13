@@ -12,7 +12,7 @@ import {
   UserSelection,
 } from './message-interactions';
 import { MessageInfo } from './message-result';
-import { emojifyString, slackUpdateMessage } from './utils';
+import { normalizeEmojiString, slackUpdateMessage } from './utils';
 
 export interface WaitForInteractionResult {
   user: string;
@@ -77,9 +77,16 @@ export async function onReceivedInteraction(
 
   const userSelection = JSON.parse(resumePayload.actionClicked);
 
-  const isResumeForActionOnThisMessage =
-    actions.includes(resumePayload.actionType) ||
-    actions.includes((userSelection as UserSelection)?.value);
+  const targetValues = [
+    resumePayload.actionType,
+    (userSelection as UserSelection)?.value,
+  ].filter(Boolean);
+
+  const matchedOriginalAction = actions.find((original) =>
+    targetValues.includes(normalizeEmojiString(original)),
+  );
+
+  const isResumeForActionOnThisMessage = Boolean(matchedOriginalAction);
 
   const isResumeForThisMessage =
     resumePayload.path === currentExecutionPath &&
@@ -115,13 +122,11 @@ export async function onReceivedInteraction(
     resumePayload.userName,
   );
 
-  const emojifiedAction = Array.isArray(userSelection)
-    ? userSelection.map((opt) => emojifyString(opt.value))
-    : emojifyString(userSelection.value);
-
   return {
     user: resumePayload.userName,
-    action: emojifiedAction,
+    action: Array.isArray(userSelection)
+      ? userSelection.map((opt) => opt.value)
+      : matchedOriginalAction || '',
     message: updatedMessage,
     userSelection,
     isExpired: false,

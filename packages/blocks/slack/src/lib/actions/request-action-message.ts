@@ -17,7 +17,7 @@ import {
   username,
   usersAndChannels,
 } from '../common/props';
-import { normalizeEmojiString, slackSendMessage } from '../common/utils';
+import { slackSendMessage } from '../common/utils';
 import {
   onReceivedInteraction,
   waitForInteraction,
@@ -72,7 +72,7 @@ export const requestActionMessageAction = createAction({
 
     const actions = context.propsValue.actions as SlackActionDefinition[];
     const actionLabels = actions.map((action) => {
-      return normalizeEmojiString(action.buttonText);
+      return action.buttonText;
     });
 
     return await onReceivedInteraction(
