@@ -1,4 +1,4 @@
-import { Project, ProjectMemberRole, User } from '@openops/shared';
+import { User } from '@openops/shared';
 
 export enum Provider {
   EMAIL = 'EMAIL',
@@ -8,16 +8,14 @@ export enum Provider {
 export type AuthenticationServiceHooks = {
   preSignIn(p: PreParams): Promise<void>;
   preSignUp(p: PreSignUpParams): Promise<void>;
-  postSignUp(p: PostParams): Promise<PostResult>;
-  postSignIn(p: PostParams): Promise<PostResult>;
+  postSignUp(p: PostParams): Promise<void>;
+  postSignIn(p: PostParams): Promise<void>;
 };
 
 type PreSignUpParams = {
   name: string;
   email: string;
   password: string;
-  organizationId: string | null;
-  provider: Provider;
 };
 
 type PreParams = {
@@ -28,15 +26,4 @@ type PreParams = {
 
 type PostParams = {
   user: User;
-  tablesAccessToken: string;
-  tablesRefreshToken: string;
-  referringUserId?: string;
-};
-
-type PostResult = {
-  user: User;
-  project: Project;
-  token: string;
-  tablesRefreshToken: string;
-  projectRole: ProjectMemberRole | null;
 };

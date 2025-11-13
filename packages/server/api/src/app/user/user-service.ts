@@ -139,10 +139,14 @@ export const userService = {
   },
 
   async delete({ id, organizationId }: DeleteParams): Promise<void> {
-    await userRepo().delete({
-      id,
-      organizationId,
-    });
+    const organizationWhereQuery = organizationId ? { organizationId } : {};
+
+    await userRepo()
+      .createQueryBuilder()
+      .delete()
+      .where({ id })
+      .andWhere(organizationWhereQuery)
+      .execute();
   },
 
   async getUserByEmailOrFail({ email }: { email: string }): Promise<User> {
@@ -266,7 +270,7 @@ export const userService = {
 
 type DeleteParams = {
   id: UserId;
-  organizationId: OrganizationId;
+  organizationId: OrganizationId | null;
 };
 
 type ListParams = {
