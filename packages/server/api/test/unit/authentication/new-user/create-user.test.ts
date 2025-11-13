@@ -1,18 +1,6 @@
 import { ErrorCode, OrganizationRole, UserStatus } from '@openops/shared';
 import { QueryFailedError } from 'typeorm';
 
-const preSignUpMock = jest.fn();
-jest.mock(
-  '../../../../src/app/authentication/authentication-service/hooks',
-  () => {
-    return {
-      authenticationServiceHooks: {
-        get: () => ({ preSignUp: preSignUpMock }),
-      },
-    };
-  },
-);
-
 const createUserServiceMock = jest.fn();
 const deleteUserServiceMock = jest.fn();
 jest.mock('../../../../src/app/user/user-service', () => ({
@@ -50,7 +38,6 @@ describe('create-user', () => {
     newsLetter: false,
     verified: true,
     organizationId: 'org-1',
-    referringUserId: 'user-x',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provider: 'email' as any,
   };
@@ -79,12 +66,6 @@ describe('create-user', () => {
     });
 
     const res = await createUser({ ...baseParams, password: 'P@ssw0rd' });
-
-    expect(preSignUpMock).toHaveBeenCalledWith({
-      name: 'John Doe',
-      email: baseParams.email,
-      password: 'P@ssw0rd',
-    });
 
     expect(createUserServiceMock).toHaveBeenCalledWith({
       email: baseParams.email,
@@ -118,7 +99,7 @@ describe('create-user', () => {
     );
 
     await expect(
-      createUser({ ...baseParams, password: 'abc' }),
+      createUser({ ...baseParams, password: 'P@ssw0rd' }),
     ).rejects.toMatchObject({
       error: {
         code: ErrorCode.EXISTING_USER,
@@ -139,7 +120,7 @@ describe('create-user', () => {
     createTablesUserMock.mockRejectedValue(new Error('tables down'));
 
     await expect(
-      createUser({ ...baseParams, password: 'abc' }),
+      createUser({ ...baseParams, password: 'P@ssw0rd' }),
     ).rejects.toBeInstanceOf(Error);
 
     expect(deleteUserServiceMock).toHaveBeenCalledWith({
@@ -159,12 +140,6 @@ describe('create-user', () => {
     createTablesUserMock.mockResolvedValue({ refresh_token: 't2' });
 
     const res = await createUserWithRandomPassword(baseParams);
-
-    expect(preSignUpMock).toHaveBeenCalledWith({
-      name: 'John Doe',
-      email: baseParams.email,
-      password: 'Rand#123',
-    });
 
     expect(createUserServiceMock).toHaveBeenCalledWith(
       expect.objectContaining({ password: 'Rand#123' }),
