@@ -4,24 +4,21 @@ import {
   AuthenticationResponse,
   ErrorCode,
   isNil,
+  Provider,
   User,
-  UserId,
   UserStatus,
 } from '@openops/shared';
 import { userService } from '../../user/user-service';
 import { passwordHasher } from '../basic/password-hasher';
+import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
-import { authenticationServiceHooks as hooks } from './hooks';
-import { Provider } from './hooks/authentication-service-hooks';
-import { getProjectAndToken } from './hooks/community-authentication-hooks';
+import { assignDefaultOrganization } from '../new-user/organization-assignment';
 
 export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
     const { user, tablesRefreshToken } = await createUser(params);
 
-    await hooks.get().postSignUp({
-      user,
-    });
+    await assignDefaultOrganization(user);
 
     return this.authResponse(user, tablesRefreshToken);
   },
@@ -136,17 +133,4 @@ type SignInParams = {
 type AssertPasswordsMatchParams = {
   requestPassword: string;
   userPassword: string;
-};
-
-type SignUpResponseParams = {
-  user: User;
-  tablesAccessToken: string;
-  tablesRefreshToken: string;
-  referringUserId?: UserId;
-};
-
-type SignInResponseParams = {
-  user: User;
-  tablesAccessToken: string;
-  tablesRefreshToken: string;
 };

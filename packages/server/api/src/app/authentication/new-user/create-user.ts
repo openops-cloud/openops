@@ -1,16 +1,18 @@
 import { cryptoUtils } from '@openops/server-shared';
 import {
   ApplicationError,
+  assertValidEmail,
+  assertValidPassword,
   ErrorCode,
+  isEmpty,
   OrganizationRole,
+  Provider,
   User,
   UserStatus,
 } from '@openops/shared';
 import { QueryFailedError } from 'typeorm';
 import { openopsTables } from '../../openops-tables';
 import { userService } from '../../user/user-service';
-import { authenticationServiceHooks as hooks } from '../authentication-service/hooks';
-import { Provider } from '../authentication-service/hooks/authentication-service-hooks';
 
 type NewUserParams = {
   email: string;
@@ -37,11 +39,18 @@ const assertValidSignUpParams = async ({
   email: string;
   password: string;
 }): Promise<void> => {
-  await hooks.get().preSignUp({
-    name,
-    email,
-    password,
-  });
+  assertValidEmail(email);
+  assertValidPassword(password);
+
+  if (isEmpty(name)) {
+    throw new ApplicationError({
+      code: ErrorCode.INVALID_NAME_FOR_USER,
+      params: {
+        name,
+        message: 'First name and last name were not provided correctly.',
+      },
+    });
+  }
 };
 
 const createEditorUser = async (
