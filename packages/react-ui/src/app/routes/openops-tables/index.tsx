@@ -2,6 +2,8 @@ import { t } from 'i18next';
 import { useLocation } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { platformHooks } from '@/app/common/hooks/platform-hooks';
+import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
 import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { FlagId } from '@openops/shared';
@@ -9,9 +11,21 @@ import { FlagId } from '@openops/shared';
 const OpenOpsTablesPage = () => {
   useDefaultSidebarState('minimized');
   const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
-  const parentData = encodeURIComponent(
-    JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
-  );
+  const { project } = projectHooks.useCurrentProject();
+  const { platform: organization } = platformHooks.useCurrentPlatform();
+
+  // TODO: Remove type assertion and remove organization?.tablesWorkspaceId fallback once Phase 1 is complete
+  const workspaceId =
+    (project as any)?.tablesWorkspaceId ?? organization?.tablesWorkspaceId;
+
+  const parentDataObj = {
+    isCanduEnabled: isCanduEnabled ? true : undefined,
+    userId: canduUserId ?? undefined,
+    canduClientToken: canduClientToken ?? undefined,
+    ...(workspaceId !== undefined && { workspaceId }),
+  };
+
+  const parentData = encodeURIComponent(JSON.stringify(parentDataObj));
 
   const location = useLocation();
   const params = new URLSearchParams(location.search);
