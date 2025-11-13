@@ -32,7 +32,16 @@ export async function assignDefaultOrganization(user: User): Promise<void> {
   });
 
   const updatedUser = await userService.getOneOrFail({ id: user.id });
-  const project = await projectService.getUserProjectOrThrow(updatedUser.id);
+  const project = await projectService.getOneForUser(updatedUser);
+
+  if (isNil(project)) {
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        message: 'No project found for user',
+      },
+    });
+  }
 
   await addUserToDefaultWorkspace({
     email: user.email,
