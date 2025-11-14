@@ -1,28 +1,24 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { IdentityClient } from '@frontegg/client';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
-import { getCloudToken, getCloudUser } from './cloud-auth';
+import { getVerifiedUser } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(userInfoController, { prefix: '/v1/user-info' });
 };
 
 export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
-  const fronteggClientId = system.get(AppSystemProp.FRONTEGG_CLIENT_ID);
-  const fronteggApiKey = system.get(AppSystemProp.FRONTEGG_API_KEY);
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
+  const connectionPageEnabled = system.getBoolean(
+    AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
 
-  if (!fronteggClientId || !fronteggApiKey) {
+  if (!publicKey || !connectionPageEnabled) {
     logger.info(
       'Missing Frontegg configuration, disabling cloud templates API',
     );
     return;
   }
-
-  const identityClient = new IdentityClient({
-    FRONTEGG_CLIENT_ID: fronteggClientId,
-    FRONTEGG_API_KEY: fronteggApiKey,
-  });
 
   // user-info is available on any origin
   app.addHook('onSend', (request, reply, payload, done) => {
@@ -53,8 +49,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       },
     },
     async (request, reply) => {
-      const token = getCloudToken(request);
-      const user = await getCloudUser(identityClient, token);
+      const user = getVerifiedUser(request, publicKey);
 
       if (!user) {
         return reply.status(401).send();
