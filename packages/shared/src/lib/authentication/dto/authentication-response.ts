@@ -9,8 +9,3 @@ export type AuthenticationResponse = UserWithoutPassword & {
   projectRole: ProjectMemberRole | null;
   tablesRefreshToken: string;
 };
-
-export const removePasswordPropFromUser = (user: User): UserWithoutPassword => {
-  const { password: _, ...filteredUser } = user;
-  return filteredUser;
-};

@@ -90,7 +90,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
         skipAuth: true,
       },
     },
-    async (_request, reply) => {
+    async (request, reply) => {
       return removeAuthCookiesAndReply(reply);
     },
   );

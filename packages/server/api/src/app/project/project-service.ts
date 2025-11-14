@@ -127,13 +127,6 @@ export const projectService = {
     return project;
   },
 
-  async getUserProject(ownerId: UserId): Promise<Project | null> {
-    return projectRepo().findOneBy({
-      ownerId,
-      deleted: IsNull(),
-    });
-  },
-
   async addProjectToOrganization({
     projectId,
     organizationId,
