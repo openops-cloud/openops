@@ -161,6 +161,7 @@ interface SlackElement {
   style?: string;
   confirm?: ConfirmationPrompt;
   url?: string;
+  value?: string;
 }
 
 interface SlackText {
@@ -198,6 +199,7 @@ function createButton(action: SlackActionDefinition): SlackElement {
       type: 'plain_text',
       text: buttonText,
     },
+    value: buttonText,
     url,
   };
 

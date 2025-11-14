@@ -13,7 +13,7 @@ export function getUserSelection(
   switch (action.type) {
     case 'button':
       return {
-        value: action.text?.text,
+        value: action.value || action.text?.text,
         displayText: action.text?.text,
       };
     case 'timepicker':
