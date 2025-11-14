@@ -160,6 +160,11 @@ export const userService = {
       .getMany();
   },
 
+  async getUserByEmail(email: string): Promise<User | null> {
+    const cleanedEmail = email.toLowerCase().trim();
+    return userRepo().findOneBy({ email: cleanedEmail });
+  },
+
   async getByOrganizationAndEmail({
     organizationId,
     email,
