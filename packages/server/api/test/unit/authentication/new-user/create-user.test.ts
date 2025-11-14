@@ -135,6 +135,7 @@ describe('create-user', () => {
     const createdUser = {
       id: 'u3',
       organizationId: baseParams.organizationId,
+      password: '12345678',
     };
     createUserServiceMock.mockResolvedValue(createdUser);
     createTablesUserMock.mockResolvedValue({ refresh_token: 't2' });
@@ -146,7 +147,7 @@ describe('create-user', () => {
     );
 
     expect(createTablesUserMock).toHaveBeenCalledWith(
-      expect.objectContaining({ password: 'Rand#123' }),
+      expect.objectContaining({ password: '12345678' }),
     );
 
     expect(res).toEqual({ user: createdUser, tablesRefreshToken: 't2' });
