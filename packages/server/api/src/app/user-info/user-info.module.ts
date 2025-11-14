@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
+import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -21,24 +22,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
   }
 
   // user-info is available on any origin
-  app.addHook('onSend', (request, reply, payload, done) => {
-    void reply.header(
-      'Access-Control-Allow-Origin',
-      request.headers.origin || request.headers['Ops-Origin'] || '*',
-    );
-    void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    void reply.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type,Ops-Origin,Authorization',
-    );
-    void reply.header('Access-Control-Allow-Credentials', 'true');
-    if (request.method === 'OPTIONS') {
-      return reply.status(204).send();
-    }
-
-    done(null, payload);
-    return;
-  });
+  app.addHook('onSend', allowAllOriginsHookHandler);
 
   app.get(
     '/',
@@ -52,11 +36,9 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       const user = getVerifiedUser(request, publicKey);
 
       if (!user) {
-        logger.info('User is not authenticated');
         return reply.status(401).send();
       }
 
-      logger.info('User is authenticated');
       return user;
     },
   );

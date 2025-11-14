@@ -4,6 +4,7 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, OpenOpsId } from '@openops/shared';
+import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
 
@@ -23,24 +24,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   }
 
   // cloud templates are available on any origin
-  app.addHook('onSend', (request, reply, payload, done) => {
-    void reply.header(
-      'Access-Control-Allow-Origin',
-      request.headers.origin || request.headers['Ops-Origin'] || '*',
-    );
-    void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    void reply.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type,Ops-Origin,Authorization',
-    );
-    void reply.header('Access-Control-Allow-Credentials', 'true');
-    if (request.method === 'OPTIONS') {
-      return reply.status(204).send();
-    }
-
-    done(null, payload);
-    return;
-  });
+  app.addHook('onSend', allowAllOriginsHookHandler);
 
   app.get(
     '/',
@@ -67,8 +51,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     async (request) => {
       const user = getVerifiedUser(request, publicKey);
       if (!user) {
-        logger.info('User is not authenticated');
-
         return flowTemplateService.getFlowTemplates({
           search: request.query.search,
           tags: request.query.tags,
@@ -84,8 +66,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         });
       }
 
-      logger.info('User is authenticated');
-      return [];
       return flowTemplateService.getFlowTemplates({
         search: request.query.search,
         tags: request.query.tags,
