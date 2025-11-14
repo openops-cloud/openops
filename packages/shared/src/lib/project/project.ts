@@ -33,6 +33,7 @@ export const Project = Type.Object({
   displayName: Type.String(),
   organizationId: OpenOpsId,
   tablesDatabaseId: Type.Integer(),
+  tablesWorkspaceId: Type.Integer(),
 });
 
 export type Project = Static<typeof Project>;

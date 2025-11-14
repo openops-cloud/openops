@@ -21,10 +21,6 @@ export const OrganizationEntity = new EntitySchema<OrganizationSchema>({
       type: String,
       nullable: false,
     },
-    tablesWorkspaceId: {
-      type: Number,
-      nullable: false,
-    },
   },
   indices: [],
   relations: {
