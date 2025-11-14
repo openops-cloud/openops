@@ -247,7 +247,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: 'value 1', // Match one of the action values
+              actionType: 'multi_static_select',
               actionClicked: JSON.stringify([
                 {
                   value: 'value 1',
@@ -271,7 +271,7 @@ describe('wait-for-interaction', () => {
 
         const result = await onReceivedInteraction(
           messageObj,
-          ['value 1', 'value 2'],
+          ['multi_static_select'],
           context,
           'step_1',
         );
