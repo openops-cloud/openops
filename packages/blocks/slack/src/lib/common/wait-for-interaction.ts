@@ -77,13 +77,14 @@ export async function onReceivedInteraction(
 
   const userSelection = JSON.parse(resumePayload.actionClicked);
 
-  const targetValues = [
-    resumePayload.actionType,
-    (userSelection as UserSelection)?.value,
-  ].filter(Boolean);
+  const targetValues = new Set(
+    [resumePayload.actionType, (userSelection as UserSelection)?.value].filter(
+      Boolean,
+    ),
+  );
 
   const matchedOriginalAction = actions.find((original) =>
-    targetValues.includes(normalizeEmojiString(original)),
+    targetValues.has(normalizeEmojiString(original)),
   );
 
   const isResumeForActionOnThisMessage = Boolean(matchedOriginalAction);
