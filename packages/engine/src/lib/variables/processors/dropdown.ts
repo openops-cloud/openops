@@ -9,7 +9,7 @@ import { PropsValidationError } from '../props-processor';
 
 export const isDropdownProperty = (propertyType: PropertyType): boolean => {
   return (
-    // propertyType === PropertyType.DROPDOWN ||
+    propertyType === PropertyType.DROPDOWN ||
     propertyType === PropertyType.STATIC_DROPDOWN ||
     propertyType === PropertyType.STATIC_MULTI_SELECT_DROPDOWN ||
     propertyType === PropertyType.MULTI_SELECT_DROPDOWN
@@ -38,6 +38,11 @@ export const dropdownProcessor = (
         `Expected an ${expectedType}, received: ${value}`,
       ];
     }
+  }
+
+  if (property.type == PropertyType.DROPDOWN && typeof value === 'string') {
+    const parsedValue = tryParseJson(value);
+    processedInput[key] = parsedValue;
   }
 
   if (
