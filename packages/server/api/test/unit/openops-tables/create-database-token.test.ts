@@ -16,8 +16,6 @@ describe('createDatabaseToken', () => {
     const params = {
       name: 'Test Token',
       workspaceId: 1,
-      databaseId: 2,
-      scopes: ['read', 'write'],
       systemToken: 'test_system_token',
     };
     const mockTokenResponse = {
@@ -45,8 +43,6 @@ describe('createDatabaseToken', () => {
       {
         name: params.name,
         workspace: params.workspaceId,
-        database_id: params.databaseId,
-        scopes: params.scopes,
       },
       new AxiosHeaders({
         'Content-Type': 'application/json',
