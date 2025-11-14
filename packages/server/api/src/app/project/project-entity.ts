@@ -42,6 +42,10 @@ export const ProjectEntity = new EntitySchema<ProjectSchema>({
       type: Number,
       nullable: false,
     },
+    tablesWorkspaceId: {
+      type: Number,
+      nullable: false,
+    },
   },
   indices: [
     {
