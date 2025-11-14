@@ -252,18 +252,6 @@ export const flagService = {
         updated,
       },
       {
-        id: FlagId.FRONTEGG_CLIENT_ID,
-        value: system.get(AppSystemProp.FRONTEGG_CLIENT_ID),
-        created,
-        updated,
-      },
-      {
-        id: FlagId.FRONTEGG_APP_ID,
-        value: system.get(AppSystemProp.FRONTEGG_APP_ID),
-        created,
-        updated,
-      },
-      {
         id: FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
         value: system.getBoolean(AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED),
         created,
