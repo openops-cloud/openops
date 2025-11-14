@@ -6,7 +6,7 @@ export const additionalFronteggParams = {
 };
 
 export function initializeFrontegg(url: string, tenant?: string): FronteggApp {
-  const tenantResolver = tenant ? () => ({ tenant: tenant }) : undefined;
+  const tenantResolver = tenant ? () => ({ tenant }) : undefined;
 
   return initialize({
     contextOptions: {
