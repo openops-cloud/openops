@@ -6,9 +6,9 @@ function normalizeEmojiStringMock(str: string): string {
     '✅': ':white_check_mark:',
   };
   let result = str;
-  Object.entries(emojiMap).forEach(([emoji, shortcode]) => {
-    result = result.replace(new RegExp(emoji, 'g'), shortcode);
-  });
+  for (const [emoji, shortcode] of Object.entries(emojiMap)) {
+    result = result.replaceAll(emoji, shortcode);
+  }
   return result;
 }
 
