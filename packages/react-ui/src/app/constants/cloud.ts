@@ -1,4 +1,4 @@
-export const OPENOPS_CLOUD_URL = 'https://test.internal.openops.com/';
+export const OPENOPS_CLOUD_URL = 'https://test.internal.openops.com';
 export const OPENOPS_CONNECT_TEMPLATES_URL = `${OPENOPS_CLOUD_URL}/connect`;
 export const OPENOPS_CONNECT_TEMPLATES_LOGOUT_URL = `${OPENOPS_CLOUD_URL}/oauth/logout`;
 export const OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS = 800;

@@ -52,9 +52,11 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       const user = getVerifiedUser(request, publicKey);
 
       if (!user) {
+        logger.info('User is not authenticated');
         return reply.status(401).send();
       }
 
+      logger.info('User is authenticated');
       return user;
     },
   );
