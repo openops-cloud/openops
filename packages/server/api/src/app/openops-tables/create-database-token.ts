@@ -13,13 +13,17 @@ export type DatabaseToken = {
   };
 };
 
-export async function createDatabaseToken(params: {
+export type CreateDatabaseTokenParams = {
   name: string;
   workspaceId: number;
   databaseId: number;
   scopes: string[];
   systemToken: string;
-}): Promise<DatabaseToken> {
+};
+
+export async function createDatabaseToken(
+  params: CreateDatabaseTokenParams,
+): Promise<DatabaseToken> {
   const payload = {
     name: params.name,
     workspace: params.workspaceId,
