@@ -54,7 +54,7 @@ describe('getVerifiedUser', () => {
   });
 
   it('should verify token from Authorization header', () => {
-    const payload = { sub: '123' } as any;
+    const payload = { sub: '123' };
     (jwt.verify as jest.Mock).mockReturnValue(payload);
     const mockRequest = createMockRequest({
       headers: { authorization: 'Bearer header-token' },
@@ -68,7 +68,7 @@ describe('getVerifiedUser', () => {
   });
 
   it('should verify token from cookie when Authorization header is missing', () => {
-    const payload = { sub: 'abc' } as any;
+    const payload = { sub: 'abc' };
     (jwt.verify as jest.Mock).mockReturnValue(payload);
     const mockRequest = createMockRequest({
       headers: {},
