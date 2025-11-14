@@ -1,21 +1,8 @@
 const slackUpdateMessageMock = jest.fn();
 
-function normalizeEmojiStringMock(str: string): string {
-  const emojiMap: Record<string, string> = {
-    '🎲': ':game_die:',
-    '✅': ':white_check_mark:',
-  };
-  let result = str;
-  for (const [emoji, shortcode] of Object.entries(emojiMap)) {
-    result = result.replaceAll(emoji, shortcode);
-  }
-  return result;
-}
-
 jest.mock('../src/lib/common/utils', () => ({
   ...jest.requireActual('../src/lib/common/utils'),
   slackUpdateMessage: slackUpdateMessageMock,
-  normalizeEmojiString: normalizeEmojiStringMock,
 }));
 
 import { StoreScope } from '@openops/blocks-framework';
@@ -98,7 +85,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':game_die: Reroll',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':game_die: Reroll',
                 displayText: ':game_die: Reroll',
@@ -169,7 +156,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':game_die: Reroll',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':game_die: Reroll',
                 displayText: ':game_die: Reroll',
@@ -207,7 +194,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: 'Approve',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: 'Approve',
                 displayText: 'Approve',
@@ -301,7 +288,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':game_die: Reroll',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':game_die: Reroll',
                 displayText: ':game_die: Reroll',
@@ -346,7 +333,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':unknown: Action',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':unknown: Action',
                 displayText: ':unknown: Action',
@@ -387,7 +374,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':unknown: Action',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':unknown: Action',
                 displayText: ':unknown: Action',
@@ -412,7 +399,7 @@ describe('wait-for-interaction', () => {
           resumePayload: {
             queryParams: {
               userName: 'test_user',
-              actionType: ':game_die: Reroll',
+              actionType: 'button',
               actionClicked: JSON.stringify({
                 value: ':game_die: Reroll',
                 displayText: ':game_die: Reroll',
