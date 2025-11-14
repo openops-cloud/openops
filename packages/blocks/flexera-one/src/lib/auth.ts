@@ -15,7 +15,7 @@ export const flexeraAuth = BlockAuth.CustomAuth({
   props: {
     appRegion: Property.StaticDropdown({
       displayName: 'App Region',
-      description: `Select the region where your Flexera application is hosted.`,
+      description: `Select the region where your Flexera application is hosted`,
       required: true,
       options: {
         options: [
@@ -33,12 +33,12 @@ export const flexeraAuth = BlockAuth.CustomAuth({
     }),
     orgId: Property.ShortText({
       displayName: 'Organization ID',
-      description: 'The organization ID to use for Flexera API calls.',
+      description: 'The organization ID to use for Flexera API calls',
       required: true,
     }),
     projectId: Property.ShortText({
       displayName: 'Project ID',
-      description: 'The project ID to use for Flexera API calls.',
+      description: 'The project ID to use for Flexera API calls',
       required: true,
     }),
   },

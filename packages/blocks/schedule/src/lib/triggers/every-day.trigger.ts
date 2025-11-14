@@ -40,7 +40,7 @@ export const everyDayTrigger = createTrigger({
   sampleData: {},
   props: {
     hour_of_the_day: Property.StaticDropdown({
-      displayName: 'Hour of the day',
+      displayName: 'Hour of the Day',
       options: {
         options: DAY_HOURS.map((h, idx) => {
           return {
@@ -61,7 +61,7 @@ export const everyDayTrigger = createTrigger({
       defaultValue: 'UTC',
     }),
     run_on_weekends: Property.Checkbox({
-      displayName: 'Run on weekends (Sat,Sun)',
+      displayName: 'Run on Weekends (sat,sun)',
       required: true,
       defaultValue: false,
     }),

@@ -29,7 +29,7 @@ export const dateDifferenceAction = createAction({
       required: true,
     }),
     startDateFormat: Property.StaticDropdown({
-      displayName: 'Starting date format',
+      displayName: 'Starting Date Format',
       description: timeFormatDescription,
       options: {
         options: optionalTimeFormats,
@@ -43,7 +43,7 @@ export const dateDifferenceAction = createAction({
       required: true,
     }),
     endDateFormat: Property.StaticDropdown({
-      displayName: 'Ending date format',
+      displayName: 'Ending Date Format',
       description: timeFormatDescription,
       options: {
         options: optionalTimeFormats,

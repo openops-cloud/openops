@@ -2,8 +2,8 @@ import { Property } from '@openops/blocks-framework';
 
 export function categoryProperty() {
   return Property.StaticMultiSelectDropdown({
-    displayName: 'Category id',
-    description: 'Get only recommendations from the selected category.',
+    displayName: 'Category Id',
+    description: 'Get only recommendations from the selected category',
     required: false,
     options: {
       disabled: false,

@@ -8,13 +8,13 @@ export const listIssueCommentsAction = createAction({
   auth: jiraCloudAuth,
   name: 'list_issue_comments',
   displayName: 'List Issue Comments',
-  description: 'Returns all comments for an issue.',
+  description: 'Returns all comments for an issue',
   isWriteAction: false,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),
     orderBy: Property.StaticDropdown({
-      displayName: 'Order By',
+      displayName: 'Order by',
       required: true,
       defaultValue: '-created',
       options: {

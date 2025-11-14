@@ -27,7 +27,7 @@ export const everyHourTrigger = createTrigger({
   sampleData: {},
   props: {
     run_on_weekends: Property.Checkbox({
-      displayName: 'Run on weekends (Sat,Sun)',
+      displayName: 'Run on Weekends (sat,sun)',
       required: true,
       defaultValue: false,
     }),

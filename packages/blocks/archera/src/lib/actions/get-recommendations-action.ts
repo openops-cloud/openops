@@ -11,7 +11,7 @@ export const getRecommendedPlan = createAction({
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',
-      description: 'The cloud provider to fetch recommendations for.',
+      description: 'The cloud provider to fetch recommendations for',
       required: true,
       options: {
         options: [

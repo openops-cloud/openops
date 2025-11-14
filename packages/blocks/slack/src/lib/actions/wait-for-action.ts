@@ -20,13 +20,13 @@ import {
 export const waitForAction = createAction({
   auth: slackAuth,
   name: 'wait_for_action',
-  displayName: 'Wait For User Action',
-  description: 'Wait for user action on the message.',
+  displayName: 'Wait for User Action',
+  description: 'Wait for user action on the message',
   isWriteAction: false,
   props: {
     message: Property.LongText({
       displayName: 'Message',
-      description: 'Slack message sent to the user.',
+      description: 'Slack message sent to the user',
       required: true,
     }),
 

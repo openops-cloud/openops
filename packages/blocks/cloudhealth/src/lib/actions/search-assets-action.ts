@@ -14,7 +14,7 @@ export const searchAssetsAction = createAction({
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',
-      description: 'The type of asset to fetch metadata for.',
+      description: 'The type of asset to fetch metadata for',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
@@ -61,11 +61,11 @@ export const searchAssetsAction = createAction({
         );
 
         properties['fields'] = Property.Array({
-          displayName: 'Fields to filter by',
+          displayName: 'Fields to Filter by',
           required: false,
           properties: {
             fieldName: Property.StaticDropdown<string>({
-              displayName: 'Field name',
+              displayName: 'Field Name',
               required: true,
               options: {
                 error: error,
@@ -77,7 +77,7 @@ export const searchAssetsAction = createAction({
               },
             }),
             value: Property.ShortText({
-              displayName: 'Value to search for',
+              displayName: 'Value to Search for',
               required: true,
             }),
           },

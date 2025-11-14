@@ -11,7 +11,7 @@ export const applyCommitmentPlanAction = createAction({
   props: {
     planId: Property.ShortText({
       displayName: 'Plan ID',
-      description: 'The UUID of the commitment plan to apply.',
+      description: 'The UUID of the commitment plan to apply',
       required: true,
     }),
   },

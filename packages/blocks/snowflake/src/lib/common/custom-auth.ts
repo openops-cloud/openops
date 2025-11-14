@@ -24,16 +24,16 @@ export const customAuth = BlockAuth.CustomAuth({
     account: Property.ShortText({
       displayName: 'Account',
       required: true,
-      description: 'A string indicating the Snowflake account identifier.',
+      description: 'A string indicating the Snowflake account identifier',
     }),
     username: Property.ShortText({
       displayName: 'Username',
       required: true,
-      description: 'The login name for your Snowflake user.',
+      description: 'The login name for your Snowflake user',
     }),
     password: Property.SecretText({
       displayName: 'Password',
-      description: 'Password for the user.',
+      description: 'Password for the user',
       required: true,
     }),
     maxLoginRetries: Property.Number({
@@ -50,13 +50,13 @@ export const customAuth = BlockAuth.CustomAuth({
     database: Property.ShortText({
       displayName: 'Database',
       description:
-        'The default database to use for the session after connecting.',
+        'The default database to use for the session after connecting',
       required: false,
     }),
     role: Property.ShortText({
       displayName: 'Role',
       description:
-        'The default security role to use for the session after connecting.',
+        'The default security role to use for the session after connecting',
       required: false,
     }),
     warehouse: Property.ShortText({

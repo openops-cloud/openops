@@ -21,13 +21,13 @@ export const mondayAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Monday',
   authProviderDisplayName: 'monday.com',
   authProviderLogoUrl: `https://static.openops.com/blocks/monday.png`,
-  displayName: 'API v2 Token',
+  displayName: 'Api V2 Token',
   description: markdown,
   required: true,
 });
 
 export const monday = createBlock({
-  displayName: 'monday.com',
+  displayName: 'Monday.com',
   description: 'Work operating system for businesses',
 
   minimumSupportedRelease: '0.5.0',

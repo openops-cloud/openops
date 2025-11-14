@@ -7,7 +7,7 @@ import { CasesFilter, getCases } from '../common/cases-api';
 export const getCostAlertsAction = createAction({
   name: 'get_cost_alerts',
   displayName: 'Get Anomalies',
-  description: 'Get Anomalies',
+  description: 'Retrieve cost anomalies and alerts from Ternary',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {
@@ -26,7 +26,7 @@ export const getCostAlertsAction = createAction({
       },
     }),
     casesFilter: Property.StaticDropdown({
-      displayName: 'Case status',
+      displayName: 'Case Status',
       description: 'Whether to include alerts that have related cases',
       required: true,
       options: {

@@ -12,7 +12,7 @@ https://docs.ternary.app/reference/using-the-api`,
   required: true,
   props: {
     apiKey: Property.SecretText({
-      displayName: 'API key',
+      displayName: 'Api Key',
       defaultValue: '',
       required: true,
     }),

@@ -6,13 +6,12 @@ import { getVariableUpdatesProperty } from './variable-updates-property';
 export const modifyVariablesFile = createAction({
   auth: BlockAuth.None(),
   name: 'update_terraform_variables_file',
-  displayName: 'Update variables file',
-  description:
-    'Updates variables of a given Terraform variables file (tfvars).',
+  displayName: 'Update Variables File',
+  description: 'Updates variables of a given Terraform variables file (tfvars)',
   isWriteAction: true,
   props: {
     fileContent: Property.LongText({
-      displayName: 'Terraform variables file (tfvars)',
+      displayName: 'Terraform Variables File (tfvars)',
       required: true,
     }),
 

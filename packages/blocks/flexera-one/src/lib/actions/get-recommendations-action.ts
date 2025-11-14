@@ -6,13 +6,13 @@ import { getActiveRecommendations } from '../common/recommendations-api';
 export const getActiveRecommendationsAction = createAction({
   auth: flexeraAuth,
   name: 'flexera_get_active_recommendations',
-  description: 'Get Active Recommendations',
+  description: 'Retrieve current active recommendations from Flexera policies',
   displayName: 'Get Active Recommendations',
   isWriteAction: false,
   props: {
     policySet: Property.Dropdown({
       displayName: 'Policy Set',
-      description: 'The policy set to use for getting recommendations.',
+      description: 'The policy set to use for getting recommendations',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }) => {
@@ -44,7 +44,7 @@ export const getActiveRecommendationsAction = createAction({
     }),
     provider: Property.StaticDropdown({
       displayName: 'Filter by Provider',
-      description: 'Filter recommendations by cloud provider.',
+      description: 'Filter recommendations by cloud provider',
       required: false,
       options: {
         options: [

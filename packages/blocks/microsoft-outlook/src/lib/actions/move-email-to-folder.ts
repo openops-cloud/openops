@@ -7,17 +7,17 @@ export const moveEmailToFolderAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'moveEmailToFolder',
   displayName: 'Move Email to Folder',
-  description: 'Moves an email message to a specific folder.',
+  description: 'Moves an email message to a specific folder',
   isWriteAction: true,
   props: {
     messageId: messageIdDropdown({
       displayName: 'Email',
-      description: 'Select the email message to move.',
+      description: 'Select the email message to move',
       required: true,
     }),
     destinationFolderId: mailFolderIdDropdown({
       displayName: 'Destination Folder',
-      description: 'The folder to move the email to.',
+      description: 'The folder to move the email to',
       required: true,
     }),
   },

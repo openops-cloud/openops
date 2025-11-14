@@ -13,12 +13,12 @@ import { TABLE_NAME } from './constants';
 export const getRequestsAction = createAction({
   auth: servicenowAuth,
   name: 'get_requests',
-  description: 'Retrieve request items from ServiceNow with optional filters.',
+  description: 'Retrieve request items from ServiceNow with optional filters',
   displayName: 'Get Requests',
   isWriteAction: false,
   props: {
     filterType: Property.StaticDropdown({
-      displayName: 'Filter type',
+      displayName: 'Filter Type',
       required: false,
       options: {
         options: [

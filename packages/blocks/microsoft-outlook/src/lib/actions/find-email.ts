@@ -10,7 +10,7 @@ export const findEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'findEmail',
   displayName: 'Find Email',
-  description: 'Searches for emails using full-text search.',
+  description: 'Searches for emails using full-text search',
   isWriteAction: false,
   props: {
     searchQuery: Property.ShortText({
@@ -27,7 +27,7 @@ export const findEmailAction = createAction({
     }),
     top: Property.Number({
       displayName: 'Max Results',
-      description: 'Maximum number of results to return (1-1000).',
+      description: 'Maximum number of results to return (1-1000)',
       required: false,
       defaultValue: 25,
     }),

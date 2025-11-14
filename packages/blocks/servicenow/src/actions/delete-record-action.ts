@@ -6,14 +6,14 @@ import { runDeleteRecordAction } from './action-runners';
 export const deleteRecordAction = createAction({
   auth: servicenowAuth,
   name: 'delete_record',
-  description: 'Delete a record from a ServiceNow table.',
+  description: 'Delete a record from a ServiceNow table',
   displayName: 'Delete Record',
   isWriteAction: true,
   props: {
     tableName: servicenowTableDropdownProperty(),
     sysId: Property.ShortText({
       displayName: 'System ID',
-      description: 'The sys_id of the record to delete.',
+      description: 'The sys_id of the record to delete',
       required: true,
     }),
   },

@@ -28,7 +28,7 @@ export const zendeskAuth = BlockAuth.CustomAuth({
       required: true,
     }),
     subdomain: Property.ShortText({
-      displayName: 'Organization (e.g mycompany)',
+      displayName: 'Organization (e.g Mycompany)',
       description: 'The subdomain of your Zendesk instance',
       required: true,
     }),

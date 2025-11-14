@@ -7,7 +7,7 @@ import { sendTernaryRequest } from '../common/send-ternary-request';
 export const getBudgets = createAction({
   name: 'get_budgets',
   displayName: 'Get Budgets',
-  description: 'Get Budgets',
+  description: 'Retrieve budget information from Ternary',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {},

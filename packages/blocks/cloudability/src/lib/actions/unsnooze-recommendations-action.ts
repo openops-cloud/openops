@@ -9,7 +9,7 @@ import { unsnoozeRecommendations, Vendor } from '../common/recommendations-api';
 export const unsnoozeRecommendationAction = createAction({
   name: `cloudability_unsnooze_recommendations`,
   displayName: `Unsnooze Recommendations`,
-  description: `Unsnooze Recommendations`,
+  description: `Re-enable previously snoozed recommendations`,
   auth: cloudabilityAuth,
   isWriteAction: true,
   props: {
@@ -17,12 +17,12 @@ export const unsnoozeRecommendationAction = createAction({
     ...getRecommendationTypesProperty(),
     accountId: Property.ShortText({
       displayName: 'Account ID',
-      description: 'The ID of the account to which the recommendation belongs.',
+      description: 'The ID of the account to which the recommendation belongs',
       required: true,
     }),
     resourceIds: Property.Array({
       displayName: 'Resource IDs',
-      description: 'The IDs of the resources to unsnooze recommendations for.',
+      description: 'The IDs of the resources to unsnooze recommendations for',
       required: true,
     }),
   },

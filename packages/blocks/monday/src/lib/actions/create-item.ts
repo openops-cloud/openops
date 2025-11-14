@@ -14,7 +14,7 @@ export const createItemAction = createAction({
   auth: mondayAuth,
   name: 'monday_create_item',
   displayName: 'Create Item',
-  description: 'Creates a new item inside a board.',
+  description: 'Creates a new item inside a board',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
@@ -22,12 +22,12 @@ export const createItemAction = createAction({
     group_id: mondayCommon.group_id(false),
     item_name: Property.ShortText({
       displayName: 'Item Name',
-      description: 'Item Name',
+      description: 'Name of the item to create',
       required: true,
     }),
     column_values: mondayCommon.columnValues,
     create_labels_if_missing: Property.Checkbox({
-      displayName: 'Create Labels if Missing',
+      displayName: 'Create Labels If Missing',
       description:
         'Creates status/dropdown labels if they are missing. This requires permission to change the board structure.',
       defaultValue: false,

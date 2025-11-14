@@ -8,7 +8,7 @@ export const sendEmail = createAction({
   auth: smtpAuth,
   name: 'send-email',
   displayName: 'Send Email',
-  description: 'Send an email using a custom SMTP server.',
+  description: 'Send an email using a custom SMTP server',
   isWriteAction: true,
   props: {
     from: Property.ShortText({
@@ -28,7 +28,7 @@ export const sendEmail = createAction({
       required: false,
     }),
     replyTo: Property.ShortText({
-      displayName: 'Reply To',
+      displayName: 'Reply to',
       required: false,
     }),
     bcc: Property.Array({

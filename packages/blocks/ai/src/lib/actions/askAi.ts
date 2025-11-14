@@ -64,7 +64,7 @@ export const askAi = createAction({
       required: true,
     }),
     additionalInput: Property.Array({
-      displayName: 'Additional input',
+      displayName: 'Additional Input',
       description: 'Array of inputs to use for analysis or transformation',
       required: false,
     }),

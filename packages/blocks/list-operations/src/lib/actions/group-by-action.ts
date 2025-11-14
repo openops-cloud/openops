@@ -5,7 +5,7 @@ export const groupByAction = createAction({
   auth: BlockAuth.None(),
   name: 'group_by_action',
   description: 'Group items by a given key',
-  displayName: 'Group By',
+  displayName: 'Group by',
   isWriteAction: false,
   props: {
     listItems: Property.LongText({
