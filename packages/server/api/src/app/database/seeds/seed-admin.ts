@@ -1,12 +1,6 @@
 import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import {
-  assertValidEmail,
-  assertValidPassword,
-  OrganizationRole,
-  Provider,
-  User,
-} from '@openops/shared';
+import { OrganizationRole, Provider, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
 import { organizationService } from '../../organization/organization.service';
@@ -175,9 +169,6 @@ async function upsertAdminEmail(user: User, email: string): Promise<void> {
 }
 
 function createAdminUser(email: string, password: string): Promise<User> {
-  assertValidEmail(email);
-  assertValidPassword(password);
-
   return userService.create({
     email,
     password,
