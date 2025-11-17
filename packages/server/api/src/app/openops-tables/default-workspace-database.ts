@@ -79,7 +79,7 @@ async function getDatabaseToken(
   let tablesToken = '';
   if (databaseTokens.length > 1) {
     throw new Error(
-      'The user has multiple databases created in OpenOps Tables.',
+      'The user has multiple database tokens created in OpenOps Tables.',
     );
   } else if (databaseTokens.length === 1) {
     tablesToken = databaseTokens[0].key;
