@@ -5,12 +5,15 @@ export const OPENOPS_DEFAULT_WORKSPACE_NAME = 'OpenOps Workspace';
 
 export async function createDefaultWorkspaceAndDatabase(
   token: string,
-): Promise<{ workspaceId: number; databaseId: number }> {
+): Promise<{ workspaceId: number; databaseId: number; databaseToken: string }> {
   const workspaceId = await getWorkspaceId(token);
 
   const databaseId = await getDatabaseId(workspaceId, token);
 
+  const databaseToken = await getDatabaseToken(workspaceId, token);
+
   return {
+    databaseToken,
     workspaceId,
     databaseId,
   };
@@ -62,4 +65,32 @@ async function getDatabaseId(
   }
 
   return databaseId;
+}
+
+async function getDatabaseToken(
+  workspaceId: number,
+  token: string,
+): Promise<string> {
+  const databaseTokens = await openopsTables.listDatabaseTokens(
+    workspaceId,
+    token,
+  );
+
+  let tablesToken = '';
+  if (databaseTokens.length > 1) {
+    throw new Error(
+      'The user has multiple databases created in OpenOps Tables.',
+    );
+  } else if (databaseTokens.length === 1) {
+    tablesToken = databaseTokens[0].key;
+  } else {
+    const newToken = await openopsTables.createDatabaseToken(
+      workspaceId,
+      token,
+    );
+
+    tablesToken = newToken.key;
+  }
+
+  return tablesToken;
 }

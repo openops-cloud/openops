@@ -1,4 +1,4 @@
-import { rejectedPromiseHandler } from '@openops/server-shared';
+import { encryptUtils, rejectedPromiseHandler } from '@openops/server-shared';
 import {
   ApplicationError,
   assertNotNullOrUndefined,
@@ -6,7 +6,6 @@ import {
   isNil,
   openOpsId,
   OpenOpsId,
-  OrganizationRole,
   Project,
   ProjectId,
   spreadIfDefined,
@@ -22,11 +21,17 @@ export const projectRepo = repoFactory(ProjectEntity);
 
 export const projectService = {
   async create(params: CreateParams): Promise<Project> {
+    const encryptTablesToken = encryptUtils.encryptString(
+      params.tablesDatabaseToken,
+    );
     const newProject: NewProject = {
       id: openOpsId(),
       ...params,
+      tablesDatabaseToken: encryptTablesToken,
     };
+
     const savedProject = await projectRepo().save(newProject);
+
     rejectedPromiseHandler(projectHooks.getHooks().postCreate(savedProject));
     return savedProject;
   },
@@ -159,6 +164,7 @@ type CreateParams = {
   externalId?: string;
   tablesDatabaseId: number;
   tablesWorkspaceId: number;
+  tablesDatabaseToken: string;
 };
 
 type AddProjectToOrganizationParams = {
