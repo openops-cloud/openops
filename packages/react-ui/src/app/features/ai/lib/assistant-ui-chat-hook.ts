@@ -232,6 +232,10 @@ export const useAssistantChat = ({
       toast(errorToast);
     },
     onFinish: async () => {
+      if (chatMode !== ChatMode.Agent) {
+        return;
+      }
+
       if (!chatId || hasAttemptedNameGenerationRef.current[chatId]) {
         return;
       }
