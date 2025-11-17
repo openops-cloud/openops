@@ -13,7 +13,7 @@ import { applyTemplateUpdate } from '../apply-template-update';
 export const updateStack = createAction({
   auth: amazonAuth,
   name: 'apply_template',
-  displayName: 'Apply Cloudformation Template',
+  displayName: 'Apply CloudFormation Template',
   description: 'Update the CloudFormation template that matches the given ARN',
   riskLevel: RiskLevel.HIGH,
   isWriteAction: true,
@@ -24,7 +24,7 @@ export const updateStack = createAction({
       required: true,
     }),
     template: Property.LongText({
-      displayName: 'Updated Cloudformation Template',
+      displayName: 'Updated CloudFormation Template',
       description: 'CloudFormation template with the new changes to be applied',
       required: true,
     }),

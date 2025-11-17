@@ -11,7 +11,7 @@ export const deleteResourceFromTemplate = createAction({
   isWriteAction: true,
   props: {
     template: Property.LongText({
-      displayName: 'Cloudformation Template',
+      displayName: 'CloudFormation Template',
       required: true,
     }),
 

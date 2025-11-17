@@ -18,19 +18,19 @@ export function virtualTagsProperty() {
 
         return {
           uuid: Property.LongText({
-            displayName: '(virtual Tag) Uuid',
+            displayName: '(Virtual Tag) UUID',
             description: 'UUID of the virtual tag to filter by',
             required: true,
           }),
 
           eq: Property.Array({
-            displayName: '(virtual Tag) Equal Values',
+            displayName: '(Virtual Tag) Equal Values',
             description: 'List of values ​​to be checked for equality',
             required: false,
           }),
 
           like: Property.Array({
-            displayName: '(virtual Tag) Like Values',
+            displayName: '(Virtual Tag) Like Values',
             description: 'List of values ​​​​to check if they are like',
             required: false,
           }),

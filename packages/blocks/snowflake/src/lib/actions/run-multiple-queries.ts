@@ -11,7 +11,7 @@ type QueryResults = { query: string; result: QueryResult }[];
 
 const props = {
   sqlTexts: Property.Array({
-    displayName: 'Sql Queries',
+    displayName: 'SQL Queries',
     description:
       'Array of SQL queries to execute in order, in the same transaction. Use :1, :2… placeholders to use binding parameters. ' +
       'Avoid using "?" to avoid unexpected behaviors when having multiple queries.',

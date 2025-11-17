@@ -139,7 +139,7 @@ function getPropertyWithAttributeName(attributeName: string) {
     }
     case 'EnaSupport': {
       return Property.Checkbox({
-        displayName: 'Enable Ena Support',
+        displayName: 'Enable ENA Support',
         description:
           'Set to true to enable enhanced networking with ENA for the instance',
         required: true,

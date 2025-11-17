@@ -28,7 +28,7 @@ export const sendEmail = createAction({
       required: false,
     }),
     replyTo: Property.ShortText({
-      displayName: 'Reply to',
+      displayName: 'Reply To',
       required: false,
     }),
     bcc: Property.Array({

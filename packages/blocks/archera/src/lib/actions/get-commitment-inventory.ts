@@ -41,7 +41,7 @@ export const getCommitmentsInventoryAction = createAction({
       required: false,
     }),
     orderBy: Property.StaticDropdown({
-      displayName: 'Order by',
+      displayName: 'Order By',
       description: 'Field to order results by',
       required: false,
       options: {

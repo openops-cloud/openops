@@ -8,7 +8,7 @@ import { customAuth } from '../common/custom-auth';
 
 const props = {
   sqlText: Property.LongText({
-    displayName: 'Sql Query',
+    displayName: 'SQL Query',
     description: 'Use :1, :2… or ? placeholders to use binding parameters',
     required: true,
     supportsAI: true,
@@ -38,7 +38,7 @@ const props = {
 export const runQuery = createAction({
   name: 'runQuery',
   displayName: 'Run Query',
-  description: 'Execute a SQL query on Snowflake',
+  description: 'Execute an SQL query on Snowflake',
   auth: customAuth,
   isWriteAction: true,
   props,

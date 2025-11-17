@@ -23,7 +23,7 @@ export const cloudfixAuth = BlockAuth.CustomAuth({
     }),
     apiKey: Property.SecretText({
       required: true,
-      displayName: 'Api Token',
+      displayName: 'API Token',
       description: 'The API token to use to connect to CloudFix',
     }),
   },

@@ -14,7 +14,7 @@ export const listIssueCommentsAction = createAction({
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),
     orderBy: Property.StaticDropdown({
-      displayName: 'Order by',
+      displayName: 'Order By',
       required: true,
       defaultValue: '-created',
       options: {

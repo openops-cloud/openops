@@ -7,7 +7,7 @@ import { nopsAuth } from './lib/auth';
 import { BASE_NOPS_URL } from './lib/common/base-url';
 
 export const nops = createBlock({
-  displayName: 'Nops',
+  displayName: 'nOps',
   description: 'Multi-cloud cost optimization and FinOps platform',
   auth: nopsAuth,
   minimumSupportedRelease: '0.20.0',

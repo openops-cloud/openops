@@ -23,7 +23,7 @@ export const getRecommendationsAction = createAction({
     duration: Property.StaticDropdown({
       displayName: 'Look-Back Period',
       description:
-        'The look back period in days, used for calculating the recommendations',
+        'The look back period in days used for calculating the recommendations',
       required: true,
       defaultValue: Duration.TenDay,
       options: {

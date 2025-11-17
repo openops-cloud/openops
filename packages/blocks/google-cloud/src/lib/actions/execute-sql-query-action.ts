@@ -21,8 +21,8 @@ type SqlQueryParams =
 export const executeSqlQueryAction = createAction({
   auth: googleCloudAuth,
   name: 'google_execute_sql_query',
-  displayName: 'Run BigQuery SQL Query',
-  description: 'Run a SQL query on BigQuery and return the results',
+  displayName: 'Execute BigQuery SQL Query',
+  description: 'Run an SQL query on BigQuery and return the results',
   isWriteAction: true,
   props: {
     useHostSession: getUseHostSessionProperty(
@@ -31,7 +31,7 @@ export const executeSqlQueryAction = createAction({
     ),
     project: projectCliDropdown,
     sqlText: Property.LongText({
-      displayName: 'Sql Query',
+      displayName: 'SQL Query',
       required: true,
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',

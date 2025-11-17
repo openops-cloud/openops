@@ -8,7 +8,7 @@ export const stripHtmlContent = createAction({
   isWriteAction: false,
   props: {
     html: Property.LongText({
-      displayName: 'Html Content',
+      displayName: 'HTML Content',
       required: true,
     }),
   },

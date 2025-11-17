@@ -9,7 +9,7 @@ enum TimeUnit {
 }
 export const delayForAction = createAction({
   name: 'delayFor',
-  displayName: 'Delay for',
+  displayName: 'Delay For',
   description: 'Delays the execution of the next action for a given duration',
   errorHandlingOptions: {
     continueOnFailure: {

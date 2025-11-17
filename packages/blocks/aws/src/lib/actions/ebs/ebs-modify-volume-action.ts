@@ -65,7 +65,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeSize: Property.Number({
-            displayName: 'New Volume Size (gb)',
+            displayName: 'New Volume Size (GB)',
             required: false,
             validators: [Validators.minValue(1), Validators.maxValue(70369)], // max size is 64 TiB
           }),
@@ -73,7 +73,7 @@ export const ebsModifyVolumeAction = createAction({
       },
     }),
     changeVolumeIops: Property.Checkbox({
-      displayName: 'Change Volume Iops',
+      displayName: 'Change Volume IOPS',
       required: false,
     }),
     newVolumeIops: Property.DynamicProperties({
@@ -86,7 +86,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeIops: Property.Number({
-            displayName: 'New Volume Iops',
+            displayName: 'New Volume IOPS',
             required: false,
             validators: [Validators.minValue(100), Validators.maxValue(256000)],
           }),
@@ -107,7 +107,7 @@ export const ebsModifyVolumeAction = createAction({
         }
         return {
           newVolumeThroughput: Property.Number({
-            displayName: 'New Volume Throughput (mb/s)',
+            displayName: 'New Volume Throughput (MB/s)',
             required: false,
             validators: [Validators.minValue(128), Validators.maxValue(1000)],
           }),

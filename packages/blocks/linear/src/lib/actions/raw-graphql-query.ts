@@ -4,7 +4,7 @@ import { makeClient } from '../common/client';
 
 export const linearRawGraphqlQuery = createAction({
   name: 'rawGraphqlQuery',
-  displayName: 'Raw Graphql Query',
+  displayName: 'Raw GraphQL Query',
   description: 'Perform a raw GraphQL query',
   auth: linearAuth,
   isWriteAction: true,
