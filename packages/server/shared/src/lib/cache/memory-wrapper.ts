@@ -73,16 +73,12 @@ const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
   throw new Error('Not implemented');
 };
 
-const addToSet = async (
-  key: string,
-  member: string,
-  expireInSeconds: number = DEFAULT_EXPIRE_TIME / 1000,
-): Promise<void> => {
+const addToSet = async (key: string, member: string): Promise<void> => {
   const existing = (await getSerializedObject<string[]>(key)) ?? [];
   if (!existing.includes(member)) {
     existing.push(member);
   }
-  await setSerializedObject(key, existing, expireInSeconds);
+  await setSerializedObject(key, existing);
 };
 
 const removeFromSet = async (key: string, member: string): Promise<void> => {

@@ -59,17 +59,9 @@ async function setSerializedObject<T>(
   await setKey(key, JSON.stringify(obj), expireInSeconds);
 }
 
-const addToSet = async (
-  key: string,
-  member: string,
-  expireInSeconds?: number,
-): Promise<void> => {
+const addToSet = async (key: string, member: string): Promise<void> => {
   const redis = getRedisClient();
   await redis.sadd(key, member);
-
-  if (expireInSeconds && expireInSeconds > 0) {
-    await redis.expire(key, expireInSeconds);
-  }
 };
 
 const removeFromSet = async (key: string, member: string): Promise<void> => {

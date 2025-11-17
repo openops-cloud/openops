@@ -141,7 +141,7 @@ export const createChatContext = async (
     chatExpireTime,
   );
   const indexKey = userChatsIndexKey(userId, projectId);
-  await cacheWrapper.addToSet(indexKey, chatId, chatExpireTime);
+  await cacheWrapper.addToSet(indexKey, chatId);
 };
 
 export const getChatContext = async (
