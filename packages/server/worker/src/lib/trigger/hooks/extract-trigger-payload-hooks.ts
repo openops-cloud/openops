@@ -50,20 +50,12 @@ export async function extractPayloads(
       const errorMessage =
         result?.message ?? 'Failed to execute trigger due to unknown error';
 
-      handleFailureFlow(
-        flowVersion,
-        projectId,
-        engineToken,
-        false,
-        !simulate
-          ? {
-              reason: 'TRIGGER_HOOK_FAILED',
-              flowVersionId: flowVersion.id,
-              errorMessage,
-              triggerInput: result.input,
-            }
-          : undefined,
-      );
+      handleFailureFlow(flowVersion, projectId, engineToken, false, {
+        reason: 'TRIGGER_HOOK_FAILED',
+        flowVersionId: flowVersion.id,
+        errorMessage,
+        triggerInput: result.input,
+      });
       return [];
     }
   } catch (e) {
@@ -81,19 +73,11 @@ export async function extractPayloads(
         'Failed to execute trigger due to timeout',
       );
 
-      handleFailureFlow(
-        flowVersion,
-        projectId,
-        engineToken,
-        false,
-        !simulate
-          ? {
-              reason: 'TRIGGER_TIMEOUT',
-              flowVersionId: flowVersion.id,
-              errorMessage: 'Trigger execution timed out',
-            }
-          : undefined,
-      );
+      handleFailureFlow(flowVersion, projectId, engineToken, false, {
+        reason: 'TRIGGER_TIMEOUT',
+        flowVersionId: flowVersion.id,
+        errorMessage: 'Trigger execution timed out',
+      });
       return [];
     }
     throw e;
