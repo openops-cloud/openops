@@ -43,25 +43,28 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
-      handleFailureFlow(flowVersion, projectId, engineToken, false);
-      if (!simulate) {
-        const triggerStepName = flowVersion.trigger.name;
-        const triggerStepId = flowVersion.trigger.id;
-        const triggerError = {
-          message:
-            result?.message ?? 'Trigger hook failed before runs were enqueued',
-        } as { message?: string };
-        rejectedPromiseHandler(
-          engineApiService(engineToken).recordTriggerFailure({
-            flowVersionId: flowVersion.id,
-            projectId,
-            reason: 'TRIGGER_HOOK_FAILED',
-            triggerStepName,
-            triggerStepId,
-            triggerError,
-          }),
-        );
-      }
+      const triggerStepName = flowVersion.trigger.name;
+      const triggerStepId = flowVersion.trigger.id;
+      const triggerError = {
+        message:
+          result?.message ?? 'Trigger hook failed before runs were enqueued',
+      } as { message?: string };
+
+      handleFailureFlow(
+        flowVersion,
+        projectId,
+        engineToken,
+        false,
+        !simulate
+          ? {
+              reason: 'TRIGGER_HOOK_FAILED',
+              flowVersionId: flowVersion.id,
+              triggerStepName,
+              triggerStepId,
+              triggerError,
+            }
+          : undefined,
+      );
       return [];
     }
   } catch (e) {
@@ -78,25 +81,28 @@ export async function extractPayloads(
         },
         'Failed to execute trigger due to timeout',
       );
-      handleFailureFlow(flowVersion, projectId, engineToken, false);
-      if (!simulate) {
-        const triggerStepName = flowVersion.trigger.name;
-        const triggerStepId = flowVersion.trigger.id;
-        const triggerError = {
-          message: 'Trigger execution timed out',
-          code: ErrorCode.EXECUTION_TIMEOUT,
-        } as { message?: string; code?: string };
-        rejectedPromiseHandler(
-          engineApiService(engineToken).recordTriggerFailure({
-            flowVersionId: flowVersion.id,
-            projectId,
-            reason: 'TRIGGER_TIMEOUT',
-            triggerStepName,
-            triggerStepId,
-            triggerError,
-          }),
-        );
-      }
+      const triggerStepName = flowVersion.trigger.name;
+      const triggerStepId = flowVersion.trigger.id;
+      const triggerError = {
+        message: 'Trigger execution timed out',
+        code: ErrorCode.EXECUTION_TIMEOUT,
+      } as { message?: string; code?: string };
+
+      handleFailureFlow(
+        flowVersion,
+        projectId,
+        engineToken,
+        false,
+        !simulate
+          ? {
+              reason: 'TRIGGER_TIMEOUT',
+              flowVersionId: flowVersion.id,
+              triggerStepName,
+              triggerStepId,
+              triggerError,
+            }
+          : undefined,
+      );
       return [];
     }
     throw e;
@@ -108,6 +114,13 @@ function handleFailureFlow(
   projectId: ProjectId,
   engineToken: string,
   success: boolean,
+  failureDetails?: {
+    reason?: string;
+    flowVersionId?: string;
+    triggerStepName?: string;
+    triggerStepId?: string;
+    triggerError?: { message?: string; code?: string; details?: unknown };
+  },
 ): void {
   const engineController = engineApiService(engineToken);
 
@@ -116,6 +129,10 @@ function handleFailureFlow(
       flowId: flowVersion.flowId,
       projectId,
       success,
+      ...(failureDetails ?? {}),
+      ...(failureDetails?.flowVersionId
+        ? { flowVersionId: failureDetails.flowVersionId }
+        : {}),
     }),
   );
 }
