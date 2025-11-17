@@ -141,13 +141,7 @@ export const createChatContext = async (
     chatExpireTime,
   );
   const indexKey = userChatsIndexKey(userId, projectId);
-  const existing =
-    (await cacheWrapper.getSerializedObject<string[]>(indexKey)) ?? [];
-
-  if (!existing.includes(chatId)) {
-    existing.push(chatId);
-    await cacheWrapper.setSerializedObject(indexKey, existing, chatExpireTime);
-  }
+  await cacheWrapper.addToSet(indexKey, chatId, chatExpireTime);
 };
 
 export const getChatContext = async (
@@ -189,8 +183,7 @@ export const getAllChats = async (
   projectId: string,
 ): Promise<{ chatId: string; chatName: string }[]> => {
   const indexKey = userChatsIndexKey(userId, projectId);
-  const chatIds =
-    (await cacheWrapper.getSerializedObject<string[]>(indexKey)) ?? [];
+  const chatIds = await cacheWrapper.getSetMembers(indexKey);
 
   if (chatIds.length === 0) {
     return [];
@@ -239,14 +232,12 @@ export const deleteChatHistory = async (
   projectId: string,
 ): Promise<void> => {
   const indexKey = userChatsIndexKey(userId, projectId);
-  const [chatIds] = await Promise.all([
-    cacheWrapper.getSerializedObject<string[]>(indexKey),
+  await Promise.all([
     cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatToolsKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId)),
+    cacheWrapper.removeFromSet(indexKey, chatId),
   ]);
-  const updatedIds = (chatIds ?? []).filter((id) => id !== chatId);
-  await cacheWrapper.setSerializedObject(indexKey, updatedIds);
 };
 
 /**
