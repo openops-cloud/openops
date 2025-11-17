@@ -67,7 +67,8 @@ export const requestActionMessageAction = createAction({
     }),
     timeoutInDays: Property.Number({
       displayName: 'Wait Timeout in Days',
-      description: 'Number of days to wait for an action',
+      description:
+        'Number of days to wait for user to take an action, after which the workflow will resume with no action taken',
       defaultValue: 3,
       required: true,
       validators: [Validators.minValue(1)],

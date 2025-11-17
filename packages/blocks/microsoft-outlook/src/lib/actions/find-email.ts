@@ -10,7 +10,7 @@ export const findEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'findEmail',
   displayName: 'Find Email',
-  description: 'Searches for emails using full-text search',
+  description: 'Search for emails using full-text search',
   isWriteAction: false,
   props: {
     searchQuery: Property.ShortText({

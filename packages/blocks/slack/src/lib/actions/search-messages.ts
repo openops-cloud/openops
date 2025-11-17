@@ -10,7 +10,7 @@ import { slackAuth } from '../common/authentication';
 export const searchMessages = createAction({
   name: 'searchMessages',
   displayName: 'Search Messages',
-  description: 'Searches for messages matching a query',
+  description: 'Search for messages matching a query',
   auth: slackAuth,
   isWriteAction: false,
   props: {
