@@ -21,7 +21,7 @@ export function getVerifiedUser(
   }
 
   try {
-    return jwt.verify(token, publicKey);
+    return jwt.verify(token, publicKey, { algorithms: ['RS256'] });
   } catch {
     return undefined;
   }
