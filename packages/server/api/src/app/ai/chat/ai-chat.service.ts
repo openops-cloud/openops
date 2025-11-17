@@ -58,6 +58,8 @@ export type MCPChatContext = {
   model?: string;
 };
 
+type ChatSummary = { chatId: string; chatName: string };
+
 export const generateChatId = (
   params: MCPChatContext & {
     userId: string;
@@ -193,21 +195,18 @@ export const getAllChats = async (
     chatIds.map((chatId) => getChatContext(chatId, userId, projectId)),
   );
 
-  const chats: { chatId: string; chatName: string }[] = [];
-
-  for (let i = 0; i < chatIds.length; i++) {
-    const context = contexts[i];
-    const chatId = chatIds[i];
-
-    if (context?.chatName) {
-      chats.push({
-        chatId,
-        chatName: context.chatName,
-      });
+  const chatsOrNull = chatIds.map((chatId, index): ChatSummary | null => {
+    const context = contexts[index];
+    if (!context?.chatName) {
+      return null;
     }
-  }
+    return {
+      chatId,
+      chatName: context.chatName,
+    };
+  });
 
-  return chats;
+  return chatsOrNull.filter((chat): chat is ChatSummary => chat !== null);
 };
 
 export const saveChatHistory = async (
