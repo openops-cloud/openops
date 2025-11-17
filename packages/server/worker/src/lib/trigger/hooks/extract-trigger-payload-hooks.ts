@@ -47,7 +47,7 @@ export async function extractPayloads(
       const triggerStepId = flowVersion.trigger.id;
       const triggerError = {
         message:
-          result?.message ?? 'Trigger hook failed before runs were enqueued',
+          result?.message ?? 'Failed to execute trigger due to unknown error',
       } as { message?: string };
 
       handleFailureFlow(
