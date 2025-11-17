@@ -1,5 +1,7 @@
 import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
 
+const TOKEN_NAME_PREFIX = 'Project_';
+
 export type DatabaseToken = {
   id: number;
   name: string;
@@ -13,26 +15,20 @@ export type DatabaseToken = {
   };
 };
 
-export type CreateDatabaseTokenParams = {
-  name: string;
-  workspaceId: number;
-  systemToken: string;
-};
-
 export async function createDatabaseToken(
-  params: CreateDatabaseTokenParams,
+  workspaceId: number,
+  token: string,
 ): Promise<DatabaseToken> {
   const payload = {
-    name: params.name,
-    workspace: params.workspaceId,
+    name: 'OpenOps Token',
+    workspace: workspaceId,
   };
 
-  const headers = createAxiosHeaders(params.systemToken);
-  const response = await makeOpenOpsTablesPost<DatabaseToken>(
+  const headers = createAxiosHeaders(token);
+
+  return makeOpenOpsTablesPost<DatabaseToken>(
     'api/database/tokens/',
     payload,
     headers,
   );
-
-  return response;
 }

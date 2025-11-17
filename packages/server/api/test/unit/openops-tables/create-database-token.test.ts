@@ -1,26 +1,29 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   makeOpenOpsTablesPost: jest.fn(),
+  createAxiosHeaders: jest.fn(),
 };
 jest.mock('@openops/common', () => openopsCommonMock);
 
 import { AxiosHeaders } from 'axios';
 import { createDatabaseToken } from '../../../src/app/openops-tables/create-database-token';
 
-describe('createDatabaseToken', () => {
+describe('createProjectDatabaseToken', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return the created token on successful creation', async () => {
-    const params = {
-      name: 'Test Token',
-      workspaceId: 1,
-      systemToken: 'test_system_token',
-    };
+    const token = 'test_system_token';
+    const workspaceId = 1;
+
+    const mockHeaders = new AxiosHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${token}`,
+    });
     const mockTokenResponse = {
       id: 1,
-      name: 'Test Token',
+      name: 'Project_test-project-123',
       workspace: 1,
       key: 'test_database_token_key',
       permissions: {
@@ -31,23 +34,23 @@ describe('createDatabaseToken', () => {
       },
     };
 
+    openopsCommonMock.createAxiosHeaders.mockReturnValue(mockHeaders);
     openopsCommonMock.makeOpenOpsTablesPost.mockResolvedValue(
       mockTokenResponse,
     );
 
-    const result = await createDatabaseToken(params);
+    const result = await createDatabaseToken(workspaceId, token);
 
     expect(result).toEqual(mockTokenResponse);
+    expect(openopsCommonMock.createAxiosHeaders).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.createAxiosHeaders).toHaveBeenCalledWith(token);
     expect(openopsCommonMock.makeOpenOpsTablesPost).toHaveBeenCalledWith(
       'api/database/tokens/',
       {
-        name: params.name,
-        workspace: params.workspaceId,
+        name: 'OpenOps Token',
+        workspace: workspaceId,
       },
-      new AxiosHeaders({
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${params.systemToken}`,
-      }),
+      mockHeaders,
     );
   });
 });
