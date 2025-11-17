@@ -138,11 +138,13 @@ export const flowRunService = {
     flowVersionId,
     errorMessage,
     reason,
+    triggerInput,
   }: {
     projectId: ProjectId;
     flowVersionId: FlowVersionId;
     errorMessage: string;
     reason: string;
+    triggerInput?: unknown;
   }): Promise<void> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
@@ -153,7 +155,7 @@ export const flowRunService = {
         [stepName]: {
           type: flowVersion.trigger.type,
           status: StepOutputStatus.FAILED,
-          input: {},
+          input: triggerInput,
           errorMessage,
         },
       } as Record<string, StepOutput>,

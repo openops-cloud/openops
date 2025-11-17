@@ -112,16 +112,15 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     if (success === false) {
-      const { flowVersionId, errorMessage, reason } = request.body as Extract<
-        UpdateFailureCountRequest,
-        { success: false }
-      >;
+      const { flowVersionId, errorMessage, reason, triggerInput } =
+        request.body as Extract<UpdateFailureCountRequest, { success: false }>;
 
       await flowRunService.recordTriggerFailure({
         projectId,
         flowVersionId,
         errorMessage,
         reason,
+        triggerInput,
       });
     }
   });

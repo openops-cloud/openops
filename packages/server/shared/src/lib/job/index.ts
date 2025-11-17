@@ -52,6 +52,7 @@ export const UpdateFailureCountRequest = Type.Union([
     flowVersionId: Type.String(),
     reason: Type.String(),
     errorMessage: Type.String(),
+    triggerInput: Type.Optional(Type.Unknown()),
   }),
 ]);
 

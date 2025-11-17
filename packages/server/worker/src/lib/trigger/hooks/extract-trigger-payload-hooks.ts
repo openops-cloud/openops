@@ -60,6 +60,7 @@ export async function extractPayloads(
               reason: 'TRIGGER_HOOK_FAILED',
               flowVersionId: flowVersion.id,
               errorMessage,
+              triggerInput: result.input,
             }
           : undefined,
       );
@@ -108,6 +109,7 @@ function handleFailureFlow(
     reason: string;
     flowVersionId: string;
     errorMessage: string;
+    triggerInput?: unknown;
   },
 ): void {
   const engineController = engineApiService(engineToken);
