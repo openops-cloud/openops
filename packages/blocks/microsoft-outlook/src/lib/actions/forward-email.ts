@@ -8,7 +8,7 @@ export const forwardEmailAction = createAction({
   auth: microsoftOutlookAuth,
   name: 'forwardEmail',
   displayName: 'Forward Email',
-  description: 'Forwards an email message',
+  description: 'Forward an email',
   isWriteAction: true,
   props: {
     messageId: messageIdDropdown({
