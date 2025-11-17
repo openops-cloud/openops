@@ -6,22 +6,20 @@ const openopsCommonMock = {
 jest.mock('@openops/common', () => openopsCommonMock);
 
 import { AxiosHeaders } from 'axios';
-import { createProjectDatabaseToken } from '../../../src/app/openops-tables/create-database-token';
+import { createDatabaseToken } from '../../../src/app/openops-tables/create-database-token';
 
-describe('createProjectDatabaseToken', () => {
+describe('createDatabaseToken', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return the created token on successful creation', async () => {
-    const params = {
-      token: 'test_system_token',
-      projectId: 'test-project-123',
-      workspaceId: 1,
-    };
+    const token = 'test_system_token';
+    const workspaceId = 1;
+
     const mockHeaders = new AxiosHeaders({
       'Content-Type': 'application/json',
-      Authorization: `JWT ${params.token}`,
+      Authorization: `JWT ${token}`,
     });
     const mockTokenResponse = {
       id: 1,
@@ -41,18 +39,16 @@ describe('createProjectDatabaseToken', () => {
       mockTokenResponse,
     );
 
-    const result = await createProjectDatabaseToken(params);
+    const result = await createDatabaseToken(workspaceId, token);
 
     expect(result).toEqual(mockTokenResponse);
     expect(openopsCommonMock.createAxiosHeaders).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.createAxiosHeaders).toHaveBeenCalledWith(
-      params.token,
-    );
+    expect(openopsCommonMock.createAxiosHeaders).toHaveBeenCalledWith(token);
     expect(openopsCommonMock.makeOpenOpsTablesPost).toHaveBeenCalledWith(
       'api/database/tokens/',
       {
-        name: 'Project_test-project-123',
-        workspace: params.workspaceId,
+        name: 'OpenOps Token',
+        workspace: workspaceId,
       },
       mockHeaders,
     );
