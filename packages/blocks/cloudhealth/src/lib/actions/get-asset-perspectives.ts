@@ -8,7 +8,7 @@ import { searchAssets } from '../common/search-assets';
 export const getAssetPerspectivesAction = createAction({
   name: 'cloudhealth_get_asset_perspectives',
   displayName: 'Get Asset Perspectives',
-  description: 'Retrieve perspectives for a specific asset',
+  description: 'Get perspectives for a specific asset',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {

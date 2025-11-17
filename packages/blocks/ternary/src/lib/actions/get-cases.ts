@@ -6,7 +6,7 @@ import { getCases } from '../common/cases-api';
 export const getCasesAction = createAction({
   name: 'get_cases',
   displayName: 'Get Cases',
-  description: 'Retrieve all cases from Ternary case management',
+  description: 'Get all cases from Ternary case management',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {},

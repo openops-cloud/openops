@@ -5,7 +5,7 @@ import { flexeraSpotAuth } from '../../auth';
 export const getClustersAction = createAction({
   auth: flexeraSpotAuth,
   name: 'flexera_get_clusters',
-  description: 'Retrieve clusters from Flexera Spot',
+  description: 'Get clusters from Flexera Spot',
   displayName: 'Get Clusters',
   isWriteAction: false,
   props: {

@@ -6,7 +6,7 @@ import { getActiveRecommendations } from '../common/recommendations-api';
 export const getActiveRecommendationsAction = createAction({
   auth: flexeraAuth,
   name: 'flexera_get_active_recommendations',
-  description: 'Retrieve current active recommendations from Flexera policies',
+  description: 'Get current active recommendations from Flexera policies',
   displayName: 'Get Active Recommendations',
   isWriteAction: false,
   props: {

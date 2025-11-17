@@ -14,7 +14,7 @@ import {
 export const getRecommendationsAction = createAction({
   name: `cloudability_get_recommendations`,
   displayName: `Get Recommendations`,
-  description: `Retrieve cost optimization recommendations from Cloudability`,
+  description: `Get cost optimization recommendations from Cloudability`,
   auth: cloudabilityAuth,
   isWriteAction: false,
   props: {

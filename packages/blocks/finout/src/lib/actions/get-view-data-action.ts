@@ -5,7 +5,7 @@ import { getView, getViews } from '../common/views';
 export const getViewDataAction = createAction({
   name: 'finout_get_view_data',
   displayName: 'Get View Data',
-  description: 'Retrieve view data',
+  description: 'Get view data',
   auth: finoutAuth,
   isWriteAction: false,
   props: {

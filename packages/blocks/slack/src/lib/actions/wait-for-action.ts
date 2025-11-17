@@ -21,7 +21,7 @@ export const waitForAction = createAction({
   auth: slackAuth,
   name: 'wait_for_action',
   displayName: 'Wait for User Action',
-  description: 'Wait for user action on the message',
+  description: 'Wait for a user to interact with the message',
   isWriteAction: false,
   props: {
     message: Property.LongText({

@@ -5,7 +5,7 @@ import { getAzureSubscriptions } from '../common/get-azure-subscriptions';
 export const getAzureSubscriptionsAction = createAction({
   name: 'cloudhealth_get_azure_subscriptions',
   displayName: 'Get Azure Subscriptions',
-  description: 'Retrieve a list of Azure subscriptions',
+  description: 'Get a list of Azure subscriptions',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {},

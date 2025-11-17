@@ -5,7 +5,7 @@ import { getAwsAccounts } from '../common/get-aws-accounts';
 export const getAwsAccountsAction = createAction({
   name: 'cloudhealth_get_aws_accounts',
   displayName: 'Get AWS Accounts',
-  description: 'Retrieve a list of AWS accounts',
+  description: 'Get a list of AWS accounts',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {},

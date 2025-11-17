@@ -5,7 +5,7 @@ import { getIncident } from '../common/governance-api';
 export const getIncidentAction = createAction({
   auth: flexeraAuth,
   name: 'flexera_get_incident',
-  description: 'Retrieve details of a specific incident from Flexera',
+  description: 'Get details of a specific incident from Flexera',
   displayName: 'Get Incident',
   isWriteAction: false,
   props: {

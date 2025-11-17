@@ -8,7 +8,7 @@ import { searchAssets } from '../common/search-assets';
 export const searchAssetsAction = createAction({
   name: 'cloudhealth_search_assets',
   displayName: 'Search Assets',
-  description: 'Retrieve assets that match specific criteria',
+  description: 'Get assets that match specific criteria',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {

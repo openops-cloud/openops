@@ -9,7 +9,7 @@ import {
 export const getRecommendationsAction = createAction({
   name: 'cloudhealth_get_recommendations',
   displayName: 'Get Recommendations',
-  description: 'Retrieve cost optimization recommendations from CloudHealth',
+  description: 'Get cost optimization recommendations from CloudHealth',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {

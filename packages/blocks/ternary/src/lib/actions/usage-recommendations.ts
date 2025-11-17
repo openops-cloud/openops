@@ -7,7 +7,7 @@ import { sendTernaryRequest } from '../common/send-ternary-request';
 export const getUsageRecommendations = createAction({
   name: 'get_usage_recommendations',
   displayName: 'Get Usage Recommendations',
-  description: 'Retrieve resource usage recommendations from Ternary',
+  description: 'Get resource usage recommendations from Ternary',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {},

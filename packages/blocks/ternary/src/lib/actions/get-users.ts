@@ -6,7 +6,7 @@ import { getUsersList } from '../common/users';
 export const getUsers = createAction({
   name: 'get_users',
   displayName: 'Get Users',
-  description: 'Retrieve user list from Ternary',
+  description: 'Get user list from Ternary',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {

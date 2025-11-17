@@ -7,7 +7,7 @@ import { sendTernaryRequest } from '../common/send-ternary-request';
 export const getDataIntegrations = createAction({
   name: 'get_data_integrations',
   displayName: 'Get Data Integrations',
-  description: 'Retrieve configured data integrations from Ternary',
+  description: 'Get configured data integrations from Ternary',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {},

@@ -14,7 +14,7 @@ export const getRecordAction = createAction({
     tableName: servicenowTableDropdownProperty(),
     sysId: Property.ShortText({
       displayName: 'System ID',
-      description: 'The sys_id of the record to retrieve',
+      description: 'The sys_id of the record to get',
       required: true,
     }),
     fields: servicenowFieldsDropdownProperty(),
