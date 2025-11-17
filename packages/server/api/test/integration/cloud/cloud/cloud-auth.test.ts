@@ -63,7 +63,9 @@ describe('getVerifiedUser', () => {
 
     const result = getVerifiedUser(mockRequest, publicKey);
 
-    expect(jwt.verify).toHaveBeenCalledWith('header-token', publicKey);
+    expect(jwt.verify).toHaveBeenCalledWith('header-token', publicKey, {
+      algorithms: ['RS256'],
+    });
     expect(result).toEqual(payload);
   });
 
@@ -77,7 +79,9 @@ describe('getVerifiedUser', () => {
 
     const result = getVerifiedUser(mockRequest, publicKey);
 
-    expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey);
+    expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey, {
+      algorithms: ['RS256'],
+    });
     expect(result).toEqual(payload);
   });
 
@@ -93,6 +97,8 @@ describe('getVerifiedUser', () => {
     const result = getVerifiedUser(mockRequest, publicKey);
 
     expect(result).toBeUndefined();
-    expect(jwt.verify).toHaveBeenCalledWith('bad-token', publicKey);
+    expect(jwt.verify).toHaveBeenCalledWith('bad-token', publicKey, {
+      algorithms: ['RS256'],
+    });
   });
 });

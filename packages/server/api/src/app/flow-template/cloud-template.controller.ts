@@ -51,7 +51,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     async (request) => {
       const user = getVerifiedUser(request, publicKey);
       if (!user) {
-        logger.info('User is not authenticated, returning sample templates');
         return flowTemplateService.getFlowTemplates({
           search: request.query.search,
           tags: request.query.tags,
@@ -67,7 +66,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         });
       }
 
-      logger.info('User is authenticated, returning all templates');
       return flowTemplateService.getFlowTemplates({
         search: request.query.search,
         tags: request.query.tags,
