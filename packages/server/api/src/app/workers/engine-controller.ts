@@ -122,63 +122,55 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     if (success === false) {
-      const { flowVersionId, triggerStepName, triggerError, reason } =
-        request.body as Extract<UpdateFailureCountRequest, { success: false }>;
+      const { flowVersionId, errorMessage, reason } = request.body as Extract<
+        UpdateFailureCountRequest,
+        { success: false }
+      >;
 
-      if (flowVersionId) {
-        const flowVersion = await flowVersionService.getOneOrThrow(
-          flowVersionId,
-        );
-        const flow = await flowService.getOneOrThrow({
-          id: flowVersion.flowId,
-          projectId,
-        });
+      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-        const stepName = triggerStepName ?? flowVersion.trigger.name;
-        const errorMessage =
-          triggerError?.message ?? 'Trigger failed before runs were enqueued';
+      const stepName = flowVersion.trigger.name;
 
-        const executionState: ExecutionState = {
-          steps: {
-            [stepName]: {
-              type: flowVersion.trigger.type,
-              status: StepOutputStatus.FAILED,
-              input: {},
-              errorMessage,
-            },
-          } as Record<string, StepOutput>,
-        };
+      const executionState: ExecutionState = {
+        steps: {
+          [stepName]: {
+            type: flowVersion.trigger.type,
+            status: StepOutputStatus.FAILED,
+            input: {},
+            errorMessage,
+          },
+        } as Record<string, StepOutput>,
+      };
 
-        const serializedLogs = await logSerializer.serialize({
-          executionState,
-        });
-        const logsFile = await fileService.save({
-          data: serializedLogs,
-          type: FileType.FLOW_RUN_LOG,
-          compression: FileCompression.GZIP,
-          projectId: flow.projectId,
-        });
+      const serializedLogs = await logSerializer.serialize({
+        executionState,
+      });
+      const logsFile = await fileService.save({
+        data: serializedLogs,
+        type: FileType.FLOW_RUN_LOG,
+        compression: FileCompression.GZIP,
+        projectId,
+      });
 
-        const failedRun = {
-          id: openOpsId(),
-          projectId: flow.projectId,
-          flowId: flow.id,
-          flowVersionId: flowVersion.id,
-          environment: RunEnvironment.PRODUCTION,
-          flowDisplayName: flowVersion.displayName,
-          startTime: new Date().toISOString(),
-          finishTime: new Date().toISOString(),
-          status: FlowRunStatus.FAILED,
-          triggerSource: FlowRunTriggerSource.TRIGGERED,
-          terminationReason: reason ?? 'TRIGGER_FAILED',
-          tasks: 0,
-          duration: 0,
-          tags: [],
-          logsFileId: logsFile.id,
-        };
+      const failedRun = {
+        id: openOpsId(),
+        projectId,
+        flowId: flowVersion.flowId,
+        flowVersionId: flowVersion.id,
+        environment: RunEnvironment.PRODUCTION,
+        flowDisplayName: flowVersion.displayName,
+        startTime: new Date().toISOString(),
+        finishTime: new Date().toISOString(),
+        status: FlowRunStatus.FAILED,
+        triggerSource: FlowRunTriggerSource.TRIGGERED,
+        terminationReason: reason,
+        tasks: 0,
+        duration: 0,
+        tags: [],
+        logsFileId: logsFile.id,
+      };
 
-        await flowRunRepo().save(failedRun);
-      }
+      await flowRunRepo().save(failedRun);
     }
   });
 

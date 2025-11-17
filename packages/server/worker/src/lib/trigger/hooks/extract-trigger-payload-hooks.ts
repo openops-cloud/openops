@@ -1,4 +1,8 @@
-import { logger, rejectedPromiseHandler } from '@openops/server-shared';
+import {
+  logger,
+  rejectedPromiseHandler,
+  UpdateFailureCountRequest,
+} from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -43,12 +47,8 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
-      const triggerStepName = flowVersion.trigger.name;
-      const triggerStepId = flowVersion.trigger.id;
-      const triggerError = {
-        message:
-          result?.message ?? 'Failed to execute trigger due to unknown error',
-      } as { message?: string };
+      const errorMessage =
+        result?.message ?? 'Failed to execute trigger due to unknown error';
 
       handleFailureFlow(
         flowVersion,
@@ -59,9 +59,7 @@ export async function extractPayloads(
           ? {
               reason: 'TRIGGER_HOOK_FAILED',
               flowVersionId: flowVersion.id,
-              triggerStepName,
-              triggerStepId,
-              triggerError,
+              errorMessage,
             }
           : undefined,
       );
@@ -81,12 +79,6 @@ export async function extractPayloads(
         },
         'Failed to execute trigger due to timeout',
       );
-      const triggerStepName = flowVersion.trigger.name;
-      const triggerStepId = flowVersion.trigger.id;
-      const triggerError = {
-        message: 'Trigger execution timed out',
-        code: ErrorCode.EXECUTION_TIMEOUT,
-      } as { message?: string; code?: string };
 
       handleFailureFlow(
         flowVersion,
@@ -97,9 +89,7 @@ export async function extractPayloads(
           ? {
               reason: 'TRIGGER_TIMEOUT',
               flowVersionId: flowVersion.id,
-              triggerStepName,
-              triggerStepId,
-              triggerError,
+              errorMessage: 'Trigger execution timed out',
             }
           : undefined,
       );
@@ -115,26 +105,24 @@ function handleFailureFlow(
   engineToken: string,
   success: boolean,
   failureDetails?: {
-    reason?: string;
-    flowVersionId?: string;
-    triggerStepName?: string;
-    triggerStepId?: string;
-    triggerError?: { message?: string; code?: string; details?: unknown };
+    reason: string;
+    flowVersionId: string;
+    errorMessage: string;
   },
 ): void {
   const engineController = engineApiService(engineToken);
 
-  rejectedPromiseHandler(
-    engineController.updateFailureCount({
-      flowId: flowVersion.flowId,
-      projectId,
-      success,
-      ...(failureDetails ?? {}),
-      ...(failureDetails?.flowVersionId
-        ? { flowVersionId: failureDetails.flowVersionId }
-        : {}),
-    }),
-  );
+  let request = {
+    flowId: flowVersion.flowId,
+    projectId,
+    success,
+  } as UpdateFailureCountRequest;
+
+  if (!success && failureDetails) {
+    request = { ...request, ...failureDetails };
+  }
+
+  rejectedPromiseHandler(engineController.updateFailureCount(request));
 }
 
 type ExecuteTrigger = {
