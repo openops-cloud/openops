@@ -15,7 +15,7 @@ export function setAuthCookiesAndReply(
   const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
   const cookieExpiryDate = new Date(date.exp * 1000);
 
-  return reply
+  let replyWithCookies = reply
     .setCookie('jwt_token', response.tablesRefreshToken, {
       domain: getOpenOpsSubDomain(),
       path: '/',
@@ -29,8 +29,23 @@ export function setAuthCookiesAndReply(
       httpOnly: false,
       expires: cookieExpiryDate,
       sameSite: 'lax',
-    })
-    .send(response);
+    });
+
+  if (response.tablesWorkspaceId !== undefined) {
+    replyWithCookies = replyWithCookies.setCookie(
+      'baserow_group_id',
+      String(response.tablesWorkspaceId),
+      {
+        domain: getOpenOpsSubDomain(),
+        path: '/',
+        signed: true,
+        httpOnly: false,
+        expires: cookieExpiryDate,
+      },
+    );
+  }
+
+  return replyWithCookies.send(response);
 }
 
 export function removeAuthCookiesAndReply(reply: FastifyReply): FastifyReply {
@@ -40,6 +55,10 @@ export function removeAuthCookiesAndReply(reply: FastifyReply): FastifyReply {
       path: '/',
     })
     .clearCookie('token', {
+      path: '/',
+    })
+    .clearCookie('baserow_group_id', {
+      domain: getOpenOpsSubDomain(),
       path: '/',
     })
     .send('Cookies removed');
