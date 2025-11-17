@@ -1,6 +1,6 @@
 import { addUserToWorkspace } from './add-user-workspace';
 import { createDatabase } from './create-database';
-import { createProjectDatabaseToken } from './create-database-token';
+import { createDatabaseToken } from './create-database-token';
 import { createMcpEndpoint } from './create-mcp-endpoint';
 import { createTable } from './create-table';
 import { createUser } from './create-user';
@@ -17,7 +17,7 @@ export const openopsTables = {
   addUserToWorkspace,
   listDatabases,
   createDatabase,
-  createProjectDatabaseToken,
+  createDatabaseToken,
   createTable,
   listWorkspaces,
   createWorkspace,
