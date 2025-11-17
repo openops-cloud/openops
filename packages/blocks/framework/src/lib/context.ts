@@ -75,12 +75,12 @@ export type TriggerHookContext<
 > = S extends TriggerStrategy.APP_WEBHOOK
   ? AppWebhookTriggerHookContext<BlockAuth, TriggerProps>
   : S extends TriggerStrategy.POLLING
-  ? PollingTriggerHookContext<BlockAuth, TriggerProps>
-  : S extends TriggerStrategy.SCHEDULED
-  ? ScheduledTriggerHookContext<BlockAuth, TriggerProps>
-  : S extends TriggerStrategy.WEBHOOK
-  ? WebhookTriggerHookContext<BlockAuth, TriggerProps>
-  : never;
+    ? PollingTriggerHookContext<BlockAuth, TriggerProps>
+    : S extends TriggerStrategy.SCHEDULED
+      ? ScheduledTriggerHookContext<BlockAuth, TriggerProps>
+      : S extends TriggerStrategy.WEBHOOK
+        ? WebhookTriggerHookContext<BlockAuth, TriggerProps>
+        : never;
 
 export type TestOrRunHookContext<
   BlockAuth extends BlockAuthProperty,

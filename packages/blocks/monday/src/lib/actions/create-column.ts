@@ -7,7 +7,7 @@ export const createColumnAction = createAction({
   auth: mondayAuth,
   name: 'monday_create_column',
   displayName: 'Create Column',
-  description: 'Creates a new column in board',
+  description: 'Create a new column in a board',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),

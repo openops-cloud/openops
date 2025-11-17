@@ -122,11 +122,14 @@ function getAssetPerspectives(asset: any): Record<string, string> {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const perspectivesAsObject = perspectives.reduce((acc, item) => {
-    const [key, ...rest] = item.split(':');
-    acc[key.trim()] = rest.join(':').trim();
-    return acc;
-  }, {} as Record<string, string>);
+  const perspectivesAsObject = perspectives.reduce(
+    (acc, item) => {
+      const [key, ...rest] = item.split(':');
+      acc[key.trim()] = rest.join(':').trim();
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   return perspectivesAsObject;
 }

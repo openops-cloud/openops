@@ -142,7 +142,7 @@ export const httpSendRequestAction = createAction({
       },
     }),
     timeout: Property.Number({
-      displayName: 'Timeout(in Seconds)',
+      displayName: 'Timeout (in Seconds)',
       required: false,
     }),
     failsafe: Property.Checkbox({

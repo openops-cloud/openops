@@ -12,7 +12,7 @@ export const deleteIssueCommentAction = createAction({
   auth: jiraCloudAuth,
   name: 'delete_issue_comment',
   displayName: 'Delete Issue Comment',
-  description: 'Deletes a comment on a specific issue',
+  description: 'Delete a comment from a specific issue',
   isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),

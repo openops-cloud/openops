@@ -4,7 +4,7 @@ import { stripHtml } from 'string-strip-html';
 export const stripHtmlContent = createAction({
   name: 'stripHtml',
   displayName: 'Remove HTML Tags',
-  description: 'Removes every HTML tag and returns plain text',
+  description: 'Remove all HTML tags and return plain text',
   isWriteAction: false,
   props: {
     html: Property.LongText({

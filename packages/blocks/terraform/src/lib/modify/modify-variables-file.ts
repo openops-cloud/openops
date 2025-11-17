@@ -7,7 +7,7 @@ export const modifyVariablesFile = createAction({
   auth: BlockAuth.None(),
   name: 'update_terraform_variables_file',
   displayName: 'Update Variables File',
-  description: 'Updates variables of a given Terraform variables file (tfvars)',
+  description: 'Update variables in a Terraform variables file (tfvars)',
   isWriteAction: true,
   props: {
     fileContent: Property.LongText({

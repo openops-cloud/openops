@@ -41,26 +41,26 @@ export type TPropertyValue<
   defaultValue?: U extends PropertyType.ARRAY
     ? unknown[]
     : U extends PropertyType.JSON
-    ? object
-    : U extends PropertyType.CHECKBOX
-    ? boolean
-    : U extends PropertyType.LONG_TEXT
-    ? string
-    : U extends PropertyType.SHORT_TEXT
-    ? string
-    : U extends PropertyType.NUMBER
-    ? number
-    : U extends PropertyType.DROPDOWN
-    ? unknown
-    : U extends PropertyType.MULTI_SELECT_DROPDOWN
-    ? unknown[]
-    : U extends PropertyType.STATIC_MULTI_SELECT_DROPDOWN
-    ? unknown[]
-    : U extends PropertyType.STATIC_DROPDOWN
-    ? unknown
-    : U extends PropertyType.DATE_TIME
-    ? string
-    : U extends PropertyType.FILE
-    ? WorkflowFile
-    : unknown;
+      ? object
+      : U extends PropertyType.CHECKBOX
+        ? boolean
+        : U extends PropertyType.LONG_TEXT
+          ? string
+          : U extends PropertyType.SHORT_TEXT
+            ? string
+            : U extends PropertyType.NUMBER
+              ? number
+              : U extends PropertyType.DROPDOWN
+                ? unknown
+                : U extends PropertyType.MULTI_SELECT_DROPDOWN
+                  ? unknown[]
+                  : U extends PropertyType.STATIC_MULTI_SELECT_DROPDOWN
+                    ? unknown[]
+                    : U extends PropertyType.STATIC_DROPDOWN
+                      ? unknown
+                      : U extends PropertyType.DATE_TIME
+                        ? string
+                        : U extends PropertyType.FILE
+                          ? WorkflowFile
+                          : unknown;
 };

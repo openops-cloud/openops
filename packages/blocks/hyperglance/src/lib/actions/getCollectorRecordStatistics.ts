@@ -10,7 +10,7 @@ export const getCollectorRecordStatistics = createAction({
   auth: hyperglanceAuth,
   name: 'getCollectorRecordStatistics',
   displayName: 'Get Credential Statistics',
-  description: 'Returns Collection Statistics for the credential',
+  description: 'Get collection statistics for a cloud provider credential',
   props: {
     datasource: getDatasourceProp({
       description: 'Get credential of this cloud provider',

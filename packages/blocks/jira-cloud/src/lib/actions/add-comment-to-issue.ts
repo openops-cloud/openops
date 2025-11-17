@@ -8,7 +8,7 @@ export const addCommentToIssueAction = createAction({
   auth: jiraCloudAuth,
   name: 'add_issue_comment',
   displayName: 'Add Issue Comment',
-  description: 'Adds a comment to an issue',
+  description: 'Add a comment to an issue',
   isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),

@@ -7,7 +7,7 @@ export const getBoardItemValuesAction = createAction({
   auth: mondayAuth,
   name: 'monday_get_board_values',
   displayName: 'Get Board Values',
-  description: "Gets a list of board's items.",
+  description: 'Get a list of items from a board',
   isWriteAction: false,
   props: {
     workspace_id: mondayCommon.workspace_id(true),

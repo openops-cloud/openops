@@ -13,7 +13,7 @@ import {
 export const updateIssueAction = createAction({
   name: 'update_issue',
   displayName: 'Update Issue',
-  description: 'Updates a existing issue in a project',
+  description: 'Update an existing issue in a project',
   auth: jiraCloudAuth,
   isWriteAction: true,
   props: {

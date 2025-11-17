@@ -8,7 +8,7 @@ export const listIssueCommentsAction = createAction({
   auth: jiraCloudAuth,
   name: 'list_issue_comments',
   displayName: 'List Issue Comments',
-  description: 'Returns all comments for an issue',
+  description: 'Get all comments for an issue',
   isWriteAction: false,
   props: {
     projectId: getProjectIdDropdown(),

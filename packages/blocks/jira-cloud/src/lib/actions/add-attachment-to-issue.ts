@@ -9,7 +9,7 @@ export const addAttachmentToIssueAction = createAction({
   auth: jiraCloudAuth,
   name: 'add_issue_attachment',
   displayName: 'Add Attachment to Issue',
-  description: 'Adds an attachment to an issue',
+  description: 'Add an attachment to an issue',
   isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),

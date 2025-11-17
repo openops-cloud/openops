@@ -6,7 +6,7 @@ export const createUpdateAction = createAction({
   auth: mondayAuth,
   name: 'monday_create_update',
   displayName: 'Create Update',
-  description: 'Creates a new update',
+  description: 'Create a new update for an item',
   isWriteAction: true,
   props: {
     item_id: Property.ShortText({

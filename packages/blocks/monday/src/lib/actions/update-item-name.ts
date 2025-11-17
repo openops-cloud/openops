@@ -6,7 +6,7 @@ export const updateItemNameAction = createAction({
   auth: mondayAuth,
   name: 'monday_update_item_name',
   displayName: 'Update Item Name',
-  description: 'Updates an item name',
+  description: 'Update an item name',
   isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),

@@ -71,8 +71,8 @@ export interface InputPropertyMap {
 export type BlockPropValueSchema<T extends BlockProperty> = T extends undefined
   ? undefined
   : T extends { required: true }
-  ? T['valueSchema']
-  : T['valueSchema'] | undefined;
+    ? T['valueSchema']
+    : T['valueSchema'] | undefined;
 
 export type StaticPropsValue<T extends BlockPropertyMap> = {
   [P in keyof T]: BlockPropValueSchema<T[P]>;
