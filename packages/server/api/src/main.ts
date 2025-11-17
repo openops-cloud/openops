@@ -22,6 +22,12 @@ import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
+// ============================================================================
+// ONE-OFF: Create Additional Workspaces and Databases
+// TO REVERT: Remove the import and function call below
+// ============================================================================
+import { createAdditionalWorkspacesAndDatabases } from './app/database/seeds/create-additional-workspaces-databases-one-off';
+// ============================================================================
 import { jwtUtils } from './app/helper/jwt-utils';
 import { setupServer } from './app/server';
 import { telemetry } from './app/telemetry/telemetry';
@@ -98,6 +104,13 @@ const main = async (): Promise<void> => {
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
     await analytics.seedAnalytics();
+
+    // ============================================================================
+    // ONE-OFF: Create Additional Workspaces and Databases
+    // TO REVERT: Remove the function call below
+    // ============================================================================
+    await createAdditionalWorkspacesAndDatabases();
+    // ============================================================================
 
     initializeLock();
   }
