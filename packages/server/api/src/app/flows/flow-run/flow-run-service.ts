@@ -148,11 +148,9 @@ export const flowRunService = {
   }): Promise<void> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    const stepName = flowVersion.trigger.name;
-
     const executionState: ExecutionState = {
       steps: {
-        [stepName]: {
+        [flowVersion.trigger.name]: {
           type: flowVersion.trigger.type,
           status: StepOutputStatus.FAILED,
           input: triggerInput,
