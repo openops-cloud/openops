@@ -36,6 +36,8 @@ import { RenameIsWorkflowToIsInternal1756377588949 } from './migrations/17563775
 import { AddContentTypeToFolder1757331587268 } from './migrations/1757331587268-AddContentTypeToFolder';
 import { MigrateAiConfigToAppConnection1759242268873 } from './migrations/1759242268873-MigrateAiConfigToAppConnection';
 import { AddTestRunActionLimitsToFlowVersion1760429290001 } from './migrations/1760429290001-AddTestRunActionLimitsToFlowVersion';
+import { MoveTablesWorkspaceIdFromOrganizationToProject1760500000000 } from './migrations/1760500000000-MoveTablesWorkspaceIdFromOrganizationToProject';
+import { AddTablesTokenToProject1763131154284 } from './migrations/1763131154284-AddTablesTokenToProject';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -80,6 +82,8 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddContentTypeToFolder1757331587268,
     MigrateAiConfigToAppConnection1759242268873,
     AddTestRunActionLimitsToFlowVersion1760429290001,
+    MoveTablesWorkspaceIdFromOrganizationToProject1760500000000,
+    AddTablesTokenToProject1763131154284,
   ];
 };
 

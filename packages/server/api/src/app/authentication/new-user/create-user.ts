@@ -158,7 +158,7 @@ export async function createUserWithRandomPassword(
     const tablesRefreshToken = await createTablesUser(
       name,
       params.email,
-      randomPassword,
+      user.password,
     );
 
     return {
