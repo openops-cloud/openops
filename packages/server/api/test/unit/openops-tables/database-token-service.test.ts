@@ -5,8 +5,12 @@ const openopsCommonMock = {
 jest.mock('@openops/common', () => openopsCommonMock);
 
 const createDatabaseTokenMock = jest.fn();
-jest.mock('../../../src/app/openops-tables/create-database-token', () => {
-  return { createDatabaseToken: createDatabaseTokenMock };
+jest.mock('../../../src/app/openops-tables/index', () => {
+  return {
+    openopsTables: {
+      createDatabaseToken: createDatabaseTokenMock,
+    },
+  };
 });
 
 import { DatabaseToken } from '../../../src/app/openops-tables/create-database-token';
