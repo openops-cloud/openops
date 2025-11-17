@@ -2,7 +2,7 @@ import { logger } from '@openops/server-shared';
 import { Principal, WebsocketServerEvent } from '@openops/shared';
 import cookie from 'cookie';
 import { Socket } from 'socket.io';
-import { accessTokenManager } from '../authentication/lib/access-token-manager';
+import { accessTokenManager } from '../authentication/context/access-token-manager';
 
 export type WebsocketListener<T> = (
   socket: Socket,

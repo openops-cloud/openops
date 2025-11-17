@@ -1,8 +1,7 @@
 import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { OrganizationRole, User } from '@openops/shared';
-import { authenticationService } from '../../authentication/authentication-service';
-import { Provider } from '../../authentication/authentication-service/hooks/authentication-service-hooks';
+import { OrganizationRole, Provider, User } from '@openops/shared';
+import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
@@ -24,9 +23,9 @@ export const upsertAdminUser = async (): Promise<void> => {
     const { workspaceId, databaseId } =
       await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
 
-    await ensureOrganizationExists(user, workspaceId);
+    await ensureOrganizationExists(user);
 
-    await ensureProjectExists(user, databaseId);
+    await ensureProjectExists(user, databaseId, workspaceId);
   }
 };
 
@@ -98,10 +97,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   return { workspaceId, databaseId };
 }
 
-async function ensureOrganizationExists(
-  user: User,
-  tablesWorkspaceId: number,
-): Promise<void> {
+async function ensureOrganizationExists(user: User): Promise<void> {
   if (user.organizationId) {
     const existingOrganization = await organizationService.getOne(
       user.organizationId,
@@ -113,19 +109,12 @@ async function ensureOrganizationExists(
       );
     }
 
-    if (existingOrganization.tablesWorkspaceId !== tablesWorkspaceId) {
-      throw new Error(
-        'User organization exists but with different tablesWorkspaceId',
-      );
-    }
-
     return;
   }
 
   const organization = await organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
-    tablesWorkspaceId,
   });
 
   user.organizationId = organization.id;
@@ -134,12 +123,19 @@ async function ensureOrganizationExists(
 async function ensureProjectExists(
   user: User,
   databaseId: number,
+  workspaceId: number,
 ): Promise<void> {
   const project = await projectService.getOneForUser(user);
   if (project) {
     if (project.tablesDatabaseId !== databaseId) {
       throw new Error(
         'User project exists but with different tablesDatabaseId',
+      );
+    }
+
+    if (project.tablesWorkspaceId !== workspaceId) {
+      throw new Error(
+        'User project exists but with different tablesWorkspaceId',
       );
     }
 
@@ -151,6 +147,7 @@ async function ensureProjectExists(
     ownerId: user.id,
     organizationId: user.organizationId!,
     tablesDatabaseId: databaseId,
+    tablesWorkspaceId: workspaceId,
   });
 }
 

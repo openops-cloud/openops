@@ -10,6 +10,7 @@ export * from './lib/app-connection/dto/upsert-app-connection-request';
 export * from './lib/authentication/dto/authentication-response';
 export * from './lib/authentication/dto/sign-in-request';
 export * from './lib/authentication/dto/sign-up-request';
+export * from './lib/authentication/model/authentication-type';
 export * from './lib/authentication/model/principal';
 export * from './lib/authentication/model/principal-type';
 export * from './lib/blocks';

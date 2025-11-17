@@ -39,7 +39,7 @@ const meta = {
   decorators: [
     (Story) => (
       <TooltipProvider>
-        <div className="w-[300px] max-h-[400px] overflow-hidden py-2 flex">
+        <div className="w-[272px] h-[265px] overflow-hidden">
           <Story />
         </div>
       </TooltipProvider>

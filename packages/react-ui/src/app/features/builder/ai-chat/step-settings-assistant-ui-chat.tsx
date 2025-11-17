@@ -8,6 +8,7 @@ import {
 import { FlowVersion } from '@openops/shared';
 import { useCallback } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
+import { useNetworkStatusWithWarning } from '../../ai/lib/hooks/use-network-status-with-warning';
 import { useStepSettingsAssistantChat } from '../assistant-ui/hooks/use-step-settings-assistant-chat';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
@@ -36,8 +37,15 @@ const StepSettingsAssistantUiChat = ({
     state.applyMidpanelAction,
   ]);
 
-  const { runtime, createNewChat, onInject, chatId, provider, model } =
-    useStepSettingsAssistantChat(flowVersion, selectedStep);
+  const {
+    runtime,
+    createNewChat,
+    onInject,
+    chatId,
+    provider,
+    model,
+    chatStatus,
+  } = useStepSettingsAssistantChat(flowVersion, selectedStep);
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -70,6 +78,9 @@ const StepSettingsAssistantUiChat = ({
   const showFullWidth =
     showDataSelector && dataSelectorSize === DataSelectorSizeState.EXPANDED;
 
+  const { isShowingSlowWarning, connectionError } =
+    useNetworkStatusWithWarning(chatStatus);
+
   return (
     <StepSettingsAssistantUiChatContainer
       parentHeight={middlePanelSize.height}
@@ -94,6 +105,8 @@ const StepSettingsAssistantUiChat = ({
           aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
           dataSelectorSize === DataSelectorSizeState.DOCKED,
       })}
+      isShowingSlowWarning={isShowingSlowWarning}
+      connectionError={connectionError}
     ></StepSettingsAssistantUiChatContainer>
   );
 };

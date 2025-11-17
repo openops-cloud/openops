@@ -1,10 +1,9 @@
 const pauseMock = jest.fn();
 const slackUpdateMessageMock = jest.fn();
-jest.mock('../src/lib/common/utils', () => {
-  return {
-    slackUpdateMessage: slackUpdateMessageMock,
-  };
-});
+jest.mock('../src/lib/common/utils', () => ({
+  ...jest.requireActual('../src/lib/common/utils'),
+  slackUpdateMessage: slackUpdateMessageMock,
+}));
 
 import { StoreScope } from '@openops/blocks-framework';
 import { ExecutionType } from '@openops/shared';

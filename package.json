@@ -235,6 +235,7 @@
     "msgpackr": "1.11.5",
     "nanoid": "3.3.8",
     "node-cron": "3.0.3",
+    "node-emoji": "2.2.0",
     "nodemailer": "6.9.9",
     "npm": "10.8.2",
     "nx-cloud": "19.1.0",
