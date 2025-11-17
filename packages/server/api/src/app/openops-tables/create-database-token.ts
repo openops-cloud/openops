@@ -15,21 +15,16 @@ export type DatabaseToken = {
   };
 };
 
-export type CreateDatabaseTokenParams = {
-  token: string;
-  projectId: string;
-  workspaceId: number;
-};
-
-export async function createProjectDatabaseToken(
-  params: CreateDatabaseTokenParams,
+export async function createDatabaseToken(
+  workspaceId: number,
+  token: string,
 ): Promise<DatabaseToken> {
   const payload = {
-    name: `${TOKEN_NAME_PREFIX}${params.projectId}`,
-    workspace: params.workspaceId,
+    name: 'OpenOps Token',
+    workspace: workspaceId,
   };
 
-  const headers = createAxiosHeaders(params.token);
+  const headers = createAxiosHeaders(token);
 
   return makeOpenOpsTablesPost<DatabaseToken>(
     'api/database/tokens/',
