@@ -41,6 +41,7 @@ export function setAuthCookiesAndReply(
         signed: true,
         httpOnly: false,
         expires: cookieExpiryDate,
+        sameSite: 'lax',
       },
     );
   }
