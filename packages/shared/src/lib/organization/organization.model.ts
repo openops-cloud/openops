@@ -8,7 +8,6 @@ export const Organization = Type.Object({
   ...BaseModelSchema,
   ownerId: OpenOpsId,
   name: Type.String(),
-  tablesWorkspaceId: Type.Number(),
 });
 
 export type Organization = Static<typeof Organization>;
