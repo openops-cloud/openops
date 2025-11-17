@@ -18,35 +18,25 @@ import {
   EnvironmentType,
   ErrorCode,
   ExecutionState,
-  FileCompression,
-  FileType,
   FlowRunId,
   FlowRunResponse,
   FlowRunStatus,
-  FlowRunTriggerSource,
   GetFlowVersionForWorkerRequest,
   GetFlowVersionForWorkerRequestType,
   isFlowStateTerminal,
   isNil,
-  openOpsId,
   PopulatedFlow,
   PrincipalType,
   ProgressUpdateType,
   RemoveStableJobEngineRequest,
-  RunEnvironment,
   StepOutput,
-  StepOutputStatus,
   UpdateRunProgressRequest,
   WebsocketClientEvent,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../authentication/authorization';
 import { fileService } from '../file/file.service';
-import {
-  flowRunRepo,
-  flowRunService,
-} from '../flows/flow-run/flow-run-service';
-import { logSerializer } from '../flows/flow-run/log-serializer';
+import { flowRunService } from '../flows/flow-run/flow-run-service';
 import { flowVersionService } from '../flows/flow-version/flow-version.service';
 import { flowService } from '../flows/flow/flow.service';
 import { triggerHooks } from '../flows/trigger';
@@ -127,50 +117,12 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         { success: false }
       >;
 
-      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
-
-      const stepName = flowVersion.trigger.name;
-
-      const executionState: ExecutionState = {
-        steps: {
-          [stepName]: {
-            type: flowVersion.trigger.type,
-            status: StepOutputStatus.FAILED,
-            input: {},
-            errorMessage,
-          },
-        } as Record<string, StepOutput>,
-      };
-
-      const serializedLogs = await logSerializer.serialize({
-        executionState,
-      });
-      const logsFile = await fileService.save({
-        data: serializedLogs,
-        type: FileType.FLOW_RUN_LOG,
-        compression: FileCompression.GZIP,
+      await flowRunService.recordTriggerFailure({
         projectId,
+        flowVersionId,
+        errorMessage,
+        reason,
       });
-
-      const failedRun = {
-        id: openOpsId(),
-        projectId,
-        flowId: flowVersion.flowId,
-        flowVersionId: flowVersion.id,
-        environment: RunEnvironment.PRODUCTION,
-        flowDisplayName: flowVersion.displayName,
-        startTime: new Date().toISOString(),
-        finishTime: new Date().toISOString(),
-        status: FlowRunStatus.FAILED,
-        triggerSource: FlowRunTriggerSource.TRIGGERED,
-        terminationReason: reason,
-        tasks: 0,
-        duration: 0,
-        tags: [],
-        logsFileId: logsFile.id,
-      };
-
-      await flowRunRepo().save(failedRun);
     }
   });
 
