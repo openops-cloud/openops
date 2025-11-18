@@ -48,7 +48,7 @@ export async function extractPayloads(
         'Failed to execute trigger',
       );
       const errorMessage =
-        result?.message ?? 'Failed to execute trigger due to unknown error';
+        result?.message ?? 'Trigger execution failed due to an unknown issue.';
 
       handleFailureFlow(flowVersion, projectId, engineToken, false, {
         reason: 'TRIGGER_HOOK_FAILED',
