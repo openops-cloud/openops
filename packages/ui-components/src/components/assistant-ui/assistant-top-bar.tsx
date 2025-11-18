@@ -18,7 +18,7 @@ type AssistantTopBarProps = {
   chatId?: string | null;
 };
 
-const AI_ASSISTANT_DEFAULT_TITLE = 'AI Assistant';
+const AI_ASSISTANT_DEFAULT_TITLE = t('OpenOps Assistant');
 
 const AssistantTopBar = ({
   onNewChat,
