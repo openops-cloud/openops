@@ -159,15 +159,10 @@ export const flowRunService = {
       } as Record<string, StepOutput>,
     };
 
-    const serializedLogs = await logSerializer.serialize({
-      executionState,
-    });
-
-    const logsFile = await fileService.save({
-      data: serializedLogs,
-      type: FileType.FLOW_RUN_LOG,
-      compression: FileCompression.GZIP,
+    const logsFileId = await updateLogs({
+      logsFileId: null,
       projectId,
+      executionState,
     });
 
     const failedRun = {
@@ -185,7 +180,7 @@ export const flowRunService = {
       tasks: 0,
       duration: 0,
       tags: [],
-      logsFileId: logsFile.id,
+      logsFileId,
     };
 
     await flowRunRepo().save(failedRun);

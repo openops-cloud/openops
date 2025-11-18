@@ -98,15 +98,12 @@ function handleFailureFlow(
 ): void {
   const engineController = engineApiService(engineToken);
 
-  let request = {
+  const request = {
     flowId: flowVersion.flowId,
     projectId,
     success,
+    ...(!success && failureDetails ? failureDetails : {}),
   } as UpdateFailureCountRequest;
-
-  if (!success && failureDetails) {
-    request = { ...request, ...failureDetails };
-  }
 
   rejectedPromiseHandler(engineController.updateFailureCount(request));
 }
