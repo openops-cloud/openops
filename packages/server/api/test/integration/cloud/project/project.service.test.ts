@@ -40,6 +40,7 @@ describe('Project Service', () => {
       const result = await projectService.create({
         ...mockProject,
         tablesDatabaseId: 123,
+        tablesDatabaseToken: 'token',
       });
       const savedProject = await projectService.getOneOrThrow(result.id);
 
@@ -76,10 +77,12 @@ describe('Project Service', () => {
       await projectService.create({
         ...mockProject1,
         tablesDatabaseId: 123,
+        tablesDatabaseToken: 'token',
       });
       await projectService.create({
         ...mockProject2,
         tablesDatabaseId: 124,
+        tablesDatabaseToken: 'token',
       });
 
       const projectIds = await projectService.getProjectIdsByOrganizationId(
