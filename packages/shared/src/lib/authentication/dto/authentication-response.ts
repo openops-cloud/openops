@@ -8,5 +8,5 @@ export type AuthenticationResponse = UserWithoutPassword & {
   projectId: string;
   projectRole: ProjectMemberRole | null;
   tablesRefreshToken: string;
-  tablesWorkspaceId?: number;
+  tablesWorkspaceId: number;
 };
