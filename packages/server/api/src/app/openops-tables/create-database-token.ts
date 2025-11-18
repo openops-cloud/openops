@@ -1,19 +1,8 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
-
-const TOKEN_NAME_PREFIX = 'Project_';
-
-export type DatabaseToken = {
-  id: number;
-  name: string;
-  workspace: number;
-  key: string;
-  permissions: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
-};
+import {
+  createAxiosHeaders,
+  DatabaseToken,
+  makeOpenOpsTablesPost,
+} from '@openops/common';
 
 export async function createDatabaseToken(
   workspaceId: number,
