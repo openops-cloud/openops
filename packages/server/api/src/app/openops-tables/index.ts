@@ -8,6 +8,7 @@ import { createWorkspace } from './create-workspace';
 import { createDefaultWorkspaceAndDatabase } from './default-workspace-database';
 import { getMcpEndpointList } from './get-mcp-endpoint-list';
 import { getWorkspaceByName } from './get-workspace-by-name';
+import { listDatabaseTokens } from './list-database-tokens';
 import { listDatabases } from './list-databases';
 import { listWorkspaces } from './list-workspaces';
 import { renameDatabase } from './rename-database';
@@ -17,6 +18,7 @@ export const openopsTables = {
   addUserToWorkspace,
   listDatabases,
   createDatabase,
+  listDatabaseTokens,
   createDatabaseToken,
   createTable,
   listWorkspaces,

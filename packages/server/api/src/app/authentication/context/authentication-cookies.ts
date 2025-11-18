@@ -30,6 +30,14 @@ export function setAuthCookiesAndReply(
       expires: cookieExpiryDate,
       sameSite: 'lax',
     })
+    .setCookie('baserow_group_id', String(response.tablesWorkspaceId), {
+      domain: getOpenOpsSubDomain(),
+      path: '/',
+      signed: true,
+      httpOnly: false,
+      expires: cookieExpiryDate,
+      sameSite: 'lax',
+    })
     .send(response);
 }
 
@@ -40,6 +48,10 @@ export function removeAuthCookiesAndReply(reply: FastifyReply): FastifyReply {
       path: '/',
     })
     .clearCookie('token', {
+      path: '/',
+    })
+    .clearCookie('baserow_group_id', {
+      domain: getOpenOpsSubDomain(),
       path: '/',
     })
     .send('Cookies removed');
