@@ -1,3 +1,4 @@
+import { encryptUtils, QueueMode } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { projectService } from '../../../../src/app/project/project-service';
@@ -7,6 +8,7 @@ import {
 } from '../../../helpers/mocks';
 
 beforeAll(async () => {
+  await encryptUtils.loadEncryptionKey(QueueMode.MEMORY);
   await databaseConnection().initialize();
 });
 
