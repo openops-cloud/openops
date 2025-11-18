@@ -58,6 +58,7 @@ export const authenticationService = {
       projectId: projectContext.project.id,
       projectRole: projectContext.projectRole,
       tablesRefreshToken: projectContext.tablesRefreshToken,
+      tablesWorkspaceId: projectContext.project.tablesWorkspaceId,
     };
   },
 };
