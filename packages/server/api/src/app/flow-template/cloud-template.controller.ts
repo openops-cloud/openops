@@ -50,21 +50,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     },
     async (request) => {
       const user = getVerifiedUser(request, publicKey);
-      if (!user) {
-        return flowTemplateService.getFlowTemplates({
-          search: request.query.search,
-          tags: request.query.tags,
-          services: request.query.services,
-          domains: request.query.domains,
-          blocks: request.query.blocks,
-          projectId: request.principal.projectId,
-          organizationId: request.principal.organization.id,
-          cloudTemplates: true,
-          isSample: true,
-          version: request.query.version,
-          categories: request.query.categories,
-        });
-      }
 
       return flowTemplateService.getFlowTemplates({
         search: request.query.search,
@@ -75,6 +60,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         projectId: request.principal.projectId,
         organizationId: request.principal.organization.id,
         cloudTemplates: true,
+        isSample: !user,
         version: request.query.version,
         categories: request.query.categories,
       });
@@ -105,7 +91,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
           request.params.id,
         );
 
-        return template?.isSample ? template : reply.status(404).send();
+        return template?.isSample ? template : reply.status(403).send();
       }
 
       return flowTemplateService.getFlowTemplate(request.params.id);
