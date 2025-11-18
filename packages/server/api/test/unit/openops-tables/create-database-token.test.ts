@@ -8,7 +8,7 @@ jest.mock('@openops/common', () => openopsCommonMock);
 import { AxiosHeaders } from 'axios';
 import { createDatabaseToken } from '../../../src/app/openops-tables/create-database-token';
 
-describe('createProjectDatabaseToken', () => {
+describe('createDatabaseToken', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
