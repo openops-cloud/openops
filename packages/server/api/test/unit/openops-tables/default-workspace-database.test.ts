@@ -1,5 +1,3 @@
-import { createDatabaseToken } from '../../../src/app/openops-tables/create-database-token';
-
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   makeOpenOpsTablesPost: jest.fn(),
