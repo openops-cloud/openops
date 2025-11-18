@@ -58,6 +58,8 @@ export type MCPChatContext = {
   model?: string;
 };
 
+type ChatSummary = { chatId: string; chatName: string };
+
 export const generateChatId = (
   params: MCPChatContext & {
     userId: string;
@@ -122,6 +124,10 @@ export const updateChatName = async (
   await createChatContext(chatId, userId, projectId, updatedChatContext);
 };
 
+const userChatsIndexKey = (userId: string, projectId: string): string => {
+  return `${projectId}:${userId}:chats`;
+};
+
 export const createChatContext = async (
   chatId: string,
   userId: string,
@@ -136,6 +142,8 @@ export const createChatContext = async (
     context,
     chatExpireTime,
   );
+  const indexKey = userChatsIndexKey(userId, projectId);
+  await cacheWrapper.addToSet(indexKey, chatId);
 };
 
 export const getChatContext = async (
@@ -176,28 +184,27 @@ export const getAllChats = async (
   userId: string,
   projectId: string,
 ): Promise<{ chatId: string; chatName: string }[]> => {
-  const pattern = `${projectId}:${userId}:*:context`;
-  const keys = await cacheWrapper.scanKeys(pattern);
-  const chats: { chatId: string; chatName: string }[] = [];
+  const indexKey = userChatsIndexKey(userId, projectId);
+  const chatIds = await cacheWrapper.getSetMembers(indexKey);
 
-  for (const key of keys) {
-    const keyParts = key.split(':');
-    if (keyParts.length !== 4) {
-      continue;
-    }
-    const longChatId = keyParts[2];
-
-    const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
-
-    if (context?.chatName) {
-      chats.push({
-        chatId: longChatId,
-        chatName: context.chatName,
-      });
-    }
+  if (chatIds.length === 0) {
+    return [];
   }
 
-  return chats;
+  const chatsOrNull = await Promise.all(
+    chatIds.map(async (chatId): Promise<ChatSummary | null> => {
+      const context = await getChatContext(chatId, userId, projectId);
+      if (!context?.chatName) {
+        return null;
+      }
+      return {
+        chatId,
+        chatName: context.chatName,
+      };
+    }),
+  );
+
+  return chatsOrNull.filter((chat): chat is ChatSummary => chat !== null);
 };
 
 export const saveChatHistory = async (
@@ -221,10 +228,12 @@ export const deleteChatHistory = async (
   userId: string,
   projectId: string,
 ): Promise<void> => {
+  const indexKey = userChatsIndexKey(userId, projectId);
   await Promise.all([
     cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatToolsKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId)),
+    cacheWrapper.removeFromSet(indexKey, chatId),
   ]);
 };
 

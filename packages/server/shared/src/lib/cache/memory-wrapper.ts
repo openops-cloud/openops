@@ -73,6 +73,24 @@ const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
   throw new Error('Not implemented');
 };
 
+const addToSet = async (key: string, member: string): Promise<void> => {
+  const existing = (await getSerializedObject<string[]>(key)) ?? [];
+  if (!existing.includes(member)) {
+    existing.push(member);
+  }
+  await setSerializedObject(key, existing);
+};
+
+const removeFromSet = async (key: string, member: string): Promise<void> => {
+  const existing = (await getSerializedObject<string[]>(key)) ?? [];
+  const updated = existing.filter((id) => id !== member);
+  await setSerializedObject(key, updated);
+};
+
+const getSetMembers = async (key: string): Promise<string[]> => {
+  return (await getSerializedObject<string[]>(key)) ?? [];
+};
+
 export const memoryWrapper = {
   setKey,
   getKey,
@@ -84,4 +102,7 @@ export const memoryWrapper = {
   setSerializedObject,
   getSerializedObject,
   scanKeys,
+  addToSet,
+  removeFromSet,
+  getSetMembers,
 };

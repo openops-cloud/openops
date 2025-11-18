@@ -33,18 +33,14 @@ const CloudConnectionPage = () => {
     if (!flags || isLoading) {
       return;
     }
-    const { FRONTEGG_URL, FRONTEGG_CLIENT_ID, FRONTEGG_APP_ID } = flags;
+    const { FRONTEGG_URL } = flags;
 
-    if (!FRONTEGG_URL || !FRONTEGG_CLIENT_ID || !FRONTEGG_APP_ID) {
+    if (!FRONTEGG_URL) {
       navigate('/');
       return;
     }
 
-    const app = initializeFrontegg(
-      FRONTEGG_URL as string,
-      FRONTEGG_CLIENT_ID as string,
-      FRONTEGG_APP_ID as string,
-    );
+    const app = initializeFrontegg(FRONTEGG_URL as string);
 
     app.ready(() => {
       app.store.subscribe(() => {
