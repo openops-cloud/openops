@@ -30,6 +30,16 @@ jest.mock('../../../src/app/openops-tables/list-databases', () => {
   return { listDatabases: listDatabasesMock };
 });
 
+const listDatabaseTokensMock = jest.fn();
+jest.mock('../../../src/app/openops-tables/list-database-tokens', () => {
+  return { listDatabaseTokens: listDatabaseTokensMock };
+});
+
+const createDatabaseTokenMock = jest.fn();
+jest.mock('../../../src/app/openops-tables/create-database-token', () => {
+  return { createDatabaseToken: createDatabaseTokenMock };
+});
+
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
 import { createDefaultWorkspaceAndDatabase } from '../../../src/app/openops-tables/default-workspace-database';
 
@@ -43,9 +53,11 @@ describe('createAdminInOpenOpsTables', () => {
   it('should successfully create new table Opportunities', async () => {
     listDatabasesMock.mockResolvedValue([]);
     listWorkspacesMock.mockResolvedValue([]);
+    listDatabaseTokensMock.mockResolvedValue([]);
     createWorkspaceMock.mockResolvedValue({ id: 1 });
     createDbMock.mockResolvedValue({ id: 2 });
     createTableMock.mockResolvedValue({ id: 3 });
+    createDatabaseTokenMock.mockResolvedValue({ key: 'key' });
 
     await createDefaultWorkspaceAndDatabase(token);
 

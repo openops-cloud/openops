@@ -20,12 +20,12 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     const user = await ensureUserExists(email, password);
 
-    const { workspaceId, databaseId } =
+    const { workspaceId, databaseId, databaseToken } =
       await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
 
     await ensureOrganizationExists(user);
 
-    await ensureProjectExists(user, databaseId, workspaceId);
+    await ensureProjectExists(user, databaseId, workspaceId, databaseToken);
   }
 };
 
@@ -77,15 +77,16 @@ async function ensureUserExists(
 }
 
 async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
+  databaseToken: string;
   workspaceId: number;
   databaseId: number;
 }> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-  const { workspaceId, databaseId } =
+  const { workspaceId, databaseId, databaseToken } =
     await openopsTables.createDefaultWorkspaceAndDatabase(token);
 
-  if (!workspaceId || !databaseId) {
+  if (!workspaceId || !databaseId || !databaseToken) {
     throw new Error('Failed to create OpenOps Tables workspace or database');
   }
 
@@ -94,7 +95,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
     databaseId,
   });
 
-  return { workspaceId, databaseId };
+  return { workspaceId, databaseId, databaseToken };
 }
 
 async function ensureOrganizationExists(user: User): Promise<void> {
@@ -124,6 +125,7 @@ async function ensureProjectExists(
   user: User,
   databaseId: number,
   workspaceId: number,
+  databaseToken: string,
 ): Promise<void> {
   const project = await projectService.getOneForUser(user);
   if (project) {
@@ -148,6 +150,7 @@ async function ensureProjectExists(
     organizationId: user.organizationId!,
     tablesDatabaseId: databaseId,
     tablesWorkspaceId: workspaceId,
+    tablesDatabaseToken: databaseToken,
   });
 }
 

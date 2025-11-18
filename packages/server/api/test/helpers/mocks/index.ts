@@ -106,6 +106,10 @@ export const createMockProject = (project?: Partial<Project>): Project => {
     organizationId: project?.organizationId ?? openOpsId(),
     tablesDatabaseId: project?.tablesDatabaseId ?? faker.number.int(),
     tablesWorkspaceId: project?.tablesWorkspaceId ?? faker.number.int(),
+    tablesDatabaseToken: project?.tablesDatabaseToken ?? {
+      iv: faker.lorem.word(),
+      data: faker.lorem.word(),
+    },
   };
 };
 

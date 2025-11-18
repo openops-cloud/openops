@@ -9,6 +9,7 @@ import {
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
+  JSONB_COLUMN_TYPE,
   OpenOpsIdSchema,
   TIMESTAMP_COLUMN_TYPE,
 } from '../database/database-common';
@@ -44,6 +45,10 @@ export const ProjectEntity = new EntitySchema<ProjectSchema>({
     },
     tablesWorkspaceId: {
       type: Number,
+      nullable: false,
+    },
+    tablesDatabaseToken: {
+      type: JSONB_COLUMN_TYPE,
       nullable: false,
     },
   },

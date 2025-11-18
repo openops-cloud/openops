@@ -1,3 +1,4 @@
+import { encryptUtils, QueueMode } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { projectService } from '../../../../src/app/project/project-service';
@@ -7,6 +8,7 @@ import {
 } from '../../../helpers/mocks';
 
 beforeAll(async () => {
+  await encryptUtils.loadEncryptionKey(QueueMode.MEMORY);
   await databaseConnection().initialize();
 });
 
@@ -40,6 +42,7 @@ describe('Project Service', () => {
       const result = await projectService.create({
         ...mockProject,
         tablesDatabaseId: 123,
+        tablesDatabaseToken: 'token',
       });
       const savedProject = await projectService.getOneOrThrow(result.id);
 
@@ -76,10 +79,12 @@ describe('Project Service', () => {
       await projectService.create({
         ...mockProject1,
         tablesDatabaseId: 123,
+        tablesDatabaseToken: 'token',
       });
       await projectService.create({
         ...mockProject2,
         tablesDatabaseId: 124,
+        tablesDatabaseToken: 'token',
       });
 
       const projectIds = await projectService.getProjectIdsByOrganizationId(
