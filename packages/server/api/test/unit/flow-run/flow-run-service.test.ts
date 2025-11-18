@@ -102,12 +102,17 @@ describe('flowRunService.recordTriggerFailure', () => {
       },
     });
 
-    expect(fileServiceMock.save).toHaveBeenCalledWith({
-      data: Buffer.from('compressed-logs'),
-      type: FileType.FLOW_RUN_LOG,
-      compression: FileCompression.GZIP,
-      projectId: 'proj_1',
-    });
+    expect(fileServiceMock.save).toHaveBeenCalledTimes(1);
+    const saveArg = (fileServiceMock.save as jest.Mock).mock.calls[0][0];
+    expect(saveArg).toEqual(
+      expect.objectContaining({
+        fileId: expect.any(String),
+        data: Buffer.from('compressed-logs'),
+        type: FileType.FLOW_RUN_LOG,
+        compression: FileCompression.GZIP,
+        projectId: 'proj_1',
+      }),
+    );
 
     expect(mockedRepo.save).toHaveBeenCalledTimes(1);
     const saved = mockedRepo.save.mock.calls[0][0];
@@ -125,8 +130,8 @@ describe('flowRunService.recordTriggerFailure', () => {
       tasks: 0,
       duration: 0,
       tags: [],
-      logsFileId: 'file_123',
     });
+    expect(saved.logsFileId).toBe(saveArg.fileId);
 
     expect(typeof saved.id).toBe('string');
     expect(saved.id.length).toBeGreaterThan(0);
