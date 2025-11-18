@@ -191,20 +191,18 @@ export const getAllChats = async (
     return [];
   }
 
-  const contexts = await Promise.all(
-    chatIds.map((chatId) => getChatContext(chatId, userId, projectId)),
+  const chatsOrNull = await Promise.all(
+    chatIds.map(async (chatId): Promise<ChatSummary | null> => {
+      const context = await getChatContext(chatId, userId, projectId);
+      if (!context?.chatName) {
+        return null;
+      }
+      return {
+        chatId,
+        chatName: context.chatName,
+      };
+    }),
   );
-
-  const chatsOrNull = chatIds.map((chatId, index): ChatSummary | null => {
-    const context = contexts[index];
-    if (!context?.chatName) {
-      return null;
-    }
-    return {
-      chatId,
-      chatName: context.chatName,
-    };
-  });
 
   return chatsOrNull.filter((chat): chat is ChatSummary => chat !== null);
 };
