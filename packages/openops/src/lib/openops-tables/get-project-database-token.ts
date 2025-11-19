@@ -27,7 +27,5 @@ export async function getProjectDatabaseToken(
   }
 
   const encryptedToken = await getEncryptedToken(projectId);
-  const decryptedToken = encryptUtils.decryptString(encryptedToken);
-  console.warn('Decrypted token for project database token', decryptedToken);
-  return decryptedToken;
+  return encryptUtils.decryptString(encryptedToken);
 }
