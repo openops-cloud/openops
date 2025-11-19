@@ -43,44 +43,8 @@ const AnalyticsGuestTokenRequestOptions = {
 export const authenticationController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  app.post('/sign-up', SignUpRequestOptions, async (request, reply) => {
-    const user = await userService.getMetaInfo({
-      id: request.principal.id,
-    });
-
-    if (!user || user.email !== adminEmail) {
-      return reply.code(403).send({
-        statusCode: 403,
-        error: 'Insufficient Permissions',
-        message: 'Adding new users only allowed to admin user.',
-      });
-    }
-
-    const signUpResponse = await authenticationService.signUp({
-      ...request.body,
-      verified: edition === OpsEdition.COMMUNITY,
-      organizationId: null,
-      provider: Provider.EMAIL,
-    });
-
-    return setAuthCookiesAndReply(reply, signUpResponse);
-  });
-
-  app.post('/sign-in', SignInRequestOptions, async (request, reply) => {
-    const organizationId = await resolveOrganizationIdForAuthnRequest(
-      request.body.email,
-      request,
-    );
-
-    const signInResponse = await authenticationService.signIn({
-      email: request.body.email,
-      password: request.body.password,
-      organizationId,
-      provider: Provider.EMAIL,
-    });
-
-    return setAuthCookiesAndReply(reply, signInResponse);
-  });
+  app.post('/sign-up', SignUpRequestOptions, signUpRoute);
+  app.post('/sign-in', SignInRequestOptions, signInRoute);
 
   app.post(
     '/sign-out',
@@ -120,6 +84,47 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       return reply.send(guestToken);
     },
   );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const signUpRoute = async (request: any, reply: any) => {
+  const user = await userService.getMetaInfo({
+    id: request.principal.id,
+  });
+
+  if (!user || user.email !== adminEmail) {
+    return reply.code(403).send({
+      statusCode: 403,
+      error: 'Insufficient Permissions',
+      message: 'Adding new users only allowed to admin user.',
+    });
+  }
+
+  const signUpResponse = await authenticationService.signUp({
+    ...request.body,
+    verified: edition === OpsEdition.COMMUNITY,
+    organizationId: null,
+    provider: Provider.EMAIL,
+  });
+
+  return setAuthCookiesAndReply(reply, signUpResponse);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const signInRoute = async (request: any, reply: any) => {
+  const organizationId = await resolveOrganizationIdForAuthnRequest(
+    request.body.email,
+    request,
+  );
+
+  const signInResponse = await authenticationService.signIn({
+    email: request.body.email,
+    password: request.body.password,
+    organizationId,
+    provider: Provider.EMAIL,
+  });
+
+  return setAuthCookiesAndReply(reply, signInResponse);
 };
 
 const rateLimitOptions: RateLimitOptions = {
