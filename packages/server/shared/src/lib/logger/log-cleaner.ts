@@ -42,7 +42,7 @@ export const cleanLogEvent = (logEvent: any) => {
       eventData[key] = Math.round(value * 100) / 100;
     } else if (typeof value === 'object') {
       try {
-        eventData[key] = truncate(JSON.stringify(value));
+        eventData[key] = stringify(value);
       } catch (error) {
         eventData[key] = `Logger error - could not stringify object. ${error}`;
       }
@@ -90,10 +90,16 @@ function extractErrorFields(
   eventData[errorKey + 'Name'] = truncate(name);
   if (value instanceof ApplicationError) {
     eventData[errorKey + 'Code'] = truncate(value.error.code);
-    eventData[errorKey + 'Params'] = truncate(
-      JSON.stringify(value.error.params),
-    );
+    eventData[errorKey + 'Params'] = stringify(value.error.params);
   } else if (context && Object.keys(context).length) {
-    eventData[errorKey + 'Context'] = truncate(JSON.stringify(context));
+    eventData[errorKey + 'Context'] = stringify(context);
+  }
+}
+
+function stringify(value: any) {
+  try {
+    return truncate(JSON.stringify(value));
+  } catch (error) {
+    return `Logger error - could not stringify object. ${error}`;
   }
 }
