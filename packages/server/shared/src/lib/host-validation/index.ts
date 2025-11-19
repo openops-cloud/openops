@@ -1,6 +1,7 @@
 import { promises as dns } from 'dns';
 import ipRangeCheck from 'ip-range-check';
 import { isIPv4, isIPv6 } from 'net';
+import { SharedSystemProp, system } from '../system';
 
 const internalV4Cidrs = [
   '127.0.0.0/8', // Loopback addresses
@@ -55,7 +56,10 @@ async function isInternalHost(host: string): Promise<boolean> {
 }
 
 export async function validateHost(host: string | undefined): Promise<void> {
-  if (!host) return;
+  const isHostValidationEnabled = system.getBoolean(
+    SharedSystemProp.ENABLE_HOST_VALIDATION,
+  );
+  if (!isHostValidationEnabled || !host) return;
   const isPrivate = await isInternalHost(host);
   if (isPrivate) throw new Error('Host must not be an internal address');
 }
