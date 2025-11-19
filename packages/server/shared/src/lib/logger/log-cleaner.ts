@@ -41,11 +41,7 @@ export const cleanLogEvent = (logEvent: any) => {
     } else if (typeof value === 'number') {
       eventData[key] = Math.round(value * 100) / 100;
     } else if (typeof value === 'object') {
-      try {
-        eventData[key] = stringify(value);
-      } catch (error) {
-        eventData[key] = `Logger error - could not stringify object. ${error}`;
-      }
+      eventData[key] = stringify(value);
     } else {
       eventData[key] = truncate(value);
     }
