@@ -2,7 +2,7 @@ const makeOpenOpsTablesGetMock = jest.fn();
 const makeOpenOpsTablesPatchMock = jest.fn();
 const makeOpenOpsTablesPostMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
-const createAxiosHeadersMock = jest.fn();
+const createAxiosHeadersForOpenOpsTablesBlockMock = jest.fn();
 
 const actualRequestsHelpers = jest.requireActual(
   '../../src/lib/openops-tables/requests-helpers',
@@ -14,7 +14,8 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
   makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
   makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
   makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
-  createAxiosHeaders: createAxiosHeadersMock,
+  createAxiosHeadersForOpenOpsTablesBlock:
+    createAxiosHeadersForOpenOpsTablesBlockMock,
 }));
 
 jest.mock('@openops/server-shared', () => ({
@@ -72,7 +73,7 @@ describe('getRows', () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([
       { results: [{ id: 1, order: 1234 }] },
     ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = await getRows({
       tableId: 1,
@@ -89,7 +90,7 @@ describe('getRows', () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([
       { results: [{ id: 1, order: 1234 }] },
     ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await getRows({
       tableId: 1,
@@ -103,15 +104,17 @@ describe('getRows', () => {
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 
   test('Should work with filters', async () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([
       { results: [{ id: 1, order: 1234 }] },
     ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await getRows({
       tableId: 1,
@@ -129,14 +132,18 @@ describe('getRows', () => {
 
     expect(result[0].id).toBe(1);
     expect(result[0].order).toBe(1234);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true&filter__name1__boolean=value+field+1&filter__name2__equal=2&filter_type=AND',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 
   test('Should flatten list', async () => {
@@ -150,7 +157,7 @@ describe('getRows', () => {
       },
       { nr: 2, results: [{ id: 2, order: 4321 }] },
     ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await getRows({
       tableId: 1,
@@ -167,8 +174,10 @@ describe('getRows', () => {
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 });
 
@@ -179,7 +188,7 @@ describe('update row', () => {
 
   test('Should update row with lock', async () => {
     makeOpenOpsTablesPatchMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = await updateRow({
       tableId: 1,
@@ -199,7 +208,7 @@ describe('update row', () => {
 
   test('Should update row with usernames', async () => {
     makeOpenOpsTablesPatchMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await updateRow({
       tableId: 1,
@@ -212,15 +221,19 @@ describe('update row', () => {
     })) as any;
 
     expect(result).toBe('mock result');
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
     expect(makeOpenOpsTablesPatchMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 });
 
@@ -231,7 +244,7 @@ describe('add row', () => {
 
   test('Should add row with lock', async () => {
     makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = await addRow({
       tableId: 1,
@@ -250,7 +263,7 @@ describe('add row', () => {
 
   test('Should add row with usernames', async () => {
     makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await addRow({
       tableId: 1,
@@ -262,15 +275,19 @@ describe('add row', () => {
     })) as any;
 
     expect(result).toBe('mock result');
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
     expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 });
 
@@ -281,7 +298,7 @@ describe('delete row', () => {
 
   test('Should delete row with lock', async () => {
     makeOpenOpsTablesDeleteMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = await deleteRow({
       tableId: 1,
@@ -297,7 +314,7 @@ describe('delete row', () => {
 
   test('Should delete row', async () => {
     makeOpenOpsTablesDeleteMock.mockResolvedValue('mock result');
-    createAxiosHeadersMock.mockReturnValue('some header');
+    createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue('some header');
 
     const result = (await deleteRow({
       tableId: 1,
@@ -306,14 +323,18 @@ describe('delete row', () => {
     })) as any;
 
     expect(result).toBe('mock result');
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
     expect(makeOpenOpsTablesDeleteMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+      'token',
+    );
   });
 });
 
@@ -333,7 +354,9 @@ describe('getRowByPrimaryKeyValue', () => {
       makeOpenOpsTablesGetMock.mockResolvedValue([
         { results: [{ id: 1, order: 1234 }] },
       ]);
-      createAxiosHeadersMock.mockReturnValue('some header');
+      createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue(
+        'some header',
+      );
 
       const result = await getRowByPrimaryKeyValue(
         'token',
@@ -349,8 +372,10 @@ describe('getRowByPrimaryKeyValue', () => {
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
       );
-      expect(createAxiosHeadersMock).toBeCalledTimes(1);
-      expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+      expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+        'token',
+      );
     },
   );
 
@@ -370,7 +395,9 @@ describe('getRowByPrimaryKeyValue', () => {
           ],
         },
       ]);
-      createAxiosHeadersMock.mockReturnValue('some header');
+      createAxiosHeadersForOpenOpsTablesBlockMock.mockReturnValue(
+        'some header',
+      );
       await expect(
         getRowByPrimaryKeyValue(
           'token',
@@ -386,8 +413,10 @@ describe('getRowByPrimaryKeyValue', () => {
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
       );
-      expect(createAxiosHeadersMock).toBeCalledTimes(1);
-      expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+      expect(createAxiosHeadersForOpenOpsTablesBlockMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersForOpenOpsTablesBlockMock).toHaveBeenCalledWith(
+        'token',
+      );
     },
   );
 });

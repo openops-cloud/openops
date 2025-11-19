@@ -1,15 +1,23 @@
+import { AxiosHeaders } from 'axios';
 import {
   createAxiosHeaders,
+  createAxiosHeadersForOpenOpsTablesBlock,
   makeOpenOpsTablesGet,
 } from '../openops-tables/requests-helpers';
-import { getDefaultDatabaseId } from './applications-service';
+import {
+  getDefaultDatabaseId,
+  getDefaultDatabaseIdForOpenOpsTablesBlock,
+} from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 
 async function getTables(
   token: string,
   databaseId: number,
+  useJwt = false,
 ): Promise<OpenOpsTable[]> {
-  const authenticationHeader = createAxiosHeaders(token);
+  const authenticationHeader: AxiosHeaders = useJwt
+    ? createAxiosHeaders(token)
+    : createAxiosHeadersForOpenOpsTablesBlock(token);
   const getTablesResult = await makeOpenOpsTablesGet<OpenOpsTable[]>(
     `api/database/tables/database/${databaseId}/`,
     authenticationHeader,
@@ -19,8 +27,10 @@ async function getTables(
 
 export async function getTableIdByTableName(
   tableName: string,
+  token?: string,
+  useJwt = false,
 ): Promise<number> {
-  const table = await getTableByName(tableName);
+  const table = await getTableByName(tableName, token, useJwt);
 
   if (!table) {
     throw new Error(`Table '${tableName}' not found`);
@@ -31,26 +41,39 @@ export async function getTableIdByTableName(
 
 export async function getTableByName(
   tableName: string,
+  token?: string,
+  useJwt = false,
 ): Promise<OpenOpsTable | undefined> {
-  const tables = await getAvailableTablesInOpenopsTables();
+  const tables = await getAvailableTablesInOpenopsTables(token, useJwt);
 
   const table = tables.find((t) => t.name === tableName);
 
   return table;
 }
 
-export async function getTableNames(): Promise<string[]> {
-  const tables = await getAvailableTablesInOpenopsTables();
+export async function getTableNames(
+  token?: string,
+  useJwt = false,
+): Promise<string[]> {
+  const tables = await getAvailableTablesInOpenopsTables(token, useJwt);
 
   return tables.map((t) => t.name);
 }
 
-async function getAvailableTablesInOpenopsTables(): Promise<OpenOpsTable[]> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+async function getAvailableTablesInOpenopsTables(
+  token?: string,
+  useJwt = false,
+): Promise<OpenOpsTable[]> {
+  const authToken =
+    token ?? (await authenticateDefaultUserInOpenOpsTables()).token;
+  const shouldUseJwt = token !== undefined ? useJwt : true;
 
-  const tablesDatabaseId = await getDefaultDatabaseId(token);
+  const getDatabaseId = shouldUseJwt
+    ? getDefaultDatabaseId
+    : getDefaultDatabaseIdForOpenOpsTablesBlock;
+  const tablesDatabaseId = await getDatabaseId(authToken);
 
-  const tables = await getTables(token, tablesDatabaseId);
+  const tables = await getTables(authToken, tablesDatabaseId, shouldUseJwt);
 
   return getDistinctTableNames(tables);
 }
