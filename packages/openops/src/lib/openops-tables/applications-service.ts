@@ -10,8 +10,8 @@ export const OPENOPS_DEFAULT_DATABASE_NAME = 'OpenOps Dataset';
 
 async function getDefaultDatabaseIdInternal(
   token: string,
-  databaseName = OPENOPS_DEFAULT_DATABASE_NAME, // TODO: remove this when all environments are migrated
   autheticationHeaderCallback: (token: string) => AxiosHeaders,
+  databaseName = OPENOPS_DEFAULT_DATABASE_NAME, // TODO: remove this when all environments are migrated
 ): Promise<number> {
   const authenticationHeader = autheticationHeaderCallback(token);
 
@@ -36,7 +36,7 @@ export const getDefaultDatabaseId = (
   token: string,
   databaseName = OPENOPS_DEFAULT_DATABASE_NAME,
 ): Promise<number> =>
-  getDefaultDatabaseIdInternal(token, databaseName, createAxiosHeaders);
+  getDefaultDatabaseIdInternal(token, createAxiosHeaders, databaseName);
 
 export const getDefaultDatabaseIdForOpenOpsTablesBlock = (
   token: string,
@@ -44,6 +44,6 @@ export const getDefaultDatabaseIdForOpenOpsTablesBlock = (
 ): Promise<number> =>
   getDefaultDatabaseIdInternal(
     token,
-    databaseName,
     createAxiosHeadersForOpenOpsTablesBlock,
+    databaseName,
   );

@@ -66,7 +66,7 @@ async function getAvailableTablesInOpenopsTables(
 ): Promise<OpenOpsTable[]> {
   const authToken =
     token ?? (await authenticateDefaultUserInOpenOpsTables()).token;
-  const shouldUseJwt = token !== undefined ? useJwt : true;
+  const shouldUseJwt = token === undefined ? true : useJwt;
 
   const getDatabaseId = shouldUseJwt
     ? getDefaultDatabaseId
