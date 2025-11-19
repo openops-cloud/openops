@@ -19,10 +19,6 @@ export async function getProjectDatabaseToken(
 
   if (!useDatabaseToken) {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    console.warn(
-      'Using default authentication for project database token',
-      token,
-    );
     return token;
   }
 
