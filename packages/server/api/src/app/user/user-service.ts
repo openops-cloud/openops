@@ -211,6 +211,16 @@ export const userService = {
     });
   },
 
+  async updateExternalId({
+    id,
+    newExternalId,
+  }: UpdateExternalIdParams): Promise<void> {
+    await userRepo().update(id, {
+      updated: dayjs().toISOString(),
+      externalId: newExternalId,
+    });
+  },
+
   async updateTracking({
     id,
     trackEvents,
@@ -320,6 +330,11 @@ type UpdatePasswordParams = {
 type UpdateEmailParams = {
   id: UserId;
   newEmail: string;
+};
+
+type UpdateExternalIdParams = {
+  id: UserId;
+  newExternalId: string;
 };
 
 type UpdateTrackingParams = {
