@@ -139,6 +139,7 @@ const AssistantUiChat = ({
         runtime={runtime}
         onNewChat={onNewChatClick}
         title={currentChatTitle}
+        defaultTitle={title}
         availableModels={availableModels}
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}
