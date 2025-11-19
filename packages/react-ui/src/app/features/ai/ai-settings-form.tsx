@@ -89,8 +89,18 @@ const AiSettingsForm = ({
   };
 
   const descriptionText = isEnterprise
-    ? `Enables ${assistantName} and other AI-powered features such as the CLI command generation and chat interfaces.`
-    : `Enables ${assistantName} and other AI-powered features such as the CLI command generation.`;
+    ? t(
+        'Enables {assistantName} and other AI-powered features such as the CLI command generation and chat interfaces.',
+        {
+          assistantName: assistantName,
+        },
+      )
+    : t(
+        'Enables {assistantName} and other AI-powered features such as the CLI command generation.',
+        {
+          assistantName: assistantName,
+        },
+      );
 
   return (
     <Form {...form}>
@@ -106,7 +116,12 @@ const AiSettingsForm = ({
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <Label htmlFor="enabled">{t('Enable OpenOps AI')}</Label>
+                <Label
+                  className="text-lg font-bold leading-6"
+                  htmlFor="enabled"
+                >
+                  {t('Enable OpenOps AI')}
+                </Label>
               </div>
               <p className="mt-8 text-base font-normal leading-6 text-primary-900">
                 {descriptionText}
