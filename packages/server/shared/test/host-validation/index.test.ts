@@ -1,13 +1,33 @@
 const resolve4 = jest.fn();
 const resolve6 = jest.fn();
+const getBoolean = jest.fn().mockReturnValue(true);
 
 jest.mock('dns', () => ({ promises: { resolve4, resolve6 } }));
+jest.mock('../../src/lib/system', () => ({
+  system: { getBoolean },
+  SharedSystemProp: { ENABLE_HOST_VALIDATION: 'ENABLE_HOST_VALIDATION' },
+}));
 
 import { validateHost } from '../../src/lib/host-validation';
 
 describe('Host Validation', () => {
+  beforeEach(() => {
+    getBoolean.mockReturnValue(true);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('should skip if host validation is disabled', async () => {
+    getBoolean.mockReturnValue(false);
+    const host = '127.0.0.1';
+    await expect(validateHost(host)).resolves.toBeUndefined();
+  });
+
+  test('should skip for empty host', async () => {
+    const host = '';
+    await expect(validateHost(host)).resolves.toBeUndefined();
   });
 
   test('should throw for private IPv4 address', async () => {
