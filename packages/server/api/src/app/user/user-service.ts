@@ -334,7 +334,7 @@ type UpdateEmailParams = {
 
 type UpdateExternalIdParams = {
   id: UserId;
-  newExternalId: string;
+  newExternalId?: string;
 };
 
 type UpdateTrackingParams = {
