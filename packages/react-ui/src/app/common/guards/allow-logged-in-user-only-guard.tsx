@@ -4,13 +4,12 @@ import { jwtDecode } from 'jwt-decode';
 import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
-// eslint-disable-next-line import/no-restricted-paths
-import { getFederatedUrlBasedOnFlags } from '@/app/features/authentication/lib/utils';
 // eslint-disable-next-line import/no-restricted-paths
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';

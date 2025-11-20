@@ -15,6 +15,7 @@ import { t } from 'i18next';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { HttpError, api } from '@/app/lib/api';
 import { authenticationApi } from '@/app/lib/authentication-api';
@@ -28,7 +29,6 @@ import {
 } from '@openops/shared';
 import { useEffect } from 'react';
 import { navigationUtil } from '../../../lib/navigation-util';
-import { getFederatedUrlBasedOnFlags } from '../lib/utils';
 
 const SignInSchema = Type.Object({
   email: Type.String({

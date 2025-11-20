@@ -1,9 +1,9 @@
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { API_URL, isUrlRelative } from '@/app/lib/api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import axios, { AxiosError, HttpStatusCode } from 'axios';
 import { OPENOPS_CLOUD_USER_INFO_API_URL } from './constants/cloud';
 import { QueryKeys } from './constants/query-keys';
-import { getFederatedUrlBasedOnFlags } from './features/authentication/lib/utils';
 import { FlagsMap } from './lib/flags-api';
 import { queryClient } from './lib/query-client';
 
