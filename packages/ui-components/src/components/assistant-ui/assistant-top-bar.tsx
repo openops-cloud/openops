@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
-  title?: string;
+  title: string;
   isTitleDefault?: boolean;
   onHistoryOpenChange?: (open: boolean) => void;
   isHistoryOpen?: boolean;
@@ -30,9 +30,8 @@ const AssistantTopBar = ({
   chatId,
   isTitleDefault,
 }: AssistantTopBarProps) => {
-  const baseTitle = t('OpenOps Assistant');
   const animatedTitle = useTypingAnimation({
-    text: title || baseTitle,
+    text: title,
     speed: 50,
     chatId: chatId,
     isDefault: isTitleDefault,
