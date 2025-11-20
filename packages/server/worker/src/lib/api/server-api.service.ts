@@ -19,7 +19,6 @@ import {
   GetBlockRequestQuery,
   GetFlowVersionForWorkerRequest,
   PopulatedFlow,
-  Project,
   RemoveStableJobEngineRequest,
   UpdateRunProgressRequest,
   WorkerMachineHealthcheckRequest,

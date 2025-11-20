@@ -39,8 +39,6 @@ export class EngineConstants {
   public static readonly BLOCK_SOURCES =
     process.env.OPS_BLOCKS_SOURCE ?? 'FILE';
 
-  private project: Project | null = null;
-
   public get baseCodeDirectory(): string {
     return EngineConstants.BASE_CODE_DIRECTORY;
   }
