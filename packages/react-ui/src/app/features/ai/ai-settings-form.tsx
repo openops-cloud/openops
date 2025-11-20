@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   aiFormSchemaResolver,
   AiSettingsFormSchema,
@@ -16,7 +17,7 @@ import {
   Label,
   Switch,
 } from '@openops/components/ui';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, FlagId, OpsEdition } from '@openops/shared';
 import equal from 'fast-deep-equal';
 import { t } from 'i18next';
 import { CircleCheck } from 'lucide-react';
@@ -42,7 +43,8 @@ const AiSettingsForm = ({
   isSaving,
 }: AiSettingsFormProps) => {
   const assistantName = useAssistantName();
-  const isEnterprise = assistantName === t('OpenOps Agent');
+  const edition = flagsHooks.useFlag<OpsEdition>(FlagId.EDITION).data;
+  const isEnterprise = edition !== OpsEdition.COMMUNITY;
 
   const form = useForm<AiSettingsFormSchema>({
     resolver: aiFormSchemaResolver,
@@ -92,13 +94,13 @@ const AiSettingsForm = ({
     ? t(
         'Enables {assistantName} and other AI-powered features such as the CLI command generation and chat interfaces.',
         {
-          assistantName: assistantName,
+          assistantName,
         },
       )
     : t(
         'Enables {assistantName} and other AI-powered features such as the CLI command generation.',
         {
-          assistantName: assistantName,
+          assistantName,
         },
       );
 
