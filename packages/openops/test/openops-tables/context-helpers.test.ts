@@ -3,7 +3,7 @@ jest.mock('../../src/lib/openops-tables/get-encrypted-token-for-block', () => ({
   getProjectDatabaseTokenForBlock: getProjectDatabaseTokenForBlockMock,
 }));
 
-import { ActionContext } from '@openops/blocks-framework';
+import { ActionContext, PropertyContext } from '@openops/blocks-framework';
 import {
   createFieldsCacheKey,
   createTableCacheKey,
@@ -16,30 +16,34 @@ describe('context-helpers', () => {
   });
 
   describe('getTokenFromContext', () => {
-    it('should retrieve token using context properties', async () => {
-      const context = {
-        server: {
-          apiUrl: 'https://api.example.com',
-          token: 'test-auth-token',
-        },
-        project: {
-          id: 'project-123',
-        },
-      } as ActionContext;
+    it.each([
+      ['ActionContext', 'project-123', 'database-token-123'],
+      ['PropertyContext', 'project-456', 'property-token-456'],
+    ])(
+      'should retrieve token using %s',
+      async (contextType, projectId, expectedToken) => {
+        const context = {
+          server: {
+            apiUrl: 'https://api.example.com',
+            token: 'test-auth-token',
+          },
+          project: {
+            id: projectId,
+          },
+        } as ActionContext | PropertyContext;
 
-      getProjectDatabaseTokenForBlockMock.mockResolvedValue(
-        'database-token-123',
-      );
+        getProjectDatabaseTokenForBlockMock.mockResolvedValue(expectedToken);
 
-      const token = await getTokenFromContext(context);
+        const token = await getTokenFromContext(context);
 
-      expect(token).toBe('database-token-123');
-      expect(getProjectDatabaseTokenForBlockMock).toHaveBeenCalledWith(
-        'https://api.example.com',
-        'test-auth-token',
-        'project-123',
-      );
-    });
+        expect(token).toBe(expectedToken);
+        expect(getProjectDatabaseTokenForBlockMock).toHaveBeenCalledWith(
+          'https://api.example.com',
+          'test-auth-token',
+          projectId,
+        );
+      },
+    );
   });
 
   describe('createTableCacheKey', () => {

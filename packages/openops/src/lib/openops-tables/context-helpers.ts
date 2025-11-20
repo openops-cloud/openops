@@ -1,8 +1,8 @@
-import { ActionContext } from '@openops/blocks-framework';
+import { ActionContext, PropertyContext } from '@openops/blocks-framework';
 import { getProjectDatabaseTokenForBlock } from './get-encrypted-token-for-block';
 
 export async function getTokenFromContext(
-  context: ActionContext,
+  context: ActionContext | PropertyContext,
 ): Promise<string> {
   return getProjectDatabaseTokenForBlock(
     context.server.apiUrl,
