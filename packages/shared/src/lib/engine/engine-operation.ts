@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionValue } from '../app-connection/app-connection';
 import { BlockPackage } from '../blocks';
+import { EncryptedObject } from '../common';
 import { OpenOpsId } from '../common/id-generator';
 import {
   ExecutionState,
@@ -32,11 +33,6 @@ export enum TriggerHookType {
   TEST = 'TEST',
 }
 
-export type EncryptedDatabaseToken = {
-  iv: string;
-  data: string;
-};
-
 export type EngineOperation =
   | ExecuteStepOperation
   | ExecuteFlowOperation
@@ -52,7 +48,7 @@ export type BaseEngineOperation = {
   internalApiUrl: string;
   publicUrl: string;
   tablesDatabaseId: number;
-  tablesDatabaseToken: EncryptedDatabaseToken;
+  tablesDatabaseToken: EncryptedObject;
 };
 
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {

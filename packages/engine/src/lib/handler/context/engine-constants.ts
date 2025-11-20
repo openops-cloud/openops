@@ -1,5 +1,5 @@
 import {
-  EncryptedDatabaseToken,
+  EncryptedObject,
   ExecuteFlowOperation,
   ExecutePropsOptions,
   ExecuteStepOperation,
@@ -69,7 +69,7 @@ export class EngineConstants {
     public readonly testRunActionLimits: TestRunLimitSettings,
     public readonly isTestRun: boolean,
     public readonly tablesDatabaseId: number,
-    public readonly tablesDatabaseToken: EncryptedDatabaseToken,
+    public readonly tablesDatabaseToken: EncryptedObject,
     public readonly resumePayload?: ResumePayload,
   ) {}
 
