@@ -2,7 +2,7 @@ import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
 
 import { QueryKeys } from '@/app/constants/query-keys';
 import { flagsApi, FlagsMap } from '@/app/lib/flags-api';
-import { FlagId } from '@openops/shared';
+import { FlagId, OpenOpsFlag } from '@openops/shared';
 
 type WebsiteBrand = {
   websiteName: string;
@@ -48,7 +48,7 @@ export const flagsHooks = {
     const { data: theme } = flagsHooks.useFlag<WebsiteBrand>(FlagId.THEME);
     return theme!;
   },
-  useFlag: <T>(flagId: FlagId) => {
+  useFlag: <T>(flagId: OpenOpsFlag) => {
     const data = useSuspenseQuery<FlagsMap, Error>({
       queryKey: [QueryKeys.flags],
       queryFn: flagsApi.getAll,
