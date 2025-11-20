@@ -28,6 +28,7 @@ import {
 } from '@openops/shared';
 import { useEffect } from 'react';
 import { navigationUtil } from '../../../lib/navigation-util';
+import { getFederatedUrlBasedOnFlags } from '../lib/utils';
 
 const SignInSchema = Type.Object({
   email: Type.String({
@@ -60,7 +61,7 @@ const SignInForm: React.FC = () => {
     }
     authenticationSession.logOut({
       userInitiated: false,
-      federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
+      federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
     });
   }, [flags]);
 

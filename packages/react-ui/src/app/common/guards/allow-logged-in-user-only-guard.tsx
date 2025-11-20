@@ -10,6 +10,8 @@ import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 // eslint-disable-next-line import/no-restricted-paths
+import { getFederatedUrlBasedOnFlags } from '@/app/features/authentication/lib/utils';
+// eslint-disable-next-line import/no-restricted-paths
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { navigationUtil } from '@/app/lib/navigation-util';
@@ -61,7 +63,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
         await authenticationSession.logOut({
           userInitiated: false,
           navigate,
-          federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
+          federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
         });
       } catch (e) {
         if (isMounted) {
