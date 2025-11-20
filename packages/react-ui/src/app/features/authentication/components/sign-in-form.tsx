@@ -60,7 +60,7 @@ const SignInForm: React.FC = () => {
     }
     authenticationSession.logOut({
       userInitiated: false,
-      federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
+      federatedLoginUrl: flags.FRONTEGG_URL as string | undefined,
     });
   }, [flags]);
 
