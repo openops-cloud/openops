@@ -64,11 +64,6 @@ const CloudConnectionPage = () => {
                 secure: true,
                 expires: getExpirationDate(auth.user.accessToken),
               });
-              Cookies.set('cloud-refresh-token', auth.user.refreshToken, {
-                sameSite: 'None',
-                secure: true,
-                expires: getExpirationDate(auth.user.accessToken),
-              });
 
               const originProjectId =
                 sessionStorage.getItem(ORGIN_PROJECT_ID_KEY);

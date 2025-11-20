@@ -1,5 +1,6 @@
 import {
   AppConnectionValue,
+  EncryptedObject,
   ExecutionType,
   FlowRunId,
   PauseMetadata,
@@ -126,10 +127,7 @@ export type ServerContext = {
   publicUrl: string;
   token: string;
   tablesDatabaseId: number;
-  tablesDatabaseToken: {
-    iv: string;
-    data: string;
-  };
+  tablesDatabaseToken: EncryptedObject;
 };
 export type BaseActionContext<
   ET extends ExecutionType,

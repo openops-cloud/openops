@@ -39,7 +39,8 @@ export async function makeHttpRequest<T>(
 
     if (axiosError && axiosError.response?.data) {
       logger.error(logMessage, {
-        ...axiosError.response?.data,
+        error: axiosError,
+        errorResponse: axiosError.response?.data,
         status: axiosError.response?.status,
         statusText: axiosError.response?.statusText,
         timeTaken,

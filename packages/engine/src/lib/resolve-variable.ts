@@ -9,7 +9,7 @@ export async function resolveVariable(
   input: ResolveVariableOperation,
 ): Promise<ResolveVariableResponse> {
   try {
-    const constants = EngineConstants.fromExecuteStepInput({
+    const constants = await EngineConstants.fromExecuteStepInput({
       projectId: input.projectId,
       engineToken: input.engineToken,
       internalApiUrl: input.internalApiUrl,

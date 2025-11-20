@@ -1,4 +1,5 @@
-import { EncryptedObject, encryptUtils, logger } from '@openops/server-shared';
+import { encryptUtils, logger } from '@openops/server-shared';
+import { EncryptedObject } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class MigrateAiConfigToAppConnection1759242268873
