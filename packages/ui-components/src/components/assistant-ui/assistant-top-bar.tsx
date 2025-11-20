@@ -34,7 +34,7 @@ const AssistantTopBar = ({
     text: title,
     speed: 50,
     chatId: chatId,
-    isDefault: isTitleDefault,
+    enableAnimation: !isTitleDefault,
   });
 
   return (

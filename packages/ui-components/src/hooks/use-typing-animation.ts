@@ -4,25 +4,25 @@ type UseTypingAnimationOptions = {
   text: string;
   speed?: number;
   chatId?: string | null;
-  isDefault?: boolean;
+  enableAnimation?: boolean;
 };
 
 export function useTypingAnimation({
   text,
   speed = 50,
   chatId,
-  isDefault,
+  enableAnimation,
 }: UseTypingAnimationOptions): string {
   const [displayedText, setDisplayedText] = useState(text);
   const prevChatIdRef = useRef(chatId);
-  const prevIsDefaultRef = useRef(isDefault);
+  const prevEnableAnimationRef = useRef(enableAnimation);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
     const shouldAnimate =
       prevChatIdRef.current === chatId &&
-      prevIsDefaultRef.current === true &&
-      isDefault === false;
+      prevEnableAnimationRef.current === false &&
+      enableAnimation === true;
 
     if (shouldAnimate && text.length > 0) {
       setDisplayedText('');
@@ -42,8 +42,8 @@ export function useTypingAnimation({
     }
 
     prevChatIdRef.current = chatId;
-    prevIsDefaultRef.current = isDefault;
-  }, [text, speed, chatId, isDefault]);
+    prevEnableAnimationRef.current = enableAnimation;
+  }, [text, speed, chatId, enableAnimation]);
 
   return displayedText;
 }
