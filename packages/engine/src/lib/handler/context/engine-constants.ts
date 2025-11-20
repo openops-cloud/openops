@@ -1,4 +1,5 @@
 import {
+  EncryptedObject,
   ExecuteFlowOperation,
   ExecutePropsOptions,
   ExecuteStepOperation,
@@ -38,8 +39,6 @@ export class EngineConstants {
   public static readonly BLOCK_SOURCES =
     process.env.OPS_BLOCKS_SOURCE ?? 'FILE';
 
-  private project: Project | null = null;
-
   public get baseCodeDirectory(): string {
     return EngineConstants.BASE_CODE_DIRECTORY;
   }
@@ -67,12 +66,19 @@ export class EngineConstants {
     public readonly serverHandlerId: string | null,
     public readonly testRunActionLimits: TestRunLimitSettings,
     public readonly isTestRun: boolean,
+    public readonly tablesDatabaseId: number,
+    public readonly tablesDatabaseToken: EncryptedObject,
     public readonly resumePayload?: ResumePayload,
   ) {}
 
-  public static fromExecuteFlowInput(
+  public static async fromExecuteFlowInput(
     input: ExecuteFlowOperation,
-  ): EngineConstants {
+  ): Promise<EngineConstants> {
+    const project = await EngineConstants.fetchProject(
+      input.internalApiUrl,
+      input.engineToken,
+    );
+
     return new EngineConstants(
       input.executionCorrelationId,
       input.flowVersion.flowId,
@@ -96,15 +102,22 @@ export class EngineConstants {
       input.serverHandlerId ?? null,
       input.flowVersion.testRunActionLimits,
       input.runEnvironment === 'TESTING',
+      project.tablesDatabaseId,
+      project.tablesDatabaseToken,
       input.executionType === ExecutionType.RESUME
         ? input.resumePayload
         : undefined,
     );
   }
 
-  public static fromExecuteStepInput(
+  public static async fromExecuteStepInput(
     input: ExecuteStepOperation,
-  ): EngineConstants {
+  ): Promise<EngineConstants> {
+    const project = await EngineConstants.fetchProject(
+      input.internalApiUrl,
+      input.engineToken,
+    );
+
     return new EngineConstants(
       null,
       input.flowVersion.flowId,
@@ -128,12 +141,19 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       true,
+      project.tablesDatabaseId,
+      project.tablesDatabaseToken,
     );
   }
 
-  public static fromExecutePropertyInput(
+  public static async fromExecutePropertyInput(
     input: ExecutePropsOptions,
-  ): EngineConstants {
+  ): Promise<EngineConstants> {
+    const project = await EngineConstants.fetchProject(
+      input.internalApiUrl,
+      input.engineToken,
+    );
+
     return new EngineConstants(
       null,
       input.flowVersion.flowId,
@@ -157,12 +177,19 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       true,
+      project.tablesDatabaseId,
+      project.tablesDatabaseToken,
     );
   }
 
-  public static fromExecuteTriggerInput(
+  public static async fromExecuteTriggerInput(
     input: ExecuteTriggerOperation<TriggerHookType>,
-  ): EngineConstants {
+  ): Promise<EngineConstants> {
+    const project = await EngineConstants.fetchProject(
+      input.internalApiUrl,
+      input.engineToken,
+    );
+
     return new EngineConstants(
       null,
       input.flowVersion.flowId,
@@ -186,24 +213,26 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       input.test,
+      project.tablesDatabaseId,
+      project.tablesDatabaseToken,
     );
   }
 
-  private async getProject(): Promise<Project> {
-    if (this.project) {
-      return this.project;
-    }
-
-    const getWorkerProjectEndpoint = `${this.internalApiUrl}v1/worker/project`;
+  private static async fetchProject(
+    internalApiUrl: string,
+    engineToken: string,
+  ): Promise<Project> {
+    const getWorkerProjectEndpoint = `${addTrailingSlashIfMissing(
+      internalApiUrl,
+    )}v1/worker/project`;
 
     const response = await fetch(getWorkerProjectEndpoint, {
       headers: {
-        Authorization: `Bearer ${this.engineToken}`,
+        Authorization: `Bearer ${engineToken}`,
       },
     });
 
-    this.project = (await response.json()) as Project;
-    return this.project;
+    return (await response.json()) as Project;
   }
 }
 
