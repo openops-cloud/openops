@@ -18,6 +18,7 @@ export function useTypingAnimation({
   const prevIsDefaultRef = useRef(isDefault);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
     const shouldAnimate =
       prevChatIdRef.current === chatId &&
       prevIsDefaultRef.current === true &&
@@ -26,7 +27,7 @@ export function useTypingAnimation({
     if (shouldAnimate && text.length > 0) {
       setDisplayedText('');
       let currentIndex = 0;
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if (currentIndex < text.length) {
           setDisplayedText(text.slice(0, currentIndex + 1));
           currentIndex++;
