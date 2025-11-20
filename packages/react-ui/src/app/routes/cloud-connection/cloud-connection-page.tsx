@@ -3,13 +3,16 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ORGIN_PROJECT_ID_KEY, ORGIN_USER_ID_KEY } from '@/app/constants/cloud';
 import { cloudUserApi } from '@/app/features/cloud/lib/cloud-user-api';
 import { getProjectIdSearchParam } from '@/app/features/cloud/lib/utils';
+import {
+  additionalFronteggParams,
+  initializeFrontegg,
+} from '@/app/lib/frontegg-setup';
+import { getExpirationDate } from '@/app/lib/jwt-utils';
 import { CloudLoggedInBrief } from '@openops/components/ui';
 import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
-import { additionalFronteggParams, initializeFrontegg } from './frontegg-setup';
-import { getExpirationDate } from './jwt-utils';
 
 const CloudConnectionPage = () => {
   const navigate = useNavigate();

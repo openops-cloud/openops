@@ -99,6 +99,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.TELEMETRY_MODE]: 'COLLECTOR',
   [AppSystemProp.TELEMETRY_COLLECTOR_URL]: 'https://telemetry.openops.com/save',
   [AppSystemProp.USE_DATABASE_TOKEN]: 'false',
+  [SharedSystemProp.ENABLE_HOST_VALIDATION]: 'true',
 };
 
 export const system = {

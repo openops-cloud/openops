@@ -49,7 +49,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   platformHooks.prefetchPlatform();
   platformHooks.prefetchNewerVersionInfo(queryClient);
 
-  flagsHooks.useFlags();
+  const { data: flags } = flagsHooks.useFlags();
   userSettingsHooks.useUserSettings();
   userHooks.useUserMeta();
   appConnectionsHooks.useConnectionsMetadata();
@@ -61,6 +61,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
         await authenticationSession.logOut({
           userInitiated: false,
           navigate,
+          federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
         });
       } catch (e) {
         if (isMounted) {
@@ -75,7 +76,14 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     return () => {
       isMounted = false;
     };
-  }, [isLoggedIn, expired, location.pathname, location.search, navigate]);
+  }, [
+    isLoggedIn,
+    expired,
+    location.pathname,
+    location.search,
+    navigate,
+    flags,
+  ]);
 
   if (!isLoggedIn || expired) {
     return <Navigate to="/sign-in" replace />;

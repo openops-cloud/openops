@@ -2,6 +2,9 @@ import { API_URL, isUrlRelative } from '@/app/lib/api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import axios, { AxiosError, HttpStatusCode } from 'axios';
 import { OPENOPS_CLOUD_USER_INFO_API_URL } from './constants/cloud';
+import { QueryKeys } from './constants/query-keys';
+import { FlagsMap } from './lib/flags-api';
+import { queryClient } from './lib/query-client';
 
 const unauthenticatedRoutes = [
   '/v1/authentication/sign-in',
@@ -25,7 +28,7 @@ const needsAuthHeader = (url: string): boolean => {
 // Add request interceptor to append Authorization header
 axios.interceptors.request.use((config) => {
   const token = authenticationSession.getToken();
-  if (token && needsAuthHeader(config.url!)) {
+  if (token && config.url && needsAuthHeader(config.url)) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -56,10 +59,15 @@ axios.interceptors.response.use(
 
       if (url !== OPENOPS_CLOUD_USER_INFO_API_URL && !isSignInRoute) {
         console.warn('JWT expired logging out');
+
+        const flags = queryClient.getQueryData<FlagsMap>([QueryKeys.flags]);
         authenticationSession.logOut({
           userInitiated: false,
+          federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
         });
-        window.location.reload();
+        if (!flags?.FRONTEGG_URL) {
+          window.location.reload();
+        }
       }
     }
     return Promise.reject(error);
