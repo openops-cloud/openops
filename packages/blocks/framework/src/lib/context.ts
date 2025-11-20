@@ -125,6 +125,11 @@ export type ServerContext = {
   apiUrl: string;
   publicUrl: string;
   token: string;
+  tablesDatabaseId: number;
+  tablesDatabaseToken: {
+    iv: string;
+    data: string;
+  };
 };
 export type BaseActionContext<
   ET extends ExecutionType,

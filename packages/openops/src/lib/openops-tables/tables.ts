@@ -1,3 +1,4 @@
+import { encryptUtils } from '@openops/server-shared';
 import {
   createAxiosHeaders,
   makeOpenOpsTablesGet,
@@ -56,8 +57,23 @@ export async function getTableNames(
   return tables.map((t) => t.name);
 }
 
+export async function getTableNamesWithContext(ctx: {
+  server: {
+    tablesDatabaseId: number;
+    tablesDatabaseToken: { iv: string; data: string };
+  };
+}): Promise<string[]> {
+  const token = encryptUtils.decryptString(ctx.server.tablesDatabaseToken);
+  const tables = await getAvailableTablesWithContext(
+    createRequestContext(token, false),
+    ctx.server.tablesDatabaseId,
+  );
+  return tables.map((t) => t.name);
+}
+
 async function getAvailableTablesWithContext(
   ctx?: RequestContext,
+  tablesDatabaseId?: number,
 ): Promise<OpenOpsTable[]> {
   const requestContext =
     ctx ??
@@ -66,13 +82,18 @@ async function getAvailableTablesWithContext(
       return createRequestContext(token, true);
     })());
 
-  const isJwt = requestContext.createHeaders === createAxiosHeaders;
-  const getDatabaseId = isJwt
-    ? getDefaultDatabaseId
-    : getDefaultDatabaseIdForOpenOpsTablesBlock;
+  let databaseId: number;
+  if (tablesDatabaseId !== undefined) {
+    databaseId = tablesDatabaseId;
+  } else {
+    const isJwt = requestContext.createHeaders === createAxiosHeaders;
+    const getDatabaseId = isJwt
+      ? getDefaultDatabaseId
+      : getDefaultDatabaseIdForOpenOpsTablesBlock;
+    databaseId = await getDatabaseId(requestContext.token);
+  }
 
-  const tablesDatabaseId = await getDatabaseId(requestContext.token);
-  const tables = await getTablesWithContext(requestContext, tablesDatabaseId);
+  const tables = await getTablesWithContext(requestContext, databaseId);
 
   return getDistinctTableNames(tables);
 }

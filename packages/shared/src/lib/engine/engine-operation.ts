@@ -32,6 +32,11 @@ export enum TriggerHookType {
   TEST = 'TEST',
 }
 
+export type EncryptedDatabaseToken = {
+  iv: string;
+  data: string;
+};
+
 export type EngineOperation =
   | ExecuteStepOperation
   | ExecuteFlowOperation
@@ -46,6 +51,8 @@ export type BaseEngineOperation = {
   engineToken: string;
   internalApiUrl: string;
   publicUrl: string;
+  tablesDatabaseId: number;
+  tablesDatabaseToken: EncryptedDatabaseToken;
 };
 
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {

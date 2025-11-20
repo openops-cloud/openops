@@ -17,6 +17,8 @@ export async function resolveVariable(
       flowVersion: input.flowVersion,
       stepName: input.stepName,
       stepTestOutputs: input.stepTestOutputs,
+      tablesDatabaseId: input.tablesDatabaseId,
+      tablesDatabaseToken: input.tablesDatabaseToken,
     });
 
     const executionState = await testExecutionContext.stateFromFlowVersion({
