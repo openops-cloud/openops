@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
@@ -61,7 +62,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
         await authenticationSession.logOut({
           userInitiated: false,
           navigate,
-          federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
+          federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
         });
       } catch (e) {
         if (isMounted) {
