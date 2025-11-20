@@ -87,9 +87,6 @@ export const engineApiService = (engineToken: string) => {
         responseType: 'arraybuffer',
       });
     },
-    async getProject(): Promise<Project> {
-      return client.get<Project>('/v1/worker/project', {});
-    },
     async updateJobStatus(request: UpdateJobRequest): Promise<void> {
       await client.post('/v1/engine/update-job', request);
     },

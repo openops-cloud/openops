@@ -25,12 +25,7 @@ import {
 import { engineApiService } from '../api/server-api.service';
 import { engineRunner } from '../engine';
 
-type EngineConstants =
-  | 'internalApiUrl'
-  | 'publicUrl'
-  | 'engineToken'
-  | 'tablesDatabaseId'
-  | 'tablesDatabaseToken';
+type EngineConstants = 'internalApiUrl' | 'publicUrl' | 'engineToken';
 
 async function prepareInput(
   flowVersion: FlowVersion,

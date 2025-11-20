@@ -16,8 +16,6 @@ describe('resolveVariable', () => {
     engineToken: 'test-engine-token',
     internalApiUrl: 'https://test-api.com',
     publicUrl: 'https://test-public.com',
-    tablesDatabaseId: 1,
-    tablesDatabaseToken: { iv: 'test-iv', data: 'test-data' },
     flowVersion: {
       id: 'flow-version-id',
       flowId: 'flow-id',
@@ -148,8 +146,6 @@ describe('resolveVariable', () => {
         flowVersion: mockInput.flowVersion,
         stepName: mockInput.stepName,
         stepTestOutputs: mockInput.stepTestOutputs,
-        tablesDatabaseId: mockInput.tablesDatabaseId,
-        tablesDatabaseToken: mockInput.tablesDatabaseToken,
       });
 
       expect(mockTestExecutionContext.stateFromFlowVersion).toHaveBeenCalledWith({
@@ -190,8 +186,6 @@ describe('resolveVariable', () => {
         flowVersion: mockInput.flowVersion,
         stepName: mockInput.stepName,
         stepTestOutputs: undefined,
-        tablesDatabaseId: mockInput.tablesDatabaseId,
-        tablesDatabaseToken: mockInput.tablesDatabaseToken,
       });
     });
   });
