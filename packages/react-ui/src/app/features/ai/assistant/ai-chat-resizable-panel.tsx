@@ -2,9 +2,9 @@ import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-g
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
+import { useAssistantName } from '@/app/features/ai/lib/use-assistant-name';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
-import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
@@ -20,6 +20,8 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
 
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
+
+  const assistantName = useAssistantName();
 
   const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
@@ -71,7 +73,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
       >
         <div className="w-full h-full flex bg-secondary overflow-hidden border-r">
           <AssistantUiChat
-            title={t('AI Assistant')}
+            title={assistantName}
             onClose={() => setIsAiChatOpened(false)}
           />
         </div>
