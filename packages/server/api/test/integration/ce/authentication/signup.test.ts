@@ -84,6 +84,7 @@ beforeAll(async () => {
 
   adminToken = await accessTokenManager.generateToken({
     id: mockAdminUser.id,
+    externalId: mockAdminUser.externalId,
     type: PrincipalType.USER,
     projectId: mockProject.id,
     organization: {

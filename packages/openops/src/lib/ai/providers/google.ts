@@ -3,6 +3,7 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleModels = [
+  'gemini-3-pro-preview',
   'gemini-2.0-flash-001',
   'gemini-1.5-flash',
   'gemini-1.5-flash-latest',

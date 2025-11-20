@@ -40,6 +40,7 @@ export async function getProjectAndToken(
 
   const token = await accessTokenManager.generateToken({
     id: user.id,
+    externalId: user.externalId,
     type: PrincipalType.USER,
     projectId: project.id,
     organization: {
