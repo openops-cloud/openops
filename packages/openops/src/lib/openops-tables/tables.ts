@@ -1,7 +1,5 @@
-import { AxiosHeaders } from 'axios';
 import {
   createAxiosHeaders,
-  createAxiosHeadersForOpenOpsTablesBlock,
   makeOpenOpsTablesGet,
 } from '../openops-tables/requests-helpers';
 import {
@@ -9,15 +7,13 @@ import {
   getDefaultDatabaseIdForOpenOpsTablesBlock,
 } from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
+import { createRequestContext, type RequestContext } from './request-context';
 
-async function getTables(
-  token: string,
+async function getTablesWithContext(
+  ctx: RequestContext,
   databaseId: number,
-  useJwt = false,
 ): Promise<OpenOpsTable[]> {
-  const authenticationHeader: AxiosHeaders = useJwt
-    ? createAxiosHeaders(token)
-    : createAxiosHeadersForOpenOpsTablesBlock(token);
+  const authenticationHeader = ctx.createHeaders(ctx.token);
   const getTablesResult = await makeOpenOpsTablesGet<OpenOpsTable[]>(
     `api/database/tables/database/${databaseId}/`,
     authenticationHeader,
@@ -60,22 +56,39 @@ export async function getTableNames(
   return tables.map((t) => t.name);
 }
 
+async function getAvailableTablesWithContext(
+  ctx?: RequestContext,
+): Promise<OpenOpsTable[]> {
+  const requestContext =
+    ctx ??
+    (await (async () => {
+      const { token } = await authenticateDefaultUserInOpenOpsTables();
+      return createRequestContext(token, true);
+    })());
+
+  const isJwt = requestContext.createHeaders === createAxiosHeaders;
+  const getDatabaseId = isJwt
+    ? getDefaultDatabaseId
+    : getDefaultDatabaseIdForOpenOpsTablesBlock;
+
+  const tablesDatabaseId = await getDatabaseId(requestContext.token);
+  const tables = await getTablesWithContext(requestContext, tablesDatabaseId);
+
+  return getDistinctTableNames(tables);
+}
+
+/**
+ * @deprecated Use getAvailableTablesWithContext with RequestContext instead
+ */
 async function getAvailableTablesInOpenopsTables(
   token?: string,
   useJwt = false,
 ): Promise<OpenOpsTable[]> {
-  const authToken =
-    token ?? (await authenticateDefaultUserInOpenOpsTables()).token;
-  const shouldUseJwt = token === undefined ? true : useJwt;
-
-  const getDatabaseId = shouldUseJwt
-    ? getDefaultDatabaseId
-    : getDefaultDatabaseIdForOpenOpsTablesBlock;
-  const tablesDatabaseId = await getDatabaseId(authToken);
-
-  const tables = await getTables(authToken, tablesDatabaseId, shouldUseJwt);
-
-  return getDistinctTableNames(tables);
+  if (token === undefined) {
+    return getAvailableTablesWithContext();
+  }
+  const ctx = createRequestContext(token, useJwt);
+  return getAvailableTablesWithContext(ctx);
 }
 
 // Tables allows you to have tables with the same name in the same database.

@@ -1,21 +1,15 @@
-import { AxiosHeaders } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
-import {
-  createAxiosHeaders,
-  createAxiosHeadersForOpenOpsTablesBlock,
-  makeOpenOpsTablesGet,
-} from '../openops-tables/requests-helpers';
+import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
+import { createRequestContext, type RequestContext } from './request-context';
 
-export async function getFields(
+export async function getFieldsWithContext(
   tableId: number,
-  token: string,
+  ctx: RequestContext,
   userFieldNames = true,
   axiosRetryConfig?: IAxiosRetryConfig,
-  useJwt = true,
 ): Promise<OpenOpsField[]> {
-  const authenticationHeader: AxiosHeaders = useJwt
-    ? createAxiosHeaders(token)
-    : createAxiosHeadersForOpenOpsTablesBlock(token);
+  const authenticationHeader = ctx.createHeaders(ctx.token);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fields = await makeOpenOpsTablesGet<any[]>(
     `api/database/fields/table/${tableId}/?user_field_names=${userFieldNames}`,
     authenticationHeader,
@@ -23,6 +17,20 @@ export async function getFields(
   );
 
   return fields.flatMap((item) => item);
+}
+
+/**
+ * @deprecated Use getFieldsWithContext with RequestContext instead
+ */
+export async function getFields(
+  tableId: number,
+  token: string,
+  userFieldNames = true,
+  axiosRetryConfig?: IAxiosRetryConfig,
+  useJwt = true,
+): Promise<OpenOpsField[]> {
+  const ctx = createRequestContext(token, useJwt);
+  return getFieldsWithContext(tableId, ctx, userFieldNames, axiosRetryConfig);
 }
 
 export interface OpenOpsField {

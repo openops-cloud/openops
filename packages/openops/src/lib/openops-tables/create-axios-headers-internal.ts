@@ -1,6 +1,11 @@
 import { AppSystemProp, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
 
+export enum AuthType {
+  JWT = 'JWT',
+  Token = 'Token',
+}
+
 export default function createAxiosHeadersInternal(
   token: string,
   useJwtOverride: boolean,
@@ -10,7 +15,7 @@ export default function createAxiosHeadersInternal(
 
   const useJwt = useJwtOverride || !shouldUseDatabaseTokenConfig;
 
-  const prefix = useJwt ? 'JWT' : 'Token';
+  const prefix = useJwt ? AuthType.JWT : AuthType.Token;
 
   return new AxiosHeaders({
     'Content-Type': 'application/json',
