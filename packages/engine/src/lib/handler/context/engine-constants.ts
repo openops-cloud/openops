@@ -1,4 +1,5 @@
 import {
+  EncryptedDatabaseToken,
   ExecuteFlowOperation,
   ExecutePropsOptions,
   ExecuteStepOperation,
@@ -67,6 +68,8 @@ export class EngineConstants {
     public readonly serverHandlerId: string | null,
     public readonly testRunActionLimits: TestRunLimitSettings,
     public readonly isTestRun: boolean,
+    public readonly tablesDatabaseId: number,
+    public readonly tablesDatabaseToken: EncryptedDatabaseToken,
     public readonly resumePayload?: ResumePayload,
   ) {}
 
@@ -96,6 +99,8 @@ export class EngineConstants {
       input.serverHandlerId ?? null,
       input.flowVersion.testRunActionLimits,
       input.runEnvironment === 'TESTING',
+      input.tablesDatabaseId,
+      input.tablesDatabaseToken,
       input.executionType === ExecutionType.RESUME
         ? input.resumePayload
         : undefined,
@@ -128,6 +133,8 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       true,
+      input.tablesDatabaseId,
+      input.tablesDatabaseToken,
     );
   }
 
@@ -157,6 +164,8 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       true,
+      input.tablesDatabaseId,
+      input.tablesDatabaseToken,
     );
   }
 
@@ -186,6 +195,8 @@ export class EngineConstants {
       null,
       input.flowVersion.testRunActionLimits,
       input.test,
+      input.tablesDatabaseId,
+      input.tablesDatabaseToken,
     );
   }
 

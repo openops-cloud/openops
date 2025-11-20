@@ -27,7 +27,12 @@ import {
 } from '@openops/shared';
 import chalk from 'chalk';
 
-type EngineConstants = 'publicUrl' | 'internalApiUrl' | 'engineToken';
+type EngineConstants =
+  | 'publicUrl'
+  | 'internalApiUrl'
+  | 'engineToken'
+  | 'tablesDatabaseId'
+  | 'tablesDatabaseToken';
 
 export type CodeArtifact = {
   name: string;
