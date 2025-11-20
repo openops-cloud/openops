@@ -84,7 +84,7 @@ jobs:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Create a release file
         run: |
           cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
@@ -94,7 +94,7 @@ jobs:
       - name: Create a GitHub release
         id: create-github-release
         if: inputs.github_release
-        uses: softprops/action-gh-release@v2.4.1
+        uses: softprops/action-gh-release@v2.4.2
         with:
           target_commitish: ${{ github.sha }}
           tag_name: ${{ env.VERSION }}
