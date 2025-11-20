@@ -4,7 +4,7 @@ import { BlockCategory } from '@openops/shared';
 import { aiStep } from './lib/actions/ai-step';
 
 export const ai = createBlock({
-  displayName: 'AI Step',
+  displayName: 'AI',
   auth: aiAuth,
   categories: [BlockCategory.CORE],
   minimumSupportedRelease: '0.7.1',
