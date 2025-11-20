@@ -91,6 +91,8 @@ const AssistantUiChat = ({
     return title;
   }, [chatId, chats, title]);
 
+  const isTitleDefault = currentChatTitle === title;
+
   const onChatSelected = useCallback(
     (id: string) => {
       onChatIdChange(id);
@@ -139,7 +141,7 @@ const AssistantUiChat = ({
         runtime={runtime}
         onNewChat={onNewChatClick}
         title={currentChatTitle}
-        defaultTitle={title}
+        isTitleDefault={isTitleDefault}
         availableModels={availableModels}
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}

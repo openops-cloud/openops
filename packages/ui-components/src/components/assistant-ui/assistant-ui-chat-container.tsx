@@ -14,6 +14,7 @@ type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   toolComponents?: Record<string, ReactNode>;
   handleInject?: (codeContent: string | SourceCode) => void;
+  isTitleDefault?: boolean;
 } & ConnectionStatusProps &
   AssistantTopBarProps &
   ThreadProps;
@@ -36,7 +37,7 @@ const AssistantUiChatContainer = ({
   isShowingSlowWarning,
   connectionError,
   chatId,
-  defaultTitle,
+  isTitleDefault,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -54,7 +55,7 @@ const AssistantUiChatContainer = ({
         isHistoryOpen={isHistoryOpen}
         historyContent={children}
         chatId={chatId}
-        defaultTitle={defaultTitle}
+        isTitleDefault={isTitleDefault}
       >
         {null}
       </AssistantTopBar>

@@ -11,7 +11,7 @@ type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
   title?: string;
-  defaultTitle?: string;
+  isTitleDefault?: boolean;
   onHistoryOpenChange?: (open: boolean) => void;
   isHistoryOpen?: boolean;
   historyContent?: ReactNode;
@@ -28,15 +28,14 @@ const AssistantTopBar = ({
   historyContent,
   children,
   chatId,
-  defaultTitle,
+  isTitleDefault,
 }: AssistantTopBarProps) => {
-  const baseTitle = defaultTitle ?? t('OpenOps Assistant');
+  const baseTitle = t('OpenOps Assistant');
   const animatedTitle = useTypingAnimation({
     text: title || baseTitle,
     speed: 50,
-    fromText: baseTitle,
-    defaultText: baseTitle,
     chatId: chatId,
+    isDefault: isTitleDefault,
   });
 
   return (
