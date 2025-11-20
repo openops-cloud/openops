@@ -10,15 +10,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
-  title?: string;
+  title: string;
+  isTitleDefault?: boolean;
   onHistoryOpenChange?: (open: boolean) => void;
   isHistoryOpen?: boolean;
   historyContent?: ReactNode;
   children: ReactNode;
   chatId?: string | null;
 };
-
-const AI_ASSISTANT_DEFAULT_TITLE = 'AI Assistant';
 
 const AssistantTopBar = ({
   onNewChat,
@@ -29,13 +28,13 @@ const AssistantTopBar = ({
   historyContent,
   children,
   chatId,
+  isTitleDefault,
 }: AssistantTopBarProps) => {
   const animatedTitle = useTypingAnimation({
-    text: title || AI_ASSISTANT_DEFAULT_TITLE,
+    text: title,
     speed: 50,
-    fromText: AI_ASSISTANT_DEFAULT_TITLE,
-    defaultText: AI_ASSISTANT_DEFAULT_TITLE,
     chatId: chatId,
+    enableAnimation: !isTitleDefault,
   });
 
   return (

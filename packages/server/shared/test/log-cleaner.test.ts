@@ -263,6 +263,48 @@ describe('log-cleaner', () => {
       });
     });
 
+    it('should handle error context with circular reference', () => {
+      const error = new Error('test error');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const circularContext: any = { key: 'value' };
+      circularContext.circular = circularContext;
+      Object.assign(error, circularContext);
+
+      const logEvent = {
+        event: error,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.errorContext).toMatch(
+        /^Logger error - could not stringify object\./,
+      );
+    });
+
+    it('should handle ApplicationError params with circular reference', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const circularParams: any = {
+        message: 'test',
+        data: {},
+      };
+      circularParams.data.circular = circularParams;
+
+      const appError = new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: circularParams,
+      });
+
+      const logEvent = {
+        event: appError,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.errorParams).toMatch(
+        /^Logger error - could not stringify object\./,
+      );
+    });
+
     it('should flatten error in correct fields by prefix', () => {
       const logEvent = {
         event: {

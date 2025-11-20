@@ -98,6 +98,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS]: '86400', // 24 hours
   [AppSystemProp.TELEMETRY_MODE]: 'COLLECTOR',
   [AppSystemProp.TELEMETRY_COLLECTOR_URL]: 'https://telemetry.openops.com/save',
+  [SharedSystemProp.ENABLE_HOST_VALIDATION]: 'true',
 };
 
 export const system = {
