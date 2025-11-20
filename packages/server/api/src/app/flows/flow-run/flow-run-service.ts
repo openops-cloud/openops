@@ -25,6 +25,8 @@ import {
   RunEnvironment,
   SeekPage,
   spreadIfDefined,
+  StepOutput,
+  StepOutputStatus,
   TERMINAL_STATUSES,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
@@ -131,6 +133,58 @@ function getEffectiveProgressUpdateType(
 }
 
 export const flowRunService = {
+  async recordTriggerFailure({
+    projectId,
+    flowVersionId,
+    errorMessage,
+    reason,
+    triggerInput,
+  }: {
+    projectId: ProjectId;
+    flowVersionId: FlowVersionId;
+    errorMessage: string;
+    reason: string;
+    triggerInput?: unknown;
+  }): Promise<void> {
+    const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+
+    const executionState: ExecutionState = {
+      steps: {
+        [flowVersion.trigger.name]: {
+          type: flowVersion.trigger.type,
+          status: StepOutputStatus.FAILED,
+          input: triggerInput,
+          errorMessage,
+        },
+      } as Record<string, StepOutput>,
+    };
+
+    const logsFileId = await updateLogs({
+      logsFileId: null,
+      projectId,
+      executionState,
+    });
+
+    const failedRun = {
+      id: openOpsId(),
+      projectId,
+      flowId: flowVersion.flowId,
+      flowVersionId: flowVersion.id,
+      environment: RunEnvironment.PRODUCTION,
+      flowDisplayName: flowVersion.displayName,
+      startTime: new Date().toISOString(),
+      finishTime: new Date().toISOString(),
+      status: FlowRunStatus.FAILED,
+      triggerSource: FlowRunTriggerSource.TRIGGERED,
+      terminationReason: reason,
+      tasks: 0,
+      duration: 0,
+      tags: [],
+      logsFileId,
+    };
+
+    await flowRunRepo().save(failedRun);
+  },
   async list({
     projectId,
     flowId,

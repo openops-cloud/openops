@@ -1,38 +1,23 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
-
-export type DatabaseToken = {
-  id: number;
-  name: string;
-  workspace: number;
-  key: string;
-  permissions: {
-    create: boolean;
-    read: boolean;
-    update: boolean;
-    delete: boolean;
-  };
-};
-
-export type CreateDatabaseTokenParams = {
-  name: string;
-  workspaceId: number;
-  systemToken: string;
-};
+import {
+  createAxiosHeaders,
+  DatabaseToken,
+  makeOpenOpsTablesPost,
+} from '@openops/common';
 
 export async function createDatabaseToken(
-  params: CreateDatabaseTokenParams,
+  workspaceId: number,
+  token: string,
 ): Promise<DatabaseToken> {
   const payload = {
-    name: params.name,
-    workspace: params.workspaceId,
+    name: 'OpenOps Token',
+    workspace: workspaceId,
   };
 
-  const headers = createAxiosHeaders(params.systemToken);
-  const response = await makeOpenOpsTablesPost<DatabaseToken>(
+  const headers = createAxiosHeaders(token);
+
+  return makeOpenOpsTablesPost<DatabaseToken>(
     'api/database/tokens/',
     payload,
     headers,
   );
-
-  return response;
 }

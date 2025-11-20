@@ -1,4 +1,8 @@
-import { logger, rejectedPromiseHandler } from '@openops/server-shared';
+import {
+  logger,
+  rejectedPromiseHandler,
+  UpdateFailureCountRequest,
+} from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -43,8 +47,15 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
-      handleFailureFlow(flowVersion, projectId, engineToken, false);
+      const errorMessage =
+        result?.message ?? 'Trigger execution failed due to an unknown issue.';
 
+      handleFailureFlow(flowVersion, projectId, engineToken, false, {
+        reason: 'TRIGGER_HOOK_FAILED',
+        flowVersionId: flowVersion.id,
+        errorMessage,
+        triggerInput: result.input,
+      });
       return [];
     }
   } catch (e) {
@@ -61,7 +72,12 @@ export async function extractPayloads(
         },
         'Failed to execute trigger due to timeout',
       );
-      handleFailureFlow(flowVersion, projectId, engineToken, false);
+
+      handleFailureFlow(flowVersion, projectId, engineToken, false, {
+        reason: 'TRIGGER_TIMEOUT',
+        flowVersionId: flowVersion.id,
+        errorMessage: 'Trigger execution timed out',
+      });
       return [];
     }
     throw e;
@@ -73,16 +89,23 @@ function handleFailureFlow(
   projectId: ProjectId,
   engineToken: string,
   success: boolean,
+  failureDetails?: {
+    reason: string;
+    flowVersionId: string;
+    errorMessage: string;
+    triggerInput?: unknown;
+  },
 ): void {
   const engineController = engineApiService(engineToken);
 
-  rejectedPromiseHandler(
-    engineController.updateFailureCount({
-      flowId: flowVersion.flowId,
-      projectId,
-      success,
-    }),
-  );
+  const request = {
+    flowId: flowVersion.flowId,
+    projectId,
+    success,
+    ...(!success && failureDetails ? failureDetails : {}),
+  } as UpdateFailureCountRequest;
+
+  rejectedPromiseHandler(engineController.updateFailureCount(request));
 }
 
 type ExecuteTrigger = {

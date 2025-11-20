@@ -5,6 +5,7 @@ import { PrincipalType } from './principal-type';
 
 export type Principal = {
   id: OpenOpsId;
+  externalId?: string;
   type: PrincipalType;
   projectId: ProjectId;
   organization: {

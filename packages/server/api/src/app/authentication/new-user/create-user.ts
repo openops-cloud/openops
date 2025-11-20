@@ -23,6 +23,7 @@ type NewUserParams = {
   verified: boolean;
   organizationId: string | null;
   provider: Provider;
+  externalId?: string;
 };
 
 type NewUserResponse = {
@@ -70,6 +71,7 @@ const createEditorUser = async (
       newsLetter: params.newsLetter,
       password: params.password,
       organizationId: params.organizationId,
+      externalId: params.externalId,
     };
 
     return await userService.create(newUser);

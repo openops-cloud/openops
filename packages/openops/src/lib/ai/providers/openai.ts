@@ -3,6 +3,7 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
+  'gpt-5.1-2025-11-13',
   'gpt-5',
   'gpt-5-mini',
   'gpt-5-nano',

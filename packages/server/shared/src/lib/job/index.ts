@@ -39,11 +39,22 @@ export const UpdateJobRequest = Type.Object({
 });
 export type UpdateJobRequest = Static<typeof UpdateJobRequest>;
 
-export const UpdateFailureCountRequest = Type.Object({
-  flowId: Type.String(),
-  projectId: Type.String(),
-  success: Type.Boolean(),
-});
+export const UpdateFailureCountRequest = Type.Union([
+  Type.Object({
+    flowId: Type.String(),
+    projectId: Type.String(),
+    success: Type.Literal(true),
+  }),
+  Type.Object({
+    flowId: Type.String(),
+    projectId: Type.String(),
+    success: Type.Literal(false),
+    flowVersionId: Type.String(),
+    reason: Type.String(),
+    errorMessage: Type.String(),
+    triggerInput: Type.Optional(Type.Unknown()),
+  }),
+]);
 
 export type UpdateFailureCountRequest = Static<
   typeof UpdateFailureCountRequest
