@@ -45,7 +45,7 @@ const executeFlow = async (
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
   try {
-    const constants = EngineConstants.fromExecuteFlowInput(input);
+    const constants = await EngineConstants.fromExecuteFlowInput(input);
 
     const response = await flowExecutor.triggerFlowExecutor({
       trigger: input.flowVersion.trigger,
@@ -92,7 +92,7 @@ async function executeStep(
       engineToken: input.engineToken,
       stepTestOutputs: input.stepTestOutputs,
     }),
-    constants: EngineConstants.fromExecuteStepInput(input),
+    constants: await EngineConstants.fromExecuteStepInput(input),
   });
 
   const stepResult = output.steps[step.name];
@@ -203,7 +203,7 @@ export async function execute(
             stepTestOutputs: input.stepTestOutputs,
           }),
           searchValue: input.searchValue,
-          constants: EngineConstants.fromExecutePropertyInput(input),
+          constants: await EngineConstants.fromExecutePropertyInput(input),
         });
 
         return {
@@ -222,7 +222,7 @@ export async function execute(
 
         const output = await triggerHelper.executeTrigger({
           params: input,
-          constants: EngineConstants.fromExecuteTriggerInput(input),
+          constants: await EngineConstants.fromExecuteTriggerInput(input),
         });
 
         return {
