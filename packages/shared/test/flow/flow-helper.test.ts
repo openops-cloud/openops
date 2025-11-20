@@ -50,7 +50,7 @@ const flowVersionWithBranching: FlowVersion = {
       triggerName: 'cron_expression',
     },
     nextAction: {
-      name: 'step_1',
+      name: 'step_a',
       type: 'BRANCH',
       valid: true,
       settings: {
@@ -66,8 +66,8 @@ const flowVersionWithBranching: FlowVersion = {
         ],
       },
       nextAction: {
-        id: 'step_4',
-        name: 'step_4',
+        id: 'step_d',
+        name: 'step_d',
         type: 'BLOCK',
         valid: true,
         settings: {
@@ -87,7 +87,7 @@ const flowVersionWithBranching: FlowVersion = {
       },
       displayName: 'Branch',
       onFailureAction: {
-        name: 'step_3',
+        name: 'step_c',
         type: 'CODE',
         valid: true,
         settings: {
@@ -100,7 +100,7 @@ const flowVersionWithBranching: FlowVersion = {
         displayName: 'Code',
       },
       onSuccessAction: {
-        name: 'step_2',
+        name: 'step_b',
         type: 'BLOCK',
         valid: true,
         settings: {
@@ -303,8 +303,8 @@ describe('Flow Helper', () => {
         },
         displayName: 'Cron Expression',
         nextAction: {
-          id: 'step_4',
-          name: 'step_4',
+          id: 'step_d',
+          name: 'step_d',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -333,8 +333,8 @@ describe('Flow Helper', () => {
     const updateRequest: FlowOperationRequest = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
-        id: 'step_1',
-        name: 'step_1',
+        id: 'step_a',
+        name: 'step_a',
         type: ActionType.BRANCH,
         displayName: 'Branch',
         valid: true,
@@ -374,13 +374,13 @@ describe('Flow Helper', () => {
         triggerName: 'cron_expression',
       },
       nextAction: {
-        id: 'step_1',
+        id: 'step_a',
         displayName: 'Branch',
-        name: 'step_1',
+        name: 'step_a',
         valid: true,
         nextAction: {
-          id: 'step_4',
-          name: 'step_4',
+          id: 'step_d',
+          name: 'step_d',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -399,7 +399,7 @@ describe('Flow Helper', () => {
           displayName: 'Get',
         },
         onFailureAction: {
-          name: 'step_3',
+          name: 'step_c',
           type: 'CODE',
           valid: true,
           settings: {
@@ -412,7 +412,7 @@ describe('Flow Helper', () => {
           displayName: 'Code',
         },
         onSuccessAction: {
-          name: 'step_2',
+          name: 'step_b',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -456,7 +456,7 @@ describe('Flow Helper', () => {
       type: FlowOperationType.ADD_ACTION,
       request: {
         parentStep: 'trigger',
-        action: createBranchAction('step_1', {
+        action: createBranchAction('step_a', {
           conditions: [
             [
               {
@@ -474,27 +474,27 @@ describe('Flow Helper', () => {
     const addCodeActionOnTrue: FlowOperationRequest = {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent:
           StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
-        action: createCodeAction('step_2'),
+        action: createCodeAction('step_b'),
       },
     };
     const addCodeActionOnFalse: FlowOperationRequest = {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent:
           StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
-        action: createCodeAction('step_3'),
+        action: createCodeAction('step_c'),
       },
     };
     const addCodeActionOnAfter: FlowOperationRequest = {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
-        action: createCodeAction('step_4'),
+        action: createCodeAction('step_d'),
       },
     };
     let resultFlow = emptyScheduleFlowVersion;
@@ -520,9 +520,9 @@ describe('Flow Helper', () => {
       },
       displayName: 'Cron Expression',
       nextAction: {
-        id: 'step_1',
+        id: 'step_a',
         displayName: 'Branch',
-        name: 'step_1',
+        name: 'step_a',
         valid: true,
         type: 'BRANCH',
         settings: {
@@ -540,8 +540,8 @@ describe('Flow Helper', () => {
         },
         onSuccessAction: {
           displayName: 'Code',
-          name: 'step_2',
-          id: 'step_2',
+          name: 'step_b',
+          id: 'step_b',
           valid: true,
           type: 'CODE',
           settings: {
@@ -554,8 +554,8 @@ describe('Flow Helper', () => {
         },
         onFailureAction: {
           displayName: 'Code',
-          name: 'step_3',
-          id: 'step_3',
+          name: 'step_c',
+          id: 'step_c',
           valid: true,
           type: 'CODE',
           settings: {
@@ -568,8 +568,8 @@ describe('Flow Helper', () => {
         },
         nextAction: {
           displayName: 'Code',
-          name: 'step_4',
-          id: 'step_4',
+          name: 'step_d',
+          id: 'step_d',
           valid: true,
           type: 'CODE',
           settings: {
@@ -590,7 +590,7 @@ describe('Flow Helper', () => {
       type: FlowOperationType.ADD_ACTION,
       request: {
         parentStep: 'trigger',
-        action: createLoopAction('step_1', {
+        action: createLoopAction('step_a', {
           items: 'items',
           inputUiInfo: {},
         }),
@@ -599,17 +599,17 @@ describe('Flow Helper', () => {
     const addCodeActionInside: FlowOperationRequest = {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_LOOP,
-        action: createCodeAction('step_3'),
+        action: createCodeAction('step_c'),
       },
     };
     const addCodeActionOnAfter: FlowOperationRequest = {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
-        action: createCodeAction('step_4'),
+        action: createCodeAction('step_d'),
       },
     };
     let resultFlow = emptyScheduleFlowVersion;
@@ -635,9 +635,9 @@ describe('Flow Helper', () => {
       },
       displayName: 'Cron Expression',
       nextAction: {
-        id: 'step_1',
+        id: 'step_a',
         displayName: 'Loop',
-        name: 'step_1',
+        name: 'step_a',
         valid: true,
         type: 'LOOP_ON_ITEMS',
         settings: {
@@ -646,8 +646,8 @@ describe('Flow Helper', () => {
         },
         firstLoopAction: {
           displayName: 'Code',
-          id: 'step_3',
-          name: 'step_3',
+          id: 'step_c',
+          name: 'step_c',
           valid: true,
           type: 'CODE',
           settings: {
@@ -660,8 +660,8 @@ describe('Flow Helper', () => {
         },
         nextAction: {
           displayName: 'Code',
-          id: 'step_4',
-          name: 'step_4',
+          id: 'step_d',
+          name: 'step_d',
           valid: true,
           type: 'CODE',
           settings: {
@@ -707,7 +707,7 @@ describe('Flow Helper', () => {
         },
         displayName: 'Cron Expression',
         nextAction: {
-          name: 'step_1',
+          name: 'step_a',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -734,8 +734,8 @@ describe('Flow Helper', () => {
       request: {
         parentStep: 'trigger',
         action: {
-          id: 'step_1',
-          name: 'step_1',
+          id: 'step_a',
+          name: 'step_a',
           type: ActionType.BLOCK,
           displayName: 'Get',
           settings: {
@@ -762,7 +762,7 @@ describe('Flow Helper', () => {
           code: ErrorCode.FLOW_OPERATION_INVALID,
           params: {},
         },
-        'Step step_1 already exists',
+        'Step step_a already exists',
       ),
     );
   });
@@ -771,7 +771,7 @@ describe('Flow Helper', () => {
     const pasteActionsRequest: PasteActionsRequest = {
       parentStep: 'trigger',
       stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
-      action: createBlockAction('step_1', 'Get', {
+      action: createBlockAction('step_a', 'Get', {
         input: {
           key: '1',
         },
@@ -802,8 +802,8 @@ describe('Flow Helper', () => {
     const updateRequest: FlowOperationRequest = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
-        id: 'step_1',
-        name: 'step_1',
+        id: 'step_a',
+        name: 'step_a',
         type: ActionType.BRANCH,
         displayName: 'Branch',
         valid: true,
@@ -832,7 +832,7 @@ describe('Flow Helper', () => {
     const operation: FlowOperationRequest = {
       type: FlowOperationType.DELETE_ACTION,
       request: {
-        name: 'step_2',
+        name: 'step_b',
       },
     };
 
@@ -870,7 +870,7 @@ it('Duplicate Flow With Branch', () => {
         triggerName: 'cron_expression',
       },
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         type: 'BRANCH',
         valid: true,
         settings: {
@@ -887,7 +887,7 @@ it('Duplicate Flow With Branch', () => {
           inputUiInfo: {},
         },
         nextAction: {
-          name: 'step_4',
+          name: 'step_d',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -907,9 +907,9 @@ it('Duplicate Flow With Branch', () => {
         },
         displayName: 'Branch',
         onFailureAction: {
-          name: 'step_3',
+          name: 'step_c',
           type: 'CODE',
-          id: 'step_3',
+          id: 'step_c',
           valid: true,
           settings: {
             input: {},
@@ -921,7 +921,7 @@ it('Duplicate Flow With Branch', () => {
           displayName: 'Code',
         },
         onSuccessAction: {
-          name: 'step_2',
+          name: 'step_b',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -953,7 +953,7 @@ it('Duplicate Flow With Branch', () => {
         parentStep: 'trigger',
         action: {
           type: ActionType.BRANCH,
-          name: 'step_1',
+          name: 'step_a',
           displayName: 'Branch',
           id: 'IPvDstQewUpNmrQtADqJw',
           settings: {
@@ -976,10 +976,10 @@ it('Duplicate Flow With Branch', () => {
     {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         action: {
           type: ActionType.BLOCK,
-          name: 'step_4',
+          name: 'step_d',
           displayName: 'Get',
           id: 'T7WQtMmqk5paJHq1HnE2m',
           settings: {
@@ -1002,14 +1002,14 @@ it('Duplicate Flow With Branch', () => {
     {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent:
           StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
         action: {
           type: ActionType.CODE,
-          name: 'step_3',
+          name: 'step_c',
           displayName: 'Code',
-          id: 'step_3',
+          id: 'step_c',
           settings: {
             input: {},
             sourceCode: {
@@ -1024,12 +1024,12 @@ it('Duplicate Flow With Branch', () => {
     {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent:
           StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
         action: {
-          id: 'step_2',
-          name: 'step_2',
+          id: 'step_b',
+          name: 'step_b',
           type: ActionType.BLOCK,
           displayName: 'Send Message Webhook',
           settings: {
@@ -1106,7 +1106,7 @@ it('Duplicate Flow With Loops using Import', () => {
         triggerName: 'trigger_star',
       },
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         type: 'LOOP_ON_ITEMS',
         valid: false,
         settings: {
@@ -1114,9 +1114,9 @@ it('Duplicate Flow With Loops using Import', () => {
           inputUiInfo: {},
         },
         nextAction: {
-          name: 'step_3',
+          name: 'step_c',
           type: 'CODE',
-          id: 'step_3',
+          id: 'step_c',
           valid: true,
           settings: {
             input: {},
@@ -1129,9 +1129,9 @@ it('Duplicate Flow With Loops using Import', () => {
         },
         displayName: 'Loop on Items',
         firstLoopAction: {
-          name: 'step_2',
+          name: 'step_b',
           type: 'CODE',
-          id: 'step_2',
+          id: 'step_b',
           valid: true,
           settings: {
             input: {},
@@ -1154,8 +1154,8 @@ it('Duplicate Flow With Loops using Import', () => {
       request: {
         parentStep: 'trigger',
         action: {
-          id: 'step_1',
-          name: 'step_1',
+          id: 'step_a',
+          name: 'step_a',
           type: ActionType.LOOP_ON_ITEMS,
           valid: false,
           settings: {
@@ -1169,10 +1169,10 @@ it('Duplicate Flow With Loops using Import', () => {
     {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         action: {
-          id: 'step_3',
-          name: 'step_3',
+          id: 'step_c',
+          name: 'step_c',
           type: ActionType.CODE,
           valid: true,
           settings: {
@@ -1189,11 +1189,11 @@ it('Duplicate Flow With Loops using Import', () => {
     {
       type: FlowOperationType.ADD_ACTION,
       request: {
-        parentStep: 'step_1',
+        parentStep: 'step_a',
         stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_LOOP,
         action: {
-          id: 'step_2',
-          name: 'step_2',
+          id: 'step_b',
+          name: 'step_b',
           type: ActionType.CODE,
           valid: true,
           settings: {
@@ -1265,7 +1265,7 @@ it('Should remove connections', () => {
         blockVersion: '~0.1.5',
       },
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         type: 'BRANCH',
         valid: true,
         settings: {
@@ -1283,7 +1283,7 @@ it('Should remove connections', () => {
         },
         displayName: 'Condition',
         onFailureAction: {
-          name: 'step_2',
+          name: 'step_b',
           type: 'BLOCK',
           valid: true,
           settings: {
@@ -1318,7 +1318,7 @@ it('Should remove connections', () => {
             },
           },
           nextAction: {
-            name: 'step_3',
+            name: 'step_c',
             type: 'LOOP_ON_ITEMS',
             valid: false,
             settings: {
@@ -1329,7 +1329,7 @@ it('Should remove connections', () => {
             },
             displayName: 'Loop on Items',
             firstLoopAction: {
-              name: 'step_4',
+              name: 'step_d',
               type: 'BLOCK',
               valid: true,
               settings: {
@@ -1392,7 +1392,7 @@ it('Should remove connections', () => {
 });
 
 describe('getImportOperations', () => {
-  const mockAction = createBlockAction('step_1', 'Get', {
+  const mockAction = createBlockAction('step_a', 'Get', {
     input: {
       key: '1',
     },
@@ -1426,7 +1426,7 @@ describe('getImportOperations', () => {
     nextAction: mockAction,
   };
 
-  const mockSlackAction = createBlockAction('step_1', 'Send Message', {
+  const mockSlackAction = createBlockAction('step_a', 'Send Message', {
     input: {
       auth: {
         authProviderKey: 'Slack',
@@ -1508,7 +1508,7 @@ describe('getImportOperations', () => {
     const { id, ...actionWithoutId } = request.action;
     expect(actionWithoutId).toEqual({
       displayName: 'Get',
-      name: 'step_1',
+      name: 'step_a',
       settings: {
         actionName: 'get',
         blockName: 'store',
@@ -1546,7 +1546,7 @@ describe('getImportOperations', () => {
 
   it('should return prefilled connections for actions inside branch / split / loop', () => {
     const mockActionWithNestedSteps = {
-      name: 'step_6',
+      name: 'step_f',
       type: ActionType.SPLIT,
       valid: true,
       branches: [
@@ -1556,7 +1556,7 @@ describe('getImportOperations', () => {
         {
           optionId: 'fA5_aFv6-6CAjno60YBsz',
           nextAction: {
-            name: 'step_1',
+            name: 'step_a',
             type: ActionType.BRANCH,
             valid: false,
             settings: {
@@ -1565,7 +1565,7 @@ describe('getImportOperations', () => {
             },
             displayName: 'Condition',
             onSuccessAction: {
-              name: 'step_2',
+              name: 'step_b',
               type: ActionType.LOOP_ON_ITEMS,
               valid: false,
               settings: {
@@ -1576,7 +1576,7 @@ describe('getImportOperations', () => {
               },
               displayName: 'Loop on Items',
               firstLoopAction: {
-                name: 'step_3',
+                name: 'step_c',
                 type: ActionType.BLOCK,
                 valid: false,
                 settings: {
@@ -1747,7 +1747,7 @@ describe('Split', () => {
       valid: false,
       settings: {},
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         type: 'SPLIT',
         valid: true,
         settings: {
@@ -1884,7 +1884,7 @@ describe('Split', () => {
         displayName: 'Select Trigger',
         nextAction: {
           displayName: 'Split',
-          name: 'step_1',
+          name: 'step_a',
           valid: false,
           type: 'SPLIT',
           settings: {
@@ -1933,7 +1933,7 @@ describe('Split', () => {
         parentStep: 'trigger',
         stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
         action: {
-          id: 'step_1',
+          id: 'step_a',
           type: ActionType.SPLIT,
           branches: [
             {
@@ -1979,7 +1979,7 @@ describe('Split', () => {
               customizedInputs: {},
             },
           },
-          name: 'step_1',
+          name: 'step_a',
           valid: false,
           displayName: 'Split',
         },
@@ -2015,9 +2015,9 @@ describe('Split', () => {
         },
         displayName: 'Cron Expression',
         nextAction: {
-          id: 'step_1',
+          id: 'step_a',
           displayName: 'Split',
-          name: 'step_1',
+          name: 'step_a',
           valid: false,
           type: 'SPLIT',
           settings: {
@@ -2067,13 +2067,13 @@ describe('Split', () => {
   });
 
   describe('Add nodes inside a Split', () => {
-    const mockCodeAction = createCodeAction('step_2');
+    const mockCodeAction = createCodeAction('step_b');
 
     it('StepLocationRelativeToParent.AFTER, should add a node in nextAction', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
           action: mockCodeAction,
         },
@@ -2088,7 +2088,7 @@ describe('Split', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent:
             StepLocationRelativeToParent.INSIDE_SPLIT,
           action: mockCodeAction,
@@ -2110,7 +2110,7 @@ describe('Split', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent:
             StepLocationRelativeToParent.INSIDE_SPLIT,
           branchNodeId: 'jFCJvPAjs8umZSeTDC5n1',
@@ -2132,7 +2132,7 @@ describe('Split', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent:
             StepLocationRelativeToParent.INSIDE_SPLIT,
           branchNodeId: 'jFCJvPAjs8umZSeTDC5n1',
@@ -2147,7 +2147,7 @@ describe('Split', () => {
         {
           optionId: 'jFCJvPAjs8umZSeTDC5n1',
           nextAction: {
-            id: 'step_2',
+            id: 'step_b',
             type: ActionType.CODE,
             settings: {
               input: {},
@@ -2156,7 +2156,7 @@ describe('Split', () => {
                 packageJson: '{}',
               },
             },
-            name: 'step_2',
+            name: 'step_b',
             valid: true,
             displayName: 'Code',
           },
@@ -2164,7 +2164,7 @@ describe('Split', () => {
       ]);
 
       const mockCodeAction2: Action = {
-        id: 'step_30',
+        id: 'step_c0',
         type: ActionType.CODE,
         settings: {
           input: {},
@@ -2173,7 +2173,7 @@ describe('Split', () => {
             packageJson: '{}',
           },
         },
-        name: 'step_30',
+        name: 'step_ad',
         valid: true,
         displayName: 'Code',
       };
@@ -2181,7 +2181,7 @@ describe('Split', () => {
       const secondOperation: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent:
             StepLocationRelativeToParent.INSIDE_SPLIT,
           branchNodeId: 'jFCJvPAjs8umZSeTDC5n1',
@@ -2196,7 +2196,7 @@ describe('Split', () => {
         {
           optionId: 'jFCJvPAjs8umZSeTDC5n1',
           nextAction: {
-            id: 'step_30',
+            id: 'step_c0',
             type: ActionType.CODE,
             settings: {
               input: {},
@@ -2205,7 +2205,7 @@ describe('Split', () => {
                 packageJson: '{}',
               },
             },
-            name: 'step_30',
+            name: 'step_ad',
             valid: true,
             displayName: 'Code',
             nextAction: {
@@ -2217,8 +2217,8 @@ describe('Split', () => {
                   packageJson: '{}',
                 },
               },
-              id: 'step_2',
-              name: 'step_2',
+              id: 'step_b',
+              name: 'step_b',
               valid: true,
               displayName: 'Code',
             },
@@ -2231,7 +2231,7 @@ describe('Split', () => {
       const addNewBranch: FlowOperationRequest = {
         type: FlowOperationType.ADD_ACTION,
         request: {
-          parentStep: 'step_1',
+          parentStep: 'step_a',
           stepLocationRelativeToParent:
             StepLocationRelativeToParent.INSIDE_SPLIT,
           branchNodeId: '123',
@@ -2267,7 +2267,7 @@ describe('Split', () => {
   });
 
   describe('Update nodes inside a Split', () => {
-    const mockCodeAction = createCodeAction('step_2');
+    const mockCodeAction = createCodeAction('step_b');
 
     it('can update a node in nextAction', () => {
       const operation: FlowOperationRequest = {
@@ -2497,7 +2497,7 @@ describe('Split', () => {
           valid: false,
           settings: {},
           nextAction: {
-            name: 'step_1',
+            name: 'step_a',
             type: 'SPLIT',
             valid: true,
             settings: {
@@ -2534,7 +2534,7 @@ describe('Split', () => {
   });
 
   describe('process operations', () => {
-    const mockCodeAction = createCodeAction('step_2');
+    const mockCodeAction = createCodeAction('step_b');
 
     it('can correctly process import operations for split with branches', () => {
       const flowVersionWithSplitWithBranches = {
@@ -2588,7 +2588,7 @@ describe('Split', () => {
                 customizedInputs: {},
               },
             },
-            name: 'step_1',
+            name: 'step_a',
             valid: false,
             displayName: 'Split',
           },
@@ -2601,7 +2601,7 @@ describe('Split', () => {
           request: {
             parentStep: 'trigger',
             action: {
-              id: 'step_1',
+              id: 'step_a',
               type: 'SPLIT',
               branches: [],
               settings: {
@@ -2640,7 +2640,7 @@ describe('Split', () => {
                   customizedInputs: {},
                 },
               },
-              name: 'step_1',
+              name: 'step_a',
               valid: false,
               displayName: 'Split',
             },
@@ -2649,10 +2649,10 @@ describe('Split', () => {
         {
           type: 'ADD_ACTION',
           request: {
-            parentStep: 'step_1',
+            parentStep: 'step_a',
             stepLocationRelativeToParent: 'INSIDE_SPLIT',
             action: {
-              id: 'step_2',
+              id: 'step_b',
               type: 'CODE',
               settings: {
                 input: {},
@@ -2661,7 +2661,7 @@ describe('Split', () => {
                   packageJson: '{}',
                 },
               },
-              name: 'step_2',
+              name: 'step_b',
               valid: true,
               displayName: 'Code',
             },
@@ -2720,7 +2720,7 @@ describe('Split', () => {
           },
           nextAction: {
             displayName: 'Split',
-            name: 'step_1',
+            name: 'step_a',
             valid: true,
             type: 'SPLIT',
             settings: {
@@ -2769,10 +2769,10 @@ describe('Split', () => {
         {
           type: FlowOperationType.ADD_ACTION,
           request: {
-            parentStep: 'step_1',
+            parentStep: 'step_a',
             action: {
-              id: 'step_3',
-              name: 'step_3',
+              id: 'step_c',
+              name: 'step_c',
               type: ActionType.BRANCH,
               valid: false,
               settings: {
@@ -2816,7 +2816,7 @@ describe('bulkAddActions', () => {
       valid: false,
       settings: {},
       nextAction: {
-        name: 'step_4',
+        name: 'step_d',
         type: 'LOOP_ON_ITEMS',
         valid: false,
         settings: {
@@ -2826,7 +2826,7 @@ describe('bulkAddActions', () => {
           },
         },
         nextAction: {
-          name: 'step_2',
+          name: 'step_b',
           type: 'SPLIT',
           valid: true,
           branches: [
@@ -2882,7 +2882,7 @@ describe('bulkAddActions', () => {
             defaultBranch: '24MiXRtodWv89yyBRntcN',
           },
           nextAction: {
-            name: 'step_3',
+            name: 'step_c',
             type: 'BRANCH',
             valid: false,
             settings: {
@@ -2901,7 +2901,7 @@ describe('bulkAddActions', () => {
               },
             },
             nextAction: {
-              name: 'step_13',
+              name: 'step_a3',
               type: 'SPLIT',
               valid: true,
               branches: [
@@ -2972,10 +2972,10 @@ describe('bulkAddActions', () => {
   };
 
   const action = {
-    ...createCodeAction('step_20'),
+    ...createCodeAction('step_b0'),
     displayName: 'COPY 1',
     nextAction: {
-      ...createCodeAction('step_30'),
+      ...createCodeAction('step_c0'),
       displayName: 'COPY 2',
     },
   };
@@ -2996,10 +2996,10 @@ describe('bulkAddActions', () => {
   it('should paste AFTER', () => {
     const result = flowHelper.apply(initialFlowVersion, {
       type: FlowOperationType.PASTE_ACTIONS,
-      request: getPasteRequest('step_4', StepLocationRelativeToParent.AFTER),
+      request: getPasteRequest('step_d', StepLocationRelativeToParent.AFTER),
     });
 
-    const parent = flowHelper.getStep(result, 'step_4');
+    const parent = flowHelper.getStep(result, 'step_d');
 
     expect(parent?.nextAction.name).toEqual(action.name);
     expect(parent?.nextAction.nextAction.name).toEqual(action.nextAction.name);
@@ -3009,12 +3009,12 @@ describe('bulkAddActions', () => {
     const result = flowHelper.apply(initialFlowVersion, {
       type: FlowOperationType.PASTE_ACTIONS,
       request: getPasteRequest(
-        'step_4',
+        'step_d',
         StepLocationRelativeToParent.INSIDE_LOOP,
       ),
     });
 
-    const parent = flowHelper.getStep(result, 'step_4');
+    const parent = flowHelper.getStep(result, 'step_d');
 
     if (parent && parent.type === 'LOOP_ON_ITEMS') {
       expect(parent.firstLoopAction?.name).toEqual(action.name);
@@ -3030,12 +3030,12 @@ describe('bulkAddActions', () => {
     const result = flowHelper.apply(initialFlowVersion, {
       type: FlowOperationType.PASTE_ACTIONS,
       request: getPasteRequest(
-        'step_3',
+        'step_c',
         StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
       ),
     });
 
-    const parent = flowHelper.getStep(result, 'step_3');
+    const parent = flowHelper.getStep(result, 'step_c');
 
     if (parent && parent.type === 'BRANCH') {
       expect(parent.onFailureAction?.name).toEqual(action.name);
@@ -3052,13 +3052,13 @@ describe('bulkAddActions', () => {
     const result = flowHelper.apply(initialFlowVersion, {
       type: FlowOperationType.PASTE_ACTIONS,
       request: getPasteRequest(
-        'step_2',
+        'step_b',
         StepLocationRelativeToParent.INSIDE_SPLIT,
         branchId,
       ),
     });
 
-    const parent = flowHelper.getStep(result, 'step_2');
+    const parent = flowHelper.getStep(result, 'step_b');
 
     let branch;
 
@@ -3078,7 +3078,7 @@ it('should add id field when adding a new action', () => {
     type: FlowOperationType.ADD_ACTION,
     request: {
       parentStep: 'trigger',
-      action: createBlockAction('step_1', 'Get', {
+      action: createBlockAction('step_a', 'Get', {
         input: {
           key: '1',
         },
@@ -3097,7 +3097,7 @@ it('should add id field when adding a new action', () => {
     emptyScheduleFlowVersion,
     addBlockRequest,
   );
-  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_a');
 });
 
 it('should preserve id field when updating an action', () => {
@@ -3105,7 +3105,7 @@ it('should preserve id field when updating an action', () => {
     type: FlowOperationType.ADD_ACTION,
     request: {
       parentStep: 'trigger',
-      action: createBlockAction('step_1', 'Get', {
+      action: createBlockAction('step_a', 'Get', {
         input: {
           key: '1',
         },
@@ -3124,7 +3124,7 @@ it('should preserve id field when updating an action', () => {
 
   const updateRequest: FlowOperationRequest = {
     type: FlowOperationType.UPDATE_ACTION,
-    request: createBlockAction('step_1', 'Get Updated', {
+    request: createBlockAction('step_a', 'Get Updated', {
       input: {
         key: '2',
       },
@@ -3139,7 +3139,7 @@ it('should preserve id field when updating an action', () => {
     }),
   };
   resultFlow = flowHelper.apply(resultFlow, updateRequest);
-  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_a');
 });
 
 it('should add id field to child actions when adding them', () => {
@@ -3147,7 +3147,7 @@ it('should add id field to child actions when adding them', () => {
     type: FlowOperationType.ADD_ACTION,
     request: {
       parentStep: 'trigger',
-      action: createBranchAction('step_1', {
+      action: createBranchAction('step_a', {
         conditions: [
           [
             {
@@ -3167,16 +3167,16 @@ it('should add id field to child actions when adding them', () => {
   const addCodeActionOnTrue: FlowOperationRequest = {
     type: FlowOperationType.ADD_ACTION,
     request: {
-      parentStep: 'step_1',
+      parentStep: 'step_a',
       stepLocationRelativeToParent:
         StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
-      action: createCodeAction('step_2'),
+      action: createCodeAction('step_b'),
     },
   };
   resultFlow = flowHelper.apply(resultFlow, addCodeActionOnTrue);
   expect(resultFlow.trigger.nextAction.onSuccessAction).toHaveProperty(
     'id',
-    'step_2',
+    'step_b',
   );
 });
 
@@ -3273,7 +3273,7 @@ describe('createTrigger', () => {
         triggerName: 'cron_expression',
       },
     };
-    const nextAction = createCodeAction('step_1');
+    const nextAction = createCodeAction('step_a');
 
     const result = flowHelper.createTrigger(name, request as any, nextAction);
 
@@ -3351,7 +3351,7 @@ describe('createTrigger', () => {
       displayName: 'Empty Trigger',
       settings: {},
     };
-    const nextAction = createCodeAction('step_1');
+    const nextAction = createCodeAction('step_a');
 
     const result = flowHelper.createTrigger(name, request as any, nextAction);
 
@@ -3390,7 +3390,7 @@ describe('duplicateStep', () => {
       displayName: 'Trigger',
       nextAction: {
         id: 'original-id',
-        name: 'step_1',
+        name: 'step_a',
         type: ActionType.CODE,
         valid: true,
         settings: {
@@ -3409,7 +3409,7 @@ describe('duplicateStep', () => {
     const operation: FlowOperationRequest = {
       type: FlowOperationType.DUPLICATE_ACTION,
       request: {
-        stepName: 'step_1',
+        stepName: 'step_a',
         stepId: 'new-custom-id',
       },
     };
@@ -3419,7 +3419,7 @@ describe('duplicateStep', () => {
 
     expect(duplicatedStep).toBeDefined();
     expect(duplicatedStep.id).toBe('new-custom-id');
-    expect(duplicatedStep.name).toBe('step_2');
+    expect(duplicatedStep.name).toBe('step_b');
     expect(duplicatedStep.displayName).toBe('Original Step Copy');
   });
 
@@ -3430,7 +3430,7 @@ describe('duplicateStep', () => {
         ...baseFlowVersion.trigger,
         nextAction: {
           id: 'branch-id',
-          name: 'step_1',
+          name: 'step_a',
           type: ActionType.BRANCH,
           valid: true,
           settings: {
@@ -3440,7 +3440,7 @@ describe('duplicateStep', () => {
           displayName: 'Branch',
           onSuccessAction: {
             id: 'success-id',
-            name: 'step_2',
+            name: 'step_b',
             type: ActionType.CODE,
             valid: true,
             settings: {
@@ -3454,7 +3454,7 @@ describe('duplicateStep', () => {
           },
           onFailureAction: {
             id: 'failure-id',
-            name: 'step_3',
+            name: 'step_c',
             type: ActionType.CODE,
             valid: true,
             settings: {
@@ -3473,7 +3473,7 @@ describe('duplicateStep', () => {
     const operation: FlowOperationRequest = {
       type: FlowOperationType.DUPLICATE_ACTION,
       request: {
-        stepName: 'step_1',
+        stepName: 'step_a',
         stepId: 'new-branch-id',
       },
     };
@@ -3483,7 +3483,7 @@ describe('duplicateStep', () => {
 
     expect(duplicatedBranch).toBeDefined();
     expect(duplicatedBranch.id).toBe('new-branch-id');
-    expect(duplicatedBranch.name).toBe('step_4');
+    expect(duplicatedBranch.name).toBe('step_d');
     expect(duplicatedBranch.displayName).toBe('Branch Copy');
 
     expect(duplicatedBranch.onSuccessAction).toBeDefined();
@@ -3505,12 +3505,12 @@ describe('duplicateStep', () => {
         ...baseFlowVersion.trigger,
         nextAction: {
           id: 'original-id',
-          name: 'step_1',
+          name: 'step_a',
           type: ActionType.CODE,
           valid: true,
           settings: {
             input: {
-              reference: '{{step_1.output}}',
+              reference: '{{step_a.output}}',
             },
             sourceCode: {
               code: 'test',
@@ -3525,7 +3525,7 @@ describe('duplicateStep', () => {
     const operation: FlowOperationRequest = {
       type: FlowOperationType.DUPLICATE_ACTION,
       request: {
-        stepName: 'step_1',
+        stepName: 'step_a',
         stepId: 'new-id',
       },
     };
@@ -3535,7 +3535,7 @@ describe('duplicateStep', () => {
 
     expect(duplicatedStep).toBeDefined();
     expect(duplicatedStep.id).toBe('new-id');
-    expect(duplicatedStep.settings.input.reference).toBe('{{step_2.output}}');
+    expect(duplicatedStep.settings.input.reference).toBe('{{step_b.output}}');
   });
 });
 
@@ -3630,7 +3630,7 @@ describe('flowHelper.addStepIndices', () => {
         displayName: 'Trigger',
         settings: {},
         nextAction: {
-          name: 'step_1',
+          name: 'step_a',
           id: 'id1',
           type: ActionType.CODE,
           valid: true,
@@ -3641,7 +3641,7 @@ describe('flowHelper.addStepIndices', () => {
             inputUiInfo: { customizedInputs: {} },
           },
           nextAction: {
-            name: 'step_2',
+            name: 'step_b',
             id: 'id2',
             type: ActionType.CODE,
             valid: true,
@@ -3670,7 +3670,7 @@ describe('flowHelper.addStepIndices', () => {
         displayName: 'Trigger',
         settings: {},
         nextAction: {
-          name: 'step_1',
+          name: 'step_a',
           id: 'id1',
           type: ActionType.LOOP_ON_ITEMS,
           valid: true,
@@ -3680,7 +3680,7 @@ describe('flowHelper.addStepIndices', () => {
             inputUiInfo: { customizedInputs: {} },
           },
           firstLoopAction: {
-            name: 'step_2',
+            name: 'step_b',
             id: 'id2',
             type: ActionType.CODE,
             valid: true,
@@ -3709,7 +3709,7 @@ describe('flowHelper.addStepIndices', () => {
         displayName: 'Trigger',
         settings: {},
         nextAction: {
-          name: 'step_1',
+          name: 'step_a',
           id: 'id1',
           type: ActionType.BRANCH,
           valid: true,
@@ -3719,7 +3719,7 @@ describe('flowHelper.addStepIndices', () => {
             inputUiInfo: { customizedInputs: {} },
           },
           onSuccessAction: {
-            name: 'step_2',
+            name: 'step_b',
             id: 'id2',
             type: ActionType.CODE,
             valid: true,
@@ -3731,7 +3731,7 @@ describe('flowHelper.addStepIndices', () => {
             },
           },
           onFailureAction: {
-            name: 'step_3',
+            name: 'step_c',
             id: 'id3',
             type: ActionType.CODE,
             valid: true,
@@ -3761,7 +3761,7 @@ describe('flowHelper.addStepIndices', () => {
         displayName: 'Trigger',
         settings: {},
         nextAction: {
-          name: 'step_1',
+          name: 'step_a',
           id: 'id1',
           type: ActionType.SPLIT,
           valid: true,
@@ -3775,7 +3775,7 @@ describe('flowHelper.addStepIndices', () => {
             {
               optionId: 'opt1',
               nextAction: {
-                name: 'step_2',
+                name: 'step_b',
                 id: 'id2',
                 type: ActionType.CODE,
                 valid: true,
@@ -3790,7 +3790,7 @@ describe('flowHelper.addStepIndices', () => {
             {
               optionId: 'opt2',
               nextAction: {
-                name: 'step_3',
+                name: 'step_c',
                 id: 'id3',
                 type: ActionType.CODE,
                 valid: true,
@@ -3830,7 +3830,7 @@ describe('flowHelper.addStepIndices', () => {
       displayName: 'Trigger',
       settings: {},
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         id: 'id1',
         type: ActionType.CODE,
         valid: true,
@@ -3841,7 +3841,7 @@ describe('flowHelper.addStepIndices', () => {
           inputUiInfo: { customizedInputs: {} },
         },
         nextAction: {
-          name: 'step_2',
+          name: 'step_b',
           id: 'id2',
           type: ActionType.LOOP_ON_ITEMS,
           valid: true,
@@ -3851,7 +3851,7 @@ describe('flowHelper.addStepIndices', () => {
             inputUiInfo: { customizedInputs: {} },
           },
           firstLoopAction: {
-            name: 'step_3',
+            name: 'step_c',
             id: 'id3',
             type: ActionType.BRANCH,
             valid: true,
@@ -3861,7 +3861,7 @@ describe('flowHelper.addStepIndices', () => {
               inputUiInfo: { customizedInputs: {} },
             },
             onSuccessAction: {
-              name: 'step_4',
+              name: 'step_d',
               id: 'id4',
               type: ActionType.CODE,
               valid: true,
@@ -3874,7 +3874,7 @@ describe('flowHelper.addStepIndices', () => {
             },
           },
           nextAction: {
-            name: 'step_5',
+            name: 'step_e',
             id: 'id5',
             type: ActionType.CODE,
             valid: true,
@@ -3926,7 +3926,7 @@ describe('flowHelper.addStepIndices', () => {
       displayName: 'Trigger',
       settings: {},
       nextAction: {
-        name: 'step_1',
+        name: 'step_a',
         id: 'id1',
         type: ActionType.CODE,
         valid: true,
@@ -3942,7 +3942,7 @@ describe('flowHelper.addStepIndices', () => {
     const result: any = flowHelper.addStepIndices(trigger);
 
     expect(result.stepIndex).toBe(1);
-    expect(result.nextAction.name).toBe('step_1');
+    expect(result.nextAction.name).toBe('step_a');
     expect(result.nextAction.id).toBe('id1');
     expect(result.nextAction.type).toBe(ActionType.CODE);
     expect(result.nextAction.displayName).toBe('Test Step');
