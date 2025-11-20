@@ -38,6 +38,7 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
   }));
   const user = authenticationSession.getCurrentUser();
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const shouldShowCloudUserInMenu = flagsHooks.useShouldShowCloudUserInMenu();
   const branding = flagsHooks.useWebsiteBranding();
   const { createPollingInterval } = useUserInfoPolling();
 
@@ -103,12 +104,13 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
       onLogout={onLogout}
       isMinimized={isMinimized}
       cloudConfig={{
-        user: cloudUser
-          ? {
-              email: cloudUser.email,
-            }
-          : undefined,
-        isCloudLoginEnabled: useCloudTemplates,
+        user:
+          cloudUser && shouldShowCloudUserInMenu
+            ? {
+                email: cloudUser.email,
+              }
+            : undefined,
+        isCloudLoginEnabled: useCloudTemplates && shouldShowCloudUserInMenu,
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}
