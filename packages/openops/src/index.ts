@@ -40,8 +40,6 @@ export * from './lib/openops-tables/applications-service';
 export * from './lib/openops-tables/auth-user';
 export * from './lib/openops-tables/fields';
 export * from './lib/openops-tables/filters';
-export * from './lib/openops-tables/get-encrypted-token-for-block';
-export * from './lib/openops-tables/get-project-database-token';
 export * from './lib/openops-tables/openops-tables-common-properties';
 export * from './lib/openops-tables/requests-helpers';
 export * from './lib/openops-tables/rows';

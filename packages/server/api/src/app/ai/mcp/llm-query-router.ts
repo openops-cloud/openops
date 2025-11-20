@@ -1,8 +1,13 @@
-import { getTableNames, isLLMTelemetryEnabled } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import {
+  getTableNames,
+  getTableNamesWithContext,
+  isLLMTelemetryEnabled,
+} from '@openops/common';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
+import { projectService } from '../../project/project-service';
 import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { getAdditionalQueryClassificationDescriptions } from './extensions';
@@ -107,7 +112,7 @@ export async function routeQuery({
   }));
 
   try {
-    const openopsTablesNames = await getOpenOpsTablesNames();
+    const openopsTablesNames = await getOpenOpsTablesNames(projectId);
 
     const { object: selectionResult } = await generateObject({
       model: languageModel,
@@ -178,9 +183,22 @@ const getPreviousToolsForChat = async (
   }
 };
 
-const getOpenOpsTablesNames = async (): Promise<string[]> => {
+const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
-    return await getTableNames();
+    const useDatabaseToken =
+      system.getBoolean(AppSystemProp.USE_DATABASE_TOKEN) ?? false;
+
+    if (useDatabaseToken) {
+      const project = await projectService.getOneOrThrow(projectId);
+      return await getTableNamesWithContext({
+        server: {
+          tablesDatabaseId: project.tablesDatabaseId,
+          tablesDatabaseToken: project.tablesDatabaseToken,
+        },
+      });
+    } else {
+      return await getTableNames();
+    }
   } catch (error) {
     logger.error('Error getting OpenOps table names for the LLM query router', {
       error,

@@ -1,12 +1,6 @@
 import { encryptUtils } from '@openops/server-shared';
-import {
-  createAxiosHeaders,
-  makeOpenOpsTablesGet,
-} from '../openops-tables/requests-helpers';
-import {
-  getDefaultDatabaseId,
-  getDefaultDatabaseIdForOpenOpsTablesBlock,
-} from './applications-service';
+import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
+import { getDefaultDatabaseId } from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 import { createRequestContext, type RequestContext } from './request-context';
 
@@ -48,6 +42,9 @@ export async function getTableByName(
   return table;
 }
 
+/**
+ * @deprecated Use getTableNamesWithContext with block context instead
+ */
 export async function getTableNames(
   token?: string,
   useJwt = false,
@@ -57,6 +54,9 @@ export async function getTableNames(
   return tables.map((t) => t.name);
 }
 
+/**
+ * Get table names using block context (optimized - uses provided tablesDatabaseId and token)
+ */
 export async function getTableNamesWithContext(ctx: {
   server: {
     tablesDatabaseId: number;
@@ -75,22 +75,18 @@ async function getAvailableTablesWithContext(
   ctx?: RequestContext,
   tablesDatabaseId?: number,
 ): Promise<OpenOpsTable[]> {
-  const requestContext =
-    ctx ??
-    (await (async () => {
-      const { token } = await authenticateDefaultUserInOpenOpsTables();
-      return createRequestContext(token, true);
-    })());
-
+  let requestContext: RequestContext;
   let databaseId: number;
-  if (tablesDatabaseId !== undefined) {
+
+  if (ctx && tablesDatabaseId !== undefined) {
+    // Block context path - both provided
+    requestContext = ctx;
     databaseId = tablesDatabaseId;
   } else {
-    const isJwt = requestContext.createHeaders === createAxiosHeaders;
-    const getDatabaseId = isJwt
-      ? getDefaultDatabaseId
-      : getDefaultDatabaseIdForOpenOpsTablesBlock;
-    databaseId = await getDatabaseId(requestContext.token);
+    // Migration/seed path - fall back to JWT authentication
+    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    requestContext = createRequestContext(token, true);
+    databaseId = await getDefaultDatabaseId(token);
   }
 
   const tables = await getTablesWithContext(requestContext, databaseId);
@@ -99,7 +95,8 @@ async function getAvailableTablesWithContext(
 }
 
 /**
- * @deprecated Use getAvailableTablesWithContext with RequestContext instead
+ * @deprecated Use getAvailableTablesWithContext with block context instead
+ * Only used by migrations/seeds
  */
 async function getAvailableTablesInOpenopsTables(
   token?: string,
