@@ -26,7 +26,7 @@ import {
   SignInRequest,
   emailRegex,
 } from '@openops/shared';
-import { useEffectOnce } from 'react-use';
+import { useEffect } from 'react';
 import { navigationUtil } from '../../../lib/navigation-util';
 
 const SignInSchema = Type.Object({
@@ -52,11 +52,17 @@ const SignInForm: React.FC = () => {
     mode: 'onChange',
   });
 
-  useEffectOnce(() => {
+  const { data: flags } = flagsHooks.useFlags();
+
+  useEffect(() => {
+    if (!flags) {
+      return;
+    }
     authenticationSession.logOut({
       userInitiated: false,
+      federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
     });
-  });
+  }, [flags]);
 
   const { data: edition } = flagsHooks.useFlag(FlagId.EDITION);
   const { data: showSignUpLink } = flagsHooks.useFlag(FlagId.SHOW_SIGN_UP_LINK);
