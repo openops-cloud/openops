@@ -47,7 +47,7 @@ const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
 const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
 const ALPHABET_LENGTH = 26;
-const A_CHAR_CODE = 'a'.charCodeAt(0);
+const A_CODE_POINT = 97;
 
 export function buildBlockActionKey(
   blockName: string,
@@ -1104,7 +1104,8 @@ function indexToAlphabetical(index: number): string {
   let result = '';
   while (n > 0) {
     n--;
-    result = String.fromCharCode(A_CHAR_CODE + (n % ALPHABET_LENGTH)) + result;
+    result =
+      String.fromCodePoint(A_CODE_POINT + (n % ALPHABET_LENGTH)) + result;
     n = Math.floor(n / ALPHABET_LENGTH);
   }
   return result;
