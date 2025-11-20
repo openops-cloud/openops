@@ -46,6 +46,9 @@ type GetStepFromSubFlow = {
 const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
 const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
+const ALPHABET_LENGTH = 26;
+const A_CHAR_CODE = 'a'.charCodeAt(0);
+
 export function buildBlockActionKey(
   blockName: string,
   actionName: string,
@@ -1096,16 +1099,30 @@ function doesActionHaveChildren(
   return false;
 }
 
-function findUnusedName(names: string[], stepPrefix: string): string {
-  let availableNumber = 1;
-  let availableName = `${stepPrefix}_${availableNumber}`;
-
-  while (names.includes(availableName)) {
-    availableNumber++;
-    availableName = `${stepPrefix}_${availableNumber}`;
+function indexToAlphabetical(index: number): string {
+  let n = index + 1;
+  let result = '';
+  while (n > 0) {
+    n--;
+    result = String.fromCharCode(A_CHAR_CODE + (n % ALPHABET_LENGTH)) + result;
+    n = Math.floor(n / ALPHABET_LENGTH);
   }
+  return result;
+}
 
-  return availableName;
+function findUnusedName(names: string[], stepPrefix: string): string {
+  const prefix = `${stepPrefix}_`;
+  const tails = new Set(
+    names
+      .filter((n) => n.startsWith(prefix))
+      .map((n) => n.slice(prefix.length)),
+  );
+
+  let index = 0;
+  while (tails.has(indexToAlphabetical(index))) {
+    index++;
+  }
+  return `${stepPrefix}_${indexToAlphabetical(index)}`;
 }
 
 function findAvailableStepName(
