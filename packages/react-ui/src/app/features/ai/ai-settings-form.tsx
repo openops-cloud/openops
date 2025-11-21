@@ -1,7 +1,9 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   aiFormSchemaResolver,
   AiSettingsFormSchema,
 } from '@/app/features/ai/lib/ai-form-utils';
+import { useAssistantName } from '@/app/features/ai/lib/use-assistant-name';
 import { ConnectionSelect } from '@/app/features/builder/step-settings/block-settings/connection-select';
 import {
   BlockMetadataModel,
@@ -15,7 +17,7 @@ import {
   Label,
   Switch,
 } from '@openops/components/ui';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, FlagId, OpsEdition } from '@openops/shared';
 import equal from 'fast-deep-equal';
 import { t } from 'i18next';
 import { CircleCheck } from 'lucide-react';
@@ -40,6 +42,10 @@ const AiSettingsForm = ({
   onSave,
   isSaving,
 }: AiSettingsFormProps) => {
+  const assistantName = useAssistantName();
+  const edition = flagsHooks.useFlag<OpsEdition>(FlagId.EDITION).data;
+  const isEnterprise = edition !== OpsEdition.COMMUNITY;
+
   const form = useForm<AiSettingsFormSchema>({
     resolver: aiFormSchemaResolver,
     defaultValues: EMPTY_FORM_VALUE,
@@ -84,32 +90,58 @@ const AiSettingsForm = ({
     });
   };
 
+  const descriptionText = isEnterprise
+    ? t(
+        'Enables {assistantName} and other AI-powered features such as the CLI command generation and chat interfaces.',
+        {
+          assistantName,
+        },
+      )
+    : t(
+        'Enables {assistantName} and other AI-powered features such as the CLI command generation.',
+        {
+          assistantName,
+        },
+      );
+
   return (
     <Form {...form}>
-      <form className="flex-1 flex flex-col gap-4 max-w-[516px]">
+      <form className="flex-1 flex flex-col gap-4">
         <FormField
           control={form.control}
           name="enabled"
           render={({ field }) => (
-            <FormItem className="flex gap-[6px]">
-              <Switch
-                id="enabled"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <Label htmlFor="enabled">{t('Enable AI')}</Label>
+            <FormItem className="flex flex-col">
+              <div className="flex items-center gap-[6px]">
+                <Switch
+                  id="enabled"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <Label
+                  className="text-lg font-bold leading-6"
+                  htmlFor="enabled"
+                >
+                  {t('Enable OpenOps AI')}
+                </Label>
+              </div>
+              <p className="mt-8 text-base font-normal leading-6 text-primary-900">
+                {descriptionText}
+              </p>
             </FormItem>
           )}
         />
-        <ConnectionSelect
-          disabled={!currentFormValue.enabled}
-          allowDynamicValues={false}
-          block={block}
-          providerKey={'AI'}
-          name={'connection'}
-        />
+        <div className="max-w-[516px]">
+          <ConnectionSelect
+            disabled={!currentFormValue.enabled}
+            allowDynamicValues={false}
+            block={block}
+            providerKey={'AI'}
+            name={'connection'}
+          />
+        </div>
 
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between max-w-[516px]">
           <div className="flex gap-2">
             <Button
               variant="outline"

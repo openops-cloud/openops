@@ -108,7 +108,7 @@ const AiSettingsPage = () => {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex-col">
-        <h1 className="text-2xl font-bold">{t('AI providers')}</h1>
+        <h1 className="text-2xl font-bold">{t('OpenOps AI')}</h1>
         {blockModel && (
           <div className="flex justify-between mt-[35px] p-6 border rounded-[11px]">
             <AiSettingsForm
