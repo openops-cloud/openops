@@ -18,7 +18,7 @@ export const getTableUrlAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableId = await getTableIdByTableName(tableName);
+    const tableId = await getTableIdByTableName(tableName, context.server);
     const baseUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
 
     return (

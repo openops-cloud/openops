@@ -1,12 +1,15 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   deleteRow,
   getFields,
   getPrimaryKeyFieldFromFields,
   getRowByPrimaryKeyValue,
   getTableIdByTableName,
+  getTablesServerContext,
+  OpenOpsField,
   openopsTablesDropdownProperty,
+  resolveTokenProvider,
+  TokenOrContext,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
@@ -27,26 +30,28 @@ export const deleteRecordAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
+    const tablesServerContext = getTablesServerContext(context.server);
+
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, tablesServerContext],
     );
 
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const tokenOrContext = await resolveTokenProvider(tablesServerContext);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const fields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
-      tableId,
-      token,
-    ]);
+    const fields = await cacheWrapper.getOrAdd<
+      OpenOpsField[],
+      [number, TokenOrContext]
+    >(fieldsCacheKey, getFields, [tableId, tokenOrContext]);
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const rowPrimaryKey = getPrimaryKey(context.propsValue.rowPrimaryKey);
 
     const rowToDelete = await getRowByPrimaryKeyValue(
-      token,
+      tokenOrContext,
       tableId,
       rowPrimaryKey,
       primaryKeyField.name,
@@ -58,8 +63,8 @@ export const deleteRecordAction = createAction({
 
     return await deleteRow({
       tableId: tableId,
-      token: token,
       rowId: rowToDelete.id,
+      tokenOrContext,
     });
   },
 });

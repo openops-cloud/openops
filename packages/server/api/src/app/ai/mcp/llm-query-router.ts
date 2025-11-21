@@ -1,8 +1,4 @@
-import {
-  getDatabaseTableNames,
-  getTableNames,
-  isLLMTelemetryEnabled,
-} from '@openops/common';
+import { getTableNames, isLLMTelemetryEnabled } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
@@ -185,18 +181,12 @@ const getPreviousToolsForChat = async (
 
 const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
-    const useDatabaseToken =
-      system.getBoolean(AppSystemProp.USE_DATABASE_TOKEN) ?? false;
-
-    if (useDatabaseToken) {
-      const project = await projectService.getOneOrThrow(projectId);
-      return await getDatabaseTableNames(
-        project.tablesDatabaseId,
-        project.tablesDatabaseToken,
-      );
-    } else {
-      return await getTableNames();
-    }
+    const project = await projectService.getOneOrThrow(projectId);
+    const parsedProjectId = parseInt(projectId);
+    return await getTableNames({
+      tablesDatabaseId: parsedProjectId,
+      tablesDatabaseToken: project.tablesDatabaseToken,
+    });
   } catch (error) {
     logger.error('Error getting OpenOps table names for the LLM query router', {
       error,

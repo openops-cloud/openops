@@ -4,13 +4,9 @@ import { AxiosError, AxiosHeaders, AxiosResponse, Method } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
 import { makeHttpRequest } from '../axios-wrapper';
-import createAxiosHeadersInternal from './create-axios-headers-internal';
+import { createAxiosHeaders } from './create-axios-headers';
 
-export const createAxiosHeaders = (token: string) =>
-  createAxiosHeadersInternal(token, true);
-
-export const createAxiosHeadersForOpenOpsTablesBlock = (token: string) =>
-  createAxiosHeadersInternal(token, false);
+export { createAxiosHeaders };
 
 const RETRY_DELAY_MS = 1000;
 

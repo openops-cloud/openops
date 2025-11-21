@@ -1,19 +1,38 @@
-import { ActionContext, PropertyContext } from '@openops/blocks-framework';
+import { ServerContext } from '@openops/blocks-framework';
 import { AppSystemProp, encryptUtils, system } from '@openops/server-shared';
+import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 
 export function shouldUseDatabaseToken(): boolean {
-  return system.getBoolean(AppSystemProp.USE_DATABASE_TOKEN) ?? false;
+  return system.getBoolean(AppSystemProp.ENABLE_TABLES_DATABASE_TOKEN) ?? false;
 }
 
-export function getTablesDatabaseTokenFromContext(
-  context: ActionContext | PropertyContext,
-): string {
-  const { tablesDatabaseToken } = context.server;
-  return encryptUtils.decryptString(tablesDatabaseToken);
+export type TokenOrContext = string | { getToken: () => string };
+export type TablesServerContext = Pick<
+  ServerContext,
+  'tablesDatabaseId' | 'tablesDatabaseToken'
+>;
+
+export function getTablesServerContext(
+  serverContext: ServerContext,
+): TablesServerContext {
+  return {
+    tablesDatabaseId: serverContext.tablesDatabaseId,
+    tablesDatabaseToken: serverContext.tablesDatabaseToken,
+  };
 }
 
-export function getTablesDatabaseIdFromContext(
-  context: ActionContext | PropertyContext,
-): number {
-  return context.server.tablesDatabaseId;
+export async function resolveTokenProvider(
+  serverContext: TablesServerContext,
+): Promise<TokenOrContext> {
+  if (shouldUseDatabaseToken()) {
+    return {
+      getToken: () => {
+        const { tablesDatabaseToken } = serverContext;
+        return encryptUtils.decryptString(tablesDatabaseToken);
+      },
+    };
+  }
+
+  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  return token;
 }
