@@ -52,7 +52,7 @@ export async function getTableFields(
 
   if (isServerContext(secondParam)) {
     const tokenOrContext = await resolveTokenProvider(secondParam);
-    return await getFields(tableId, tokenOrContext, false, undefined);
+    return await getFields(tableId, tokenOrContext, false);
   }
 
   const { token } = await authenticateDefaultUserInOpenOpsTables();

@@ -1,5 +1,5 @@
 import { getTableNames, isLLMTelemetryEnabled } from '@openops/common';
-import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
@@ -182,7 +182,7 @@ const getPreviousToolsForChat = async (
 const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
     const project = await projectService.getOneOrThrow(projectId);
-    const parsedProjectId = parseInt(projectId);
+    const parsedProjectId = Number.parseInt(projectId);
     return await getTableNames({
       tablesDatabaseId: parsedProjectId,
       tablesDatabaseToken: project.tablesDatabaseToken,
