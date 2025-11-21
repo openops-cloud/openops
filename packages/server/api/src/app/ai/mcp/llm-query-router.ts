@@ -1,6 +1,6 @@
 import {
+  getDatabaseTableNames,
   getTableNames,
-  getTableNamesWithContext,
   isLLMTelemetryEnabled,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
@@ -190,12 +190,10 @@ const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
 
     if (useDatabaseToken) {
       const project = await projectService.getOneOrThrow(projectId);
-      return await getTableNamesWithContext({
-        server: {
-          tablesDatabaseId: project.tablesDatabaseId,
-          tablesDatabaseToken: project.tablesDatabaseToken,
-        },
-      });
+      return await getDatabaseTableNames(
+        project.tablesDatabaseId,
+        project.tablesDatabaseToken,
+      );
     } else {
       return await getTableNames();
     }

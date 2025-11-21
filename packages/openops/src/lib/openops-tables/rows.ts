@@ -7,6 +7,7 @@ import {
 } from '../openops-tables/filters';
 import {
   createAxiosHeaders,
+  createAxiosHeadersForOpenOpsTablesBlock,
   makeOpenOpsTablesDelete,
   makeOpenOpsTablesGet,
   makeOpenOpsTablesPatch,
@@ -22,6 +23,7 @@ export interface OpenOpsRow {
 export interface RowParams {
   tableId: number;
   token: string;
+  useDatabaseToken?: boolean;
 }
 
 export interface GetRowsParams extends RowParams {
@@ -101,7 +103,9 @@ export async function getRows(getRowsParams: GetRowsParams) {
   const paramsString = params.toString();
   const baseUrl = `api/database/rows/table/${getRowsParams.tableId}/`;
   const url = paramsString ? baseUrl + `?${paramsString}` : baseUrl;
-  const authenticationHeader = createAxiosHeaders(getRowsParams.token);
+  const authenticationHeader = getRowsParams.useDatabaseToken
+    ? createAxiosHeadersForOpenOpsTablesBlock(getRowsParams.token)
+    : createAxiosHeaders(getRowsParams.token);
 
   return executeWithConcurrencyLimit(
     async () => {
@@ -128,7 +132,9 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(updateRowParams.token);
+      const authenticationHeader = updateRowParams.useDatabaseToken
+        ? createAxiosHeadersForOpenOpsTablesBlock(updateRowParams.token)
+        : createAxiosHeaders(updateRowParams.token);
       return await makeOpenOpsTablesPatch(
         url,
         updateRowParams.fields,
@@ -150,7 +156,9 @@ export async function upsertRow(upsertRowParams: UpsertRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
+      const authenticationHeader = upsertRowParams.useDatabaseToken
+        ? createAxiosHeadersForOpenOpsTablesBlock(upsertRowParams.token)
+        : createAxiosHeaders(upsertRowParams.token);
       return await makeOpenOpsTablesPut(
         url,
         upsertRowParams.fields,
@@ -172,7 +180,9 @@ export async function addRow(addRowParams: AddRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(addRowParams.token);
+      const authenticationHeader = addRowParams.useDatabaseToken
+        ? createAxiosHeadersForOpenOpsTablesBlock(addRowParams.token)
+        : createAxiosHeaders(addRowParams.token);
       return await makeOpenOpsTablesPost(
         url,
         addRowParams.fields,
@@ -194,7 +204,9 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
+      const authenticationHeader = deleteRowParams.useDatabaseToken
+        ? createAxiosHeadersForOpenOpsTablesBlock(deleteRowParams.token)
+        : createAxiosHeaders(deleteRowParams.token);
       return await makeOpenOpsTablesDelete(url, authenticationHeader);
     },
     (error) => {
@@ -212,6 +224,7 @@ export async function getRowByPrimaryKeyValue(
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,
   primaryKeyFieldType: string,
+  useDatabaseToken = false,
 ) {
   const rows = await getRows({
     tableId: tableId,
@@ -223,6 +236,7 @@ export async function getRowByPrimaryKeyValue(
         type: getEqualityFilterType(primaryKeyFieldType),
       },
     ],
+    useDatabaseToken,
   });
 
   if (rows.length > 1) {

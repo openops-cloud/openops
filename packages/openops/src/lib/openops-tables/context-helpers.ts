@@ -1,5 +1,9 @@
 import { ActionContext, PropertyContext } from '@openops/blocks-framework';
-import { encryptUtils } from '@openops/server-shared';
+import { AppSystemProp, encryptUtils, system } from '@openops/server-shared';
+
+export function shouldUseDatabaseToken(): boolean {
+  return system.getBoolean(AppSystemProp.USE_DATABASE_TOKEN) ?? false;
+}
 
 export function getTablesDatabaseTokenFromContext(
   context: ActionContext | PropertyContext,

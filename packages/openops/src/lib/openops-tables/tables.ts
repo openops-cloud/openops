@@ -1,112 +1,139 @@
+import { ActionContext, PropertyContext } from '@openops/blocks-framework';
 import { encryptUtils } from '@openops/server-shared';
-import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
+import { EncryptedObject } from '@openops/shared';
+import {
+  createAxiosHeaders,
+  createAxiosHeadersForOpenOpsTablesBlock,
+  makeOpenOpsTablesGet,
+} from '../openops-tables/requests-helpers';
 import { getDefaultDatabaseId } from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
-import { createRequestContext, type RequestContext } from './request-context';
+import {
+  getTablesDatabaseIdFromContext,
+  getTablesDatabaseTokenFromContext,
+  shouldUseDatabaseToken,
+} from './context-helpers';
 
-async function getTablesWithContext(
-  ctx: RequestContext,
+export async function getTableIdByTableNameFromContext(
+  tableName: string,
+  context: ActionContext | PropertyContext,
+): Promise<number> {
+  if (!shouldUseDatabaseToken()) {
+    return await getTableIdByTableName(tableName);
+  }
+
+  const databaseId = getTablesDatabaseIdFromContext(context);
+  const token = getTablesDatabaseTokenFromContext(context);
+  return getTableIdByTableNameWithDatabaseToken(tableName, databaseId, token);
+}
+
+async function getTableIdByTableNameWithDatabaseToken(
+  tableName: string,
   databaseId: number,
+  token: string,
+): Promise<number> {
+  const table = await getTableByNameFromDatabaseToken(
+    tableName,
+    databaseId,
+    token,
+  );
+  if (!table) {
+    throw new Error(`Table '${tableName}' not found`);
+  }
+  return table.id;
+}
+
+export async function getTableByNameFromContext(
+  tableName: string,
+  context: ActionContext | PropertyContext,
+): Promise<OpenOpsTable | undefined> {
+  if (!shouldUseDatabaseToken()) {
+    return await getTableByName(tableName);
+  }
+
+  const databaseId = getTablesDatabaseIdFromContext(context);
+  const token = getTablesDatabaseTokenFromContext(context);
+  return getTableByNameFromDatabaseToken(tableName, databaseId, token);
+}
+
+export async function getTableNamesFromContext(
+  context: ActionContext | PropertyContext,
+): Promise<string[]> {
+  if (!shouldUseDatabaseToken()) {
+    return await getTableNames();
+  }
+
+  const databaseId = getTablesDatabaseIdFromContext(context);
+  const token = getTablesDatabaseTokenFromContext(context);
+  const tables = await getTablesFromDatabaseToken(databaseId, token);
+  return tables.map((t) => t.name);
+}
+
+export async function getDatabaseTableNames(
+  databaseId: number,
+  token: EncryptedObject,
+): Promise<string[]> {
+  const tables = await getTablesFromDatabaseToken(
+    databaseId,
+    encryptUtils.decryptString(token),
+  );
+  return tables.map((t) => t.name);
+}
+
+async function getTableByNameFromDatabaseToken(
+  tableName: string,
+  databaseId: number,
+  token: string,
+): Promise<OpenOpsTable | undefined> {
+  const tables = await getTablesFromDatabaseToken(databaseId, token);
+  return tables.find((t) => t.name === tableName);
+}
+
+export async function getTablesFromDatabaseToken(
+  databaseId: number,
+  token: string,
 ): Promise<OpenOpsTable[]> {
-  const authenticationHeader = ctx.createHeaders(ctx.token);
+  const authenticationHeader = createAxiosHeadersForOpenOpsTablesBlock(token);
   const getTablesResult = await makeOpenOpsTablesGet<OpenOpsTable[]>(
     `api/database/tables/database/${databaseId}/`,
     authenticationHeader,
   );
-  return getTablesResult.flatMap((item) => item);
+  const tables = getTablesResult.flatMap((item) => item);
+  return getDistinctTableNames(tables);
 }
 
 export async function getTableIdByTableName(
   tableName: string,
-  token?: string,
-  useJwt = false,
 ): Promise<number> {
-  const table = await getTableByName(tableName, token, useJwt);
-
+  const table = await getTableByName(tableName);
   if (!table) {
     throw new Error(`Table '${tableName}' not found`);
   }
-
   return table.id;
 }
 
 export async function getTableByName(
   tableName: string,
-  token?: string,
-  useJwt = false,
 ): Promise<OpenOpsTable | undefined> {
-  const tables = await getAvailableTablesInOpenopsTables(token, useJwt);
-
-  const table = tables.find((t) => t.name === tableName);
-
-  return table;
+  const tables = await getAvailableTablesInOpenopsTables();
+  return tables.find((t) => t.name === tableName);
 }
 
-/**
- * @deprecated Use getTableNamesWithContext with block context instead
- */
-export async function getTableNames(
-  token?: string,
-  useJwt = false,
-): Promise<string[]> {
-  const tables = await getAvailableTablesInOpenopsTables(token, useJwt);
-
+export async function getTableNames(): Promise<string[]> {
+  const tables = await getAvailableTablesInOpenopsTables();
   return tables.map((t) => t.name);
 }
 
-/**
- * Get table names using block context (optimized - uses provided tablesDatabaseId and token)
- */
-export async function getTableNamesWithContext(ctx: {
-  server: {
-    tablesDatabaseId: number;
-    tablesDatabaseToken: { iv: string; data: string };
-  };
-}): Promise<string[]> {
-  const token = encryptUtils.decryptString(ctx.server.tablesDatabaseToken);
-  const tables = await getAvailableTablesWithContext(
-    createRequestContext(token, false),
-    ctx.server.tablesDatabaseId,
+async function getAvailableTablesInOpenopsTables(): Promise<OpenOpsTable[]> {
+  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const tablesDatabaseId = await getDefaultDatabaseId(token);
+  const authenticationHeader = createAxiosHeaders(token);
+  const getTablesResult = await makeOpenOpsTablesGet<OpenOpsTable[]>(
+    `api/database/tables/database/${tablesDatabaseId}/`,
+    authenticationHeader,
   );
-  return tables.map((t) => t.name);
-}
-
-async function getAvailableTablesWithContext(
-  ctx?: RequestContext,
-  tablesDatabaseId?: number,
-): Promise<OpenOpsTable[]> {
-  let requestContext: RequestContext;
-  let databaseId: number;
-
-  if (ctx && tablesDatabaseId !== undefined) {
-    // Block context path - both provided
-    requestContext = ctx;
-    databaseId = tablesDatabaseId;
-  } else {
-    // Migration/seed path - fall back to JWT authentication
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
-    requestContext = createRequestContext(token, true);
-    databaseId = await getDefaultDatabaseId(token);
-  }
-
-  const tables = await getTablesWithContext(requestContext, databaseId);
-
+  const tables = getTablesResult.flatMap((item) => item);
   return getDistinctTableNames(tables);
-}
-
-/**
- * @deprecated Use getAvailableTablesWithContext with block context instead
- * Only used by migrations/seeds
- */
-async function getAvailableTablesInOpenopsTables(
-  token?: string,
-  useJwt = false,
-): Promise<OpenOpsTable[]> {
-  if (token === undefined) {
-    return getAvailableTablesWithContext();
-  }
-  const ctx = createRequestContext(token, useJwt);
-  return getAvailableTablesWithContext(ctx);
 }
 
 // Tables allows you to have tables with the same name in the same database.

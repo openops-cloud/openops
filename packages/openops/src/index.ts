@@ -38,12 +38,14 @@ export * from './lib/aws/pricing';
 export * from './lib/openops-analytics';
 export * from './lib/openops-tables/applications-service';
 export * from './lib/openops-tables/auth-user';
+export * from './lib/openops-tables/context-helpers';
 export * from './lib/openops-tables/fields';
 export * from './lib/openops-tables/filters';
 export * from './lib/openops-tables/openops-tables-common-properties';
 export * from './lib/openops-tables/requests-helpers';
 export * from './lib/openops-tables/rows';
 export * from './lib/openops-tables/tables';
+export * from './lib/openops-tables/token-helpers';
 export * from './lib/openops-tables/types';
 
 export * from './lib/cli-command-wrapper';
