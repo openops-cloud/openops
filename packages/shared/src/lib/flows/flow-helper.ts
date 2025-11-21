@@ -1317,4 +1317,6 @@ export const flowHelper = {
   getUsedConnections,
   createTrigger,
   addStepIndices,
+  indexToAlphabetical,
+  findUnusedName,
 };
