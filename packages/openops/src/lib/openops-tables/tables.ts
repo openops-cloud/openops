@@ -98,7 +98,7 @@ export async function getTablesFromDatabaseToken(
     `api/database/tables/database/${databaseId}/`,
     authenticationHeader,
   );
-  const tables = getTablesResult.flatMap((item) => item);
+  const tables = getTablesResult.flat();
   return getDistinctTableNames(tables);
 }
 
@@ -132,7 +132,7 @@ async function getAvailableTablesInOpenopsTables(): Promise<OpenOpsTable[]> {
     `api/database/tables/database/${tablesDatabaseId}/`,
     authenticationHeader,
   );
-  const tables = getTablesResult.flatMap((item) => item);
+  const tables = getTablesResult.flat();
   return getDistinctTableNames(tables);
 }
 

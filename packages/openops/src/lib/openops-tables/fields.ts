@@ -33,7 +33,7 @@ export async function getFieldsFromContext(
     authenticationHeader,
     axiosRetryConfig,
   );
-  return fields.flatMap((item) => item);
+  return fields.flat();
 }
 
 export async function getTableFieldsFromContext(
@@ -63,7 +63,7 @@ export async function getFields(
     authenticationHeader,
     axiosRetryConfig,
   );
-  return fields.flatMap((item) => item);
+  return fields.flat();
 }
 
 export interface OpenOpsField {
