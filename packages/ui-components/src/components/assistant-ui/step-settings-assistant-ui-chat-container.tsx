@@ -38,6 +38,10 @@ type StepSettingsAssistantUiChatContainerProps = {
   theme: Theme;
   handleInject: (code: string | SourceCode) => void;
   showFullWidth: boolean;
+  stepLogoUrl?: string;
+  stepDisplayName?: string;
+  stepIndex?: number;
+  blockDisplayName?: string;
 } & ConnectionStatusProps;
 
 const StepSettingsAssistantUiChatContainer = ({
@@ -59,6 +63,10 @@ const StepSettingsAssistantUiChatContainer = ({
   showFullWidth,
   isShowingSlowWarning,
   connectionError,
+  stepLogoUrl,
+  stepDisplayName,
+  stepIndex,
+  blockDisplayName,
 }: StepSettingsAssistantUiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -105,9 +113,13 @@ const StepSettingsAssistantUiChatContainer = ({
         onNewChat={onNewChatClick}
         availableModels={availableModels}
         theme={theme}
-        title={t('AI Chat')}
+        title={t('Generate with AI')}
         isShowingSlowWarning={isShowingSlowWarning}
         connectionError={connectionError}
+        stepLogoUrl={stepLogoUrl}
+        stepDisplayName={stepDisplayName}
+        stepIndex={stepIndex}
+        blockDisplayName={blockDisplayName}
       >
         <div
           className="text-md dark:text-primary items-center font-bold flex"

@@ -17,7 +17,13 @@ type AssistantUiChatContainerProps = {
   isTitleDefault?: boolean;
 } & ConnectionStatusProps &
   AssistantTopBarProps &
-  ThreadProps;
+  ThreadProps & {
+    // Step settings specific props
+    stepLogoUrl?: string;
+    stepDisplayName?: string;
+    stepIndex?: number;
+    blockDisplayName?: string;
+  };
 
 const AssistantUiChatContainer = ({
   onClose,
@@ -38,6 +44,10 @@ const AssistantUiChatContainer = ({
   connectionError,
   chatId,
   isTitleDefault,
+  stepLogoUrl,
+  stepDisplayName,
+  stepIndex,
+  blockDisplayName,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -56,6 +66,10 @@ const AssistantUiChatContainer = ({
         historyContent={children}
         chatId={chatId}
         isTitleDefault={isTitleDefault}
+        stepLogoUrl={stepLogoUrl}
+        stepDisplayName={stepDisplayName}
+        stepIndex={stepIndex}
+        blockDisplayName={blockDisplayName}
       >
         {null}
       </AssistantTopBar>
