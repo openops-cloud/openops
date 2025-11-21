@@ -23,6 +23,9 @@ jest.mock('ai', () => ({
 jest.mock('@openops/common', () => ({
   isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
   getTableNames: jest.fn().mockResolvedValue(['table1', 'table2', 'table3']),
+  getDatabaseTableNames: jest
+    .fn()
+    .mockResolvedValue(['table1', 'table2', 'table3']),
 }));
 
 jest.mock('@openops/server-shared', () => ({
@@ -34,10 +37,23 @@ jest.mock('@openops/server-shared', () => ({
     get: jest.fn().mockReturnValue('mock-value'),
     getBoolean: jest.fn().mockReturnValue(false),
   },
+  AppSystemProp: {
+    DB_TYPE: 'DB_TYPE',
+    USE_DATABASE_TOKEN: 'USE_DATABASE_TOKEN',
+  },
 }));
 
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getChatTools: jest.fn(),
+}));
+
+jest.mock('../../../src/app/project/project-service', () => ({
+  projectService: {
+    getOneOrThrow: jest.fn().mockResolvedValue({
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'mock-encrypted-token',
+    }),
+  },
 }));
 
 const getChatToolsMock = getChatTools as jest.Mock;
