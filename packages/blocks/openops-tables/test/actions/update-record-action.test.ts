@@ -375,7 +375,9 @@ describe('fieldsProperties property', () => {
       },
     });
     expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith('Opportunity');
+    expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
+      'Opportunity',
+    );
   });
 });
 
