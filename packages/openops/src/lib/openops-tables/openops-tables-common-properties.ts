@@ -1,15 +1,10 @@
-import {
-  Property,
-  PropertyContext,
-  Validators,
-} from '@openops/blocks-framework';
+import { Property, Validators } from '@openops/blocks-framework';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
   getFields,
-  getTableFieldsFromContext,
   NumberOpenOpsField,
   OpenOpsField,
   RatingOpenOpsField,
