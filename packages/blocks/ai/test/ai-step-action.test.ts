@@ -13,7 +13,7 @@ jest.mock('ai', () => ({
 
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject, generateText } from 'ai';
-import { askAi } from '../src/lib/actions/askAi';
+import { aiStep } from '../src/lib/actions/ai-step';
 
 describe('analyze action', () => {
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('analyze action', () => {
   });
 
   test('should expose correct props', () => {
-    expect(askAi.props).toMatchObject({
+    expect(aiStep.props).toMatchObject({
       model: {
         type: 'DYNAMIC',
         displayName: 'Model',
@@ -59,7 +59,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Hello' });
 
-    const result = await askAi.run(context as any);
+    const result = await aiStep.run(context as any);
 
     expect(generateObject).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -100,7 +100,7 @@ describe('analyze action', () => {
       additionalInput: ['s1', 's2'],
     });
 
-    const result = await askAi.run(context as any);
+    const result = await aiStep.run(context as any);
 
     expect(generateObject).toHaveBeenCalledTimes(1);
     const args = (generateObject as jest.Mock).mock.calls[0][0];
@@ -134,7 +134,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Hi' });
 
-    const result = await askAi.run(context as any);
+    const result = await aiStep.run(context as any);
 
     expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
       provider: AiProviderEnum.OPENAI,
@@ -174,7 +174,7 @@ describe('analyze action', () => {
       model: { model: 'gpt-from-props' },
     });
 
-    const result = await askAi.run(context as any);
+    const result = await aiStep.run(context as any);
 
     expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
       provider: AiProviderEnum.OPENAI,
@@ -217,7 +217,7 @@ describe('analyze action', () => {
       const context = createContext(auth, { prompt: 'P' });
 
       isLLMTelemetryEnabled.mockReturnValueOnce(isLLMTelemetryEnabledValue);
-      await askAi.run(context as any);
+      await aiStep.run(context as any);
 
       expect(generateObject).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -247,7 +247,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Q' });
 
-    const result = await askAi.run(context as any);
+    const result = await aiStep.run(context as any);
 
     expect(generateText).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'lm', prompt: 'Q' }),
