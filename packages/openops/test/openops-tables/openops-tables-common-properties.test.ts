@@ -1,20 +1,13 @@
-const getTableNamesMock = jest.fn();
-const getTableIdByTableNameMock = jest.fn();
+const getTableNames = jest.fn();
+const getTableFieldsFromContextMock = jest.fn();
 jest.mock('../../src/lib/openops-tables/tables', () => {
   return {
-    getTableNames: getTableNamesMock,
-    getTableIdByTableName: getTableIdByTableNameMock,
+    getTableNames: getTableNames,
   };
 });
-const getFieldsMock = jest.fn();
 jest.mock('../../src/lib/openops-tables/fields', () => {
-  return { getFields: getFieldsMock };
-});
-const authenticateDefaultUserInOpenOpsTablesMock = jest.fn();
-jest.mock('../../src/lib/openops-tables/auth-user', () => {
   return {
-    authenticateDefaultUserInOpenOpsTables:
-      authenticateDefaultUserInOpenOpsTablesMock,
+    getTableFieldsFromContext: getTableFieldsFromContextMock,
   };
 });
 
@@ -34,12 +27,15 @@ describe('table property', () => {
   });
 
   test('should return dropdown with all tables', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
-    getTableNamesMock.mockResolvedValue(['table1', 'table2']);
+    const mockContext = {
+      server: { tablesDatabaseId: 1, tablesDatabaseToken: 'encrypted-token' },
+    } as any;
+    getTableNames.mockResolvedValue(['table1', 'table2']);
 
-    const result = await openopsTablesDropdownProperty().options();
+    const result = await openopsTablesDropdownProperty().options(
+      null,
+      mockContext,
+    );
 
     expect(result).toMatchObject({
       disabled: false,
@@ -48,19 +44,25 @@ describe('table property', () => {
         { label: 'table2', value: 'table2' },
       ],
     });
-    expect(getTableNamesMock).toHaveBeenCalledTimes(1);
+    expect(getTableNames).toHaveBeenCalledTimes(1);
   });
 
   test('should handle empty tables', async () => {
-    getTableNamesMock.mockResolvedValue([]);
+    const mockContext = {
+      server: { tablesDatabaseId: 1, tablesDatabaseToken: 'encrypted-token' },
+    } as any;
+    getTableNames.mockResolvedValue([]);
 
-    const result = await openopsTablesDropdownProperty().options();
+    const result = await openopsTablesDropdownProperty().options(
+      null,
+      mockContext,
+    );
 
     expect(result).toMatchObject({
       disabled: false,
       options: [],
     });
-    expect(getTableNamesMock).toHaveBeenCalledTimes(1);
+    expect(getTableNames).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -70,10 +72,10 @@ describe('getTableFields', () => {
   });
 
   test('should return the options', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
-    getFieldsMock.mockResolvedValue([
+    const mockContext = {
+      server: { tablesDatabaseId: 1, tablesDatabaseToken: 'encrypted-token' },
+    } as any;
+    getTableFieldsFromContextMock.mockResolvedValue([
       {
         name: 'field1',
         id: 1,
@@ -92,9 +94,7 @@ describe('getTableFields', () => {
       },
     ]);
 
-    getTableIdByTableNameMock.mockResolvedValue(1);
-
-    const result = await getTableFields('Opportunity');
+    const result = await getTableFields('Opportunity', mockContext);
 
     expect(result).toMatchObject([
       {
@@ -114,40 +114,35 @@ describe('getTableFields', () => {
         type: 'equal',
       },
     ]);
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false, undefined); // Adjust this line as needed.
-  });
-
-  test('should handle authentication failure', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockRejectedValueOnce(
-      new Error('Authentication failed'),
+    expect(getTableFieldsFromContextMock).toHaveBeenCalledTimes(1);
+    expect(getTableFieldsFromContextMock).toHaveBeenCalledWith(
+      'Opportunity',
+      mockContext,
+      undefined,
     );
-    getTableIdByTableNameMock.mockResolvedValue(1);
-
-    await expect(getTableFields('Opportunity')).rejects.toThrow(
-      'Authentication failed',
-    );
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).not.toHaveBeenCalled();
   });
 
   test('should handle empty fields', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
-    getFieldsMock.mockResolvedValue([]);
-    getTableIdByTableNameMock.mockResolvedValue(1);
+    const mockContext = {
+      server: { tablesDatabaseId: 1, tablesDatabaseToken: 'encrypted-token' },
+    } as any;
+    getTableFieldsFromContextMock.mockResolvedValue([]);
 
-    const result = await getTableFields('Opportunity');
+    const result = await getTableFields('Opportunity', mockContext);
 
     expect(result).toMatchObject([]);
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false, undefined);
+    expect(getTableFieldsFromContextMock).toHaveBeenCalledTimes(1);
+    expect(getTableFieldsFromContextMock).toHaveBeenCalledWith(
+      'Opportunity',
+      mockContext,
+      undefined,
+    );
   });
 
   test('should return our supported properties for the field', async () => {
+    const mockContext = {
+      server: { tablesDatabaseId: 1, tablesDatabaseToken: 'encrypted-token' },
+    } as any;
     const numberField: NumberOpenOpsField = {
       name: 'field1',
       id: 1,
@@ -185,18 +180,14 @@ describe('getTableFields', () => {
       duration_format: 'format',
     };
 
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
-    getFieldsMock.mockResolvedValue([
+    getTableFieldsFromContextMock.mockResolvedValue([
       numberField,
       singleSelectField,
       multiSelectField,
       durationField,
     ]);
-    getTableIdByTableNameMock.mockResolvedValue(2);
 
-    const result = await getTableFields('Opportunity');
+    const result = await getTableFields('Opportunity', mockContext);
 
     expect(result).toEqual([
       numberField,

@@ -1,10 +1,15 @@
-import { Property, Validators } from '@openops/blocks-framework';
+import {
+  Property,
+  PropertyContext,
+  Validators,
+} from '@openops/blocks-framework';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
   getFields,
+  getTableFieldsFromContext,
   NumberOpenOpsField,
   OpenOpsField,
   RatingOpenOpsField,
@@ -35,12 +40,18 @@ export function openopsTablesDropdownProperty(): any {
 
 export async function getTableFields(
   tableName: string,
+  context: PropertyContext,
+  axiosRetryConfig?: IAxiosRetryConfig,
+): Promise<OpenOpsField[]> {
+  return await getTableFieldsFromContext(tableName, context, axiosRetryConfig);
+}
+
+export async function getTableFieldsForMigration(
+  tableName: string,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
-
   const tableId = await getTableIdByTableName(tableName as unknown as string);
-
   return await getFields(tableId, token, false, axiosRetryConfig);
 }
 
