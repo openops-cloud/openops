@@ -1099,6 +1099,19 @@ function doesActionHaveChildren(
   return false;
 }
 
+/**
+ * Converts a zero-based numeric index into a lowercase alphabetical label.
+ * Similar to spreadsheet column naming but using lowercase letters:
+ * 0 -> "a", 25 -> "z", 26 -> "aa", 27 -> "ab", and so on.
+ *
+ * @param index - Zero-based integer to convert.
+ * @returns Alphabetical label corresponding to the index.
+ * @example
+ * indexToAlphabetical(0)   // "a"
+ * indexToAlphabetical(25)  // "z"
+ * indexToAlphabetical(26)  // "aa"
+ * indexToAlphabetical(701) // "zz"
+ */
 function indexToAlphabetical(index: number): string {
   let n = index + 1;
   let result = '';
