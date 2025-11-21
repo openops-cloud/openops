@@ -12,6 +12,7 @@ jest.mock('@openops/server-shared', () => ({
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
+  getTokenForBlock: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
@@ -24,13 +25,20 @@ const openopsCommonMock = {
 
 jest.mock('@openops/common', () => openopsCommonMock);
 import { DynamicPropsValue } from '@openops/blocks-framework';
-import { getFields, getTableIdByTableName } from '@openops/common';
+import {
+  getFieldsFromContext,
+  getTableIdByTableNameFromContext,
+} from '@openops/common';
 import { nanoid } from 'nanoid';
 import { updateRecordAction } from '../../src/actions/update-record-action';
 
 describe('updateRowAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    openopsCommonMock.getTokenForBlock.mockResolvedValue({
+      token: 'some databaseToken',
+      useDatabaseToken: true,
+    });
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
     });
@@ -117,12 +125,7 @@ describe('updateRowAction', () => {
 
     validateWrapperCall(context);
     expect(result).toStrictEqual('mock result');
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.getTokenForBlock).toHaveBeenCalledTimes(1);
   });
 
   test('should invoke upsertRow operation', async () => {
@@ -158,6 +161,7 @@ describe('updateRowAction', () => {
         'primary key field': 'some primary key value',
         field1: 'new value',
       },
+      useDatabaseToken: true,
     });
     expect(result).toBe('mock result');
   });
@@ -365,6 +369,7 @@ describe('fieldsProperties property', () => {
     expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
       'Opportunity',
+      context,
     );
   });
 });
@@ -374,14 +379,14 @@ function validateWrapperCall(context: any) {
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
-    getTableIdByTableName,
-    [context.propsValue.tableName],
+    getTableIdByTableNameFromContext,
+    [context.propsValue.tableName, context],
   );
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     2,
     `${context.run.id}-1-fields`,
-    getFields,
-    [1, 'some databaseToken'],
+    getFieldsFromContext,
+    [1, context],
   );
 }
 
@@ -403,6 +408,10 @@ function createContext(params?: ContextParams) {
     },
     run: {
       id: nanoid(),
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'encrypted-token',
     },
   };
 }

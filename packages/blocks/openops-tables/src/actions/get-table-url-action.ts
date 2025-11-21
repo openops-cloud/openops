@@ -1,11 +1,10 @@
 import { BlockAuth, createAction } from '@openops/blocks-framework';
 import {
-  getTableIdByTableName,
+  getDatabaseIdForBlock,
+  getTableIdByTableNameFromContext,
   openopsTablesDropdownProperty,
 } from '@openops/common';
 import { SharedSystemProp, system } from '@openops/server-shared';
-
-const DEFAULT_DATABASE_ID = 1;
 
 export const getTableUrlAction = createAction({
   auth: BlockAuth.None(),
@@ -18,11 +17,10 @@ export const getTableUrlAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableId = await getTableIdByTableName(tableName);
+    const tableId = await getTableIdByTableNameFromContext(tableName, context);
+    const databaseId = getDatabaseIdForBlock(context);
     const baseUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
 
-    return (
-      baseUrl + `/tables?path=/database/${DEFAULT_DATABASE_ID}/table/${tableId}`
-    );
+    return baseUrl + `/tables?path=/database/${databaseId}/table/${tableId}`;
   },
 });

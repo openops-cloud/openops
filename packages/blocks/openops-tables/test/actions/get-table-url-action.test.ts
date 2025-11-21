@@ -1,4 +1,5 @@
 const systemMock = {
+  get: jest.fn(),
   getOrThrow: jest.fn(),
   getNumber: jest.fn(),
   getBoolean: jest.fn(),
@@ -14,7 +15,10 @@ jest.mock('@openops/server-shared', () => ({
 
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
+  authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getTableIdByTableName: jest.fn().mockReturnValue(1),
+  getTableIdByTableNameFromContext: jest.fn(),
+  getDatabaseIdForBlock: jest.fn(),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -29,6 +33,7 @@ describe('getTableUrlAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    systemMock.get.mockReturnValue('https://some-url');
     systemMock.getOrThrow.mockReturnValue('https://some-url');
   });
 
@@ -43,6 +48,12 @@ describe('getTableUrlAction', () => {
   });
 
   test('should return proper URL', async () => {
+    openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
+      token: 'mock-token',
+      refresh_token: 'mock-refresh-token',
+    });
+    openopsCommonMock.getTableIdByTableNameFromContext.mockResolvedValue(123);
+    openopsCommonMock.getDatabaseIdForBlock.mockReturnValue(1);
     openopsCommonMock.getTableIdByTableName.mockReturnValue(123);
 
     const context = {
@@ -58,10 +69,13 @@ describe('getTableUrlAction', () => {
       'https://some-url/tables?path=/database/1/table/123',
     );
 
-    expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
-      'my table',
-    );
+    expect(
+      openopsCommonMock.getTableIdByTableNameFromContext,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      openopsCommonMock.getTableIdByTableNameFromContext,
+    ).toHaveBeenCalledWith('my table', context);
+    expect(openopsCommonMock.getDatabaseIdForBlock).toHaveBeenCalledTimes(1);
     expect(systemMock.getOrThrow).toHaveBeenCalledTimes(1);
     expect(systemMock.getOrThrow).toHaveBeenCalledWith('FRONTEND_URL');
   });

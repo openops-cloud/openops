@@ -1,11 +1,11 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
-  getFields,
+  getFieldsFromContext,
   getPrimaryKeyFieldFromFields,
   getPropertyFromField,
   getTableFields,
-  getTableIdByTableName,
+  getTableIdByTableNameFromContext,
+  getTokenForBlock,
   OpenOpsField,
   openopsTablesDropdownProperty,
   upsertRow,
@@ -29,12 +29,15 @@ export const updateRecordAction = createAction({
         'The primary key value of the row to update. If the row does not exist, a new row will be created.',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
 
-        const fields = await getTableFields(tableName as unknown as string);
+        const fields = await getTableFields(
+          tableName as unknown as string,
+          context,
+        );
 
         const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
 
@@ -61,13 +64,14 @@ export const updateRecordAction = createAction({
       description: '',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
 
         const tableFields = await getTableFields(
           tableName as unknown as string,
+          context,
         );
 
         const properties: { [key: string]: any } = {};
@@ -127,17 +131,18 @@ export const updateRecordAction = createAction({
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
-      getTableIdByTableName,
-      [tableName],
+      getTableIdByTableNameFromContext,
+      [tableName, context],
     );
 
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token, useDatabaseToken } = await getTokenForBlock(context);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const tableFields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
-      tableId,
-      token,
-    ]);
+    const tableFields = await cacheWrapper.getOrAdd(
+      fieldsCacheKey,
+      getFieldsFromContext,
+      [tableId, context],
+    );
 
     const fieldsToUpdate = mapFieldsToObject(
       tableName,
@@ -154,6 +159,7 @@ export const updateRecordAction = createAction({
       tableId: tableId,
       token: token,
       fields: fieldsToUpdate,
+      useDatabaseToken,
     });
   },
 });

@@ -14,6 +14,7 @@ const openopsCommonMock = {
   isSingleValueFilter: jest.fn(),
   getPropertyFromField: jest.fn(),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
+  getTokenForBlock: jest.fn(),
   getRows: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([
     {
@@ -35,7 +36,7 @@ jest.mock('@openops/common', () => openopsCommonMock);
 import { DynamicPropsValue } from '@openops/blocks-framework';
 import {
   FilterType,
-  getTableIdByTableName,
+  getTableIdByTableNameFromContext,
   ViewFilterTypesEnum,
 } from '@openops/common';
 import { nanoid } from 'nanoid';
@@ -95,11 +96,16 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
         'Opportunity',
+        context,
       );
     });
   });
 
   test('should authenticate', async () => {
+    openopsCommonMock.getTokenForBlock.mockResolvedValue({
+      token: 'some databaseToken',
+      useDatabaseToken: true,
+    });
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
     });
@@ -110,15 +116,14 @@ describe('getRecordsAction test', () => {
 
     validateWrapperCall(context);
     expect(result).toStrictEqual({ items: [], count: 0 });
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.getTokenForBlock).toHaveBeenCalledTimes(1);
   });
 
   test('should get row with the given filters', async () => {
+    openopsCommonMock.getTokenForBlock.mockResolvedValue({
+      token: 'some databaseToken',
+      useDatabaseToken: true,
+    });
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
     });
@@ -154,6 +159,7 @@ describe('getRecordsAction test', () => {
         },
       ],
       filterType: FilterType.AND,
+      useDatabaseToken: true,
     });
   });
 
@@ -238,6 +244,10 @@ describe('getRecordsAction test', () => {
   ])(
     'should replace field filter=%p with %p when the value is empty',
     async (originalFilter, emptyFieldValue, expectedNewFilter) => {
+      openopsCommonMock.getTokenForBlock.mockResolvedValue({
+        token: 'some databaseToken',
+        useDatabaseToken: true,
+      });
       openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue(
         { token: 'some databaseToken' },
       );
@@ -299,6 +309,7 @@ describe('getRecordsAction test', () => {
           },
         ],
         filterType: FilterType.AND,
+        useDatabaseToken: true,
       });
     },
   );
@@ -309,8 +320,8 @@ function validateWrapperCall(context: any) {
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
-    getTableIdByTableName,
-    [context.propsValue.tableName],
+    getTableIdByTableNameFromContext,
+    [context.propsValue.tableName, context],
   );
 }
 
@@ -330,6 +341,10 @@ function createContext(params?: ContextParams) {
     },
     run: {
       id: nanoid(),
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'encrypted-token',
     },
   };
 }

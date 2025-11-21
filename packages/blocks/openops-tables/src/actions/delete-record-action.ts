@@ -1,11 +1,11 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   deleteRow,
-  getFields,
+  getFieldsFromContext,
   getPrimaryKeyFieldFromFields,
   getRowByPrimaryKeyValue,
-  getTableIdByTableName,
+  getTableIdByTableNameFromContext,
+  getTokenForBlock,
   openopsTablesDropdownProperty,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -30,17 +30,18 @@ export const deleteRecordAction = createAction({
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
-      getTableIdByTableName,
-      [tableName],
+      getTableIdByTableNameFromContext,
+      [tableName, context],
     );
 
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token, useDatabaseToken } = await getTokenForBlock(context);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const fields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
-      tableId,
-      token,
-    ]);
+    const fields = await cacheWrapper.getOrAdd(
+      fieldsCacheKey,
+      getFieldsFromContext,
+      [tableId, context],
+    );
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const rowPrimaryKey = getPrimaryKey(context.propsValue.rowPrimaryKey);
@@ -51,6 +52,7 @@ export const deleteRecordAction = createAction({
       rowPrimaryKey,
       primaryKeyField.name,
       primaryKeyField.type,
+      useDatabaseToken,
     );
     if (!rowToDelete) {
       throw new Error('No record found with given primary key');
@@ -60,6 +62,7 @@ export const deleteRecordAction = createAction({
       tableId: tableId,
       token: token,
       rowId: rowToDelete.id,
+      useDatabaseToken,
     });
   },
 });

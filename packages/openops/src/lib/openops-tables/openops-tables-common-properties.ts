@@ -15,15 +15,15 @@ import {
   RatingOpenOpsField,
   SelectOpenOpsField,
 } from './fields';
-import { getTableIdByTableName, getTableNames } from './tables';
+import { getTableIdByTableName, getTableNamesFromContext } from './tables';
 
 export function openopsTablesDropdownProperty(): any {
   return Property.Dropdown({
     displayName: 'Table',
     refreshers: [],
     required: true,
-    options: async () => {
-      const tables = await getTableNames();
+    options: async (_, context) => {
+      const tables = await getTableNamesFromContext(context);
 
       return {
         disabled: false,
@@ -40,13 +40,10 @@ export function openopsTablesDropdownProperty(): any {
 
 export async function getTableFields(
   tableName: string,
+  context: PropertyContext,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
-
-  const tableId = await getTableIdByTableName(tableName as unknown as string);
-
-  return await getFields(tableId, token, false, axiosRetryConfig);
+  return await getTableFieldsFromContext(tableName, context, axiosRetryConfig);
 }
 
 export async function getTableFieldsForMigration(

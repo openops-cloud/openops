@@ -1,11 +1,11 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   FilterType,
   getPropertyFromField,
   getRows,
   getTableFields,
-  getTableIdByTableName,
+  getTableIdByTableNameFromContext,
+  getTokenForBlock,
   isSingleValueFilter,
   openopsTablesDropdownProperty,
   ViewFilterTypesEnum,
@@ -41,7 +41,7 @@ export const getRecordsAction = createAction({
       displayName: '',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
@@ -49,6 +49,7 @@ export const getRecordsAction = createAction({
 
         const tableFields = await getTableFields(
           tableName as unknown as string,
+          context,
         );
 
         properties['filters'] = Property.Array({
@@ -113,15 +114,14 @@ export const getRecordsAction = createAction({
     }),
   },
   async run(context) {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
-
+    const { token, useDatabaseToken } = await getTokenForBlock(context);
     const tableName = context.propsValue.tableName as unknown as string;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
-      getTableIdByTableName,
-      [tableName],
+      getTableIdByTableNameFromContext,
+      [tableName, context],
     );
 
     const filtersProps = context.propsValue.filters['filters'] as unknown as {
@@ -148,6 +148,7 @@ export const getRecordsAction = createAction({
       token: token,
       filters,
       filterType: filterType,
+      useDatabaseToken,
     });
 
     return { count: rows.length, items: rows };
