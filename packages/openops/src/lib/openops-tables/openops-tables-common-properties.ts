@@ -40,10 +40,13 @@ export function openopsTablesDropdownProperty(): any {
 
 export async function getTableFields(
   tableName: string,
-  context: PropertyContext,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  return await getTableFieldsFromContext(tableName, context, axiosRetryConfig);
+  const { token } = await authenticateDefaultUserInOpenOpsTables();
+
+  const tableId = await getTableIdByTableName(tableName as unknown as string);
+
+  return await getFields(tableId, token, false, axiosRetryConfig);
 }
 
 export async function getTableFieldsForMigration(
