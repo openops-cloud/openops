@@ -3,15 +3,17 @@ import { flowHelper } from '../flow-helper';
 
 describe('flowHelper', () => {
   describe('indexToAlphabetical', () => {
-    it('should convert boundary and multi-letter indices correctly', () => {
-      expect(flowHelper.indexToAlphabetical(0)).toBe('a');
-      expect(flowHelper.indexToAlphabetical(25)).toBe('z');
-      expect(flowHelper.indexToAlphabetical(26)).toBe('aa');
-      expect(flowHelper.indexToAlphabetical(27)).toBe('ab');
-      expect(flowHelper.indexToAlphabetical(51)).toBe('az');
-      expect(flowHelper.indexToAlphabetical(52)).toBe('ba');
-      expect(flowHelper.indexToAlphabetical(701)).toBe('zz');
-      expect(flowHelper.indexToAlphabetical(702)).toBe('aaa');
+    it.each<[number, string]>([
+      [0, 'a'],
+      [25, 'z'],
+      [26, 'aa'],
+      [27, 'ab'],
+      [51, 'az'],
+      [52, 'ba'],
+      [701, 'zz'],
+      [702, 'aaa'],
+    ])('converts %d to %s', (input, expected) => {
+      expect(flowHelper.indexToAlphabetical(input)).toBe(expected);
     });
   });
 
