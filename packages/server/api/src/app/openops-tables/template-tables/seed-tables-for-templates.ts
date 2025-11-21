@@ -1,8 +1,7 @@
-import {
-  authenticateDefaultUserInOpenOpsTables,
-  getDefaultDatabaseId,
-} from '@openops/common';
-import { logger } from '@openops/server-shared';
+import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { projectService } from '../../project/project-service';
+import { userService } from '../../user/user-service';
 import { createAggregatedCostsTable } from './create-aggregated-costs-table';
 import { createAutoInstancesShutdownTable } from './create-auto-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
@@ -12,10 +11,30 @@ import { createOpportunitiesTable } from './create-opportunities-table';
 import { createResourceBuTagAssignmentTable } from './create-resource-bu-tag-assignment-table';
 import { createTagOwnerMappingTable } from './create-tag-owner-mapping-table';
 
+const getProjectTablesDatabaseId = async (): Promise<number> => {
+  const email = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
+  const user = await userService.getByOrganizationAndEmail({
+    organizationId: null,
+    email,
+  });
+
+  if (!user) {
+    throw new Error(`Admin user not found for email: ${email}`);
+  }
+
+  const project = await projectService.getOneForUser(user);
+
+  if (!project) {
+    throw new Error(`No project found for user: ${email}`);
+  }
+
+  return project.tablesDatabaseId;
+};
+
 export const seedTemplateTablesService = {
-  async createBaseTemplateTables() {
+  async createBaseTemplateTables(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    const databaseId = await getDefaultDatabaseId(token);
+    const databaseId = await getProjectTablesDatabaseId();
 
     const buTable = await createBusinessUnitsTable(databaseId, token);
     await createTagOwnerMappingTable(databaseId, token, buTable.tableId);
@@ -29,25 +48,25 @@ export const seedTemplateTablesService = {
     logger.info('[Seeding template tables] Done');
   },
 
-  async createOpportunityTemplateTable() {
+  async createOpportunityTemplateTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    const databaseId = await getDefaultDatabaseId(token);
+    const databaseId = await getProjectTablesDatabaseId();
 
     await createOpportunitiesTable(token, databaseId);
 
     logger.info('[Seeding opportunity template table] Done');
   },
 
-  async createAggregatedCostsTable() {
+  async createAggregatedCostsTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    const databaseId = await getDefaultDatabaseId(token);
+    const databaseId = await getProjectTablesDatabaseId();
 
     await createAggregatedCostsTable(databaseId, token);
   },
 
-  async createKnownCostTypesByApplicationTable() {
+  async createKnownCostTypesByApplicationTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    const databaseId = await getDefaultDatabaseId(token);
+    const databaseId = await getProjectTablesDatabaseId();
 
     await createKnownCostTypesByApplicationTable(token, databaseId);
 
@@ -56,7 +75,7 @@ export const seedTemplateTablesService = {
 
   async createAutoInstancesShutdownTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
-    const databaseId = await getDefaultDatabaseId(token);
+    const databaseId = await getProjectTablesDatabaseId();
 
     await createAutoInstancesShutdownTable(token, databaseId);
 

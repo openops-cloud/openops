@@ -13,6 +13,7 @@ import {
   makeOpenOpsTablesPost,
   makeOpenOpsTablesPut,
 } from '../openops-tables/requests-helpers';
+import { TokenOrContext } from './context-helpers';
 
 export interface OpenOpsRow {
   id: number;
@@ -24,25 +25,30 @@ export interface RowParams {
   token: string;
 }
 
-export interface GetRowsParams extends RowParams {
+type RowParamsWithTokenOrContext = Omit<RowParams, 'token'> & {
+  tokenOrContext: TokenOrContext;
+};
+
+export interface GetRowsParams extends RowParamsWithTokenOrContext {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
+  tokenOrContext: TokenOrContext;
 }
 
-export interface AddRowParams extends RowParams {
+export interface AddRowParams extends RowParamsWithTokenOrContext {
   fields: { [key: string]: any };
 }
 
-export interface UpsertRowParams extends RowParams {
+export interface UpsertRowParams extends RowParamsWithTokenOrContext {
   fields: { [key: string]: any };
 }
 
-export interface UpdateRowParams extends RowParams {
+export interface UpdateRowParams extends RowParamsWithTokenOrContext {
   fields: { [key: string]: any };
   rowId: number;
 }
 
-export interface DeleteRowParams extends RowParams {
+export interface DeleteRowParams extends RowParamsWithTokenOrContext {
   rowId: number;
 }
 
@@ -101,7 +107,7 @@ export async function getRows(getRowsParams: GetRowsParams) {
   const paramsString = params.toString();
   const baseUrl = `api/database/rows/table/${getRowsParams.tableId}/`;
   const url = paramsString ? baseUrl + `?${paramsString}` : baseUrl;
-  const authenticationHeader = createAxiosHeaders(getRowsParams.token);
+  const authenticationHeader = createAxiosHeaders(getRowsParams.tokenOrContext);
 
   return executeWithConcurrencyLimit(
     async () => {
@@ -128,7 +134,9 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(updateRowParams.token);
+      const authenticationHeader = createAxiosHeaders(
+        updateRowParams.tokenOrContext,
+      );
       return await makeOpenOpsTablesPatch(
         url,
         updateRowParams.fields,
@@ -150,7 +158,9 @@ export async function upsertRow(upsertRowParams: UpsertRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
+      const authenticationHeader = createAxiosHeaders(
+        upsertRowParams.tokenOrContext,
+      );
       return await makeOpenOpsTablesPut(
         url,
         upsertRowParams.fields,
@@ -172,7 +182,9 @@ export async function addRow(addRowParams: AddRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(addRowParams.token);
+      const authenticationHeader = createAxiosHeaders(
+        addRowParams.tokenOrContext,
+      );
       return await makeOpenOpsTablesPost(
         url,
         addRowParams.fields,
@@ -194,7 +206,9 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
 
   return executeWithConcurrencyLimit(
     async () => {
-      const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
+      const authenticationHeader = createAxiosHeaders(
+        deleteRowParams.tokenOrContext,
+      );
       return await makeOpenOpsTablesDelete(url, authenticationHeader);
     },
     (error) => {
@@ -207,7 +221,7 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
 }
 
 export async function getRowByPrimaryKeyValue(
-  token: string,
+  tokenOrContext: TokenOrContext,
   tableId: number,
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,
@@ -215,7 +229,6 @@ export async function getRowByPrimaryKeyValue(
 ) {
   const rows = await getRows({
     tableId: tableId,
-    token: token,
     filters: [
       {
         fieldName: primaryKeyFieldName,
@@ -223,6 +236,7 @@ export async function getRowByPrimaryKeyValue(
         type: getEqualityFilterType(primaryKeyFieldType),
       },
     ],
+    tokenOrContext,
   });
 
   if (rows.length > 1) {

@@ -15,6 +15,10 @@ jest.mock('@openops/server-shared', () => ({
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getTableIdByTableName: jest.fn().mockReturnValue(1),
+  getTablesServerContext: jest.fn((server) => ({
+    tablesDatabaseId: server?.tablesDatabaseId,
+    tablesDatabaseToken: server?.tablesDatabaseToken,
+  })),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -50,6 +54,10 @@ describe('getTableUrlAction', () => {
       propsValue: {
         tableName: 'my table',
       },
+      server: {
+        tablesDatabaseId: 1,
+        tablesDatabaseToken: 'token',
+      },
     };
 
     const result = (await getTableUrlAction.run(context)) as any;
@@ -61,6 +69,10 @@ describe('getTableUrlAction', () => {
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
       'my table',
+      {
+        tablesDatabaseId: 1,
+        tablesDatabaseToken: 'token',
+      },
     );
     expect(systemMock.getOrThrow).toHaveBeenCalledTimes(1);
     expect(systemMock.getOrThrow).toHaveBeenCalledWith('FRONTEND_URL');

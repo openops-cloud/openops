@@ -1,6 +1,7 @@
 import { Property, Validators } from '@openops/blocks-framework';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
+import { resolveTokenProvider, TablesServerContext } from './context-helpers';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
@@ -17,8 +18,8 @@ export function openopsTablesDropdownProperty(): any {
     displayName: 'Table',
     refreshers: [],
     required: true,
-    options: async () => {
-      const tables = await getTableNames();
+    options: async (_, { server }) => {
+      const tables = await getTableNames(server);
 
       return {
         disabled: false,
@@ -35,13 +36,38 @@ export function openopsTablesDropdownProperty(): any {
 
 export async function getTableFields(
   tableName: string,
+  serverContext: TablesServerContext,
+): Promise<OpenOpsField[]>;
+
+export async function getTableFields(
+  tableName: string,
   axiosRetryConfig?: IAxiosRetryConfig,
+): Promise<OpenOpsField[]>;
+
+export async function getTableFields(
+  tableName: string,
+  secondParam?: TablesServerContext | IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
+  const tableId = await getTableIdByTableName(tableName);
+
+  if (isServerContext(secondParam)) {
+    const tokenOrContext = await resolveTokenProvider(secondParam);
+    return await getFields(tableId, tokenOrContext, false);
+  }
+
   const { token } = await authenticateDefaultUserInOpenOpsTables();
+  return await getFields(tableId, token, false, secondParam);
+}
 
-  const tableId = await getTableIdByTableName(tableName as unknown as string);
-
-  return await getFields(tableId, token, false, axiosRetryConfig);
+function isServerContext(
+  value: object | undefined,
+): value is TablesServerContext {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    'tablesDatabaseId' in value &&
+    'tablesDatabaseToken' in value
+  );
 }
 
 // https://api.baserow.io/api/redoc/#tag/Database-table-fields/operation/get_database_table_field

@@ -39,7 +39,9 @@ describe('table property', () => {
     });
     getTableNamesMock.mockResolvedValue(['table1', 'table2']);
 
-    const result = await openopsTablesDropdownProperty().options();
+    const result = await openopsTablesDropdownProperty().options(undefined, {
+      server: undefined,
+    });
 
     expect(result).toMatchObject({
       disabled: false,
@@ -49,18 +51,22 @@ describe('table property', () => {
       ],
     });
     expect(getTableNamesMock).toHaveBeenCalledTimes(1);
+    expect(getTableNamesMock).toHaveBeenCalledWith(undefined);
   });
 
   test('should handle empty tables', async () => {
     getTableNamesMock.mockResolvedValue([]);
 
-    const result = await openopsTablesDropdownProperty().options();
+    const result = await openopsTablesDropdownProperty().options(undefined, {
+      server: undefined,
+    });
 
     expect(result).toMatchObject({
       disabled: false,
       options: [],
     });
     expect(getTableNamesMock).toHaveBeenCalledTimes(1);
+    expect(getTableNamesMock).toHaveBeenCalledWith(undefined);
   });
 });
 
