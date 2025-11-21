@@ -10,10 +10,12 @@ export function handleCliError({
   command: string;
   error: unknown;
 }): never {
-  logger.error(`${provider} CLI execution failed.`, {
-    command,
-    error,
-  });
+  logger.error(
+    `${provider} CLI execution failed.`,
+    error instanceof Error
+      ? { command, error }
+      : { command, errorMessage: error },
+  );
 
   const message = `An error occurred while running ${provider} CLI command: ${error}`;
 

@@ -42,10 +42,10 @@ export async function executeFile(
 
 async function getResult(childProcess: ChildProcess, fullCommand: string) {
   let stdout = '';
-  let error = '';
+  let errorMessage = '';
 
   childProcess.stderr?.on('data', function (data) {
-    error += data;
+    errorMessage += data;
   });
 
   childProcess.stdout?.on('data', (data) => {
@@ -62,13 +62,13 @@ async function getResult(childProcess: ChildProcess, fullCommand: string) {
     command: fullCommand,
     exitCode,
     stdout,
-    error,
+    errorMessage,
   });
 
   return {
     exitCode: exitCode,
     stdOut: trimNewLines(stdout),
-    stdError: trimNewLines(error),
+    stdError: trimNewLines(errorMessage),
   };
 }
 
