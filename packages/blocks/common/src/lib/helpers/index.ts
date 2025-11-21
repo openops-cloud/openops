@@ -87,7 +87,7 @@ export function createCustomApiCallAction({
       headers: Property.Object({
         displayName: 'Headers',
         description:
-          'Authorization headers are injected automatically from your connection.',
+          'Authorization headers are injected automatically from your connection',
         required: false,
       }),
       queryParams: Property.Object({
@@ -103,7 +103,7 @@ export function createCustomApiCallAction({
         required: false,
       }),
       timeout: Property.Number({
-        displayName: 'Timeout (in seconds)',
+        displayName: 'Timeout (in Seconds)',
         required: false,
       }),
     },

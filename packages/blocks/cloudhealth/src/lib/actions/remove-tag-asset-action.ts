@@ -7,13 +7,13 @@ import { safeFetch } from '../common/safe-fetch';
 export const removeTagAssetAction = createAction({
   name: 'cloudhealth_remove_tag_asset',
   displayName: 'Remove Asset Tags',
-  description: 'Remove Asset Tags',
+  description: 'Remove tags from CloudHealth assets',
   auth: cloudhealthAuth,
   isWriteAction: true,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',
-      description: 'The type of asset to tag.',
+      description: 'The type of asset to tag',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
@@ -43,7 +43,7 @@ export const removeTagAssetAction = createAction({
     }),
     assetId: Property.Number({
       displayName: 'Asset ID',
-      description: 'The ID of the asset to tag.',
+      description: 'The ID of the asset to tag',
       required: true,
     }),
     tags: Property.Array({

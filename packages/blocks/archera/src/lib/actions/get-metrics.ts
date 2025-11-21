@@ -11,7 +11,7 @@ export const getMetricsAction = createAction({
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',
-      description: 'The cloud provider to fetch metrics for.',
+      description: 'The cloud provider to fetch metrics for',
       required: true,
       options: {
         options: [

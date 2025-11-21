@@ -8,8 +8,8 @@ import { customAuth } from '../common/custom-auth';
 
 const props = {
   sqlText: Property.LongText({
-    displayName: 'SQL query',
-    description: 'Use :1, :2… or ? placeholders to use binding parameters.',
+    displayName: 'SQL Query',
+    description: 'Use :1, :2… or ? placeholders to use binding parameters',
     required: true,
     supportsAI: true,
   }),
@@ -20,16 +20,16 @@ const props = {
     required: false,
   }),
   timeout: Property.Number({
-    displayName: 'Query timeout (ms)',
+    displayName: 'Query Timeout (ms)',
     description:
-      'An integer indicating the maximum number of milliseconds to wait for a query to complete before timing out.',
+      'An integer indicating the maximum number of milliseconds to wait for a query to complete before timing out',
     required: false,
     defaultValue: DEFAULT_QUERY_TIMEOUT,
   }),
   application: Property.ShortText({
-    displayName: 'Application name',
+    displayName: 'Application Name',
     description:
-      'A string indicating the name of the client application connecting to the server.',
+      'A string indicating the name of the client application connecting to the server',
     required: false,
     defaultValue: DEFAULT_APPLICATION_NAME,
   }),
@@ -38,7 +38,7 @@ const props = {
 export const runQuery = createAction({
   name: 'runQuery',
   displayName: 'Run Query',
-  description: 'Run Query',
+  description: 'Execute an SQL query on Snowflake',
   auth: customAuth,
   isWriteAction: true,
   props,

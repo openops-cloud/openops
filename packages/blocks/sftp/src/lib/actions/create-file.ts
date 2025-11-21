@@ -14,7 +14,7 @@ export const createFile = createAction({
       required: true,
     }),
     fileContent: Property.LongText({
-      displayName: 'File content',
+      displayName: 'File Content',
       required: true,
     }),
   },

@@ -12,7 +12,7 @@ export const assignIssueAction = createAction({
   auth: jiraCloudAuth,
   name: 'assign_issue',
   displayName: 'Assign Issue',
-  description: 'Assigns an issue to a user.',
+  description: 'Assigns an issue to a user',
   isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),

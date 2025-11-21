@@ -3,8 +3,8 @@ import { dateProperty, operatorProperty } from './property-helpers';
 
 export function closedAndDoneRecommendationsProperty() {
   return Property.DynamicProperties({
-    displayName: 'Date filters for closed and done recommendations',
-    description: 'Filter closed and done recommendations by date range.',
+    displayName: 'Date Filters for Closed and Done Recommendations',
+    description: 'Filter closed and done recommendations by date range',
     required: true,
     refreshers: ['statusFilter'],
     props: async ({ statusFilter }): Promise<{ [key: string]: any }> => {

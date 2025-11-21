@@ -188,30 +188,30 @@ export const newEmailTrigger = createTrigger({
   auth: microsoftOutlookAuth,
   name: 'newEmail',
   displayName: 'New Email',
-  description: 'Triggers when a new email is received in the inbox.',
+  description: 'Triggers when a new email is received in the inbox',
   props: {
     mailBox: mailFolderIdDropdown({
       displayName: 'Mail Folder',
-      description: 'The folder to monitor for new emails.',
+      description: 'The folder to monitor for new emails',
       required: false,
     }),
     senders: Property.Array({
       displayName: 'Sender (From)',
-      description: 'Matches at least one sender.',
+      description: 'Matches at least one sender',
       required: false,
     }),
     recipients: Property.Array({
       displayName: 'Recipients (To)',
-      description: 'Matches at least one recipient (To).',
+      description: 'Matches at least one recipient (To)',
       required: false,
     }),
     cc: Property.Array({
       displayName: 'CC',
-      description: 'Matches at least one CC address.',
+      description: 'Matches at least one CC address',
       required: false,
     }),
     subject: Property.ShortText({
-      displayName: 'Subject text contains',
+      displayName: 'Subject Text Contains',
       required: false,
     }),
   },

@@ -25,7 +25,7 @@ export const servicenowAuth = BlockAuth.CustomAuth({
       required: true,
     }),
     instanceName: Property.ShortText({
-      displayName: 'Instance name',
+      displayName: 'Instance Name',
       description:
         'The name of your ServiceNow instance (for example: https://<instance>.service-now.com/)',
       required: true,

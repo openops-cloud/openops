@@ -63,8 +63,8 @@ export const getPriceAction = createAction({
       },
     }),
     queryFilters: Property.DynamicProperties({
-      displayName: '',
-      description: '',
+      displayName: 'Query Filters',
+      description: 'Dynamic filters for AWS pricing query',
       required: true,
       refreshers: ['auth', 'service'],
       props: async ({ auth, service }, { input }) => {
@@ -79,7 +79,7 @@ export const getPriceAction = createAction({
           displayName: 'Filters',
           properties: {
             attributeName: Property.StaticDropdown({
-              displayName: 'Attribute name',
+              displayName: 'Attribute Name',
               required: true,
               options: {
                 options: attributeNames.map((attribute) => ({
@@ -89,7 +89,7 @@ export const getPriceAction = createAction({
               },
             }),
             attributeValue: Property.Dropdown({
-              displayName: 'Attribute value',
+              displayName: 'Attribute Value',
               required: true,
               refreshers: ['attributeName'],
               options: async () => {

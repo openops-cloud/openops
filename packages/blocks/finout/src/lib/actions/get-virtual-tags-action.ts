@@ -5,7 +5,7 @@ import { getVirtualTags } from '../common/virtual-tags';
 export const getVirtualTagValuesAction = createAction({
   name: 'finout_get_virtual_tags',
   displayName: 'Get Virtual Tag Values',
-  description: 'Retrieve virtual tags and their values',
+  description: 'Get virtual tags and their values',
   auth: finoutAuth,
   isWriteAction: false,
   props: {

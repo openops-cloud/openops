@@ -10,7 +10,7 @@ import { getUsersIDsDropdownProperty } from '../common/users';
 export const createCaseAction = createAction({
   name: 'create_case',
   displayName: 'Create a Case',
-  description: 'Create a Case',
+  description: 'Create a new case in Ternary for tracking cloud resources',
   auth: ternaryCloudAuth,
   isWriteAction: false,
   props: {
@@ -33,7 +33,7 @@ export const createCaseAction = createAction({
     assigneeIDs: getUsersIDsDropdownProperty('Assignee IDs'),
     followerIDs: getUsersIDsDropdownProperty('Follower IDs'),
     linkToJira: Property.Checkbox({
-      displayName: 'Link case to Jira',
+      displayName: 'Link Case to Jira',
       description:
         'Indicates whether a Jira ticket should be created for this case',
       required: false,

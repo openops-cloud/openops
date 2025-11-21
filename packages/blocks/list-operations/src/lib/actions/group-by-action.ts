@@ -29,13 +29,16 @@ export const groupByAction = createAction({
 
 function groupItemsByKey(items: any[], groupKey: string): any[][] {
   return Object.values(
-    items.reduce((groupedItems, currentItem) => {
-      if (groupKey in currentItem) {
-        const keyValue = currentItem[groupKey];
-        groupedItems[keyValue] = groupedItems[keyValue] || [];
-        groupedItems[keyValue].push(currentItem);
-      }
-      return groupedItems;
-    }, {} as Record<string, any[]>),
+    items.reduce(
+      (groupedItems, currentItem) => {
+        if (groupKey in currentItem) {
+          const keyValue = currentItem[groupKey];
+          groupedItems[keyValue] = groupedItems[keyValue] || [];
+          groupedItems[keyValue].push(currentItem);
+        }
+        return groupedItems;
+      },
+      {} as Record<string, any[]>,
+    ),
   );
 }

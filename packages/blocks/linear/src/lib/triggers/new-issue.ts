@@ -80,9 +80,8 @@ export const linearNewIssue = createTrigger({
   },
   async onDisable(context) {
     const client = makeClient(context.auth);
-    const response = await context.store?.get<WebhookInformation>(
-      '_new_issue_trigger',
-    );
+    const response =
+      await context.store?.get<WebhookInformation>('_new_issue_trigger');
     if (response?.webhookId) {
       await client.deleteWebhook(response.webhookId);
     }

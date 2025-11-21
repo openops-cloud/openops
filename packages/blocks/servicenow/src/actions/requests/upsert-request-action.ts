@@ -8,7 +8,7 @@ export const upsertRequestAction = createAction({
   auth: servicenowAuth,
   name: 'upsert_request',
   description:
-    'Create a new request item or update an existing request item in ServiceNow.',
+    'Create a new request item or update an existing request item in ServiceNow',
   displayName: 'Add or Update Request',
   isWriteAction: true,
   props: {
@@ -19,8 +19,8 @@ export const upsertRequestAction = createAction({
       required: false,
     }),
     fieldsProperties: Property.DynamicProperties({
-      displayName: '',
-      description: '',
+      displayName: 'Fields Properties',
+      description: 'Fields to set for the ServiceNow request',
       required: true,
       refreshers: ['auth'],
       props: async ({ auth }) => {

@@ -5,7 +5,7 @@ import { slackUpdateMessage } from '../common/utils';
 
 export const updateMessageAction = createAction({
   name: 'updateMessage',
-  displayName: 'Update message',
+  displayName: 'Update Message',
   description: 'Update an existing message',
   auth: slackAuth,
   isWriteAction: true,
@@ -14,7 +14,7 @@ export const updateMessageAction = createAction({
     ts: Property.ShortText({
       displayName: 'Message Timestamp',
       description:
-        'Please provide the timestamp of the message you wish to update, such as `1710304378.475129`.',
+        'Please provide the timestamp of the message you wish to update, such as `1710304378.475129`',
       required: true,
     }),
     text: Property.LongText({

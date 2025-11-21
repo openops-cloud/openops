@@ -12,7 +12,7 @@ export function getReviewersProperty(): MultiSelectDropdownProperty<
   return Property.MultiSelectDropdown({
     displayName: 'Reviewers',
     description:
-      'List of GitHub usernames to be notified to review the pull request.',
+      'List of GitHub usernames to be notified to review the pull request',
     required: false,
     refreshers: ['repository'],
     options: async ({ repository, auth }) => {

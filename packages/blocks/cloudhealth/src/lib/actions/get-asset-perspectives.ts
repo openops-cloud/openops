@@ -8,7 +8,7 @@ import { searchAssets } from '../common/search-assets';
 export const getAssetPerspectivesAction = createAction({
   name: 'cloudhealth_get_asset_perspectives',
   displayName: 'Get Asset Perspectives',
-  description: 'Retrieve perspectives for a specific asset',
+  description: 'Get perspectives for a specific asset',
   auth: cloudhealthAuth,
   isWriteAction: false,
   props: {
@@ -122,11 +122,14 @@ function getAssetPerspectives(asset: any): Record<string, string> {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const perspectivesAsObject = perspectives.reduce((acc, item) => {
-    const [key, ...rest] = item.split(':');
-    acc[key.trim()] = rest.join(':').trim();
-    return acc;
-  }, {} as Record<string, string>);
+  const perspectivesAsObject = perspectives.reduce(
+    (acc, item) => {
+      const [key, ...rest] = item.split(':');
+      acc[key.trim()] = rest.join(':').trim();
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   return perspectivesAsObject;
 }
