@@ -1,4 +1,4 @@
-import { Property, StaticDropdownProperty } from '@openops/blocks-framework';
+import { Property } from '@openops/blocks-framework';
 import {
   getEBSProperty,
   getEC2Property,
@@ -18,7 +18,8 @@ export function getResourceProperties() {
 
       const logicalIdProp = logicalId as { type: string };
 
-      let propertyNameDropdown: StaticDropdownProperty<string, true>;
+      let propertyNameDropdown: any;
+
       switch (logicalIdProp.type) {
         case 'AWS::EC2::Instance':
           propertyNameDropdown = getEC2Property('cloudformation');
@@ -28,6 +29,13 @@ export function getResourceProperties() {
           break;
         case 'AWS::RDS::DBInstance':
           propertyNameDropdown = getRDSProperty('cloudformation');
+          break;
+        case 'AWS::S3::Bucket':
+          propertyNameDropdown = Property.ShortText({
+            displayName: 'Property name',
+            description: 'The property to modify.',
+            required: true,
+          });
           break;
         default:
           return {} as any;
@@ -39,11 +47,19 @@ export function getResourceProperties() {
           required: true,
           properties: {
             propertyName: propertyNameDropdown,
-            propertyValue: Property.ShortText({
-              displayName: 'Property value',
-              description: 'The new value for the property.',
-              required: true,
-            }),
+            propertyValue:
+              propertyNameDropdown.type === 'SHORT_TEXT'
+                ? Property.Json({
+                    displayName: 'Property value',
+                    description: 'The new value for the property.',
+                    required: true,
+                    supportsAI: true,
+                  })
+                : Property.ShortText({
+                    displayName: 'Property value',
+                    description: 'The new value for the property.',
+                    required: true,
+                  }),
           },
         }),
       };
