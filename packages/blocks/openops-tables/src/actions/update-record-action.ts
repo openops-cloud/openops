@@ -66,13 +66,14 @@ export const updateRecordAction = createAction({
       description: '',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
 
         const tableFields = await getTableFields(
           tableName as unknown as string,
+          context.server,
         );
 
         const properties: { [key: string]: any } = {};
@@ -133,7 +134,7 @@ export const updateRecordAction = createAction({
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, context.server],
     );
 
     const tablesServerContext = getTablesServerContext(context.server);
