@@ -6,7 +6,7 @@ export function shouldUseDatabaseToken(): boolean {
   return system.getBoolean(AppSystemProp.ENABLE_TABLES_DATABASE_TOKEN) ?? false;
 }
 
-export type TokenOrContext = string | { getToken: () => string };
+export type TokenOrResolver = string | { getToken: () => string };
 export type TablesServerContext = Pick<
   ServerContext,
   'tablesDatabaseId' | 'tablesDatabaseToken'
@@ -14,7 +14,7 @@ export type TablesServerContext = Pick<
 
 export async function resolveTokenProvider(
   serverContext: TablesServerContext,
-): Promise<TokenOrContext> {
+): Promise<TokenOrResolver> {
   if (shouldUseDatabaseToken()) {
     return {
       getToken: () => {
