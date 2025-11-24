@@ -26,6 +26,8 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+import { EncryptedObject } from '@openops/shared';
+import { TablesServerContext } from '../../src/lib/openops-tables/context-helpers';
 import {
   DurationOpenOpsField,
   NumberOpenOpsField,
@@ -35,8 +37,6 @@ import {
   getTableFields,
   openopsTablesDropdownProperty,
 } from '../../src/lib/openops-tables/openops-tables-common-properties';
-import { TablesServerContext } from '../../src/lib/openops-tables/context-helpers';
-import { EncryptedObject } from '@openops/shared';
 
 const mockTablesServerContext: TablesServerContext = {
   tablesDatabaseId: 1,
@@ -149,9 +149,9 @@ describe('getTableFields', () => {
     );
     getTableIdByTableNameMock.mockResolvedValue(1);
 
-    await expect(getTableFields('Opportunity', mockTablesServerContext)).rejects.toThrow(
-      'Authentication failed',
-    );
+    await expect(
+      getTableFields('Opportunity', mockTablesServerContext),
+    ).rejects.toThrow('Authentication failed');
     expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
     expect(getFieldsMock).not.toHaveBeenCalled();
   });
