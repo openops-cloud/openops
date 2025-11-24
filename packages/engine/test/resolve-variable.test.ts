@@ -60,7 +60,7 @@ describe('resolveVariable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockEngineConstants.fromExecuteStepInput = jest.fn().mockReturnValue(mockConstants);
+    mockEngineConstants.fromExecuteStepInput = jest.fn().mockResolvedValue(mockConstants);
     mockTestExecutionContext.stateFromFlowVersion = jest.fn().mockResolvedValue(mockExecutionState);
   });
 

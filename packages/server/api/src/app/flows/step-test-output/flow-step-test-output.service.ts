@@ -1,9 +1,9 @@
 import {
   compressAndEncrypt,
   decryptAndDecompress,
-  EncryptedObject,
 } from '@openops/server-shared';
 import {
+  EncryptedObject,
   FlowStepTestOutput,
   FlowVersionId,
   OpenOpsId,

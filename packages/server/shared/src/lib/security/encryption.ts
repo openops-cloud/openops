@@ -1,4 +1,8 @@
-import { assertNotNullOrUndefined, isNil } from '@openops/shared';
+import {
+  assertNotNullOrUndefined,
+  EncryptedObject,
+  isNil,
+} from '@openops/shared';
 import * as crypto from 'crypto';
 import { randomBytes } from 'node:crypto';
 import { promisify } from 'util';
@@ -8,11 +12,6 @@ import { localFileStore } from './local-store';
 let secret: string | null;
 const algorithm = 'aes-256-cbc';
 const ivLength = 16;
-
-export type EncryptedObject = {
-  iv: string;
-  data: string;
-};
 
 const loadEncryptionKey = async (
   queueMode: QueueMode,

@@ -189,6 +189,8 @@ const executeAction: ActionHandler<BlockAction> = async ({
         token: constants.engineToken,
         apiUrl: constants.internalApiUrl,
         publicUrl: constants.publicUrl,
+        tablesDatabaseId: constants.tablesDatabaseId,
+        tablesDatabaseToken: constants.tablesDatabaseToken,
       },
       propsValue: processedInput,
       tags: createTagsManager(hookResponse),

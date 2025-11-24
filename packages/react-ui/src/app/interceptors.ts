@@ -1,3 +1,4 @@
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { API_URL, isUrlRelative } from '@/app/lib/api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import axios, { AxiosError, HttpStatusCode } from 'axios';
@@ -60,12 +61,13 @@ axios.interceptors.response.use(
       if (url !== OPENOPS_CLOUD_USER_INFO_API_URL && !isSignInRoute) {
         console.warn('JWT expired logging out');
 
-        const flags = queryClient.getQueryData<FlagsMap>([QueryKeys.flags]);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const flags = queryClient.getQueryData<FlagsMap>([QueryKeys.flags])!;
         authenticationSession.logOut({
           userInitiated: false,
-          federatedLoginUrl: flags?.FRONTEGG_URL as string | undefined,
+          federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
         });
-        if (!flags?.FRONTEGG_URL) {
+        if (!flags?.FEDERATED_LOGIN_ENABLED) {
           window.location.reload();
         }
       }
