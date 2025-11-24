@@ -59,7 +59,7 @@ const AssistantTopBar = ({
   return (
     <div
       className={cn(
-        'flex flex-col px-4 py-2 gap-2 flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200',
+        'flex flex-col px-4 py-2 gap-[7px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200',
       )}
     >
       <div className="flex justify-between items-center gap-2">
@@ -134,15 +134,18 @@ const AssistantTopBar = ({
         </div>
       </div>
       {isStepSettingsMode && (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 pl-1">
           <BlockIcon
             logoUrl={stepLogoUrl}
             displayName={blockDisplayName}
             showTooltip={false}
-            size="sm"
+            className="size-[16px]"
           />
-          <span className="min-w-0 truncate text-sm font-normal">
-            {blockDisplayName} ({stepIndex}. {stepDisplayName})
+          <span className="min-w-0 truncate text-xs text-gray-500 font-medium">
+            {blockDisplayName}{' '}
+            <span className="italic">
+              ( {stepIndex}. {stepDisplayName} )
+            </span>
           </span>
         </div>
       )}

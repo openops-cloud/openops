@@ -15,7 +15,7 @@ import { AssistantUiChatContainer } from './assistant-ui-chat-container';
 import { ConnectionStatusProps } from './types';
 
 const COLLAPSED_HEIGHT = 57;
-const DOCKED_HEIGHT = 450;
+const DOCKED_HEIGHT = 700;
 const EXPANDED_HEIGHT_OFFSET = 122;
 const FULL_WIDTH_HEIGHT = 100;
 const EXPANDED_WIDTH_OFFSET = 40;
