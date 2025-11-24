@@ -121,40 +121,55 @@ async function updateJsonObject(
   obj: any,
   tablesServerContext: TablesServerContext,
 ): Promise<any> {
-  if (!obj || typeof obj !== 'object') return obj;
-
-  if (obj.input?.tableName) {
-    const fields = await getFieldsFromCache(
-      obj.input.tableName,
-      tablesServerContext,
-    );
-
-    if (!fields) {
-      return obj;
-    }
-
-    if (obj.input.fieldsProperties?.fieldsProperties) {
-      for (const field of obj.input.fieldsProperties.fieldsProperties) {
-        if (!field.fieldName) {
-          continue;
-        }
-
-        updateFieldValue(field, fields.get(field.fieldName));
-      }
-    }
+  if (!obj || typeof obj !== 'object') {
+    return obj;
   }
 
+  await updateInputFields(obj, tablesServerContext);
+  await processObjectKeys(obj, tablesServerContext);
+
+  return obj;
+}
+
+async function updateInputFields(
+  obj: any,
+  tablesServerContext: TablesServerContext,
+): Promise<void> {
+  if (!obj.input?.tableName) {
+    return;
+  }
+
+  const fields = await getFieldsFromCache(
+    obj.input.tableName,
+    tablesServerContext,
+  );
+
+  if (!fields || !obj.input.fieldsProperties?.fieldsProperties) {
+    return;
+  }
+
+  for (const field of obj.input.fieldsProperties.fieldsProperties) {
+    if (field.fieldName) {
+      updateFieldValue(field, fields.get(field.fieldName));
+    }
+  }
+}
+
+async function processObjectKeys(
+  obj: any,
+  tablesServerContext: TablesServerContext,
+): Promise<void> {
   for (const key of Object.keys(obj)) {
     if (Array.isArray(obj[key])) {
-      for (const item of obj[key]) {
-        obj[key] = await updateJsonObject(item, tablesServerContext);
-      }
-    } else if (typeof obj[key] === 'object') {
+      obj[key] = await Promise.all(
+        obj[key].map((item: any) =>
+          updateJsonObject(item, tablesServerContext),
+        ),
+      );
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
       obj[key] = await updateJsonObject(obj[key], tablesServerContext);
     }
   }
-
-  return obj;
 }
 
 function updateFieldValue(field: any, fieldMap?: Map<number, string>) {
