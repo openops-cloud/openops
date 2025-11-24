@@ -13,10 +13,10 @@ import {
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject, generateText } from 'ai';
 
-export const askAi = createAction({
-  displayName: 'Ask AI',
+export const aiStep = createAction({
+  displayName: 'AI Step',
   description:
-    'Ask AI a question or transform input using an LLM based on a prompt',
+    'Transform an input into a desired output through an AI analysis',
   name: 'analyze',
   auth: aiAuth,
   isWriteAction: false,
