@@ -48,13 +48,14 @@ export async function getTableFields(
   tableName: string,
   secondParam?: TablesServerContext | IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  const tableId = await getTableIdByTableName(tableName);
-
   if (isServerContext(secondParam)) {
-    const tokenOrContext = await resolveTokenProvider(secondParam);
+    const context = secondParam;
+    const tableId = await getTableIdByTableName(tableName, context);
+    const tokenOrContext = await resolveTokenProvider(context);
     return await getFields(tableId, tokenOrContext, false);
   }
 
+  const tableId = await getTableIdByTableName(tableName);
   const { token } = await authenticateDefaultUserInOpenOpsTables();
   return await getFields(tableId, token, false, secondParam);
 }
