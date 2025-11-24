@@ -6,6 +6,7 @@ import {
 import * as crypto from 'crypto';
 import { randomBytes } from 'node:crypto';
 import { promisify } from 'util';
+import { logger } from '../logger';
 import { AppSystemProp, QueueMode, system } from '../system';
 import { localFileStore } from './local-store';
 
@@ -25,6 +26,13 @@ const loadEncryptionKey = async (
       secret = await generateAndStoreSecret();
     }
   }
+
+  if (secret) {
+    logger.info('Encryption key loaded');
+  } else {
+    logger.info('Encryption key not loaded');
+  }
+
   return secret;
 };
 
