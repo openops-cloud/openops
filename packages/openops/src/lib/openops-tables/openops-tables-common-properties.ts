@@ -1,9 +1,5 @@
 import { Property, Validators } from '@openops/blocks-framework';
-import {
-  getTablesServerContext,
-  resolveTokenProvider,
-  TablesServerContext,
-} from './context-helpers';
+import { resolveTokenProvider, TablesServerContext } from './context-helpers';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
@@ -21,71 +17,17 @@ export function openopsTablesDropdownProperty(): any {
     refreshers: [],
     required: true,
     options: async (_, { server }) => {
-      try {
-        if (!server) {
+      const tables = await getTableNames(server);
+
+      return {
+        disabled: false,
+        options: tables.map((t) => {
           return {
-            disabled: true,
-            options: [],
-            placeholder: 'Server context is not available',
+            label: t,
+            value: t,
           };
-        }
-
-        const tablesServerContext = getTablesServerContext(server);
-
-        if (
-          tablesServerContext.tablesDatabaseId === undefined ||
-          tablesServerContext.tablesDatabaseId === null
-        ) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Tables database ID is missing',
-          };
-        }
-
-        if (
-          tablesServerContext.tablesDatabaseToken === undefined ||
-          tablesServerContext.tablesDatabaseToken === null
-        ) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Tables database token is missing',
-          };
-        }
-
-        const tables = await getTableNames(tablesServerContext);
-
-        return {
-          disabled: false,
-          options: tables.map((t) => {
-            return {
-              label: t,
-              value: t,
-            };
-          }),
-        };
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-
-        // Provide a more specific error message for encryption key issues
-        const isEncryptionError =
-          errorMessage.includes('secret') ||
-          errorMessage.includes('null') ||
-          errorMessage.includes('undefined');
-
-        const placeholder = isEncryptionError
-          ? 'Encryption key not configured. Please check OPS_ENCRYPTION_KEY environment variable.'
-          : 'Failed to fetch tables';
-
-        return {
-          disabled: true,
-          options: [],
-          placeholder,
-          error: errorMessage,
-        };
-      }
+        }),
+      };
     },
   });
 }
