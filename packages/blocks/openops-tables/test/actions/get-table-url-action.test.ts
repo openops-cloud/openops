@@ -15,10 +15,6 @@ jest.mock('@openops/server-shared', () => ({
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getTableIdByTableName: jest.fn().mockReturnValue(1),
-  getTablesServerContext: jest.fn((server) => ({
-    tablesDatabaseId: server?.tablesDatabaseId,
-    tablesDatabaseToken: server?.tablesDatabaseToken,
-  })),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,

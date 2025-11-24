@@ -5,7 +5,6 @@ import {
   getPropertyFromField,
   getTableFields,
   getTableIdByTableName,
-  getTablesServerContext,
   OpenOpsField,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
@@ -137,11 +136,9 @@ export const updateRecordAction = createAction({
       [tableName, context.server],
     );
 
-    const tablesServerContext = getTablesServerContext(context.server);
-
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
 
-    const tokenOrContext = await resolveTokenProvider(tablesServerContext);
+    const tokenOrContext = await resolveTokenProvider(context.server);
 
     const tableFields = await cacheWrapper.getOrAdd<
       OpenOpsField[],

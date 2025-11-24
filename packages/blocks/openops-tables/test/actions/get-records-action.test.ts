@@ -24,10 +24,6 @@ const openopsCommonMock = {
       type: 'text',
     },
   ]),
-  getTablesServerContext: jest.fn((server) => ({
-    tablesDatabaseId: server?.tablesDatabaseId,
-    tablesDatabaseToken: server?.tablesDatabaseToken,
-  })),
   resolveTokenProvider: jest.fn(async (serverContext) => {
     return {
       getToken: () => serverContext.tablesDatabaseToken,

@@ -5,7 +5,6 @@ import {
   getPrimaryKeyFieldFromFields,
   getRowByPrimaryKeyValue,
   getTableIdByTableName,
-  getTablesServerContext,
   OpenOpsField,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
@@ -30,16 +29,15 @@ export const deleteRecordAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
-    const tablesServerContext = getTablesServerContext(context.server);
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName, tablesServerContext],
+      [tableName, context.server],
     );
 
-    const tokenOrContext = await resolveTokenProvider(tablesServerContext);
+    const tokenOrContext = await resolveTokenProvider(context.server);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
     const fields = await cacheWrapper.getOrAdd<

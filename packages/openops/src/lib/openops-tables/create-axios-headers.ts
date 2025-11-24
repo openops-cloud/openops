@@ -22,7 +22,7 @@ function getAuthPrefix(
 }
 
 export const createAxiosHeaders = (
-  contextOrToken: TokenOrContext | string,
+  contextOrToken: TokenOrContext,
 ): AxiosHeaders => {
   const useJwtOverride = typeof contextOrToken === 'string';
   const token = getToken(contextOrToken);

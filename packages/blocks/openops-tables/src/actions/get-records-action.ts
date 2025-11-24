@@ -5,7 +5,6 @@ import {
   getRows,
   getTableFields,
   getTableIdByTableName,
-  getTablesServerContext,
   isSingleValueFilter,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
@@ -117,13 +116,11 @@ export const getRecordsAction = createAction({
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
 
-    const tablesServerContext = getTablesServerContext(context.server);
-
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName, tablesServerContext],
+      [tableName, context.server],
     );
 
     const filtersProps = context.propsValue.filters['filters'] as unknown as {
@@ -145,7 +142,7 @@ export const getRecordsAction = createAction({
     });
     const filterType = context.propsValue.filterType as FilterType;
 
-    const tokenOrContext = await resolveTokenProvider(tablesServerContext);
+    const tokenOrContext = await resolveTokenProvider(context.server);
 
     const rows = await getRows({
       tableId: tableId,

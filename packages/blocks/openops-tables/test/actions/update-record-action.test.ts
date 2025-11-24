@@ -14,10 +14,6 @@ const openopsCommonMock = {
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
-  getTablesServerContext: jest.fn((server) => ({
-    tablesDatabaseId: server?.tablesDatabaseId,
-    tablesDatabaseToken: server?.tablesDatabaseToken,
-  })),
   resolveTokenProvider: jest.fn(async (serverContext) => {
     return {
       getToken: () => serverContext.tablesDatabaseToken,

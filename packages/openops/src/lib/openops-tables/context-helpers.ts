@@ -12,15 +12,6 @@ export type TablesServerContext = Pick<
   'tablesDatabaseId' | 'tablesDatabaseToken'
 >;
 
-export function getTablesServerContext(
-  serverContext: ServerContext,
-): TablesServerContext {
-  return {
-    tablesDatabaseId: serverContext.tablesDatabaseId,
-    tablesDatabaseToken: serverContext.tablesDatabaseToken,
-  };
-}
-
 export async function resolveTokenProvider(
   serverContext: TablesServerContext,
 ): Promise<TokenOrContext> {
