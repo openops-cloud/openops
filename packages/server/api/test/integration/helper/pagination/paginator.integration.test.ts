@@ -284,6 +284,155 @@ describe('Paginator Integration Tests', () => {
   });
 
   describe('Edge Cases', () => {
+    describe('refetch when backward result is shorter than limit', () => {
+      test.each([3, 4])(
+        'returns correct forward window with limit %i',
+        async (limit) => {
+          const testData = [
+            {
+              id: 'run1',
+              created: '2025-01-01 08:51:00.880',
+              projectId: 'proj1',
+              status: 'SUCCEEDED',
+            },
+            {
+              id: 'run2',
+              created: '2025-01-01 08:51:00.852',
+              projectId: 'proj1',
+              status: 'RUNNING',
+            },
+            {
+              id: 'run3',
+              created: '2025-01-01 08:51:00.123',
+              projectId: 'proj1',
+              status: 'SUCCEEDED',
+            },
+            {
+              id: 'run4',
+              created: '2025-01-01 08:50:59.999',
+              projectId: 'proj1',
+              status: 'FAILED',
+            },
+          ];
+
+          for (const data of testData) {
+            await dataSource
+              .createQueryBuilder()
+              .insert()
+              .into('test_flow_runs')
+              .values(data)
+              .execute();
+          }
+
+          const queryBase = () =>
+            dataSource
+              .createQueryBuilder(TestFlowRunEntity, 'fr')
+              .where('fr.projectId = :projectId', { projectId: 'proj1' });
+
+          const paginator1 = new Paginator(TestFlowRunEntity);
+          paginator1.setAlias('fr');
+          paginator1.setOrder(Order.DESC);
+          paginator1.setLimit(2);
+          const page1 = await paginator1.paginate(queryBase());
+
+          const paginator2 = new Paginator(TestFlowRunEntity);
+          paginator2.setAlias('fr');
+          paginator2.setOrder(Order.DESC);
+          paginator2.setLimit(2);
+          paginator2.setAfterCursor(page1.cursor.afterCursor!);
+          const page2 = await paginator2.paginate(queryBase());
+
+          const paginatorBack = new Paginator(TestFlowRunEntity);
+          paginatorBack.setAlias('fr');
+          paginatorBack.setOrder(Order.DESC);
+          paginatorBack.setLimit(limit);
+          paginatorBack.setBeforeCursor(page2.cursor.beforeCursor!);
+
+          const backPage = await paginatorBack.paginate(queryBase());
+
+          const allIds = ['run1', 'run2', 'run3', 'run4'];
+          const expectedIds = allIds.slice(0, Math.min(limit, allIds.length));
+
+          expect(backPage.data.map((d) => d.id)).toEqual(expectedIds);
+        },
+      );
+
+      test.each([
+        { limit: 3, expectAfterDefined: true },
+        { limit: 4, expectAfterDefined: false },
+      ])(
+        'sets expected cursors with limit $limit',
+        async ({ limit, expectAfterDefined }) => {
+          const testData = [
+            {
+              id: 'run1',
+              created: '2025-01-01 08:51:00.880',
+              projectId: 'proj1',
+              status: 'SUCCEEDED',
+            },
+            {
+              id: 'run2',
+              created: '2025-01-01 08:51:00.852',
+              projectId: 'proj1',
+              status: 'RUNNING',
+            },
+            {
+              id: 'run3',
+              created: '2025-01-01 08:51:00.123',
+              projectId: 'proj1',
+              status: 'SUCCEEDED',
+            },
+            {
+              id: 'run4',
+              created: '2025-01-01 08:50:59.999',
+              projectId: 'proj1',
+              status: 'FAILED',
+            },
+          ];
+
+          for (const data of testData) {
+            await dataSource
+              .createQueryBuilder()
+              .insert()
+              .into('test_flow_runs')
+              .values(data)
+              .execute();
+          }
+
+          const queryBase = () =>
+            dataSource
+              .createQueryBuilder(TestFlowRunEntity, 'fr')
+              .where('fr.projectId = :projectId', { projectId: 'proj1' });
+
+          const paginator1 = new Paginator(TestFlowRunEntity);
+          paginator1.setAlias('fr');
+          paginator1.setOrder(Order.DESC);
+          paginator1.setLimit(2);
+          const page1 = await paginator1.paginate(queryBase());
+
+          const paginator2 = new Paginator(TestFlowRunEntity);
+          paginator2.setAlias('fr');
+          paginator2.setOrder(Order.DESC);
+          paginator2.setLimit(2);
+          paginator2.setAfterCursor(page1.cursor.afterCursor!);
+          const page2 = await paginator2.paginate(queryBase());
+
+          const paginatorBack = new Paginator(TestFlowRunEntity);
+          paginatorBack.setAlias('fr');
+          paginatorBack.setOrder(Order.DESC);
+          paginatorBack.setLimit(limit);
+          paginatorBack.setBeforeCursor(page2.cursor.beforeCursor!);
+          const backPage = await paginatorBack.paginate(queryBase());
+
+          if (expectAfterDefined) {
+            expect(backPage.cursor.afterCursor).toBeDefined();
+          } else {
+            expect(backPage.cursor.afterCursor).toBeNull();
+          }
+          expect(backPage.cursor.beforeCursor).toBeNull();
+        },
+      );
+    });
     test('should handle empty result set', async () => {
       const paginator = new Paginator(TestFlowRunEntity);
       paginator.setAlias('fr');
