@@ -20,7 +20,7 @@ export async function getDefaultDatabaseId(
     );
 
   const defaultDatabase: Application | undefined = getTablesResult
-    .flat()
+    .flatMap((item) => item)
     .find((t) => t.type === 'database' && t.name === databaseName);
 
   if (!defaultDatabase) {
