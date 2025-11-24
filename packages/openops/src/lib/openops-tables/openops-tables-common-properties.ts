@@ -1,5 +1,9 @@
 import { Property, Validators } from '@openops/blocks-framework';
-import { resolveTokenProvider, TablesServerContext } from './context-helpers';
+import {
+  getTablesServerContext,
+  resolveTokenProvider,
+  TablesServerContext,
+} from './context-helpers';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
@@ -17,17 +21,47 @@ export function openopsTablesDropdownProperty(): any {
     refreshers: [],
     required: true,
     options: async (_, { server }) => {
-      const tables = await getTableNames(server);
-
-      return {
-        disabled: false,
-        options: tables.map((t) => {
+      try {
+        if (!server) {
           return {
-            label: t,
-            value: t,
+            disabled: true,
+            options: [],
+            placeholder: 'Server context is not available',
           };
-        }),
-      };
+        }
+
+        const tablesServerContext = getTablesServerContext(server);
+
+        if (
+          !tablesServerContext.tablesDatabaseId ||
+          !tablesServerContext.tablesDatabaseToken
+        ) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Tables database configuration is missing',
+          };
+        }
+
+        const tables = await getTableNames(tablesServerContext);
+
+        return {
+          disabled: false,
+          options: tables.map((t) => {
+            return {
+              label: t,
+              value: t,
+            };
+          }),
+        };
+      } catch (error) {
+        return {
+          disabled: true,
+          options: [],
+          placeholder: 'Failed to fetch tables',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
     },
   });
 }
