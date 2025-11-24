@@ -6,7 +6,7 @@ export enum AuthType {
   Token = 'Token',
 }
 
-function getToken(tokenOrResolver: TokenOrResolver | string): string {
+function getToken(tokenOrResolver: TokenOrResolver): string {
   return typeof tokenOrResolver === 'string'
     ? tokenOrResolver
     : tokenOrResolver.getToken();
