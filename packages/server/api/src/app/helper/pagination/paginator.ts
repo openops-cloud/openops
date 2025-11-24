@@ -91,8 +91,22 @@ export default class Paginator<Entity extends ObjectLiteral> {
   public async paginate(
     builder: SelectQueryBuilder<Entity>,
   ): Promise<PagingResult<Entity>> {
-    const entities = await this.appendPagingQuery(builder).getMany();
-    const hasMore = entities.length > this.limit;
+    let entities = await this.appendPagingQuery(builder).getMany();
+    let hasMore = entities.length > this.limit;
+
+    if (
+      this.hasBeforeCursor() &&
+      !this.hasAfterCursor() &&
+      entities.length < this.limit
+    ) {
+      this.afterCursor = null;
+      this.beforeCursor = null;
+      this.nextAfterCursor = null;
+      this.nextBeforeCursor = null;
+
+      entities = await this.appendPagingQuery(builder).getMany();
+      hasMore = entities.length > this.limit;
+    }
 
     if (hasMore) {
       entities.splice(entities.length - 1, 1);

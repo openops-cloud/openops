@@ -13,7 +13,6 @@ import {
   Trigger,
   TriggerType,
 } from '@openops/shared';
-
 import { createDefaultOptionSettings } from '../step-settings/split-settings/utils';
 
 const defaultCode = `export const code = async (inputs) => {
@@ -37,13 +36,7 @@ const getStepName = (block: StepMetadata, flowVersion: FlowVersion) => {
   if (block.type === TriggerType.BLOCK) {
     return 'trigger';
   }
-  const baseName = 'step_';
-  let number = 1;
-  const steps = flowHelper.getAllSteps(flowVersion.trigger);
-  while (steps.some((step) => step.name === `${baseName}${number}`)) {
-    number++;
-  }
-  return `${baseName}${number}`;
+  return flowHelper.findAvailableStepName(flowVersion, 'step');
 };
 
 const getDefaultStep = ({
