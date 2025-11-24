@@ -26,12 +26,7 @@ async function getTables(
 
 export async function getTableIdByTableName(
   tableName: string,
-  tablesServerContext?: TablesServerContext,
-): Promise<number>;
-
-export async function getTableIdByTableName(
-  tableName: string,
-  tablesServerContext?: TablesServerContext,
+  tablesServerContext: TablesServerContext,
 ): Promise<number> {
   const table = await getTableByName(tableName, tablesServerContext);
 
@@ -44,7 +39,7 @@ export async function getTableIdByTableName(
 
 export async function getTableByName(
   tableName: string,
-  tablesServerContext?: TablesServerContext,
+  tablesServerContext: TablesServerContext,
 ): Promise<OpenOpsTable | undefined> {
   const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
 
@@ -54,53 +49,32 @@ export async function getTableByName(
 }
 
 export async function getTableNames(
-  tablesServerContext?: TablesServerContext,
+  tablesServerContext: TablesServerContext,
 ): Promise<string[]> {
   const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
 
   return tables.map((t) => t.name);
 }
 
-type TokenAndDatabaseId = {
-  token: string;
-  databaseId: number;
-};
-
 async function getAvailableTablesInOpenopsTables(
-  serverContext?: TablesServerContext,
+  serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
-  let tokenAndDatabaseId: TokenAndDatabaseId;
+  const tokenOrContext = await resolveTokenProvider(serverContext);
 
-  if (serverContext) {
-    const tokenOrContext = await resolveTokenProvider(serverContext);
-    const token =
+  const tokenAndDatabaseId = {
+    token:
       typeof tokenOrContext === 'string'
         ? tokenOrContext
-        : tokenOrContext.getToken();
+        : tokenOrContext.getToken(),
+    databaseId: serverContext.tablesDatabaseId,
+  };
 
-    tokenAndDatabaseId = {
-      token,
-      databaseId: serverContext.tablesDatabaseId,
-    };
-  } else {
-    tokenAndDatabaseId = await authenticateDefaultUserAndGetDatabaseId();
-  }
-
-  const authenticationHeader = createAxiosHeaders(tokenAndDatabaseId.token);
+  const authenticationHeader = createAxiosHeaders(tokenOrContext);
 
   const { token, databaseId } = tokenAndDatabaseId;
   const tables = await getTables(token, databaseId, authenticationHeader);
 
   return getDistinctTableNames(tables);
-}
-
-async function authenticateDefaultUserAndGetDatabaseId(): Promise<TokenAndDatabaseId> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
-  const databaseId = await getDefaultDatabaseId(token);
-  return {
-    token,
-    databaseId,
-  };
 }
 
 // Tables allows you to have tables with the same name in the same database.

@@ -4,6 +4,7 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME } from '../../openops-tables/template-tables/create-auto-instances-shutdown-table';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
+import { getDefaultUserDbToken } from '../get-default-user-db-token';
 
 const AUTO_INSTANCES_SHUTDOWN_TABLE_SEED = 'AUTOINSTANCESSHUTDOWN';
 
@@ -34,6 +35,7 @@ export const seedAutoInstancesShutdownTable = async (): Promise<void> => {
 
   const table = await getTableByName(
     SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
+    await getDefaultUserDbToken(),
   );
 
   if (!table) {

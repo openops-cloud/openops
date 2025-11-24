@@ -4,6 +4,7 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME } from '../../openops-tables/template-tables/create-known-cost-types-by-application-table';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
+import { getDefaultUserDbToken } from '../get-default-user-db-token';
 
 const KNOWN_COST_TYPES_BY_APPLICATION = 'KNOWNCOSTTYPES';
 
@@ -34,6 +35,7 @@ export const seedKnownCostTypesByApplicationTable = async (): Promise<void> => {
 
   const table = await getTableByName(
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
+    await getDefaultUserDbToken(),
   );
 
   if (!table) {

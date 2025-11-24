@@ -37,38 +37,10 @@ export function openopsTablesDropdownProperty(): any {
 export async function getTableFields(
   tableName: string,
   serverContext: TablesServerContext,
-): Promise<OpenOpsField[]>;
-
-export async function getTableFields(
-  tableName: string,
-  axiosRetryConfig?: IAxiosRetryConfig,
-): Promise<OpenOpsField[]>;
-
-export async function getTableFields(
-  tableName: string,
-  secondParam?: TablesServerContext | IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  if (isServerContext(secondParam)) {
-    const context = secondParam;
-    const tableId = await getTableIdByTableName(tableName, context);
-    const tokenOrContext = await resolveTokenProvider(context);
-    return await getFields(tableId, tokenOrContext, false);
-  }
-
-  const tableId = await getTableIdByTableName(tableName);
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
-  return await getFields(tableId, token, false, secondParam);
-}
-
-function isServerContext(
-  value: object | undefined,
-): value is TablesServerContext {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    'tablesDatabaseId' in value &&
-    'tablesDatabaseToken' in value
-  );
+  const tableId = await getTableIdByTableName(tableName, serverContext);
+  const tokenOrContext = await resolveTokenProvider(serverContext);
+  return await getFields(tableId, tokenOrContext, false);
 }
 
 // https://api.baserow.io/api/redoc/#tag/Database-table-fields/operation/get_database_table_field

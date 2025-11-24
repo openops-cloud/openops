@@ -3,6 +3,7 @@ import {
   getTableIdByTableName,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { getDefaultUserDbToken } from '../database/get-default-user-db-token';
 import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
@@ -40,7 +41,10 @@ export async function seedAnalyticsDashboards(): Promise<void> {
 
   let seedTableId: number | undefined;
   try {
-    seedTableId = await getTableIdByTableName(SEED_OPENOPS_TABLE_NAME);
+    seedTableId = await getTableIdByTableName(
+      SEED_OPENOPS_TABLE_NAME,
+      await getDefaultUserDbToken(),
+    );
   } catch (error) {
     logger.error(`Could not find table with name: ${SEED_OPENOPS_TABLE_NAME}`, {
       tableName: SEED_OPENOPS_TABLE_NAME,
