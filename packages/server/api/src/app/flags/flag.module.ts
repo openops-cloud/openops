@@ -15,6 +15,7 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        skipAuth: true,
       },
       logLevel: 'silent',
       schema: {
