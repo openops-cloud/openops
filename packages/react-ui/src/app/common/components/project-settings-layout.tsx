@@ -22,7 +22,7 @@ const appearanceNavItem = {
 };
 
 const aiNavItem = {
-  title: t('AI'),
+  title: t('OpenOps AI'),
   href: '/settings/ai',
   icon: <Sparkles size={iconSize} />,
 };

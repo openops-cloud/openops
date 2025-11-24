@@ -84,32 +84,47 @@ const AiSettingsForm = ({
     });
   };
 
+  const descriptionText =
+    'Enables OpenOps Assistant and other AI-powered features such as the CLI command generation.';
+
   return (
     <Form {...form}>
-      <form className="flex-1 flex flex-col gap-4 max-w-[516px]">
+      <form className="flex-1 flex flex-col gap-4">
         <FormField
           control={form.control}
           name="enabled"
           render={({ field }) => (
-            <FormItem className="flex gap-[6px]">
-              <Switch
-                id="enabled"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <Label htmlFor="enabled">{t('Enable AI')}</Label>
+            <FormItem className="flex flex-col">
+              <div className="flex items-center gap-[6px]">
+                <Switch
+                  id="enabled"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <Label
+                  className="text-lg font-bold leading-6"
+                  htmlFor="enabled"
+                >
+                  {t('Enable OpenOps AI')}
+                </Label>
+              </div>
+              <p className="mt-8 text-base font-normal leading-6 text-primary-900">
+                {descriptionText}
+              </p>
             </FormItem>
           )}
         />
-        <ConnectionSelect
-          disabled={!currentFormValue.enabled}
-          allowDynamicValues={false}
-          block={block}
-          providerKey={'AI'}
-          name={'connection'}
-        />
+        <div className="max-w-[516px]">
+          <ConnectionSelect
+            disabled={!currentFormValue.enabled}
+            allowDynamicValues={false}
+            block={block}
+            providerKey={'AI'}
+            name={'connection'}
+          />
+        </div>
 
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between max-w-[516px]">
           <div className="flex gap-2">
             <Button
               variant="outline"
