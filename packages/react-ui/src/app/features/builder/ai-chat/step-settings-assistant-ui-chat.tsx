@@ -82,25 +82,26 @@ const StepSettingsAssistantUiChat = ({
   const { isShowingSlowWarning, connectionError } =
     useNetworkStatusWithWarning(chatStatus);
 
-  const step = useMemo(() => {
-    return flowHelper.getStep(flowVersion, selectedStep) as
+  const { step, stepIndex } = useMemo(() => {
+    const step = flowHelper.getStep(flowVersion, selectedStep) as
       | Action
       | Trigger
       | undefined;
+
+    if (!step) {
+      return { step: undefined, stepIndex: undefined };
+    }
+
+    const steps = flowHelper.getAllSteps(flowVersion.trigger);
+    const stepIndex = steps.findIndex((s) => s.name === step.name) + 1;
+
+    return { step, stepIndex };
   }, [flowVersion, selectedStep]);
 
   const { stepMetadata } = blocksHooks.useStepMetadata({
     step: step,
     enabled: !!step,
   });
-
-  const stepIndex = useMemo(() => {
-    if (!step) {
-      return undefined;
-    }
-    const steps = flowHelper.getAllSteps(flowVersion.trigger);
-    return steps.findIndex((s) => s.name === step.name) + 1;
-  }, [flowVersion, step]);
 
   return (
     <StepSettingsAssistantUiChatContainer
