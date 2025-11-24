@@ -10,7 +10,7 @@ import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultUserDbToken } from '../get-default-user-db-token';
+import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 
 const OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED = 'OPPORTUNITYDEL1';
 
@@ -57,7 +57,7 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
 
     const table = await getTableByName(
       SEED_OPENOPS_TABLE_NAME,
-      await getDefaultUserDbToken(),
+      await getDefaultProjectTablesDatabaseToken(),
     );
     if (!table) {
       logger.info('Skip: OpenOps deletion of old opportunities table', {
