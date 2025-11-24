@@ -8,11 +8,9 @@ import { TooltipWrapper } from '../tooltip-wrapper';
 const NoAiEnabledPopover = ({
   className,
   onCloseClick,
-  title,
 }: {
   className?: string;
   onCloseClick: () => void;
-  title: string;
 }) => {
   return (
     <div className={cn('bg-background shadow-editor rounded-lg', className)}>
@@ -21,7 +19,7 @@ const NoAiEnabledPopover = ({
           <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
             <Bot size={20} />
           </div>
-          <h2 className="font-bold text-base">{title}</h2>
+          <h2 className="font-bold text-base">{t('OpenOps Assistant')}</h2>
         </div>
         <TooltipWrapper tooltipText={t('Close')}>
           <Button

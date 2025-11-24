@@ -17,7 +17,7 @@ import { useAssistantChatHistory } from '../lib/use-ai-assistant-chat-history';
 
 type AssistantUiChatProps = {
   onClose: () => void;
-  title?: string;
+  title: string;
   children?: ReactNode;
   handleInject?: (codeContent: string | SourceCode) => void;
 };
