@@ -1,15 +1,15 @@
 import { AxiosHeaders } from 'axios';
-import { shouldUseDatabaseToken, TokenOrContext } from './context-helpers';
+import { shouldUseDatabaseToken, TokenOrResolver } from './context-helpers';
 
 export enum AuthType {
   JWT = 'JWT',
   Token = 'Token',
 }
 
-function getToken(contextOrToken: TokenOrContext | string): string {
-  return typeof contextOrToken === 'string'
-    ? contextOrToken
-    : contextOrToken.getToken();
+function getToken(tokenOrResolver: TokenOrResolver | string): string {
+  return typeof tokenOrResolver === 'string'
+    ? tokenOrResolver
+    : tokenOrResolver.getToken();
 }
 
 function getAuthPrefix(
@@ -21,10 +21,10 @@ function getAuthPrefix(
 }
 
 export const createAxiosHeaders = (
-  contextOrToken: TokenOrContext,
+  tokenOrResolver: TokenOrResolver,
 ): AxiosHeaders => {
-  const useJwtOverride = typeof contextOrToken === 'string';
-  const token = getToken(contextOrToken);
+  const useJwtOverride = typeof tokenOrResolver === 'string';
+  const token = getToken(tokenOrResolver);
 
   const prefix = getAuthPrefix(useJwtOverride, shouldUseDatabaseToken());
 
