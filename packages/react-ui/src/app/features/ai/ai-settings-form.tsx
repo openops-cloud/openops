@@ -1,9 +1,7 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   aiFormSchemaResolver,
   AiSettingsFormSchema,
 } from '@/app/features/ai/lib/ai-form-utils';
-import { useAssistantName } from '@/app/features/ai/lib/use-assistant-name';
 import { ConnectionSelect } from '@/app/features/builder/step-settings/block-settings/connection-select';
 import {
   BlockMetadataModel,
@@ -17,7 +15,7 @@ import {
   Label,
   Switch,
 } from '@openops/components/ui';
-import { AiConfig, FlagId, OpsEdition } from '@openops/shared';
+import { AiConfig } from '@openops/shared';
 import equal from 'fast-deep-equal';
 import { t } from 'i18next';
 import { CircleCheck } from 'lucide-react';
@@ -42,10 +40,6 @@ const AiSettingsForm = ({
   onSave,
   isSaving,
 }: AiSettingsFormProps) => {
-  const assistantName = useAssistantName();
-  const edition = flagsHooks.useFlag<OpsEdition>(FlagId.EDITION).data;
-  const isEnterprise = edition !== OpsEdition.COMMUNITY;
-
   const form = useForm<AiSettingsFormSchema>({
     resolver: aiFormSchemaResolver,
     defaultValues: EMPTY_FORM_VALUE,
@@ -90,19 +84,8 @@ const AiSettingsForm = ({
     });
   };
 
-  const descriptionText = isEnterprise
-    ? t(
-        'Enables {assistantName} and other AI-powered features such as the CLI command generation and chat interfaces.',
-        {
-          assistantName,
-        },
-      )
-    : t(
-        'Enables {assistantName} and other AI-powered features such as the CLI command generation.',
-        {
-          assistantName,
-        },
-      );
+  const descriptionText =
+    'Enables OpenOps Assistant and other AI-powered features such as the CLI command generation.';
 
   return (
     <Form {...form}>
