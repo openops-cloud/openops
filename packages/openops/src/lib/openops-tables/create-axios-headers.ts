@@ -1,6 +1,5 @@
-import { AppSystemProp, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
-import { TokenOrContext } from './context-helpers';
+import { shouldUseDatabaseToken, TokenOrContext } from './context-helpers';
 
 export enum AuthType {
   JWT = 'JWT',
@@ -27,10 +26,7 @@ export const createAxiosHeaders = (
   const useJwtOverride = typeof contextOrToken === 'string';
   const token = getToken(contextOrToken);
 
-  const shouldUseDatabaseTokenConfig =
-    system.getBoolean(AppSystemProp.ENABLE_TABLES_DATABASE_TOKEN) ?? false;
-
-  const prefix = getAuthPrefix(useJwtOverride, shouldUseDatabaseTokenConfig);
+  const prefix = getAuthPrefix(useJwtOverride, shouldUseDatabaseToken());
 
   return new AxiosHeaders({
     'Content-Type': 'application/json',
