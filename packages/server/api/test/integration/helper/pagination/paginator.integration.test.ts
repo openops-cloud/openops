@@ -73,6 +73,33 @@ const TestFlowVersionEntity = new EntitySchema({
   },
 });
 
+const FOUR_RUNS_TEST_DATA = [
+  {
+    id: 'run1',
+    created: '2025-01-01 08:51:00.880',
+    projectId: 'proj1',
+    status: 'SUCCEEDED',
+  },
+  {
+    id: 'run2',
+    created: '2025-01-01 08:51:00.852',
+    projectId: 'proj1',
+    status: 'RUNNING',
+  },
+  {
+    id: 'run3',
+    created: '2025-01-01 08:51:00.123',
+    projectId: 'proj1',
+    status: 'SUCCEEDED',
+  },
+  {
+    id: 'run4',
+    created: '2025-01-01 08:50:59.999',
+    projectId: 'proj1',
+    status: 'FAILED',
+  },
+];
+
 describe('Paginator Integration Tests', () => {
   let dataSource: DataSource;
 
@@ -288,32 +315,7 @@ describe('Paginator Integration Tests', () => {
       test.each([3, 4])(
         'returns correct forward window with limit %i',
         async (limit) => {
-          const testData = [
-            {
-              id: 'run1',
-              created: '2025-01-01 08:51:00.880',
-              projectId: 'proj1',
-              status: 'SUCCEEDED',
-            },
-            {
-              id: 'run2',
-              created: '2025-01-01 08:51:00.852',
-              projectId: 'proj1',
-              status: 'RUNNING',
-            },
-            {
-              id: 'run3',
-              created: '2025-01-01 08:51:00.123',
-              projectId: 'proj1',
-              status: 'SUCCEEDED',
-            },
-            {
-              id: 'run4',
-              created: '2025-01-01 08:50:59.999',
-              projectId: 'proj1',
-              status: 'FAILED',
-            },
-          ];
+          const testData = FOUR_RUNS_TEST_DATA;
 
           for (const data of testData) {
             await dataSource
@@ -363,32 +365,7 @@ describe('Paginator Integration Tests', () => {
       ])(
         'sets expected cursors with limit $limit',
         async ({ limit, expectAfterDefined }) => {
-          const testData = [
-            {
-              id: 'run1',
-              created: '2025-01-01 08:51:00.880',
-              projectId: 'proj1',
-              status: 'SUCCEEDED',
-            },
-            {
-              id: 'run2',
-              created: '2025-01-01 08:51:00.852',
-              projectId: 'proj1',
-              status: 'RUNNING',
-            },
-            {
-              id: 'run3',
-              created: '2025-01-01 08:51:00.123',
-              projectId: 'proj1',
-              status: 'SUCCEEDED',
-            },
-            {
-              id: 'run4',
-              created: '2025-01-01 08:50:59.999',
-              projectId: 'proj1',
-              status: 'FAILED',
-            },
-          ];
+          const testData = FOUR_RUNS_TEST_DATA;
 
           for (const data of testData) {
             await dataSource
