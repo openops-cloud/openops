@@ -3,8 +3,6 @@ import {
   createAxiosHeaders,
   makeOpenOpsTablesGet,
 } from '../openops-tables/requests-helpers';
-import { getDefaultDatabaseId } from './applications-service';
-import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 import { resolveTokenProvider, TablesServerContext } from './context-helpers';
 
 export interface OpenOpsTable {
