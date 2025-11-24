@@ -59,7 +59,7 @@ const AssistantTopBar = ({
   return (
     <div
       className={cn(
-        'flex flex-col px-4 py-2 gap-[7px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200',
+        'flex flex-col px-4 py-2 gap-1 flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200',
       )}
     >
       <div className="flex justify-between items-center gap-2">

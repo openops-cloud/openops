@@ -18,7 +18,6 @@ type AssistantUiChatContainerProps = {
 } & ConnectionStatusProps &
   AssistantTopBarProps &
   ThreadProps & {
-    // Step settings specific props
     stepLogoUrl?: string;
     stepDisplayName?: string;
     stepIndex?: number;

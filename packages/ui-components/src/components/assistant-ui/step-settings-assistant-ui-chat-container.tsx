@@ -15,8 +15,8 @@ import { AssistantUiChatContainer } from './assistant-ui-chat-container';
 import { ConnectionStatusProps } from './types';
 
 const COLLAPSED_HEIGHT = 57;
-const DOCKED_HEIGHT = 700;
 const EXPANDED_HEIGHT_OFFSET = 122;
+const DOCKED_HEIGHT_OFFSET = 40;
 const FULL_WIDTH_HEIGHT = 100;
 const EXPANDED_WIDTH_OFFSET = 40;
 const REGULAR_WIDTH = 450;
@@ -74,7 +74,7 @@ const StepSettingsAssistantUiChatContainer = ({
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
     height = COLLAPSED_HEIGHT;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
-    height = DOCKED_HEIGHT;
+    height = parentHeight - DOCKED_HEIGHT_OFFSET;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
     height = parentHeight - EXPANDED_HEIGHT_OFFSET;
   } else {
