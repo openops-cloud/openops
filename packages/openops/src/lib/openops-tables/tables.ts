@@ -11,7 +11,6 @@ export interface OpenOpsTable {
 }
 
 async function getTables(
-  token: string,
   databaseId: number,
   authenticationHeader: AxiosHeaders,
 ): Promise<OpenOpsTable[]> {
@@ -59,18 +58,12 @@ async function getAvailableTablesInOpenopsTables(
 ): Promise<OpenOpsTable[]> {
   const tokenOrContext = await resolveTokenProvider(serverContext);
 
-  const tokenAndDatabaseId = {
-    token:
-      typeof tokenOrContext === 'string'
-        ? tokenOrContext
-        : tokenOrContext.getToken(),
-    databaseId: serverContext.tablesDatabaseId,
-  };
-
   const authenticationHeader = createAxiosHeaders(tokenOrContext);
 
-  const { token, databaseId } = tokenAndDatabaseId;
-  const tables = await getTables(token, databaseId, authenticationHeader);
+  const tables = await getTables(
+    serverContext.tablesDatabaseId,
+    authenticationHeader,
+  );
 
   return getDistinctTableNames(tables);
 }
