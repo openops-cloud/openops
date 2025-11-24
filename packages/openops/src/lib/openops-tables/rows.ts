@@ -13,7 +13,7 @@ import {
   makeOpenOpsTablesPost,
   makeOpenOpsTablesPut,
 } from '../openops-tables/requests-helpers';
-import { TokenOrContext } from './context-helpers';
+import { TokenOrResolver } from './context-helpers';
 
 export interface OpenOpsRow {
   id: number;
@@ -26,13 +26,13 @@ export interface RowParams {
 }
 
 type RowParamsWithTokenOrContext = Omit<RowParams, 'token'> & {
-  tokenOrContext: TokenOrContext;
+  tokenOrContext: TokenOrResolver;
 };
 
 export interface GetRowsParams extends RowParamsWithTokenOrContext {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
-  tokenOrContext: TokenOrContext;
+  tokenOrContext: TokenOrResolver;
 }
 
 export interface AddRowParams extends RowParamsWithTokenOrContext {
@@ -221,7 +221,7 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
 }
 
 export async function getRowByPrimaryKeyValue(
-  tokenOrContext: TokenOrContext,
+  tokenOrContext: TokenOrResolver,
   tableId: number,
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,

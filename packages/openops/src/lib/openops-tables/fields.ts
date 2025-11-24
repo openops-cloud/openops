@@ -3,11 +3,11 @@ import {
   createAxiosHeaders,
   makeOpenOpsTablesGet,
 } from '../openops-tables/requests-helpers';
-import { TokenOrContext } from './context-helpers';
+import { TokenOrResolver } from './context-helpers';
 
 export async function getFields(
   tableId: number,
-  context: TokenOrContext | string,
+  context: TokenOrResolver,
   userFieldNames?: boolean,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]>;
@@ -21,7 +21,7 @@ export async function getFields(
 
 export async function getFields(
   tableId: number,
-  contextOrToken: TokenOrContext,
+  contextOrToken: TokenOrResolver,
   userFieldNames = true,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {

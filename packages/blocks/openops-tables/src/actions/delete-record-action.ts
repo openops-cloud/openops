@@ -8,7 +8,7 @@ import {
   OpenOpsField,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
-  TokenOrContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
@@ -42,7 +42,7 @@ export const deleteRecordAction = createAction({
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
     const fields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
-      [number, TokenOrContext]
+      [number, TokenOrResolver]
     >(fieldsCacheKey, getFields, [tableId, tokenOrContext]);
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);

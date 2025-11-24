@@ -8,7 +8,7 @@ import {
   OpenOpsField,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
-  TokenOrContext,
+  TokenOrResolver,
   upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -142,7 +142,7 @@ export const updateRecordAction = createAction({
 
     const tableFields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
-      [number, TokenOrContext]
+      [number, TokenOrResolver]
     >(fieldsCacheKey, getFields, [tableId, tokenOrContext]);
 
     const fieldsToUpdate = mapFieldsToObject(
