@@ -33,13 +33,24 @@ export function openopsTablesDropdownProperty(): any {
         const tablesServerContext = getTablesServerContext(server);
 
         if (
-          !tablesServerContext.tablesDatabaseId ||
-          !tablesServerContext.tablesDatabaseToken
+          tablesServerContext.tablesDatabaseId === undefined ||
+          tablesServerContext.tablesDatabaseId === null
         ) {
           return {
             disabled: true,
             options: [],
-            placeholder: 'Tables database configuration is missing',
+            placeholder: 'Tables database ID is missing',
+          };
+        }
+
+        if (
+          tablesServerContext.tablesDatabaseToken === undefined ||
+          tablesServerContext.tablesDatabaseToken === null
+        ) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Tables database token is missing',
           };
         }
 
@@ -55,11 +66,24 @@ export function openopsTablesDropdownProperty(): any {
           }),
         };
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+
+        // Provide a more specific error message for encryption key issues
+        const isEncryptionError =
+          errorMessage.includes('secret') ||
+          errorMessage.includes('null') ||
+          errorMessage.includes('undefined');
+
+        const placeholder = isEncryptionError
+          ? 'Encryption key not configured. Please check OPS_ENCRYPTION_KEY environment variable.'
+          : 'Failed to fetch tables';
+
         return {
           disabled: true,
           options: [],
-          placeholder: 'Failed to fetch tables',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          placeholder,
+          error: errorMessage,
         };
       }
     },

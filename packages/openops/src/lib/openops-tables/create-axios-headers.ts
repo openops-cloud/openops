@@ -31,7 +31,7 @@ export const createAxiosHeaders = (
     system.getBoolean(AppSystemProp.ENABLE_TABLES_DATABASE_TOKEN) ?? false;
 
   const prefix = getAuthPrefix(useJwtOverride, shouldUseDatabaseTokenConfig);
-
+  console.warn('final auth ', `${prefix} ${token}`);
   return new AxiosHeaders({
     'Content-Type': 'application/json',
     Authorization: `${prefix} ${token}`,
