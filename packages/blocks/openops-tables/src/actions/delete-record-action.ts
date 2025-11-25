@@ -33,7 +33,7 @@ export const deleteRecordAction = createAction({
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, context.server],
     );
 
     const tokenOrResolver = await resolveTokenProvider(context.server);

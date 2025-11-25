@@ -30,12 +30,15 @@ export const updateRecordAction = createAction({
         'The primary key value of the row to update. If the row does not exist, a new row will be created.',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
 
-        const fields = await getTableFields(tableName as unknown as string);
+        const fields = await getTableFields(
+          tableName as unknown as string,
+          context.server,
+        );
 
         const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
 
@@ -69,6 +72,7 @@ export const updateRecordAction = createAction({
 
         const tableFields = await getTableFields(
           tableName as unknown as string,
+          context.server,
         );
 
         const properties: { [key: string]: any } = {};
@@ -129,7 +133,7 @@ export const updateRecordAction = createAction({
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, context.server],
     );
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;

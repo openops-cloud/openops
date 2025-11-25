@@ -236,12 +236,16 @@ describe('deleteRecordAction', () => {
 });
 
 function validateWrapperCall(context: any) {
+  const expectedServerContext = {
+    tablesDatabaseId: context.server.tablesDatabaseId,
+    tablesDatabaseToken: context.server.tablesDatabaseToken,
+  };
   expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(2);
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    [context.propsValue.tableName],
+    [context.propsValue.tableName, expectedServerContext],
   );
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     2,
