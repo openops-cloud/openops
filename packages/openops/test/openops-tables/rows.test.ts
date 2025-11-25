@@ -4,18 +4,19 @@ const makeOpenOpsTablesPostMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
-const actualRequestsHelpers = jest.requireActual(
-  '../../src/lib/openops-tables/requests-helpers',
-);
-
-jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
-  ...actualRequestsHelpers,
-  makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
-  makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
-  makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
-  makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
-  createAxiosHeaders: createAxiosHeadersMock,
-}));
+jest.mock('../../src/lib/openops-tables/requests-helpers', () => {
+  const actualRequestsHelpers = jest.requireActual(
+    '../../src/lib/openops-tables/requests-helpers',
+  );
+  return {
+    ...actualRequestsHelpers,
+    makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
+    makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
+    makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
+    makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
+    createAxiosHeaders: createAxiosHeadersMock,
+  };
+});
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),

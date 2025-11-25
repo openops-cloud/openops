@@ -3,6 +3,10 @@ import { Application } from './types';
 
 export const OPENOPS_DEFAULT_DATABASE_NAME = 'OpenOps Dataset';
 
+/*
+@deprecated The tablesDatabaseId is now stored in the project.
+This function will be removed once flag ENABLE_TABLES_DATABASE_TOKEN is removed.
+*/
 export async function getDefaultDatabaseId(
   token: string,
   databaseName = OPENOPS_DEFAULT_DATABASE_NAME, // TODO: remove this when all environments are migrated
