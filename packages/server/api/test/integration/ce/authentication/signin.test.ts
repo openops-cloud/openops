@@ -11,8 +11,13 @@ jest.mock('jwt-decode', () => ({
 
 jest.mock('@openops/common', () => ({
   authenticateUserInOpenOpsTables: authUserMock,
-  authenticateDefaultUserInOpenOpsTables: authUserMock,
   getAiTelemetrySDK: jest.fn().mockReturnValue(undefined),
+}));
+
+jest.mock('../../../../src/app/openops-tables/index', () => ({
+  openopsTables: {
+    authenticateAdminUserInOpenOpsTables: authUserMock,
+  },
 }));
 
 import { faker } from '@faker-js/faker';

@@ -1,13 +1,13 @@
 /* TODO: remove this when all environments are migrated */
 
 import {
-  authenticateDefaultUserInOpenOpsTables,
   createAxiosHeaders,
   getTableByName,
   makeOpenOpsTablesDelete,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
+import { openopsTables } from '../../openops-tables';
 import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
@@ -53,7 +53,8 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
   }
 
   try {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } =
+      await openopsTables.authenticateAdminUserInOpenOpsTables();
 
     const table = await getTableByName(
       SEED_OPENOPS_TABLE_NAME,
