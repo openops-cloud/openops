@@ -182,9 +182,8 @@ const getPreviousToolsForChat = async (
 const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
     const project = await projectService.getOneOrThrow(projectId);
-    const parsedProjectId = Number.parseInt(projectId);
     return await getTableNames({
-      tablesDatabaseId: parsedProjectId,
+      tablesDatabaseId: project.tablesDatabaseId,
       tablesDatabaseToken: project.tablesDatabaseToken,
     });
   } catch (error) {
@@ -254,8 +253,11 @@ const repairText = (text: string): string | null => {
   try {
     const parsedText = JSON.parse(text);
 
+    const rawToolNames = findFirstKeyInObject(parsedText, 'tool_names');
+    const toolNames = normalizeToolNames(rawToolNames);
+
     return JSON.stringify({
-      tool_names: findFirstKeyInObject(parsedText, 'tool_names') || [],
+      tool_names: toolNames,
       query_classification:
         findFirstKeyInObject(parsedText, 'query_classification') || [],
       reasoning: findFirstKeyInObject(parsedText, 'reasoning') || '',
@@ -265,4 +267,19 @@ const repairText = (text: string): string | null => {
   } catch (error) {
     return null;
   }
+};
+
+export const normalizeToolNames = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+  }
+
+  return [];
 };

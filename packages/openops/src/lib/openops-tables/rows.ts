@@ -22,7 +22,7 @@ export interface OpenOpsRow {
 
 export interface RowParams {
   tableId: number;
-  token: TokenOrResolver;
+  tokenOrResolver: TokenOrResolver;
 }
 
 type RowParamsWithTokenOrContext = Omit<RowParams, 'token'> & {

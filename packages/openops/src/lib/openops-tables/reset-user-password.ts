@@ -1,4 +1,5 @@
-import { createAxiosHeaders, makeOpenOpsTablesPatch } from './requests-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
+import { makeOpenOpsTablesPatch } from './requests-helpers';
 
 export async function resetUserPassword(
   email: string,

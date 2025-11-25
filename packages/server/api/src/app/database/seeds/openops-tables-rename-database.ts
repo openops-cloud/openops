@@ -1,15 +1,14 @@
 /* TODO: remove this when all environments are migrated */
 
-import { logger } from '@openops/server-shared';
-import { FlagEntity } from '../../flags/flag.entity';
-import { openopsTables } from '../../openops-tables';
-import { databaseConnection } from '../database-connection';
-
 import {
   getDefaultDatabaseId,
   OPENOPS_DEFAULT_DATABASE_NAME,
 } from '@openops/common';
-import { authenticateAdminUserInOpenOpsTables } from './auth-tables';
+import { logger } from '@openops/server-shared';
+import { FlagEntity } from '../../flags/flag.entity';
+import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
+import { databaseConnection } from '../database-connection';
 
 const OPENOPS_TABLES_DATABASE_RENAMED_FLAG = 'TABLES_DB_RENAMED';
 const isOpenopsTablesDatabaseAlreadyRenamed = async (): Promise<boolean> => {

@@ -1,15 +1,7 @@
 import { authenticateUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, cacheWrapper, system } from '@openops/server-shared';
 import { IAxiosRetryConfig } from 'axios-retry';
-import { userService } from '../../user/user-service';
-
-const tokenLifetimeMinutes = system.getNumber(
-  AppSystemProp.TABLES_TOKEN_LIFETIME_MINUTES,
-);
-
-const tokenLifetimeSeconds = tokenLifetimeMinutes
-  ? (tokenLifetimeMinutes - 10) * 60 // Subtract 10 minutes to ensure the cache expired before the token
-  : undefined;
+import { userService } from '../user/user-service';
 
 export type AuthTokens = {
   token: string;
@@ -20,6 +12,12 @@ export async function authenticateAdminUserInOpenOpsTables(
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<AuthTokens> {
   const cacheKey = 'openops-tables-token';
+  const tokenLifetimeMinutes = system.getNumber(
+    AppSystemProp.TABLES_TOKEN_LIFETIME_MINUTES,
+  );
+  const tokenLifetimeSeconds = tokenLifetimeMinutes
+    ? (tokenLifetimeMinutes - 10) * 60
+    : undefined;
 
   let tokens = await cacheWrapper.getSerializedObject<AuthTokens>(cacheKey);
 

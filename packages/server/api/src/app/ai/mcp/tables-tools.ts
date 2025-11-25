@@ -1,8 +1,8 @@
 import { createAxiosHeaders } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
-import { authenticateAdminUserInOpenOpsTables } from '../../database/seeds/auth-tables';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { MCPTool } from './types';
 
 export async function getTablesTools(): Promise<MCPTool> {

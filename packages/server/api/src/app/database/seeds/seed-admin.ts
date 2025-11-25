@@ -3,18 +3,14 @@ import {
   resetUserPassword,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import {
-  OrganizationRole,
-  Provider,
-  User,
-} from '@openops/shared';
+import { OrganizationRole, Provider, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { passwordHasher } from '../../authentication/basic/password-hasher';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
-import { authenticateAdminUserInOpenOpsTables } from './auth-tables';
 
 const DEFAULT_ORGANIZATION_NAME = 'organization';
 

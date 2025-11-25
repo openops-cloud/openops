@@ -1,7 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { OPENOPS_DEFAULT_WORKSPACE_NAME } from '../../openops-tables/default-workspace-database';
-import { authenticateAdminUserInOpenOpsTables } from './auth-tables';
 
 export const createOpenOpsTablesMcpEndpoint = async () => {
   const { token } = await authenticateAdminUserInOpenOpsTables();

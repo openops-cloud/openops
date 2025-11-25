@@ -141,7 +141,6 @@ export const getRecordsAction = createAction({
       };
     });
     const filterType = context.propsValue.filterType as FilterType;
-
     const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const rows = await getRows({
