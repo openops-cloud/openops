@@ -1,9 +1,9 @@
 declare module 'cookie' {
-  export interface CookieParseOptions {
+  export type CookieParseOptions = {
     decode?(value: string): string;
-  }
+  };
 
-  export interface CookieSerializeOptions {
+  export type CookieSerializeOptions = {
     encode?(value: string): string;
     domain?: string;
     path?: string;
@@ -14,7 +14,7 @@ declare module 'cookie' {
     sameSite?: true | false | 'lax' | 'strict' | 'none';
     partitioned?: boolean;
     priority?: 'low' | 'medium' | 'high';
-  }
+  };
 
   export function parse(
     str: string,
