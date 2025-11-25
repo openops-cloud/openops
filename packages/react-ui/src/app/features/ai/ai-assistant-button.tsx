@@ -1,6 +1,6 @@
-import { useAssistantName } from '@/app/features/ai/lib/use-assistant-name';
 import { useAppStore } from '@/app/store/app-store';
 import { Button, cn, TooltipWrapper } from '@openops/components/ui';
+import { t } from 'i18next';
 import { Bot } from 'lucide-react';
 import { useCallback } from 'react';
 
@@ -10,14 +10,15 @@ const AiAssistantButton = ({ className }: { className?: string }) => {
     setIsAiChatOpened: s.setIsAiChatOpened,
   }));
 
-  const assistantName = useAssistantName();
-
   const onToggleAiChat = useCallback(() => {
     setIsAiChatOpened(!isAiChatOpened);
   }, [isAiChatOpened, setIsAiChatOpened]);
 
   return (
-    <TooltipWrapper tooltipText={assistantName} tooltipPlacement="right">
+    <TooltipWrapper
+      tooltipText={t('OpenOps Assistant')}
+      tooltipPlacement="right"
+    >
       <Button
         variant="ai"
         className={cn('size-9 p-0 gap-2', className, {

@@ -12,7 +12,6 @@ const meta = {
   },
   args: {
     onCloseClick: action('onCloseClick'),
-    title: 'OpenOps Assistant',
   },
   tags: ['autodocs'],
   render: (args) => (
