@@ -137,9 +137,7 @@ export const updateRecordAction = createAction({
     );
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-
     const tokenOrResolver = await resolveTokenProvider(context.server);
-
     const tableFields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
       [number, TokenOrResolver]
