@@ -15,7 +15,7 @@ export async function executeEngine(
 ): Promise<string> {
   const startTime = performance.now();
 
-  await encryptionKeyInitializer();
+  encryptionKeyInitializer();
 
   // TODO: Remove this from the server side
   engineInput.publicUrl = await networkUtls.getPublicUrl();

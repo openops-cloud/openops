@@ -1,6 +1,6 @@
 import { encryptUtils } from './encryption';
 
-export async function encryptionKeyInitializer(): Promise<void> {
+export function encryptionKeyInitializer(): void {
   const encryptionKey = encryptUtils.loadEncryptionKey();
   const isValidHexKey =
     encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
