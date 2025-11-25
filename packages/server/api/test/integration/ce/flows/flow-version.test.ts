@@ -21,7 +21,7 @@ let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
   await databaseConnection().initialize();
-  await encryptionKeyInitializer();
+  void encryptionKeyInitializer();
   app = await setupServer();
 });
 

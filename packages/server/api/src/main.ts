@@ -64,7 +64,7 @@ async function validateEnvPropsOnStartup(): Promise<void> {
     );
   }
 
-  await encryptionKeyInitializer();
+  void encryptionKeyInitializer();
 
   const jwtSecret = await jwtUtils.getJwtSecret();
   if (isNil(jwtSecret)) {

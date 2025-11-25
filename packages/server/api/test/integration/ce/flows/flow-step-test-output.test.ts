@@ -1,4 +1,4 @@
-import { encryptUtils, QueueMode } from '@openops/server-shared';
+import { encryptUtils } from '@openops/server-shared';
 import { FlowVersionState, openOpsId } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
@@ -13,7 +13,7 @@ import {
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
-  await encryptUtils.loadEncryptionKey(QueueMode.MEMORY);
+  encryptUtils.loadEncryptionKey();
   await databaseConnection().initialize();
   app = await setupServer();
 });
