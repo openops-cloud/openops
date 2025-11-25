@@ -238,7 +238,6 @@
     "node-cron": "3.0.3",
     "node-emoji": "2.2.0",
     "nodemailer": "7.0.10",
-    "npm": "11.6.3",
     "nx-cloud": "19.1.0",
     "object-sizeof": "2.6.3",
     "pdf-parse": "1.1.1",
@@ -459,6 +458,7 @@
     },
     "vite": {
       "rollup": "npm:@rollup/wasm-node"
-    }
+    },
+    "glob": "13.0.0"
   }
 }
