@@ -14,21 +14,6 @@ let secret: string | null;
 const algorithm = 'aes-256-cbc';
 const ivLength = 16;
 
-function ensureSecretLoaded(): void {
-  if (isNil(secret)) {
-    const loadedSecret = system.get(AppSystemProp.ENCRYPTION_KEY);
-    if (loadedSecret) {
-      secret = loadedSecret;
-      logger.debug('Encryption key loaded via ensureSecretLoaded()');
-    } else {
-      logger.warn(
-        'Encryption key not found in system properties when ensureSecretLoaded() was called. ' +
-          'This may indicate an issue with the Lambda environment or OPS_ENCRYPTION_KEY not being set.',
-      );
-    }
-  }
-}
-
 const loadEncryptionKey = async (
   queueMode: QueueMode,
 ): Promise<string | null> => {
@@ -60,7 +45,6 @@ const generateAndStoreSecret = async (): Promise<string> => {
 };
 
 function encryptString(inputString: string): EncryptedObject {
-  ensureSecretLoaded();
   const iv = crypto.randomBytes(ivLength); // Generate a random initialization vector
   assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
@@ -79,7 +63,6 @@ function encryptObject(object: unknown): EncryptedObject {
 }
 
 function encryptBuffer(inputBuffer: Buffer): EncryptedObject {
-  ensureSecretLoaded();
   const iv = crypto.randomBytes(ivLength);
   assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
@@ -93,7 +76,6 @@ function encryptBuffer(inputBuffer: Buffer): EncryptedObject {
 }
 
 function decryptObject<T>(encryptedObject: EncryptedObject): T {
-  ensureSecretLoaded();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
@@ -104,7 +86,6 @@ function decryptObject<T>(encryptedObject: EncryptedObject): T {
 }
 
 function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
-  ensureSecretLoaded();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
@@ -116,7 +97,6 @@ function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
 }
 
 function decryptString(encryptedObject: EncryptedObject): string {
-  ensureSecretLoaded();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
@@ -127,7 +107,6 @@ function decryptString(encryptedObject: EncryptedObject): string {
 }
 
 function get16ByteKey(): string {
-  ensureSecretLoaded();
   assertNotNullOrUndefined(secret, 'secret is not defined');
   return secret;
 }

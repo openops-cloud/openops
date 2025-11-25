@@ -1,4 +1,5 @@
 import { Action, Block } from '@openops/blocks-framework';
+import { encryptionKeyInitializer } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -24,6 +25,8 @@ const loadBlockOrThrow = async ({
   });
 
   const module = await import(packageName);
+  await encryptionKeyInitializer();
+
   const block = extractBlockFromModule<Block>({
     module,
     blockName,
