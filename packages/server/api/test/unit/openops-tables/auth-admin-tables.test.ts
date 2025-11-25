@@ -53,7 +53,7 @@ describe('Authenticate admin user in OpenOps Tables', () => {
     const tokens = { token: 't2', refresh_token: 'r2' };
     authenticateUserInOpenOpsTablesMock.mockResolvedValue(tokens);
 
-    const axiosRetryConfig = { retries: 2 } as any;
+    const axiosRetryConfig = { retries: 2 };
     const res = await authenticateAdminUserInOpenOpsTables(axiosRetryConfig);
 
     expect(getOrThrowMock).toHaveBeenNthCalledWith(1, 'OPENOPS_ADMIN_EMAIL');

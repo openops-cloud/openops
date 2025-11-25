@@ -4,7 +4,6 @@ import { openopsTables } from '../../openops-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
-import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 
 export async function assignDefaultOrganization(user: User): Promise<void> {
   let organization = await organizationService.getOldestOrganization();
@@ -53,7 +52,8 @@ async function addUserToDefaultWorkspace(values: {
   email: string;
   workspaceId: number;
 }): Promise<void> {
-  const { token: defaultToken } = await authenticateAdminUserInOpenOpsTables();
+  const { token: defaultToken } =
+    await openopsTables.authenticateAdminUserInOpenOpsTables();
 
   await openopsTables.addUserToWorkspace(defaultToken, {
     ...values,
