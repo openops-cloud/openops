@@ -1,26 +1,24 @@
+import { AxiosHeaders } from 'axios';
 import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
-import { getDefaultDatabaseId } from './applications-service';
-import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
-import { TablesServerContext } from './context-helpers';
+import { TablesServerContext, resolveTokenProvider } from './context-helpers';
 import { createAxiosHeaders } from './create-axios-headers';
 
 async function getTables(
-  token: string,
   databaseId: number,
+  authenticationHeader: AxiosHeaders,
 ): Promise<OpenOpsTable[]> {
-  const authenticationHeader = createAxiosHeaders(token);
   const getTablesResult = await makeOpenOpsTablesGet<OpenOpsTable[]>(
     `api/database/tables/database/${databaseId}/`,
     authenticationHeader,
   );
-  return getTablesResult.flatMap((item) => item);
+  return getTablesResult.flat();
 }
 
 export async function getTableIdByTableName(
   tableName: string,
-  _tablesServerContext: TablesServerContext,
+  tablesServerContext: TablesServerContext,
 ): Promise<number> {
-  const table = await getTableByName(tableName);
+  const table = await getTableByName(tableName, tablesServerContext);
 
   if (!table) {
     throw new Error(`Table '${tableName}' not found`);
@@ -31,26 +29,34 @@ export async function getTableIdByTableName(
 
 export async function getTableByName(
   tableName: string,
+  tablesServerContext: TablesServerContext,
 ): Promise<OpenOpsTable | undefined> {
-  const tables = await getAvailableTablesInOpenopsTables();
+  const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
 
   const table = tables.find((t) => t.name === tableName);
 
   return table;
 }
 
-export async function getTableNames(): Promise<string[]> {
-  const tables = await getAvailableTablesInOpenopsTables();
+export async function getTableNames(
+  tablesServerContext: TablesServerContext,
+): Promise<string[]> {
+  const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
 
   return tables.map((t) => t.name);
 }
 
-async function getAvailableTablesInOpenopsTables(): Promise<OpenOpsTable[]> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+async function getAvailableTablesInOpenopsTables(
+  serverContext: TablesServerContext,
+): Promise<OpenOpsTable[]> {
+  const tokenOrResolver = await resolveTokenProvider(serverContext);
 
-  const tablesDatabaseId = await getDefaultDatabaseId(token);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
 
-  const tables = await getTables(token, tablesDatabaseId);
+  const tables = await getTables(
+    serverContext.tablesDatabaseId,
+    authenticationHeader,
+  );
 
   return getDistinctTableNames(tables);
 }

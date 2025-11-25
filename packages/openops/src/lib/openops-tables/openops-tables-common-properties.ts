@@ -16,8 +16,8 @@ export function openopsTablesDropdownProperty(): any {
     displayName: 'Table',
     refreshers: [],
     required: true,
-    options: async () => {
-      const tables = await getTableNames();
+    options: async (_, { server }) => {
+      const tables = await getTableNames(server);
 
       return {
         disabled: false,
