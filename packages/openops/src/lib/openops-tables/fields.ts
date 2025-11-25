@@ -9,7 +9,7 @@ export async function getFields(
   userFieldNames = true,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  const authenticationHeader = createAxiosHeaders(contextOrToken);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
   const fields = await makeOpenOpsTablesGet<any[]>(
     `api/database/fields/table/${tableId}/?user_field_names=${userFieldNames}`,
     authenticationHeader,
