@@ -100,6 +100,10 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
         'Opportunity',
+        {
+          tablesDatabaseId: 1,
+          tablesDatabaseToken: 'token',
+        },
       );
     });
   });
@@ -313,12 +317,16 @@ describe('getRecordsAction test', () => {
 });
 
 function validateWrapperCall(context: any) {
+  const expectedServerContext = {
+    tablesDatabaseId: context.server.tablesDatabaseId,
+    tablesDatabaseToken: context.server.tablesDatabaseToken,
+  };
   expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(1);
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    [context.propsValue.tableName],
+    [context.propsValue.tableName, expectedServerContext],
   );
 }
 

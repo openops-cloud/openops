@@ -1,6 +1,7 @@
 import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
 import { getDefaultDatabaseId } from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
+import { TablesServerContext } from './context-helpers';
 import { createAxiosHeaders } from './create-axios-headers';
 
 async function getTables(
@@ -17,6 +18,7 @@ async function getTables(
 
 export async function getTableIdByTableName(
   tableName: string,
+  _tablesServerContext: TablesServerContext,
 ): Promise<number> {
   const table = await getTableByName(tableName);
 
