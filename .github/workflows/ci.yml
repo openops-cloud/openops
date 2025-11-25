@@ -28,8 +28,6 @@ jobs:
   audit:
     name: Security Audit
     needs: install
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.1
