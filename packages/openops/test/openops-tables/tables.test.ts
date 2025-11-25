@@ -4,6 +4,9 @@ const createAxiosHeadersMock = jest.fn();
 
 jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
   makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
+}));
+
+jest.mock('../../src/lib/openops-tables/create-axios-headers', () => ({
   createAxiosHeaders: createAxiosHeadersMock,
 }));
 

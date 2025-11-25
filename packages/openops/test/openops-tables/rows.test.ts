@@ -14,9 +14,12 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => {
     makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
     makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
     makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
-    createAxiosHeaders: createAxiosHeadersMock,
   };
 });
+
+jest.mock('../../src/lib/openops-tables/create-axios-headers', () => ({
+  createAxiosHeaders: createAxiosHeadersMock,
+}));
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),

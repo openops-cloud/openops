@@ -1,4 +1,5 @@
-import { createAxiosHeaders, makeOpenOpsTablesGet } from './requests-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
+import { makeOpenOpsTablesGet } from './requests-helpers';
 import { Application } from './types';
 
 export const OPENOPS_DEFAULT_DATABASE_NAME = 'OpenOps Dataset';
