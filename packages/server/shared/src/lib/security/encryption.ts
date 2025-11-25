@@ -1,44 +1,22 @@
-import {
-  assertNotNullOrUndefined,
-  EncryptedObject,
-  isNil,
-} from '@openops/shared';
+import { EncryptedObject, isNil } from '@openops/shared';
 import * as crypto from 'crypto';
-import { randomBytes } from 'node:crypto';
-import { promisify } from 'util';
-import { AppSystemProp, QueueMode, system } from '../system';
-import { localFileStore } from './local-store';
+import { AppSystemProp, system } from '../system';
 
-let secret: string | null;
+let encryptionKey: string | null;
 const algorithm = 'aes-256-cbc';
 const ivLength = 16;
 
-const loadEncryptionKey = async (
-  queueMode: QueueMode,
-): Promise<string | null> => {
-  secret = system.get(AppSystemProp.ENCRYPTION_KEY) ?? null;
-  if (queueMode === QueueMode.MEMORY) {
-    if (isNil(secret)) {
-      secret = await localFileStore.load(AppSystemProp.ENCRYPTION_KEY);
-    }
-    if (isNil(secret)) {
-      secret = await generateAndStoreSecret();
-    }
+const loadEncryptionKey = (): string => {
+  if (isNil(encryptionKey)) {
+    encryptionKey = system.getOrThrow(AppSystemProp.ENCRYPTION_KEY);
   }
-  return secret;
-};
 
-const generateAndStoreSecret = async (): Promise<string> => {
-  const secretLengthInBytes = 16;
-  const secretBuffer = await promisify(randomBytes)(secretLengthInBytes);
-  const secret = secretBuffer.toString('hex'); // Convert to hexadecimal
-  await localFileStore.save(AppSystemProp.ENCRYPTION_KEY, secret);
-  return secret;
+  return encryptionKey;
 };
 
 function encryptString(inputString: string): EncryptedObject {
+  const secret = loadEncryptionKey();
   const iv = crypto.randomBytes(ivLength); // Generate a random initialization vector
-  assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
   const cipher = crypto.createCipheriv(algorithm, key, iv); // Create a cipher with the key and initialization vector
   let encrypted = cipher.update(inputString, 'utf8', 'hex');
@@ -55,8 +33,8 @@ function encryptObject(object: unknown): EncryptedObject {
 }
 
 function encryptBuffer(inputBuffer: Buffer): EncryptedObject {
+  const secret = loadEncryptionKey();
   const iv = crypto.randomBytes(ivLength);
-  assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(inputBuffer).toString('hex');
@@ -68,8 +46,8 @@ function encryptBuffer(inputBuffer: Buffer): EncryptedObject {
 }
 
 function decryptObject<T>(encryptedObject: EncryptedObject): T {
+  const secret = loadEncryptionKey();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
-  assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(encryptedObject.data, 'hex', 'utf8');
@@ -78,8 +56,8 @@ function decryptObject<T>(encryptedObject: EncryptedObject): T {
 }
 
 function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
+  const secret = loadEncryptionKey();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
-  assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   return Buffer.concat([
@@ -89,8 +67,8 @@ function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
 }
 
 function decryptString(encryptedObject: EncryptedObject): string {
+  const secret = loadEncryptionKey();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
-  assertNotNullOrUndefined(secret, 'secret');
   const key = Buffer.from(secret, 'binary');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(encryptedObject.data, 'hex', 'utf8');
@@ -99,8 +77,7 @@ function decryptString(encryptedObject: EncryptedObject): string {
 }
 
 function get16ByteKey(): string {
-  assertNotNullOrUndefined(secret, 'secret is not defined');
-  return secret;
+  return loadEncryptionKey();
 }
 
 export const encryptUtils = {

@@ -1,9 +1,7 @@
-import {
-  createAxiosHeaders,
-  makeOpenOpsTablesGet,
-} from '../openops-tables/requests-helpers';
+import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
 import { getDefaultDatabaseId } from './applications-service';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
+import { createAxiosHeaders } from './create-axios-headers';
 
 async function getTables(
   token: string,
