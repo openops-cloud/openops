@@ -24,7 +24,6 @@ const loadBlockOrThrow = async ({
   });
 
   const module = await import(packageName);
-
   const block = extractBlockFromModule<Block>({
     module,
     blockName,
