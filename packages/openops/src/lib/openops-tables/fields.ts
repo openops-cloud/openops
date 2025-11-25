@@ -7,7 +7,7 @@ import { TokenOrResolver } from './context-helpers';
 
 export async function getFields(
   tableId: number,
-  contextOrToken: TokenOrResolver,
+  tokenOrResolver: TokenOrResolver,
   userFieldNames = true,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
