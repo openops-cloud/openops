@@ -6,7 +6,7 @@ import {
   cn,
   StepSettingsAssistantUiChatContainer,
 } from '@openops/components/ui';
-import { Action, flowHelper, FlowVersion, Trigger } from '@openops/shared';
+import { flowHelper, FlowVersion } from '@openops/shared';
 import { useCallback, useMemo } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useNetworkStatusWithWarning } from '../../ai/lib/hooks/use-network-status-with-warning';
@@ -82,21 +82,10 @@ const StepSettingsAssistantUiChat = ({
   const { isShowingSlowWarning, connectionError } =
     useNetworkStatusWithWarning(chatStatus);
 
-  const { step, stepIndex } = useMemo(() => {
-    const step = flowHelper.getStep(flowVersion, selectedStep) as
-      | Action
-      | Trigger
-      | undefined;
-
-    if (!step) {
-      return { step: undefined, stepIndex: undefined };
-    }
-
-    const steps = flowHelper.getAllSteps(flowVersion.trigger);
-    const stepIndex = steps.findIndex((s) => s.name === step.name) + 1;
-
-    return { step, stepIndex };
-  }, [flowVersion, selectedStep]);
+  const { step, stepIndex } = useMemo(
+    () => flowHelper.getStepWithIndex(flowVersion, selectedStep),
+    [flowVersion, selectedStep],
+  );
 
   const { stepMetadata } = blocksHooks.useStepMetadata({
     step: step,

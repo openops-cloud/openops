@@ -1,3 +1,4 @@
+import { isNil } from '@openops/shared';
 import { t } from 'i18next';
 import { History, SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
 import { ReactNode } from 'react';
@@ -47,10 +48,10 @@ const AssistantTopBar = ({
   });
 
   const isStepSettingsMode =
-    stepLogoUrl !== undefined &&
-    blockDisplayName !== undefined &&
-    stepIndex !== undefined &&
-    stepDisplayName !== undefined;
+    !isNil(stepLogoUrl) &&
+    !isNil(blockDisplayName) &&
+    !isNil(stepIndex) &&
+    !isNil(stepDisplayName);
 
   const displayTitle = isStepSettingsMode
     ? t('Generate with AI')
