@@ -182,9 +182,8 @@ const getPreviousToolsForChat = async (
 const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
     const project = await projectService.getOneOrThrow(projectId);
-    const parsedProjectId = Number.parseInt(projectId);
     return await getTableNames({
-      tablesDatabaseId: parsedProjectId,
+      tablesDatabaseId: project.tablesDatabaseId,
       tablesDatabaseToken: project.tablesDatabaseToken,
     });
   } catch (error) {
