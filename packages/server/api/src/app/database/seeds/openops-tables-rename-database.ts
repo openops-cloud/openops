@@ -6,10 +6,10 @@ import { openopsTables } from '../../openops-tables';
 import { databaseConnection } from '../database-connection';
 
 import {
-  authenticateDefaultUserInOpenOpsTables,
   getDefaultDatabaseId,
   OPENOPS_DEFAULT_DATABASE_NAME,
 } from '@openops/common';
+import { authenticateAdminUserInOpenOpsTables } from './auth-tables';
 
 const OPENOPS_TABLES_DATABASE_RENAMED_FLAG = 'TABLES_DB_RENAMED';
 const isOpenopsTablesDatabaseAlreadyRenamed = async (): Promise<boolean> => {
@@ -39,7 +39,7 @@ export const updateOpenopsTablesDatabase = async (): Promise<void> => {
     return;
   }
 
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
 
   try {
     const tablesDatabaseId = await getDefaultDatabaseId(

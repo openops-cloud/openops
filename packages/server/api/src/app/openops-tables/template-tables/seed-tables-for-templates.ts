@@ -1,5 +1,5 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { authenticateAdminUserInOpenOpsTables } from '../../database/seeds/auth-tables';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 import { createAggregatedCostsTable } from './create-aggregated-costs-table';
@@ -33,7 +33,7 @@ const getProjectTablesDatabaseId = async (): Promise<number> => {
 
 export const seedTemplateTablesService = {
   async createBaseTemplateTables(): Promise<void> {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
     const buTable = await createBusinessUnitsTable(databaseId, token);
@@ -49,7 +49,7 @@ export const seedTemplateTablesService = {
   },
 
   async createOpportunityTemplateTable(): Promise<void> {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
     await createOpportunitiesTable(token, databaseId);
@@ -58,14 +58,14 @@ export const seedTemplateTablesService = {
   },
 
   async createAggregatedCostsTable(): Promise<void> {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
     await createAggregatedCostsTable(databaseId, token);
   },
 
   async createKnownCostTypesByApplicationTable(): Promise<void> {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
     await createKnownCostTypesByApplicationTable(token, databaseId);
@@ -74,7 +74,7 @@ export const seedTemplateTablesService = {
   },
 
   async createAutoInstancesShutdownTable(): Promise<void> {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
     await createAutoInstancesShutdownTable(token, databaseId);

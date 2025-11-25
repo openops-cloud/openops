@@ -1,6 +1,5 @@
 import { ServerContext } from '@openops/blocks-framework';
 import { AppSystemProp, encryptUtils, system } from '@openops/server-shared';
-import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
 
 export function shouldUseDatabaseToken(): boolean {
   return system.getBoolean(AppSystemProp.ENABLE_TABLES_DATABASE_TOKEN) ?? false;
@@ -15,15 +14,15 @@ export type TablesServerContext = Pick<
 export async function resolveTokenProvider(
   serverContext: TablesServerContext,
 ): Promise<TokenOrResolver> {
-  if (shouldUseDatabaseToken()) {
-    return {
-      getToken: () => {
+  // if (shouldUseDatabaseToken()) {
+  return {
+    getToken: () => {
         const { tablesDatabaseToken } = serverContext;
-        return encryptUtils.decryptString(tablesDatabaseToken);
-      },
-    };
-  }
+      return encryptUtils.decryptString(tablesDatabaseToken);
+    },
+  };
+  // }
 
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
-  return token;
+  // const { token } = await authenticateDefaultUserInOpenOpsTables();
+  // return token;
 }

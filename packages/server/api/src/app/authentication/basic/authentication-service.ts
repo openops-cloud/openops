@@ -38,7 +38,7 @@ export const authenticationService = {
 
     const { refresh_token } = await authenticateUserInOpenOpsTables(
       request.email,
-      request.password,
+      user.password,
     );
 
     return this.authResponse(user, refresh_token);

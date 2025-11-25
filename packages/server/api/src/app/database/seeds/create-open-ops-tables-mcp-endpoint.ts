@@ -1,10 +1,10 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../../openops-tables';
 import { OPENOPS_DEFAULT_WORKSPACE_NAME } from '../../openops-tables/default-workspace-database';
+import { authenticateAdminUserInOpenOpsTables } from './auth-tables';
 
 export const createOpenOpsTablesMcpEndpoint = async () => {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
   const mcpEndpoints = await openopsTables.getMcpEndpointList(token);
   const workspace = await openopsTables.getWorkspaceByName(
     token,
