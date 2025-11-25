@@ -18,6 +18,11 @@ const openopsCommonMock = {
     type: 'DROPDOWN',
   }),
   deleteRow: jest.fn(),
+  resolveTokenProvider: jest.fn(async (serverContext) => {
+    return {
+      getToken: () => serverContext.tablesDatabaseToken,
+    };
+  }),
 };
 
 jest.mock('@openops/common', () => openopsCommonMock);
@@ -65,12 +70,11 @@ describe('deleteRecordAction', () => {
     validateWrapperCall(context);
 
     expect(result).toStrictEqual('mock result');
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledWith({
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'some databaseToken',
+    });
   });
 
   test.each([[[]], [{}]])(
@@ -170,7 +174,9 @@ describe('deleteRecordAction', () => {
     );
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
-      'some databaseToken',
+      expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       1,
       'some primary key value',
       'primary key field',
@@ -204,7 +210,9 @@ describe('deleteRecordAction', () => {
 
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
-      'some databaseToken',
+      expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       1,
       'some primary key value',
       'primary key field',
@@ -219,7 +227,9 @@ describe('deleteRecordAction', () => {
     expect(openopsCommonMock.deleteRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.deleteRow).toHaveBeenCalledWith({
       tableId: 1,
-      token: 'some databaseToken',
+      tokenOrResolver: expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       rowId: 1,
     });
   });
@@ -237,7 +247,12 @@ function validateWrapperCall(context: any) {
     2,
     `${context.run.id}-1-fields`,
     getFields,
-    [1, 'some databaseToken'],
+    [
+      1,
+      expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
+    ],
   );
 }
 
@@ -252,6 +267,10 @@ function createContext(params?: ContextParams) {
     propsValue: {
       tableName: params?.tableName ?? '1',
       rowPrimaryKey: params?.rowPrimaryKey ?? 'default primary key',
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'some databaseToken',
     },
     run: {
       id: nanoid(),

@@ -50,6 +50,10 @@ describe('getTableUrlAction', () => {
       propsValue: {
         tableName: 'my table',
       },
+      server: {
+        tablesDatabaseId: 1,
+        tablesDatabaseToken: 'token',
+      },
     };
 
     const result = (await getTableUrlAction.run(context)) as any;
