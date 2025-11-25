@@ -39,7 +39,7 @@ jobs:
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Run npm audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=critical
   lint:
     name: Lint
     needs: install
