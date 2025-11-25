@@ -5,8 +5,8 @@ import {
   CustomAuthConnectionValue,
   isEmpty,
 } from '@openops/shared';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { experimental_createMCPClient } from '@ai-sdk/mcp';
+import { Experimental_StdioMCPTransport } from '@ai-sdk/mcp/dist/mcp-stdio';
 import path from 'path';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { mcpConfigService } from '../../mcp/config/mcp-config.service';
@@ -109,10 +109,9 @@ async function initializeMcpClient(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toolSet: Record<string, any> = {};
   for (const [key, tool] of Object.entries(tools)) {
-    toolSet[key] = {
-      ...tool,
-      toolProvider: config.toolProvider,
-    };
+    const toolWithProvider = tool as typeof tool & { toolProvider: string };
+    toolWithProvider.toolProvider = config.toolProvider;
+    toolSet[key] = toolWithProvider;
   }
 
   return {

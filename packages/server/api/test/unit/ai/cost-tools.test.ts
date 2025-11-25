@@ -6,7 +6,7 @@ import {
   AWS_COST_MCP_CONFIG_NAME,
   CustomAuthConnectionValue,
 } from '@openops/shared';
-import { experimental_createMCPClient } from 'ai';
+import { experimental_createMCPClient } from '@ai-sdk/mcp';
 import { getCostTools } from '../../../src/app/ai/mcp/cost-tools';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
 import { mcpConfigService } from '../../../src/app/mcp/config/mcp-config.service';
@@ -24,7 +24,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-jest.mock('ai', () => ({
+jest.mock('@ai-sdk/mcp', () => ({
   experimental_createMCPClient: jest.fn(),
 }));
 
@@ -38,7 +38,7 @@ const mockTransport = {
   },
 };
 
-jest.mock('ai/mcp-stdio', () => ({
+jest.mock('@ai-sdk/mcp/dist/mcp-stdio', () => ({
   Experimental_StdioMCPTransport: jest
     .fn()
     .mockImplementation(() => mockTransport),

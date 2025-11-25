@@ -3,7 +3,8 @@ import {
   createAxiosHeaders,
 } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
-import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
+import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
+import { ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
 import { MCPTool } from './types';
 
@@ -34,10 +35,9 @@ export async function getTablesTools(): Promise<MCPTool> {
   const toolSet: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
     if (name.includes('list')) {
-      toolSet[name] = {
-        ...tool,
-        toolProvider: 'tables',
-      } as typeof tool & { toolProvider: string };
+      const toolWithProvider = tool as typeof tool & { toolProvider: string };
+      toolWithProvider.toolProvider = 'tables';
+      toolSet[name] = toolWithProvider;
     }
   }
 

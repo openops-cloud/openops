@@ -4,8 +4,8 @@ import {
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { experimental_createMCPClient } from '@ai-sdk/mcp';
+import { Experimental_StdioMCPTransport } from '@ai-sdk/mcp/dist/mcp-stdio';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
 import { OpenAPI } from 'openapi-types';
@@ -99,10 +99,9 @@ export async function getOpenOpsTools(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toolSet: Record<string, any> = {};
   for (const [key, tool] of Object.entries(tools)) {
-    toolSet[key] = {
-      ...tool,
-      toolProvider: 'openops',
-    };
+    const toolWithProvider = tool as typeof tool & { toolProvider: string };
+    toolWithProvider.toolProvider = 'openops';
+    toolSet[key] = toolWithProvider;
   }
 
   return {

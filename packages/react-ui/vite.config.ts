@@ -3,8 +3,55 @@ import path from 'path';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import checker from 'vite-plugin-checker';
 import circleDependency from 'vite-plugin-circular-dependency';
+
+const guardCssPlugin = (): Plugin => ({
+  name: 'react-ui-css-guard',
+  enforce: 'pre',
+  configResolved(config) {
+    const cssPlugins = config.plugins.filter((plugin) => plugin.name === 'vite:css');
+    for (const cssPlugin of cssPlugins) {
+      const transform = (cssPlugin as { transform?: { handler?: (...args: unknown[]) => unknown } } | undefined)?.transform;
+      const originalHandler = transform?.handler;
+      if (!originalHandler) {
+        continue;
+      }
+
+      transform.handler = function (this: unknown, code: string, id: string, ...args: unknown[]) {
+        if (id.includes('html-proxy') || id.endsWith('.html')) {
+          return null;
+        }
+
+        return originalHandler.call(this, code, id, ...args);
+      };
+    }
+  },
+});
+
+const guardJsonPlugin = (): Plugin => ({
+  name: 'react-ui-json-guard',
+  enforce: 'pre',
+  configResolved(config) {
+    const jsonPlugins = config.plugins.filter((plugin) => plugin.name === 'vite:json');
+    for (const jsonPlugin of jsonPlugins) {
+      const transform = (jsonPlugin as { transform?: { handler?: (...args: unknown[]) => unknown } } | undefined)?.transform;
+      const originalHandler = transform?.handler;
+      if (!originalHandler) {
+        continue;
+      }
+
+      transform.handler = function (this: unknown, code: string, id: string, ...args: unknown[]) {
+        if (!/\.json(?:$|\?)/.test(id)) {
+          return null;
+        }
+
+        return originalHandler.call(this, code, id, ...args);
+      };
+    }
+  },
+});
 
 export default defineConfig({
   root: __dirname,
@@ -47,6 +94,8 @@ export default defineConfig({
     },
   },
   plugins: [
+    guardJsonPlugin(),
+    guardCssPlugin(),
     react(),
     nxViteTsPaths(),
     checker({
@@ -61,6 +110,9 @@ export default defineConfig({
     outDir: '../../dist/packages/react-ui',
     emptyOutDir: true,
     reportCompressedSize: true,
+    modulePreload: {
+      polyfill: false,
+    },
     commonjsOptions: {
       transformMixedEsModules: true,
     },

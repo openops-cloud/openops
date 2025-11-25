@@ -1,6 +1,7 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { experimental_createMCPClient as createMCPClient, tool } from 'ai';
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
+import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
+import { Experimental_StdioMCPTransport as StdioMCPTransport } from '@ai-sdk/mcp/dist/mcp-stdio';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { MCPTool } from './types';
 
