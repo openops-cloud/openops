@@ -5,6 +5,9 @@ jest.mock('../../src/lib/axios-wrapper', () => ({
 
 const systemMock = {
   get: jest.fn(),
+  getNumber: jest.fn(),
+  getBoolean: jest.fn(),
+  getOrThrow: jest.fn(),
 };
 
 jest.mock('@openops/server-shared', () => ({
@@ -30,6 +33,9 @@ describe('axios request', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     systemMock.get.mockReturnValue('https://mockapi.com');
+    systemMock.getNumber.mockReturnValue(60);
+    systemMock.getBoolean.mockReturnValue(false);
+    systemMock.getOrThrow.mockReturnValue('mock-value');
   });
 
   const header = new AxiosHeaders({ some: 'header' });
