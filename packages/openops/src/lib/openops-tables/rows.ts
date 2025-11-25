@@ -25,30 +25,25 @@ export interface RowParams {
   tokenOrResolver: TokenOrResolver;
 }
 
-type RowParamsWithTokenOrContext = Omit<RowParams, 'token'> & {
-  tokenOrResolver: TokenOrResolver;
-};
-
-export interface GetRowsParams extends RowParamsWithTokenOrContext {
+export interface GetRowsParams extends RowParams {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
-  tokenOrResolver: TokenOrResolver;
 }
 
-export interface AddRowParams extends RowParamsWithTokenOrContext {
+export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
-export interface UpsertRowParams extends RowParamsWithTokenOrContext {
+export interface UpsertRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
-export interface UpdateRowParams extends RowParamsWithTokenOrContext {
+export interface UpdateRowParams extends RowParams {
   fields: { [key: string]: any };
   rowId: number;
 }
 
-export interface DeleteRowParams extends RowParamsWithTokenOrContext {
+export interface DeleteRowParams extends RowParams {
   rowId: number;
 }
 
