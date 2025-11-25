@@ -84,8 +84,12 @@ const AiSettingsForm = ({
     });
   };
 
-  const descriptionText =
-    'Enables OpenOps Assistant and other AI-powered features such as the CLI command generation.';
+  const descriptionText = t(
+    'Enables {assistantName} and other AI-powered features such as the CLI command generation.',
+    {
+      assistantName: t('OpenOps Assistant'),
+    },
+  );
 
   return (
     <Form {...form}>
