@@ -6,13 +6,14 @@ import {
   ViewFilterTypesEnum,
 } from '../openops-tables/filters';
 import {
-  createAxiosHeaders,
   makeOpenOpsTablesDelete,
   makeOpenOpsTablesGet,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
   makeOpenOpsTablesPut,
 } from '../openops-tables/requests-helpers';
+import { TokenOrResolver } from './context-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
 
 export interface OpenOpsRow {
   id: number;
@@ -21,7 +22,7 @@ export interface OpenOpsRow {
 
 export interface RowParams {
   tableId: number;
-  token: string;
+  token: TokenOrResolver;
 }
 
 export interface GetRowsParams extends RowParams {
@@ -207,7 +208,7 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
 }
 
 export async function getRowByPrimaryKeyValue(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,
@@ -215,7 +216,6 @@ export async function getRowByPrimaryKeyValue(
 ) {
   const rows = await getRows({
     tableId: tableId,
-    token: token,
     filters: [
       {
         fieldName: primaryKeyFieldName,
@@ -223,6 +223,7 @@ export async function getRowByPrimaryKeyValue(
         type: getEqualityFilterType(primaryKeyFieldType),
       },
     ],
+    token: tokenOrResolver,
   });
 
   if (rows.length > 1) {

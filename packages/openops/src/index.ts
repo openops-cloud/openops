@@ -38,6 +38,7 @@ export * from './lib/aws/pricing';
 export * from './lib/openops-analytics';
 export * from './lib/openops-tables/applications-service';
 export * from './lib/openops-tables/auth-user';
+export * from './lib/openops-tables/create-axios-headers';
 export * from './lib/openops-tables/fields';
 export * from './lib/openops-tables/filters';
 export * from './lib/openops-tables/openops-tables-common-properties';
