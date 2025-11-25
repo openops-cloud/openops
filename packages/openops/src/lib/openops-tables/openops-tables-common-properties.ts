@@ -1,6 +1,7 @@
 import { Property, Validators } from '@openops/blocks-framework';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { authenticateDefaultUserInOpenOpsTables } from './auth-user';
+import { resolveTokenProvider, TablesServerContext } from './context-helpers';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
@@ -35,13 +36,11 @@ export function openopsTablesDropdownProperty(): any {
 
 export async function getTableFields(
   tableName: string,
-  axiosRetryConfig?: IAxiosRetryConfig,
+  serverContext: TablesServerContext,
 ): Promise<OpenOpsField[]> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
-
-  const tableId = await getTableIdByTableName(tableName as unknown as string);
-
-  return await getFields(tableId, token, false, axiosRetryConfig);
+  const tableId = await getTableIdByTableName(tableName, serverContext);
+  const tokenOrResolver = await resolveTokenProvider(serverContext);
+  return await getFields(tableId, tokenOrResolver, false);
 }
 
 // https://api.baserow.io/api/redoc/#tag/Database-table-fields/operation/get_database_table_field

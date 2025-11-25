@@ -41,7 +41,7 @@ export const getRecordsAction = createAction({
       displayName: '',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, ctx) => {
         if (!tableName) {
           return {};
         }
@@ -49,6 +49,7 @@ export const getRecordsAction = createAction({
 
         const tableFields = await getTableFields(
           tableName as unknown as string,
+          ctx.server,
         );
 
         properties['filters'] = Property.Array({
@@ -119,7 +120,7 @@ export const getRecordsAction = createAction({
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, context.server],
     );
 
     const filtersProps = context.propsValue.filters['filters'] as unknown as {

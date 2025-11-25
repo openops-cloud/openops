@@ -373,6 +373,10 @@ describe('fieldsProperties property', () => {
     expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
       'Opportunity',
+      {
+        tablesDatabaseId: 1,
+        tablesDatabaseToken: 'token',
+      },
     );
   });
 });
@@ -383,7 +387,13 @@ function validateWrapperCall(context: any) {
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    [context.propsValue.tableName],
+    [
+      context.propsValue.tableName,
+      {
+        tablesDatabaseId: context.server.tablesDatabaseId,
+        tablesDatabaseToken: context.server.tablesDatabaseToken,
+      },
+    ],
   );
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     2,

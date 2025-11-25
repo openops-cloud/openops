@@ -65,6 +65,10 @@ describe('getTableUrlAction', () => {
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
       'my table',
+      {
+        tablesDatabaseId: 1,
+        tablesDatabaseToken: 'token',
+      },
     );
     expect(systemMock.getOrThrow).toHaveBeenCalledTimes(1);
     expect(systemMock.getOrThrow).toHaveBeenCalledWith('FRONTEND_URL');
