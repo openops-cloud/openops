@@ -1,9 +1,7 @@
-import { AppSystemProp, QueueMode, system } from '../system';
 import { encryptUtils } from './encryption';
 
 export async function encryptionKeyInitializer(): Promise<void> {
-  const queueMode = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
-  const encryptionKey = await encryptUtils.loadEncryptionKey(queueMode);
+  const encryptionKey = encryptUtils.loadEncryptionKey();
   const isValidHexKey =
     encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
 
