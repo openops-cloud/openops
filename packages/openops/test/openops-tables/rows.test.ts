@@ -4,16 +4,20 @@ const makeOpenOpsTablesPostMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
-const actualRequestsHelpers = jest.requireActual(
-  '../../src/lib/openops-tables/requests-helpers',
-);
+jest.mock('../../src/lib/openops-tables/requests-helpers', () => {
+  const actualRequestsHelpers = jest.requireActual(
+    '../../src/lib/openops-tables/requests-helpers',
+  );
+  return {
+    ...actualRequestsHelpers,
+    makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
+    makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
+    makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
+    makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
+  };
+});
 
-jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
-  ...actualRequestsHelpers,
-  makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
-  makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
-  makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
-  makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
+jest.mock('../../src/lib/openops-tables/create-axios-headers', () => ({
   createAxiosHeaders: createAxiosHeadersMock,
 }));
 
@@ -76,7 +80,7 @@ describe('getRows', () => {
 
     const result = await getRows({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
     });
 
     expect(result).toStrictEqual([{ id: 1, order: 1234 }]);
@@ -93,7 +97,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
     })) as unknown as OpenOpsRow[];
 
     expect(result[0].id).toBe(1);
@@ -115,7 +119,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       filters: [
         {
           fieldName: 'name1',
@@ -154,7 +158,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
     })) as unknown as OpenOpsRow[];
 
     expect(result).toStrictEqual([
@@ -183,7 +187,7 @@ describe('update row', () => {
 
     const result = await updateRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
       fields: {
         'some field name one': 'value field1',
@@ -203,7 +207,7 @@ describe('update row', () => {
 
     const result = (await updateRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
       fields: {
         'some field name one': 'value field1',
@@ -235,7 +239,7 @@ describe('add row', () => {
 
     const result = await addRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       fields: {
         'some field name one': 'value field1',
         'some field name two': 2,
@@ -254,7 +258,7 @@ describe('add row', () => {
 
     const result = (await addRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       fields: {
         'some field name one': 'value field1',
         'some field name two': 2,
@@ -285,7 +289,7 @@ describe('delete row', () => {
 
     const result = await deleteRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
     });
 
@@ -301,7 +305,7 @@ describe('delete row', () => {
 
     const result = (await deleteRow({
       tableId: 1,
-      token: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
     })) as any;
 

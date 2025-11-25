@@ -24,6 +24,11 @@ const openopsCommonMock = {
       type: 'text',
     },
   ]),
+  resolveTokenProvider: jest.fn(async (serverContext) => {
+    return {
+      getToken: () => serverContext.tablesDatabaseToken,
+    };
+  }),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -95,6 +100,10 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getTableFields).toHaveBeenCalledWith(
         'Opportunity',
+        {
+          tablesDatabaseId: 1,
+          tablesDatabaseToken: 'token',
+        },
       );
     });
   });
@@ -110,12 +119,11 @@ describe('getRecordsAction test', () => {
 
     validateWrapperCall(context);
     expect(result).toStrictEqual({ items: [], count: 0 });
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledWith({
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
+    });
   });
 
   test('should get row with the given filters', async () => {
@@ -145,7 +153,9 @@ describe('getRecordsAction test', () => {
     expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
       tableId: 123,
-      token: 'some databaseToken',
+      tokenOrResolver: expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       filters: [
         {
           fieldName: 'field name',
@@ -279,7 +289,9 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
         tableId: 123,
-        token: 'some databaseToken',
+        tokenOrResolver: expect.objectContaining({
+          getToken: expect.any(Function),
+        }),
         filters: [
           {
             fieldName: 'a',
@@ -305,12 +317,16 @@ describe('getRecordsAction test', () => {
 });
 
 function validateWrapperCall(context: any) {
+  const expectedServerContext = {
+    tablesDatabaseId: context.server.tablesDatabaseId,
+    tablesDatabaseToken: context.server.tablesDatabaseToken,
+  };
   expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(1);
   expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
     `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    [context.propsValue.tableName],
+    [context.propsValue.tableName, expectedServerContext],
   );
 }
 
@@ -327,6 +343,10 @@ function createContext(params?: ContextParams) {
       tableName: params?.tableName ?? 'Opportunity',
       filterType: params?.filterType,
       filters: { filters: params?.filters || [] },
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
     },
     run: {
       id: nanoid(),

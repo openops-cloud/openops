@@ -1,4 +1,3 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { ApplicationError, ErrorCode, isNil, User } from '@openops/shared';
 import { openopsTables } from '../../openops-tables';
@@ -54,7 +53,7 @@ async function addUserToDefaultWorkspace(values: {
   workspaceId: number;
 }): Promise<void> {
   const { token: defaultToken } =
-    await authenticateDefaultUserInOpenOpsTables();
+    await openopsTables.authenticateAdminUserInOpenOpsTables();
 
   await openopsTables.addUserToWorkspace(defaultToken, {
     ...values,
