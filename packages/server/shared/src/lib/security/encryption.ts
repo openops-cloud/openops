@@ -66,9 +66,7 @@ function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
   ]);
 }
 
-function decryptString(
-  encryptedObject: EncryptedObject,
-): string {
+function decryptString(encryptedObject: EncryptedObject): string {
   const secret = loadEncryptionKey();
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   const key = Buffer.from(secret, 'binary');
