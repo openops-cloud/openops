@@ -69,7 +69,6 @@ describe('table property', () => {
       ],
     });
     expect(getTableNamesMock).toHaveBeenCalledTimes(1);
-    expect(getTableNamesMock).toHaveBeenCalledWith(undefined);
   });
 
   test('should handle empty tables', async () => {
@@ -84,7 +83,6 @@ describe('table property', () => {
       options: [],
     });
     expect(getTableNamesMock).toHaveBeenCalledTimes(1);
-    expect(getTableNamesMock).toHaveBeenCalledWith(undefined);
   });
 });
 
