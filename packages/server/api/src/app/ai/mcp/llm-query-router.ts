@@ -248,8 +248,11 @@ const repairText = (text: string): string | null => {
   try {
     const parsedText = JSON.parse(text);
 
+    const rawToolNames = findFirstKeyInObject(parsedText, 'tool_names');
+    const toolNames = normalizeToolNames(rawToolNames);
+
     return JSON.stringify({
-      tool_names: findFirstKeyInObject(parsedText, 'tool_names') || [],
+      tool_names: toolNames,
       query_classification:
         findFirstKeyInObject(parsedText, 'query_classification') || [],
       reasoning: findFirstKeyInObject(parsedText, 'reasoning') || '',
@@ -259,4 +262,19 @@ const repairText = (text: string): string | null => {
   } catch (error) {
     return null;
   }
+};
+
+export const normalizeToolNames = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+  }
+
+  return [];
 };
