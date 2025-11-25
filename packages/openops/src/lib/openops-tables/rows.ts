@@ -28,7 +28,6 @@ export interface RowParams {
 export interface GetRowsParams extends RowParams {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
-  tokenOrResolver: TokenOrResolver;
 }
 
 export interface AddRowParams extends RowParams {
