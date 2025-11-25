@@ -6,7 +6,6 @@ import {
   ViewFilterTypesEnum,
 } from '../openops-tables/filters';
 import {
-  createAxiosHeaders,
   makeOpenOpsTablesDelete,
   makeOpenOpsTablesGet,
   makeOpenOpsTablesPatch,
@@ -14,6 +13,7 @@ import {
   makeOpenOpsTablesPut,
 } from '../openops-tables/requests-helpers';
 import { TokenOrResolver } from './context-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
 
 export interface OpenOpsRow {
   id: number;
@@ -22,7 +22,7 @@ export interface OpenOpsRow {
 
 export interface RowParams {
   tableId: number;
-  token: string;
+  token: TokenOrResolver;
 }
 
 type RowParamsWithTokenOrContext = Omit<RowParams, 'token'> & {
