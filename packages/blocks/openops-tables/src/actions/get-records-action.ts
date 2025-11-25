@@ -1,6 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   FilterType,
   getPropertyFromField,
   getRows,
@@ -8,6 +7,7 @@ import {
   getTableIdByTableName,
   isSingleValueFilter,
   openopsTablesDropdownProperty,
+  resolveTokenProvider,
   ViewFilterTypesEnum,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -113,8 +113,6 @@ export const getRecordsAction = createAction({
     }),
   },
   async run(context) {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
-
     const tableName = context.propsValue.tableName as unknown as string;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
@@ -142,10 +140,11 @@ export const getRecordsAction = createAction({
       };
     });
     const filterType = context.propsValue.filterType as FilterType;
+    const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const rows = await getRows({
       tableId: tableId,
-      token: token,
+      tokenOrResolver,
       filters,
       filterType: filterType,
     });

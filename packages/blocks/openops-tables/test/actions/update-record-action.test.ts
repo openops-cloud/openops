@@ -14,6 +14,11 @@ const openopsCommonMock = {
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
+  resolveTokenProvider: jest.fn(async (serverContext) => {
+    return {
+      getToken: () => serverContext.tablesDatabaseToken,
+    };
+  }),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -32,7 +37,9 @@ describe('updateRowAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
-      token: 'some databaseToken',
+      tokenOrResolver: expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
     });
   });
 
@@ -117,12 +124,11 @@ describe('updateRowAction', () => {
 
     validateWrapperCall(context);
     expect(result).toStrictEqual('mock result');
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledWith({
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
+    });
   });
 
   test('should invoke upsertRow operation', async () => {
@@ -153,7 +159,9 @@ describe('updateRowAction', () => {
     expect(openopsCommonMock.upsertRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith({
       tableId: 1,
-      token: 'some databaseToken',
+      tokenOrResolver: expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       fields: {
         'primary key field': 'some primary key value',
         field1: 'new value',
@@ -381,7 +389,12 @@ function validateWrapperCall(context: any) {
     2,
     `${context.run.id}-1-fields`,
     getFields,
-    [1, 'some databaseToken'],
+    [
+      1,
+      expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
+    ],
   );
 }
 
@@ -400,6 +413,10 @@ function createContext(params?: ContextParams) {
         rowPrimaryKey: 'default primary key',
       },
       fieldsProperties: { fieldsProperties: params?.fieldsProperties },
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
     },
     run: {
       id: nanoid(),
