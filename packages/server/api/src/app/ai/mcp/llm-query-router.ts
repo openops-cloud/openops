@@ -244,7 +244,7 @@ function findFirstKeyInObject(
  * Attempts to repair a malformed JSON string by extracting the expected schema fields.
  * Returns null if the input cannot be parsed or repaired, so then ai sdk will throw an error.
  */
-export const repairText = (text: string): string | null => {
+const repairText = (text: string): string | null => {
   try {
     const parsedText = JSON.parse(text);
 
