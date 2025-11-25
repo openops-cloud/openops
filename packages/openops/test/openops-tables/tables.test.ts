@@ -15,10 +15,6 @@ jest.mock('../../src/lib/openops-tables/auth-user', () => ({
     authenticateDefaultUserInOpenOpsTablesMock,
 }));
 
-jest.mock('../../src/lib/openops-tables/applications-service', () => ({
-  getDefaultDatabaseId: jest.fn().mockResolvedValue(1),
-}));
-
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   system: {
