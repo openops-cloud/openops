@@ -3,11 +3,6 @@ import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
 import { TablesServerContext, resolveTokenProvider } from './context-helpers';
 import { createAxiosHeaders } from './create-axios-headers';
 
-export interface OpenOpsTable {
-  id: number;
-  name: string;
-}
-
 async function getTables(
   databaseId: number,
   authenticationHeader: AxiosHeaders,
@@ -83,4 +78,9 @@ function getDistinctTableNames(tables: OpenOpsTable[]): OpenOpsTable[] {
   }
 
   return Array.from(tablesMap.values());
+}
+
+export interface OpenOpsTable {
+  id: number;
+  name: string;
 }

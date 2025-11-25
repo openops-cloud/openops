@@ -29,7 +29,6 @@ export const deleteRecordAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
-
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
