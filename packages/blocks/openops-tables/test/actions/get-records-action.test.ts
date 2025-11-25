@@ -24,6 +24,11 @@ const openopsCommonMock = {
       type: 'text',
     },
   ]),
+  resolveTokenProvider: jest.fn(async (serverContext) => {
+    return {
+      getToken: () => serverContext.tablesDatabaseToken,
+    };
+  }),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -110,12 +115,11 @@ describe('getRecordsAction test', () => {
 
     validateWrapperCall(context);
     expect(result).toStrictEqual({ items: [], count: 0 });
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
-    ).toHaveBeenCalledWith();
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledWith({
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
+    });
   });
 
   test('should get row with the given filters', async () => {
@@ -145,7 +149,9 @@ describe('getRecordsAction test', () => {
     expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
       tableId: 123,
-      token: 'some databaseToken',
+      tokenOrResolver: expect.objectContaining({
+        getToken: expect.any(Function),
+      }),
       filters: [
         {
           fieldName: 'field name',
@@ -279,7 +285,9 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
         tableId: 123,
-        token: 'some databaseToken',
+        tokenOrResolver: expect.objectContaining({
+          getToken: expect.any(Function),
+        }),
         filters: [
           {
             fieldName: 'a',
@@ -327,6 +335,10 @@ function createContext(params?: ContextParams) {
       tableName: params?.tableName ?? 'Opportunity',
       filterType: params?.filterType,
       filters: { filters: params?.filters || [] },
+    },
+    server: {
+      tablesDatabaseId: 1,
+      tablesDatabaseToken: 'token',
     },
     run: {
       id: nanoid(),

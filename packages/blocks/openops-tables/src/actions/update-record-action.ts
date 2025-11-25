@@ -1,6 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   getFields,
   getPrimaryKeyFieldFromFields,
   getPropertyFromField,
@@ -8,6 +7,8 @@ import {
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
+  resolveTokenProvider,
+  TokenOrResolver,
   upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -61,7 +62,7 @@ export const updateRecordAction = createAction({
       description: '',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName }, context) => {
         if (!tableName) {
           return {};
         }
@@ -131,13 +132,12 @@ export const updateRecordAction = createAction({
       [tableName],
     );
 
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
-
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const tableFields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
-      tableId,
-      token,
-    ]);
+    const tokenOrResolver = await resolveTokenProvider(context.server);
+    const tableFields = await cacheWrapper.getOrAdd<
+      OpenOpsField[],
+      [number, TokenOrResolver]
+    >(fieldsCacheKey, getFields, [tableId, tokenOrResolver]);
 
     const fieldsToUpdate = mapFieldsToObject(
       tableName,
@@ -152,8 +152,8 @@ export const updateRecordAction = createAction({
 
     return await upsertRow({
       tableId: tableId,
-      token: token,
       fields: fieldsToUpdate,
+      tokenOrResolver,
     });
   },
 });
