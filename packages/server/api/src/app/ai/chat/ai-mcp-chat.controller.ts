@@ -225,6 +225,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     try {
       await handleNewMessage(request, reply);
     } finally {
+      // Flush traces to Langfuse (critical for Fastify)
       const spanProcessor = getLangfuseSpanProcessor();
       if (spanProcessor) {
         try {
