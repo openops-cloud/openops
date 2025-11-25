@@ -25,7 +25,7 @@ const loadBlockOrThrow = async ({
   });
 
   const module = await import(packageName);
-  await encryptionKeyInitializer();
+  encryptionKeyInitializer();
 
   const block = extractBlockFromModule<Block>({
     module,

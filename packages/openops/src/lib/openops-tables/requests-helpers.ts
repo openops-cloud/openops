@@ -4,7 +4,6 @@ import { AxiosError, AxiosHeaders, AxiosResponse, Method } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
 import { makeHttpRequest } from '../axios-wrapper';
-export { createAxiosHeaders } from './create-axios-headers';
 
 const RETRY_DELAY_MS = 1000;
 

@@ -1,9 +1,7 @@
 import { AxiosHeaders } from 'axios';
-import {
-  createAxiosHeaders,
-  makeOpenOpsTablesGet,
-} from '../openops-tables/requests-helpers';
-import { resolveTokenProvider, TablesServerContext } from './context-helpers';
+import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
+import { TablesServerContext, resolveTokenProvider } from './context-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
 
 export interface OpenOpsTable {
   id: number;
@@ -56,9 +54,9 @@ export async function getTableNames(
 async function getAvailableTablesInOpenopsTables(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
-  const tokenOrContext = await resolveTokenProvider(serverContext);
+  const tokenOrResolver = await resolveTokenProvider(serverContext);
 
-  const authenticationHeader = createAxiosHeaders(tokenOrContext);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
 
   const tables = await getTables(
     serverContext.tablesDatabaseId,

@@ -1,17 +1,15 @@
 import { IAxiosRetryConfig } from 'axios-retry';
-import {
-  createAxiosHeaders,
-  makeOpenOpsTablesGet,
-} from '../openops-tables/requests-helpers';
+import { makeOpenOpsTablesGet } from '../openops-tables/requests-helpers';
 import { TokenOrResolver } from './context-helpers';
+import { createAxiosHeaders } from './create-axios-headers';
 
 export async function getFields(
   tableId: number,
-  contextOrToken: TokenOrResolver,
+  tokenOrResolver: TokenOrResolver,
   userFieldNames = true,
   axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<OpenOpsField[]> {
-  const authenticationHeader = createAxiosHeaders(contextOrToken);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
   const fields = await makeOpenOpsTablesGet<any[]>(
     `api/database/fields/table/${tableId}/?user_field_names=${userFieldNames}`,
     authenticationHeader,

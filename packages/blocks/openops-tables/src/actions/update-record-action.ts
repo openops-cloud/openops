@@ -138,12 +138,12 @@ export const updateRecordAction = createAction({
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
 
-    const tokenOrContext = await resolveTokenProvider(context.server);
+    const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const tableFields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
       [number, TokenOrResolver]
-    >(fieldsCacheKey, getFields, [tableId, tokenOrContext]);
+    >(fieldsCacheKey, getFields, [tableId, tokenOrResolver]);
 
     const fieldsToUpdate = mapFieldsToObject(
       tableName,
@@ -159,7 +159,7 @@ export const updateRecordAction = createAction({
     return await upsertRow({
       tableId: tableId,
       fields: fieldsToUpdate,
-      tokenOrContext,
+      tokenOrResolver,
     });
   },
 });
