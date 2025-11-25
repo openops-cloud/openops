@@ -37,7 +37,7 @@ describe('updateRowAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
-      tokenOrContext: expect.objectContaining({
+      tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
       }),
     });
@@ -159,7 +159,7 @@ describe('updateRowAction', () => {
     expect(openopsCommonMock.upsertRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith({
       tableId: 1,
-      tokenOrContext: expect.objectContaining({
+      tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
       }),
       fields: {

@@ -77,7 +77,7 @@ describe('getRows', () => {
 
     const result = await getRows({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
     });
 
     expect(result).toStrictEqual([{ id: 1, order: 1234 }]);
@@ -94,7 +94,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
     })) as unknown as OpenOpsRow[];
 
     expect(result[0].id).toBe(1);
@@ -116,7 +116,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       filters: [
         {
           fieldName: 'name1',
@@ -155,7 +155,7 @@ describe('getRows', () => {
 
     const result = (await getRows({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
     })) as unknown as OpenOpsRow[];
 
     expect(result).toStrictEqual([
@@ -184,7 +184,7 @@ describe('update row', () => {
 
     const result = await updateRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
       fields: {
         'some field name one': 'value field1',
@@ -204,7 +204,7 @@ describe('update row', () => {
 
     const result = (await updateRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
       fields: {
         'some field name one': 'value field1',
@@ -236,7 +236,7 @@ describe('add row', () => {
 
     const result = await addRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       fields: {
         'some field name one': 'value field1',
         'some field name two': 2,
@@ -255,7 +255,7 @@ describe('add row', () => {
 
     const result = (await addRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       fields: {
         'some field name one': 'value field1',
         'some field name two': 2,
@@ -286,7 +286,7 @@ describe('delete row', () => {
 
     const result = await deleteRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
     });
 
@@ -302,7 +302,7 @@ describe('delete row', () => {
 
     const result = (await deleteRow({
       tableId: 1,
-      tokenOrContext: 'token',
+      tokenOrResolver: 'token',
       rowId: 2,
     })) as any;
 

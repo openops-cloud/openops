@@ -153,7 +153,7 @@ describe('getRecordsAction test', () => {
     expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
       tableId: 123,
-      tokenOrContext: expect.objectContaining({
+      tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
       }),
       filters: [
@@ -289,7 +289,7 @@ describe('getRecordsAction test', () => {
       expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
         tableId: 123,
-        tokenOrContext: expect.objectContaining({
+        tokenOrResolver: expect.objectContaining({
           getToken: expect.any(Function),
         }),
         filters: [

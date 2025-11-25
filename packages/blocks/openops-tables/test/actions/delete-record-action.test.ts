@@ -227,7 +227,7 @@ describe('deleteRecordAction', () => {
     expect(openopsCommonMock.deleteRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.deleteRow).toHaveBeenCalledWith({
       tableId: 1,
-      tokenOrContext: expect.objectContaining({
+      tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
       }),
       rowId: 1,

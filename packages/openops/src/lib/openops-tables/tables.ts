@@ -56,9 +56,9 @@ export async function getTableNames(
 async function getAvailableTablesInOpenopsTables(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
-  const tokenOrContext = await resolveTokenProvider(serverContext);
+  const tokenOrResolver = await resolveTokenProvider(serverContext);
 
-  const authenticationHeader = createAxiosHeaders(tokenOrContext);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
 
   const tables = await getTables(
     serverContext.tablesDatabaseId,

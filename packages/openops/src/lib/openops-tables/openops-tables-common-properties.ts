@@ -37,8 +37,8 @@ export async function getTableFields(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsField[]> {
   const tableId = await getTableIdByTableName(tableName, serverContext);
-  const tokenOrContext = await resolveTokenProvider(serverContext);
-  return await getFields(tableId, tokenOrContext, false);
+  const tokenOrResolver = await resolveTokenProvider(serverContext);
+  return await getFields(tableId, tokenOrResolver, false);
 }
 
 // https://api.baserow.io/api/redoc/#tag/Database-table-fields/operation/get_database_table_field

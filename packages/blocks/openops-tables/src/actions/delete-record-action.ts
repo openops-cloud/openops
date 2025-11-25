@@ -37,19 +37,19 @@ export const deleteRecordAction = createAction({
       [tableName, context.server],
     );
 
-    const tokenOrContext = await resolveTokenProvider(context.server);
+    const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
     const fields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
       [number, TokenOrResolver]
-    >(fieldsCacheKey, getFields, [tableId, tokenOrContext]);
+    >(fieldsCacheKey, getFields, [tableId, tokenOrResolver]);
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const rowPrimaryKey = getPrimaryKey(context.propsValue.rowPrimaryKey);
 
     const rowToDelete = await getRowByPrimaryKeyValue(
-      tokenOrContext,
+      tokenOrResolver,
       tableId,
       rowPrimaryKey,
       primaryKeyField.name,
@@ -62,7 +62,7 @@ export const deleteRecordAction = createAction({
     return await deleteRow({
       tableId: tableId,
       rowId: rowToDelete.id,
-      tokenOrContext,
+      tokenOrResolver,
     });
   },
 });
