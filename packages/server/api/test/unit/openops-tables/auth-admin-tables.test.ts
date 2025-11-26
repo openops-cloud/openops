@@ -7,7 +7,6 @@ jest.mock('@openops/server-shared', () => ({
   AppSystemProp: {
     TABLES_TOKEN_LIFETIME_MINUTES: 'TABLES_TOKEN_LIFETIME_MINUTES',
     OPENOPS_ADMIN_EMAIL: 'OPENOPS_ADMIN_EMAIL',
-    DB_TYPE: 'DB_TYPE',
   },
   system: {
     getOrThrow: getOrThrowMock,
