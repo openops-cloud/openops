@@ -137,6 +137,67 @@ describe('log-cleaner', () => {
     });
   });
 
+  describe('sensitive data redaction', () => {
+    it('should redact password field', () => {
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('[REDACTED]');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should redact authorization field in objects', () => {
+      const logEvent = {
+        event: {
+          request: {
+            method: 'POST',
+            authorization: 'Bearer token',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('Bearer token');
+    });
+
+    it('should redact password in stringified JSON', () => {
+      const logEvent = {
+        event: {
+          body: '{"email":"user@example.com","password":"secret"}',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.body).toContain('[REDACTED]');
+      expect(result.event.body).not.toContain('secret');
+    });
+
+    it('should redact password in nested objects', () => {
+      const logEvent = {
+        event: {
+          request: {
+            email: 'user@example.com',
+            password: 'secret',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('secret');
+    });
+  });
+
   describe('error objects', () => {
     it('should map error object', () => {
       const error = new Error('test error');
