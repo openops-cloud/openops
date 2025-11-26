@@ -143,8 +143,8 @@ const AssistantTopBar = ({
             className="size-[16px]"
           />
           <span className="min-w-0 truncate text-xs text-gray-500 font-medium">
-            {blockDisplayName}{' '}
-            <span className="italic">
+            {blockDisplayName}
+            <span className="italic ml-1">
               ( {stepIndex}. {stepDisplayName} )
             </span>
           </span>
