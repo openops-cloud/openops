@@ -1,4 +1,3 @@
-const authenticateDefaultUserInOpenOpsTablesMock = jest.fn();
 const makeOpenOpsTablesGetMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
@@ -8,19 +7,6 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
 
 jest.mock('../../src/lib/openops-tables/create-axios-headers', () => ({
   createAxiosHeaders: createAxiosHeadersMock,
-}));
-
-jest.mock('../../src/lib/openops-tables/auth-user', () => ({
-  authenticateDefaultUserInOpenOpsTables:
-    authenticateDefaultUserInOpenOpsTablesMock,
-}));
-
-jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
-  system: {
-    ...jest.requireActual('@openops/server-shared').system,
-    getBoolean: jest.fn().mockReturnValue(false),
-  },
 }));
 
 import { EncryptedObject } from '@openops/shared';
@@ -42,9 +28,9 @@ const mockTablesServerContext: TablesServerContext = {
 describe('get table names', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
+    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
+    //   token: 'token',
+    // });
   });
 
   test('should return the list of available table names', async () => {
@@ -64,7 +50,9 @@ describe('get table names', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should return the list of available table names in a flatten list', async () => {
@@ -86,7 +74,9 @@ describe('get table names', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should return the list of distinct table names', async () => {
@@ -109,16 +99,18 @@ describe('get table names', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 });
 
 describe('get table id by table name', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
+    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
+    //   token: 'token',
+    // });
   });
 
   test('should return the right table id', async () => {
@@ -140,7 +132,9 @@ describe('get table id by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should throw an error if the table name is not found', async () => {
@@ -157,7 +151,9 @@ describe('get table id by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should return the lowest table id when multiple tables have the same name', async () => {
@@ -180,16 +176,18 @@ describe('get table id by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 });
 
 describe('get table by table name', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
+    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
+    //   token: 'token',
+    // });
   });
 
   test('should return the right table', async () => {
@@ -208,7 +206,9 @@ describe('get table by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should return undefined if table was not found', async () => {
@@ -224,7 +224,9 @@ describe('get table by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 
   test('should return the lowest table when multiple tables have the same name', async () => {
@@ -244,6 +246,8 @@ describe('get table by table name', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
   });
 });

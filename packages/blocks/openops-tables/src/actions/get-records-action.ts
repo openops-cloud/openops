@@ -1,5 +1,6 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
+  createTokenProvider,
   FilterType,
   getPropertyFromField,
   getRows,
@@ -7,7 +8,6 @@ import {
   getTableIdByTableName,
   isSingleValueFilter,
   openopsTablesDropdownProperty,
-  createTokenProvider,
   ViewFilterTypesEnum,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';

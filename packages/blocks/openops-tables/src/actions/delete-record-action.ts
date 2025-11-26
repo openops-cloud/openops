@@ -1,5 +1,6 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
+  createTokenProvider,
   deleteRow,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -7,7 +8,6 @@ import {
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
-  createTokenProvider,
   TokenOrResolver,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
