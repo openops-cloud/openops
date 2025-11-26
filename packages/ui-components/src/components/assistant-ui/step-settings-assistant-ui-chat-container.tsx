@@ -15,8 +15,8 @@ import { AssistantUiChatContainer } from './assistant-ui-chat-container';
 import { ConnectionStatusProps } from './types';
 
 const COLLAPSED_HEIGHT = 57;
-const DOCKED_HEIGHT = 450;
 const EXPANDED_HEIGHT_OFFSET = 122;
+const DOCKED_HEIGHT_OFFSET = 40;
 const FULL_WIDTH_HEIGHT = 100;
 const EXPANDED_WIDTH_OFFSET = 40;
 const REGULAR_WIDTH = 450;
@@ -38,6 +38,10 @@ type StepSettingsAssistantUiChatContainerProps = {
   theme: Theme;
   handleInject: (code: string | SourceCode) => void;
   showFullWidth: boolean;
+  stepLogoUrl?: string;
+  stepDisplayName?: string;
+  stepIndex?: number;
+  blockDisplayName?: string;
 } & ConnectionStatusProps;
 
 const StepSettingsAssistantUiChatContainer = ({
@@ -59,6 +63,10 @@ const StepSettingsAssistantUiChatContainer = ({
   showFullWidth,
   isShowingSlowWarning,
   connectionError,
+  stepLogoUrl,
+  stepDisplayName,
+  stepIndex,
+  blockDisplayName,
 }: StepSettingsAssistantUiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +74,7 @@ const StepSettingsAssistantUiChatContainer = ({
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
     height = COLLAPSED_HEIGHT;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
-    height = DOCKED_HEIGHT;
+    height = parentHeight - DOCKED_HEIGHT_OFFSET;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
     height = parentHeight - EXPANDED_HEIGHT_OFFSET;
   } else {
@@ -105,9 +113,13 @@ const StepSettingsAssistantUiChatContainer = ({
         onNewChat={onNewChatClick}
         availableModels={availableModels}
         theme={theme}
-        title={t('AI Chat')}
+        title={t('Generate with AI')}
         isShowingSlowWarning={isShowingSlowWarning}
         connectionError={connectionError}
+        stepLogoUrl={stepLogoUrl}
+        stepDisplayName={stepDisplayName}
+        stepIndex={stepIndex}
+        blockDisplayName={blockDisplayName}
       >
         <div
           className="text-md dark:text-primary items-center font-bold flex"
