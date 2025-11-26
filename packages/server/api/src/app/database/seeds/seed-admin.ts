@@ -5,7 +5,6 @@ import {
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { OrganizationRole, Provider, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
-import { passwordHasher } from '../../authentication/basic/password-hasher';
 import { openopsTables } from '../../openops-tables';
 import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
@@ -168,23 +167,16 @@ async function upsertAdminPassword(
   user: User,
   newPassword: string,
 ): Promise<void> {
-  const passwordMatches = await passwordHasher.compare(
+  const email = user.email;
+  logger.info(`Updating password for admin [${email}]`, email);
+
+  const updatedUser = await userService.updatePassword({
+    id: user.id,
     newPassword,
-    user.password,
-  );
+  });
 
-  if (!passwordMatches) {
-    const email = user.email;
-    logger.info(`Updating password for admin [${email}]`, email);
-
-    const updatedUser = await userService.updatePassword({
-      id: user.id,
-      newPassword,
-    });
-
-    const { token } = await authenticateUserInOpenOpsTables(email, newPassword);
-    await resetUserPassword(email, updatedUser.password, token);
-  }
+  const { token } = await authenticateUserInOpenOpsTables(email, newPassword);
+  await resetUserPassword(email, updatedUser.password, token);
 }
 
 async function upsertAdminEmail(user: User, email: string): Promise<void> {
