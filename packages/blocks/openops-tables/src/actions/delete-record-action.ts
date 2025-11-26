@@ -7,7 +7,7 @@ import {
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
-  resolveTokenProvider,
+  createTokenProvider,
   TokenOrResolver,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -36,7 +36,7 @@ export const deleteRecordAction = createAction({
       [tableName, context.server],
     );
 
-    const tokenOrResolver = await resolveTokenProvider(context.server);
+    const tokenOrResolver = await createTokenProvider(context.server);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
     const fields = await cacheWrapper.getOrAdd<

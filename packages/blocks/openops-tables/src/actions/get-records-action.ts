@@ -7,7 +7,7 @@ import {
   getTableIdByTableName,
   isSingleValueFilter,
   openopsTablesDropdownProperty,
-  resolveTokenProvider,
+  createTokenProvider,
   ViewFilterTypesEnum,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
@@ -141,7 +141,7 @@ export const getRecordsAction = createAction({
       };
     });
     const filterType = context.propsValue.filterType as FilterType;
-    const tokenOrResolver = await resolveTokenProvider(context.server);
+    const tokenOrResolver = await createTokenProvider(context.server);
 
     const rows = await getRows({
       tableId: tableId,

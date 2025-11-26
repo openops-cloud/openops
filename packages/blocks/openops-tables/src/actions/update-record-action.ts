@@ -1,5 +1,6 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
+  createTokenProvider,
   getFields,
   getPrimaryKeyFieldFromFields,
   getPropertyFromField,
@@ -7,7 +8,6 @@ import {
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
-  resolveTokenProvider,
   TokenOrResolver,
   upsertRow,
 } from '@openops/common';
@@ -137,7 +137,7 @@ export const updateRecordAction = createAction({
     );
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const tokenOrResolver = await resolveTokenProvider(context.server);
+    const tokenOrResolver = await createTokenProvider(context.server);
     const tableFields = await cacheWrapper.getOrAdd<
       OpenOpsField[],
       [number, TokenOrResolver]

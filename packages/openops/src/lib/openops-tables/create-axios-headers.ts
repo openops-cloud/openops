@@ -1,5 +1,5 @@
 import { AxiosHeaders } from 'axios';
-import { shouldUseDatabaseToken, TokenOrResolver } from './context-helpers';
+import { TokenOrResolver } from './context-helpers';
 
 export enum AuthType {
   JWT = 'JWT',
@@ -12,12 +12,8 @@ function getToken(tokenOrResolver: TokenOrResolver): string {
     : tokenOrResolver.getToken();
 }
 
-function getAuthPrefix(
-  useJwtOverride: boolean,
-  shouldUseDatabaseTokenConfig: boolean,
-): AuthType {
-  const useJwt = useJwtOverride || !shouldUseDatabaseTokenConfig;
-  return useJwt ? AuthType.JWT : AuthType.Token;
+function getAuthPrefix(useJwtOverride: boolean): AuthType {
+  return useJwtOverride ? AuthType.JWT : AuthType.Token;
 }
 
 export const createAxiosHeaders = (
@@ -26,7 +22,7 @@ export const createAxiosHeaders = (
   const useJwtOverride = typeof tokenOrResolver === 'string';
   const token = getToken(tokenOrResolver);
 
-  const prefix = getAuthPrefix(useJwtOverride, shouldUseDatabaseToken());
+  const prefix = getAuthPrefix(useJwtOverride);
 
   return new AxiosHeaders({
     'Content-Type': 'application/json',

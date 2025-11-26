@@ -1,5 +1,5 @@
 import { Property, Validators } from '@openops/blocks-framework';
-import { resolveTokenProvider, TablesServerContext } from './context-helpers';
+import { createTokenProvider, TablesServerContext } from './context-helpers';
 import {
   DateOpenOpsField,
   DurationOpenOpsField,
@@ -37,7 +37,7 @@ export async function getTableFields(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsField[]> {
   const tableId = await getTableIdByTableName(tableName, serverContext);
-  const tokenOrResolver = await resolveTokenProvider(serverContext);
+  const tokenOrResolver = await createTokenProvider(serverContext);
   return await getFields(tableId, tokenOrResolver, false);
 }
 

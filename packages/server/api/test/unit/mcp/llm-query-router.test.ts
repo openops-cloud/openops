@@ -39,7 +39,6 @@ jest.mock('@openops/server-shared', () => ({
   },
   AppSystemProp: {
     DB_TYPE: 'DB_TYPE',
-    ENABLE_TABLES_DATABASE_TOKEN: 'ENABLE_TABLES_DATABASE_TOKEN',
   },
 }));
 
