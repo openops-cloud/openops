@@ -7,7 +7,7 @@ jest.mock('@openops/server-shared', () => ({
   AppSystemProp: {
     TABLES_TOKEN_LIFETIME_MINUTES: 'TABLES_TOKEN_LIFETIME_MINUTES',
     OPENOPS_ADMIN_EMAIL: 'OPENOPS_ADMIN_EMAIL',
-    OPENOPS_ADMIN_PASSWORD: 'OPENOPS_ADMIN_PASSWORD',
+    DB_TYPE: 'DB_TYPE',
   },
   system: {
     getOrThrow: getOrThrowMock,
@@ -16,6 +16,13 @@ jest.mock('@openops/server-shared', () => ({
   cacheWrapper: {
     getSerializedObject: getSerializedObjectMock,
     setSerializedObject: setSerializedObjectMock,
+  },
+}));
+
+const getUserByEmailOrFailMock = jest.fn().mockResolvedValue({});
+jest.mock('../../../src/app/user/user-service', () => ({
+  userService: {
+    getUserByEmailOrFail: getUserByEmailOrFailMock,
   },
 }));
 
@@ -29,6 +36,13 @@ import { authenticateAdminUserInOpenOpsTables } from '../../../src/app/openops-t
 describe('Authenticate admin user in OpenOps Tables', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    const user = {
+      id: 'u1',
+      password: 'secret',
+    };
+
+    getUserByEmailOrFailMock.mockResolvedValue(user);
   });
 
   it('returns cached tokens when available', async () => {
@@ -57,7 +71,6 @@ describe('Authenticate admin user in OpenOps Tables', () => {
     const res = await authenticateAdminUserInOpenOpsTables(axiosRetryConfig);
 
     expect(getOrThrowMock).toHaveBeenNthCalledWith(1, 'OPENOPS_ADMIN_EMAIL');
-    expect(getOrThrowMock).toHaveBeenNthCalledWith(2, 'OPENOPS_ADMIN_PASSWORD');
     expect(authenticateUserInOpenOpsTablesMock).toHaveBeenCalledWith(
       'admin@example.com',
       'secret',
