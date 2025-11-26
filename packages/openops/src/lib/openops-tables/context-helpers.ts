@@ -7,7 +7,7 @@ export type TablesServerContext = Pick<
   'tablesDatabaseId' | 'tablesDatabaseToken'
 >;
 
-export async function createTokenProvider(
+export async function resolveTokenProvider(
   serverContext: TablesServerContext,
 ): Promise<TokenOrResolver> {
   return {

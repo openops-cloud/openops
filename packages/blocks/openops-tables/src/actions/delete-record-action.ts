@@ -1,6 +1,6 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  createTokenProvider,
+  resolveTokenProvider,
   deleteRow,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -36,7 +36,7 @@ export const deleteRecordAction = createAction({
       [tableName, context.server],
     );
 
-    const tokenOrResolver = await createTokenProvider(context.server);
+    const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
     const fields = await cacheWrapper.getOrAdd<
