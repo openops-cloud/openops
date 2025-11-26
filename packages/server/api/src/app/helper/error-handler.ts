@@ -27,6 +27,19 @@ export const errorHandler = async (
       query,
     }))(_request);
 
+    // check if the body in requestSummary has a secret property like password and censor it
+    const secretProperties = ['password', 'secret', 'token', 'key'];
+    if (requestSummary.body && typeof requestSummary.body === 'object') {
+      const censoredBody = { ...requestSummary.body };
+      for (const key of Object.keys(censoredBody)) {
+        if (secretProperties. includes(key.toLowerCase())) {
+          censoredBody[key] = '****';
+        }
+      }
+      requestSummary.body = censoredBody;
+    }
+
+
     logger.error('Error handler caught an exception.', {
       message: error.message,
       stack: error.stack,

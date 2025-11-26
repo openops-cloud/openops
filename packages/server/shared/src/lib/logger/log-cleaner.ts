@@ -99,3 +99,19 @@ function stringify(value: any) {
     return `Logger error - could not stringify object. ${error}`;
   }
 }
+
+function isSecretKey(key: string): boolean {
+  const secretKeywords = ["password", "token", "key", "secret", "authorization"];
+  return secretKeywords.some(keyword => key.toLowerCase().includes(keyword));
+}
+
+function censorSecrets(object: Object) {
+  for (const key in Object.keys(object)) {
+    if (typeof object[key] === 'string' && secretKeywords.some(keyword => key.toLowerCase().includes(keyword))) {
+        event[key] = "[CENSORED]";
+    }
+    else if (typeof event[key] === 'object' && event[key] !== null) {
+        censorSecrets(event[key]);
+    }
+  }
+}
