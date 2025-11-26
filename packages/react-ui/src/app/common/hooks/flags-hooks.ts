@@ -1,4 +1,4 @@
-import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { QueryKeys } from '@/app/constants/query-keys';
 import { flagsApi, FlagsMap } from '@/app/lib/flags-api';
