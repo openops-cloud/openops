@@ -1,14 +1,12 @@
-import {
-  authenticateDefaultUserInOpenOpsTables,
-  createAxiosHeaders,
-} from '@openops/common';
+import { createAxiosHeaders } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { MCPTool } from './types';
 
 export async function getTablesTools(): Promise<MCPTool> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
   const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
   if (!mcpEndpoint) {
     return {

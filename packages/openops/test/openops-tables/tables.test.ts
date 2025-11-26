@@ -15,15 +15,29 @@ jest.mock('../../src/lib/openops-tables/auth-user', () => ({
     authenticateDefaultUserInOpenOpsTablesMock,
 }));
 
-jest.mock('../../src/lib/openops-tables/applications-service', () => ({
-  getDefaultDatabaseId: jest.fn().mockResolvedValue(1),
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  system: {
+    ...jest.requireActual('@openops/server-shared').system,
+    getBoolean: jest.fn().mockReturnValue(false),
+  },
 }));
 
+import { EncryptedObject } from '@openops/shared';
+import { TablesServerContext } from '../../src/lib/openops-tables/context-helpers';
 import {
   getTableByName,
   getTableIdByTableName,
   getTableNames,
 } from '../../src/lib/openops-tables/tables';
+
+const mockTablesServerContext: TablesServerContext = {
+  tablesDatabaseId: 1,
+  tablesDatabaseToken: {
+    iv: 'test-iv',
+    data: 'test-data',
+  } as EncryptedObject,
+};
 
 describe('get table names', () => {
   beforeEach(() => {
@@ -40,7 +54,7 @@ describe('get table names', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableNames();
+    const result = await getTableNames(mockTablesServerContext);
 
     expect(result[0]).toBe('table name 1');
     expect(result[1]).toBe('table name 2');
@@ -63,7 +77,7 @@ describe('get table names', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableNames();
+    const result = await getTableNames(mockTablesServerContext);
 
     expect(result).toStrictEqual(['table name', 'table name2', 'table name3']);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -86,7 +100,7 @@ describe('get table names', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableNames();
+    const result = await getTableNames(mockTablesServerContext);
 
     expect(result).toStrictEqual(['table name', 'table name3', 'Table Name']);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -114,7 +128,10 @@ describe('get table id by table name', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableIdByTableName('table name');
+    const result = await getTableIdByTableName(
+      'table name',
+      mockTablesServerContext,
+    );
 
     expect(result).toBe(1);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -130,9 +147,9 @@ describe('get table id by table name', () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([{ id: 1, name: 'table name' }]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    await expect(getTableIdByTableName('table name 2')).rejects.toThrow(
-      "Table 'table name 2' not found",
-    );
+    await expect(
+      getTableIdByTableName('table name 2', mockTablesServerContext),
+    ).rejects.toThrow("Table 'table name 2' not found");
 
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
@@ -151,7 +168,10 @@ describe('get table id by table name', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableIdByTableName('table name');
+    const result = await getTableIdByTableName(
+      'table name',
+      mockTablesServerContext,
+    );
 
     expect(result).toBe(1);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -179,7 +199,7 @@ describe('get table by table name', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableByName('table name');
+    const result = await getTableByName('table name', mockTablesServerContext);
 
     expect(result).toStrictEqual({ id: 1, name: 'table name' });
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -195,7 +215,7 @@ describe('get table by table name', () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([{ id: 1, name: 'table name' }]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableByName('table name1');
+    const result = await getTableByName('table name1', mockTablesServerContext);
 
     expect(result).toBe(undefined);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
@@ -215,7 +235,7 @@ describe('get table by table name', () => {
     ]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getTableByName('table name');
+    const result = await getTableByName('table name', mockTablesServerContext);
 
     expect(result).toStrictEqual({ id: 1, name: 'table name' });
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);

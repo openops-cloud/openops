@@ -3,6 +3,7 @@ import { logger } from '@openops/server-shared';
 import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
+import { projectService } from '../../project/project-service';
 import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { getAdditionalQueryClassificationDescriptions } from './extensions';
@@ -107,7 +108,7 @@ export async function routeQuery({
   }));
 
   try {
-    const openopsTablesNames = await getOpenOpsTablesNames();
+    const openopsTablesNames = await getOpenOpsTablesNames(projectId);
 
     const { object: selectionResult } = await generateObject({
       model: languageModel,
@@ -178,9 +179,13 @@ const getPreviousToolsForChat = async (
   }
 };
 
-const getOpenOpsTablesNames = async (): Promise<string[]> => {
+const getOpenOpsTablesNames = async (projectId: string): Promise<string[]> => {
   try {
-    return await getTableNames();
+    const project = await projectService.getOneOrThrow(projectId);
+    return await getTableNames({
+      tablesDatabaseId: project.tablesDatabaseId,
+      tablesDatabaseToken: project.tablesDatabaseToken,
+    });
   } catch (error) {
     logger.error('Error getting OpenOps table names for the LLM query router', {
       error,
@@ -248,8 +253,11 @@ const repairText = (text: string): string | null => {
   try {
     const parsedText = JSON.parse(text);
 
+    const rawToolNames = findFirstKeyInObject(parsedText, 'tool_names');
+    const toolNames = normalizeToolNames(rawToolNames);
+
     return JSON.stringify({
-      tool_names: findFirstKeyInObject(parsedText, 'tool_names') || [],
+      tool_names: toolNames,
       query_classification:
         findFirstKeyInObject(parsedText, 'query_classification') || [],
       reasoning: findFirstKeyInObject(parsedText, 'reasoning') || '',
@@ -259,4 +267,19 @@ const repairText = (text: string): string | null => {
   } catch (error) {
     return null;
   }
+};
+
+export const normalizeToolNames = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+  }
+
+  return [];
 };
