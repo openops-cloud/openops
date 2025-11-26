@@ -10288,11 +10288,12 @@ Apache-2.0
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - @swc/core-linux-x64-gnu@1.7.42
  - @swc/core-linux-x64-musl@1.7.42
 
-This package contains the following license:
+These packages each contain the following license:
 
 Apache-2.0 AND MIT
 
