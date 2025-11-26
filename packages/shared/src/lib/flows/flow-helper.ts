@@ -340,10 +340,10 @@ function getStepWithIndex(
   flowVersion: FlowVersion,
   stepName: string,
 ): {
-  step: Action | Trigger | undefined;
+  step: Action | TriggerWithOptionalId | undefined;
   stepIndex: number | undefined;
 } {
-  const step = getStep(flowVersion, stepName) as Action | Trigger | undefined;
+  const step = getStep(flowVersion, stepName);
 
   if (!step) {
     return { step: undefined, stepIndex: undefined };
