@@ -1,6 +1,7 @@
 import { authenticateUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, cacheWrapper, system } from '@openops/server-shared';
 import { IAxiosRetryConfig } from 'axios-retry';
+import { userService } from '../user/user-service';
 
 export type AuthTokens = {
   token: string;
@@ -22,11 +23,11 @@ export async function authenticateAdminUserInOpenOpsTables(
 
   if (!tokens) {
     const email = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
-    const password = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_PASSWORD);
+    const user = await userService.getUserByEmailOrFail({ email });
 
     tokens = await authenticateUserInOpenOpsTables(
       email,
-      password,
+      user.password,
       axiosRetryConfig,
     );
     await cacheWrapper.setSerializedObject(

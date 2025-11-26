@@ -2,7 +2,6 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 import { authenticateAdminUserInOpenOpsTables } from '../auth-admin-tables';
-import { openopsTables } from '../index';
 import { createAggregatedCostsTable } from './create-aggregated-costs-table';
 import { createAutoInstancesShutdownTable } from './create-auto-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
