@@ -10,21 +10,6 @@ const getFieldsMock = jest.fn();
 jest.mock('../../src/lib/openops-tables/fields', () => {
   return { getFields: getFieldsMock };
 });
-const authenticateDefaultUserInOpenOpsTablesMock = jest.fn();
-jest.mock('../../src/lib/openops-tables/auth-user', () => {
-  return {
-    authenticateDefaultUserInOpenOpsTables:
-      authenticateDefaultUserInOpenOpsTablesMock,
-  };
-});
-
-jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
-  system: {
-    ...jest.requireActual('@openops/server-shared').system,
-    getBoolean: jest.fn().mockReturnValue(false),
-  },
-}));
 
 import { EncryptedObject } from '@openops/shared';
 import { TablesServerContext } from '../../src/lib/openops-tables/context-helpers';
@@ -52,9 +37,6 @@ describe('table property', () => {
   });
 
   test('should return dropdown with all tables', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
     getTableNamesMock.mockResolvedValue(['table1', 'table2']);
 
     const result = await openopsTablesDropdownProperty().options(undefined, {
@@ -68,6 +50,7 @@ describe('table property', () => {
         { label: 'table2', value: 'table2' },
       ],
     });
+
     expect(getTableNamesMock).toHaveBeenCalledTimes(1);
   });
 
@@ -92,9 +75,6 @@ describe('getTableFields', () => {
   });
 
   test('should return the options', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
     getFieldsMock.mockResolvedValue([
       {
         name: 'field1',
@@ -136,37 +116,33 @@ describe('getTableFields', () => {
         type: 'equal',
       },
     ]);
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
+
     expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false);
-  });
-
-  test('should handle authentication failure', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockRejectedValueOnce(
-      new Error('Authentication failed'),
+    expect(getFieldsMock).toHaveBeenCalledWith(
+      1,
+      {
+        getToken: expect.any(Function),
+      },
+      false,
     );
-    getTableIdByTableNameMock.mockResolvedValue(1);
-
-    await expect(
-      getTableFields('Opportunity', mockTablesServerContext),
-    ).rejects.toThrow('Authentication failed');
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).not.toHaveBeenCalled();
   });
 
   test('should handle empty fields', async () => {
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
     getFieldsMock.mockResolvedValue([]);
     getTableIdByTableNameMock.mockResolvedValue(1);
 
     const result = await getTableFields('Opportunity', mockTablesServerContext);
 
     expect(result).toMatchObject([]);
-    expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
+
     expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false);
+    expect(getFieldsMock).toHaveBeenCalledWith(
+      1,
+      {
+        getToken: expect.any(Function),
+      },
+      false,
+    );
   });
 
   test('should return our supported properties for the field', async () => {
@@ -207,9 +183,6 @@ describe('getTableFields', () => {
       duration_format: 'format',
     };
 
-    authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-      token: 'token',
-    });
     getFieldsMock.mockResolvedValue([
       numberField,
       singleSelectField,
