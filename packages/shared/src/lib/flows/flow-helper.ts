@@ -336,6 +336,25 @@ function getStep(
   );
 }
 
+function getStepWithIndex(
+  flowVersion: FlowVersion,
+  stepName: string,
+): {
+  step: Action | TriggerWithOptionalId | undefined;
+  stepIndex: number | undefined;
+} {
+  const step = getStep(flowVersion, stepName);
+
+  if (!step) {
+    return { step: undefined, stepIndex: undefined };
+  }
+
+  const steps = getAllSteps(flowVersion.trigger);
+  const stepIndex = steps.findIndex((s) => s.name === step.name) + 1;
+
+  return { step, stepIndex };
+}
+
 function getSplitBranches(step: SplitActionSchema): SplitBranch[] {
   return step.settings?.options.map((option) => ({
     optionId: option.id,
@@ -1295,6 +1314,7 @@ export const flowHelper = {
   },
 
   getStep,
+  getStepWithIndex,
   isAction,
   isTrigger,
   getAllSteps,
