@@ -28,9 +28,6 @@ const mockTablesServerContext: TablesServerContext = {
 describe('get table names', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-    //   token: 'token',
-    // });
   });
 
   test('should return the list of available table names', async () => {
@@ -108,9 +105,6 @@ describe('get table names', () => {
 describe('get table id by table name', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-    //   token: 'token',
-    // });
   });
 
   test('should return the right table id', async () => {
@@ -185,9 +179,6 @@ describe('get table id by table name', () => {
 describe('get table by table name', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // authenticateDefaultUserInOpenOpsTablesMock.mockResolvedValue({
-    //   token: 'token',
-    // });
   });
 
   test('should return the right table', async () => {
