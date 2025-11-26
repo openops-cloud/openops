@@ -7,6 +7,7 @@ import {
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { databaseConnection } from '../database-connection';
 
 const OPENOPS_TABLES_DATABASE_RENAMED_FLAG = 'TABLES_DB_RENAMED';
@@ -37,7 +38,7 @@ export const updateOpenopsTablesDatabase = async (): Promise<void> => {
     return;
   }
 
-  const { token } = await openopsTables.authenticateAdminUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
 
   try {
     const tablesDatabaseId = await getDefaultDatabaseId(
