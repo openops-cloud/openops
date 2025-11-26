@@ -90,7 +90,7 @@ engine:
 tables:
   name: openops-tables
   image: openops-tables
-  tag: "0.2.11"
+  tag: "0.2.12"
   replicas: 1
   env:
     BASEROW_PUBLIC_URL: "{{ .Values.openopsEnv.OPS_OPENOPS_TABLES_PUBLIC_URL }}"
