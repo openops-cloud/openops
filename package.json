@@ -85,7 +85,7 @@
     "@fastify/swagger-ui": "5.2.3",
     "@fastify/type-provider-typebox": "5.1.0",
     "@frontegg/client": "5.3.2",
-    "@frontegg/js": "7.79.0",
+    "@frontegg/js": "7.92.0",
     "@hookform/resolvers": "3.9.0",
     "@langfuse/otel": "4.2.0",
     "@langfuse/tracing": "4.2.0",
