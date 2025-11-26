@@ -9,7 +9,7 @@ type AppBootstrapProps = {
   children: React.ReactNode;
 };
 
-export function AppBootstrap({ children }: AppBootstrapProps) {
+export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {

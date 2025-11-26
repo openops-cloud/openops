@@ -7,14 +7,15 @@ import { setupResponseInterceptor } from '@/app/interceptors';
 type InitialDataGuardProps = {
   children: React.ReactNode;
 };
-export const InitialDataGuard = ({ children }: InitialDataGuardProps) => {
+export const InitialDataGuard = ({
+  children,
+}: Readonly<InitialDataGuardProps>) => {
   const { data: flags } = flagsHooks.useFlags();
   flagsHooks.prefetchFlags();
 
   useEffect(() => {
     if (!flags) {
       console.error('Missing flags for response interceptor configuration');
-      return;
     }
     setupResponseInterceptor({
       isFederatedAuth: Boolean(flags?.FEDERATED_LOGIN_ENABLED),
