@@ -29,7 +29,9 @@ const SENSITIVE_FIELD_PATTERNS = SENSITIVE_FIELDS.map(
 );
 
 const isSensitiveField = (key: string): boolean => {
-  return SENSITIVE_FIELDS.includes(key.toLowerCase());
+  return SENSITIVE_FIELDS.some(
+    (field) => field.toLowerCase() === key.toLowerCase(),
+  );
 };
 
 const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
