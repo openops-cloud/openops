@@ -6,64 +6,62 @@ export const maxFieldLength = 2048;
 
 const REDACTED = '[REDACTED]';
 
-const SENSITIVE_FIELDS = [
+const SENSITIVE_PATTERNS = [
   'password',
-  'newPassword',
-  'oldPassword',
-  'currentPassword',
-  'confirmPassword',
   'token',
-  'accessToken',
-  'refreshToken',
-  'apiKey',
   'secret',
-  'privateKey',
   'authorization',
+  'apikey',
+  'privatekey',
   'cookie',
-  'sessionId',
+  'session',
   'passphrase',
 ];
 
-const SENSITIVE_FIELD_PATTERNS = SENSITIVE_FIELDS.map(
-  (field) => new RegExp(String.raw`"${field}"\s*:\s*"[^"]*"`, 'gi'),
+const SENSITIVE_FIELD_PATTERNS = SENSITIVE_PATTERNS.map(
+  (pattern) =>
+    new RegExp(String.raw`"[^"]*${pattern}[^"]*"\s*:\s*"[^"]*"`, 'gi'),
 );
 
 const isSensitiveField = (key: string): boolean => {
-  return SENSITIVE_FIELDS.some(
-    (field) => field.toLowerCase() === key.toLowerCase(),
-  );
+  const lowerKey = key.toLowerCase();
+  return SENSITIVE_PATTERNS.some((pattern) => lowerKey.includes(pattern));
 };
 
 const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj !== 'object') {
-    return obj;
-  }
-
-  if (visited.has(obj)) {
-    return '[Circular]';
-  }
-
-  visited.add(obj);
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => redactSensitiveFields(item, visited));
-  }
-
-  const redacted: any = {};
-  for (const key in obj) {
-    if (isSensitiveField(key)) {
-      redacted[key] = REDACTED;
-    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      redacted[key] = redactSensitiveFields(obj[key], visited);
-    } else {
-      redacted[key] = obj[key];
+  try {
+    if (obj === null || obj === undefined) {
+      return obj;
     }
+
+    if (typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (visited.has(obj)) {
+      return '[Circular]';
+    }
+
+    visited.add(obj);
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => redactSensitiveFields(item, visited));
+    }
+
+    const redacted: any = {};
+    for (const key in obj) {
+      if (isSensitiveField(key)) {
+        redacted[key] = REDACTED;
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        redacted[key] = redactSensitiveFields(obj[key], visited);
+      } else {
+        redacted[key] = obj[key];
+      }
+    }
+    return redacted;
+  } catch (error) {
+    return `[Error redacting object: ${error}]`;
   }
-  return redacted;
 };
 
 const redactSensitiveDataInString = (
@@ -73,11 +71,12 @@ const redactSensitiveDataInString = (
     return value;
   }
   let result = value;
-  SENSITIVE_FIELDS.forEach((field, index) => {
-    result = result.replace(
-      SENSITIVE_FIELD_PATTERNS[index],
-      `"${field}":"${REDACTED}"`,
-    );
+  SENSITIVE_FIELD_PATTERNS.forEach((pattern) => {
+    result = result.replace(pattern, (match) => {
+      const colonIndex = match.indexOf(':');
+      const keyPart = match.substring(0, colonIndex);
+      return `${keyPart}:"${REDACTED}"`;
+    });
   });
   return result;
 };
