@@ -25,7 +25,7 @@ const SENSITIVE_FIELDS = [
 ];
 
 const SENSITIVE_FIELD_PATTERNS = SENSITIVE_FIELDS.map(
-  (field) => new RegExp(`"${field}"\\s*:\\s*"[^"]*"`, 'gi'),
+  (field) => new RegExp(String.raw`"${field}"\s*:\s*"[^"]*"`, 'gi'),
 );
 
 const isSensitiveField = (key: string): boolean => {
@@ -114,7 +114,7 @@ export const cleanLogEvent = (logEvent: any) => {
 
     if (isSensitiveField(key)) {
       eventData[key] = REDACTED;
-    } else if (key === 'res' && value && value.raw) {
+    } else if (key === 'res' && value?.raw) {
       extractRequestFields(value, eventData, logEvent);
     } else if (value instanceof Error) {
       extractErrorFields(key, value, eventData, logEvent);
@@ -173,11 +173,15 @@ function extractErrorFields(
     eventData[errorKey + 'Params'] = stringify(
       redactSensitiveFields(value.error.params),
     );
-  } else if (Object.keys(context).length) {
+  } else if (context && Object.keys(context).length) {
     eventData[errorKey + 'Context'] = stringify(redactSensitiveFields(context));
   }
 }
 
 function stringify(value: any) {
-  return truncate(JSON.stringify(value));
+  try {
+    return truncate(JSON.stringify(value));
+  } catch (error) {
+    return `Logger error - could not stringify object. ${error}`;
+  }
 }
