@@ -9,8 +9,13 @@ type AppBootstrapProps = {
   children: React.ReactNode;
 };
 
+type BootstrapState =
+  | { status: 'loading' }
+  | { status: 'ready' }
+  | { status: 'error'; error: Error };
+
 export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
-  const [isReady, setIsReady] = useState(false);
+  const [state, setState] = useState<BootstrapState>({ status: 'loading' });
 
   useEffect(() => {
     let mounted = true;
@@ -22,12 +27,18 @@ export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
         await initializeInternal();
 
         if (mounted) {
-          setIsReady(true);
+          setState({ status: 'ready' });
         }
       } catch (error) {
         console.error('Bootstrap failed:', error);
         if (mounted) {
-          setIsReady(true);
+          setState({
+            status: 'error',
+            error:
+              error instanceof Error
+                ? error
+                : new Error('Failed to initialize application'),
+          });
         }
       }
     }
@@ -39,12 +50,16 @@ export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
     };
   }, []);
 
-  if (!isReady) {
+  if (state.status === 'loading') {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <LoadingSpinner size={50} />
       </div>
     );
+  }
+
+  if (state.status === 'error') {
+    throw state.error;
   }
 
   return children;
