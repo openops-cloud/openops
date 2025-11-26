@@ -1,13 +1,25 @@
 import { LoadingSpinner } from '@openops/components/ui';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { setupResponseInterceptor } from '@/app/interceptors';
 
 type InitialDataGuardProps = {
   children: React.ReactNode;
 };
 export const InitialDataGuard = ({ children }: InitialDataGuardProps) => {
+  const { data: flags } = flagsHooks.useFlags();
   flagsHooks.prefetchFlags();
+
+  useEffect(() => {
+    if (!flags) {
+      console.error('Missing flags for response interceptor configuration');
+      return;
+    }
+    setupResponseInterceptor({
+      isFederatedAuth: Boolean(flags?.FEDERATED_LOGIN_ENABLED),
+    });
+  }, [flags]);
 
   return (
     <Suspense
