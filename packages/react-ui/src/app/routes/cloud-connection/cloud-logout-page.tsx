@@ -37,7 +37,7 @@ const CloudLogoutPage = () => {
       return;
     }
 
-    const app = initializeFrontegg(FRONTEGG_URL as string);
+    const app = initializeFrontegg({ url: FRONTEGG_URL as string });
 
     Cookies.remove('cloud-token');
     Cookies.remove('cloud-refresh-token');
