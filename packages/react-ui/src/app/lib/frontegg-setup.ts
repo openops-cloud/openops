@@ -25,7 +25,7 @@ export function initializeFrontegg({
   const options = {
     contextOptions: {
       baseUrl: url,
-      clientId: clientId,
+      clientId,
       tenantResolver,
     },
     authOptions: {
