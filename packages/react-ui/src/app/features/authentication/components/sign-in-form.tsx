@@ -15,6 +15,7 @@ import { t } from 'i18next';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { HttpError, api } from '@/app/lib/api';
 import { authenticationApi } from '@/app/lib/authentication-api';
@@ -26,7 +27,7 @@ import {
   SignInRequest,
   emailRegex,
 } from '@openops/shared';
-import { useEffectOnce } from 'react-use';
+import { useEffect } from 'react';
 import { navigationUtil } from '../../../lib/navigation-util';
 
 const SignInSchema = Type.Object({
@@ -52,11 +53,17 @@ const SignInForm: React.FC = () => {
     mode: 'onChange',
   });
 
-  useEffectOnce(() => {
+  const { data: flags } = flagsHooks.useFlags();
+
+  useEffect(() => {
+    if (!flags) {
+      return;
+    }
     authenticationSession.logOut({
       userInitiated: false,
+      federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
     });
-  });
+  }, [flags]);
 
   const { data: edition } = flagsHooks.useFlag(FlagId.EDITION);
   const { data: showSignUpLink } = flagsHooks.useFlag(FlagId.SHOW_SIGN_UP_LINK);

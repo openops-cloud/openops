@@ -71,7 +71,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
       >
         <div className="w-full h-full flex bg-secondary overflow-hidden border-r">
           <AssistantUiChat
-            title={t('AI Assistant')}
+            title={t('OpenOps Assistant')}
             onClose={() => setIsAiChatOpened(false)}
           />
         </div>

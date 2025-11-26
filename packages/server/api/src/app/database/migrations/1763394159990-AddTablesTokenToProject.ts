@@ -1,5 +1,5 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
-import { encryptUtils } from '@openops/server-shared';
+import { authenticateUserInOpenOpsTables } from '@openops/common';
+import { AppSystemProp, encryptUtils, system } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { openopsTables } from '../../openops-tables';
 
@@ -43,7 +43,9 @@ async function createTokensForExistingProjects(
     return;
   }
 
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
+  const password = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_PASSWORD);
+  const { token } = await authenticateUserInOpenOpsTables(adminEmail, password);
   for (const record of projects) {
     const newToken = await openopsTables.createDatabaseToken(
       record.tablesWorkspaceId,

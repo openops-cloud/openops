@@ -13,7 +13,7 @@ jobs:
     name: Install Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Lookup node_modules cache
         id: node-modules-cache
         uses: actions/cache@v4.3.0
@@ -25,12 +25,27 @@ jobs:
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --no-audit --no-fund
+  audit:
+    name: Security Audit
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.1
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache/restore@v4.3.0
+        with:
+          path: node_modules
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
+      - name: Run npm audit
+        run: npm audit --audit-level=critical
   lint:
     name: Lint
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4.3.0
@@ -61,12 +76,12 @@ jobs:
     steps:
       - name: Checkout for Dependabot PR
         if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
         with:
           ref: ${{ github.head_ref }}
       - name: Checkout for others
         if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5.0.1
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4.3.0
@@ -109,7 +124,7 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4.3.0
@@ -142,7 +157,7 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4.3.0
@@ -183,7 +198,7 @@ jobs:
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5.0.1
       - name: Restore build cache
         uses: actions/cache/restore@v4.3.0
         with:

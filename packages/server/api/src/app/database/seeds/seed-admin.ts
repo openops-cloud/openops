@@ -1,8 +1,8 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { OrganizationRole, Provider, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
@@ -81,7 +81,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   workspaceId: number;
   databaseId: number;
 }> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
 
   const { workspaceId, databaseId, databaseToken } =
     await openopsTables.createDefaultWorkspaceAndDatabase(token);

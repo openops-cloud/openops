@@ -1,7 +1,7 @@
 import { createBlock } from '@openops/blocks-framework';
 import { aiAuth } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
-import { askAi } from './lib/actions/askAi';
+import { aiStep } from './lib/actions/ai-step';
 
 export const ai = createBlock({
   displayName: 'AI',
@@ -10,6 +10,6 @@ export const ai = createBlock({
   minimumSupportedRelease: '0.7.1',
   logoUrl: 'https://static.openops.com/blocks/openops-ai.svg',
   authors: [],
-  actions: [askAi],
+  actions: [aiStep],
   triggers: [],
 });

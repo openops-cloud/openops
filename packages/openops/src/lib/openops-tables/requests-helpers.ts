@@ -5,13 +5,6 @@ import { IAxiosRetryConfig } from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
 import { makeHttpRequest } from '../axios-wrapper';
 
-export function createAxiosHeaders(token: string): AxiosHeaders {
-  return new AxiosHeaders({
-    'Content-Type': 'application/json',
-    Authorization: `JWT ${token}`,
-  });
-}
-
 const RETRY_DELAY_MS = 1000;
 
 const getStatusText = (statusCode: number): string => {

@@ -15,7 +15,10 @@ const AiAssistantButton = ({ className }: { className?: string }) => {
   }, [isAiChatOpened, setIsAiChatOpened]);
 
   return (
-    <TooltipWrapper tooltipText={t('AI Assistant')} tooltipPlacement="right">
+    <TooltipWrapper
+      tooltipText={t('OpenOps Assistant')}
+      tooltipPlacement="right"
+    >
       <Button
         variant="ai"
         className={cn('size-9 p-0 gap-2', className, {

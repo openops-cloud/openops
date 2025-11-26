@@ -1,5 +1,9 @@
-import { EncryptedObject } from '@openops/server-shared';
-import { AppConnection, AppConnectionStatus, Project } from '@openops/shared';
+import {
+  AppConnection,
+  AppConnectionStatus,
+  EncryptedObject,
+  Project,
+} from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,

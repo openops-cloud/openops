@@ -228,8 +228,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       // Flush traces to Langfuse (critical for Fastify)
       const spanProcessor = getLangfuseSpanProcessor();
       if (spanProcessor) {
-        await spanProcessor.forceFlush();
-        logger.debug('Flushed Langfuse traces');
+        try {
+          await spanProcessor.forceFlush();
+          logger.debug('Flushed Langfuse traces');
+        } catch (error) {
+          logger.error('Failed to flush Langfuse traces', { error });
+        }
       }
     }
   });

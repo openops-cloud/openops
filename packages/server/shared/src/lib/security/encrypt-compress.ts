@@ -1,6 +1,6 @@
-import { FileCompression } from '@openops/shared';
+import { EncryptedObject, FileCompression } from '@openops/shared';
 import { fileCompressor } from '../file-compressor';
-import { EncryptedObject, encryptUtils } from './encryption';
+import { encryptUtils } from './encryption';
 
 /**
  * Compress and encrypt an object
