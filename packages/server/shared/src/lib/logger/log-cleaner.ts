@@ -28,17 +28,23 @@ const isSensitiveField = (key: string): boolean => {
   return SENSITIVE_FIELDS.includes(key.toLowerCase());
 };
 
-const redactSensitiveFields = (obj: any): any => {
+const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
   if (obj === null || obj === undefined) {
     return obj;
   }
 
-  if (Array.isArray(obj)) {
-    return obj.map((item) => redactSensitiveFields(item));
-  }
-
   if (typeof obj !== 'object') {
     return obj;
+  }
+
+  if (visited.has(obj)) {
+    return '[Circular]';
+  }
+
+  visited.add(obj);
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => redactSensitiveFields(item, visited));
   }
 
   const redacted: any = {};
@@ -46,7 +52,7 @@ const redactSensitiveFields = (obj: any): any => {
     if (isSensitiveField(key)) {
       redacted[key] = REDACTED;
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      redacted[key] = redactSensitiveFields(obj[key]);
+      redacted[key] = redactSensitiveFields(obj[key], visited);
     } else {
       redacted[key] = obj[key];
     }
