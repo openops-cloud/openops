@@ -13,6 +13,7 @@ const googleVertexGeminiModels = [
 ];
 
 const googleVertexClaudeModels = [
+  'claude-opus-4-5@20251101',
   'claude-sonnet-4-5@20250929',
   'claude-haiku-4-5@20251001',
   'claude-3-haiku@20240307',

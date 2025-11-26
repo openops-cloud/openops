@@ -43,7 +43,7 @@ const CloudConnectionPage = () => {
       return;
     }
 
-    const app = initializeFrontegg(FRONTEGG_URL as string);
+    const app = initializeFrontegg({ url: FRONTEGG_URL as string });
 
     app.ready(() => {
       app.store.subscribe(() => {
