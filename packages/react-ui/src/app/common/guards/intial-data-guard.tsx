@@ -11,7 +11,6 @@ export const InitialDataGuard = ({
   children,
 }: Readonly<InitialDataGuardProps>) => {
   const { data: flags } = flagsHooks.useFlags();
-  flagsHooks.prefetchFlags();
 
   useEffect(() => {
     if (!flags) {

@@ -29,14 +29,6 @@ type WebsiteBrand = {
 };
 
 export const flagsHooks = {
-  prefetchFlags: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    usePrefetchQuery<FlagsMap, Error>({
-      queryKey: [QueryKeys.flags],
-      queryFn: flagsApi.getAll,
-      staleTime: Infinity,
-    });
-  },
   useFlags: () => {
     return useSuspenseQuery<FlagsMap, Error>({
       queryKey: [QueryKeys.flags],
