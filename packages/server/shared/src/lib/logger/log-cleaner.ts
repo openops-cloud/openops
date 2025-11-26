@@ -24,6 +24,10 @@ const SENSITIVE_FIELDS = [
   'passphrase',
 ];
 
+const SENSITIVE_FIELD_PATTERNS = SENSITIVE_FIELDS.map(
+  (field) => new RegExp(`"${field}"\\s*:\\s*"[^"]*"`, 'gi'),
+);
+
 const isSensitiveField = (key: string): boolean => {
   return SENSITIVE_FIELDS.includes(key.toLowerCase());
 };
@@ -67,9 +71,9 @@ const redactSensitiveDataInString = (
     return value;
   }
   let result = value;
-  SENSITIVE_FIELDS.forEach((field) => {
+  SENSITIVE_FIELDS.forEach((field, index) => {
     result = result.replace(
-      new RegExp(`"${field}"\\s*:\\s*"[^"]*"`, 'gi'),
+      SENSITIVE_FIELD_PATTERNS[index],
       `"${field}":"${REDACTED}"`,
     );
   });
@@ -173,9 +177,5 @@ function extractErrorFields(
 }
 
 function stringify(value: any) {
-  try {
-    return truncate(JSON.stringify(value));
-  } catch (error) {
-    return `Logger error - could not stringify object. ${error}`;
-  }
+  return truncate(JSON.stringify(value));
 }

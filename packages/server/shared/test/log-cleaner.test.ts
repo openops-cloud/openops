@@ -129,10 +129,7 @@ describe('log-cleaner', () => {
 
     expect(result).toEqual({
       event: {
-        circularObject:
-          'Logger error - could not stringify object. TypeError: Converting circular structure to JSON\n' +
-          "    --> starting at object with constructor 'Object'\n" +
-          "    --- property 'circular' closes the circle",
+        circularObject: '{"key":"value","circular":"[Circular]"}',
       },
     });
   });
@@ -337,8 +334,8 @@ describe('log-cleaner', () => {
 
       const result = cleanLogEvent(logEvent);
 
-      expect(result.event.errorContext).toMatch(
-        /^Logger error - could not stringify object\./,
+      expect(result.event.errorContext).toBe(
+        '{"key":"value","circular":{"key":"value","circular":"[Circular]"}}',
       );
     });
 
@@ -361,8 +358,8 @@ describe('log-cleaner', () => {
 
       const result = cleanLogEvent(logEvent);
 
-      expect(result.event.errorParams).toMatch(
-        /^Logger error - could not stringify object\./,
+      expect(result.event.errorParams).toBe(
+        '{"message":"test","data":{"circular":"[Circular]"}}',
       );
     });
 
