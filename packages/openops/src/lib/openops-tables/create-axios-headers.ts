@@ -12,17 +12,13 @@ function getToken(tokenOrResolver: TokenOrResolver): string {
     : tokenOrResolver.getToken();
 }
 
-function getAuthPrefix(useJwtOverride: boolean): AuthType {
-  return useJwtOverride ? AuthType.JWT : AuthType.Token;
-}
-
 export const createAxiosHeaders = (
   tokenOrResolver: TokenOrResolver,
 ): AxiosHeaders => {
-  const useJwtOverride = typeof tokenOrResolver === 'string';
   const token = getToken(tokenOrResolver);
 
-  const prefix = getAuthPrefix(useJwtOverride);
+  const prefix =
+    typeof tokenOrResolver === 'string' ? AuthType.JWT : AuthType.Token;
 
   return new AxiosHeaders({
     'Content-Type': 'application/json',
