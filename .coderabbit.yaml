@@ -1,2 +1,3 @@
-auto_review:
-  enabled: false
+reviews:
+  auto_review:
+    enabled: false
