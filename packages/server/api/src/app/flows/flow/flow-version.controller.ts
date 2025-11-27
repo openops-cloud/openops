@@ -242,7 +242,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 
 const GetLatestVersionsByConnectionRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [
+      PrincipalType.MCP,
+      PrincipalType.USER,
+      PrincipalType.SERVICE,
+    ],
     permission: Permission.READ_FLOW,
   },
   schema: {

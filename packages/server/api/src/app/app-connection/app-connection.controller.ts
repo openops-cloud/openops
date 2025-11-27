@@ -171,7 +171,7 @@ const UpsertAppConnectionRequest = {
 
 const PatchAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.MCP],
     permission: Permission.WRITE_APP_CONNECTION,
   },
   schema: {
@@ -189,7 +189,11 @@ const PatchAppConnectionRequest = {
 
 const ListAppConnectionsRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [
+      PrincipalType.MCP,
+      PrincipalType.USER,
+      PrincipalType.SERVICE,
+    ],
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
@@ -226,7 +230,7 @@ const DeleteAppConnectionRequest = {
 
 const GetAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.MCP],
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
@@ -253,7 +257,7 @@ const GetAppConnectionRequest = {
 
 const GetConnectionMetadataRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.MCP],
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
