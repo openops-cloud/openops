@@ -42,7 +42,7 @@ export const accessTokenManager = {
     return jwtUtils.sign({
       payload: {
         ...principal,
-        token: PrincipalType.MCP,
+        type: PrincipalType.MCP,
       },
       key: secret,
       expiresInSeconds,
