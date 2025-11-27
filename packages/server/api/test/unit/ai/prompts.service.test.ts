@@ -257,7 +257,7 @@ describe('getSystemPrompt', () => {
         steps: [
           {
             id: 'step1',
-            stepName: 'step1',
+            stepDisplayName: 'step1',
             variables: [
               { name: 'var1', value: 'value1' },
               { name: 'var2', value: 'value2' },
@@ -265,7 +265,7 @@ describe('getSystemPrompt', () => {
           },
           {
             id: 'step2',
-            stepName: 'step2',
+            stepDisplayName: 'step2',
             variables: [{ name: 'var3', value: 'value3' }],
           },
         ],
@@ -301,8 +301,8 @@ describe('getSystemPrompt', () => {
         flowId: 'test-flow-id',
         flowVersionId: 'test-flow-version-id',
         steps: [
-          { id: 'step1', stepName: 'step1' },
-          { id: 'step2', stepName: 'step2' },
+          { id: 'step1', stepDisplayName: 'step1' },
+          { id: 'step2', stepDisplayName: 'step2' },
         ],
       };
 
@@ -358,16 +358,16 @@ describe('getSystemPrompt', () => {
         steps: [
           {
             id: 'step1',
-            stepName: 'step1',
+            stepDisplayName: 'step1',
             variables: [{ name: 'var1', value: 'value1' }],
           },
           {
             id: 'step2',
-            stepName: 'step2',
+            stepDisplayName: 'step2',
           },
           {
             id: 'step3',
-            stepName: 'step3',
+            stepDisplayName: 'step3',
             variables: [{ name: 'var2', value: 'value2' }],
           },
         ],
@@ -549,7 +549,7 @@ describe('buildUIContextSection', () => {
         {
           flowId: TEST_IDS.flowId,
           flowVersionId: TEST_IDS.flowVersionId,
-          currentStepName: TEST_IDS.currentStepName,
+          currentStepDisplayName: TEST_IDS.currentStepName,
         },
         `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with step name "${TEST_IDS.currentStepName}"`,
       ],
@@ -560,7 +560,7 @@ describe('buildUIContextSection', () => {
           flowVersionId: TEST_IDS.flowVersionId,
           runId: TEST_IDS.runId,
           currentStepId: TEST_IDS.currentStepId,
-          currentStepName: TEST_IDS.currentStepName,
+          currentStepDisplayName: TEST_IDS.currentStepName,
         },
         `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with run ${TEST_IDS.runId} with step id ${TEST_IDS.currentStepId} with step name "${TEST_IDS.currentStepName}"`,
       ],
@@ -587,7 +587,7 @@ describe('buildUIContextSection', () => {
           flowVersionId: '',
           runId: TEST_IDS.runId,
           currentStepId: '',
-          currentStepName: TEST_IDS.currentStepName,
+          currentStepDisplayName: TEST_IDS.currentStepName,
         },
         `flow ${TEST_IDS.flowId} with run ${TEST_IDS.runId} with step name "${TEST_IDS.currentStepName}"`,
       ],
@@ -598,7 +598,7 @@ describe('buildUIContextSection', () => {
           flowVersionId: TEST_IDS.flowVersionId,
           runId: undefined,
           currentStepId: undefined,
-          currentStepName: undefined,
+          currentStepDisplayName: undefined,
         },
         `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId}`,
       ],
@@ -610,12 +610,14 @@ describe('buildUIContextSection', () => {
           steps: [
             {
               id: 'step1',
-              stepName: 'Step One',
+              stepDisplayName: 'Step One',
+              stepIndex: 1,
               variables: [{ name: 'var1', value: 'value1' }],
             },
             {
               id: 'step2',
-              stepName: 'Step Two',
+              stepDisplayName: 'Step Two',
+              stepIndex: 2,
             },
           ],
         },

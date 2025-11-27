@@ -181,7 +181,8 @@ async function enrichSteps(
       } catch (error) {
         return {
           id: step.id,
-          stepName: step.stepName,
+          stepDisplayName: step.stepDisplayName,
+          stepIndex: step.stepIndex,
           variables: step.variables?.map((variable) => ({
             name: variable.name,
             value: String(error),
@@ -202,7 +203,8 @@ async function enrichStep(
   if (!step.variables || step.variables.length === 0) {
     return {
       id: step.id,
-      stepName: step.stepName,
+      stepDisplayName: step.stepDisplayName,
+      stepIndex: step.stepIndex,
       variables: step.variables,
     };
   }
@@ -215,7 +217,8 @@ async function enrichStep(
 
   return {
     id: step.id,
-    stepName: step.stepName,
+    stepDisplayName: step.stepDisplayName,
+    stepIndex: step.stepIndex,
     variables: resolvedVariables,
   };
 }
@@ -257,7 +260,7 @@ async function resolveVariable(
     variableExpression: variable.value,
     flowVersion: flowData.flow.version,
     projectId,
-    stepName: step.stepName,
+    stepName: step.stepDisplayName,
     stepTestOutputs: flowData.stepTestOutputs,
   });
 

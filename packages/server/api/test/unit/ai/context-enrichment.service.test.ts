@@ -111,7 +111,7 @@ describe('ContextEnrichmentService', () => {
       steps: [
         {
           id: 'step-1',
-          stepName: 'step_1',
+          stepDisplayName: 'step_1',
           variables: [
             {
               name: 'variable1',
@@ -159,7 +159,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -196,7 +196,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
           },
         ],
       };
@@ -219,7 +219,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
             variables: undefined,
           },
         ],
@@ -241,7 +241,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -280,7 +280,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -305,7 +305,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -338,7 +338,8 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
+            stepDisplayName: 'step_1',
+            stepIndex: undefined,
             variables: [
               {
                 name: 'variable1',
