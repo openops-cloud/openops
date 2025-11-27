@@ -207,7 +207,7 @@ const getSystemPrompt = async (
     `IMPORTANT: Tables tools should always be included in the output if the user asks a question involving those table names: ${openopsTablesNames.join(
       ', ',
     )}. ` +
-    "NOTE: The 'session-sql' tool is ONLY for querying tables created by AWS cost/billing MCP tools and performing temporary analysis. It is NOT for user's database or table related queries. " +
+    "NOTE: The 'session-sql' tool is ONLY for querying tables created by AWS cost/billing MCP tools and performing temporary analysis within the session. It is NOT for user's database or table related queries. " +
     "Classify the user's prompt into one or more of the provided categories. A single prompt can qualify for multiple categories. " +
     'Include ALL relevant categories that apply. ' +
     `${
