@@ -140,7 +140,11 @@ const FlowRunFilteredWithNoSteps = Type.Omit(FlowRun, [
 
 const ListRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [
+      PrincipalType.MCP,
+      PrincipalType.USER,
+      PrincipalType.SERVICE,
+    ],
   },
   schema: {
     operationId: 'List Flow Runs',
@@ -157,7 +161,11 @@ const ListRequest = {
 
 const GetRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
+    allowedPrincipals: [
+      PrincipalType.SERVICE,
+      PrincipalType.USER,
+      PrincipalType.MCP,
+    ],
   },
   schema: {
     operationId: 'Get Flow Run Details',
@@ -190,6 +198,7 @@ const ResumeFlowRunRequest = {
 
 const RetryFlowRequest = {
   config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.MCP],
     permission: Permission.RETRY_RUN,
   },
   schema: {
