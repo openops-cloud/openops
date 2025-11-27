@@ -191,7 +191,7 @@ export const userService = {
   async updatePassword({
     id,
     newPassword,
-  }: UpdatePasswordParams): Promise<void> {
+  }: UpdatePasswordParams): Promise<User> {
     assertValidPassword(newPassword);
 
     const hashedPassword = await passwordHasher.hash(newPassword);
@@ -200,6 +200,8 @@ export const userService = {
       updated: dayjs().toISOString(),
       password: hashedPassword,
     });
+
+    return userService.getOneOrFail({ id });
   },
 
   async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {

@@ -122,7 +122,7 @@ export async function createUser(
     const tablesRefreshToken = await createTablesUser(
       name,
       params.email,
-      params.password,
+      user.password,
     );
 
     return {

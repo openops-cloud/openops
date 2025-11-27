@@ -1,5 +1,4 @@
 import { addUserToWorkspace } from './add-user-workspace';
-import { authenticateAdminUserInOpenOpsTables } from './auth-admin-tables';
 import { createDatabase } from './create-database';
 import { createDatabaseToken } from './create-database-token';
 import { createMcpEndpoint } from './create-mcp-endpoint';
@@ -29,5 +28,4 @@ export const openopsTables = {
   getMcpEndpointList,
   createMcpEndpoint,
   getWorkspaceByName,
-  authenticateAdminUserInOpenOpsTables,
 };

@@ -14,7 +14,7 @@ export function ErrorFallback({ error }: FallbackProps) {
       <p className="text-gray-600 mb-2">{error.message}</p>
       <p className="text-gray-600 mb-4">
         {t(
-          "If it's a persistant issue, please contact support with steps to reproduce and include any relevant error messages.",
+          "If it's a persistent issue, please contact support with steps to reproduce and include any relevant error messages.",
         )}
       </p>
       <div className="space-x-4">

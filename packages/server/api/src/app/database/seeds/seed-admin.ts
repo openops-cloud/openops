@@ -1,3 +1,7 @@
+import {
+  authenticateUserInOpenOpsTables,
+  resetUserPassword,
+} from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { OrganizationRole, Provider, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
@@ -53,6 +57,7 @@ async function ensureUserExists(
       `Admin user already exists [${email}], updating their password`,
       email,
     );
+
     await upsertAdminPassword(user, password);
     return user;
   }
@@ -73,7 +78,11 @@ async function ensureUserExists(
     email,
   );
 
-  return createAdminUser(email, password);
+  user = await createAdminUser(email, password);
+  const { token } = await authenticateUserInOpenOpsTables(email, password);
+  await resetUserPassword(email, user.password, token);
+
+  return user;
 }
 
 async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
@@ -160,7 +169,14 @@ async function upsertAdminPassword(
 ): Promise<void> {
   const email = user.email;
   logger.info(`Updating password for admin [${email}]`, email);
-  await userService.updatePassword({ id: user.id, newPassword });
+
+  const updatedUser = await userService.updatePassword({
+    id: user.id,
+    newPassword,
+  });
+
+  const { token } = await authenticateUserInOpenOpsTables(email, newPassword);
+  await resetUserPassword(email, updatedUser.password, token);
 }
 
 async function upsertAdminEmail(user: User, email: string): Promise<void> {
