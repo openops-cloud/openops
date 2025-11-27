@@ -31,6 +31,32 @@ export const accessTokenManager = {
     });
   },
 
+  async generateMCPToken(
+    userToken: string,
+    expiresInSeconds: number = openOpsRefreshTokenLifetimeSeconds,
+  ): Promise<string> {
+    const principal = await this.extractPrincipal(userToken);
+    if (principal.type !== PrincipalType.USER) {
+      throw new ApplicationError({
+        code: ErrorCode.INVALID_BEARER_TOKEN,
+        params: {
+          message: 'MCP token can only be generated from a USER token',
+        },
+      });
+    }
+
+    const secret = await jwtUtils.getJwtSecret();
+
+    return jwtUtils.sign({
+      payload: {
+        ...principal,
+        type: PrincipalType.MCP,
+      },
+      key: secret,
+      expiresInSeconds,
+    });
+  },
+
   async generateEngineToken({
     executionCorrelationId,
     projectId,
