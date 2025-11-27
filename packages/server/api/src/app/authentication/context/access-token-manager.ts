@@ -31,6 +31,24 @@ export const accessTokenManager = {
     });
   },
 
+  async generateMCPToken(
+    userToken: string,
+    expiresInSeconds: number = openOpsRefreshTokenLifetimeSeconds,
+  ): Promise<string> {
+    const principal = await this.extractPrincipal(userToken);
+
+    const secret = await jwtUtils.getJwtSecret();
+
+    return jwtUtils.sign({
+      payload: {
+        ...principal,
+        token: PrincipalType.MCP,
+      },
+      key: secret,
+      expiresInSeconds,
+    });
+  },
+
   async generateEngineToken({
     executionCorrelationId,
     projectId,
