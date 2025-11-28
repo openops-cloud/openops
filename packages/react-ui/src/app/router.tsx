@@ -65,6 +65,10 @@ const createRoutes = () => {
     FlagId.SHOW_DEMO_HOME_PAGE,
   );
 
+  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
+    FlagId.FEDERATED_LOGIN_ENABLED,
+  );
+
   const routes = [
     {
       path: 'flows',
@@ -137,61 +141,6 @@ const createRoutes = () => {
             <SettingsRerouter />
           </OpsErrorBoundary>
         </RouteWrapper>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
-      path: 'forget-password',
-      element: (
-        <OpsErrorBoundary>
-          <PageTitle title="Forget Password">
-            <ResetPasswordPage />
-          </PageTitle>
-        </OpsErrorBoundary>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
-      path: 'reset-password',
-      element: (
-        <OpsErrorBoundary>
-          <PageTitle title="Reset Password">
-            <ChangePasswordPage />
-          </PageTitle>
-        </OpsErrorBoundary>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
-      path: 'sign-in',
-      element: (
-        <OpsErrorBoundary>
-          <PageTitle title="Sign In">
-            <SignInPage />
-          </PageTitle>
-        </OpsErrorBoundary>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
-      path: 'verify-email',
-      element: (
-        <OpsErrorBoundary>
-          <PageTitle title="Verify Email">
-            <VerifyEmail />
-          </PageTitle>
-        </OpsErrorBoundary>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
-      path: 'sign-up',
-      element: (
-        <OpsErrorBoundary>
-          <PageTitle title="Sign Up">
-            <SignUpPage />
-          </PageTitle>
-        </OpsErrorBoundary>
       ),
       errorElement: <RouteErrorBoundary />,
     },
@@ -278,6 +227,70 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
+  ];
+
+  if (!isFederatedLogin) {
+    const regularLoginRoutes = [
+      {
+        path: 'forget-password',
+        element: (
+          <OpsErrorBoundary>
+            <PageTitle title="Forget Password">
+              <ResetPasswordPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'reset-password',
+        element: (
+          <OpsErrorBoundary>
+            <PageTitle title="Reset Password">
+              <ChangePasswordPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'sign-in',
+        element: (
+          <OpsErrorBoundary>
+            <PageTitle title="Sign In">
+              <SignInPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'verify-email',
+        element: (
+          <OpsErrorBoundary>
+            <PageTitle title="Verify Email">
+              <VerifyEmail />
+            </PageTitle>
+          </OpsErrorBoundary>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'sign-up',
+        element: (
+          <OpsErrorBoundary>
+            <PageTitle title="Sign Up">
+              <SignUpPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+    ];
+    routes.push(...regularLoginRoutes);
+  }
+
+  const redirectRoutes = [
     {
       path: 'redirect',
       element: <RedirectPage></RedirectPage>,
@@ -295,6 +308,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
   ];
+  routes.push(...redirectRoutes);
 
   if (isCloudConnectionPageEnabled) {
     const CloudConnectionPage = lazy(
