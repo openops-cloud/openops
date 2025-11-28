@@ -255,7 +255,7 @@ async function resolveVariable(
   if (!workflowStep) {
     return {
       name: variable.name,
-      value: 'Failed to resolve variable: Step not found in flow.',
+      value: 'Failed to resolve variable: Step not found in the workflow.',
     };
   }
 

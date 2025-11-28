@@ -22,7 +22,7 @@ export const createAdditionalContext = (
     flowId: flowVersion.flowId,
     flowVersionId: flowVersion.id,
     runId,
-    currentStepIndex: stepData?.stepIndex,
+    currentStepId: stepData?.id ?? '',
     steps: [
       {
         id: stepData?.id ?? '',

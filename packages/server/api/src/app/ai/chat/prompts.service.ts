@@ -139,14 +139,6 @@ export const buildUIContextSection = async (
     contextParts.push(`step id ${flowContext.currentStepId}`);
   }
 
-  if (flowContext.currentStepDisplayName) {
-    contextParts.push(`step name "${flowContext.currentStepDisplayName}"`);
-  }
-
-  if (flowContext.currentStepIndex) {
-    contextParts.push(`step index "${flowContext.currentStepIndex}"`);
-  }
-
   if (contextParts.length === 0) {
     return '';
   }
