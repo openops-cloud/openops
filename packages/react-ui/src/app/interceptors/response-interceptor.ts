@@ -45,6 +45,5 @@ export function createFederatedResponseInterceptor(): {
   onFulfilled: (response: AxiosResponse) => AxiosResponse;
   onRejected: (error: AxiosError) => Promise<never>;
 } {
-  // should not be used in the OSS
   throw new Error('Not implemented in OSS');
 }
