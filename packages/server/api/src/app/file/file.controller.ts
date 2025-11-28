@@ -19,7 +19,7 @@ export const fileController: FastifyPluginAsyncTypebox = async (app) => {
 
 const GetFileRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.MCP],
   },
   schema: {
     operationId: 'Get File',

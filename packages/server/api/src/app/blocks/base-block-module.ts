@@ -230,6 +230,9 @@ const ListCategoriesRequest = {
 };
 
 const OptionsBlockRequest = {
+  config: {
+    allowedPrincipals: ALL_PRINCIPAL_TYPES,
+  },
   schema: {
     operationId: 'Execute Block Properties',
     description:
