@@ -18,11 +18,7 @@ const getCloudToken = (request: FastifyRequest): string | undefined => {
     return cookieToken;
   }
 
-  if (headerToken) {
-    return headerToken.replace('Bearer ', '');
-  }
-
-  return undefined;
+  return headerToken;
 };
 
 export function getVerifiedUser(
