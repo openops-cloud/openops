@@ -399,7 +399,8 @@ describe('ContextEnrichmentService', () => {
             variables: [
               {
                 name: 'variable1',
-                value: 'Error resolving variable: Engine error',
+                value:
+                  'Failed to resolve variable: Step not found in the workflow.',
               },
             ],
           },
