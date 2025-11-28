@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import {
+  Action,
   ChatFlowContext,
   EngineResponseStatus,
   flowHelper,
@@ -59,6 +60,7 @@ jest.mock('server-worker', () => ({
 jest.mock('@openops/shared', () => ({
   flowHelper: {
     getAllStepIds: jest.fn(),
+    getStepById: jest.fn(),
   },
   groupStepOutputsById: jest.fn(),
 }));
@@ -99,6 +101,12 @@ describe('ContextEnrichmentService', () => {
         mockEngineToken,
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
+      mockFlowHelper.getStepById.mockImplementation((_version, stepId) => {
+        if (stepId === 'step-1') {
+          return { name: 'step_1' } as Action;
+        }
+        return { name: stepId } as Action;
+      });
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
       mockGroupStepOutputsById.mockReturnValue({});
 
@@ -111,7 +119,6 @@ describe('ContextEnrichmentService', () => {
       steps: [
         {
           id: 'step-1',
-          stepDisplayName: 'step_1',
           variables: [
             {
               name: 'variable1',
@@ -159,7 +166,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -196,7 +202,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
           },
         ],
       };
@@ -219,7 +224,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
             variables: undefined,
           },
         ],
@@ -241,7 +245,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -280,7 +283,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -305,7 +307,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -338,8 +339,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepDisplayName: 'step_1',
-            stepIndex: undefined,
             variables: [
               {
                 name: 'variable1',
