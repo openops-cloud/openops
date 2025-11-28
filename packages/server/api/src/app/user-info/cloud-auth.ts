@@ -4,11 +4,25 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 const CLOUD_TOKEN_COOKIE_NAME = 'cloud-token';
 
 const getCloudToken = (request: FastifyRequest): string | undefined => {
-  let token = request.headers.authorization?.replace('Bearer ', '');
-  if (!token) {
-    token = request.cookies[CLOUD_TOKEN_COOKIE_NAME];
+  const authorizationHeader = request.headers.authorization;
+  const cookieToken = request.cookies[CLOUD_TOKEN_COOKIE_NAME];
+  const headerToken = request.headers[CLOUD_TOKEN_COOKIE_NAME] as
+    | string
+    | undefined;
+
+  if (authorizationHeader) {
+    return authorizationHeader.replace('Bearer ', '');
   }
-  return token;
+
+  if (cookieToken) {
+    return cookieToken;
+  }
+
+  if (headerToken) {
+    return headerToken.replace('Bearer ', '');
+  }
+
+  return undefined;
 };
 
 export function getVerifiedUser(
