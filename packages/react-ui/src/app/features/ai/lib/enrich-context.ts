@@ -22,14 +22,10 @@ export const createAdditionalContext = (
     flowId: flowVersion.flowId,
     flowVersionId: flowVersion.id,
     runId,
-    currentStepId: stepData?.id ?? '',
-    currentStepDisplayName: stepData?.displayName ?? '',
     currentStepIndex: stepData?.stepIndex,
     steps: [
       {
         id: stepData?.id ?? '',
-        stepDisplayName: stepData?.displayName ?? '',
-        stepIndex: stepData?.stepIndex,
         variables: variables.length > 0 ? variables : undefined,
       },
     ],

@@ -43,8 +43,6 @@ export type VariableContext = Static<typeof VariableContext>;
 
 export const StepContext = Type.Object({
   id: Type.String(),
-  stepDisplayName: Type.String(),
-  stepIndex: Type.Optional(Type.Number()),
   variables: Type.Optional(Type.Array(VariableContext)),
 });
 export type StepContext = Static<typeof StepContext>;
