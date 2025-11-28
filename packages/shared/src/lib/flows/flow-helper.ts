@@ -336,6 +336,16 @@ function getStep(
   );
 }
 
+function getStepById(
+  flowVersion: FlowVersion,
+  stepId: string,
+): Action | TriggerWithOptionalId | undefined {
+  if (flowVersion.trigger.id === stepId) {
+    return flowVersion.trigger;
+  }
+  return getAllSteps(flowVersion.trigger).find((step) => step.id === stepId);
+}
+
 function getStepWithIndex(
   flowVersion: FlowVersion,
   stepName: string,
@@ -1314,6 +1324,7 @@ export const flowHelper = {
   },
 
   getStep,
+  getStepById,
   getStepWithIndex,
   isAction,
   isTrigger,
