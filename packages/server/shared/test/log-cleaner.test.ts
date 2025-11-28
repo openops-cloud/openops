@@ -129,11 +129,69 @@ describe('log-cleaner', () => {
 
     expect(result).toEqual({
       event: {
-        circularObject:
-          'Logger error - could not stringify object. TypeError: Converting circular structure to JSON\n' +
-          "    --> starting at object with constructor 'Object'\n" +
-          "    --- property 'circular' closes the circle",
+        circularObject: '{"key":"value","circular":"[Circular]"}',
       },
+    });
+  });
+
+  describe('sensitive data redaction', () => {
+    it('should redact password field', () => {
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('[REDACTED]');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should redact authorization field in objects', () => {
+      const logEvent = {
+        event: {
+          request: {
+            method: 'POST',
+            authorization: 'Bearer token',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('Bearer token');
+    });
+
+    it('should redact password in stringified JSON', () => {
+      const logEvent = {
+        event: {
+          body: '{"email":"user@example.com","password":"secret"}',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.body).toContain('[REDACTED]');
+      expect(result.event.body).not.toContain('secret');
+    });
+
+    it('should redact password in nested objects', () => {
+      const logEvent = {
+        event: {
+          request: {
+            email: 'user@example.com',
+            password: 'secret',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('secret');
     });
   });
 
@@ -276,8 +334,8 @@ describe('log-cleaner', () => {
 
       const result = cleanLogEvent(logEvent);
 
-      expect(result.event.errorContext).toMatch(
-        /^Logger error - could not stringify object\./,
+      expect(result.event.errorContext).toBe(
+        '{"key":"value","circular":{"key":"value","circular":"[Circular]"}}',
       );
     });
 
@@ -300,8 +358,8 @@ describe('log-cleaner', () => {
 
       const result = cleanLogEvent(logEvent);
 
-      expect(result.event.errorParams).toMatch(
-        /^Logger error - could not stringify object\./,
+      expect(result.event.errorParams).toBe(
+        '{"message":"test","data":{"circular":"[Circular]"}}',
       );
     });
 
