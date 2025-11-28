@@ -294,6 +294,63 @@ describe('ContextEnrichmentService', () => {
       });
     });
 
+    it("should set an error value when step isn't found (getStepById returns undefined)", async () => {
+      const mockFlow = {
+        version: {
+          trigger: { id: 'trigger-id' },
+        },
+      } as PopulatedFlow;
+
+      const mockInputContext = {
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        steps: [
+          {
+            id: 'step-unknown',
+            variables: [
+              {
+                name: 'variable1',
+                value: '{{some.expression}}',
+              },
+            ],
+          },
+        ],
+      };
+
+      mockFlowService.getOnePopulatedOrThrow.mockResolvedValue(mockFlow);
+      mockAccessTokenManager.generateEngineToken.mockResolvedValue(
+        mockEngineToken,
+      );
+      mockFlowHelper.getAllStepIds.mockReturnValue(['step-unknown']);
+      mockFlowHelper.getStepById.mockReturnValue(undefined);
+      mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
+      mockGroupStepOutputsById.mockReturnValue({});
+
+      const result = await enrichContext(mockInputContext, mockProjectId);
+
+      expect(result).toEqual({
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
+        steps: [
+          {
+            id: 'step-unknown',
+            variables: [
+              {
+                name: 'variable1',
+                value:
+                  'Failed to resolve variable: Step not found in the workflow.',
+              },
+            ],
+          },
+        ],
+      });
+
+      // Ensure engine is not called when step cannot be found
+      expect(mockEngineRunner.executeVariable).not.toHaveBeenCalled();
+    });
+
     it('should handle engine runner exceptions', async () => {
       const mockFlow = {
         version: {
