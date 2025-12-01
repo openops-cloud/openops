@@ -24,7 +24,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   }
 
   // cloud templates are available on any origin
-  app.addHook('onSend', allowAllOriginsHookHandler);
+  app.addHook('onRequest', allowAllOriginsHookHandler);
 
   app.get(
     '/',

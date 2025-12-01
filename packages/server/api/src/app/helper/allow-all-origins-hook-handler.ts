@@ -1,9 +1,8 @@
-import { onSendHookHandler } from 'fastify/types/hooks';
+import { onRequestHookHandler } from 'fastify/types/hooks';
 
-export const allowAllOriginsHookHandler: onSendHookHandler = (
+export const allowAllOriginsHookHandler: onRequestHookHandler = (
   request,
   reply,
-  payload,
   done,
 ) => {
   void reply.header(
@@ -21,9 +20,8 @@ export const allowAllOriginsHookHandler: onSendHookHandler = (
   void reply.header('Access-Control-Allow-Credentials', 'true');
 
   if (request.method === 'OPTIONS') {
-    return reply.status(204).send();
+    return void reply.status(204).send();
   }
 
-  done(null, payload);
-  return;
+  done();
 };
