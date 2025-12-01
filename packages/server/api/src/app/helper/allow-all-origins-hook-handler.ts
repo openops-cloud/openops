@@ -1,9 +1,8 @@
-import { onSendHookHandler } from 'fastify/types/hooks';
+import { onRequestHookHandler } from 'fastify/types/hooks';
 
-export const allowAllOriginsHookHandler: onSendHookHandler = (
+export const allowAllOriginsHookHandler: onRequestHookHandler = (
   request,
   reply,
-  payload,
   done,
 ) => {
   void reply.header(
@@ -24,6 +23,5 @@ export const allowAllOriginsHookHandler: onSendHookHandler = (
     return reply.status(204).send();
   }
 
-  done(null, payload);
-  return;
+  done();
 };
