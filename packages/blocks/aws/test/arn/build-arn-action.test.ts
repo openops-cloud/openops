@@ -17,7 +17,7 @@ describe('buildArnAction', () => {
       },
       region: {
         type: 'SHORT_TEXT',
-        required: true,
+        required: false,
       },
     });
   });
