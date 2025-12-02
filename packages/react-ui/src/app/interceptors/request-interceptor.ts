@@ -1,24 +1,21 @@
-import { API_URL, isUrlRelative } from '@/app/lib/api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { InternalAxiosRequestConfig } from 'axios';
 
 const unauthenticatedRoutes = [
-  '/v1/authentication/sign-in',
-  '/v1/authentication/sign-up',
-  '/v1/authn/local/verify-email',
-  '/v1/flags',
-  '/v1/forms/',
-  '/v1/user-invitations/accept',
+  'api/v1/authentication/sign-in',
+  'api/v1/authentication/sign-up',
+  'api/v1/flags',
 ];
 
-const needsAuthHeader = (url: string): boolean => {
-  const resolvedUrl = !isUrlRelative(url) ? url : `${API_URL}${url}`;
-  const isLocalUrl = resolvedUrl.includes(API_URL);
-  const isUnauthenticatedRoute = unauthenticatedRoutes.some((route) =>
-    url.startsWith(route),
-  );
+const isOriginUrl = (url: string): boolean =>
+  url.startsWith(window.location.origin);
 
-  return !isUnauthenticatedRoute && isLocalUrl;
+const needsAuthHeader = (url: string): boolean => {
+  if (!isOriginUrl(url)) {
+    return false;
+  }
+
+  return unauthenticatedRoutes.some((route) => url.startsWith(route));
 };
 
 export function createRequestInterceptor(): (
