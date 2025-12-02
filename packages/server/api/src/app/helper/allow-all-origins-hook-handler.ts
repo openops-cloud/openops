@@ -1,13 +1,14 @@
 import { logger } from '@openops/server-shared';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { onRequestHookHandler } from 'fastify';
 
-export const allowAllOriginsHookHandler = (
-  request: FastifyRequest,
-  reply: FastifyReply,
+export const allowAllOriginsHookHandler: onRequestHookHandler = (
+  request,
+  reply,
+  done,
 ) => {
   void reply.header(
     'Access-Control-Allow-Origin',
-    request.headers.origin || request.headers['ops-origin'] || '*',
+    request.headers.origin || request.headers['Ops-Origin'] || '*',
   );
 
   void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -19,7 +20,10 @@ export const allowAllOriginsHookHandler = (
 
   void reply.header('Access-Control-Allow-Credentials', 'true');
 
-  logger.info('Returning 204 No Content for CORS preflight request.');
+  if (request.method === 'OPTIONS') {
+    logger.info('Returning 204 No Content for CORS preflight request.');
+    return void reply.status(204).send();
+  }
 
-  return reply.status(204).send();
+  done();
 };
