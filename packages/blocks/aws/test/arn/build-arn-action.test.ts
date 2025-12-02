@@ -37,17 +37,20 @@ describe('buildArnAction', () => {
     );
   });
 
-  it('should build ARN without region for global services (e.g., IAM)', async () => {
-    const result = await buildArnAction.run({
-      ...jest.requireActual('@openops/blocks-framework'),
-      propsValue: {
-        service: 'iam',
-        region: undefined,
-        accountId: '123456789012',
-        resourceId: 'i-1234567890abcdef0',
-      },
-    });
+  test.each([undefined, null, ''])(
+    'should build ARN without region when region=%p',
+    async (regionVal) => {
+      const result = await buildArnAction.run({
+        ...jest.requireActual('@openops/blocks-framework'),
+        propsValue: {
+          service: 'iam',
+          region: regionVal,
+          accountId: '123456789012',
+          resourceId: 'user/David',
+        },
+      });
 
-    expect(result).toEqual('arn:aws:iam::123456789012:i-1234567890abcdef0');
-  });
+      expect(result).toEqual('arn:aws:iam::123456789012:user/David');
+    },
+  );
 });
