@@ -8,12 +8,18 @@ import { FastifyReply } from 'fastify';
 import { jwtDecode } from 'jwt-decode';
 import { getSubDomain } from '../../helper/sub-domain';
 
-export function setAuthCookiesAndReply(
+export function setAuthCookies(
   reply: FastifyReply,
   response: AuthenticationResponse,
+  expireInSeconds?: number,
 ): FastifyReply {
-  const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
-  const cookieExpiryDate = new Date(date.exp * 1000);
+  let cookieExpiryDate: Date;
+  if (expireInSeconds) {
+    cookieExpiryDate = new Date(expireInSeconds * 1000);
+  } else {
+    const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
+    cookieExpiryDate = new Date(date.exp * 1000);
+  }
 
   return reply
     .setCookie('jwt_token', response.tablesRefreshToken, {
@@ -37,11 +43,10 @@ export function setAuthCookiesAndReply(
       httpOnly: false,
       expires: cookieExpiryDate,
       sameSite: 'lax',
-    })
-    .send(response);
+    });
 }
 
-export function removeAuthCookiesAndReply(reply: FastifyReply): FastifyReply {
+export function removeAuthCookies(reply: FastifyReply): FastifyReply {
   return reply
     .clearCookie('jwt_token', {
       domain: getOpenOpsSubDomain(),
@@ -53,8 +58,7 @@ export function removeAuthCookiesAndReply(reply: FastifyReply): FastifyReply {
     .clearCookie('baserow_group_id', {
       domain: getOpenOpsSubDomain(),
       path: '/',
-    })
-    .send('Cookies removed');
+    });
 }
 
 function getOpenOpsSubDomain(): string {
