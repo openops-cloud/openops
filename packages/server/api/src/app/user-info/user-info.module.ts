@@ -3,6 +3,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
 import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from './cloud-auth';
+import cors from '@fastify/cors';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(userInfoController, { prefix: '/v1/user-info' });
@@ -30,6 +31,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
+        cors: false,
       },
     },
     async (request, reply) => {
