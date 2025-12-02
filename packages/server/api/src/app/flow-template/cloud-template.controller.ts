@@ -26,35 +26,13 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
 
-  app.options('/*', async (request, reply) => {
-    logger.info('Options request');
-
-    void reply.header(
-      'Access-Control-Allow-Origin',
-      request.headers.origin || request.headers['Ops-Origin'] || '*',
-    );
-
-    void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-
-    void reply.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type,Ops-Origin,Authorization',
-    );
-
-    void reply.header('Access-Control-Allow-Credentials', 'false');
-
-    if (request.method === 'OPTIONS') {
-      return void reply.status(204).send();
-    }
-  });
-
   app.get(
     '/',
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        bypassCorsPlugin: true,
         skipAuth: true,
+        cors: false,
       },
       schema: {
         tags: ['flow-templates'],
@@ -95,8 +73,8 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        bypassCorsPlugin: true,
         skipAuth: true,
+        cors: false,
       },
       schema: {
         tags: ['flow-templates'],

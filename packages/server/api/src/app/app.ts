@@ -137,47 +137,32 @@ export const setupApp = async (
 
   await app.register(rateLimitModule);
 
-  await app.register(async (app) => {
-    app.addHook('preHandler', async (req, _reply) => {
-      const bypassCorsPlugin =
-        req.routeOptions.config?.bypassCorsPlugin ?? false;
-
-      if (bypassCorsPlugin) {
-        // reply.header('X-CORS-SKIPPED', 'true');
-        logger.info('Bypass Cors Plugin');
-
-        return;
+  await app.register(cors, {
+    origin: (origin, callback) => {
+      if (origin === system.get(SharedSystemProp.FRONTEND_URL)) {
+        return callback(null, true);
       }
-    });
 
-    await app.register(cors, {
-      origin: (origin, callback) => {
-        logger.info('Allow cors request plugin');
+      const allowedDomainsString = system.get(AppSystemProp.ALLOWED_DOMAINS);
 
-        if (origin === system.get(SharedSystemProp.FRONTEND_URL)) {
+      if (allowedDomainsString) {
+        if (allowedDomainsString === '*') {
           return callback(null, true);
         }
 
-        const allowedDomainsString = system.get(AppSystemProp.ALLOWED_DOMAINS);
+        const allowedDomains = allowedDomainsString.split(',');
 
-        if (allowedDomainsString) {
-          if (allowedDomainsString === '*') {
-            return callback(null, true);
-          }
-
-          const allowedDomains = allowedDomainsString.split(',');
-
-          if (allowedDomains.includes(origin as string)) {
-            return callback(null, true);
-          }
+        if (allowedDomains.includes(origin as string)) {
+          return callback(null, true);
         }
+      }
 
-        return callback(null, false);
-      },
-      exposedHeaders: ['*'],
-      methods: ['*'],
-      credentials: true,
-    });
+      logger.info('Block cors request plugin');
+      return callback(null, false);
+    },
+    exposedHeaders: ['*'],
+    methods: ['*'],
+    credentials: true,
   });
 
   await app.register(fastifySocketIO, {
