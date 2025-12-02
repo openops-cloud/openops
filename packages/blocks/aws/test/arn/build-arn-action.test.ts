@@ -44,7 +44,7 @@ describe('buildArnAction', () => {
         ...jest.requireActual('@openops/blocks-framework'),
         propsValue: {
           service: 'iam',
-          region: regionVal,
+          region: regionVal as any,
           accountId: '123456789012',
           resourceId: 'user/David',
         },
