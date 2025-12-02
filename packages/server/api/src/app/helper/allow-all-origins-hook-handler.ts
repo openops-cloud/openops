@@ -20,7 +20,7 @@ export const allowAllOriginsHookHandler: onRequestHookHandler = (
     'Content-Type,Ops-Origin,Authorization',
   );
 
-  void reply.header('Access-Control-Allow-Credentials', 'false');
+  void reply.header('Access-Control-Allow-Credentials', 'true');
 
   if (request.method === 'OPTIONS') {
     return void reply.status(204).send();
