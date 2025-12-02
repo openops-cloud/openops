@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { onRequestHookHandler } from 'fastify/types/hooks';
 
 export const allowAllOriginsHookHandler: onRequestHookHandler = (
@@ -20,6 +21,7 @@ export const allowAllOriginsHookHandler: onRequestHookHandler = (
   void reply.header('Access-Control-Allow-Credentials', 'true');
 
   if (request.method === 'OPTIONS') {
+    logger.info('Hook returning 204 No Content for CORS preflight request.');
     return void reply.status(204).send();
   }
 

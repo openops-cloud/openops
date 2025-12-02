@@ -11,17 +11,17 @@ import { flowTemplateService } from './flow-template.service';
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
-  const connectionPageEnabled = system.getBoolean(
-    AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
-  );
-
-  if (!publicKey || !connectionPageEnabled) {
-    logger.info(
-      'Missing Frontegg configuration, disabling cloud templates API',
-    );
-    return;
-  }
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY) || '';
+  // const connectionPageEnabled = system.getBoolean(
+  //   AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
+  // );
+  //
+  // if (!publicKey || !connectionPageEnabled) {
+  //   logger.info(
+  //     'Missing Frontegg configuration, disabling cloud templates API',
+  //   );
+  //   return;
+  // }
 
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
@@ -50,21 +50,22 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request) => {
-      const user = getVerifiedUser(request, publicKey);
-
-      return flowTemplateService.getFlowTemplates({
-        search: request.query.search,
-        tags: request.query.tags,
-        services: request.query.services,
-        domains: request.query.domains,
-        blocks: request.query.blocks,
-        projectId: request.principal.projectId,
-        organizationId: request.principal.organization.id,
-        cloudTemplates: true,
-        isSample: !user,
-        version: request.query.version,
-        categories: request.query.categories,
-      });
+      return [];
+      // const user = getVerifiedUser(request, publicKey);
+      //
+      // return flowTemplateService.getFlowTemplates({
+      //   search: request.query.search,
+      //   tags: request.query.tags,
+      //   services: request.query.services,
+      //   domains: request.query.domains,
+      //   blocks: request.query.blocks,
+      //   projectId: request.principal.projectId,
+      //   organizationId: request.principal.organization.id,
+      //   cloudTemplates: true,
+      //   isSample: !user,
+      //   version: request.query.version,
+      //   categories: request.query.categories,
+      // });
     },
   );
 
