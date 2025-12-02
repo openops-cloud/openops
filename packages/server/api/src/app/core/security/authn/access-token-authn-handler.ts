@@ -12,12 +12,27 @@ import { BaseSecurityHandler } from '../security-handler';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   private static readonly COOKIE_NAME = 'token';
+  private static readonly HEADER_NAME = 'authorization';
+  private static readonly HEADER_PREFIX = 'Bearer ';
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
-    const token = request.cookies?.[AccessTokenAuthnHandler.COOKIE_NAME];
-    const hasToken = !isNil(token);
+    const hasToken = this.getAccessToken(request) !== undefined;
     const skipAuth = request.routeOptions.config?.skipAuth ?? false;
     return Promise.resolve(hasToken && !skipAuth);
+  }
+
+  private getAccessToken(request: FastifyRequest): string | undefined {
+    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
+    if (header?.startsWith(AccessTokenAuthnHandler.HEADER_PREFIX)) {
+      return header.substring(AccessTokenAuthnHandler.HEADER_PREFIX.length);
+    }
+
+    const cookieToken = request.cookies?.[AccessTokenAuthnHandler.COOKIE_NAME];
+    if (!isNil(cookieToken)) {
+      return cookieToken;
+    }
+
+    return undefined;
   }
 
   protected async doHandle(request: FastifyRequest): Promise<void> {
@@ -48,7 +63,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   private extractAccessTokenOrThrow(request: FastifyRequest): string {
-    const accessToken = request.cookies?.[AccessTokenAuthnHandler.COOKIE_NAME];
+    const accessToken = this.getAccessToken(request);
 
     if (isNil(accessToken)) {
       throw new ApplicationError({
