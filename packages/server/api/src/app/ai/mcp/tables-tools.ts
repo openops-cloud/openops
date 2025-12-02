@@ -8,7 +8,7 @@ import { MCPTool } from './types';
 export async function getTablesTools(): Promise<MCPTool> {
   const { token } = await authenticateAdminUserInOpenOpsTables();
   const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
-  if (!mcpEndpoint || mcpEndpoint.length === 0) {
+  if (!mcpEndpoint?.length) {
     return {
       client: undefined,
       toolSet: {},
