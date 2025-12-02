@@ -157,7 +157,6 @@ export const setupApp = async (
         }
       }
 
-      logger.info('Block cors request plugin');
       return callback(null, false);
     },
     exposedHeaders: ['*'],
