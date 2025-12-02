@@ -36,4 +36,18 @@ describe('buildArnAction', () => {
       'arn:aws:ec2:us-west-2:123456789012:i-1234567890abcdef0',
     );
   });
+
+  it('should build ARN without region for global services (e.g., IAM)', async () => {
+    const result = await buildArnAction.run({
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        service: 'iam',
+        region: undefined,
+        accountId: '123456789012',
+        resourceId: 'i-1234567890abcdef0',
+      },
+    });
+
+    expect(result).toEqual('arn:aws:iam::123456789012:i-1234567890abcdef0');
+  });
 });
