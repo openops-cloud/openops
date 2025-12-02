@@ -8,8 +8,8 @@ import { MCPTool } from './types';
 
 export async function getTablesTools(): Promise<MCPTool> {
   const { token } = await authenticateAdminUserInOpenOpsTables();
-  const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
-  if (isEmpty(mcpEndpoint)) {
+  const mcpEndpoints = await openopsTables.getMcpEndpointList(token);
+  if (isEmpty(mcpEndpoints)) {
     return {
       client: undefined,
       toolSet: {},
@@ -18,7 +18,7 @@ export async function getTablesTools(): Promise<MCPTool> {
 
   const url =
     system.get(AppSystemProp.OPENOPS_TABLES_API_URL) +
-    `/openops-tables/mcp/${mcpEndpoint[0].key}/sse`;
+    `/openops-tables/mcp/${mcpEndpoints[0].key}/sse`;
 
   const client = await createMCPClient({
     transport: {
