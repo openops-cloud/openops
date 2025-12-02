@@ -1,4 +1,4 @@
-import { cacheWrapper, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -11,15 +11,28 @@ import { userService } from '../../../user/user-service';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
+  private static readonly COOKIE_NAME = 'token';
   private static readonly HEADER_NAME = 'authorization';
   private static readonly HEADER_PREFIX = 'Bearer ';
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
-    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
-    const prefix = AccessTokenAuthnHandler.HEADER_PREFIX;
-    const routeMatches = header?.startsWith(prefix) ?? false;
+    const hasToken = this.getAccessToken(request) !== undefined;
     const skipAuth = request.routeOptions.config?.skipAuth ?? false;
-    return Promise.resolve(routeMatches && !skipAuth);
+    return Promise.resolve(hasToken && !skipAuth);
+  }
+
+  private getAccessToken(request: FastifyRequest): string | undefined {
+    const cookieToken = request.cookies?.[AccessTokenAuthnHandler.COOKIE_NAME];
+    if (!isNil(cookieToken)) {
+      return cookieToken;
+    }
+
+    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
+    if (header?.startsWith(AccessTokenAuthnHandler.HEADER_PREFIX)) {
+      return header.substring(AccessTokenAuthnHandler.HEADER_PREFIX.length);
+    }
+
+    return undefined;
   }
 
   protected async doHandle(request: FastifyRequest): Promise<void> {
@@ -50,9 +63,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   private extractAccessTokenOrThrow(request: FastifyRequest): string {
-    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
-    const prefix = AccessTokenAuthnHandler.HEADER_PREFIX;
-    const accessToken = header?.substring(prefix.length);
+    const accessToken = this.getAccessToken(request);
 
     if (isNil(accessToken)) {
       throw new ApplicationError({
