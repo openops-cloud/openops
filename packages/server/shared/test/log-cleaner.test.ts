@@ -135,18 +135,18 @@ describe('log-cleaner', () => {
   });
 
   describe('sensitive data redaction', () => {
-    const originalEnv = process.env['OPS_REDACT_LOGS'];
+    const originalEnv = process.env['OPS_LOG_REDACTION'];
 
     afterEach(() => {
       if (originalEnv === undefined) {
-        delete process.env['OPS_REDACT_LOGS'];
+        delete process.env['OPS_LOG_REDACTION'];
       } else {
-        process.env['OPS_REDACT_LOGS'] = originalEnv;
+        process.env['OPS_LOG_REDACTION'] = originalEnv;
       }
     });
 
     it('should redact password field when redaction is enabled', () => {
-      process.env['OPS_REDACT_LOGS'] = 'true';
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         event: {
           email: 'user@example.com',
@@ -161,7 +161,7 @@ describe('log-cleaner', () => {
     });
 
     it('should NOT redact password field when redaction is disabled', () => {
-      process.env['OPS_REDACT_LOGS'] = 'false';
+      process.env['OPS_LOG_REDACTION'] = 'false';
       const logEvent = {
         event: {
           email: 'user@example.com',
@@ -176,7 +176,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact password field by default when variable is not set', () => {
-      delete process.env['OPS_REDACT_LOGS'];
+      delete process.env['OPS_LOG_REDACTION'];
       const logEvent = {
         event: {
           email: 'user@example.com',
@@ -205,7 +205,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact authorization field in objects', () => {
-      process.env['OPS_REDACT_LOGS'] = 'true';
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         event: {
           request: {
@@ -222,7 +222,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact password in stringified JSON', () => {
-      process.env['OPS_REDACT_LOGS'] = 'true';
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         event: {
           body: '{"email":"user@example.com","password":"secret"}',
@@ -236,7 +236,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact password in nested objects', () => {
-      process.env['OPS_REDACT_LOGS'] = 'true';
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         event: {
           request: {
@@ -253,7 +253,7 @@ describe('log-cleaner', () => {
     });
 
     it('should NOT redact token usage statistics when redaction is disabled', () => {
-      process.env['OPS_REDACT_LOGS'] = 'false';
+      process.env['OPS_LOG_REDACTION'] = 'false';
       const logEvent = {
         message: 'Total token usage for stream',
         event: {
@@ -272,7 +272,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact token usage statistics when redaction is enabled', () => {
-      process.env['OPS_REDACT_LOGS'] = 'true';
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         message: 'Total token usage for stream',
         event: {

@@ -26,7 +26,7 @@ const SENSITIVE_FIELD_PATTERNS = SENSITIVE_PATTERNS.map(
 );
 
 const shouldRedactLogs = (): boolean => {
-  return system.getBoolean(SharedSystemProp.REDACT_LOGS) ?? true;
+  return system.getBoolean(SharedSystemProp.LOG_REDACTION) ?? true;
 };
 
 const isSensitiveField = (key: string): boolean => {
