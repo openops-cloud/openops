@@ -1,11 +1,22 @@
 import axios from 'axios';
 
+import { createRequestInterceptor } from './request-interceptor';
 import {
   createFederatedResponseInterceptor,
   createResponseInterceptor,
 } from './response-interceptor';
 
+let requestInterceptorId: number | null = null;
 let responseInterceptorId: number | null = null;
+
+function setupRequestInterceptor(): void {
+  if (requestInterceptorId === null) {
+    const requestInterceptor = createRequestInterceptor();
+    requestInterceptorId = axios.interceptors.request.use(requestInterceptor);
+  }
+}
+
+setupRequestInterceptor();
 
 type ResponseInterceptorOptions = {
   isFederatedAuth: boolean;

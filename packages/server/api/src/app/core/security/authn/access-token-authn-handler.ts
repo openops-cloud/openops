@@ -22,14 +22,14 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   private getAccessToken(request: FastifyRequest): string | undefined {
-    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
-    if (header?.startsWith(AccessTokenAuthnHandler.HEADER_PREFIX)) {
-      return header.substring(AccessTokenAuthnHandler.HEADER_PREFIX.length);
-    }
-
     const cookieToken = request.cookies?.[AccessTokenAuthnHandler.COOKIE_NAME];
     if (!isNil(cookieToken)) {
       return cookieToken;
+    }
+
+    const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];
+    if (header?.startsWith(AccessTokenAuthnHandler.HEADER_PREFIX)) {
+      return header.substring(AccessTokenAuthnHandler.HEADER_PREFIX.length);
     }
 
     return undefined;
