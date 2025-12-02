@@ -11,7 +11,7 @@ import { flowTemplateService } from './flow-template.service';
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY) || '';
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
   const connectionPageEnabled = system.getBoolean(
     AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
   );

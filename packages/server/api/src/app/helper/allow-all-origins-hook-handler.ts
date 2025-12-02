@@ -1,4 +1,3 @@
-import { logger } from '@openops/server-shared';
 import { onRequestHookHandler } from 'fastify/types/hooks';
 
 export const allowAllOriginsHookHandler: onRequestHookHandler = (
@@ -6,8 +5,6 @@ export const allowAllOriginsHookHandler: onRequestHookHandler = (
   reply,
   done,
 ) => {
-  logger.info('Allow cors request');
-
   void reply.header(
     'Access-Control-Allow-Origin',
     request.headers.origin || request.headers['Ops-Origin'] || '*',
