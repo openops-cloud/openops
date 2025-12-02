@@ -60,16 +60,9 @@ export const assertPasswordMatches = async ({
   }
 };
 
-export async function authResponse(
-  user: User,
-  tablesRefreshToken: string,
-  getProjectAndToken: (
-    user: User,
-    tablesRefreshToken: string,
-  ) => Promise<ProjectContext>,
+export async function buildAuthResponse(
+  projectContext: ProjectContext,
 ): Promise<AuthenticationResponse> {
-  const projectContext = await getProjectAndToken(user, tablesRefreshToken);
-
   const userWithoutPassword = removePasswordPropFromUser(projectContext.user);
 
   return {

@@ -8,7 +8,7 @@ import { SignInParams, SignUpParams } from '../types';
 import {
   assertPasswordMatches,
   assertUserIsAllowedToSignIn,
-  authResponse,
+  buildAuthResponse,
 } from '../utils';
 
 export const authenticationService = {
@@ -17,7 +17,8 @@ export const authenticationService = {
 
     await assignDefaultOrganization(user);
 
-    return authResponse(user, tablesRefreshToken, getProjectAndToken);
+    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
+    return buildAuthResponse(projectContext);
   },
 
   async signIn(request: SignInParams): Promise<AuthenticationResponse> {
@@ -33,11 +34,10 @@ export const authenticationService = {
       userPassword: user.password,
     });
 
-    const { refresh_token } = await authenticateUserInOpenOpsTables(
-      request.email,
-      user.password,
-    );
+    const { refresh_token: tablesRefreshToken } =
+      await authenticateUserInOpenOpsTables(request.email, user.password);
 
-    return authResponse(user, refresh_token, getProjectAndToken);
+    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
+    return buildAuthResponse(projectContext);
   },
 };
