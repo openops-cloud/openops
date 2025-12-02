@@ -1,21 +1,9 @@
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { InternalAxiosRequestConfig } from 'axios';
-
-const unauthenticatedRoutes = [
-  'api/v1/authentication/sign-in',
-  'api/v1/authentication/sign-up',
-  'api/v1/flags',
-];
-
-const isOriginUrl = (url: string): boolean =>
-  url.startsWith(window.location.origin);
+import { isUrlRelative } from '../lib/api';
 
 const needsAuthHeader = (url: string): boolean => {
-  if (!isOriginUrl(url)) {
-    return false;
-  }
-
-  return unauthenticatedRoutes.some((route) => url.startsWith(route));
+  return isUrlRelative(url);
 };
 
 export function createRequestInterceptor(): (
