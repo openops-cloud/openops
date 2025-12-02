@@ -139,6 +139,8 @@ export const setupApp = async (
 
   await app.register(cors, {
     origin: (origin, callback) => {
+      logger.info('Allow cors request plugin');
+
       if (origin === system.get(SharedSystemProp.FRONTEND_URL)) {
         return callback(null, true);
       }

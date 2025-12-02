@@ -11,20 +11,42 @@ import { flowTemplateService } from './flow-template.service';
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
-  const connectionPageEnabled = system.getBoolean(
-    AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
-  );
-
-  if (!publicKey || !connectionPageEnabled) {
-    logger.info(
-      'Missing Frontegg configuration, disabling cloud templates API',
-    );
-    return;
-  }
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY) || '';
+  // const connectionPageEnabled = system.getBoolean(
+  //   AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
+  // );
+  //
+  // if (!publicKey || !connectionPageEnabled) {
+  //   logger.info(
+  //     'Missing Frontegg configuration, disabling cloud templates API',
+  //   );
+  //   return;
+  // }
 
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
+
+  app.options('/*', async (request, reply) => {
+    logger.info('Options request');
+
+    void reply.header(
+      'Access-Control-Allow-Origin',
+      request.headers.origin || request.headers['Ops-Origin'] || '*',
+    );
+
+    void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
+
+    void reply.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type,Ops-Origin,Authorization',
+    );
+
+    void reply.header('Access-Control-Allow-Credentials', 'false');
+
+    if (request.method === 'OPTIONS') {
+      return void reply.status(204).send();
+    }
+  });
 
   app.get(
     '/',
