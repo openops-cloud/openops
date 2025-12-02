@@ -137,33 +137,47 @@ export const setupApp = async (
 
   await app.register(rateLimitModule);
 
-  await app.register(cors, {
-    origin: (origin, callback) => {
-      logger.info('Allow cors request plugin');
+  await app.register(async (app) => {
+    app.addHook('preHandler', async (req, _reply) => {
+      const bypassCorsPlugin =
+        req.routeOptions.config?.bypassCorsPlugin ?? false;
 
-      if (origin === system.get(SharedSystemProp.FRONTEND_URL)) {
-        return callback(null, true);
+      if (bypassCorsPlugin) {
+        // reply.header('X-CORS-SKIPPED', 'true');
+        logger.info('Bypass Cors Plugin');
+
+        return;
       }
+    });
 
-      const allowedDomainsString = system.get(AppSystemProp.ALLOWED_DOMAINS);
+    await app.register(cors, {
+      origin: (origin, callback) => {
+        logger.info('Allow cors request plugin');
 
-      if (allowedDomainsString) {
-        if (allowedDomainsString === '*') {
+        if (origin === system.get(SharedSystemProp.FRONTEND_URL)) {
           return callback(null, true);
         }
 
-        const allowedDomains = allowedDomainsString.split(',');
+        const allowedDomainsString = system.get(AppSystemProp.ALLOWED_DOMAINS);
 
-        if (allowedDomains.includes(origin as string)) {
-          return callback(null, true);
+        if (allowedDomainsString) {
+          if (allowedDomainsString === '*') {
+            return callback(null, true);
+          }
+
+          const allowedDomains = allowedDomainsString.split(',');
+
+          if (allowedDomains.includes(origin as string)) {
+            return callback(null, true);
+          }
         }
-      }
 
-      return callback(null, false);
-    },
-    exposedHeaders: ['*'],
-    methods: ['*'],
-    credentials: true,
+        return callback(null, false);
+      },
+      exposedHeaders: ['*'],
+      methods: ['*'],
+      credentials: true,
+    });
   });
 
   await app.register(fastifySocketIO, {

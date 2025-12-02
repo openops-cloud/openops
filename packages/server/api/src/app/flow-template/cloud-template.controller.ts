@@ -53,6 +53,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        bypassCorsPlugin: true,
         skipAuth: true,
       },
       schema: {
@@ -94,6 +95,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        bypassCorsPlugin: true,
         skipAuth: true,
       },
       schema: {
