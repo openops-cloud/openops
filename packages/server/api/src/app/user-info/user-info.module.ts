@@ -24,13 +24,25 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
   // user-info is available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
 
+  app.options(
+    '*',
+    {
+      config: {
+        allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        skipAuth: true,
+      },
+    },
+    (_request, reply) => {
+      return reply.status(204).send();
+    },
+  );
+
   app.get(
     '/',
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
-        cors: false,
       },
     },
     async (request, reply) => {

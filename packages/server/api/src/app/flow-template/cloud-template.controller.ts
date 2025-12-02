@@ -32,7 +32,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
-        // cors: false,
       },
     },
     (_request, reply) => {
@@ -46,7 +45,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
-        // cors: false,
       },
       schema: {
         tags: ['flow-templates'],
@@ -89,7 +87,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
-        // cors: false,
       },
       schema: {
         tags: ['flow-templates'],
