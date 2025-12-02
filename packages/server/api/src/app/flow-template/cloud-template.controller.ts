@@ -4,9 +4,7 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, OpenOpsId } from '@openops/shared';
-import {
-  allowAllOriginsHookHandlerTest,
-} from '../helper/allow-all-origins-hook-handler';
+import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
 
@@ -25,11 +23,9 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   //   return;
   // }
 
-  // app.addHook('onRequest', allowAllOriginsHookHandler);
-
   // cloud templates are available on any origin
   app.options(
-    '/*',
+    '*',
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
@@ -37,7 +33,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         cors: false,
       },
     },
-    allowAllOriginsHookHandlerTest,
+    allowAllOriginsHookHandler,
   );
 
   app.get(

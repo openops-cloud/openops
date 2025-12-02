@@ -1,10 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
-import {
-  allowAllOriginsHookHandler,
-  allowAllOriginsHookHandlerTest,
-} from '../helper/allow-all-origins-hook-handler';
+import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -25,10 +22,8 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
   }
 
   // user-info is available on any origin
-  // app.addHook('onRequest', allowAllOriginsHookHandler);
-
   app.options(
-    '/*',
+    '*',
     {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
@@ -36,7 +31,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
         cors: false,
       },
     },
-    allowAllOriginsHookHandlerTest,
+    allowAllOriginsHookHandler,
   );
 
   app.get(
