@@ -11,11 +11,11 @@ import { getSubDomain } from '../../helper/sub-domain';
 export function setAuthCookies(
   reply: FastifyReply,
   response: AuthenticationResponse,
-  expireInSeconds?: number,
+  expiresAt?: number,
 ): FastifyReply {
   let cookieExpiryDate: Date;
-  if (expireInSeconds) {
-    cookieExpiryDate = new Date(expireInSeconds * 1000);
+  if (expiresAt) {
+    cookieExpiryDate = new Date(expiresAt * 1000);
   } else {
     const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
     cookieExpiryDate = new Date(date.exp * 1000);
