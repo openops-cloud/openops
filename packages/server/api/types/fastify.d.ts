@@ -23,6 +23,7 @@ declare module 'fastify' {
     allowedPrincipals?: PrincipalType[];
     rawBody?: boolean;
     skipAuth?: boolean;
+    cors?: boolean;
     scope?: EndpointScope;
     permission?: Permission;
   }
