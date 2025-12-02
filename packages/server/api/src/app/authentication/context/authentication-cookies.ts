@@ -61,7 +61,7 @@ export function removeAuthCookies(reply: FastifyReply): FastifyReply {
     });
 }
 
-function getOpenOpsSubDomain(): string {
+export function getOpenOpsSubDomain(): string {
   const frontendUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
 
   const tablesUrl = system.getOrThrow(AppSystemProp.OPENOPS_TABLES_PUBLIC_URL);
