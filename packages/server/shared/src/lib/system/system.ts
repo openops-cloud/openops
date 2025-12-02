@@ -59,6 +59,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [WorkerSystemProps.SCHEDULED_WORKER_CONCURRENCY]: '10',
   [SharedSystemProp.LOG_LEVEL]: 'info',
   [SharedSystemProp.LOG_PRETTY]: 'false',
+  [SharedSystemProp.REDACT_LOGS]: 'true',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
   [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
