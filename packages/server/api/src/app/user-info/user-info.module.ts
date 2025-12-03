@@ -22,7 +22,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
   }
 
   // user-info is available on any origin
-  app.addHook('onSend', allowAllOriginsHookHandler);
+  app.addHook('onRequest', allowAllOriginsHookHandler);
 
   app.get(
     '/',

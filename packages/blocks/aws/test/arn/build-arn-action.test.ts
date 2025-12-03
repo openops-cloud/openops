@@ -17,7 +17,7 @@ describe('buildArnAction', () => {
       },
       region: {
         type: 'SHORT_TEXT',
-        required: true,
+        required: false,
       },
     });
   });
@@ -36,4 +36,21 @@ describe('buildArnAction', () => {
       'arn:aws:ec2:us-west-2:123456789012:i-1234567890abcdef0',
     );
   });
+
+  test.each([undefined, null, ''])(
+    'should build ARN without region when region=%p',
+    async (regionVal) => {
+      const result = await buildArnAction.run({
+        ...jest.requireActual('@openops/blocks-framework'),
+        propsValue: {
+          service: 'iam',
+          region: regionVal as any,
+          accountId: '123456789012',
+          resourceId: 'user/David',
+        },
+      });
+
+      expect(result).toEqual('arn:aws:iam::123456789012:user/David');
+    },
+  );
 });

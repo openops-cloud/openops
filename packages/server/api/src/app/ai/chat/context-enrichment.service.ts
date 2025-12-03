@@ -181,7 +181,6 @@ async function enrichSteps(
       } catch (error) {
         return {
           id: step.id,
-          stepName: step.stepName,
           variables: step.variables?.map((variable) => ({
             name: variable.name,
             value: String(error),
@@ -202,7 +201,6 @@ async function enrichStep(
   if (!step.variables || step.variables.length === 0) {
     return {
       id: step.id,
-      stepName: step.stepName,
       variables: step.variables,
     };
   }
@@ -215,7 +213,6 @@ async function enrichStep(
 
   return {
     id: step.id,
-    stepName: step.stepName,
     variables: resolvedVariables,
   };
 }
@@ -253,11 +250,20 @@ async function resolveVariable(
   flowData: FlowData,
   projectId: string,
 ): Promise<{ name: string; value: unknown }> {
+  const workflowStep = flowHelper.getStepById(flowData.flow.version, step.id);
+
+  if (!workflowStep) {
+    return {
+      name: variable.name,
+      value: 'Failed to resolve variable: Step not found in the workflow.',
+    };
+  }
+
   const { result } = await engineRunner.executeVariable(flowData.engineToken, {
     variableExpression: variable.value,
     flowVersion: flowData.flow.version,
     projectId,
-    stepName: step.stepName,
+    stepName: workflowStep.name,
     stepTestOutputs: flowData.stepTestOutputs,
   });
 
