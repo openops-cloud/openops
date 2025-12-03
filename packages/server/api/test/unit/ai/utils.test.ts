@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelMessage } from 'ai';
-import {
-  mergeToolResultsIntoMessages,
-  sanitizeMessagesForChatName,
-} from '../../../src/app/ai/chat/utils';
+import { mergeToolResultsIntoMessages, sanitizeMessagesForChatName, } from '../../../src/app/ai/chat/utils';
 
 describe('mergeToolResultsIntoMessages', () => {
   describe('basic message handling', () => {
@@ -29,6 +26,7 @@ describe('mergeToolResultsIntoMessages', () => {
             type: 'text',
             text: 'Hello, how are you?',
             state: 'done',
+
           },
         ],
       });
