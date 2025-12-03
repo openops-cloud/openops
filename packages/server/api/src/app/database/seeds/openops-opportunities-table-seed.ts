@@ -5,7 +5,6 @@ import {
   createOpportunitiesTable,
   SEED_OPENOPS_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-opportunities-table';
-import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTokenAndDatabaseId } from './get-admin-token-and-database';

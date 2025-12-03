@@ -5,7 +5,6 @@ import {
   createKnownCostTypesByApplicationTable,
   SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-known-cost-types-by-application-table';
-import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTokenAndDatabaseId } from './get-admin-token-and-database';
