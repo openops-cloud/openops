@@ -1,6 +1,10 @@
 import { isNil } from '@openops/shared';
 import { t } from 'i18next';
-import { History, SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
+import {
+  History,
+  MessageSquarePlus,
+  SquareArrowOutDownLeft,
+} from 'lucide-react';
 import { ReactNode } from 'react';
 import { BlockIcon } from '../../components/block-icon/block-icon';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
@@ -112,7 +116,7 @@ const AssistantTopBar = ({
               size="icon"
               className="text-outline size-[23px] rounded-xs bg-gray-100 enabled:hover:bg-gray-200"
             >
-              <SquarePen size={13} />
+              <MessageSquarePlus size={13} />
             </Button>
           </TooltipWrapper>
           <span className="min-w-0 max-w-[240px] truncate">{displayTitle}</span>
