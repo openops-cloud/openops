@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import {
+  Action,
   ChatFlowContext,
   EngineResponseStatus,
   flowHelper,
@@ -59,6 +60,7 @@ jest.mock('server-worker', () => ({
 jest.mock('@openops/shared', () => ({
   flowHelper: {
     getAllStepIds: jest.fn(),
+    getStepById: jest.fn(),
   },
   groupStepOutputsById: jest.fn(),
 }));
@@ -99,6 +101,12 @@ describe('ContextEnrichmentService', () => {
         mockEngineToken,
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
+      mockFlowHelper.getStepById.mockImplementation((_version, stepId) => {
+        if (stepId === 'step-1') {
+          return { name: 'step_1' } as Action;
+        }
+        return { name: stepId } as Action;
+      });
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
       mockGroupStepOutputsById.mockReturnValue({});
 
@@ -111,7 +119,6 @@ describe('ContextEnrichmentService', () => {
       steps: [
         {
           id: 'step-1',
-          stepName: 'step_1',
           variables: [
             {
               name: 'variable1',
@@ -159,7 +166,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -196,7 +202,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
           },
         ],
       };
@@ -219,7 +224,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: undefined,
           },
         ],
@@ -241,7 +245,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -280,7 +283,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -290,6 +292,63 @@ describe('ContextEnrichmentService', () => {
           },
         ],
       });
+    });
+
+    it("should set an error value when step isn't found (getStepById returns undefined)", async () => {
+      const mockFlow = {
+        version: {
+          trigger: { id: 'trigger-id' },
+        },
+      } as PopulatedFlow;
+
+      const mockInputContext = {
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        steps: [
+          {
+            id: 'step-unknown',
+            variables: [
+              {
+                name: 'variable1',
+                value: '{{some.expression}}',
+              },
+            ],
+          },
+        ],
+      };
+
+      mockFlowService.getOnePopulatedOrThrow.mockResolvedValue(mockFlow);
+      mockAccessTokenManager.generateEngineToken.mockResolvedValue(
+        mockEngineToken,
+      );
+      mockFlowHelper.getAllStepIds.mockReturnValue(['step-unknown']);
+      mockFlowHelper.getStepById.mockReturnValue(undefined);
+      mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
+      mockGroupStepOutputsById.mockReturnValue({});
+
+      const result = await enrichContext(mockInputContext, mockProjectId);
+
+      expect(result).toEqual({
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
+        steps: [
+          {
+            id: 'step-unknown',
+            variables: [
+              {
+                name: 'variable1',
+                value:
+                  'Failed to resolve variable: Step not found in the workflow.',
+              },
+            ],
+          },
+        ],
+      });
+
+      // Ensure engine is not called when step cannot be found
+      expect(mockEngineRunner.executeVariable).not.toHaveBeenCalled();
     });
 
     it('should handle engine runner exceptions', async () => {
@@ -305,7 +364,6 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -338,11 +396,11 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
-                value: 'Error resolving variable: Engine error',
+                value:
+                  'Failed to resolve variable: Step not found in the workflow.',
               },
             ],
           },
