@@ -12,18 +12,18 @@ const getCloudToken = (request: FastifyRequest): string | undefined => {
     | undefined;
 
   if (authorizationHeader) {
-    logger.debug(`Authorization Header'}`);
+    logger.debug(`Authorization Header`);
 
     return authorizationHeader.replace('Bearer ', '');
   }
 
   if (cookieToken) {
-    logger.debug(`Authorization Cookie'}`);
+    logger.debug(`Authorization Cookie`);
 
     return cookieToken;
   }
 
-  logger.debug(`Authorization Cookie Header'}`);
+  logger.debug(`Authorization Cookie Header`, headerToken);
   return headerToken;
 };
 
