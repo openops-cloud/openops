@@ -61,16 +61,18 @@ export function mergeToolResultsIntoMessages(
 export function sanitizeMessagesForChatName(
   messages: ModelMessage[],
 ): ModelMessage[] {
-  return messages
-    .filter((m) => m.role === 'user' || m.role === 'assistant')
-    .map((m) => {
-      if (typeof m.content === 'string') {
-        const text = m.content.trim();
-        return text ? { role: m.role, content: text } : null;
-      }
-      if (Array.isArray(m.content)) {
-        const textParts: string[] = [];
-        for (const part of m.content as Array<unknown>) {
+  const isSupportedRole = (m: ModelMessage) =>
+    m.role === 'user' || m.role === 'assistant';
+
+  const extractText = (content: ModelMessage['content']): string | null => {
+    if (typeof content === 'string') {
+      const text = content.trim();
+      return text ? text : null;
+    }
+
+    if (Array.isArray(content)) {
+      const merged = (content as Array<unknown>)
+        .reduce<string[]>((acc, part) => {
           if (
             part &&
             typeof part === 'object' &&
@@ -78,18 +80,27 @@ export function sanitizeMessagesForChatName(
           ) {
             const p = part as { type?: string; text?: string };
             if (p.type === 'text' && typeof p.text === 'string') {
-              textParts.push(p.text);
+              acc.push(p.text);
             }
           }
-        }
-        const merged = textParts.join('\n').trim();
-        return merged
-          ? ({ role: m.role, content: merged } as ModelMessage)
-          : null;
-      }
-      return null;
+          return acc;
+        }, [])
+        .join('\n')
+        .trim();
+
+      return merged ? merged : null;
+    }
+
+    return null;
+  };
+
+  return messages
+    .filter(isSupportedRole)
+    .map((m) => {
+      const text = extractText(m.content);
+      return text ? ({ role: m.role, content: text } as ModelMessage) : null;
     })
-    .filter((m) => m !== null);
+    .filter((m): m is ModelMessage => m !== null);
 }
 
 function isToolMessage(msg: ModelMessage): boolean {
