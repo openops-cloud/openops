@@ -26,6 +26,6 @@ hide_toc: false
 
 - Added client ID configuration to the Frontegg app.
 - Updated the Templates gallery icon mapping to support the new "Policy & Governance" domain.
-- Updated internal flow helper and AI chat context enrichment logic to resolve variables by step ID instead of step name, aligning with the newer step context structure.
+- Updated internal flow helper and AI chat context enrichment logic to resolve variables by step ID instead of step name.
 
 
