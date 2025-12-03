@@ -215,7 +215,7 @@ describe('getOpenOpsTools', () => {
       'utf-8',
     );
 
-    await getOpenOpsTools(mockApp, 'auth-1');
+    await getOpenOpsTools(mockApp, 'auth-2');
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
   });
 
