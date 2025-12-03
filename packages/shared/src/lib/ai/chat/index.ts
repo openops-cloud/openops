@@ -43,7 +43,6 @@ export type VariableContext = Static<typeof VariableContext>;
 
 export const StepContext = Type.Object({
   id: Type.String(),
-  stepName: Type.String(),
   variables: Type.Optional(Type.Array(VariableContext)),
 });
 export type StepContext = Static<typeof StepContext>;
@@ -53,7 +52,6 @@ export const ChatFlowContext = Type.Object({
   flowVersionId: Type.String(),
   runId: Type.Optional(Type.String()),
   currentStepId: Type.Optional(Type.String()),
-  currentStepName: Type.Optional(Type.String()),
   currentStepData: Type.Optional(Type.Any()),
   steps: Type.Array(StepContext),
 });
