@@ -9,22 +9,22 @@ import {
 let requestInterceptorId: number | null = null;
 let responseInterceptorId: number | null = null;
 
-function setupRequestInterceptor(): void {
+type InterceptorOptions = {
+  isFederatedAuth: boolean;
+};
+
+export function setupRequestInterceptor({
+  isFederatedAuth,
+}: InterceptorOptions): void {
   if (requestInterceptorId === null) {
     const requestInterceptor = createRequestInterceptor();
     requestInterceptorId = axios.interceptors.request.use(requestInterceptor);
   }
 }
 
-setupRequestInterceptor();
-
-type ResponseInterceptorOptions = {
-  isFederatedAuth: boolean;
-};
-
 export function setupResponseInterceptor({
   isFederatedAuth,
-}: ResponseInterceptorOptions): void {
+}: InterceptorOptions): void {
   if (responseInterceptorId === null) {
     const responseInterceptor = isFederatedAuth
       ? createFederatedResponseInterceptor()
