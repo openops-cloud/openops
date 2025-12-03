@@ -8,20 +8,21 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
+import { TokenAndDatabaseId } from './types';
 
 export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
   'Known cost types by application';
 
-export async function createKnownCostTypesByApplicationTable(
-  token: string,
-  databaseId: number,
-) {
+export async function createKnownCostTypesByApplicationTable({
+  token,
+  tablesDatabaseId,
+}: TokenAndDatabaseId) {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] Start`,
   );
 
   const table = await createTable(
-    databaseId,
+    tablesDatabaseId,
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
     [['ID']],
     token,
