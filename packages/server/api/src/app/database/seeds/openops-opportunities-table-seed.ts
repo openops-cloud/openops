@@ -7,7 +7,7 @@ import {
 } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
-import { getAdminTokenAndDatabaseId } from './get-admin-token-and-database';
+import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
 
@@ -42,7 +42,7 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
   );
 
   if (!table) {
-    const tokenAndDatabaseId = await getAdminTokenAndDatabaseId();
+    const tokenAndDatabaseId = await getAdminTablesContext();
     await createOpportunitiesTable(tokenAndDatabaseId);
   }
 

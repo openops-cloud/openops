@@ -8,14 +8,14 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TokenAndDatabaseId } from './types';
+import { TablesContext } from './types';
 
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
 export async function createOpportunitiesTable({
   token,
   tablesDatabaseId,
-}: TokenAndDatabaseId) {
+}: TablesContext) {
   logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
 
   const table = await createTable(

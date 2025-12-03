@@ -8,7 +8,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TokenAndDatabaseId } from './types';
+import { TablesContext } from './types';
 
 export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
   'Known cost types by application';
@@ -16,7 +16,7 @@ export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
 export async function createKnownCostTypesByApplicationTable({
   token,
   tablesDatabaseId,
-}: TokenAndDatabaseId) {
+}: TablesContext) {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] Start`,
   );
