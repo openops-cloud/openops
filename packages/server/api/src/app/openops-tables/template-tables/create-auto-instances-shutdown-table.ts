@@ -7,7 +7,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TokenAndDatabaseId } from './types';
+import { TablesContext } from './types';
 
 export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
   'Auto instances shutdown';
@@ -15,7 +15,7 @@ export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
 export async function createAutoInstancesShutdownTable({
   token,
   tablesDatabaseId,
-}: TokenAndDatabaseId): Promise<void> {
+}: TablesContext): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] Start`,
   );

@@ -1,4 +1,4 @@
-export type TokenAndDatabaseId = {
+export type TablesContext = {
   token: string;
   tablesDatabaseId: number;
 };
