@@ -85,6 +85,22 @@ describe('getVerifiedUser', () => {
     expect(result).toEqual(payload);
   });
 
+  it('should verify token from header when Authorization header and cookie are missing', () => {
+    const payload = { sub: 'abc' };
+    (jwt.verify as jest.Mock).mockReturnValue(payload);
+    const mockRequest = createMockRequest({
+      headers: { 'cloud-token': 'cookie-token' },
+      cookies: {},
+    });
+
+    const result = getVerifiedUser(mockRequest, publicKey);
+
+    expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey, {
+      algorithms: ['RS256'],
+    });
+    expect(result).toEqual(payload);
+  });
+
   it('should return undefined when verification fails (throws)', () => {
     (jwt.verify as jest.Mock).mockImplementation(() => {
       throw new Error('invalid');
