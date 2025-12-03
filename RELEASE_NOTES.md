@@ -1,0 +1,31 @@
+---
+title: "Release Notes"
+description: "Versioned summary of OpenOps changes for each release."
+icon: "📝"
+iconType: "emoji"
+slug: "/release-notes"
+tags: ["release-notes", "changelog"]
+draft: false
+sidebar_order: 90
+hide_toc: false
+---
+
+## Latest Release
+
+## 🚀
+
+- Extended AI chat history retention to 30 days, keeping past conversations available longer before cleanup.
+- Made the Region property optional in the Build ARN AWS action to simplify and flexibilize workflow configuration.
+- Added a new "Policy & Governance" category in the Templates gallery to make related templates easier to discover.
+
+## 🐛
+
+- Improved error handling when the Tables MCP endpoint list is empty to avoid unexpected failures.
+
+## ✨
+
+- Added client ID configuration to the Frontegg app to support more robust cloud connection authentication flows.
+- Updated the Templates gallery icon mapping to support the new "Policy & Governance" domain for consistent visual presentation.
+- Updated internal flow helper and AI chat context enrichment logic to resolve variables by step ID instead of step name, aligning with the newer step context structure.
+
+
