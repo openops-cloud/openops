@@ -52,6 +52,46 @@ export function mergeToolResultsIntoMessages(
   return uiMessages;
 }
 
+/**
+ * Sanitize chat history for secondary tasks like naming/summarization.
+ * - keeps only 'user' and 'assistant' roles
+ * - strips tool calls and non-text parts
+ * - merges multiple text parts into a single string with newlines
+ */
+export function sanitizeMessagesForChatName(
+  messages: ModelMessage[],
+): ModelMessage[] {
+  return messages
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .map((m) => {
+      if (typeof m.content === 'string') {
+        const text = m.content.trim();
+        return text ? { role: m.role, content: text } : null;
+      }
+      if (Array.isArray(m.content)) {
+        const textParts: string[] = [];
+        for (const part of m.content as Array<unknown>) {
+          if (
+            part &&
+            typeof part === 'object' &&
+            'type' in (part as Record<string, unknown>)
+          ) {
+            const p = part as { type?: string; text?: string };
+            if (p.type === 'text' && typeof p.text === 'string') {
+              textParts.push(p.text);
+            }
+          }
+        }
+        const merged = textParts.join('\n').trim();
+        return merged
+          ? ({ role: m.role, content: merged } as ModelMessage)
+          : null;
+      }
+      return null;
+    })
+    .filter((m) => m !== null);
+}
+
 function isToolMessage(msg: ModelMessage): boolean {
   return (
     msg.role === 'tool' && Array.isArray(msg.content) && msg.content.length > 0

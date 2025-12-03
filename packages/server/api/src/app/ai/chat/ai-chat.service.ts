@@ -2,6 +2,7 @@ import {
   AiAuth,
   getAiModelFromConnection,
   getAiProviderLanguageModel,
+  isLLMTelemetryEnabled,
 } from '@openops/common';
 import {
   AppSystemProp,
@@ -14,14 +15,19 @@ import {
   ApplicationError,
   CustomAuthConnectionValue,
   ErrorCode,
+  GeneratedChatName,
   removeConnectionBrackets,
 } from '@openops/shared';
-import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
+import { generateObject, LanguageModel, ModelMessage, UIMessage } from 'ai';
+import { z } from 'zod';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
-import { mergeToolResultsIntoMessages } from './utils';
+import {
+  mergeToolResultsIntoMessages,
+  sanitizeMessagesForChatName,
+} from './utils';
 
 const chatContextKey = (
   chatId: string,
@@ -84,28 +90,38 @@ export const generateChatIdForMCP = (params: {
   });
 };
 
+const generatedChatNameSchema = z.object({
+  name: z
+    .string()
+    .max(100)
+    .nullable()
+    .describe('Conversation name or null if it was not generated'),
+  isGenerated: z.boolean().describe('Whether the name was generated or not'),
+});
+
 export async function generateChatName(
   messages: ModelMessage[],
   projectId: string,
-): Promise<string> {
+): Promise<GeneratedChatName> {
   const { languageModel } = await getLLMConfig(projectId);
   const systemPrompt = await loadPrompt('chat-name.txt');
   if (!systemPrompt.trim()) {
     throw new Error('Failed to load prompt to generate the chat name.');
   }
-  const prompt: ModelMessage[] = [
-    {
-      role: 'system',
-      content: systemPrompt,
-    } as const,
-    ...messages,
-  ];
-  const response = await generateText({
+
+  const sanitizedMessages: ModelMessage[] =
+    sanitizeMessagesForChatName(messages);
+
+  const result = await generateObject({
     model: languageModel,
-    messages: prompt,
+    system: systemPrompt,
+    messages: sanitizedMessages,
+    schema: generatedChatNameSchema,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     maxRetries: 2,
   });
-  return response.text.trim();
+
+  return result.object;
 }
 
 export const updateChatName = async (
