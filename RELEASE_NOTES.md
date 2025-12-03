@@ -20,7 +20,7 @@ hide_toc: false
 
 ## 🐛
 
-- Improved error handling when the Tables MCP endpoint list is empty to avoid unexpected failures.
+- Improved error handling when the Tables MCP endpoint list is empty.
 
 ## ✨
 
