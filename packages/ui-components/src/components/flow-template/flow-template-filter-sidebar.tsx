@@ -38,7 +38,7 @@ const FlowTemplateFilterItem = ({
     aria-selected={isActive}
     role="option"
     className={cn(
-      'w-full px-3 py-[10px] justify-start gap-2.5 inline-flex items-center overflow-visible cursor-pointer hover:bg-muted relative',
+      'w-full px-3 py-[10px] justify-start gap-2.5 inline-flex items-center overflow-hidden cursor-pointer hover:bg-muted relative',
       {
         'bg-muted': isActive,
       },
