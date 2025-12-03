@@ -1,5 +1,4 @@
 export enum PrincipalType {
-  MCP = 'MCP',
   USER = 'USER',
   ENGINE = 'ENGINE',
   SERVICE = 'SERVICE',

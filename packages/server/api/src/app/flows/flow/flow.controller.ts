@@ -361,7 +361,6 @@ const UpdateFlowRequestOptions = {
 const ListFlowsRequestOptions = {
   config: {
     allowedPrincipals: [
-      PrincipalType.MCP,
       PrincipalType.USER,
       PrincipalType.SERVICE,
       PrincipalType.WORKER,
@@ -383,7 +382,7 @@ const ListFlowsRequestOptions = {
 
 const CountFlowsRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.MCP, PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
   },
   schema: {
     operationId: 'Get Flow Count',
@@ -423,11 +422,7 @@ const GetFlowTemplateRequestOptions = {
 
 const GetFlowRequestOptions = {
   config: {
-    allowedPrincipals: [
-      PrincipalType.MCP,
-      PrincipalType.USER,
-      PrincipalType.SERVICE,
-    ],
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     permission: Permission.READ_FLOW,
   },
   schema: {
