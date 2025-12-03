@@ -7,6 +7,7 @@ import { projectService } from '../../project/project-service';
 import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { getAdditionalQueryClassificationDescriptions } from './extensions';
+import { getToolAdditionalDescription } from './external-tool-descriptions';
 import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
 
@@ -202,6 +203,20 @@ const getSystemPrompt = async (
   const toolsMessage = toolList
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
+  const additionalToolNotes: string[] = [];
+  for (const tool of toolList) {
+    const additionalDescription = getToolAdditionalDescription(tool.name);
+    if (additionalDescription) {
+      additionalToolNotes.push(additionalDescription);
+    }
+  }
+
+  const additionalToolNotesSection =
+    additionalToolNotes.length > 0
+      ? `\n\n## IMPORTANT TOOL USAGE NOTES:\n\n${additionalToolNotes.join(
+          '\n\n',
+        )}\n`
+      : '';
   return (
     "Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. " +
     `IMPORTANT: Tables tools should always be included in the output if the user asks a question involving those table names: ${openopsTablesNames.join(
@@ -211,7 +226,7 @@ const getSystemPrompt = async (
     'Include ALL relevant categories that apply. ' +
     `${
       uiContext ? `${await buildUIContextSection(uiContext)}\n` : ''
-    } Tools: ${toolsMessage}`
+    } Tools: ${toolsMessage}${additionalToolNotesSection}`
   );
 };
 

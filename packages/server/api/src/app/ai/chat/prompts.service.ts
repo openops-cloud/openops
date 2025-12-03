@@ -3,9 +3,19 @@ import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
 import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { getAdditionalDescriptionsForSelectedTools } from '../mcp/external-tool-descriptions';
 import { hasToolProvider } from '../mcp/tool-utils';
 import { QueryClassification } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
+
+function buildAdditionalToolNotes(selectedTools: ToolSet | undefined): string {
+  if (!selectedTools) {
+    return '';
+  }
+
+  const descriptions = getAdditionalDescriptionsForSelectedTools(selectedTools);
+  return descriptions.length > 0 ? descriptions.join('\n\n') : '';
+}
 
 export const getMcpSystemPrompt = async ({
   queryClassification,
@@ -58,7 +68,12 @@ export const getMcpSystemPrompt = async ({
 
   const allPrompts = await Promise.all(promptPromises);
 
-  return allPrompts.join('\n\n');
+  const additionalToolNotes = buildAdditionalToolNotes(selectedTools);
+  const finalPrompts = additionalToolNotes
+    ? [...allPrompts, additionalToolNotes]
+    : allPrompts;
+
+  return finalPrompts.join('\n\n');
 };
 
 export const getBlockSystemPrompt = async (
