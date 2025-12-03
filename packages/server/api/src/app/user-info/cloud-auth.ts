@@ -1,5 +1,6 @@
 import { FastifyRequest } from 'fastify';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { logger } from '@openops/server-shared';
 
 const CLOUD_TOKEN_COOKIE_NAME = 'cloud-token';
 
