@@ -15,6 +15,7 @@ import { accessTokenManager } from './access-token-manager';
 export async function getProjectAndToken(
   user: User,
   tablesRefreshToken: string,
+  expiresInSeconds?: number,
 ): Promise<{
   user: User;
   project: Project;
@@ -38,15 +39,18 @@ export async function getProjectAndToken(
     project.organizationId,
   );
 
-  const token = await accessTokenManager.generateToken({
-    id: user.id,
-    externalId: user.externalId,
-    type: PrincipalType.USER,
-    projectId: project.id,
-    organization: {
-      id: organization.id,
+  const token = await accessTokenManager.generateToken(
+    {
+      id: user.id,
+      externalId: user.externalId,
+      type: PrincipalType.USER,
+      projectId: project.id,
+      organization: {
+        id: organization.id,
+      },
     },
-  });
+    expiresInSeconds,
+  );
 
   return {
     user: updatedUser,
