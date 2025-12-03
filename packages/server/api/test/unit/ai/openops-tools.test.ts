@@ -1,5 +1,3 @@
-import { accessTokenManager } from '../../../src/app/authentication/context/access-token-manager';
-
 const mockBasePath = '/mock/base/path';
 const mockApiBaseUrl = 'http://test-api-url';
 const mockTools = {
