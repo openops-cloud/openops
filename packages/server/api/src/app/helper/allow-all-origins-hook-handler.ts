@@ -1,4 +1,5 @@
-import { onRequestHookHandler } from 'fastify';
+import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
+import { FastifyInstance, onRequestHookHandler } from 'fastify';
 
 export const allowAllOriginsHookHandler: onRequestHookHandler = (
   request,
@@ -21,3 +22,18 @@ export const allowAllOriginsHookHandler: onRequestHookHandler = (
 
   done();
 };
+
+export function registerOptionsEndpoint(app: FastifyInstance) {
+  app.options(
+    '*',
+    {
+      config: {
+        allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        skipAuth: true,
+      },
+    },
+    (_request, reply) => {
+      return reply.status(204).send();
+    },
+  );
+}
