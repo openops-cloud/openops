@@ -41,8 +41,8 @@ export const seedFocusDataAggregationTemplateTable =
     );
 
     if (!table) {
-      const tokenAndDatabaseId = await getAdminTablesContext();
-      await createAggregatedCostsTable(tokenAndDatabaseId);
+      const tablesContext = await getAdminTablesContext();
+      await createAggregatedCostsTable(tablesContext);
     }
 
     await setTableSeedFlag();

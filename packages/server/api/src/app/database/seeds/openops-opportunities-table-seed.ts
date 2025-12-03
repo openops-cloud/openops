@@ -42,8 +42,8 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
   );
 
   if (!table) {
-    const tokenAndDatabaseId = await getAdminTablesContext();
-    await createOpportunitiesTable(tokenAndDatabaseId);
+    const tablesContext = await getAdminTablesContext();
+    await createOpportunitiesTable(tablesContext);
   }
 
   await setTableSeedFlag();

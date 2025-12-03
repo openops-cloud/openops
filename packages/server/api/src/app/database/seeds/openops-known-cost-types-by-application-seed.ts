@@ -42,8 +42,8 @@ export const seedKnownCostTypesByApplicationTable = async (): Promise<void> => {
   );
 
   if (!table) {
-    const tokenAndDatabaseId = await getAdminTablesContext();
-    await createKnownCostTypesByApplicationTable(tokenAndDatabaseId);
+    const tablesContext = await getAdminTablesContext();
+    await createKnownCostTypesByApplicationTable(tablesContext);
   }
 
   await setTableSeedFlag();

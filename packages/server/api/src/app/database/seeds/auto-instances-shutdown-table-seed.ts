@@ -42,8 +42,8 @@ export const seedAutoInstancesShutdownTable = async (): Promise<void> => {
   );
 
   if (!table) {
-    const tokenAndDatabaseId = await getAdminTablesContext();
-    await createAutoInstancesShutdownTable(tokenAndDatabaseId);
+    const tablesContext = await getAdminTablesContext();
+    await createAutoInstancesShutdownTable(tablesContext);
   }
 
   await setTableSeedFlag();

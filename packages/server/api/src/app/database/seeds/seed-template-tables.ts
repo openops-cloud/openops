@@ -31,8 +31,8 @@ export const seedTemplateTables = async (): Promise<void> => {
     return;
   }
 
-  const tokenAndDatabaseId = await getAdminTablesContext();
-  await createBaseTemplateTables(tokenAndDatabaseId);
+  const tablesContext = await getAdminTablesContext();
+  await createBaseTemplateTables(tablesContext);
 
   await setTableSeedFlag();
 };
