@@ -7,7 +7,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
-import { TokenAndDatabaseId } from './types';
+import { TablesContext } from './types';
 
 export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
@@ -15,7 +15,7 @@ const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
 export async function createAggregatedCostsTable({
   token,
   tablesDatabaseId,
-}: TokenAndDatabaseId): Promise<{ tableId: number }> {
+}: TablesContext): Promise<{ tableId: number }> {
   logger.debug(`${SEED_LOG_HEADER} Start`);
 
   const table = await openopsTables.createTable(

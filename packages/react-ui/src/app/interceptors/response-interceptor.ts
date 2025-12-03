@@ -43,7 +43,7 @@ export function createResponseInterceptor(): {
 
 export function createFederatedResponseInterceptor(): {
   onFulfilled: (response: AxiosResponse) => AxiosResponse;
-  onRejected: (error: AxiosError) => Promise<never>;
+  onRejected: (error: AxiosError) => Promise<AxiosResponse | never>;
 } {
   throw new Error('Not implemented in OSS');
 }
