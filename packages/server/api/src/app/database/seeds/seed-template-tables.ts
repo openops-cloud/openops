@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
-import { createBaseTemplateTables } from '../../openops-tables/template-tables/seed-tables-for-templates';
+import { createBaseTemplateTables } from '../../openops-tables/template-tables/create-base-template-tables';
 import { databaseConnection } from '../database-connection';
 import { getAdminTablesContext } from './get-admin-token-and-database';
 
