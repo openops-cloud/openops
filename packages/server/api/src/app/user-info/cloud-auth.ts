@@ -1,6 +1,5 @@
 import { FastifyRequest } from 'fastify';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { logger } from '@openops/server-shared';
 
 const CLOUD_TOKEN_COOKIE_NAME = 'cloud-token';
 
@@ -12,18 +11,13 @@ const getCloudToken = (request: FastifyRequest): string | undefined => {
     | undefined;
 
   if (authorizationHeader) {
-    logger.info(`Authorization Header`);
-
     return authorizationHeader.replace('Bearer ', '');
   }
 
   if (cookieToken) {
-    logger.info(`Authorization Cookie`);
-
     return cookieToken;
   }
 
-  logger.info(`Authorization Cookie Header`, headerToken);
   return headerToken;
 };
 

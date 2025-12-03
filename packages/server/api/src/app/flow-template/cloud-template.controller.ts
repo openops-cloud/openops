@@ -14,17 +14,17 @@ import { flowTemplateService } from './flow-template.service';
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY) || '';
-  // const connectionPageEnabled = system.getBoolean(
-  //   AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
-  // );
-  //
-  // if (!publicKey || !connectionPageEnabled) {
-  //   logger.info(
-  //     'Missing Frontegg configuration, disabling cloud templates API',
-  //   );
-  //   return;
-  // }
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
+  const connectionPageEnabled = system.getBoolean(
+    AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
+
+  if (!publicKey || !connectionPageEnabled) {
+    logger.info(
+      'Missing Frontegg configuration, disabling cloud templates API',
+    );
+    return;
+  }
 
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
