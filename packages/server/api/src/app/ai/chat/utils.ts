@@ -67,7 +67,7 @@ export function sanitizeMessagesForChatName(
   const extractText = (content: ModelMessage['content']): string | null => {
     if (typeof content === 'string') {
       const text = content.trim();
-      return text ? text : null;
+      return text ?? null;
     }
 
     if (Array.isArray(content)) {
@@ -88,7 +88,7 @@ export function sanitizeMessagesForChatName(
         .join('\n')
         .trim();
 
-      return merged ? merged : null;
+      return merged ?? null;
     }
 
     return null;
