@@ -9,9 +9,7 @@ import {
 import { passwordHasher } from './basic/password-hasher';
 import { AssertPasswordsMatchParams, ProjectContext } from './types';
 
-export const removePasswordPropFromUser = (
-  user: User,
-): Omit<User, 'password'> => {
+const removePasswordPropFromUser = (user: User): Omit<User, 'password'> => {
   const { password: _, ...filteredUser } = user;
   return filteredUser;
 };
