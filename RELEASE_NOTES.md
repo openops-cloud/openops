@@ -24,7 +24,7 @@ hide_toc: false
 
 ## ✨
 
-- Added client ID configuration to the Frontegg app to support more robust cloud connection authentication flows.
+- Added client ID configuration to the Frontegg app.
 - Updated the Templates gallery icon mapping to support the new "Policy & Governance" domain for consistent visual presentation.
 - Updated internal flow helper and AI chat context enrichment logic to resolve variables by step ID instead of step name, aligning with the newer step context structure.
 
