@@ -58,9 +58,9 @@ export const assertPasswordMatches = async ({
   }
 };
 
-export async function buildAuthResponse(
+export function buildAuthResponse(
   projectContext: ProjectContext,
-): Promise<AuthenticationResponse> {
+): AuthenticationResponse {
   const userWithoutPassword = removePasswordPropFromUser(projectContext.user);
 
   return {
