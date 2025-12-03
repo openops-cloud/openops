@@ -28,7 +28,6 @@ const networkUtlsMock = {
   getInternalApiUrl: jest.fn(),
 };
 
-
 const generateServiceTokenMock = jest.fn();
 jest.mock(
   '../../../src/app/authentication/context/access-token-manager',
