@@ -1,6 +1,6 @@
-import { LoadingSpinner } from '@openops/components/ui';
 import { Suspense, useEffect, useState } from 'react';
 
+import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   setupRequestInterceptor,
@@ -32,22 +32,8 @@ export const InitialDataGuard = ({
   }, [flags]);
 
   if (!interceptorsReady) {
-    return (
-      <div className="bg-background flex h-screen w-screen items-center justify-center ">
-        <LoadingSpinner size={50}></LoadingSpinner>
-      </div>
-    );
+    return <FullPageSpinner />;
   }
 
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-background flex h-screen w-screen items-center justify-center ">
-          <LoadingSpinner size={50}></LoadingSpinner>
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
-  );
+  return <Suspense fallback={<FullPageSpinner />}>{children}</Suspense>;
 };
