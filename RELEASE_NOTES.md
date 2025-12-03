@@ -16,7 +16,7 @@ hide_toc: false
 
 - Extended AI chat history retention to 30 days.
 - Made the Region property optional in the Build ARN AWS action.
-- Added a new "Policy & Governance" category in the Templates gallery to make related templates easier to discover.
+- Added a new "Policy & Governance" category in the Templates gallery.
 
 ## 🐛
 
