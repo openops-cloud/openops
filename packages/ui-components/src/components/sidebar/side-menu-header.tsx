@@ -13,7 +13,7 @@ const SideMenuHeader = ({
 }) => (
   <div
     className={cn(
-      'w-full flex items-center px-6 py-[18px] h-[60px] flex-shrink-0',
+      'w-full flex items-center px-6 py-[18px] h-[60px] flex-shrink-0 border-b',
       className,
     )}
   >

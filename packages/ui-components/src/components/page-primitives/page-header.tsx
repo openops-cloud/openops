@@ -11,7 +11,7 @@ const PageHeader = ({
 }) => (
   <div
     className={cn(
-      'flex items-center justify-between border-b w-full bg-background h-[61px] flex-shrink-0',
+      'flex items-center justify-between border-b w-full bg-background h-[60px] flex-shrink-0',
       className,
     )}
   >
