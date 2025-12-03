@@ -16,6 +16,7 @@ import {
   CustomAuthConnectionValue,
   ErrorCode,
   GeneratedChatName,
+  isEmpty,
   removeConnectionBrackets,
 } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, UIMessage } from 'ai';
@@ -111,6 +112,10 @@ export async function generateChatName(
 
   const sanitizedMessages: ModelMessage[] =
     sanitizeMessagesForChatName(messages);
+
+  if (isEmpty(sanitizedMessages.length)) {
+    return { name: null, isGenerated: false };
+  }
 
   const result = await generateObject({
     model: languageModel,
