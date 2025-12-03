@@ -103,7 +103,7 @@ export async function generateChatName(
   messages: ModelMessage[],
   projectId: string,
 ): Promise<GeneratedChatName> {
-  const { languageModel } = await getLLMConfig(projectId);
+  const { languageModel, aiConfig } = await getLLMConfig(projectId);
   const systemPrompt = await loadPrompt('chat-name.txt');
   if (!systemPrompt.trim()) {
     throw new Error('Failed to load prompt to generate the chat name.');
@@ -117,6 +117,7 @@ export async function generateChatName(
     system: systemPrompt,
     messages: sanitizedMessages,
     schema: generatedChatNameSchema,
+    ...aiConfig.modelSettings,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     maxRetries: 2,
   });
