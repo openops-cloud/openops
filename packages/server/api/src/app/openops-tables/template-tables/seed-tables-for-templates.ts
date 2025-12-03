@@ -31,21 +31,42 @@ const getProjectTablesDatabaseId = async (): Promise<number> => {
   return project.tablesDatabaseId;
 };
 
+const seedBaseTemplateTables = async (
+  databaseId: number,
+  token: string,
+): Promise<void> => {
+  const buTable = await createBusinessUnitsTable(databaseId, token);
+  await createTagOwnerMappingTable(databaseId, token, buTable.tableId);
+  await createIdleEbsVolumesToDeleteTable(databaseId, token);
+  await createResourceBuTagAssignmentTable(databaseId, token, buTable.tableId);
+};
+
+const seedAdditionalTemplateTables = async (
+  databaseId: number,
+  token: string,
+): Promise<void> => {
+  await createOpportunitiesTable(token, databaseId);
+  await createAggregatedCostsTable(databaseId, token);
+  await createKnownCostTypesByApplicationTable(token, databaseId);
+  await createAutoInstancesShutdownTable(token, databaseId);
+};
+
 export const seedTemplateTablesService = {
   async createBaseTemplateTables() {
     const { token } = await authenticateAdminUserInOpenOpsTables();
     const databaseId = await getProjectTablesDatabaseId();
 
-    const buTable = await createBusinessUnitsTable(databaseId, token);
-    await createTagOwnerMappingTable(databaseId, token, buTable.tableId);
-    await createIdleEbsVolumesToDeleteTable(databaseId, token);
-    await createResourceBuTagAssignmentTable(
-      databaseId,
-      token,
-      buTable.tableId,
-    );
+    await seedBaseTemplateTables(databaseId, token);
 
     logger.info('[Seeding template tables] Done');
+  },
+
+  async seedTemplateTablesForDatabase(
+    databaseId: number,
+    token: string,
+  ): Promise<void> {
+    await seedBaseTemplateTables(databaseId, token);
+    await seedAdditionalTemplateTables(databaseId, token);
   },
 
   async createOpportunityTemplateTable() {
