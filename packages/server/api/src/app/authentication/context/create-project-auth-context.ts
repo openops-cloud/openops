@@ -23,7 +23,7 @@ export async function getProjectAndToken(
   tablesRefreshToken: string;
   projectRole: ProjectMemberRole;
 }> {
-  const updatedUser = await userService.getOneOrFail({ id: user.id });
+  const updatedUser = await userService.getOneOrThrow({ id: user.id });
 
   const project = await projectService.getOneForUser(updatedUser);
   if (isNil(project)) {
