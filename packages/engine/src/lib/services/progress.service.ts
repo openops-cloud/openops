@@ -114,13 +114,7 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
             return false;
           }
 
-          if (error.config) {
-            const newBodyAccessKey = await saveRequestBody(request);
-            error.config.data = JSON.stringify({
-              bodyAccessKey: newBodyAccessKey,
-            });
-          }
-
+          await updateRequestBody(request, error);
           return true;
         },
         retryDelay: (retryCount: number) => (retryCount + 1) * 200, // 200ms, 400ms, 600ms
@@ -140,6 +134,22 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
   const duration = Math.floor(performance.now() - startTime);
   logger.debug(`Progress update request for ${flowRunId} took ${duration}ms`);
 };
+
+async function updateRequestBody(
+  request: UpdateRunProgressRequest,
+  error: AxiosError,
+): Promise<void> {
+  try {
+    if (error.config) {
+      const newBodyAccessKey = await saveRequestBody(request);
+      error.config.data = JSON.stringify({
+        bodyAccessKey: newBodyAccessKey,
+      });
+    }
+  } catch (e) {
+    logger.info('Failed to update progress request body.', e);
+  }
+}
 
 type UpdateStepProgressParams = {
   engineConstants: EngineConstants;
