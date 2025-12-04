@@ -10,6 +10,7 @@ import { BlockIcon } from '../../components/block-icon/block-icon';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { useTypingAnimation } from '../../hooks/use-typing-animation';
 import { cn } from '../../lib/cn';
+import { TOP_BAR_HEIGHT } from '../../lib/constants';
 import { Button } from '../../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 
@@ -64,8 +65,9 @@ const AssistantTopBar = ({
   return (
     <div
       className={cn(
-        'flex flex-col px-4 py-2 gap-1 flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200',
+        'flex flex-col px-4 py-2 gap-1 flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200 justify-center',
       )}
+      style={{ minHeight: `${TOP_BAR_HEIGHT}px` }}
     >
       <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
