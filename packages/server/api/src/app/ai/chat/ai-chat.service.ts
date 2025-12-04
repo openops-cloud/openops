@@ -8,6 +8,7 @@ import {
   AppSystemProp,
   cacheWrapper,
   hashUtils,
+  logger,
   system,
 } from '@openops/server-shared';
 import {
@@ -23,6 +24,7 @@ import { generateObject, LanguageModel, ModelMessage, UIMessage } from 'ai';
 import { z } from 'zod';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
+import { findFirstKeyInObject } from '../mcp/llm-query-router';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
 import {
@@ -100,6 +102,32 @@ const generatedChatNameSchema = z.object({
   isGenerated: z.boolean().describe('Whether the name was generated or not'),
 });
 
+/**
+ * Attempts to repair a malformed JSON string produced by the model for chat name generation.
+ * It extracts only the expected fields according to generatedChatNameSchema.
+ * Returns null if the input cannot be parsed or repaired (so the AI SDK can retry/throw).
+ */
+const repairText = (text: string): string | null => {
+  try {
+    const parsed = JSON.parse(text);
+
+    const nameRaw = findFirstKeyInObject(parsed, 'name');
+    let name: string | null = null;
+    if (typeof nameRaw === 'string') {
+      const trimmed = nameRaw.trim();
+      name = trimmed.length > 0 ? trimmed.slice(0, 100) : null;
+    }
+
+    const isGeneratedRaw = findFirstKeyInObject(parsed, 'isGenerated');
+    const isGenerated =
+      typeof isGeneratedRaw === 'boolean' ? isGeneratedRaw : Boolean(name);
+
+    return JSON.stringify({ name, isGenerated });
+  } catch {
+    return null;
+  }
+};
+
 export async function generateChatName(
   messages: ModelMessage[],
   projectId: string,
@@ -117,17 +145,22 @@ export async function generateChatName(
     return { name: null, isGenerated: false };
   }
 
-  const result = await generateObject({
-    model: languageModel,
-    system: systemPrompt,
-    messages: sanitizedMessages,
-    schema: generatedChatNameSchema,
-    ...aiConfig.modelSettings,
-    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    maxRetries: 2,
-  });
-
-  return result.object;
+  try {
+    const result = await generateObject({
+      model: languageModel,
+      system: systemPrompt,
+      messages: sanitizedMessages,
+      schema: generatedChatNameSchema,
+      ...aiConfig.modelSettings,
+      experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      experimental_repairText: async ({ text }) => repairText(text),
+      maxRetries: 2,
+    });
+    return result.object;
+  } catch (error) {
+    logger.error('Failed to generate chat name', { error });
+    return { name: null, isGenerated: false };
+  }
 }
 
 export const updateChatName = async (
