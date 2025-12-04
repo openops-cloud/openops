@@ -6,9 +6,7 @@ const CLOUD_TOKEN_COOKIE_NAME = 'cloud-token';
 const getCloudToken = (request: FastifyRequest): string | undefined => {
   const authorizationHeader = request.headers.authorization;
   const cookieToken = request.cookies[CLOUD_TOKEN_COOKIE_NAME];
-  const headerToken = request.headers[CLOUD_TOKEN_COOKIE_NAME] as
-    | string
-    | undefined;
+  const headerToken = request.headers['Ops-Cloud-Token'] as string | undefined;
 
   if (authorizationHeader) {
     return authorizationHeader.replace('Bearer ', '');

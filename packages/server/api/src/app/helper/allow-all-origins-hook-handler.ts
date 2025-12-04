@@ -15,7 +15,7 @@ export const allowAllOriginsHookHandler: onRequestHookHandler = (
 
   void reply.header(
     'Access-Control-Allow-Headers',
-    'Content-Type,Ops-Origin,Authorization,Cloud-Token',
+    'Content-Type,Ops-Origin,Authorization,Ops-Cloud-Token',
   );
 
   void reply.header('Access-Control-Allow-Credentials', 'true');

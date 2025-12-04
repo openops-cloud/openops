@@ -89,13 +89,13 @@ describe('getVerifiedUser', () => {
     const payload = { sub: 'abc' };
     (jwt.verify as jest.Mock).mockReturnValue(payload);
     const mockRequest = createMockRequest({
-      headers: { 'cloud-token': 'cookie-token' },
+      headers: { 'ops-cloud-token': 'cookie-header-token' },
       cookies: {},
     });
 
     const result = getVerifiedUser(mockRequest, publicKey);
 
-    expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey, {
+    expect(jwt.verify).toHaveBeenCalledWith('cookie-header-token', publicKey, {
       algorithms: ['RS256'],
     });
     expect(result).toEqual(payload);
