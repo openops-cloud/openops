@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import { OpenAPI } from 'openapi-types';
 import os from 'os';
 import path from 'path';
+import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { MCPTool } from './types';
 
 const INCLUDED_PATHS: Record<string, string[]> = {
@@ -68,7 +69,7 @@ async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
 
 export async function getOpenOpsTools(
   app: FastifyInstance,
-  authToken: string,
+  userAuthToken: string,
 ): Promise<MCPTool> {
   const basePath = system.getOrThrow<string>(
     AppSystemProp.OPENOPS_MCP_SERVER_PATH,
@@ -79,13 +80,17 @@ export async function getOpenOpsTools(
 
   const tempSchemaPath = await getOpenApiSchemaPath(app);
 
+  const serviceToken = await accessTokenManager.generateServiceToken(
+    userAuthToken,
+  );
+
   const openopsClient = await experimental_createMCPClient({
     transport: new Experimental_StdioMCPTransport({
       command: pythonPath,
       args: [serverPath],
       env: {
         OPENAPI_SCHEMA_PATH: tempSchemaPath,
-        AUTH_TOKEN: authToken,
+        AUTH_TOKEN: serviceToken,
         API_BASE_URL: networkUtls.getInternalApiUrl(),
         OPENOPS_MCP_SERVER_PATH: basePath,
         LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
