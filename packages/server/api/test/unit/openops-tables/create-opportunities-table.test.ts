@@ -27,7 +27,10 @@ describe('createOpportunityTable', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
     openopsCommonMock.makeOpenOpsTablesPost.mockReturnValue({ id: 1 });
 
-    await createOpportunitiesTable('some token', 2);
+    await createOpportunitiesTable({
+      token: 'some token',
+      tablesDatabaseId: 2,
+    });
 
     expect(createTableMock).toHaveBeenCalledTimes(1);
     expect(createTableMock).toHaveBeenCalledWith(
@@ -139,8 +142,8 @@ describe('createOpportunityTable', () => {
   it('should throw if something fails', async () => {
     openopsCommonMock.getFields.mockRejectedValue(new Error('some error'));
 
-    await expect(createOpportunitiesTable('some token', 2)).rejects.toThrow(
-      'some error',
-    );
+    await expect(
+      createOpportunitiesTable({ token: 'some token', tablesDatabaseId: 2 }),
+    ).rejects.toThrow('some error');
   });
 });

@@ -1,5 +1,6 @@
-import { LoadingSpinner } from '@openops/components/ui';
 import { useEffect, useState } from 'react';
+
+import { FullPageSpinner } from './common/components/full-page-spinner';
 import { QueryKeys } from './constants/query-keys';
 import { flagsApi, FlagsMap } from './lib/flags-api';
 import { initializeInternal } from './lib/initialize-internal';
@@ -51,11 +52,7 @@ export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
   }, []);
 
   if (state.status === 'loading') {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <LoadingSpinner size={50} />
-      </div>
-    );
+    return <FullPageSpinner />;
   }
 
   if (state.status === 'error') {
