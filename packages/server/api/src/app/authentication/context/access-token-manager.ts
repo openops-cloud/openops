@@ -97,9 +97,12 @@ export const accessTokenManager = {
 
     const secret = await jwtUtils.getJwtSecret();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { exp: _exp, iat: _iat, iss: _iss, ...payload } = principal as any;
+
     return jwtUtils.sign({
       payload: {
-        ...principal,
+        ...payload,
         type: PrincipalType.SERVICE,
       },
       key: secret,
