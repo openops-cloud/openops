@@ -113,7 +113,7 @@ export async function generateChatName(
   const sanitizedMessages: ModelMessage[] =
     sanitizeMessagesForChatName(messages);
 
-  if (isEmpty(sanitizedMessages.length)) {
+  if (isEmpty(sanitizedMessages)) {
     return { name: null, isGenerated: false };
   }
 
