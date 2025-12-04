@@ -81,6 +81,32 @@ export const accessTokenManager = {
     });
   },
 
+  async generateServiceToken(
+    userToken: string,
+    expiresInSeconds: number = openOpsRefreshTokenLifetimeSeconds,
+  ): Promise<string> {
+    const principal = await this.extractPrincipal(userToken);
+    if (principal.type !== PrincipalType.USER) {
+      throw new ApplicationError({
+        code: ErrorCode.INVALID_BEARER_TOKEN,
+        params: {
+          message: 'Service token can only be generated from a user token',
+        },
+      });
+    }
+
+    const secret = await jwtUtils.getJwtSecret();
+
+    return jwtUtils.sign({
+      payload: {
+        ...principal,
+        type: PrincipalType.SERVICE,
+      },
+      key: secret,
+      expiresInSeconds,
+    });
+  },
+
   async extractPrincipal(token: string): Promise<Principal> {
     const secret = await jwtUtils.getJwtSecret();
 

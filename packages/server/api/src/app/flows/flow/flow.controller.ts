@@ -381,6 +381,9 @@ const ListFlowsRequestOptions = {
 };
 
 const CountFlowsRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
+  },
   schema: {
     operationId: 'Get Flow Count',
     description:

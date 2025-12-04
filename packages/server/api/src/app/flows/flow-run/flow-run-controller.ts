@@ -190,6 +190,7 @@ const ResumeFlowRunRequest = {
 
 const RetryFlowRequest = {
   config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     permission: Permission.RETRY_RUN,
   },
   schema: {

@@ -16,6 +16,7 @@ const mockTools = {
 const systemMock = {
   get: jest.fn(),
   getOrThrow: jest.fn(),
+  getNumber: jest.fn(),
 };
 
 const loggerMock = {
@@ -27,8 +28,17 @@ const networkUtlsMock = {
   getInternalApiUrl: jest.fn(),
 };
 
-const createMcpClientMock = jest.fn();
+const generateServiceTokenMock = jest.fn();
+jest.mock(
+  '../../../src/app/authentication/context/access-token-manager',
+  () => ({
+    accessTokenManager: {
+      generateServiceToken: generateServiceTokenMock,
+    },
+  }),
+);
 
+const createMcpClientMock = jest.fn();
 jest.mock('ai', () => ({
   experimental_createMCPClient: createMcpClientMock,
 }));
@@ -214,6 +224,7 @@ describe('getOpenOpsTools', () => {
       tools: jest.fn().mockResolvedValue(mockTools),
     };
     createMcpClientMock.mockResolvedValue(mockClient);
+    generateServiceTokenMock.mockResolvedValue('auth-service-token');
 
     const result = await getOpenOpsTools(mockApp, 'test-auth-token');
 
@@ -229,7 +240,7 @@ describe('getOpenOpsTools', () => {
           args: [`${mockBasePath}/main.py`],
           env: expect.objectContaining({
             OPENAPI_SCHEMA_PATH: expect.any(String),
-            AUTH_TOKEN: 'test-auth-token',
+            AUTH_TOKEN: 'auth-service-token',
             API_BASE_URL: mockApiBaseUrl,
             OPENOPS_MCP_SERVER_PATH: mockBasePath,
             LOGZIO_TOKEN: 'test-logzio-token',
