@@ -3,7 +3,10 @@
   "output": "./THIRD_PARTY_LICENSES.txt",
   "lineEnding": "lf",
   "ci": true,
-  "append": ["./THIRD_PARTY_LICENSES_ADDITIONAL.txt"],
+  "append": [
+    "./THIRD_PARTY_LICENSES_ADDITIONAL.txt",
+    "./THIRD_PARTY_LICENSES_LINUX.txt"
+  ],
   "replace": {
     "sax": "./node_modules/sax/LICENSE",
     "mailsplit": "./node_modules/mailsplit/LICENSE.MIT",
@@ -13,6 +16,32 @@
     "jsonlint-mod": "https://raw.githubusercontent.com/circlecell/jsonlint/refs/heads/main/license.txt",
     "rc@1.2.8": "https://raw.githubusercontent.com/dominictarr/rc/refs/heads/master/LICENSE.MIT"
   },
-  "exclude": [],
+  "exclude": [
+    "@swc/core-darwin-arm64",
+    "@swc/core-darwin-x64",
+    "@swc/core-win32-x64-msvc",
+    "@swc/core-win32-arm64-msvc",
+    "@nx/nx-darwin-arm64",
+    "@nx/nx-darwin-x64",
+    "@nx/nx-win32-x64-msvc",
+    "@nx/nx-win32-arm64-msvc",
+    "@rollup/rollup-darwin-arm64",
+    "@rollup/rollup-darwin-x64",
+    "@rollup/rollup-win32-x64-msvc",
+    "@rollup/rollup-win32-arm64-msvc",
+    "@esbuild/darwin-arm64",
+    "@esbuild/darwin-x64",
+    "@esbuild/win32-x64-msvc",
+    "@esbuild/win32-arm64-msvc",
+    "sass-embedded-darwin-arm64",
+    "sass-embedded-darwin-x64",
+    "sass-embedded-win32-x64",
+    "sass-embedded-win32-arm64",
+    "@parcel/watcher-darwin-arm64",
+    "@parcel/watcher-darwin-x64",
+    "@parcel/watcher-win32-x64",
+    "@parcel/watcher-win32-arm64",
+    "fsevents"
+  ],
   "omitVersion": false
 }

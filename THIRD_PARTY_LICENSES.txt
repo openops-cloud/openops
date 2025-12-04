@@ -10288,17 +10288,6 @@ Apache-2.0
 
 -----------
 
-The following npm packages may be included in this product:
-
- - @swc/core-linux-x64-gnu@1.7.42
- - @swc/core-linux-x64-musl@1.7.42
-
-These packages each contain the following license:
-
-Apache-2.0 AND MIT
-
------------
-
 The following npm package may be included in this product:
 
  - caniuse-lite@1.0.30001660
@@ -16334,6 +16323,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 The following npm packages may be included in this product:
 
  - @ai-sdk/anthropic@2.0.49
+ - @ai-sdk/anthropic@2.0.50
  - @ai-sdk/azure@2.0.70
  - @ai-sdk/cerebras@1.0.7
  - @ai-sdk/cohere@2.0.3
@@ -16350,6 +16340,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/openai@2.0.68
  - @ai-sdk/perplexity@2.0.3
  - @ai-sdk/provider-utils@3.0.17
+ - @ai-sdk/provider-utils@3.0.18
  - @ai-sdk/provider-utils@3.0.2
  - @ai-sdk/provider-utils@3.0.3
  - @ai-sdk/provider-utils@3.0.5
@@ -19279,7 +19270,6 @@ The following npm packages may be included in this product:
  - @frontegg/rest-api@7.92.0
  - @frontegg/types@7.92.0
  - @linear/sdk@7.0.1
- - @nx/nx-linux-x64-gnu@19.8.8
  - @polka/url@1.0.0-next.25
  - @radix-ui/number@1.1.0
  - @radix-ui/primitive@1.0.0
@@ -19365,8 +19355,6 @@ The following npm packages may be included in this product:
  - @radix-ui/react-use-size@1.1.0
  - @radix-ui/react-visually-hidden@1.1.0
  - @radix-ui/rect@1.1.0
- - @rollup/rollup-linux-x64-gnu@4.24.0
- - @rollup/rollup-linux-x64-musl@4.24.0
  - @tiptap/extension-blockquote@2.6.6
  - @tiptap/extension-bold@2.6.6
  - @tiptap/extension-bubble-menu@2.6.6
@@ -34822,6 +34810,42 @@ Third party SIL Open Font License v1.1 (OFL-1.1)
 
 (SIL OPEN FONT LICENSE Version 1.1) The Inter font family (https://github.com/rsms/inter)
 (SIL OPEN FONT LICENSE Version 1.1) The Fira Code font family (https://github.com/tonsky/FiraCode)
+
+-----------
+
+-----------
+
+The following npm packages may be included in this product:
+
+ - @swc/core-linux-x64-gnu@1.7.42
+ - @swc/core-linux-x64-musl@1.7.42
+
+These packages each contain the following license:
+
+Apache-2.0 AND MIT
+
+-----------
+
+The following npm package may be included in this product:
+
+ - @nx/nx-linux-x64-gnu@19.8.8
+
+This package contains the following license:
+
+MIT
+
+-----------
+
+The following npm packages may be included in this product:
+
+ - @rollup/rollup-linux-x64-gnu@4.24.0
+ - @rollup/rollup-linux-x64-musl@4.24.0
+
+These packages each contain the following license:
+
+MIT
+
+-----------
 
 -----------
 

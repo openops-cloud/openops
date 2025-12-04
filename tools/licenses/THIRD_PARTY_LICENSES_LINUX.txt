@@ -1,0 +1,34 @@
+-----------
+
+The following npm packages may be included in this product:
+
+ - @swc/core-linux-x64-gnu@1.7.42
+ - @swc/core-linux-x64-musl@1.7.42
+
+These packages each contain the following license:
+
+Apache-2.0 AND MIT
+
+-----------
+
+The following npm package may be included in this product:
+
+ - @nx/nx-linux-x64-gnu@19.8.8
+
+This package contains the following license:
+
+MIT
+
+-----------
+
+The following npm packages may be included in this product:
+
+ - @rollup/rollup-linux-x64-gnu@4.24.0
+ - @rollup/rollup-linux-x64-musl@4.24.0
+
+These packages each contain the following license:
+
+MIT
+
+-----------
+
