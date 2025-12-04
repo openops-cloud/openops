@@ -2,6 +2,7 @@ import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import { t } from 'i18next';
 import { ChevronRight, Layers, LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { Badge } from '../../ui/badge';
 import {
   Collapsible,
   CollapsibleContent,
@@ -21,6 +22,7 @@ type FlowTemplateFilterItemProps = {
   isActive: boolean;
   logoUrl?: string;
   Icon?: LucideIcon;
+  isNew?: boolean;
 };
 
 const FlowTemplateFilterItem = ({
@@ -30,12 +32,13 @@ const FlowTemplateFilterItem = ({
   onClick,
   logoUrl,
   Icon,
+  isNew = false,
 }: FlowTemplateFilterItemProps) => (
   <div
     aria-selected={isActive}
     role="option"
     className={cn(
-      'w-full px-3 py-[10px] justify-start gap-2.5 inline-flex items-center overflow-hidden cursor-pointer hover:bg-muted',
+      'w-full px-3 py-[10px] justify-start gap-2.5 inline-flex items-center overflow-hidden cursor-pointer hover:bg-muted relative',
       {
         'bg-muted': isActive,
       },
@@ -52,6 +55,14 @@ const FlowTemplateFilterItem = ({
         text={displayName}
         className="w-full font-normal text-slate-600 dark:text-primary text-base leading-snug truncate select-none"
       />
+      {isNew && (
+        <Badge
+          variant="secondary"
+          className="-mx-2.5 text-[10px] font-medium px-0.5"
+        >
+          {t('New')}
+        </Badge>
+      )}
     </TooltipProvider>
   </div>
 );
@@ -94,6 +105,7 @@ type FlowTemplateFilterSidebarProps = {
   onCategoryFilterClick: (category: string) => void;
   clearFilters: () => void;
   categoryLogos?: Record<string, string>;
+  newDomains?: string[];
 };
 
 const FlowTemplateFilterSidebar = ({
@@ -111,6 +123,7 @@ const FlowTemplateFilterSidebar = ({
   onCategoryFilterClick,
   clearFilters,
   categoryLogos,
+  newDomains = [],
 }: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   return (
     <div className="rounded-2xl flex-col justify-start items-start inline-flex h-full w-full px-4 pt-[25px] pb-8 bg-background">
@@ -183,6 +196,7 @@ const FlowTemplateFilterSidebar = ({
                   onClick={onDomainFilterClick}
                   isActive={selectedDomains.includes(domain)}
                   Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
+                  isNew={newDomains.includes(domain)}
                 />
               ))}
             </div>
