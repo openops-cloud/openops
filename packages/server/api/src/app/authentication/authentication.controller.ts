@@ -18,8 +18,8 @@ import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
 import { authenticationService } from './basic/authentication-service';
 import {
-  removeAuthCookiesAndReply,
-  setAuthCookiesAndReply,
+  removeAuthCookies,
+  setAuthCookies,
 } from './context/authentication-cookies';
 
 const edition = system.getEdition();
@@ -55,7 +55,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request, reply) => {
-      return removeAuthCookiesAndReply(reply);
+      return removeAuthCookies(reply).send('Cookies removed');
     },
   );
 
@@ -107,7 +107,7 @@ const signUpRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookiesAndReply(reply, signUpResponse);
+  return setAuthCookies(reply, signUpResponse).send(signUpResponse);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,7 +124,7 @@ const signInRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookiesAndReply(reply, signInResponse);
+  return setAuthCookies(reply, signInResponse).send(signInResponse);
 };
 
 const rateLimitOptions: RateLimitOptions = {

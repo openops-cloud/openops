@@ -1,10 +1,10 @@
-import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
 import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
+import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
@@ -46,13 +46,7 @@ const LoggedIn = ({ children }: { children: React.ReactNode }) => {
   appConnectionsHooks.useConnectionsMetadata();
 
   return (
-    <Suspense
-      fallback={
-        <div className=" flex h-screen w-screen items-center justify-center ">
-          <LoadingSpinner size={50}></LoadingSpinner>
-        </div>
-      }
-    >
+    <Suspense fallback={<FullPageSpinner />}>
       <SocketProvider>{children}</SocketProvider>
     </Suspense>
   );
