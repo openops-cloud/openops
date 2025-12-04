@@ -1,10 +1,13 @@
 import { getTableByName } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
-import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
-import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
+import {
+  createOpportunitiesTable,
+  SEED_OPENOPS_TABLE_NAME,
+} from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
+import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
 
@@ -39,7 +42,8 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
   );
 
   if (!table) {
-    await seedTemplateTablesService.createOpportunityTemplateTable();
+    const tablesContext = await getAdminTablesContext();
+    await createOpportunitiesTable(tablesContext);
   }
 
   await setTableSeedFlag();
