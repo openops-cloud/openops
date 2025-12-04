@@ -10,7 +10,7 @@ const SideMenuNavigation = ({
   links,
   isMinimized,
 }: SideMenuNavigationProps) => (
-  <nav className="flex flex-col w-full gap-1 py-3 px-3 border-t">
+  <nav className="flex flex-col w-full gap-1 py-3 px-3">
     {links.map((link, index) => (
       <MenuNavigationItem
         to={link.to}
