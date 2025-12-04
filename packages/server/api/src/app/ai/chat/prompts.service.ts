@@ -3,17 +3,13 @@ import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
 import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { getAdditionalDescriptionsForSelectedTools } from '../mcp/external-tool-descriptions';
+import { getAdditionalToolDescriptions } from '../mcp/external-tool-descriptions';
 import { hasToolProvider } from '../mcp/tool-utils';
 import { QueryClassification } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
 
 function buildAdditionalToolNotes(selectedTools: ToolSet | undefined): string {
-  if (!selectedTools) {
-    return '';
-  }
-
-  const descriptions = getAdditionalDescriptionsForSelectedTools(selectedTools);
+  const descriptions = getAdditionalToolDescriptions(selectedTools);
   return descriptions.length > 0 ? descriptions.join('\n\n') : '';
 }
 

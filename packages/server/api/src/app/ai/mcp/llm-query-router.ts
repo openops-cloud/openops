@@ -7,7 +7,7 @@ import { projectService } from '../../project/project-service';
 import { getChatTools } from '../chat/ai-chat.service';
 import { buildUIContextSection } from '../chat/prompts.service';
 import { getAdditionalQueryClassificationDescriptions } from './extensions';
-import { getToolAdditionalDescription } from './external-tool-descriptions';
+import { getAdditionalToolDescriptions } from './external-tool-descriptions';
 import { sanitizeMessages } from './tool-utils';
 import { QueryClassification } from './types';
 
@@ -203,17 +203,13 @@ const getSystemPrompt = async (
   const toolsMessage = toolList
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
-  const additionalToolNotes: string[] = [];
-  for (const tool of toolList) {
-    const additionalDescription = getToolAdditionalDescription(tool.name);
-    if (additionalDescription) {
-      additionalToolNotes.push(additionalDescription);
-    }
-  }
+  const additionalToolNotes = getAdditionalToolDescriptions(
+    toolList.map((t) => t.name),
+  );
 
   const additionalToolNotesSection =
     additionalToolNotes.length > 0
-      ? `\n\n## IMPORTANT TOOL USAGE NOTES:\n\n${additionalToolNotes.join(
+      ? `\n\n### IMPORTANT TOOL USAGE NOTES:\n\n${additionalToolNotes.join(
           '\n\n',
         )}\n`
       : '';

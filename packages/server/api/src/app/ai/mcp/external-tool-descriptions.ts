@@ -1,23 +1,20 @@
+import { ToolSet } from 'ai';
 import { MCP_TOOL_ADDITIONAL_DESCRIPTIONS } from './external-tool-descriptions-data';
 
-export function getToolAdditionalDescription(
-  toolName: string,
-): string | undefined {
-  return MCP_TOOL_ADDITIONAL_DESCRIPTIONS[toolName];
-}
-
-export function getAdditionalDescriptionsForSelectedTools(
-  selectedTools: Record<string, unknown> | undefined,
+export function getAdditionalToolDescriptions(
+  tools: ToolSet | string[] | undefined,
 ): string[] {
-  if (!selectedTools) {
+  if (!tools) {
     return [];
   }
 
+  const toolNames = Array.isArray(tools) ? tools : Object.keys(tools);
   const descriptions: string[] = [];
-  for (const toolName of Object.keys(selectedTools)) {
-    const description = getToolAdditionalDescription(toolName);
-    if (description) {
-      descriptions.push(description);
+
+  for (const toolName of toolNames) {
+    const description = MCP_TOOL_ADDITIONAL_DESCRIPTIONS[toolName];
+    if (description?.note) {
+      descriptions.push(description.note);
     }
   }
 
