@@ -1,5 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { ApplicationError, ErrorCode } from '@openops/shared';
+import type { ErrorObject } from 'ajv';
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 
@@ -19,19 +20,28 @@ export const errorHandler = async (
       params: error.error.params,
     });
   } else {
-    const requestSummary = (({ method, url, body, params, query }) => ({
+    const { method, url, body, params, query } = _request;
+    const requestSummary = {
       method,
       url,
       body,
       params,
       query,
-    }))(_request);
+    };
 
-    logger.error('Error handler caught an exception.', {
-      message: error.message,
-      stack: error.stack,
-      request: requestSummary,
-    });
+    if (isValidationError(error)) {
+      logger.debug('Request validation failed.', {
+        message: error.message,
+        validation: error.validation,
+        request: requestSummary,
+      });
+    } else {
+      logger.error('Error handler caught an exception.', {
+        message: error.message,
+        stack: error.stack,
+        request: requestSummary,
+      });
+    }
 
     await reply
       .status(error.statusCode ?? StatusCodes.INTERNAL_SERVER_ERROR)
@@ -51,6 +61,17 @@ const isApplicationError = (error: unknown): error is ApplicationError => {
   } catch (e) {
     return false;
   }
+};
+
+type FastifyValidationError = FastifyError & { validation?: ErrorObject[] };
+
+const isValidationError = (error: unknown): error is FastifyValidationError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'validation' in error &&
+    Array.isArray((error as FastifyValidationError).validation)
+  );
 };
 
 const statusCodeMap: Partial<Record<ErrorCode, StatusCodes>> = {
