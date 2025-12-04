@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ApplicationError } from '@openops/shared';
+import { system } from '../system';
+import { SharedSystemProp } from '../system/system-prop';
 
 export const maxFieldLength = 2048;
 
@@ -23,18 +25,26 @@ const SENSITIVE_FIELD_PATTERNS = SENSITIVE_PATTERNS.map(
     new RegExp(String.raw`"[^"]*${pattern}[^"]*"\s*:\s*"[^"]*"`, 'gi'),
 );
 
+const shouldRedactLogs = (): boolean => {
+  return system.getBoolean(SharedSystemProp.LOG_REDACTION) ?? true;
+};
+
 const isSensitiveField = (key: string): boolean => {
+  if (!shouldRedactLogs()) {
+    return false;
+  }
   const lowerKey = key.toLowerCase();
   return SENSITIVE_PATTERNS.some((pattern) => lowerKey.includes(pattern));
 };
 
 const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
   try {
-    if (obj === null || obj === undefined) {
-      return obj;
-    }
-
-    if (typeof obj !== 'object') {
+    if (
+      obj === null ||
+      obj === undefined ||
+      typeof obj !== 'object' ||
+      !shouldRedactLogs()
+    ) {
       return obj;
     }
 
@@ -67,7 +77,7 @@ const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
 const redactSensitiveDataInString = (
   value: string | undefined,
 ): string | undefined => {
-  if (!value) {
+  if (!value || !shouldRedactLogs()) {
     return value;
   }
   let result = value;
