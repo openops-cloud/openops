@@ -92,7 +92,7 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
   );
 
   try {
-    const bodyAccessKey = await saveRequestBody(request);
+    let bodyAccessKey = await saveRequestBody(request);
 
     throwIfExecutionTimeExceeded();
     await makeHttpRequest(
@@ -107,9 +107,15 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
       } as BodyAccessKeyRequest,
       {
         retries: MAX_RETRIES,
-        retryCondition: (error: AxiosError) => {
+        retryCondition: async (error: AxiosError) => {
           throwIfExecutionTimeExceeded();
-          return isRetryableError(error);
+
+          if (isRetryableError(error)) {
+            bodyAccessKey = await saveRequestBody(request);
+            return true;
+          }
+
+          return false;
         },
         retryDelay: (retryCount: number) => (retryCount + 1) * 200, // 200ms, 400ms, 600ms
       },
