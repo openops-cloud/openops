@@ -48,52 +48,43 @@ Alternatively, discuss your ideas with the OpenOps team in the [Slack community]
 
 We love innovative ideas that can take OpenOps to the next level!
 
-## 🤝 Community
+### 🚀 Creating a Pull Request
+
+Before making any significant code changes, please discuss them in the relevant [issue](https://github.com/openops-cloud/openops/issues) or in the [OpenOps Community](https://slack.openops.com) to ensure alignment with the OpenOps team and gather feedback.
+
+To contribute code changes to this repository:
+
+1. **Fork this repository**: Create your own copy of the repository.
+2. **Create a branch**: Use a descriptive name, e.g., `fix-issue-xyz` or `feature-abc`.
+3. **Set up the [development environment](https://docs.openops.com/contributing/development-environment)**.
+4. **Make changes**: Implement your changes in the new branch. See the [OpenOps Contributing Guide](https://docs.openops.com/contributing) for specific advice, such as [how to choose an authentication method](https://docs.openops.com/contributing/authentication) or [how to develop an integration](https://docs.openops.com/contributing/contributing-an-integration). When contributing:
+    * Follow existing code style and patterns in the repository.  
+    * Write clear, self-documenting code with descriptive variable and function names.  
+    * Include comments for complex logic or non-obvious behavior.
+5. **Test your changes**: Write and update tests to ensure your code works as expected and doesn't break existing functionality.
+6. **Commit changes**: Write clear, concise commit messages.
+7. **Push to your fork**: Push your changes to your GitHub fork.
+8. **Open a Pull Request**: Navigate to the original repository and [open a pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) from your forked repository.
+9. **Describe your changes**: In the PR description, explain what your changes do and why they're needed.
+
+*By contributing to OpenOps, you agree that your contributions will be licensed under the project's [Apache 2.0 License](./LICENSE).*
+
+### 🤝 Community
 
 Join our community to discuss ideas, ask questions, and connect with other contributors:
 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
-### 🚀 Creating a Pull Request
-
-To contribute code or documentation:
-
-1. **Fork the Repository**: Create your own copy of the repository.
-
-2. **Create a Branch**: Use a descriptive name, e.g., `fix-issue-xyz` or `feature-abc`.
-
-3. **Make Changes**: Implement your changes in the new branch.
-
-4. **Test Your Changes**: Ensure your code works as expected and doesn't break existing functionality.
-
-5. **Commit Changes**: Write clear, concise commit messages.
-
-6. **Push to Your Fork**: Push your changes to your GitHub fork.
-
-7. **Open a Pull Request**: Navigate to the original repository and [open a pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) from your forked repository.
-
-8. **Describe Your Changes**: In the PR description, explain what your changes do and why they're needed.
-
-**Note**: For any significant changes, we recommend discussing them via an issue or on our Slack before implementation to ensure alignment and gather feedback.
-
-*By contributing to OpenOps, you agree that your contributions will be licensed under the project's [Apache 2.0 License](./LICENSE).*
-
-#### 📝 Code Style Guidelines
-
-When contributing code, please follow these guidelines:
-
-* Follow existing code style and patterns in the repository.  
-* Write clear, self-documenting code with descriptive variable and function names.  
-* Include comments for complex logic or non-obvious behavior.  
-* Write tests for new functionality and any changes.  
-* Update documentation for user-facing changes.
-
 ## 🎉 Recognition
 
 We believe in recognizing contributions. Contributors will be:
 
-* Mentioned in the release notes once their contribution is accepted  
+* Mentioned in the [release notes](https://github.com/openops-cloud/openops/releases) once their contribution is accepted.
 * Considered for early access to new features.
+
+## 🙏 Many Thanks to other OSS projects!
+
+OpenOps leverages code from other open-source projects, such as [ActivePieces](https://github.com/activepieces/activepieces), [Baserow](https://gitlab.com/baserow/baserow), [Superset](https://github.com/apache/superset), [React Flow](https://github.com/xyflow/xyflow), and more. Huge thanks to the OSS community; we are thrilled to be a part of it and contribute back.
 
 ## ❓ Questions?
 
@@ -102,8 +93,3 @@ If you have any questions about contributing, please reach out:
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
 We appreciate your contributions and look forward to collaborating with you!
-
-## 🙏 Many Thanks to other OSS projects!
-
-OpenOps leverages code from other open-source projects, such as [ActivePieces](https://github.com/activepieces/activepieces), [Baserow](https://gitlab.com/baserow/baserow), [Superset](https://github.com/apache/superset), [React Flow](https://github.com/xyflow/xyflow), and more. Huge thanks to the OSS community; we are thrilled to be a part of it and contribute back.
-
