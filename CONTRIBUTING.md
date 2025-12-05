@@ -8,14 +8,15 @@ Your involvement will help improve FinOps automation for everyone, and this guid
 
 ## 🌟 How You Can Contribute
 
+Here are some common ways to contribute to OpenOps:
+
 * **[Report bugs](#-reporting-bugs)**   
 * **[Suggest features](#-suggesting-features)**
-* **[Submit PRs](#-creating-a-pull-request)**
+* **[Submit pull requests](#-creating-a-pull-request)**
 * **Improve documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
 * **Spread the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
 * **Join the OpenOps Community** on Slack to discuss ideas, ask questions, connect with other users and contributors:
-
-[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
+    [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
 ### 🐛 Reporting Bugs
 
@@ -37,11 +38,11 @@ Please let us know if you plan to [submit a PR](#-creating-a-pull-request) to ad
 
 To propose a new feature:
 
-1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Ensure the feature hasn't been suggested. If you find a previously suggested feature, upvote it by reacting with 👍.  
+1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Ensure the feature hasn't been suggested. To support a previously suggested feature, upvote it by reacting with 👍.  
 2. [Propose a feature](https://github.com/openops-cloud/openops/issues/new?template=feature-request.md): If not found, create a new issue using the "Feature Request" template. Include:  
-   * A clear description of the feature.  
-   * The problem it solves.  
-   * Any relevant context or examples.  
+   * A clear description of the feature.
+   * The problem it solves.
+   * Any relevant context or examples.
    * Potential implementation approaches, if you have ideas.
 
 Alternatively, discuss your ideas with the OpenOps team in the [Slack community](https://slack.openops.com).
@@ -51,6 +52,10 @@ Alternatively, discuss your ideas with the OpenOps team in the [Slack community]
 We love innovative ideas that can take OpenOps to the next level!
 
 ### 🚀 Creating a Pull Request
+
+You're welcome to submit PRs that address reported bugs or add new features.
+
+When it comes to feature contributions, external contributors most often submit PRs that introduce integrations with other tools relevant to the FinOps community, such as cloud providers, optimization services, and project management tools. 
 
 Before making any significant code changes, please discuss them in the relevant [issue](https://github.com/openops-cloud/openops/issues) or in the [OpenOps Community](https://slack.openops.com) to ensure alignment with the OpenOps team and gather feedback.
 
