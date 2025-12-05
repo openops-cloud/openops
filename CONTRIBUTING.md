@@ -57,9 +57,7 @@ You're welcome to submit PRs that address reported bugs or add new features.
 
 External contributors often submit PRs introducing integrations with tools relevant to the FinOps community, such as cloud platforms, optimization services, and project management tools.
 
-Before making significant changes, please discuss them in the relevant  
-[issue](https://github.com/openops-cloud/openops/issues) or in the  
-[OpenOps Community](https://slack.openops.com) to ensure alignment and gather feedback.
+Before making significant changes, please discuss them in the relevant [issue](https://github.com/openops-cloud/openops/issues) or in the [OpenOps Community](https://slack.openops.com) to ensure alignment and gather feedback.
 
 To contribute code changes:
 
