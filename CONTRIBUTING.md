@@ -63,15 +63,15 @@ To contribute code changes:
 
 1. **Fork this repository** to create your own copy.
 2. **Create a branch** with a descriptive name (e.g., `fix-issue-xyz`, `feature-abc`).
-3. **Set up the [development dnvironment](https://docs.openops.com/contributing/development-environment)**.
-4. **Make changes** in your branch. See the [OpenOps Contributing Guide](https://docs.openops.com/contributing) for guidance, such as [choosing an authentication method](https://docs.openops.com/contributing/authentication) or [developing an integration](https://docs.openops.com/contributing/contributing-an-integration). When contributing:
+3. **Set up the [development environment](https://docs.openops.com/contributing/development-environment)**.
+4. **Make changes** in your branch. See the [OpenOps Contributing Guide](https://docs.openops.com/contributing) for guidance on specific tasks, such as [choosing an authentication method](https://docs.openops.com/contributing/authentication) or [developing an integration](https://docs.openops.com/contributing/contributing-an-integration). When contributing:
    * Follow existing code style and patterns
    * Write clear, self-documenting code with descriptive variable and function names
    * Add comments for complex or non-obvious logic
 5. **Test your changes**. Add or update tests to ensure your code works as expected and doesn't break existing functionality.
 6. **Commit changes** with clear, concise commit messages.
 7. **Push to your fork**.
-8. **Open a Pull Request** in the original repository.
+8. **Open a Pull Request** from your fork to this repository.
 9. **Describe your changes** clearly in the PR description.
 
 *By contributing to OpenOps, you agree that your work will be licensed under the project's [Apache 2.0 License](./LICENSE).*
