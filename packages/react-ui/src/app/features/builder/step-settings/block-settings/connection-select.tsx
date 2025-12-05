@@ -18,7 +18,7 @@ import {
   removeConnectionBrackets,
 } from '@openops/shared';
 import { t } from 'i18next';
-import { Plus } from 'lucide-react';
+import { PencilLine, Plus, X } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -68,9 +68,9 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   );
 
   const handleReconnectClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (e?: React.MouseEvent<HTMLElement>) => {
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
       const currentValue = form.getValues(params.name);
       const connectionName = removeConnectionBrackets(currentValue ?? '');
 
@@ -138,45 +138,84 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 }}
                 disabled={params.disabled}
               >
-                <div className="relative">
-                  {field.value && !field.disabled && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="xs"
-                      className="z-50 absolute right-8 top-2 "
-                      onClick={handleReconnectClick}
-                    >
-                      {t('Reconnect')}
-                    </Button>
-                  )}
-
-                  <SelectTrigger className="flex gap-2 items-center">
+                <SelectTrigger
+                  className="h-14 flex items-center gap-2"
+                  iconClassName="size-5"
+                >
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <SelectValue
-                      className="truncate flex-grow flex-shrink"
-                      placeholder={t('Select a connection')}
+                      placeholder={
+                        <span className="text-start block">
+                          {t('Select a connection')}
+                        </span>
+                      }
                     >
                       {!!field.value && (
-                        <div className="truncate flex-grow flex-shrink">
+                        <span className="text-start block truncate text-primary-700 text-base font-medium">
                           {removeConnectionBrackets(field.value)}
-                        </div>
+                        </span>
                       )}
                     </SelectValue>
-                    <div className="grow"></div>
-                    {/* Hidden Button to take same space as shown button */}
-                    {field.value && (
+                  </div>
+
+                  {field.value && !field.disabled && (
+                    <div className="shrink-0 flex items-center gap-1">
                       <Button
                         type="button"
                         variant="ghost"
                         size="xs"
-                        className="z-50 opacity-0 pointer-events-none"
+                        className="text-primary-700 text-base font-medium"
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === ' ' || e.key === 'Enter') {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }
+                        }}
+                        onClick={(e) => {
+                          handleReconnectClick(e);
+                        }}
                       >
-                        {t('Reconnect')}
+                        <PencilLine size={16} />
+                        {t('Edit')}
                       </Button>
-                    )}
-                  </SelectTrigger>
-                </div>
 
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        className="text-primary-700 text-base font-medium"
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === ' ' || e.key === 'Enter') {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }
+                        }}
+                        onClick={() => {
+                          field.onChange('');
+                        }}
+                      >
+                        <X size={16} />
+                        {t('Clear')}
+                      </Button>
+                    </div>
+                  )}
+                </SelectTrigger>
                 <SelectContent>
                   <SelectAction
                     onClick={() => {
@@ -187,7 +226,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                   >
                     <span className="flex items-center gap-1 text-primary w-full">
                       <Plus size={16} />
-                      {t('Create Connection')}
+                      {t('Create new connection')}
                     </span>
                   </SelectAction>
 
