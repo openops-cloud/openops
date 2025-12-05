@@ -140,8 +140,8 @@ const WorkflowStepNode = React.memo(
 
       const actionMetadata = getActionMetadata(
         actionsMetadata,
-        data.step?.settings.blockName,
-        data.step?.settings.actionName,
+        blockName,
+        actionName,
       );
 
       return actionMetadata?.riskLevel === RiskLevel.HIGH;
