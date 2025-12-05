@@ -8,11 +8,11 @@ Your involvement will help improve FinOps automation for everyone, and this guid
 
 ## 🌟 How You Can Contribute
 
-* **[Reporting bugs](#-reporting-bugs)**.   
+* **[Reporting bugs](#-reporting-bugs)**   
 * **[Suggesting features](#-suggesting-features)**
-* **Fixing bugs**  
+* **[Submitting PRs](#-creating-a-pull-request)**
 * **Improving documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
-* **Joining the OpenOps Community:** We welcome you in the OpenOps [Slack community](https://slack.openops.com).  
+* **[Joining the OpenOps Community](#-community)**.  
 * **Spreading the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
 
 ### 🐛 Reporting Bugs
@@ -29,13 +29,13 @@ If you find a bug:
 
 We take every bug report seriously and appreciate your help in making OpenOps better!
 
-Please let us know if you plan to [submit a PR](TODO link) to address the issue.
+Please let us know if you plan to [submit a PR](#-creating-a-pull-request) to address the issue.
 
 ### 💡 Suggesting Features
 
 To propose a new feature:
 
-1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Ensure the feature hasn't been suggested. If you find a previously suggested feature, upvote it by reacting with :thumbs-up:.  
+1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Ensure the feature hasn't been suggested. If you find a previously suggested feature, upvote it by reacting with 👍.  
 2. [Propose a feature](https://github.com/openops-cloud/openops/issues/new?template=feature-request.md): If not found, create a new issue using the "Feature Request" template. Include:  
    * A clear description of the feature.  
    * The problem it solves.  
@@ -48,7 +48,13 @@ Alternatively, discuss your ideas with the OpenOps team in the [Slack community]
 
 We love innovative ideas that can take OpenOps to the next level!
 
-## 🚀 Creating a Pull Request
+## 🤝 Community
+
+Join our community to discuss ideas, ask questions, and connect with other contributors:
+
+[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
+
+### 🚀 Creating a Pull Request
 
 To contribute code or documentation:
 
@@ -70,7 +76,9 @@ To contribute code or documentation:
 
 **Note**: For any significant changes, we recommend discussing them via an issue or on our Slack before implementation to ensure alignment and gather feedback.
 
-## 📝 Code Style Guidelines
+*By contributing to OpenOps, you agree that your contributions will be licensed under the project's [Apache 2.0 License](./LICENSE).*
+
+#### 📝 Code Style Guidelines
 
 When contributing code, please follow these guidelines:
 
@@ -79,12 +87,6 @@ When contributing code, please follow these guidelines:
 * Include comments for complex logic or non-obvious behavior.  
 * Write tests for new functionality and any changes.  
 * Update documentation for user-facing changes.
-
-## 🤝 Community
-
-Join our community to discuss ideas, ask questions, and connect with other contributors:
-
-[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
 ## 🎉 Recognition
 
@@ -104,8 +106,4 @@ We appreciate your contributions and look forward to collaborating with you!
 ## 🙏 Many Thanks to other OSS projects!
 
 OpenOps leverages code from other open-source projects, such as [ActivePieces](https://github.com/activepieces/activepieces), [Baserow](https://gitlab.com/baserow/baserow), [Superset](https://github.com/apache/superset), [React Flow](https://github.com/xyflow/xyflow), and more. Huge thanks to the OSS community; we are thrilled to be a part of it and contribute back.
-
----
-
-*By contributing to OpenOps, you agree that your contributions will be licensed under the project's [Apache 2.0 License](./LICENSE).*
 
