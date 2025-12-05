@@ -222,7 +222,7 @@ const getSystemPrompt = async (
  * @param targetKey - The key to search for.
  * @returns The value of the first key in the object.
  */
-function findFirstKeyInObject(
+export function findFirstKeyInObject(
   obj: Record<string, unknown>,
   targetKey: string,
 ): unknown {
