@@ -8,11 +8,45 @@ Your involvement will help improve FinOps automation for everyone, and this guid
 
 ## 🌟 How You Can Contribute
 
-* **Reporting and fixing bugs**: If you encounter a bug, please [open an issue](https://github.com/openops-cloud/openops/issues/new?template=bug.md) to inform us. Please let us know if you plan to raise a PR to address the issue.  
-* **Suggesting features**: Have ideas for improvements? [Propose a feature](https://github.com/openops-cloud/openops/issues/new?template=feature-request.md) for discussion. We love every idea!  
+* **[Reporting bugs](#-reporting-bugs)**.   
+* **[Suggesting features](#-suggesting-features)**
+* **Fixing bugs**  
 * **Improving documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
 * **Joining the OpenOps Community:** We welcome you in the OpenOps [Slack community](https://slack.openops.com).  
 * **Spreading the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
+
+### 🐛 Reporting Bugs
+
+If you find a bug:
+
+1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Check if the issue has already been reported.  
+2. **[Open a new issue](https://github.com/openops-cloud/openops/issues/new?template=bug.md)**: If an existing issue was not found, create a new issue with:  
+   * A descriptive title.  
+   * Steps to reproduce the issue.  
+   * Expected and actual behavior.  
+   * Screenshots or logs, if applicable.  
+   * Your environment (OS, browser, version, etc.).
+
+We take every bug report seriously and appreciate your help in making OpenOps better!
+
+Please let us know if you plan to [submit a PR](TODO link) to address the issue.
+
+### 💡 Suggesting Features
+
+To propose a new feature:
+
+1. **[Search existing issues](https://github.com/openops-cloud/openops/issues)**: Ensure the feature hasn't been suggested. If you find a previously suggested feature, upvote it by reacting with :thumbs-up:.  
+2. [Propose a feature](https://github.com/openops-cloud/openops/issues/new?template=feature-request.md): If not found, create a new issue using the "Feature Request" template. Include:  
+   * A clear description of the feature.  
+   * The problem it solves.  
+   * Any relevant context or examples.  
+   * Potential implementation approaches, if you have ideas.
+
+Alternatively, discuss your ideas with the OpenOps team in the [Slack community](https://slack.openops.com).
+
+[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
+
+We love innovative ideas that can take OpenOps to the next level!
 
 ## 🚀 Creating a Pull Request
 
@@ -35,36 +69,6 @@ To contribute code or documentation:
 8. **Describe Your Changes**: In the PR description, explain what your changes do and why they're needed.
 
 **Note**: For any significant changes, we recommend discussing them via an issue or on our Slack before implementation to ensure alignment and gather feedback.
-
-## 🐛 Reporting Bugs
-
-If you find a bug:
-
-1. **Search Existing Issues**: Check if the issue has already been reported.  
-2. **Open a New Issue**: If not found, create a new issue with:  
-   * A descriptive title.  
-   * Steps to reproduce the issue.  
-   * Expected and actual behavior.  
-   * Screenshots or logs, if applicable.  
-   * Your environment (OS, browser, version, etc.).
-
-We take every bug report seriously and appreciate your help in making OpenOps better!
-
-## 💡 Suggesting Features
-
-To propose a new feature:
-
-1. **Search Existing Issues**: Ensure the feature hasn't been suggested.  
-2. **Open a New Issue**: If not found, create a new issue and tag it as an `improvement`. Include:  
-   * A clear description of the feature.  
-   * The problem it solves.  
-   * Any relevant context or examples.  
-   * Potential implementation approaches, if you have ideas.  
-3. **Through Slack:** Discuss your ideas with the OpenOps team in the [Slack community](https://slack.openops.com).
-
-[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
-
-We love innovative ideas that can take OpenOps to the next level!
 
 ## 📝 Code Style Guidelines
 
