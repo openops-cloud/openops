@@ -25,6 +25,7 @@ import {
 import { ModelMessage, UserModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import removeMarkdown from 'markdown-to-text';
 import {
   createChatContext,
   deleteChatHistory,
@@ -263,7 +264,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       }
 
       const rawChatName = await generateChatName(userMessages, projectId);
-      const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
+      const chatName = removeMarkdown(rawChatName).trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
 
