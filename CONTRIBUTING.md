@@ -1,22 +1,20 @@
-![Contribuitng](./static/OpenOps-GitHub-Contributing-Cover.png)
+![Contributing](./static/OpenOps-GitHub-Contributing-Cover.png)
 
-# **Hello there friend! 👋**
+# Hello there friend! 👋
 
-
-Thank you for considering contributing to OpenOps - **any contribution is welcome\!** 
+Thank you for considering contributing to OpenOps - **any contribution is welcome!** 
 
 Your involvement will help improve FinOps automation for everyone, and this guide outlines how you can do it effectively.
 
-## **🌟 How You Can Contribute**
+## 🌟 How You Can Contribute
 
-* **Reporting and fixing bugs**: If you encounter any issues, please open an issue to inform us. Please let us know if you plan to raise a PR for the issue.  
-* **Suggesting Features**: Have ideas for improvements? Propose a feature for discussion. We love every idea\!  
-* **Improving Documentation**: Notice any gaps or errors in our documentation? Submit a PR with your corrections or enhancements in our [docs repository](https://github.com/openops-cloud/docs).  
-* **Sharing Use Cases**: Real-world examples help others see the potential of OpenOps in their organizations.  
-* **Joining the Community:** We welcome you in the OpenOps [Slack community](https://slack.openops.com)**.**  
-* **Spreading the Word**: Tell others about OpenOps through blog posts, talks, or social media ❤️
+* **Reporting and fixing bugs**: If you encounter a bug, please [open an issue](https://github.com/openops-cloud/openops/issues/new?template=bug.md) to inform us. Please let us know if you plan to raise a PR to address the issue.  
+* **Suggesting features**: Have ideas for improvements? [Propose a feature](https://github.com/openops-cloud/openops/issues/new?template=feature-request.md) for discussion. We love every idea!  
+* **Improving documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
+* **Joining the OpenOps Community:** We welcome you in the OpenOps [Slack community](https://slack.openops.com).  
+* **Spreading the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
 
-## **🚀 Creating a Pull Request**
+## 🚀 Creating a Pull Request
 
 To contribute code or documentation:
 
@@ -38,7 +36,7 @@ To contribute code or documentation:
 
 **Note**: For any significant changes, we recommend discussing them via an issue or on our Slack before implementation to ensure alignment and gather feedback.
 
-## **🐛 Reporting Bugs**
+## 🐛 Reporting Bugs
 
 If you find a bug:
 
@@ -50,9 +48,9 @@ If you find a bug:
    * Screenshots or logs, if applicable.  
    * Your environment (OS, browser, version, etc.).
 
-We take every bug report seriously and appreciate your help in making OpenOps better\!
+We take every bug report seriously and appreciate your help in making OpenOps better!
 
-## **💡 Suggesting Features**
+## 💡 Suggesting Features
 
 To propose a new feature:
 
@@ -66,9 +64,9 @@ To propose a new feature:
 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
-We love innovative ideas that can take OpenOps to the next level\!
+We love innovative ideas that can take OpenOps to the next level!
 
-## **📝 Code Style Guidelines**
+## 📝 Code Style Guidelines
 
 When contributing code, please follow these guidelines:
 
@@ -78,28 +76,28 @@ When contributing code, please follow these guidelines:
 * Write tests for new functionality and any changes.  
 * Update documentation for user-facing changes.
 
-## **🤝 Community**
+## 🤝 Community
 
 Join our community to discuss ideas, ask questions, and connect with other contributors:
 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
-## **🎉 Recognition**
+## 🎉 Recognition
 
 We believe in recognizing contributions. Contributors will be:
 
 * Mentioned in the release notes once their contribution is accepted  
 * Considered for early access to new features.
 
-## **❓ Questions?**
+## ❓ Questions?
 
 If you have any questions about contributing, please reach out:
 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
-We appreciate your contributions and look forward to collaborating with you\!
+We appreciate your contributions and look forward to collaborating with you!
 
-## **🙏 Many Thanks to other OSS projects!**
+## 🙏 Many Thanks to other OSS projects!
 
 OpenOps leverages code from other open-source projects, such as [ActivePieces](https://github.com/activepieces/activepieces), [Baserow](https://gitlab.com/baserow/baserow), [Superset](https://github.com/apache/superset), [React Flow](https://github.com/xyflow/xyflow), and more. Huge thanks to the OSS community; we are thrilled to be a part of it and contribute back.
 
