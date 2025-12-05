@@ -101,8 +101,18 @@ export const userService = {
   async get({ id }: IdParams): Promise<User | null> {
     return userRepo().findOneBy({ id });
   },
-  async getOneOrFail({ id }: IdParams): Promise<User> {
-    return userRepo().findOneByOrFail({ id });
+  async getOneOrThrow({ id }: IdParams): Promise<User> {
+    const user = await this.get({ id });
+    if (isNil(user)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityId: id,
+          entityType: 'user',
+        },
+      });
+    }
+    return user;
   },
 
   async getDefaultAdmin(): Promise<User | null> {
@@ -201,7 +211,7 @@ export const userService = {
       password: hashedPassword,
     });
 
-    return userService.getOneOrFail({ id });
+    return userService.getOneOrThrow({ id });
   },
 
   async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {

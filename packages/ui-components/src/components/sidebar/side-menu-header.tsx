@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/cn';
+import { TOP_BAR_HEIGHT } from '../../lib/constants';
 import { Tooltip, TooltipTrigger } from '../../ui/tooltip';
 
 const SideMenuHeader = ({
@@ -13,9 +14,10 @@ const SideMenuHeader = ({
 }) => (
   <div
     className={cn(
-      'w-full flex items-center px-6 py-[18px] h-[60px] flex-shrink-0',
+      'w-full flex items-center px-6 py-[18px] flex-shrink-0 border-b',
       className,
     )}
+    style={{ height: `${TOP_BAR_HEIGHT}px` }}
   >
     <Link to="/">
       <Tooltip>
