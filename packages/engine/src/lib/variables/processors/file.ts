@@ -31,7 +31,7 @@ function handleBase64File(propertyValue: string): WorkflowFile | null {
   if (!isBase64(propertyValue, { allowMime: true })) {
     return null;
   }
-  const matches = propertyValue.match(/^data:([A-Za-z-+/]+);base64,(.+)$/); // example match: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+  const matches = propertyValue.match(/^data:([A-Za-z.+/-]+);base64,(.+)$/); // example match: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
   if (!matches || matches?.length !== 3) {
     return null;
   }

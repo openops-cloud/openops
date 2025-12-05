@@ -9,7 +9,7 @@ describe('Props Processor', () => {
     };
     const props = {
       base64WithMime: Property.File({
-        displayName: 'Base64',
+        displayName: 'Base64WithMime',
         required: true,
       }),
       base64: Property.File({
