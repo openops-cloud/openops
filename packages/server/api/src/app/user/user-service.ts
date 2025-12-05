@@ -313,7 +313,6 @@ function getStaticSalt(): string {
   return system.getOrThrow<string>(AppSystemProp.OPENOPS_ADMIN_PASSWORD_SALT);
 }
 
-
 type DeleteParams = {
   id: UserId;
   organizationId: OrganizationId | null;
