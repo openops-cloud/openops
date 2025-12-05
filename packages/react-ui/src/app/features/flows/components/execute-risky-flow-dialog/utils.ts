@@ -7,7 +7,7 @@ import { Action, ActionType, RiskLevel, Trigger } from '@openops/shared';
 
 type ActionOrTriggerWithIndex = (Action | Trigger) & { index: number };
 
-const getActionMetadata = (
+export const getActionMetadata = (
   metadata: StepMetadataWithSuggestions[] | undefined,
   blockName: string,
   actionName: string | undefined,
