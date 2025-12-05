@@ -158,7 +158,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                     </SelectValue>
                   </div>
 
-                  {field.value && !field.disabled && (
+                  {field.value && !field.disabled && !params.disabled && (
                     <div className="shrink-0 flex items-center gap-1">
                       <Button
                         type="button"
