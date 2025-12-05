@@ -8,12 +8,14 @@ Your involvement will help improve FinOps automation for everyone, and this guid
 
 ## 🌟 How You Can Contribute
 
-* **[Reporting bugs](#-reporting-bugs)**   
-* **[Suggesting features](#-suggesting-features)**
-* **[Submitting PRs](#-creating-a-pull-request)**
-* **Improving documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
-* **[Joining the OpenOps Community](#-community)**.  
-* **Spreading the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
+* **[Report bugs](#-reporting-bugs)**   
+* **[Suggest features](#-suggesting-features)**
+* **[Submit PRs](#-creating-a-pull-request)**
+* **Improve documentation**: Notice any gaps or errors in our documentation? [Open an issue](https://github.com/openops-cloud/docs/issues/new) in our [Docs repository](https://github.com/openops-cloud/docs). Feel free to submit a PR with your corrections - if you do, please reference the issue number in your PR.
+* **Spread the word**: Tell others about OpenOps and your real-world experience with the product through blog posts, talks, or social media ❤️
+* **Join the OpenOps Community** on Slack to discuss ideas, ask questions, connect with other users and contributors:
+
+[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
 ### 🐛 Reporting Bugs
 
@@ -68,12 +70,6 @@ To contribute code changes to this repository:
 9. **Describe your changes**: In the PR description, explain what your changes do and why they're needed.
 
 *By contributing to OpenOps, you agree that your contributions will be licensed under the project's [Apache 2.0 License](./LICENSE).*
-
-### 🤝 Community
-
-Join our community to discuss ideas, ask questions, and connect with other contributors:
-
-[![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 
 ## 🎉 Recognition
 
