@@ -72,7 +72,7 @@ async function handleArrayProperty(
       const parsed = tryParseJson(value);
 
       return {
-        processedArray: Array.isArray(parsed) ? parsed : [],
+        processedArray: Array.isArray(parsed) ? parsed : [parsed],
         arrayErrors: undefined,
       };
     }
