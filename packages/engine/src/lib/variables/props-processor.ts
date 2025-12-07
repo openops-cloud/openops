@@ -67,11 +67,10 @@ async function handleArrayProperty(
   processedArray: unknown[];
   arrayErrors: PropsValidationError | undefined;
 }> {
-  // Simple array without nested properties
   if (!('properties' in property) || !property.properties) {
     if (typeof value === 'string') {
       const parsed = tryParseJson(value);
-      // Ensure the parsed value is an array
+
       return {
         processedArray: Array.isArray(parsed) ? parsed : [],
         arrayErrors: undefined,
@@ -80,7 +79,6 @@ async function handleArrayProperty(
     return { processedArray: value as unknown[], arrayErrors: undefined };
   }
 
-  // Complex array with nested properties - use arrayZipperProcessor
   const arrayOfObjects = arrayZipperProcessor(property, value);
   const processedArray = [];
   const processedErrors = [];
@@ -196,7 +194,6 @@ async function processInputProperties(
       continue;
     }
 
-    // Handle array properties
     if (property.type === PropertyType.ARRAY) {
       const { processedArray, arrayErrors } = await handleArrayProperty(
         key,
@@ -210,7 +207,6 @@ async function processInputProperties(
       continue;
     }
 
-    // Apply processor
     const processor = processors[property.type];
     if (processor) {
       context.processedInput[key] = await processor(property, value);
@@ -226,7 +222,6 @@ async function processInputProperties(
       context.processedInput[key] = value;
     }
 
-    // Validate required fields
     const requiredError = validateRequiredField(key, value, property);
     if (requiredError) {
       context.errors[property.displayName] = requiredError;
@@ -247,7 +242,6 @@ export const propsProcessor = {
     const processedInput = { ...resolvedInput };
     const errors: PropsValidationError = {};
 
-    // 1. Handle authentication
     const { processedAuth, authErrors } = await handleAuthentication(
       resolvedInput,
       auth,
@@ -260,7 +254,6 @@ export const propsProcessor = {
       errors.auth = authErrors;
     }
 
-    // 2. Process input properties
     await processInputProperties({
       resolvedInput,
       props,
@@ -268,14 +261,12 @@ export const propsProcessor = {
       errors,
     });
 
-    // 3. Validate processed properties
     for (const [key, value] of Object.entries(processedInput)) {
       const property = props[key];
       if (isNil(property) || (isNil(value) && !property.required)) {
         continue;
       }
 
-      // Type validation using Zod
       const schema = getSchemaForType(property, resolvedInput[key]);
       try {
         schema.parse(value);
@@ -286,7 +277,6 @@ export const propsProcessor = {
         }
       }
 
-      // Custom validators
       const validatorErrors = executeCustomValidators(
         property,
         processedInput[key],
