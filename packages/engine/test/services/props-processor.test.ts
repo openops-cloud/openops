@@ -482,4 +482,58 @@ describe('Props Processor', () => {
       'Empty String Number': ['Expected a number, received: '],
     });
   });
+
+  it('should wrap non-array JSON strings in array for PropertyType.ARRAY', async () => {
+    const input = {
+      arrayOfStrings: '["item1", "item2"]',
+      objectAsString: '{"key": "value"}',
+      numberAsString: '123',
+      plainString: 'not-json',
+    };
+
+    const props = {
+      arrayOfStrings: Property.Array({
+        displayName: 'Array of Strings',
+        required: true,
+      }),
+      objectAsString: Property.Array({
+        displayName: 'Object as String',
+        required: true,
+      }),
+      numberAsString: Property.Array({
+        displayName: 'Number as String',
+        required: true,
+      }),
+      plainString: Property.Array({
+        displayName: 'Plain String',
+        required: true,
+      }),
+    };
+
+    const { processedInput, errors } = await propsProcessor.applyProcessorsAndValidators(
+      input,
+      props,
+      BlockAuth.None(),
+      false,
+    );
+
+    // Array strings should remain as arrays
+    expect(Array.isArray(processedInput.arrayOfStrings)).toBe(true);
+    expect(processedInput.arrayOfStrings).toEqual(['item1', 'item2']);
+
+    // Objects should be wrapped in array
+    expect(Array.isArray(processedInput.objectAsString)).toBe(true);
+    expect(processedInput.objectAsString).toEqual([{ key: 'value' }]);
+
+    // Numbers should be wrapped in array
+    expect(Array.isArray(processedInput.numberAsString)).toBe(true);
+    expect(processedInput.numberAsString).toEqual([123]);
+
+    // Unparsed strings should be wrapped in array
+    expect(Array.isArray(processedInput.plainString)).toBe(true);
+    expect(processedInput.plainString).toEqual(['not-json']);
+
+    // No errors should be present
+    expect(Object.keys(errors)).toHaveLength(0);
+  });
 });
