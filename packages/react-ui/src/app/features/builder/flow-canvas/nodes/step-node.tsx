@@ -32,11 +32,10 @@ import {
   FlowRunStatus,
   FlowVersion,
   isNil,
-  RiskLevel,
   TriggerType,
 } from '@openops/shared';
 
-import { getActionMetadata } from '@/app/features/flows/components/execute-risky-flow-dialog/utils';
+import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { ShieldHalf } from 'lucide-react';
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
 import { CollapsibleButton } from './collapsible-button';
@@ -130,26 +129,11 @@ const WorkflowStepNode = React.memo(
       return getStepStatus(data.step?.name, run, loopIndexes, flowVersion);
     }, [data.step?.name, run, loopIndexes, flowVersion]);
 
-    const isRiskyStep = useMemo(() => {
-      const actionName = data.step?.settings.actionName;
-      const blockName = data.step?.settings.blockName;
-
-      if (!actionsMetadata || !actionName || !blockName) {
-        return false;
-      }
-
-      const actionMetadata = getActionMetadata(
-        actionsMetadata,
-        blockName,
-        actionName,
-      );
-
-      return actionMetadata?.riskLevel === RiskLevel.HIGH;
-    }, [
+    const isRiskyStep = flowsHooks.useIsRiskyAction(
       actionsMetadata,
-      data.step?.settings.actionName,
       data.step?.settings.blockName,
-    ]);
+      data.step?.settings.actionName,
+    );
 
     const showRunningIcon =
       isNil(stepOutputStatus) && run?.status === FlowRunStatus.RUNNING;

@@ -1,28 +1,8 @@
-import { ActionBase } from '@openops/blocks-framework';
-import {
-  BlockStepMetadataWithSuggestions,
-  StepMetadataWithSuggestions,
-} from '@openops/components/ui';
+import { StepMetadataWithSuggestions } from '@openops/components/ui';
 import { Action, ActionType, RiskLevel, Trigger } from '@openops/shared';
+import { flowsUtils } from '@/app/features/flows/lib/flows-utils';
 
 type ActionOrTriggerWithIndex = (Action | Trigger) & { index: number };
-
-export const getActionMetadata = (
-  metadata: StepMetadataWithSuggestions[] | undefined,
-  blockName: string,
-  actionName: string | undefined,
-): ActionBase | undefined => {
-  const blockStepMetadata = metadata?.find(
-    (stepMetadata: StepMetadataWithSuggestions) =>
-      stepMetadata.type === ActionType.BLOCK &&
-      (stepMetadata as BlockStepMetadataWithSuggestions).blockName ===
-        blockName,
-  ) as BlockStepMetadataWithSuggestions | undefined;
-
-  return blockStepMetadata?.suggestedActions?.find(
-    (suggestedAction) => suggestedAction.name === actionName,
-  );
-};
 
 export const getRiskyActionFormattedNames = (
   allSteps: (Action | Trigger)[],
@@ -35,7 +15,7 @@ export const getRiskyActionFormattedNames = (
     .map((action) => {
       return {
         action,
-        metadata: getActionMetadata(
+        metadata: flowsUtils.getActionMetadata(
           metadata,
           action.settings.blockName,
           action.settings.actionName,
