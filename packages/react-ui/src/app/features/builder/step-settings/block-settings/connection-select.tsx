@@ -19,6 +19,7 @@ import {
 } from '@openops/shared';
 import { t } from 'i18next';
 import { PencilLine, Plus, X } from 'lucide-react';
+import type React from 'react';
 import { memo, useCallback, useState } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -68,7 +69,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   );
 
   const handleReconnectClick = useCallback(
-    (e?: React.MouseEvent<HTMLElement>) => {
+    (e?: React.SyntheticEvent<HTMLElement>) => {
       e?.preventDefault?.();
       e?.stopPropagation?.();
       const currentValue = form.getValues(params.name);
@@ -84,6 +85,26 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     },
     [connectionsPage?.data, form, params.name],
   );
+
+  const suppressPointerOrMouseDown = useCallback(
+    (e: React.PointerEvent<HTMLElement> | React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
+      e.preventDefault();
+    },
+    [],
+  );
+
+  const makeActivationKeysHandler = (
+    action: (e: React.KeyboardEvent<HTMLElement>) => void,
+  ) => {
+    return (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.stopPropagation();
+        e.preventDefault();
+        action(e);
+      }
+    };
+  };
 
   return (
     <FormField
@@ -165,20 +186,11 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                         variant="ghost"
                         size="xs"
                         className="text-primary-700 text-base font-medium"
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === ' ' || e.key === 'Enter') {
-                            e.stopPropagation();
-                            e.preventDefault();
-                          }
-                        }}
+                        onPointerDown={suppressPointerOrMouseDown}
+                        onMouseDown={suppressPointerOrMouseDown}
+                        onKeyDown={makeActivationKeysHandler((e) =>
+                          handleReconnectClick(e),
+                        )}
                         onClick={(e) => {
                           handleReconnectClick(e);
                         }}
@@ -192,20 +204,11 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                         variant="ghost"
                         size="xs"
                         className="text-primary-700 text-base font-medium"
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === ' ' || e.key === 'Enter') {
-                            e.stopPropagation();
-                            e.preventDefault();
-                          }
-                        }}
+                        onPointerDown={suppressPointerOrMouseDown}
+                        onMouseDown={suppressPointerOrMouseDown}
+                        onKeyDown={makeActivationKeysHandler(() => {
+                          field.onChange('');
+                        })}
                         onClick={() => {
                           field.onChange('');
                         }}
