@@ -181,23 +181,25 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
 
                   {field.value && !field.disabled && !params.disabled && (
                     <div className="shrink-0 flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="xs"
-                        className="text-primary-700 text-base font-medium"
-                        onPointerDown={suppressPointerOrMouseDown}
-                        onMouseDown={suppressPointerOrMouseDown}
-                        onKeyDown={makeActivationKeysHandler((e) =>
-                          handleReconnectClick(e),
-                        )}
-                        onClick={(e) => {
-                          handleReconnectClick(e);
-                        }}
-                      >
-                        <PencilLine size={16} />
-                        {t('Edit')}
-                      </Button>
+                      {selectConnectionOpen && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          className="text-primary-700 text-base font-medium"
+                          onPointerDown={suppressPointerOrMouseDown}
+                          onMouseDown={suppressPointerOrMouseDown}
+                          onKeyDown={makeActivationKeysHandler((e) =>
+                            handleReconnectClick(e),
+                          )}
+                          onClick={(e) => {
+                            handleReconnectClick(e);
+                          }}
+                        >
+                          <PencilLine size={16} />
+                          {t('Edit')}
+                        </Button>
+                      )}
 
                       <Button
                         type="button"
