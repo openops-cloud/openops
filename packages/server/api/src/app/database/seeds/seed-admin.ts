@@ -3,13 +3,20 @@ import {
   resetUserPassword,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { OrganizationRole, Provider, User } from '@openops/shared';
+import {
+  Organization,
+  OrganizationRole,
+  Project,
+  Provider,
+  User,
+} from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
 import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
+import { EnsureProjectParams } from './types';
 
 const DEFAULT_ORGANIZATION_NAME = 'organization';
 
@@ -27,9 +34,15 @@ export const upsertAdminUser = async (): Promise<void> => {
     const { workspaceId, databaseId, databaseToken } =
       await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
 
-    await ensureOrganizationExists(user);
+    const organization = await ensureOrganizationExists(user);
 
-    await ensureProjectExists(user, databaseId, workspaceId, databaseToken);
+    await ensureProjectExists({
+      organizationId: organization.id,
+      user,
+      databaseId,
+      workspaceId,
+      databaseToken,
+    });
   }
 };
 
@@ -107,7 +120,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   return { workspaceId, databaseId, databaseToken };
 }
 
-async function ensureOrganizationExists(user: User): Promise<void> {
+async function ensureOrganizationExists(user: User): Promise<Organization> {
   if (user.organizationId) {
     const existingOrganization = await organizationService.getOne(
       user.organizationId,
@@ -119,23 +132,22 @@ async function ensureOrganizationExists(user: User): Promise<void> {
       );
     }
 
-    return;
+    return existingOrganization;
   }
 
-  const organization = await organizationService.create({
+  return organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
   });
-
-  user.organizationId = organization.id;
 }
 
-async function ensureProjectExists(
-  user: User,
-  databaseId: number,
-  workspaceId: number,
-  databaseToken: string,
-): Promise<void> {
+async function ensureProjectExists({
+  organizationId,
+  user,
+  databaseId,
+  workspaceId,
+  databaseToken,
+}: EnsureProjectParams): Promise<Project> {
   const project = await projectService.getOneForUser(user);
   if (project) {
     if (project.tablesDatabaseId !== databaseId) {
@@ -150,13 +162,13 @@ async function ensureProjectExists(
       );
     }
 
-    return;
+    return project;
   }
 
-  await projectService.create({
+  return projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
-    organizationId: user.organizationId!,
+    organizationId,
     tablesDatabaseId: databaseId,
     tablesWorkspaceId: workspaceId,
     tablesDatabaseToken: databaseToken,
