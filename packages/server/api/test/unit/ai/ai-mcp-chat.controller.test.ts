@@ -367,9 +367,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           { role: 'assistant', content: 'You can use AWS Cost Explorer...' },
         ],
       });
-      (generateChatName as jest.Mock).mockResolvedValue(
-        'AWS Cost Optimization',
-      );
+      (generateChatName as jest.Mock).mockResolvedValue({
+        isGenerated: true,
+        name: 'AWS Cost Optimization',
+      });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -378,10 +379,14 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'AWS Cost Optimization',
+        isGenerated: true,
+        name: 'AWS Cost Optimization',
       });
       expect(generateChatName).toHaveBeenCalledWith(
-        [{ role: 'user', content: 'How do I optimize AWS costs?' }],
+        [
+          { role: 'user', content: 'How do I optimize AWS costs?' },
+          { role: 'assistant', content: 'You can use AWS Cost Explorer...' },
+        ],
         'test-project-id',
       );
       expect(updateChatName).toHaveBeenCalledWith(
@@ -402,23 +407,26 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'New Chat',
+        name: 'New Chat',
+        isGenerated: false,
       });
       expect(generateChatName).not.toHaveBeenCalled();
       expect(updateChatName).not.toHaveBeenCalled();
     });
 
     it('should return "New Chat" when chatHistory has no user messages', async () => {
+      const chatHistory = [
+        { role: 'assistant', content: 'Some response' },
+        { role: 'system', content: 'System message' },
+        {
+          role: 'tool',
+          content: [{ type: 'tool-result', toolCallId: '123' }],
+        },
+      ];
       (getConversation as jest.Mock).mockResolvedValue({
-        chatHistory: [
-          { role: 'assistant', content: 'Some response' },
-          { role: 'system', content: 'System message' },
-          {
-            role: 'tool',
-            content: [{ type: 'tool-result', toolCallId: '123' }],
-          },
-        ],
+        chatHistory,
       });
+      (generateChatName as jest.Mock).mockResolvedValue({ isGenerated: false });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -427,13 +435,17 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'New Chat',
+        name: 'New Chat',
+        isGenerated: false,
       });
-      expect(generateChatName).not.toHaveBeenCalled();
+      expect(generateChatName).toHaveBeenCalledWith(
+        chatHistory,
+        'test-project-id',
+      );
       expect(updateChatName).not.toHaveBeenCalled();
     });
 
-    it('should filter out invalid message objects without role property', async () => {
+    it('should pass the raw chatHistory to generateChatName (no filtering at controller)', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [
           { role: 'user', content: 'Valid message' },
@@ -443,7 +455,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           { role: 'assistant', content: 'Response' },
         ],
       });
-      (generateChatName as jest.Mock).mockResolvedValue('Filtered Name');
+      (generateChatName as jest.Mock).mockResolvedValue({
+        isGenerated: true,
+        name: 'Filtered Name',
+      });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -452,18 +467,22 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Filtered Name',
+        isGenerated: true,
+        name: 'Filtered Name',
       });
       expect(generateChatName).toHaveBeenCalledWith(
         [
           { role: 'user', content: 'Valid message' },
+          { content: 'Invalid message object' },
+          { type: 'reasoning', text: 'Some reasoning' },
           { role: 'user', content: 'Another valid message' },
+          { role: 'assistant', content: 'Response' },
         ],
         'test-project-id',
       );
     });
 
-    it('should call generateChatName with all user messages (filtered)', async () => {
+    it('should call generateChatName with full chatHistory', async () => {
       const mockChatHistory = [
         { role: 'user', content: 'First question' },
         { role: 'assistant', content: 'First answer' },
@@ -475,7 +494,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: mockChatHistory,
       });
-      (generateChatName as jest.Mock).mockResolvedValue('Multi-Question Chat');
+      (generateChatName as jest.Mock).mockResolvedValue({
+        isGenerated: true,
+        name: 'Multi-Question Chat',
+      });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -483,27 +505,26 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
 
       expect(generateChatName).toHaveBeenCalledWith(
-        [
-          { role: 'user', content: 'First question' },
-          { role: 'user', content: 'Second question' },
-          { role: 'user', content: 'Third question' },
-        ],
+        mockChatHistory,
         'test-project-id',
       );
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'Multi-Question Chat',
+        isGenerated: true,
+        name: 'Multi-Question Chat',
       });
     });
 
-    it('should return "New Chat" if LLM returns empty/whitespace', async () => {
+    it('should return "New Chat" if LLM indicates not generated', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [
           { role: 'user', content: 'Hello?' },
           { role: 'assistant', content: 'Hi!' },
         ],
       });
-      (generateChatName as jest.Mock).mockResolvedValue('   ');
+      (generateChatName as jest.Mock).mockResolvedValue({
+        isGenerated: false,
+      });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -512,21 +533,17 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'New Chat',
+        name: 'New Chat',
+        isGenerated: false,
       });
-      expect(updateChatName).toHaveBeenCalledWith(
-        'test-chat-id',
-        'test-user-id',
-        'test-project-id',
-        'New Chat',
-      );
+      expect(updateChatName).not.toHaveBeenCalled();
     });
 
-    it('should return "New Chat" if LLM returns empty string', async () => {
+    it('should return "New Chat" if LLM returns empty string (not generated)', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatHistory: [{ role: 'user', content: 'Test question' }],
       });
-      (generateChatName as jest.Mock).mockResolvedValue('');
+      (generateChatName as jest.Mock).mockResolvedValue({ isGenerated: false });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -535,7 +552,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'New Chat',
+        name: 'New Chat',
+        isGenerated: false,
       });
     });
 
@@ -546,9 +564,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           { role: 'assistant', content: 'OpenOps is a platform...' },
         ],
       });
-      (generateChatName as jest.Mock).mockResolvedValue(
-        'OpenOps Platform Overview',
-      );
+      (generateChatName as jest.Mock).mockResolvedValue({
+        isGenerated: true,
+        name: 'OpenOps Platform Overview',
+      });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -563,7 +582,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({
-        chatName: 'OpenOps Platform Overview',
+        isGenerated: true,
+        name: 'OpenOps Platform Overview',
       });
     });
 

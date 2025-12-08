@@ -129,3 +129,9 @@ export const UpdateChatModelResponse = Type.Object({
 export type UpdateChatModelResponse = Static<typeof UpdateChatModelResponse>;
 
 export * from './code-output-structure';
+
+export const GeneratedChatName = Type.Object({
+  name: Type.Union([Type.String(), Type.Null()]),
+  isGenerated: Type.Boolean(),
+});
+export type GeneratedChatName = Static<typeof GeneratedChatName>;
