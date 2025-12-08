@@ -84,6 +84,8 @@ const AiSettingsPage = () => {
       },
     });
 
+  const isAiConfigered = !!aiSettings?.[0]?.connection;
+
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex flex-col gap-4">
@@ -95,7 +97,7 @@ const AiSettingsPage = () => {
             'Enable OpenOps Assistant and other AI-powered features such as the CLI command generation.',
           )}
         </p>
-        <AiConfigIndicator enabled={!!aiSettings?.[0]?.connection} />
+        <AiConfigIndicator enabled={isAiConfigered} />
         <div className="p-6 border rounded-[11px]">
           <div className="max-w-[648px] flex flex-col gap-4">
             <h3 className="text-base font-bold">{t('AI connection')}</h3>
@@ -118,7 +120,7 @@ const AiSettingsPage = () => {
               <Skeleton className="h-[78px]" />
             )}
 
-            <h3 className="text-sm font-normal">{t('MCP')}</h3>
+            <h3 className="text-sm font-medium">{t('MCP')}</h3>
             {awsBlockModel ? (
               <AiSettingsForm
                 block={awsBlockModel}
@@ -143,6 +145,11 @@ const AiSettingsPage = () => {
               />
             ) : (
               <Skeleton className="h-[78px]" />
+            )}
+            {!isAiConfigered && (
+              <p className="text-sm font-medium text-muted-foreground">
+                {t('* Select AI connection in order to use the MCP tools')}
+              </p>
             )}
           </div>
         </div>
