@@ -39,6 +39,7 @@ type ConnectionSelectProps = {
   allowDynamicValues: boolean;
   providerKey: string;
   name: string;
+  displayName?: string;
 };
 
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
@@ -121,7 +122,11 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
           )}
           {!isLoading && (
             <AutoFormFieldWrapper
-              property={params.block.auth!}
+              property={{
+                ...params.block.auth!,
+                displayName:
+                  params.displayName ?? params.block.auth?.displayName ?? '',
+              }}
               propertyName="auth"
               field={field as unknown as ControllerRenderProps}
               disabled={params.disabled}
