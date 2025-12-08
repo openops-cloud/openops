@@ -4,10 +4,9 @@ import {
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
 import { Form } from '@openops/components/ui';
-import { removeConnectionBrackets } from '@openops/shared';
 import equal from 'fast-deep-equal';
 import debounce from 'lodash.debounce';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 type AiSettingsFormProps = {
@@ -78,7 +77,7 @@ const AiSettingsForm = ({
 
   return (
     <Form {...form}>
-      <form className="max-w-[516px]">
+      <form>
         <ConnectionSelect
           disabled={disabled}
           allowDynamicValues={false}

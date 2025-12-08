@@ -1,4 +1,5 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { AiConfigIndicator } from '@/app/features/ai/ai-config-indicator';
 import { AiSettingsForm } from '@/app/features/ai/ai-settings-form';
 import {
   AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
@@ -9,7 +10,7 @@ import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { mcpSettingsHooks } from '@/app/features/ai/lib/mcp-settings-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import { INTERNAL_ERROR_TOAST, Skeleton, toast } from '@openops/components/ui';
 import {
   ApplicationErrorParams,
   ErrorCode,
@@ -85,7 +86,7 @@ const AiSettingsPage = () => {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
-      <div className="mx-auto w-full flex-col">
+      <div className="mx-auto w-full flex flex-col gap-4">
         <h1 className="text-[24px] font-bold text-primary-900">
           {t('OpenOps AI')}
         </h1>
@@ -94,47 +95,56 @@ const AiSettingsPage = () => {
             'Enable OpenOps Assistant and other AI-powered features such as the CLI command generation.',
           )}
         </p>
-        <div className="flex flex-col gap-8 p-6 border rounded-[11px]">
-          {aiBlockModel && (
-            <AiSettingsForm
-              block={aiBlockModel}
-              providerKey={'AI'}
-              initialConnection={aiSettings?.[0]?.connection}
-              onSave={(connectionName) =>
-                onSaveAiSettings({
-                  ...aiSettings?.[0],
-                  enabled: !!connectionName,
-                  connection: connectionName,
-                })
-              }
-              disabled={isSavingAiSettings}
-              displayName={t('Select Connection')}
-            />
-          )}
-
-          {awsBlockModel && (
-            <AiSettingsForm
-              block={awsBlockModel}
-              providerKey={'AWS'}
-              initialConnection={mcpSettings?.awsCost?.connectionName}
-              onSave={(connectionName: string) =>
-                onSaveMcpSettings({
-                  ...mcpSettings,
-                  awsCost: {
+        <AiConfigIndicator enabled={!!aiSettings?.[0]?.connection} />
+        <div className="p-6 border rounded-[11px]">
+          <div className="max-w-[648px] flex flex-col gap-4">
+            <h3 className="text-base font-bold">{t('AI connection')}</h3>
+            {aiBlockModel ? (
+              <AiSettingsForm
+                block={aiBlockModel}
+                providerKey={'AI'}
+                initialConnection={aiSettings?.[0]?.connection}
+                onSave={(connectionName) =>
+                  onSaveAiSettings({
+                    ...aiSettings?.[0],
                     enabled: !!connectionName,
-                    connectionName:
-                      removeConnectionBrackets(connectionName) ?? '',
-                  },
-                })
-              }
-              disabled={
-                isSavingMcpSettings ||
-                !aiSettings?.[0]?.connection ||
-                isSavingAiSettings
-              }
-              displayName={t('AWS Cost')}
-            />
-          )}
+                    connection: connectionName,
+                  })
+                }
+                disabled={isSavingAiSettings}
+                displayName={t('Select Connection')}
+              />
+            ) : (
+              <Skeleton className="h-[78px]" />
+            )}
+
+            <h3 className="text-sm font-normal">{t('MCP')}</h3>
+            {awsBlockModel ? (
+              <AiSettingsForm
+                block={awsBlockModel}
+                providerKey={'AWS'}
+                initialConnection={mcpSettings?.awsCost?.connectionName}
+                onSave={(connectionName: string) =>
+                  onSaveMcpSettings({
+                    ...mcpSettings,
+                    awsCost: {
+                      enabled: !!connectionName,
+                      connectionName:
+                        removeConnectionBrackets(connectionName) ?? '',
+                    },
+                  })
+                }
+                disabled={
+                  isSavingMcpSettings ||
+                  !aiSettings?.[0]?.connection ||
+                  isSavingAiSettings
+                }
+                displayName={t('AWS Cost')}
+              />
+            ) : (
+              <Skeleton className="h-[78px]" />
+            )}
+          </div>
         </div>
       </div>
     </div>
