@@ -14,6 +14,7 @@ import { useAnalyticsLinks } from '@/app/features/navigation/lib/analytics-links
 import { useMenuLinks } from '@/app/features/navigation/lib/menu-links-hook';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
+import { NavTop } from '@/app/features/workspaces/components/nav-top';
 import { usersApi } from '@/app/lib/users-api';
 import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
@@ -65,7 +66,11 @@ export function DashboardSideMenu() {
       MenuHeader={<DashboardSideMenuHeader />}
       MenuFooter={<SideMenuFooter isMinimized={isSidebarMinimized} />}
     >
-      <SideMenuNavigation links={menuLinks} isMinimized={isSidebarMinimized} />
+      <SideMenuNavigation
+        links={menuLinks}
+        isMinimized={isSidebarMinimized}
+        NavTop={<NavTop isSidebarMinimized={isSidebarMinimized} />}
+      />
       <div className="flex flex-col justify-between h-full overflow-hidden">
         {isWorkflowsPage && !isSidebarMinimized && (
           <ScrollArea className="border-t">
