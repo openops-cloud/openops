@@ -1,12 +1,24 @@
-import { AuthenticationResponse } from '@openops/shared';
-import { authenticationService } from './basic/authentication-service';
-import { SignInParams, SignUpParams } from './types';
+import { User, UserWithOrganization } from '@openops/shared';
+import { getProjectAndToken } from './context/create-project-auth-context';
+import { addUserToDefaultWorkspace } from './new-user/organization-assignment';
+import { ProjectContext } from './types';
 
-export type AuthenticationService = {
-  signUp(params: SignUpParams): Promise<AuthenticationResponse>;
-  signIn(request: SignInParams): Promise<AuthenticationResponse>;
+export type ProjectAndTokenService = {
+  fetch(user: User, tablesRefreshToken: string): Promise<ProjectContext>;
 };
 
-export function getAuthenticationService(): AuthenticationService {
-  return authenticationService;
+export type UserCreatedHook = { execute: () => Promise<void> | void };
+
+export function getProjectAndTokenService(): ProjectAndTokenService {
+  return { fetch: getProjectAndToken };
+}
+
+export function getUserCreatedHook(
+  userWithOrganization: UserWithOrganization,
+): UserCreatedHook {
+  return {
+    execute: async (): Promise<void> => {
+      await addUserToDefaultWorkspace(userWithOrganization);
+    },
+  };
 }

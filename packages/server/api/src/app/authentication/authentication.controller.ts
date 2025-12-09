@@ -16,7 +16,7 @@ import { analyticsDashboardService } from '../openops-analytics/analytics-dashbo
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
-import { getAuthenticationService } from './authentication-service-factory';
+import { authenticationService } from './basic/authentication-service';
 import {
   removeAuthCookies,
   setAuthCookies,
@@ -100,7 +100,7 @@ const signUpRoute = async (request: any, reply: any) => {
     });
   }
 
-  const signUpResponse = await getAuthenticationService().signUp({
+  const signUpResponse = await authenticationService.signUp({
     ...request.body,
     verified: edition === OpsEdition.COMMUNITY,
     organizationId: null,
@@ -117,7 +117,7 @@ const signInRoute = async (request: any, reply: any) => {
     request,
   );
 
-  const signInResponse = await getAuthenticationService().signIn({
+  const signInResponse = await authenticationService.signIn({
     email: request.body.email,
     password: request.body.password,
     organizationId,
