@@ -1,12 +1,20 @@
 import { AppSystemProp, system } from '@openops/server-shared';
-import { ApplicationError, ErrorCode, isNil, User } from '@openops/shared';
+import {
+  ApplicationError,
+  ErrorCode,
+  isNil,
+  User,
+  UserWithOrganization,
+} from '@openops/shared';
 import { openopsTables } from '../../openops-tables';
 import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 
-export async function assignDefaultOrganization(user: User): Promise<void> {
+export async function assignDefaultOrganization(
+  user: User,
+): Promise<UserWithOrganization> {
   let organization = await organizationService.getOldestOrganization();
 
   const adminUser = await userService.getUserByEmailOrFail({
@@ -26,10 +34,7 @@ export async function assignDefaultOrganization(user: User): Promise<void> {
     });
   }
 
-  await userService.addUserToOrganization({
-    id: user.id,
-    organizationId: organization.id,
-  });
+  return userService.addUserToOrganization(user, organization.id);
 }
 
 export async function addUserToDefaultWorkspace(user: User): Promise<void> {

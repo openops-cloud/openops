@@ -18,9 +18,8 @@ export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
     const { user, tablesRefreshToken } = await createUser(params);
 
-    await assignDefaultOrganization(user);
-
-    await addUserToDefaultWorkspace(user);
+    const updatedUser = await assignDefaultOrganization(user);
+    await addUserToDefaultWorkspace(updatedUser);
 
     const projectContext = await getProjectAndToken(user, tablesRefreshToken);
     return buildAuthResponse(projectContext);

@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
+import { OrganizationId } from '../organization';
 
 export type UserId = OpenOpsId;
 
@@ -41,6 +42,10 @@ export const User = Type.Object({
 });
 
 export type User = Static<typeof User>;
+
+export type UserWithOrganization = User & {
+  organizationId: OrganizationId;
+};
 
 export const UserMeta = Type.Object({
   id: Type.String(),
