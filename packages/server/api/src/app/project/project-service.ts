@@ -7,6 +7,8 @@ import {
   openOpsId,
   OpenOpsId,
   Project,
+  PROJECT_COLORS,
+  ProjectColor,
   ProjectId,
   spreadIfDefined,
   User,
@@ -19,6 +21,12 @@ import { projectHooks } from './project-hooks';
 
 export const projectRepo = repoFactory(ProjectEntity);
 
+async function getNextProjectColor(): Promise<ProjectColor> {
+  const projectCount = await projectRepo().count();
+  const colorIndex = projectCount % PROJECT_COLORS.length;
+  return PROJECT_COLORS[colorIndex];
+}
+
 export const projectService = {
   async create(params: CreateParams): Promise<Project> {
     const encryptTablesToken = encryptUtils.encryptString(
@@ -28,6 +36,7 @@ export const projectService = {
       id: openOpsId(),
       ...params,
       tablesDatabaseToken: encryptTablesToken,
+      color: await getNextProjectColor(),
     };
 
     const savedProject = await projectRepo().save(newProject);

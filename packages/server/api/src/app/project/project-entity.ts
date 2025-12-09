@@ -51,6 +51,10 @@ export const ProjectEntity = new EntitySchema<ProjectSchema>({
       type: JSONB_COLUMN_TYPE,
       nullable: false,
     },
+    color: {
+      type: String,
+      nullable: false,
+    },
   },
   indices: [
     {

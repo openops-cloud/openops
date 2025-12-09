@@ -39,6 +39,7 @@ import { AddTestRunActionLimitsToFlowVersion1760429290001 } from './migrations/1
 import { MoveTablesWorkspaceIdFromOrganizationToProject1760500000000 } from './migrations/1760500000000-MoveTablesWorkspaceIdFromOrganizationToProject';
 import { AddTablesDatabaseTokenToProject1763394159990 } from './migrations/1763394159990-AddTablesTokenToProject';
 import { MigrateTablesUserPassword1763755045436 } from './migrations/1763755045436-MigrateTablesUserPassword';
+import { AddColorToProject1765287443041 } from './migrations/1765287443041-AddColorToProject';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -86,6 +87,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     MoveTablesWorkspaceIdFromOrganizationToProject1760500000000,
     AddTablesDatabaseTokenToProject1763394159990,
     MigrateTablesUserPassword1763755045436,
+    AddColorToProject1765287443041,
   ];
 };
 

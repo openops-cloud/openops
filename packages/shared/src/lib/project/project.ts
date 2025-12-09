@@ -3,6 +3,20 @@ import { BaseModelSchema, Nullable } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
 import { ProjectMemberRole } from './project-member';
 
+export const PROJECT_COLORS = [
+  'purple',
+  'blue',
+  'green',
+  'yellow',
+  'pink',
+] as const;
+
+export type ProjectColor = (typeof PROJECT_COLORS)[number];
+
+export const ProjectColorSchema = Type.Union(
+  PROJECT_COLORS.map((color) => Type.Literal(color)),
+);
+
 export const ListProjectRequestForUserQueryParams = Type.Object({
   cursor: Type.Optional(Type.String()),
   limit: Type.Optional(Type.Number()),
@@ -38,6 +52,7 @@ export const Project = Type.Object({
     iv: Type.String(),
     data: Type.String(),
   }),
+  color: ProjectColorSchema,
 });
 
 export type Project = Static<typeof Project>;
