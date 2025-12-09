@@ -60,15 +60,13 @@ const AiSettingsPage = () => {
           ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
         ) {
           message = t('Base URL is required for OpenAI-compatible providers');
+        } else if (error.response?.status === 400) {
+          const data = error.response?.data as
+            | { errorMessage?: string }
+            | undefined;
+          message = data?.errorMessage ?? error.message;
         } else {
-          if (error.response?.status === 400) {
-            const data = error.response?.data as
-              | { errorMessage?: string }
-              | undefined;
-            message = data?.errorMessage ?? error.message;
-          } else {
-            message = error.message;
-          }
+          message = error.message;
         }
         toast({
           title: t('Error'),
