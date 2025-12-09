@@ -19,7 +19,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { t } from 'i18next';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 const AiSettingsPage = () => {
   const { data: aiSettings, refetch: refetchAiSettings } =
@@ -52,17 +52,23 @@ const AiSettingsPage = () => {
       },
       onError: (error: AxiosError) => {
         let message = '';
-        const apError = error.response?.data as ApplicationErrorParams;
+        const apError = error.response?.data as
+          | ApplicationErrorParams
+          | undefined;
         if (
-          apError.code ===
+          apError?.code ===
           ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
         ) {
           message = t('Base URL is required for OpenAI-compatible providers');
         } else {
-          message =
-            error.status === 400
-              ? (error.response?.data as { errorMessage: string })?.errorMessage
-              : error.message;
+          if (error.response?.status === 400) {
+            const data = error.response?.data as
+              | { errorMessage?: string }
+              | undefined;
+            message = data?.errorMessage ?? error.message;
+          } else {
+            message = error.message;
+          }
         }
         toast({
           title: t('Error'),
@@ -84,7 +90,29 @@ const AiSettingsPage = () => {
       },
     });
 
-  const isAiConfigered = !!aiSettings?.[0]?.connection;
+  const isAiConfigured = !!aiSettings?.[0]?.connection;
+
+  const handleSaveAi = useCallback(
+    (connectionName: string) =>
+      onSaveAiSettings({
+        ...aiSettings?.[0],
+        enabled: !!connectionName,
+        connection: connectionName,
+      }),
+    [onSaveAiSettings, aiSettings],
+  );
+
+  const handleSaveMcp = useCallback(
+    (connectionName: string) =>
+      onSaveMcpSettings({
+        ...mcpSettings,
+        awsCost: {
+          enabled: !!connectionName,
+          connectionName: removeConnectionBrackets(connectionName) ?? '',
+        },
+      }),
+    [onSaveMcpSettings, mcpSettings],
+  );
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
@@ -97,7 +125,7 @@ const AiSettingsPage = () => {
             'Enable OpenOps Assistant and other AI-powered features such as the CLI command generation.',
           )}
         </p>
-        <AiConfigIndicator enabled={isAiConfigered} />
+        <AiConfigIndicator enabled={isAiConfigured} />
         <div className="p-6 border rounded-[11px]">
           <div className="max-w-[648px] flex flex-col gap-4">
             <h3 className="text-base font-bold">{t('AI connection')}</h3>
@@ -106,13 +134,7 @@ const AiSettingsPage = () => {
                 block={aiBlockModel}
                 providerKey={'AI'}
                 initialConnection={aiSettings?.[0]?.connection}
-                onSave={(connectionName) =>
-                  onSaveAiSettings({
-                    ...aiSettings?.[0],
-                    enabled: !!connectionName,
-                    connection: connectionName,
-                  })
-                }
+                onSave={handleSaveAi}
                 disabled={isSavingAiSettings}
                 displayName={t('Select Connection')}
               />
@@ -126,16 +148,7 @@ const AiSettingsPage = () => {
                 block={awsBlockModel}
                 providerKey={'AWS'}
                 initialConnection={mcpSettings?.awsCost?.connectionName}
-                onSave={(connectionName: string) =>
-                  onSaveMcpSettings({
-                    ...mcpSettings,
-                    awsCost: {
-                      enabled: !!connectionName,
-                      connectionName:
-                        removeConnectionBrackets(connectionName) ?? '',
-                    },
-                  })
-                }
+                onSave={handleSaveMcp}
                 disabled={
                   isSavingMcpSettings ||
                   !aiSettings?.[0]?.connection ||
@@ -146,7 +159,7 @@ const AiSettingsPage = () => {
             ) : (
               <Skeleton className="h-[78px]" />
             )}
-            {!isAiConfigered && (
+            {!isAiConfigured && (
               <p className="text-sm font-medium text-muted-foreground">
                 {t('* Select AI connection in order to use the MCP tools')}
               </p>
