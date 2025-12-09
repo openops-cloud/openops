@@ -5,7 +5,7 @@ import {
   getProjectAndTokenService,
   getUserCreatedHook,
 } from '../authentication-service-factory';
-import {} from '../context/create-project-auth-context';
+import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
 import { assignDefaultOrganization } from '../new-user/organization-assignment';
 import { SignInParams, SignUpParams } from '../types';
@@ -45,7 +45,10 @@ export const authenticationService = {
     const { refresh_token: tablesRefreshToken } =
       await authenticateUserInOpenOpsTables(request.email, user.password);
 
-    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
+    const projectContext = await getProjectAndTokenService().fetch(
+      user,
+      tablesRefreshToken,
+    );
     return buildAuthResponse(projectContext);
   },
 };
