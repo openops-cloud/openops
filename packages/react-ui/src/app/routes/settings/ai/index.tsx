@@ -149,7 +149,7 @@ const AiSettingsPage = () => {
                 onSave={handleSaveMcp}
                 disabled={
                   isSavingMcpSettings ||
-                  !aiSettings?.[0]?.connection ||
+                  !isAiConfigured ||
                   isSavingAiSettings
                 }
                 displayName={t('AWS Cost')}
