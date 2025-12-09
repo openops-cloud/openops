@@ -35,6 +35,8 @@ import {
   TriggerType,
 } from '@openops/shared';
 
+import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
+import { ShieldHalf } from 'lucide-react';
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
 import { CollapsibleButton } from './collapsible-button';
 import { StackedNodeLayers } from './stacked-node-layer';
@@ -86,6 +88,11 @@ const WorkflowStepNode = React.memo(
       step: data.step!,
     });
 
+    const { metadata: actionsMetadata } = blocksHooks.useAllStepsMetadata({
+      searchQuery: '',
+      type: 'action',
+    });
+
     const stepIndex = useMemo(() => {
       const steps = flowHelper.getAllSteps(flowVersion.trigger);
       return steps.findIndex((step) => step.name === data.step!.name) + 1;
@@ -121,6 +128,12 @@ const WorkflowStepNode = React.memo(
     const stepOutputStatus = useMemo(() => {
       return getStepStatus(data.step?.name, run, loopIndexes, flowVersion);
     }, [data.step?.name, run, loopIndexes, flowVersion]);
+
+    const isRiskyStep = flowsHooks.useIsRiskyAction(
+      actionsMetadata,
+      data.step?.settings.blockName,
+      data.step?.settings.actionName,
+    );
 
     const showRunningIcon =
       isNil(stepOutputStatus) && run?.status === FlowRunStatus.RUNNING;
@@ -247,15 +260,49 @@ const WorkflowStepNode = React.memo(
                       </div>
                     </div>
 
-                    {!readonly && (
-                      <CanvasContextMenu
-                        data={data}
-                        isAction={isAction}
-                        openStepActionsMenu={openStepActionsMenu}
-                        setOpenStepActionsMenu={setOpenStepActionsMenu}
-                        setOpenBlockSelector={setOpenBlockSelector}
-                      />
-                    )}
+                    <div className="flex items-center gap-0.5">
+                      <div className="flex items-center gap-[7px]">
+                        {!data.step?.valid && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <InvalidStepIcon
+                                size={16}
+                                viewBox="0 0 16 16"
+                                className="stroke-0 animate-fade"
+                              ></InvalidStepIcon>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              {t('Incomplete settings')}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        {isRiskyStep && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="size-4 flex items-center justify-center rounded-full bg-destructive-100">
+                                <ShieldHalf className="size-[10px] text-destructive-300"></ShieldHalf>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              {t(
+                                'This step may make changes to your environment',
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+
+                      {!readonly && (
+                        <CanvasContextMenu
+                          data={data}
+                          isAction={isAction}
+                          openStepActionsMenu={openStepActionsMenu}
+                          setOpenStepActionsMenu={setOpenStepActionsMenu}
+                          setOpenBlockSelector={setOpenBlockSelector}
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex justify-between gap-[6px] w-full items-center">
@@ -275,22 +322,6 @@ const WorkflowStepNode = React.memo(
                         })}
                       {showRunningIcon && (
                         <LoadingSpinner className="w-4 h-4 text-primary"></LoadingSpinner>
-                      )}
-                      {!data.step?.valid && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="mr-2">
-                              <InvalidStepIcon
-                                size={16}
-                                viewBox="0 0 16 16"
-                                className="stroke-0 animate-fade"
-                              ></InvalidStepIcon>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            {t('Incomplete settings')}
-                          </TooltipContent>
-                        </Tooltip>
                       )}
                     </div>
                   </div>

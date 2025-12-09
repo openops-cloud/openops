@@ -1,10 +1,15 @@
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
-import { ListFlowsRequest, PopulatedFlow } from '@openops/shared';
+import {
+  INTERNAL_ERROR_TOAST,
+  StepMetadataWithSuggestions,
+  toast,
+} from '@openops/components/ui';
+import { ListFlowsRequest, PopulatedFlow, RiskLevel } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { NavigateFunction } from 'react-router-dom';
 
+import { flowsUtils } from '@/app/features/flows/lib/flows-utils';
 import { flowsApi } from './flows-api';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
@@ -64,6 +69,22 @@ export const flowsHooks = {
       searchState,
       setSearchTerm,
     };
+  },
+  useIsRiskyAction: (
+    metadata: StepMetadataWithSuggestions[] | undefined,
+
+    blockName: string | undefined,
+    actionName: string | undefined,
+  ) => {
+    return useMemo(() => {
+      if (!metadata || !blockName || !actionName) return false;
+      const actionMetadata = flowsUtils.getActionMetadata(
+        metadata,
+        blockName,
+        actionName,
+      );
+      return actionMetadata?.riskLevel === RiskLevel.HIGH;
+    }, [metadata, blockName, actionName]);
   },
   useCreateFlow: (navigate: NavigateFunction) => {
     const { updateHomePageOperationalViewFlag } =
