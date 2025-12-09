@@ -11,6 +11,11 @@ type MCPSearchTool = {
   ) => Promise<unknown>;
 };
 
+type MCPHttpTransport = {
+  type: 'http';
+  url: string;
+};
+
 export async function getDocsTools(): Promise<MCPTool> {
   const mcpServerUrl = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);
   if (!mcpServerUrl) {
@@ -28,7 +33,7 @@ export async function getDocsTools(): Promise<MCPTool> {
     transport: {
       type: 'http',
       url: mcpServerUrl,
-    } as Parameters<typeof createMCPClient>[0]['transport'],
+    } as MCPHttpTransport,
   });
 
   const tools = await client.tools();
