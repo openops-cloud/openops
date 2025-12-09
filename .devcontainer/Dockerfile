@@ -2,8 +2,7 @@ ARG VARIANT=1.1.12-20-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 RUN <<-```
-    npm install -g nx cross-env@7.0.3 mint-mcp
-    npx -y mint-mcp add docs.openops.com
+    npm install -g nx cross-env@7.0.3
     apt-get update && apt-get install -y --no-install-recommends \
       git \
       locales \
