@@ -5,7 +5,6 @@ import {
   getProjectAndTokenService,
   getUserCreatedHook,
 } from '../authentication-service-factory';
-import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
 import { assignDefaultOrganization } from '../new-user/organization-assignment';
 import { SignInParams, SignUpParams } from '../types';
