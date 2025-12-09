@@ -110,6 +110,7 @@ export const createMockProject = (project?: Partial<Project>): Project => {
       iv: faker.lorem.word(),
       data: faker.lorem.word(),
     },
+    color: project?.color ?? 'blue',
   };
 };
 
