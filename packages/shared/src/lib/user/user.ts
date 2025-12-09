@@ -42,10 +42,6 @@ export const User = Type.Object({
 
 export type User = Static<typeof User>;
 
-export type UserWithOrganization = User & {
-  organizationId: OpenOpsId;
-};
-
 export const UserMeta = Type.Object({
   id: Type.String(),
   email: Type.String(),
