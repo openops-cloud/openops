@@ -290,6 +290,7 @@ export const userService = {
   ): Promise<UserWithOrganization> {
     return userRepo().save({
       ...user,
+      organizationRole: OrganizationRole.MEMBER,
       updated: dayjs().toISOString(),
       organizationId,
     });
