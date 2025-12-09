@@ -1,12 +1,19 @@
+import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { experimental_createMCPClient as createMCPClient, tool } from 'ai';
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { MCPTool } from './types';
 
+type MCPSearchTool = {
+  execute: (
+    args: { query: string },
+    options: { toolCallId: string; messages: unknown[] },
+  ) => Promise<unknown>;
+};
+
 export async function getDocsTools(): Promise<MCPTool> {
-  const mcpServerPath = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);
-  if (!mcpServerPath) {
+  const mcpServerUrl = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);
+  if (!mcpServerUrl) {
     return {
       client: undefined,
       toolSet: {},
@@ -14,18 +21,29 @@ export async function getDocsTools(): Promise<MCPTool> {
   }
 
   logger.debug('Creating MCP client for docs', {
-    serverPath: mcpServerPath,
+    serverPath: mcpServerUrl,
   });
 
   const client = await createMCPClient({
-    transport: new StdioMCPTransport({
-      command: 'node',
-      args: [mcpServerPath],
-    }),
+    transport: {
+      type: 'http',
+      url: mcpServerUrl,
+    } as Parameters<typeof createMCPClient>[0]['transport'],
   });
 
   const tools = await client.tools();
-  const searchTool = tools['search'];
+  const toolEntries =
+    tools instanceof Map ? Array.from(tools.entries()) : Object.entries(tools);
+
+  const searchTool = toolEntries.find(([name]) =>
+    name.toLowerCase().includes('search'),
+  )?.[1] as MCPSearchTool | undefined;
+
+  if (!searchTool?.execute) {
+    logger.error('Docs MCP search tool not available', {
+      availableTools: toolEntries.map(([name]) => name),
+    });
+  }
 
   const toolSet = {
     OpenOps_Documentation: tool({
@@ -41,25 +59,21 @@ Use this tool to find accurate, verified information before answering OpenOps-sp
         query: z.string().describe('The search query'),
       }),
       execute: async ({ query }) => {
-        try {
-          if (!searchTool || typeof searchTool.execute !== 'function') {
-            return await Promise.resolve({
-              success: false,
-              error: 'search tool not available',
-            });
-          }
+        if (!searchTool?.execute) {
+          return { success: false, error: 'search tool not available' };
+        }
 
-          const result = await searchTool.execute(
+        try {
+          return await searchTool.execute(
             { query },
             { toolCallId: '', messages: [] },
           );
-          return result;
         } catch (error) {
           logger.error('OpenOps Documentation MCP client error:', { error });
-          return Promise.resolve({
+          return {
             success: false,
             error: error instanceof Error ? error.message : String(error),
-          });
+          };
         }
       },
     }),
