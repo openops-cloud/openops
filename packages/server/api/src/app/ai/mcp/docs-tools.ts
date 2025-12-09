@@ -37,16 +37,18 @@ export async function getDocsTools(): Promise<MCPTool> {
   });
 
   const tools = await client.tools();
-  const toolEntries =
-    tools instanceof Map ? Array.from(tools.entries()) : Object.entries(tools);
+  const toolsObject = tools instanceof Map ? Object.fromEntries(tools) : tools;
 
-  const searchTool = toolEntries.find(([name]) =>
+  const searchToolName = Object.keys(toolsObject).find((name) =>
     name.toLowerCase().includes('search'),
-  )?.[1] as MCPSearchTool | undefined;
+  );
+  const searchTool = searchToolName
+    ? (toolsObject[searchToolName] as MCPSearchTool)
+    : undefined;
 
   if (!searchTool?.execute) {
     logger.error('Docs MCP search tool not available', {
-      availableTools: toolEntries.map(([name]) => name),
+      availableTools: Object.keys(toolsObject),
     });
   }
 
