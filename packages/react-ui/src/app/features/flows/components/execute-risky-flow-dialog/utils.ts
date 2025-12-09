@@ -1,6 +1,6 @@
+import { flowsUtils } from '@/app/features/flows/lib/flows-utils';
 import { StepMetadataWithSuggestions } from '@openops/components/ui';
 import { Action, ActionType, RiskLevel, Trigger } from '@openops/shared';
-import { flowsUtils } from '@/app/features/flows/lib/flows-utils';
 
 type ActionOrTriggerWithIndex = (Action | Trigger) & { index: number };
 
