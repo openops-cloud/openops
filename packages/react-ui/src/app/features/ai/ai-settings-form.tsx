@@ -16,6 +16,7 @@ type AiSettingsFormProps = {
   onSave: (connectionName: string) => void;
   displayName?: string;
   disabled?: boolean;
+  labelPlacement?: 'top' | 'left';
 };
 
 type LocalForm = { connection: string };
@@ -30,6 +31,7 @@ const AiSettingsForm = ({
   initialConnection,
   onSave,
   displayName,
+  labelPlacement,
   disabled = false,
 }: AiSettingsFormProps) => {
   const form = useForm<LocalForm>({
@@ -85,6 +87,7 @@ const AiSettingsForm = ({
           providerKey={providerKey}
           name={'connection'}
           displayName={displayName}
+          labelPlacement={labelPlacement}
         />
       </form>
     </Form>
