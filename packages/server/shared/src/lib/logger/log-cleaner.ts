@@ -1,8 +1,95 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ApplicationError } from '@openops/shared';
+import { system } from '../system';
+import { SharedSystemProp } from '../system/system-prop';
 
 export const maxFieldLength = 2048;
+
+const REDACTED = '[REDACTED]';
+
+const SENSITIVE_PATTERNS = [
+  'password',
+  'token',
+  'secret',
+  'authorization',
+  'apikey',
+  'privatekey',
+  'cookie',
+  'session',
+  'passphrase',
+];
+
+const SENSITIVE_FIELD_PATTERNS = SENSITIVE_PATTERNS.map(
+  (pattern) =>
+    new RegExp(String.raw`"[^"]*${pattern}[^"]*"\s*:\s*"[^"]*"`, 'gi'),
+);
+
+const shouldRedactLogs = (): boolean => {
+  return system.getBoolean(SharedSystemProp.LOG_REDACTION) ?? true;
+};
+
+const isSensitiveField = (key: string): boolean => {
+  if (!shouldRedactLogs()) {
+    return false;
+  }
+  const lowerKey = key.toLowerCase();
+  return SENSITIVE_PATTERNS.some((pattern) => lowerKey.includes(pattern));
+};
+
+const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
+  try {
+    if (
+      obj === null ||
+      obj === undefined ||
+      typeof obj !== 'object' ||
+      !shouldRedactLogs()
+    ) {
+      return obj;
+    }
+
+    if (visited.has(obj)) {
+      return '[Circular]';
+    }
+
+    visited.add(obj);
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => redactSensitiveFields(item, visited));
+    }
+
+    const redacted: any = {};
+    for (const key in obj) {
+      if (isSensitiveField(key)) {
+        redacted[key] = REDACTED;
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        redacted[key] = redactSensitiveFields(obj[key], visited);
+      } else {
+        redacted[key] = obj[key];
+      }
+    }
+    return redacted;
+  } catch (error) {
+    return `[Error redacting object: ${error}]`;
+  }
+};
+
+const redactSensitiveDataInString = (
+  value: string | undefined,
+): string | undefined => {
+  if (!value || !shouldRedactLogs()) {
+    return value;
+  }
+  let result = value;
+  SENSITIVE_FIELD_PATTERNS.forEach((pattern) => {
+    result = result.replace(pattern, (match) => {
+      const colonIndex = match.indexOf(':');
+      const keyPart = match.substring(0, colonIndex);
+      return `${keyPart}:"${REDACTED}"`;
+    });
+  });
+  return result;
+};
 
 export const truncate = (
   value: string | undefined,
@@ -15,7 +102,7 @@ export const truncate = (
 
 export const cleanLogEvent = (logEvent: any) => {
   if (logEvent.message) {
-    logEvent.message = truncate(logEvent.message);
+    logEvent.message = redactSensitiveDataInString(truncate(logEvent.message));
   }
 
   if (!logEvent.event) {
@@ -34,14 +121,18 @@ export const cleanLogEvent = (logEvent: any) => {
       continue;
     }
 
-    if (key === 'res' && value && value.raw) {
+    if (isSensitiveField(key)) {
+      eventData[key] = REDACTED;
+    } else if (key === 'res' && value?.raw) {
       extractRequestFields(value, eventData, logEvent);
     } else if (value instanceof Error) {
       extractErrorFields(key, value, eventData, logEvent);
     } else if (typeof value === 'number') {
       eventData[key] = Math.round(value * 100) / 100;
     } else if (typeof value === 'object') {
-      eventData[key] = stringify(value);
+      eventData[key] = stringify(redactSensitiveFields(value));
+    } else if (typeof value === 'string') {
+      eventData[key] = redactSensitiveDataInString(truncate(value));
     } else {
       eventData[key] = truncate(value);
     }
@@ -76,19 +167,23 @@ function extractErrorFields(
 ) {
   const errorKey = key === 'err' ? 'error' : key;
   const { stack, message, name, ...context } = value;
-  eventData[errorKey + 'Stack'] = truncate(stack);
+  eventData[errorKey + 'Stack'] = redactSensitiveDataInString(truncate(stack));
   if (message) {
-    eventData[errorKey + 'Message'] = truncate(message);
+    eventData[errorKey + 'Message'] = redactSensitiveDataInString(
+      truncate(message),
+    );
     if (!logEvent.message) {
-      logEvent.message = truncate(message);
+      logEvent.message = redactSensitiveDataInString(truncate(message));
     }
   }
   eventData[errorKey + 'Name'] = truncate(name);
   if (value instanceof ApplicationError) {
     eventData[errorKey + 'Code'] = truncate(value.error.code);
-    eventData[errorKey + 'Params'] = stringify(value.error.params);
+    eventData[errorKey + 'Params'] = stringify(
+      redactSensitiveFields(value.error.params),
+    );
   } else if (context && Object.keys(context).length) {
-    eventData[errorKey + 'Context'] = stringify(context);
+    eventData[errorKey + 'Context'] = stringify(redactSensitiveFields(context));
   }
 }
 

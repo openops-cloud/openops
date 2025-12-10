@@ -16,7 +16,7 @@ import { seedDevData } from './app/database/seeds/dev-seeds';
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
-import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-knonw-cost-types-by-application-seed';
+import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-known-cost-types-by-application-seed';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
 import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables-rename-database';
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
@@ -64,7 +64,7 @@ async function validateEnvPropsOnStartup(): Promise<void> {
     );
   }
 
-  await encryptionKeyInitializer();
+  void encryptionKeyInitializer();
 
   const jwtSecret = await jwtUtils.getJwtSecret();
   if (isNil(jwtSecret)) {

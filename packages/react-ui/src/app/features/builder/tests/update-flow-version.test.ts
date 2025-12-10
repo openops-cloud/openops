@@ -52,8 +52,8 @@ describe('updateFlowVersion', () => {
           valid: false,
           displayName: 'Select Trigger',
           nextAction: {
-            id: 'step_1',
-            name: 'step_1',
+            id: 'step_a',
+            name: 'step_a',
             type: ActionType.BLOCK,
             valid: false,
             displayName: 'step1',
@@ -68,7 +68,7 @@ describe('updateFlowVersion', () => {
         valid: false,
         state: FlowVersionState.DRAFT,
       },
-      selectedStep: 'step_1',
+      selectedStep: 'step_a',
       rightSidebar: RightSideBarType.BLOCK_SETTINGS,
       readonly: false,
       loopsIndexes: {},
@@ -124,7 +124,7 @@ describe('updateFlowVersion', () => {
     const operation = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
-        name: 'step_1',
+        name: 'step_a',
         type: 'BLOCK',
         valid: false,
         settings: { blockVersion: '1.0.0' },
@@ -160,7 +160,7 @@ describe('updateFlowVersion', () => {
           valid: false,
           displayName: 'Select Trigger',
           nextAction: {
-            name: 'step_1',
+            name: 'step_a',
             valid: false,
             type: 'BLOCK',
             displayName: 'Google Cloud CLI',
@@ -175,7 +175,7 @@ describe('updateFlowVersion', () => {
   it('should handle delete action and clear selection when deleting selected step', async () => {
     const operation = {
       type: FlowOperationType.DELETE_ACTION,
-      request: { name: 'step_1' },
+      request: { name: 'step_a' },
     } as FlowOperationRequest;
 
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
@@ -189,26 +189,26 @@ describe('updateFlowVersion', () => {
   it('should handle duplicate action selecting new step', async () => {
     const operation = {
       type: FlowOperationType.DUPLICATE_ACTION,
-      request: { stepName: 'step_1' },
+      request: { stepName: 'step_a' },
     } as FlowOperationRequest;
 
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
     await waitFor(() => expect(mockSet).toHaveBeenCalledWith({ saving: true }));
     await waitFor(() =>
-      expect(mockSet).toHaveBeenCalledWith({ selectedStep: 'step_2' }),
+      expect(mockSet).toHaveBeenCalledWith({ selectedStep: 'step_b' }),
     );
   });
 
   it('should call stepTestOutputCache.clearStep when deleting a step', async () => {
     const operation = {
       type: FlowOperationType.DELETE_ACTION,
-      request: { name: 'step_1' },
+      request: { name: 'step_a' },
     } as FlowOperationRequest;
     const clearStepSpy = jest.spyOn(stepTestOutputCache, 'clearStep');
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
-    expect(clearStepSpy).toHaveBeenCalledWith('step_1');
+    expect(clearStepSpy).toHaveBeenCalledWith('step_a');
     clearStepSpy.mockRestore();
   });
 });

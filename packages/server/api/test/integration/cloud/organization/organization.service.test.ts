@@ -69,7 +69,7 @@ describe('Organization Service', () => {
 
       expect(savedOrganization.id).toBe(result.id);
 
-      const savedUser = await userService.getOneOrFail({
+      const savedUser = await userService.getOneOrThrow({
         id: mockOrganization.ownerId,
       });
 

@@ -15,6 +15,7 @@ import {
   UserId,
   UserMeta,
   UserStatus,
+  UserWithOrganization,
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/basic/password-hasher';
@@ -101,8 +102,18 @@ export const userService = {
   async get({ id }: IdParams): Promise<User | null> {
     return userRepo().findOneBy({ id });
   },
-  async getOneOrFail({ id }: IdParams): Promise<User> {
-    return userRepo().findOneByOrFail({ id });
+  async getOneOrThrow({ id }: IdParams): Promise<User> {
+    const user = await this.get({ id });
+    if (isNil(user)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityId: id,
+          entityType: 'user',
+        },
+      });
+    }
+    return user;
   },
 
   async getDefaultAdmin(): Promise<User | null> {
@@ -191,7 +202,7 @@ export const userService = {
   async updatePassword({
     id,
     newPassword,
-  }: UpdatePasswordParams): Promise<void> {
+  }: UpdatePasswordParams): Promise<User> {
     assertValidPassword(newPassword);
 
     const hashedPassword = await passwordHasher.hash(newPassword);
@@ -200,6 +211,8 @@ export const userService = {
       updated: dayjs().toISOString(),
       password: hashedPassword,
     });
+
+    return userService.getOneOrThrow({ id });
   },
 
   async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {
@@ -271,13 +284,14 @@ export const userService = {
     });
   },
 
-  async addUserToOrganization({
-    id,
-    organizationId,
-  }: UpdateOrganizationIdParams): Promise<void> {
-    await userRepo().update(id, {
-      updated: dayjs().toISOString(),
+  async addUserToOrganization(
+    user: User,
+    organizationId: OrganizationId,
+  ): Promise<UserWithOrganization> {
+    return userRepo().save({
+      ...user,
       organizationRole: OrganizationRole.MEMBER,
+      updated: dayjs().toISOString(),
       organizationId,
     });
   },

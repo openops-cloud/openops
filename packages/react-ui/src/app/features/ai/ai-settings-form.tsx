@@ -1,141 +1,91 @@
-import {
-  aiFormSchemaResolver,
-  AiSettingsFormSchema,
-} from '@/app/features/ai/lib/ai-form-utils';
 import { ConnectionSelect } from '@/app/features/builder/step-settings/block-settings/connection-select';
 import {
   BlockMetadataModel,
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
-import {
-  Button,
-  Form,
-  FormField,
-  FormItem,
-  Label,
-  Switch,
-} from '@openops/components/ui';
-import { AiConfig } from '@openops/shared';
+import { Form } from '@openops/components/ui';
 import equal from 'fast-deep-equal';
-import { t } from 'i18next';
-import { CircleCheck } from 'lucide-react';
+import debounce from 'lodash.debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 type AiSettingsFormProps = {
   block: BlockMetadataModelSummary | BlockMetadataModel;
-  savedSettings?: AiConfig;
-  onSave: (settings: AiSettingsFormSchema) => void;
-  isSaving: boolean;
+  providerKey: string;
+  initialConnection?: string;
+  onSave: (connectionName: string) => void;
+  displayName?: string;
+  disabled?: boolean;
 };
 
-export const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
-  enabled: false,
+type LocalForm = { connection: string };
+
+export const EMPTY_FORM_VALUE: LocalForm = {
   connection: '',
 };
 
 const AiSettingsForm = ({
   block,
-  savedSettings,
+  providerKey,
+  initialConnection,
   onSave,
-  isSaving,
+  displayName,
+  disabled = false,
 }: AiSettingsFormProps) => {
-  const form = useForm<AiSettingsFormSchema>({
-    resolver: aiFormSchemaResolver,
+  const form = useForm<LocalForm>({
     defaultValues: EMPTY_FORM_VALUE,
     mode: 'onChange',
   });
   const [initialFormValue, setInitialFormValue] =
-    useState<AiSettingsFormSchema>(EMPTY_FORM_VALUE);
+    useState<LocalForm>(EMPTY_FORM_VALUE);
 
   useEffect(() => {
-    const formValue: AiSettingsFormSchema = {
-      enabled: savedSettings?.enabled ?? false,
-      connection: savedSettings?.connection ?? '',
+    const formValue: LocalForm = {
+      connection: initialConnection ?? '',
     };
     setInitialFormValue(formValue);
     form.reset(formValue);
-  }, [savedSettings, form]);
+  }, [initialConnection, form]);
 
   const currentFormValue = form.watch();
+  const watchedConnection = form.watch('connection');
 
   const isFormUnchanged = useMemo(() => {
     return equal(currentFormValue, initialFormValue);
   }, [currentFormValue, initialFormValue]);
 
-  const isValidConnection = useMemo(() => {
-    const omit = (obj?: AiSettingsFormSchema) => {
-      const { enabled, ...rest } = obj ?? EMPTY_FORM_VALUE;
-      return rest;
+  const debouncedSave = useMemo(
+    () =>
+      debounce((connection: string, unchanged: boolean) => {
+        if (!unchanged) {
+          onSave(connection);
+          setInitialFormValue({ connection });
+        }
+      }, 300),
+    [onSave],
+  );
+
+  useEffect(() => {
+    debouncedSave(watchedConnection ?? '', isFormUnchanged);
+  }, [debouncedSave, watchedConnection, isFormUnchanged]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSave.cancel();
     };
-
-    return equal(omit(currentFormValue), omit(initialFormValue));
-  }, [currentFormValue, initialFormValue]);
-
-  const resetForm = () => {
-    form.reset();
-  };
-
-  const onSaveClick = () => {
-    const formValue = form.getValues();
-    onSave({
-      ...savedSettings,
-      ...formValue,
-    });
-  };
+  }, [debouncedSave]);
 
   return (
     <Form {...form}>
-      <form className="flex-1 flex flex-col gap-4 max-w-[516px]">
-        <FormField
-          control={form.control}
-          name="enabled"
-          render={({ field }) => (
-            <FormItem className="flex gap-[6px]">
-              <Switch
-                id="enabled"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <Label htmlFor="enabled">{t('Enable AI')}</Label>
-            </FormItem>
-          )}
-        />
+      <form>
         <ConnectionSelect
-          disabled={!currentFormValue.enabled}
+          disabled={disabled}
           allowDynamicValues={false}
           block={block}
-          providerKey={'AI'}
+          providerKey={providerKey}
           name={'connection'}
+          displayName={displayName}
         />
-
-        <div className="flex items-center justify-between ">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={resetForm}
-              disabled={isSaving || isFormUnchanged}
-            >
-              {t('Cancel')}
-            </Button>
-            <Button
-              className="w-[95px]"
-              type="button"
-              disabled={!form.formState.isValid || isFormUnchanged}
-              onClick={onSaveClick}
-              loading={isSaving}
-            >
-              {t('Save')}
-            </Button>
-          </div>
-          {savedSettings?.id && isValidConnection && (
-            <div className="flex items-center gap-2">
-              <CircleCheck size={24} className="text-success-300" />
-              <span>{t('Valid Connection')}</span>
-            </div>
-          )}
-        </div>
       </form>
     </Form>
   );

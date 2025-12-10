@@ -1,5 +1,5 @@
 import { api } from '@/app/lib/api';
-import { ListChatsResponse } from '@openops/shared';
+import { GeneratedChatName, ListChatsResponse } from '@openops/shared';
 
 export const aiAssistantChatHistoryApi = {
   list() {
@@ -9,7 +9,7 @@ export const aiAssistantChatHistoryApi = {
     return api.delete<void>(`/v1/ai/conversation/${chatId}`);
   },
   generateName(chatId: string) {
-    return api.post<{ chatName: string }>('/v1/ai/conversation/chat-name', {
+    return api.post<GeneratedChatName>('/v1/ai/conversation/chat-name', {
       chatId,
     });
   },

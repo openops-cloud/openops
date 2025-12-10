@@ -124,6 +124,8 @@ export const blockHelper = {
           token: params.engineToken,
           apiUrl: constants.internalApiUrl,
           publicUrl: params.publicUrl,
+          tablesDatabaseId: constants.tablesDatabaseId,
+          tablesDatabaseToken: constants.tablesDatabaseToken,
         },
         project: {
           id: params.projectId,

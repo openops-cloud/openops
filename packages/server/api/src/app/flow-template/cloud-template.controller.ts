@@ -4,7 +4,10 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, OpenOpsId } from '@openops/shared';
-import { allowAllOriginsHookHandler } from '../helper/allow-all-origins-hook-handler';
+import {
+  allowAllOriginsHookHandler,
+  registerOptionsEndpoint,
+} from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
 
@@ -24,7 +27,9 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   }
 
   // cloud templates are available on any origin
-  app.addHook('onSend', allowAllOriginsHookHandler);
+  app.addHook('onRequest', allowAllOriginsHookHandler);
+
+  registerOptionsEndpoint(app);
 
   app.get(
     '/',

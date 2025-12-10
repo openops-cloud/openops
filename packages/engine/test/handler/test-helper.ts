@@ -30,6 +30,8 @@ export const generateMockEngineConstants = (params?: Partial<EngineConstants>): 
         params?.serverHandlerId ?? null,
         params?.testRunActionLimits ?? { isEnabled: false, limits: [] },
         params?.isTestRun ?? false,
+        params?.tablesDatabaseId ?? 1,
+        params?.tablesDatabaseToken ?? { iv: 'test-iv', data: 'test-data' },
         params?.resumePayload,
     )
 }

@@ -1,8 +1,18 @@
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
+import {
+  authenticateUserInOpenOpsTables,
+  resetUserPassword,
+} from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { OrganizationRole, Provider, User } from '@openops/shared';
+import {
+  Organization,
+  OrganizationRole,
+  Project,
+  Provider,
+  User,
+} from '@openops/shared';
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
+import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
@@ -23,9 +33,19 @@ export const upsertAdminUser = async (): Promise<void> => {
     const { workspaceId, databaseId, databaseToken } =
       await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
 
-    await ensureOrganizationExists(user);
+    const organization = await ensureOrganizationExists(user);
 
-    await ensureProjectExists(user, databaseId, workspaceId, databaseToken);
+    const userWithOrganization = {
+      ...user,
+      organizationId: organization.id,
+    };
+
+    await ensureProjectExists(
+      userWithOrganization,
+      databaseId,
+      workspaceId,
+      databaseToken,
+    );
   }
 };
 
@@ -53,6 +73,7 @@ async function ensureUserExists(
       `Admin user already exists [${email}], updating their password`,
       email,
     );
+
     await upsertAdminPassword(user, password);
     return user;
   }
@@ -73,7 +94,11 @@ async function ensureUserExists(
     email,
   );
 
-  return createAdminUser(email, password);
+  user = await createAdminUser(email, password);
+  const { token } = await authenticateUserInOpenOpsTables(email, password);
+  await resetUserPassword(email, user.password, token);
+
+  return user;
 }
 
 async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
@@ -81,7 +106,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   workspaceId: number;
   databaseId: number;
 }> {
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateAdminUserInOpenOpsTables();
 
   const { workspaceId, databaseId, databaseToken } =
     await openopsTables.createDefaultWorkspaceAndDatabase(token);
@@ -98,7 +123,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   return { workspaceId, databaseId, databaseToken };
 }
 
-async function ensureOrganizationExists(user: User): Promise<void> {
+async function ensureOrganizationExists(user: User): Promise<Organization> {
   if (user.organizationId) {
     const existingOrganization = await organizationService.getOne(
       user.organizationId,
@@ -110,23 +135,25 @@ async function ensureOrganizationExists(user: User): Promise<void> {
       );
     }
 
-    return;
+    return existingOrganization;
   }
 
-  const organization = await organizationService.create({
+  return organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
   });
-
-  user.organizationId = organization.id;
 }
 
+type UserWithOrganization = User & {
+  organizationId: string;
+};
+
 async function ensureProjectExists(
-  user: User,
+  user: UserWithOrganization,
   databaseId: number,
   workspaceId: number,
   databaseToken: string,
-): Promise<void> {
+): Promise<Project> {
   const project = await projectService.getOneForUser(user);
   if (project) {
     if (project.tablesDatabaseId !== databaseId) {
@@ -141,13 +168,13 @@ async function ensureProjectExists(
       );
     }
 
-    return;
+    return project;
   }
 
-  await projectService.create({
+  return projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
-    organizationId: user.organizationId!,
+    organizationId: user.organizationId,
     tablesDatabaseId: databaseId,
     tablesWorkspaceId: workspaceId,
     tablesDatabaseToken: databaseToken,
@@ -160,7 +187,14 @@ async function upsertAdminPassword(
 ): Promise<void> {
   const email = user.email;
   logger.info(`Updating password for admin [${email}]`, email);
-  await userService.updatePassword({ id: user.id, newPassword });
+
+  const updatedUser = await userService.updatePassword({
+    id: user.id,
+    newPassword,
+  });
+
+  const { token } = await authenticateUserInOpenOpsTables(email, newPassword);
+  await resetUserPassword(email, updatedUser.password, token);
 }
 
 async function upsertAdminEmail(user: User, email: string): Promise<void> {

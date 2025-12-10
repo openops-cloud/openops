@@ -46,6 +46,9 @@ type GetStepFromSubFlow = {
 const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
 const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
+const ALPHABET_LENGTH = 26;
+const A_CODE_POINT = 97;
+
 export function buildBlockActionKey(
   blockName: string,
   actionName: string,
@@ -331,6 +334,35 @@ function getStep(
   return getAllSteps(flowVersion.trigger).find(
     (step) => step.name === stepName,
   );
+}
+
+function getStepById(
+  flowVersion: FlowVersion,
+  stepId: string,
+): Action | TriggerWithOptionalId | undefined {
+  if (flowVersion.trigger.id === stepId) {
+    return flowVersion.trigger;
+  }
+  return getAllSteps(flowVersion.trigger).find((step) => step.id === stepId);
+}
+
+function getStepWithIndex(
+  flowVersion: FlowVersion,
+  stepName: string,
+): {
+  step: Action | TriggerWithOptionalId | undefined;
+  stepIndex: number | undefined;
+} {
+  const step = getStep(flowVersion, stepName);
+
+  if (!step) {
+    return { step: undefined, stepIndex: undefined };
+  }
+
+  const steps = getAllSteps(flowVersion.trigger);
+  const stepIndex = steps.findIndex((s) => s.name === step.name) + 1;
+
+  return { step, stepIndex };
 }
 
 function getSplitBranches(step: SplitActionSchema): SplitBranch[] {
@@ -1096,16 +1128,44 @@ function doesActionHaveChildren(
   return false;
 }
 
-function findUnusedName(names: string[], stepPrefix: string): string {
-  let availableNumber = 1;
-  let availableName = `${stepPrefix}_${availableNumber}`;
-
-  while (names.includes(availableName)) {
-    availableNumber++;
-    availableName = `${stepPrefix}_${availableNumber}`;
+/**
+ * Converts a zero-based numeric index into a lowercase alphabetical label.
+ * Similar to spreadsheet column naming but using lowercase letters:
+ * 0 -> "a", 25 -> "z", 26 -> "aa", 27 -> "ab", and so on.
+ *
+ * @param index - Zero-based integer to convert.
+ * @returns Alphabetical label corresponding to the index.
+ * @example
+ * indexToAlphabetical(0)   // "a"
+ * indexToAlphabetical(25)  // "z"
+ * indexToAlphabetical(26)  // "aa"
+ * indexToAlphabetical(701) // "zz"
+ */
+function indexToAlphabetical(index: number): string {
+  let n = index + 1;
+  let result = '';
+  while (n > 0) {
+    n--;
+    result =
+      String.fromCodePoint(A_CODE_POINT + (n % ALPHABET_LENGTH)) + result;
+    n = Math.floor(n / ALPHABET_LENGTH);
   }
+  return result;
+}
 
-  return availableName;
+function findUnusedName(names: string[], stepPrefix: string): string {
+  const prefix = `${stepPrefix}_`;
+  const tails = new Set(
+    names
+      .filter((n) => n.startsWith(prefix))
+      .map((n) => n.slice(prefix.length)),
+  );
+
+  let index = 0;
+  while (tails.has(indexToAlphabetical(index))) {
+    index++;
+  }
+  return `${stepPrefix}_${indexToAlphabetical(index)}`;
 }
 
 function findAvailableStepName(
@@ -1264,6 +1324,8 @@ export const flowHelper = {
   },
 
   getStep,
+  getStepById,
+  getStepWithIndex,
   isAction,
   isTrigger,
   getAllSteps,
@@ -1286,4 +1348,6 @@ export const flowHelper = {
   getUsedConnections,
   createTrigger,
   addStepIndices,
+  indexToAlphabetical,
+  findUnusedName,
 };

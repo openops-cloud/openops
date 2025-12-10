@@ -83,7 +83,7 @@ describe('create-user', () => {
     expect(createTablesUserMock).toHaveBeenCalledWith({
       name: 'John Doe',
       email: baseParams.email,
-      password: 'P@ssw0rd',
+      password: res.user.password,
       authenticate: true,
     });
 

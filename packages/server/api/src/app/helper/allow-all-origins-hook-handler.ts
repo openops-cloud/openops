@@ -1,9 +1,9 @@
-import { onSendHookHandler } from 'fastify/types/hooks';
+import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
+import { FastifyInstance, onRequestHookHandler } from 'fastify';
 
-export const allowAllOriginsHookHandler: onSendHookHandler = (
+export const allowAllOriginsHookHandler: onRequestHookHandler = (
   request,
   reply,
-  payload,
   done,
 ) => {
   void reply.header(
@@ -15,15 +15,25 @@ export const allowAllOriginsHookHandler: onSendHookHandler = (
 
   void reply.header(
     'Access-Control-Allow-Headers',
-    'Content-Type,Ops-Origin,Authorization',
+    'Content-Type,Ops-Origin,Authorization,Ops-Cloud-Token',
   );
 
   void reply.header('Access-Control-Allow-Credentials', 'true');
 
-  if (request.method === 'OPTIONS') {
-    return reply.status(204).send();
-  }
-
-  done(null, payload);
-  return;
+  done();
 };
+
+export function registerOptionsEndpoint(app: FastifyInstance) {
+  app.options(
+    '*',
+    {
+      config: {
+        allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        skipAuth: true,
+      },
+    },
+    (_request, reply) => {
+      return reply.status(204).send();
+    },
+  );
+}

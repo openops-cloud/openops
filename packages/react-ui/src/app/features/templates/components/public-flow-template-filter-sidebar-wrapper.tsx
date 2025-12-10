@@ -20,6 +20,7 @@ export type FlowTemplateFilterSidebarProps = {
   setSelectedServices: (services: string[]) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
+  newDomains?: string[];
 };
 
 export const FlowTemplateFilterSidebarSkeletonLoader: React.FC<{
@@ -53,6 +54,7 @@ const PublicFlowTemplateFilterSidebarWrapper = ({
   setSelectedCategories,
   setSelectedBlocks,
   showDomains = true,
+  newDomains = [],
 }: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
@@ -175,6 +177,7 @@ const PublicFlowTemplateFilterSidebarWrapper = ({
       selectedCategories={selectedCategories}
       categoryLogos={categoryLogos}
       showDomains={showDomains}
+      newDomains={newDomains}
     />
   );
 };

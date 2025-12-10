@@ -18,6 +18,6 @@ export const projectApi = {
     return api.get<Project>(`/v1/users/projects/${projectId}`);
   },
   getAll: async () => {
-    return api.get<Project>(`/v1/users/projects`);
+    return api.get<Project[]>(`/v1/users/projects`);
   },
 };

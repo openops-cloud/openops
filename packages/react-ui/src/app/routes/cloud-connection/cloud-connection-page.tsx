@@ -43,7 +43,7 @@ const CloudConnectionPage = () => {
       return;
     }
 
-    const app = initializeFrontegg(FRONTEGG_URL as string);
+    const app = initializeFrontegg({ url: FRONTEGG_URL as string });
 
     app.ready(() => {
       app.store.subscribe(() => {
@@ -60,11 +60,6 @@ const CloudConnectionPage = () => {
           } else {
             if (auth.user?.accessToken && auth.user?.refreshToken) {
               Cookies.set('cloud-token', auth.user.accessToken, {
-                sameSite: 'None',
-                secure: true,
-                expires: getExpirationDate(auth.user.accessToken),
-              });
-              Cookies.set('cloud-refresh-token', auth.user.refreshToken, {
                 sameSite: 'None',
                 secure: true,
                 expires: getExpirationDate(auth.user.accessToken),
