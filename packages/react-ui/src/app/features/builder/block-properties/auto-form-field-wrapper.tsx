@@ -33,6 +33,7 @@ type AutoFormFieldWrapperProps = {
   property: BlockProperty;
   hideDescription?: boolean;
   placeBeforeLabelText?: boolean;
+  labelPlacement?: 'top' | 'left';
   disabled: boolean;
   field: ControllerRenderProps;
   inputName: string;
@@ -129,8 +130,31 @@ const FormLabelButton = ({
   return null;
 };
 
+type LabelContentProps = {
+  property: BlockProperty;
+  placeBeforeLabelText: boolean;
+  dynamicViewToggled: boolean;
+  children: React.ReactNode;
+};
+
+const LabelContent = ({
+  property,
+  placeBeforeLabelText,
+  dynamicViewToggled,
+  children,
+}: LabelContentProps) => {
+  return (
+    <FormLabel className="flex items-center gap-1">
+      {placeBeforeLabelText && !dynamicViewToggled && children}
+      <span>{t(property.displayName)}</span>
+      {property.required && <span className="text-destructive">*</span>}
+    </FormLabel>
+  );
+};
+
 const AutoFormFieldWrapper = ({
   placeBeforeLabelText = false,
+  labelPlacement = 'top',
   children,
   hideDescription,
   allowDynamicValues,
@@ -238,11 +262,19 @@ const AutoFormFieldWrapper = ({
 
   return (
     <FormItem className="flex flex-col gap-1">
-      <FormLabel className="flex items-center gap-1">
-        {placeBeforeLabelText && !dynamicViewToggled && children}
-        <span>{t(property.displayName)}</span>
-        {property.required && <span className="text-destructive">*</span>}
-        <span className="grow"></span>
+      <div className="flex items-center justify-between">
+        <div>
+          {labelPlacement === 'top' && (
+            <LabelContent
+              property={property}
+              placeBeforeLabelText={placeBeforeLabelText}
+              dynamicViewToggled={dynamicViewToggled}
+            >
+              {children}
+            </LabelContent>
+          )}
+        </div>
+
         <FormLabelButton
           property={property}
           allowDynamicValues={allowDynamicValues}
@@ -251,16 +283,34 @@ const AutoFormFieldWrapper = ({
           handleDynamicValueChange={handleChange}
           onGenerateWithAIClick={onGenerateWithAIClick}
         />
-      </FormLabel>
+      </div>
 
-      {dynamicViewToggled && (
-        <TextInputWithMentions
-          disabled={disabled}
-          onChange={field.onChange}
-          initialValue={field.value ?? null}
-        ></TextInputWithMentions>
-      )}
-      {!placeBeforeLabelText && !dynamicViewToggled && <div>{children}</div>}
+      <div className="flex items-center gap-6">
+        {labelPlacement === 'left' && (
+          <div className="shrink-0">
+            <LabelContent
+              property={property}
+              placeBeforeLabelText={placeBeforeLabelText}
+              dynamicViewToggled={dynamicViewToggled}
+            >
+              {children}
+            </LabelContent>
+          </div>
+        )}
+        <div className="flex-1 min-w-0 overflow-visible">
+          {dynamicViewToggled && (
+            <TextInputWithMentions
+              disabled={disabled}
+              onChange={field.onChange}
+              initialValue={field.value ?? null}
+            ></TextInputWithMentions>
+          )}
+          {!placeBeforeLabelText && !dynamicViewToggled && (
+            <div>{children}</div>
+          )}
+        </div>
+      </div>
+
       {property.description && !hideDescription && (
         <ReadMoreDescription text={t(property.description)} />
       )}
