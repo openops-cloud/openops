@@ -45,6 +45,12 @@ describe('getSystemPrompt', () => {
       'azure_cli',
       'azure prompt content',
     ],
+    [
+      'cloudhealth-graphql.txt',
+      '@openops/block-cloudhealth',
+      'graphql_query',
+      'cloudhealth graphql prompt content',
+    ],
   ])(
     'should load cli block prompt from cloud',
     async (
@@ -88,6 +94,13 @@ describe('getSystemPrompt', () => {
       '',
     ],
     [
+      'cloudhealth-graphql.txt',
+      '@openops/block-cloudhealth',
+      'graphql_query',
+      'cloudhealth graphql prompt content',
+      '',
+    ],
+    [
       'aws-cli.txt',
       '@openops/block-aws',
       'aws_cli',
@@ -106,6 +119,13 @@ describe('getSystemPrompt', () => {
       '@openops/block-google-cloud',
       'google_cloud_cli',
       'gcp prompt content',
+      undefined,
+    ],
+    [
+      'cloudhealth-graphql.txt',
+      '@openops/block-cloudhealth',
+      'graphql_query',
+      'cloudhealth graphql prompt content',
       undefined,
     ],
   ])(
@@ -178,6 +198,12 @@ describe('getSystemPrompt', () => {
       '@openops/block-google-cloud',
       'google_execute_sql_query',
       'gcp big query prompt content',
+    ],
+    [
+      'cloudhealth-graphql.txt',
+      '@openops/block-cloudhealth',
+      'graphql_query',
+      'cloudhealth graphql prompt content',
     ],
   ])(
     'should load action prompt from cloud',

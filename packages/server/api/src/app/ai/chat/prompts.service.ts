@@ -81,6 +81,11 @@ export const getBlockSystemPrompt = async (
       return loadPrompt('snowflake.txt');
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
+    case '@openops/block-cloudhealth':
+      if (context.actionName === 'graphql_query') {
+        return loadPrompt('cloudhealth-graphql.txt');
+      }
+      return '';
     case CODE_BLOCK_NAME: {
       let enhancedPrompt = '';
 

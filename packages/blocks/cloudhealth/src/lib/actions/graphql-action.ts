@@ -46,6 +46,7 @@ export const graphqlAction = createAction({
       displayName: 'GraphQL Query',
       description: 'The GraphQL query to execute',
       required: true,
+      supportsAI: true,
     }),
     variables: Property.Json({
       displayName: 'Variables',
