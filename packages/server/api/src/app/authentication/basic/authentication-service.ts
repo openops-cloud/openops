@@ -3,7 +3,10 @@ import { AuthenticationResponse } from '@openops/shared';
 import { userService } from '../../user/user-service';
 import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
-import { assignDefaultOrganization } from '../new-user/organization-assignment';
+import {
+  addUserToDefaultWorkspace,
+  assignDefaultOrganization,
+} from '../new-user/organization-assignment';
 import { SignInParams, SignUpParams } from '../types';
 import {
   assertPasswordMatches,
@@ -15,7 +18,8 @@ export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
     const { user, tablesRefreshToken } = await createUser(params);
 
-    await assignDefaultOrganization(user);
+    const updatedUser = await assignDefaultOrganization(user);
+    await addUserToDefaultWorkspace(updatedUser);
 
     const projectContext = await getProjectAndToken(user, tablesRefreshToken);
     return buildAuthResponse(projectContext);

@@ -15,6 +15,7 @@ import {
   UserId,
   UserMeta,
   UserStatus,
+  UserWithOrganization,
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/basic/password-hasher';
@@ -283,13 +284,14 @@ export const userService = {
     });
   },
 
-  async addUserToOrganization({
-    id,
-    organizationId,
-  }: UpdateOrganizationIdParams): Promise<void> {
-    await userRepo().update(id, {
-      updated: dayjs().toISOString(),
+  async addUserToOrganization(
+    user: User,
+    organizationId: OrganizationId,
+  ): Promise<UserWithOrganization> {
+    return userRepo().save({
+      ...user,
       organizationRole: OrganizationRole.MEMBER,
+      updated: dayjs().toISOString(),
       organizationId,
     });
   },
