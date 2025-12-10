@@ -40,6 +40,7 @@ type ConnectionSelectProps = {
   providerKey: string;
   name: string;
   displayName?: string;
+  labelPlacement?: 'top' | 'left';
 };
 
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
@@ -133,6 +134,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               hideDescription={true}
               inputName={params.name}
               allowDynamicValues={params.allowDynamicValues}
+              labelPlacement={params.labelPlacement}
             >
               {connectionDialogOpen && !isLoadingConnection && (
                 <DynamicFormValidationProvider>

@@ -140,7 +140,7 @@ const AiSettingsPage = () => {
               <Skeleton className="h-[78px]" />
             )}
 
-            <h3 className="text-sm font-medium">{t('MCP')}</h3>
+            <h3 className="text-sm font-bold">{t('MCP')}</h3>
             {awsBlockModel ? (
               <AiSettingsForm
                 block={awsBlockModel}
@@ -151,6 +151,7 @@ const AiSettingsPage = () => {
                   isSavingMcpSettings || !isAiConfigured || isSavingAiSettings
                 }
                 displayName={t('AWS Cost')}
+                labelPlacement="left"
               />
             ) : (
               <Skeleton className="h-[78px]" />
