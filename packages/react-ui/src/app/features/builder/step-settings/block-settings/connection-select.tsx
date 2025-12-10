@@ -177,7 +177,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                       }
                     >
                       {!!field.value && (
-                        <span className="text-start block truncate text-primary-700 text-base font-medium">
+                        <span className="text-start block truncate text-primary-700 text-sm font-medium">
                           {removeConnectionBrackets(field.value)}
                         </span>
                       )}
@@ -191,7 +191,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                           type="button"
                           variant="ghost"
                           size="xs"
-                          className="text-primary-700 text-base font-medium"
+                          className="text-primary-700 text-sm font-medium"
                           onPointerDown={suppressPointerOrMouseDown}
                           onMouseDown={suppressPointerOrMouseDown}
                           onKeyDown={makeActivationKeysHandler((e) =>
@@ -210,7 +210,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                         type="button"
                         variant="ghost"
                         size="xs"
-                        className="text-primary-700 text-base font-medium"
+                        className="text-primary-700 text-sm font-medium"
                         onPointerDown={suppressPointerOrMouseDown}
                         onMouseDown={suppressPointerOrMouseDown}
                         onKeyDown={makeActivationKeysHandler(() => {
