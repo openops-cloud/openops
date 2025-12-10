@@ -1,5 +1,5 @@
 import { createAxiosHeaders } from '@openops/common';
-import { AppSystemProp, system } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { isEmpty } from '@openops/shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
@@ -10,6 +10,7 @@ export async function getTablesTools(): Promise<MCPTool> {
   const { token } = await authenticateAdminUserInOpenOpsTables();
   const mcpEndpoints = await openopsTables.getMcpEndpointList(token);
   if (isEmpty(mcpEndpoints)) {
+    logger.error('No MCP endpoints found from OpenOps Tables');
     return {
       client: undefined,
       toolSet: {},

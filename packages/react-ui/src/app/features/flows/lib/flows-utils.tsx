@@ -1,8 +1,13 @@
+import { ActionBase } from '@openops/blocks-framework';
+import {
+  BlockStepMetadataWithSuggestions,
+  StepMetadataWithSuggestions,
+} from '@openops/components/ui';
 import cronstrue from 'cronstrue/i18n';
 import { t } from 'i18next';
 import { TimerReset, TriangleAlert, Zap } from 'lucide-react';
 
-import { Flow, FlowVersion, TriggerType } from '@openops/shared';
+import { ActionType, Flow, FlowVersion, TriggerType } from '@openops/shared';
 
 import { flowsApi } from './flows-api';
 
@@ -29,8 +34,26 @@ const downloadFlow = async (flowId: string, versionId: string) => {
   downloadFile(JSON.stringify(template, null, 2), template.name, 'json');
 };
 
+const getActionMetadata = (
+  metadata: StepMetadataWithSuggestions[] | undefined,
+  blockName: string,
+  actionName: string | undefined,
+): ActionBase | undefined => {
+  const blockStepMetadata = metadata?.find(
+    (stepMetadata: StepMetadataWithSuggestions) =>
+      stepMetadata.type === ActionType.BLOCK &&
+      (stepMetadata as BlockStepMetadataWithSuggestions).blockName ===
+        blockName,
+  ) as BlockStepMetadataWithSuggestions | undefined;
+
+  return blockStepMetadata?.suggestedActions?.find(
+    (suggestedAction) => suggestedAction.name === actionName,
+  );
+};
+
 export const flowsUtils = {
   downloadFlow,
+  getActionMetadata,
   flowStatusToolTipRenderer: (flow: Flow, version: FlowVersion) => {
     const trigger = version.trigger;
     switch (trigger.type) {

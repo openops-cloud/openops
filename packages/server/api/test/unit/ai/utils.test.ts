@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelMessage } from 'ai';
-import { mergeToolResultsIntoMessages } from '../../../src/app/ai/chat/utils';
+import {
+  mergeToolResultsIntoMessages,
+  sanitizeMessagesForChatName,
+} from '../../../src/app/ai/chat/utils';
 
 describe('mergeToolResultsIntoMessages', () => {
   describe('basic message handling', () => {
@@ -799,5 +802,84 @@ describe('mergeToolResultsIntoMessages', () => {
         input: { userId: '123' },
       });
     });
+  });
+});
+
+describe('sanitizeMessagesForChatName', () => {
+  it('keeps only user and assistant roles, dropping tool messages', () => {
+    const messages: ModelMessage[] = [
+      { role: 'system', content: 'sys' },
+      { role: 'user', content: 'hello ' },
+      {
+        role: 'assistant',
+        content: [{ type: 'text', text: 'hi' } as any],
+      },
+      {
+        role: 'tool',
+        content: [
+          { toolCallId: 'x', type: 'tool_result', content: 'ok' } as any,
+        ],
+      },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([
+      { role: 'user', content: 'hello' },
+      { role: 'assistant', content: 'hi' },
+    ]);
+  });
+
+  it('trims string content and removes empty messages after trim', () => {
+    const messages: ModelMessage[] = [
+      { role: 'user', content: '   ' },
+      { role: 'assistant', content: '  answer  ' },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([{ role: 'assistant', content: 'answer' }]);
+  });
+
+  it('merges multiple text parts with newlines and trims overall', () => {
+    const messages: ModelMessage[] = [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Line 1' } as any,
+          { type: 'text', text: 'Line 2' } as any,
+        ],
+      },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([{ role: 'user', content: 'Line 1\nLine 2' }]);
+  });
+
+  it('ignores non-text parts (e.g., tool_use, image) and keeps only text', () => {
+    const messages: ModelMessage[] = [
+      {
+        role: 'assistant',
+        content: [
+          { type: 'tool_use', id: 't1', name: 'X', input: {} } as any,
+          { type: 'text', text: 'Only this is kept' } as any,
+          { type: 'image', image: 'raw' } as any,
+        ],
+      },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([
+      { role: 'assistant', content: 'Only this is kept' },
+    ]);
+  });
+
+  it('returns empty array when nothing useful remains', () => {
+    const messages: ModelMessage[] = [
+      { role: 'system', content: 'not included' },
+      { role: 'tool', content: [] as any },
+      { role: 'user', content: [] as any },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([]);
   });
 });

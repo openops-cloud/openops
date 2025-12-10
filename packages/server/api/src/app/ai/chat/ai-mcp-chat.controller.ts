@@ -22,7 +22,7 @@ import {
   UpdateChatModelRequest,
   UpdateChatModelResponse,
 } from '@openops/shared';
-import { ModelMessage, UserModelMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import removeMarkdown from 'markdown-to-text';
@@ -248,27 +248,30 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { chatHistory } = await getConversation(chatId, userId, projectId);
 
       if (chatHistory.length === 0) {
-        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+        return await reply
+          .code(200)
+          .send({ name: DEFAULT_CHAT_NAME, isGenerated: false });
       }
 
-      const userMessages = chatHistory.filter(
-        (msg): msg is UserModelMessage =>
-          msg &&
-          typeof msg === 'object' &&
-          'role' in msg &&
-          msg.role === 'user',
-      );
+      const generated = await generateChatName(chatHistory, projectId);
 
-      if (userMessages.length === 0) {
-        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      if (!generated.isGenerated) {
+        return await reply
+          .code(200)
+          .send({ name: DEFAULT_CHAT_NAME, isGenerated: false });
       }
 
-      const rawChatName = await generateChatName(userMessages, projectId);
-      const chatName = removeMarkdown(rawChatName).trim() || DEFAULT_CHAT_NAME;
+      const chatName = generated?.name
+        ? removeMarkdown(generated.name).trim()
+        : DEFAULT_CHAT_NAME;
 
-      await updateChatName(chatId, userId, projectId, chatName);
+      if (generated.isGenerated && generated.name) {
+        await updateChatName(chatId, userId, projectId, chatName);
+      }
 
-      return await reply.code(200).send({ chatName });
+      return await reply
+        .code(200)
+        .send({ name: chatName, isGenerated: generated.isGenerated });
     } catch (error) {
       return handleError(error, reply, 'generate chat name');
     }
