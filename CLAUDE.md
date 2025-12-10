@@ -7,14 +7,23 @@
 - Update documentation for user-facing changes
 - Do not introduce new dependencies without discussion
 
-
 ## Structure
 
 The repository is using nx, with the source code under the "packages" directory.
-Use nx to run tests (e.g. npx nx test server-shared).
-Run "npx nx lint" before committing. 
+Notable packages (nx projects) include:
+- **packages/server/api** - Main Fastify-based API server (port 3000)
+- **packages/server/shared** - Shared server utilities (logging, caching, encryption)
+- **packages/engine** - Workflow execution engine (runs as separate service or AWS Lambda)
+- **packages/react-ui** - React frontend application (Vite + TailwindCSS)
+- **packages/shared** - Shared types and utilities across frontend/backend
+- **packages/blocks/** - 50+ integration blocks (AWS, Azure, GCP, Slack, etc.)
+- **packages/blocks/framework** - Base framework for creating blocks/actions/triggers
+- **packages/ui-components** - Reusable UI component library (documented in Storybook)
+
 
 ## Code Style
+
+Run "npx nx lint" to verify code style before committing.
 
 ### Formatting
 
@@ -112,14 +121,14 @@ export function getUserProfile(userId: string): UserProfile {
 - Run tests using Nx commands:
 
 ```bash
-nx test react-ui
-nx test ui-components
-nx test-unit server-api
-nx test engine
-nx lint react-ui
+npx nx test react-ui
+npx nx test ui-components
+npx nx test-unit server-api
+npx nx test engine
+npx nx lint react-ui
 ```
 
-## Git Workflow
+## Git and Pull Request Guidelines
 
 ### Commits
 
@@ -127,16 +136,6 @@ nx lint react-ui
 - Keep commits small and focused on a single change
 - Write descriptive commit messages that explain what and why, not how
 
-**Commit message format:**
-
-```
-Short summary in imperative mood (under 50 chars)
-
-More detailed explanation if necessary. Wrap at around 72
-characters. Explain what and why, not how (the code shows that).
-
-Fixes #issue_number
-```
 
 ### Pull Requests
 
