@@ -15,6 +15,6 @@ Release notes for event time 2025-12-10T13:44:52Z are listed below.
 ## ✨
 
 - Switched Mint integration documentation from the deprecated `mint-mcp` package to the hosted Mint MCP URL
-- Improved generated chat names by stripping markdown syntax from LLM‑produced titles.
+- Improved generated chat names by stripping markdown syntax from LLM‑produced titles
 
 
