@@ -55,7 +55,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.BLOCKS_SYNC_MODE]: BlockSyncMode.NONE,
   [AppSystemProp.TRIGGER_FAILURES_THRESHOLD]: '576',
   [AppSystemProp.RUN_DB_MIGRATIONS]: 'true',
-  [SharedSystemProp.ENVIRONMENT]: 'prod',
   [WorkerSystemProps.FLOW_WORKER_CONCURRENCY]: '10',
   [WorkerSystemProps.POLLING_POOL_SIZE]: '5',
   [WorkerSystemProps.SCHEDULED_WORKER_CONCURRENCY]: '10',
