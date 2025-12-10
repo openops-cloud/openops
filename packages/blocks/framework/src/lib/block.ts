@@ -8,9 +8,9 @@ import { BlockBaseDetails, BlockMetadata } from './block-metadata';
 import { BlockAuthProperty } from './property/authentication';
 import { Trigger } from './trigger/trigger';
 
-export class Block<BlockAuth extends BlockAuthProperty = BlockAuthProperty>
-  implements Omit<BlockBaseDetails, 'version' | 'name'>
-{
+export class Block<
+  BlockAuth extends BlockAuthProperty = BlockAuthProperty,
+> implements Omit<BlockBaseDetails, 'version' | 'name'> {
   private readonly _actions: Record<string, Action> = {};
   private readonly _triggers: Record<string, Trigger> = {};
 

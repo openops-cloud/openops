@@ -7,7 +7,7 @@ export const linearNewIssue = createTrigger({
   auth: linearAuth,
   name: 'new_issue',
   displayName: 'New Issue',
-  description: 'Triggers when Linear receives a new issue',
+  description: 'Trigger when Linear receives a new issue',
   props: {
     team_id: props.team_id(),
   },

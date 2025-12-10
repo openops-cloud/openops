@@ -39,7 +39,7 @@ function getEveryWeekData(
 export const everyWeekTrigger = createTrigger({
   name: 'every_week',
   displayName: 'Every Week',
-  description: 'Triggers the current flow every week',
+  description: 'Trigger the current flow every week',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {

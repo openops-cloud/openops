@@ -55,7 +55,7 @@ export const newOrModifiedFile = createTrigger({
   auth: sftpAuth,
   name: 'new_file',
   displayName: 'New File',
-  description: 'Triggers when a new file is created or modified',
+  description: 'Trigger when a new file is created or modified',
   props: {
     path: Property.ShortText({
       displayName: 'Path',

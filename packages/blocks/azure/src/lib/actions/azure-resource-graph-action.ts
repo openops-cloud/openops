@@ -90,7 +90,7 @@ export const azureResourceGraphAction = createAction({
   props: {
     query: Property.LongText({
       displayName: 'KQL Query',
-      description: 'The Kusto Query Language (KQL) query to execute.',
+      description: 'The Kusto Query Language (KQL) query to execute',
       required: true,
     }),
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),

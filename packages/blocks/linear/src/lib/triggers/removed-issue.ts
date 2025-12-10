@@ -7,7 +7,7 @@ export const linearRemovedIssue = createTrigger({
   auth: linearAuth,
   name: 'removed_issue',
   displayName: 'Removed Issue',
-  description: 'Triggers when an existing Linear issue is removed',
+  description: 'Trigger when an existing Linear issue is removed',
   props: {
     team_id: props.team_id(),
   },

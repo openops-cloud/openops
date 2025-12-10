@@ -39,7 +39,7 @@ function getEveryMonthData(
 export const everyMonthTrigger = createTrigger({
   name: 'every_month',
   displayName: 'Every Month',
-  description: 'Triggers the current flow every month',
+  description: 'Trigger the current flow every month',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {

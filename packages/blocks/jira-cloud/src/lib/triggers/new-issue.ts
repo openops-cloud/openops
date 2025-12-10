@@ -35,7 +35,7 @@ const polling: Polling<
 export const newIssue = createTrigger({
   name: 'new_issue',
   displayName: 'New Issue',
-  description: 'Triggers when a new issue is created',
+  description: 'Trigger when a new issue is created',
   auth: jiraCloudAuth,
   type: TriggerStrategy.POLLING,
   props: {

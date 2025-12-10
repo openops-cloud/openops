@@ -188,7 +188,7 @@ export const newEmailTrigger = createTrigger({
   auth: microsoftOutlookAuth,
   name: 'newEmail',
   displayName: 'New Email',
-  description: 'Triggers when a new email is received in the inbox',
+  description: 'Trigger when a new email is received in the inbox',
   props: {
     mailBox: mailFolderIdDropdown({
       displayName: 'Mail Folder',

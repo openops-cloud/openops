@@ -22,7 +22,7 @@ function getEveryHourData(runOnWeekends: boolean) {
 export const everyHourTrigger = createTrigger({
   name: 'every_hour',
   displayName: 'Every Hour',
-  description: 'Triggers the current flow every hour',
+  description: 'Trigger the current flow every hour',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {

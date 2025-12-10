@@ -35,7 +35,7 @@ function getEveryDayData(
 export const everyDayTrigger = createTrigger({
   name: 'every_day',
   displayName: 'Every Day',
-  description: 'Triggers the current flow every day',
+  description: 'Trigger the current flow every day',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {

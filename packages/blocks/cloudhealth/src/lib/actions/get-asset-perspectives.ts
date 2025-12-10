@@ -14,7 +14,7 @@ export const getAssetPerspectivesAction = createAction({
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',
-      description: 'The type of asset to fetch metadata for.',
+      description: 'The type of asset to fetch metadata for',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
