@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*", "deploy/**/*"],
-  "plugins": ["@nx"],
+  "plugins": ["@nx", "@openops/block-style"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx", "*.json"],
@@ -51,6 +51,12 @@
         "jest": true
       },
       "rules": {}
+    },
+    {
+      "files": ["packages/blocks/**/*.ts"],
+      "rules": {
+        "@openops/block-style/block-style-guide": "error"
+      }
     }
   ],
   "settings": {
@@ -65,5 +71,8 @@
         "project": ["tsconfig.json", "package/tsconfig.json"]
       }
     }
+  },
+  "plugins": {
+    "@openops/block-style": "./tools/eslint-rules"
   }
 }

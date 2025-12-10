@@ -1,0 +1,9 @@
+{
+  "name": "@openops/eslint-plugin-block-style",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce OpenOps block style guide",
+  "main": "index.js",
+  "keywords": ["eslint", "eslintplugin", "openops", "blocks"],
+  "author": "OpenOps",
+  "license": "MIT"
+}
