@@ -3,13 +3,16 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ORGIN_PROJECT_ID_KEY, ORGIN_USER_ID_KEY } from '@/app/constants/cloud';
 import { cloudUserApi } from '@/app/features/cloud/lib/cloud-user-api';
 import { getProjectIdSearchParam } from '@/app/features/cloud/lib/utils';
+import {
+  additionalFronteggParams,
+  initializeFrontegg,
+} from '@/app/lib/frontegg-setup';
+import { getExpirationDate } from '@/app/lib/jwt-utils';
 import { CloudLoggedInBrief } from '@openops/components/ui';
 import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
-import { additionalFronteggParams, initializeFrontegg } from './frontegg-setup';
-import { getExpirationDate } from './jwt-utils';
 
 const CloudConnectionPage = () => {
   const navigate = useNavigate();
@@ -33,18 +36,14 @@ const CloudConnectionPage = () => {
     if (!flags || isLoading) {
       return;
     }
-    const { FRONTEGG_URL, FRONTEGG_CLIENT_ID, FRONTEGG_APP_ID } = flags;
+    const { FRONTEGG_URL } = flags;
 
-    if (!FRONTEGG_URL || !FRONTEGG_CLIENT_ID || !FRONTEGG_APP_ID) {
+    if (!FRONTEGG_URL) {
       navigate('/');
       return;
     }
 
-    const app = initializeFrontegg(
-      FRONTEGG_URL as string,
-      FRONTEGG_CLIENT_ID as string,
-      FRONTEGG_APP_ID as string,
-    );
+    const app = initializeFrontegg({ url: FRONTEGG_URL as string });
 
     app.ready(() => {
       app.store.subscribe(() => {
@@ -61,11 +60,6 @@ const CloudConnectionPage = () => {
           } else {
             if (auth.user?.accessToken && auth.user?.refreshToken) {
               Cookies.set('cloud-token', auth.user.accessToken, {
-                sameSite: 'None',
-                secure: true,
-                expires: getExpirationDate(auth.user.accessToken),
-              });
-              Cookies.set('cloud-refresh-token', auth.user.refreshToken, {
                 sameSite: 'None',
                 secure: true,
                 expires: getExpirationDate(auth.user.accessToken),

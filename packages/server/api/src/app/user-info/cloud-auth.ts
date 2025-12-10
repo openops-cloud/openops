@@ -1,34 +1,36 @@
-import { IdentityClient } from '@frontegg/client';
-import {
-  IAccessToken,
-  IEntityWithRoles,
-} from '@frontegg/client/dist/src/clients/identity/types';
 import { FastifyRequest } from 'fastify';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const CLOUD_TOKEN_COOKIE_NAME = 'cloud-token';
 
-export const getCloudToken = (request: FastifyRequest): string | undefined => {
-  let token = request.headers.authorization?.replace('Bearer ', '');
-  if (!token) {
-    token = request.cookies[CLOUD_TOKEN_COOKIE_NAME];
+const getCloudToken = (request: FastifyRequest): string | undefined => {
+  const authorizationHeader = request.headers.authorization;
+  const cookieToken = request.cookies[CLOUD_TOKEN_COOKIE_NAME];
+  const headerToken = request.headers['ops-cloud-token'] as string | undefined;
+
+  if (authorizationHeader) {
+    return authorizationHeader.replace('Bearer ', '');
   }
-  return token;
+
+  if (cookieToken) {
+    return cookieToken;
+  }
+
+  return headerToken;
 };
 
-export async function getCloudUser(
-  identityClient: IdentityClient,
-  token?: string,
-): Promise<null | IEntityWithRoles | IAccessToken> {
+export function getVerifiedUser(
+  request: FastifyRequest,
+  publicKey: string,
+): string | JwtPayload | undefined {
+  const token = getCloudToken(request);
   if (!token) {
-    return null;
+    return undefined;
   }
 
   try {
-    const user = await identityClient.validateIdentityOnToken(token);
-    return user;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
-    return null;
+    return jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+  } catch {
+    return undefined;
   }
 }

@@ -1,23 +1,39 @@
-import { LoadingSpinner } from '@openops/components/ui';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
+import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import {
+  setupRequestInterceptor,
+  setupResponseInterceptor,
+} from '@/app/interceptors';
 
 type InitialDataGuardProps = {
   children: React.ReactNode;
 };
-export const InitialDataGuard = ({ children }: InitialDataGuardProps) => {
-  flagsHooks.prefetchFlags();
+export const InitialDataGuard = ({
+  children,
+}: Readonly<InitialDataGuardProps>) => {
+  const { data: flags } = flagsHooks.useFlags();
+  const [interceptorsReady, setInterceptorsReady] = useState(false);
 
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-background flex h-screen w-screen items-center justify-center ">
-          <LoadingSpinner size={50}></LoadingSpinner>
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
-  );
+  useEffect(() => {
+    if (!flags) {
+      console.error('Missing flags for response interceptor configuration');
+      return;
+    }
+    const isFederatedAuth = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
+    setupRequestInterceptor({
+      isFederatedAuth,
+    });
+    setupResponseInterceptor({
+      isFederatedAuth,
+    });
+    setInterceptorsReady(true);
+  }, [flags]);
+
+  if (!interceptorsReady) {
+    return <FullPageSpinner />;
+  }
+
+  return <Suspense fallback={<FullPageSpinner />}>{children}</Suspense>;
 };

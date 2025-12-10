@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  FileBadge,
   Gauge,
   LucideIcon,
   PieChart,
@@ -11,4 +12,5 @@ export const DOMAIN_ICON_SUGGESTIONS: Record<string, LucideIcon> = {
   'Anomaly Management': AlertTriangle,
   'Rate Optimization': TrendingUp,
   'Workload Optimization': Gauge,
+  'Policy & Governance': FileBadge,
 };

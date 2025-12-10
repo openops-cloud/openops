@@ -4,6 +4,7 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleVertexGeminiModels = [
+  'gemini-3-pro-preview',
   'gemini-2.5-pro',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
@@ -12,6 +13,7 @@ const googleVertexGeminiModels = [
 ];
 
 const googleVertexClaudeModels = [
+  'claude-opus-4-5@20251101',
   'claude-sonnet-4-5@20250929',
   'claude-haiku-4-5@20251001',
   'claude-3-haiku@20240307',

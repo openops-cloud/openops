@@ -1,9 +1,13 @@
 import { getTableByName } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
-import { SEED_TABLE_NAME } from '../../openops-tables/template-tables/create-aggregated-costs-table';
-import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
+import {
+  createAggregatedCostsTable,
+  SEED_TABLE_NAME,
+} from '../../openops-tables/template-tables/create-aggregated-costs-table';
 import { databaseConnection } from '../database-connection';
+import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
+import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const AGGREGATED_TABLE_SEED = 'AGGREGATEDCOSTS';
 
@@ -31,10 +35,14 @@ export const seedFocusDataAggregationTemplateTable =
       return;
     }
 
-    const table = await getTableByName(SEED_TABLE_NAME);
+    const table = await getTableByName(
+      SEED_TABLE_NAME,
+      await getDefaultProjectTablesDatabaseToken(),
+    );
 
     if (!table) {
-      await seedTemplateTablesService.createAggregatedCostsTable();
+      const tablesContext = await getAdminTablesContext();
+      await createAggregatedCostsTable(tablesContext);
     }
 
     await setTableSeedFlag();

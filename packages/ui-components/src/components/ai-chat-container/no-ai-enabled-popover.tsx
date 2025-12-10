@@ -19,7 +19,7 @@ const NoAiEnabledPopover = ({
           <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
             <Bot size={20} />
           </div>
-          <h2 className="font-bold text-base">{t('AI Assistant')}</h2>
+          <h2 className="font-bold text-base">{t('OpenOps Assistant')}</h2>
         </div>
         <TooltipWrapper tooltipText={t('Close')}>
           <Button

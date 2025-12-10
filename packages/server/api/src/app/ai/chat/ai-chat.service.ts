@@ -2,11 +2,13 @@ import {
   AiAuth,
   getAiModelFromConnection,
   getAiProviderLanguageModel,
+  isLLMTelemetryEnabled,
 } from '@openops/common';
 import {
   AppSystemProp,
   cacheWrapper,
   hashUtils,
+  logger,
   system,
 } from '@openops/server-shared';
 import {
@@ -14,14 +16,21 @@ import {
   ApplicationError,
   CustomAuthConnectionValue,
   ErrorCode,
+  GeneratedChatName,
+  isEmpty,
   removeConnectionBrackets,
 } from '@openops/shared';
-import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
+import { generateObject, LanguageModel, ModelMessage, UIMessage } from 'ai';
+import { z } from 'zod';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
+import { findFirstKeyInObject } from '../mcp/llm-query-router';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
-import { mergeToolResultsIntoMessages } from './utils';
+import {
+  mergeToolResultsIntoMessages,
+  sanitizeMessagesForChatName,
+} from './utils';
 
 const chatContextKey = (
   chatId: string,
@@ -58,6 +67,8 @@ export type MCPChatContext = {
   model?: string;
 };
 
+type ChatSummary = { chatId: string; chatName: string };
+
 export const generateChatId = (
   params: MCPChatContext & {
     userId: string;
@@ -82,28 +93,74 @@ export const generateChatIdForMCP = (params: {
   });
 };
 
+const generatedChatNameSchema = z.object({
+  name: z
+    .string()
+    .max(100)
+    .nullable()
+    .describe('Conversation name or null if it was not generated'),
+  isGenerated: z.boolean().describe('Whether the name was generated or not'),
+});
+
+/**
+ * Attempts to repair a malformed JSON string produced by the model for chat name generation.
+ * It extracts only the expected fields according to generatedChatNameSchema.
+ * Returns null if the input cannot be parsed or repaired (so the AI SDK can retry/throw).
+ */
+const repairText = (text: string): string | null => {
+  try {
+    const parsed = JSON.parse(text);
+
+    const nameRaw = findFirstKeyInObject(parsed, 'name');
+    let name: string | null = null;
+    if (typeof nameRaw === 'string') {
+      const trimmed = nameRaw.trim();
+      name = trimmed.length > 0 ? trimmed.slice(0, 100) : null;
+    }
+
+    const isGeneratedRaw = findFirstKeyInObject(parsed, 'isGenerated');
+    const isGenerated =
+      typeof isGeneratedRaw === 'boolean' ? isGeneratedRaw : Boolean(name);
+
+    return JSON.stringify({ name, isGenerated });
+  } catch {
+    return null;
+  }
+};
+
 export async function generateChatName(
   messages: ModelMessage[],
   projectId: string,
-): Promise<string> {
-  const { languageModel } = await getLLMConfig(projectId);
+): Promise<GeneratedChatName> {
+  const { languageModel, aiConfig } = await getLLMConfig(projectId);
   const systemPrompt = await loadPrompt('chat-name.txt');
   if (!systemPrompt.trim()) {
     throw new Error('Failed to load prompt to generate the chat name.');
   }
-  const prompt: ModelMessage[] = [
-    {
-      role: 'system',
-      content: systemPrompt,
-    } as const,
-    ...messages,
-  ];
-  const response = await generateText({
-    model: languageModel,
-    messages: prompt,
-    maxRetries: 2,
-  });
-  return response.text.trim();
+
+  const sanitizedMessages: ModelMessage[] =
+    sanitizeMessagesForChatName(messages);
+
+  if (isEmpty(sanitizedMessages)) {
+    return { name: null, isGenerated: false };
+  }
+
+  try {
+    const result = await generateObject({
+      model: languageModel,
+      system: systemPrompt,
+      messages: sanitizedMessages,
+      schema: generatedChatNameSchema,
+      ...aiConfig.modelSettings,
+      experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      experimental_repairText: async ({ text }) => repairText(text),
+      maxRetries: 2,
+    });
+    return result.object;
+  } catch (error) {
+    logger.error('Failed to generate chat name', { error });
+    return { name: null, isGenerated: false };
+  }
 }
 
 export const updateChatName = async (
@@ -122,6 +179,10 @@ export const updateChatName = async (
   await createChatContext(chatId, userId, projectId, updatedChatContext);
 };
 
+const userChatsIndexKey = (userId: string, projectId: string): string => {
+  return `${projectId}:${userId}:chats`;
+};
+
 export const createChatContext = async (
   chatId: string,
   userId: string,
@@ -136,6 +197,8 @@ export const createChatContext = async (
     context,
     chatExpireTime,
   );
+  const indexKey = userChatsIndexKey(userId, projectId);
+  await cacheWrapper.addToSet(indexKey, chatId);
 };
 
 export const getChatContext = async (
@@ -176,28 +239,27 @@ export const getAllChats = async (
   userId: string,
   projectId: string,
 ): Promise<{ chatId: string; chatName: string }[]> => {
-  const pattern = `${projectId}:${userId}:*:context`;
-  const keys = await cacheWrapper.scanKeys(pattern);
-  const chats: { chatId: string; chatName: string }[] = [];
+  const indexKey = userChatsIndexKey(userId, projectId);
+  const chatIds = await cacheWrapper.getSetMembers(indexKey);
 
-  for (const key of keys) {
-    const keyParts = key.split(':');
-    if (keyParts.length !== 4) {
-      continue;
-    }
-    const longChatId = keyParts[2];
-
-    const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
-
-    if (context?.chatName) {
-      chats.push({
-        chatId: longChatId,
-        chatName: context.chatName,
-      });
-    }
+  if (chatIds.length === 0) {
+    return [];
   }
 
-  return chats;
+  const chatsOrNull = await Promise.all(
+    chatIds.map(async (chatId): Promise<ChatSummary | null> => {
+      const context = await getChatContext(chatId, userId, projectId);
+      if (!context?.chatName) {
+        return null;
+      }
+      return {
+        chatId,
+        chatName: context.chatName,
+      };
+    }),
+  );
+
+  return chatsOrNull.filter((chat): chat is ChatSummary => chat !== null);
 };
 
 export const saveChatHistory = async (
@@ -221,10 +283,12 @@ export const deleteChatHistory = async (
   userId: string,
   projectId: string,
 ): Promise<void> => {
+  const indexKey = userChatsIndexKey(userId, projectId);
   await Promise.all([
     cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatToolsKey(chatId, userId, projectId)),
     cacheWrapper.deleteKey(chatContextKey(chatId, userId, projectId)),
+    cacheWrapper.removeFromSet(indexKey, chatId),
   ]);
 };
 

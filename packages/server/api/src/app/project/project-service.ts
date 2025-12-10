@@ -1,4 +1,4 @@
-import { rejectedPromiseHandler } from '@openops/server-shared';
+import { encryptUtils, rejectedPromiseHandler } from '@openops/server-shared';
 import {
   ApplicationError,
   assertNotNullOrUndefined,
@@ -6,7 +6,6 @@ import {
   isNil,
   openOpsId,
   OpenOpsId,
-  OrganizationRole,
   Project,
   ProjectId,
   spreadIfDefined,
@@ -22,11 +21,17 @@ export const projectRepo = repoFactory(ProjectEntity);
 
 export const projectService = {
   async create(params: CreateParams): Promise<Project> {
+    const encryptTablesToken = encryptUtils.encryptString(
+      params.tablesDatabaseToken,
+    );
     const newProject: NewProject = {
       id: openOpsId(),
       ...params,
+      tablesDatabaseToken: encryptTablesToken,
     };
+
     const savedProject = await projectRepo().save(newProject);
+
     rejectedPromiseHandler(projectHooks.getHooks().postCreate(savedProject));
     return savedProject;
   },
@@ -52,6 +57,7 @@ export const projectService = {
         ...spreadIfDefined('displayName', request.displayName),
         ...spreadIfDefined('ownerId', request.ownerId),
         ...spreadIfDefined('tablesDatabaseId', request.tablesDatabaseId),
+        ...spreadIfDefined('tablesWorkspaceId', request.tablesWorkspaceId),
       },
     );
     return this.getOneOrThrow(projectId);
@@ -148,6 +154,7 @@ type UpdateParams = {
   displayName?: string;
   ownerId?: UserId;
   tablesDatabaseId?: number;
+  tablesWorkspaceId?: number;
 };
 
 type CreateParams = {
@@ -156,6 +163,8 @@ type CreateParams = {
   organizationId: string;
   externalId?: string;
   tablesDatabaseId: number;
+  tablesWorkspaceId: number;
+  tablesDatabaseToken: string;
 };
 
 type AddProjectToOrganizationParams = {

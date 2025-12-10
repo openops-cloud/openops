@@ -7,7 +7,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
+import { OpsErrorBoundary } from '@/app/common/error-boundaries/ops-error-boundary';
 import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged-in-user-only-guard';
+import { FronteggAuthGuard } from '@/app/common/guards/frontegg-auth-guard';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import {
@@ -102,76 +104,80 @@ export function GlobalLayout() {
   }
 
   return (
-    <AllowOnlyLoggedInUserOnlyGuard>
-      <div className="h-screen w-screen overflow-hidden">
-        <ResizablePanelGroup
-          direction="horizontal"
-          id="page-container"
-          onLayout={onResize}
-          className="h-full"
-        >
-          <LeftSidebarResizablePanel
-            minSize={
-              isMinimized
-                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
-                : GLOBAL_SIDEBAR_MIN_SIZE
-            }
-            maxSize={
-              isMinimized
-                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
-                : LEFT_SIDEBAR_MAX_SIZE
-            }
-            collapsedSize={
-              isMinimized
-                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
-                : LEFT_SIDEBAR_MIN_SIZE
-            }
-            isDragging={isDragging}
-            className={cn(
-              LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
-              'shadow-sidebar z-[12]',
-              {
-                'min-w-[70px] max-w-[70px]': isMinimized,
-              },
-              {
-                'max-w-[400px]': !isMinimized,
-              },
-            )}
-          >
-            <DashboardSideMenu />
-          </LeftSidebarResizablePanel>
+    <OpsErrorBoundary>
+      <FronteggAuthGuard>
+        <AllowOnlyLoggedInUserOnlyGuard>
+          <div className="h-screen w-screen overflow-hidden">
+            <ResizablePanelGroup
+              direction="horizontal"
+              id="page-container"
+              onLayout={onResize}
+              className="h-full"
+            >
+              <LeftSidebarResizablePanel
+                minSize={
+                  isMinimized
+                    ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                    : GLOBAL_SIDEBAR_MIN_SIZE
+                }
+                maxSize={
+                  isMinimized
+                    ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                    : LEFT_SIDEBAR_MAX_SIZE
+                }
+                collapsedSize={
+                  isMinimized
+                    ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                    : LEFT_SIDEBAR_MIN_SIZE
+                }
+                isDragging={isDragging}
+                className={cn(
+                  LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
+                  'shadow-sidebar z-[12]',
+                  {
+                    'min-w-[70px] max-w-[70px]': isMinimized,
+                  },
+                  {
+                    'max-w-[400px]': !isMinimized,
+                  },
+                )}
+              >
+                <DashboardSideMenu />
+              </LeftSidebarResizablePanel>
 
-          <ResizableHandle
-            className="bg-transparent"
-            disabled={isMinimized}
-            onDragging={setIsDragging}
-            style={{
-              width: '0px',
-            }}
-          />
-
-          <AiChatResizablePanel onDragging={setIsDragging} />
-
-          <ResizablePanel
-            id={RESIZABLE_PANEL_IDS.MAIN}
-            order={3}
-            className="flex-1 h-full overflow-hidden min-w-[900px] contain-layout"
-            defaultSize={GLOBAL_MAIN_PANEL_DEFAULT_SIZE}
-            minSize={GLOBAL_MAIN_PANEL_MIN_SIZE}
-          >
-            <div className="relative h-full w-full">
-              <AiConfigurationPrompt
-                className={cn({
-                  'bottom-[60px]':
-                    location.pathname.startsWith('/flows/') ||
-                    location.pathname.startsWith('/runs/'),
-                })}
+              <ResizableHandle
+                className="bg-transparent"
+                disabled={isMinimized}
+                onDragging={setIsDragging}
+                style={{
+                  width: '0px',
+                }}
               />
-              <Outlet />
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </div>
-    </AllowOnlyLoggedInUserOnlyGuard>
+
+              <AiChatResizablePanel onDragging={setIsDragging} />
+
+              <ResizablePanel
+                id={RESIZABLE_PANEL_IDS.MAIN}
+                order={3}
+                className="flex-1 h-full overflow-hidden min-w-[900px] contain-layout"
+                defaultSize={GLOBAL_MAIN_PANEL_DEFAULT_SIZE}
+                minSize={GLOBAL_MAIN_PANEL_MIN_SIZE}
+              >
+                <div className="relative h-full w-full">
+                  <AiConfigurationPrompt
+                    className={cn({
+                      'bottom-[60px]':
+                        location.pathname.startsWith('/flows/') ||
+                        location.pathname.startsWith('/runs/'),
+                    })}
+                  />
+                  <Outlet />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
+        </AllowOnlyLoggedInUserOnlyGuard>
+      </FronteggAuthGuard>
+    </OpsErrorBoundary>
   );
 }

@@ -232,6 +232,10 @@ export const useAssistantChat = ({
       toast(errorToast);
     },
     onFinish: async () => {
+      if (chatMode !== ChatMode.Agent) {
+        return;
+      }
+
       if (!chatId || hasAttemptedNameGenerationRef.current[chatId]) {
         return;
       }
@@ -239,7 +243,10 @@ export const useAssistantChat = ({
       if (messagesRef.current.length >= MIN_MESSAGES_BEFORE_NAME_GENERATION) {
         try {
           hasAttemptedNameGenerationRef.current[chatId] = true;
-          await aiAssistantChatHistoryApi.generateName(chatId);
+          const result = await aiAssistantChatHistoryApi.generateName(chatId);
+          if (!result.isGenerated) {
+            hasAttemptedNameGenerationRef.current[chatId] = false;
+          }
           qc.invalidateQueries({ queryKey: [QueryKeys.assistantHistory] });
         } catch (error) {
           console.error('Failed to generate chat name', error);

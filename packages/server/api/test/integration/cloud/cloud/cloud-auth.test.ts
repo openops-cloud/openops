@@ -1,10 +1,6 @@
-import { IdentityClient } from '@frontegg/client';
-import { IEntityWithRoles } from '@frontegg/client/dist/src/clients/identity/types';
 import { FastifyRequest } from 'fastify';
-import {
-  getCloudToken,
-  getCloudUser,
-} from '../../../../src/app/user-info/cloud-auth';
+import jwt from 'jsonwebtoken';
+import { getVerifiedUser } from '../../../../src/app/user-info/cloud-auth';
 
 type MockFastifyRequest = FastifyRequest & {
   cookies: Record<string, string>;
@@ -41,75 +37,84 @@ function createMockRequest(options: {
   } as unknown as MockFastifyRequest;
 }
 
-describe('cloud-auth', () => {
-  describe('getCloudToken', () => {
-    it('should extract token from Authorization header', () => {
-      const mockRequest = createMockRequest({
-        headers: { authorization: 'Bearer test-token' },
-        cookies: {},
-      });
+describe('getVerifiedUser', () => {
+  const publicKey = 'test-public-key';
 
-      expect(getCloudToken(mockRequest)).toBe('test-token');
-    });
-
-    it('should get token from cookie when Authorization header is missing', () => {
-      const mockRequest = createMockRequest({
-        headers: {},
-        cookies: { 'cloud-token': 'cookie-token' },
-      });
-
-      expect(getCloudToken(mockRequest)).toBe('cookie-token');
-    });
-
-    it('should return undefined when no token is present', () => {
-      const mockRequest = createMockRequest({
-        headers: {},
-        cookies: {},
-      });
-
-      expect(getCloudToken(mockRequest)).toBeUndefined();
-    });
+  beforeEach(() => {
+    jest.spyOn(jwt, 'verify').mockReset();
   });
 
-  describe('getCloudUser', () => {
-    let mockIdentityClient: jest.Mocked<IdentityClient>;
+  it('should return undefined when no token is present (no header, no cookie)', () => {
+    const mockRequest = createMockRequest({ headers: {}, cookies: {} });
 
-    beforeEach(() => {
-      mockIdentityClient = {
-        validateIdentityOnToken: jest.fn(),
-      } as never;
+    const result = getVerifiedUser(mockRequest, publicKey);
+
+    expect(result).toBeUndefined();
+    expect(jwt.verify).not.toHaveBeenCalled();
+  });
+
+  it('should verify token from Authorization header', () => {
+    const payload = { sub: '123' };
+    (jwt.verify as jest.Mock).mockReturnValue(payload);
+    const mockRequest = createMockRequest({
+      headers: { authorization: 'Bearer header-token' },
+      cookies: {},
     });
 
-    it('should return null when no token is provided', async () => {
-      const result = await getCloudUser(mockIdentityClient);
-      expect(result).toBeNull();
+    const result = getVerifiedUser(mockRequest, publicKey);
+
+    expect(jwt.verify).toHaveBeenCalledWith('header-token', publicKey, {
+      algorithms: ['RS256'],
+    });
+    expect(result).toEqual(payload);
+  });
+
+  it('should verify token from cookie when Authorization header is missing', () => {
+    const payload = { sub: 'abc' };
+    (jwt.verify as jest.Mock).mockReturnValue(payload);
+    const mockRequest = createMockRequest({
+      headers: {},
+      cookies: { 'cloud-token': 'cookie-token' },
     });
 
-    it('should return user when validation succeeds', async () => {
-      const mockUser = { id: '123', roles: [] };
-      mockIdentityClient.validateIdentityOnToken.mockResolvedValue(
-        mockUser as unknown as IEntityWithRoles,
-      );
+    const result = getVerifiedUser(mockRequest, publicKey);
 
-      const result = await getCloudUser(mockIdentityClient, 'valid-token');
+    expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey, {
+      algorithms: ['RS256'],
+    });
+    expect(result).toEqual(payload);
+  });
 
-      expect(result).toEqual(mockUser);
-      expect(mockIdentityClient.validateIdentityOnToken).toHaveBeenCalledWith(
-        'valid-token',
-      );
+  it('should verify token from header when Authorization header and cookie are missing', () => {
+    const payload = { sub: 'abc' };
+    (jwt.verify as jest.Mock).mockReturnValue(payload);
+    const mockRequest = createMockRequest({
+      headers: { 'ops-cloud-token': 'cookie-header-token' },
+      cookies: {},
     });
 
-    it('should return null when validation fails', async () => {
-      mockIdentityClient.validateIdentityOnToken.mockRejectedValue(
-        new Error('Invalid token'),
-      );
+    const result = getVerifiedUser(mockRequest, publicKey);
 
-      const result = await getCloudUser(mockIdentityClient, 'invalid-token');
+    expect(jwt.verify).toHaveBeenCalledWith('cookie-header-token', publicKey, {
+      algorithms: ['RS256'],
+    });
+    expect(result).toEqual(payload);
+  });
 
-      expect(result).toBeNull();
-      expect(mockIdentityClient.validateIdentityOnToken).toHaveBeenCalledWith(
-        'invalid-token',
-      );
+  it('should return undefined when verification fails (throws)', () => {
+    (jwt.verify as jest.Mock).mockImplementation(() => {
+      throw new Error('invalid');
+    });
+    const mockRequest = createMockRequest({
+      headers: { authorization: 'Bearer bad-token' },
+      cookies: {},
+    });
+
+    const result = getVerifiedUser(mockRequest, publicKey);
+
+    expect(result).toBeUndefined();
+    expect(jwt.verify).toHaveBeenCalledWith('bad-token', publicKey, {
+      algorithms: ['RS256'],
     });
   });
 });

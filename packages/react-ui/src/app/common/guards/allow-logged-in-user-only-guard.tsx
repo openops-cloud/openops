@@ -1,9 +1,10 @@
-import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
 import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
+import { getFederatedUrlBasedOnFlags } from '@/app/common/auth/lib/utils';
+import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
@@ -12,7 +13,9 @@ import { SocketProvider } from '@/app/common/providers/socket-provider';
 // eslint-disable-next-line import/no-restricted-paths
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
+import { getFronteggApp } from '@/app/lib/frontegg-setup';
 import { navigationUtil } from '@/app/lib/navigation-util';
+import { FlagId } from '@openops/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { userHooks } from '../hooks/user-hooks';
 
@@ -31,6 +34,24 @@ function isJwtExpired(token: string): boolean {
   }
 }
 
+const LoggedIn = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient();
+
+  projectHooks.prefetchProject();
+  platformHooks.prefetchPlatform();
+  platformHooks.prefetchNewerVersionInfo(queryClient);
+
+  userSettingsHooks.useUserSettings();
+  userHooks.useUserMeta();
+  appConnectionsHooks.useConnectionsMetadata();
+
+  return (
+    <Suspense fallback={<FullPageSpinner />}>
+      <SocketProvider>{children}</SocketProvider>
+    </Suspense>
+  );
+};
+
 type AllowOnlyLoggedInUserOnlyGuardProps = {
   children: React.ReactNode;
 };
@@ -39,29 +60,32 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
 }: AllowOnlyLoggedInUserOnlyGuardProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { data: flags } = flagsHooks.useFlags();
+  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
+    FlagId.FEDERATED_LOGIN_ENABLED,
+  );
 
   const token = authenticationSession.getToken();
-  const isLoggedIn = authenticationSession.isLoggedIn();
+  const fronteggToken =
+    getFronteggApp()?.store.getState().auth.user?.accessToken;
+  const isLoggedIn = isFederatedLogin
+    ? fronteggToken
+    : authenticationSession.isLoggedIn();
   const expired = !token || isJwtExpired(token);
-
-  projectHooks.prefetchProject();
-  platformHooks.prefetchPlatform();
-  platformHooks.prefetchNewerVersionInfo(queryClient);
-
-  flagsHooks.useFlags();
-  userSettingsHooks.useUserSettings();
-  userHooks.useUserMeta();
-  appConnectionsHooks.useConnectionsMetadata();
 
   useEffect(() => {
     let isMounted = true;
     async function doLogout() {
       try {
-        await authenticationSession.logOut({
-          userInitiated: false,
-          navigate,
-        });
+        if (isFederatedLogin) {
+          getFronteggApp()?.logout();
+        } else {
+          await authenticationSession.logOut({
+            userInitiated: false,
+            navigate,
+            federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
+          });
+        }
       } catch (e) {
         if (isMounted) {
           console.error('Logout failed:', e);
@@ -75,21 +99,21 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     return () => {
       isMounted = false;
     };
-  }, [isLoggedIn, expired, location.pathname, location.search, navigate]);
+  }, [
+    isLoggedIn,
+    expired,
+    location.pathname,
+    location.search,
+    navigate,
+    flags,
+    isFederatedLogin,
+  ]);
 
-  if (!isLoggedIn || expired) {
+  if ((!isLoggedIn || expired) && !isFederatedLogin) {
     return <Navigate to="/sign-in" replace />;
+  } else if (!isLoggedIn && isFederatedLogin) {
+    return <Navigate to="/" replace />;
   }
 
-  return (
-    <Suspense
-      fallback={
-        <div className=" flex h-screen w-screen items-center justify-center ">
-          <LoadingSpinner size={50}></LoadingSpinner>
-        </div>
-      }
-    >
-      <SocketProvider>{children}</SocketProvider>
-    </Suspense>
-  );
+  return <LoggedIn>{children}</LoggedIn>;
 };

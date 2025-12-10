@@ -1,9 +1,9 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { initializeFrontegg } from '@/app/lib/frontegg-setup';
 import { FronteggApp } from '@frontegg/js';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { initializeFrontegg } from './frontegg-setup';
 
 const handleAppReady = (app: FronteggApp) => {
   app.ready(() => handleLogout(app));
@@ -30,18 +30,14 @@ const CloudLogoutPage = () => {
     if (!flags || isLoading) {
       return;
     }
-    const { FRONTEGG_URL, FRONTEGG_CLIENT_ID, FRONTEGG_APP_ID } = flags;
+    const { FRONTEGG_URL } = flags;
 
-    if (!FRONTEGG_URL || !FRONTEGG_CLIENT_ID || !FRONTEGG_APP_ID) {
+    if (!FRONTEGG_URL) {
       navigate('/');
       return;
     }
 
-    const app = initializeFrontegg(
-      FRONTEGG_URL as string,
-      FRONTEGG_CLIENT_ID as string,
-      FRONTEGG_APP_ID as string,
-    );
+    const app = initializeFrontegg({ url: FRONTEGG_URL as string });
 
     Cookies.remove('cloud-token');
     Cookies.remove('cloud-refresh-token');

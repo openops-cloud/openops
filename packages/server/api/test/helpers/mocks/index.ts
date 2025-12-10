@@ -105,6 +105,11 @@ export const createMockProject = (project?: Partial<Project>): Project => {
     displayName: project?.displayName ?? faker.lorem.word(),
     organizationId: project?.organizationId ?? openOpsId(),
     tablesDatabaseId: project?.tablesDatabaseId ?? faker.number.int(),
+    tablesWorkspaceId: project?.tablesWorkspaceId ?? faker.number.int(),
+    tablesDatabaseToken: project?.tablesDatabaseToken ?? {
+      iv: faker.lorem.word(),
+      data: faker.lorem.word(),
+    },
   };
 };
 
@@ -128,7 +133,6 @@ export const createMockOrganization = (
     updated: organization?.updated ?? faker.date.recent().toISOString(),
     ownerId: organization?.ownerId ?? openOpsId(),
     name: organization?.name ?? faker.lorem.word(),
-    tablesWorkspaceId: organization?.tablesWorkspaceId ?? faker.number.int(),
   };
 };
 

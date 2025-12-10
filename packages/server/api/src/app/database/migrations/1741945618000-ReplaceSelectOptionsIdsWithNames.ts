@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getTableFields, SelectOpenOpsField } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import {
+  getTableFields,
+  SelectOpenOpsField,
+  TablesServerContext,
+} from '@openops/common';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const mappingOfSelectOptionsIdToValuesInEveryTable = new Map<
@@ -21,8 +25,31 @@ export class ReplaceSelectOptionsIdsWithNames1741945618000
       ['0.1.8'],
     );
 
-    await updateRecords(queryRunner, workflows, 'flow_version');
-    await updateRecords(queryRunner, templates, 'flow_template');
+    const user = await queryRunner.query(
+      `SELECT * FROM "user" WHERE "email" = $1`,
+      [system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL)],
+    );
+    const project = await queryRunner.query(
+      `SELECT * FROM "project" WHERE "ownerId" = $1`,
+      [user.id],
+    );
+    const tablesServerContext: TablesServerContext = {
+      tablesDatabaseId: project.tablesDatabaseId,
+      tablesDatabaseToken: project.tablesDatabaseToken,
+    };
+
+    await updateRecords(
+      queryRunner,
+      workflows,
+      'flow_version',
+      tablesServerContext,
+    );
+    await updateRecords(
+      queryRunner,
+      templates,
+      'flow_template',
+      tablesServerContext,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -34,9 +61,13 @@ async function updateRecords(
   queryRunner: QueryRunner,
   records: { id: string; trigger?: any; template?: any }[],
   tableName: string,
+  tablesServerContext: TablesServerContext,
 ) {
   for (const record of records) {
-    const jsonData = await updateJsonObject(record.trigger ?? record.template);
+    const jsonData = await updateJsonObject(
+      record.trigger ?? record.template,
+      tablesServerContext,
+    );
 
     await queryRunner.query(
       `UPDATE "${tableName}" SET "${
@@ -47,7 +78,10 @@ async function updateRecords(
   }
 }
 
-const getFieldsFromCache = async (tableName: string) => {
+const getFieldsFromCache = async (
+  tableName: string,
+  tablesServerContext: TablesServerContext,
+) => {
   if (mappingOfSelectOptionsIdToValuesInEveryTable.has(tableName)) {
     const cachedFields =
       mappingOfSelectOptionsIdToValuesInEveryTable.get(tableName);
@@ -56,8 +90,12 @@ const getFieldsFromCache = async (tableName: string) => {
   }
 
   let fields: SelectOpenOpsField[] = [];
+
   try {
-    fields = (await getTableFields(tableName)) as SelectOpenOpsField[];
+    fields = (await getTableFields(
+      tableName,
+      tablesServerContext,
+    )) as SelectOpenOpsField[];
   } catch (e) {
     logger.error(`Failed to get fields for table ${tableName}`, e);
   }
@@ -79,36 +117,59 @@ const getFieldsFromCache = async (tableName: string) => {
   return fieldMaps;
 };
 
-async function updateJsonObject(obj: any): Promise<any> {
-  if (!obj || typeof obj !== 'object') return obj;
-
-  if (obj.input?.tableName) {
-    const fields = await getFieldsFromCache(obj.input.tableName);
-
-    if (!fields) {
-      return obj;
-    }
-
-    if (obj.input.fieldsProperties?.fieldsProperties) {
-      for (const field of obj.input.fieldsProperties.fieldsProperties) {
-        if (!field.fieldName) {
-          continue;
-        }
-
-        updateFieldValue(field, fields.get(field.fieldName));
-      }
-    }
+async function updateJsonObject(
+  obj: any,
+  tablesServerContext: TablesServerContext,
+): Promise<any> {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
   }
 
-  for (const key of Object.keys(obj)) {
-    if (Array.isArray(obj[key])) {
-      obj[key] = await Promise.all(obj[key].map(updateJsonObject));
-    } else if (typeof obj[key] === 'object') {
-      obj[key] = await updateJsonObject(obj[key]);
-    }
-  }
+  await updateInputFields(obj, tablesServerContext);
+  await processObjectKeys(obj, tablesServerContext);
 
   return obj;
+}
+
+async function updateInputFields(
+  obj: any,
+  tablesServerContext: TablesServerContext,
+): Promise<void> {
+  if (!obj.input?.tableName) {
+    return;
+  }
+
+  const fields = await getFieldsFromCache(
+    obj.input.tableName,
+    tablesServerContext,
+  );
+
+  if (!fields || !obj.input.fieldsProperties?.fieldsProperties) {
+    return;
+  }
+
+  for (const field of obj.input.fieldsProperties.fieldsProperties) {
+    if (field.fieldName) {
+      updateFieldValue(field, fields.get(field.fieldName));
+    }
+  }
+}
+
+async function processObjectKeys(
+  obj: any,
+  tablesServerContext: TablesServerContext,
+): Promise<void> {
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key])) {
+      obj[key] = await Promise.all(
+        obj[key].map((item: any) =>
+          updateJsonObject(item, tablesServerContext),
+        ),
+      );
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      obj[key] = await updateJsonObject(obj[key], tablesServerContext);
+    }
+  }
 }
 
 function updateFieldValue(field: any, fieldMap?: Map<number, string>) {

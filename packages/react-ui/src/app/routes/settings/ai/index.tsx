@@ -1,27 +1,25 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { AiConfigIndicator } from '@/app/features/ai/ai-config-indicator';
 import { AiSettingsForm } from '@/app/features/ai/ai-settings-form';
 import {
-  AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
   AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
   AiSettingsFormSchema,
-  MCP_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
   MCP_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
 } from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { mcpSettingsHooks } from '@/app/features/ai/lib/mcp-settings-hooks';
-import { McpSettingsForm } from '@/app/features/ai/mcp-settings-form';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
+import { INTERNAL_ERROR_TOAST, Skeleton, toast } from '@openops/components/ui';
 import {
-  INTERNAL_ERROR_TOAST,
-  toast,
-  TooltipWrapper,
-} from '@openops/components/ui';
-import { ApplicationErrorParams, ErrorCode } from '@openops/shared';
+  ApplicationErrorParams,
+  ErrorCode,
+  removeConnectionBrackets,
+} from '@openops/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { t } from 'i18next';
-import { Trash } from 'lucide-react';
+import React, { useCallback } from 'react';
 
 const AiSettingsPage = () => {
   const { data: aiSettings, refetch: refetchAiSettings } =
@@ -32,42 +30,52 @@ const AiSettingsPage = () => {
 
   const queryClient = useQueryClient();
 
-  const { blockModel } = blocksHooks.useBlock({
+  const { blockModel: aiBlockModel } = blocksHooks.useBlock({
     name: '@openops/block-ai',
   });
 
-  const { mutate: onSaveAiSettings, isPending: isSaving } = useMutation({
-    mutationFn: async (aiSettings: AiSettingsFormSchema) => {
-      return aiSettingsApi.saveAiSettings(aiSettings);
-    },
-    onSuccess: async () => {
-      refetchAiSettings();
-      toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
-      await queryClient.invalidateQueries({
-        queryKey: [QueryKeys.activeAiSettings],
-      });
-    },
-    onError: (error: AxiosError) => {
-      let message = '';
-      const apError = error.response?.data as ApplicationErrorParams;
-      if (
-        apError.code === ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
-      ) {
-        message = t('Base URL is required for OpenAI-compatible providers');
-      } else {
-        message =
-          error.status === 400
-            ? (error.response?.data as { errorMessage: string })?.errorMessage
-            : error.message;
-      }
-      toast({
-        title: t('Error'),
-        variant: 'destructive',
-        description: message,
-        duration: 3000,
-      });
-    },
+  const { blockModel: awsBlockModel } = blocksHooks.useBlock({
+    name: '@openops/block-aws',
   });
+
+  const { mutate: onSaveAiSettings, isPending: isSavingAiSettings } =
+    useMutation({
+      mutationFn: async (aiSettings: AiSettingsFormSchema) => {
+        return aiSettingsApi.saveAiSettings(aiSettings);
+      },
+      onSuccess: async () => {
+        refetchAiSettings();
+        toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKeys.activeAiSettings],
+        });
+      },
+      onError: (error: AxiosError) => {
+        let message = '';
+        const apError = error.response?.data as
+          | ApplicationErrorParams
+          | undefined;
+        if (
+          apError?.code ===
+          ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
+        ) {
+          message = t('Base URL is required for OpenAI-compatible providers');
+        } else if (error.response?.status === 400) {
+          const data = error.response?.data as
+            | { errorMessage?: string }
+            | undefined;
+          message = data?.errorMessage ?? error.message;
+        } else {
+          message = error.message;
+        }
+        toast({
+          title: t('Error'),
+          variant: 'destructive',
+          description: message,
+          duration: 3000,
+        });
+      },
+    });
 
   const { mutate: onSaveMcpSettings, isPending: isSavingMcpSettings } =
     mcpSettingsHooks.useSaveMcpSettings({
@@ -80,74 +88,79 @@ const AiSettingsPage = () => {
       },
     });
 
-  const { mutate: onDeleteMcpSettings } = mcpSettingsHooks.useDeleteMcpSettings(
-    {
-      onSuccess: () => {
-        refetchMcpSettings();
-        toast(MCP_SETTINGS_DELETED_SUCCESSFULLY_TOAST);
-      },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
-    },
+  const isAiConfigured = !!aiSettings?.[0]?.connection;
+
+  const handleSaveAiConfig = useCallback(
+    (connectionName: string) =>
+      onSaveAiSettings({
+        ...aiSettings?.[0],
+        enabled: !!connectionName,
+        connection: connectionName,
+      }),
+    [onSaveAiSettings, aiSettings],
   );
 
-  const { mutate: onDelete } = useMutation({
-    mutationFn: async (id: string) => {
-      return aiSettingsApi.deleteAiSettings(id);
-    },
-    onSuccess: () => {
-      refetchAiSettings();
-      toast(AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST);
-    },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
-  });
+  const handleSaveMcpConfig = useCallback(
+    (connectionName: string) =>
+      onSaveMcpSettings({
+        ...mcpSettings,
+        awsCost: {
+          enabled: !!connectionName,
+          connectionName: removeConnectionBrackets(connectionName) ?? '',
+        },
+      }),
+    [onSaveMcpSettings, mcpSettings],
+  );
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
-      <div className="mx-auto w-full flex-col">
-        <h1 className="text-2xl font-bold">{t('AI providers')}</h1>
-        {blockModel && (
-          <div className="flex justify-between mt-[35px] p-6 border rounded-[11px]">
-            <AiSettingsForm
-              block={blockModel}
-              savedSettings={aiSettings?.[0]}
-              onSave={onSaveAiSettings}
-              isSaving={isSaving}
-            />
-            {aiSettings?.[0]?.id && (
-              <TooltipWrapper tooltipText={t('Delete')}>
-                <Trash
-                  size={24}
-                  role="button"
-                  className="text-destructive"
-                  aria-label="Delete"
-                  onClick={() => onDelete(aiSettings?.[0].id)}
-                />
-              </TooltipWrapper>
+      <div className="mx-auto w-full flex flex-col gap-4">
+        <h1 className="text-[24px] font-bold text-primary-900">
+          {t('OpenOps AI')}
+        </h1>
+        <p className="text-base font-normal text-primary-900">
+          {t(
+            'Enable OpenOps Assistant and other AI-powered features such as the CLI command generation.',
+          )}
+        </p>
+        <AiConfigIndicator enabled={isAiConfigured} />
+        <div className="p-6 border rounded-[11px]">
+          <div className="max-w-[648px] flex flex-col gap-4">
+            <h3 className="text-base font-bold">{t('AI connection')}</h3>
+            {aiBlockModel ? (
+              <AiSettingsForm
+                block={aiBlockModel}
+                providerKey={'AI'}
+                initialConnection={aiSettings?.[0]?.connection}
+                onSave={handleSaveAiConfig}
+                disabled={isSavingAiSettings}
+                displayName={t('Select Connection')}
+              />
+            ) : (
+              <Skeleton className="h-[78px]" />
+            )}
+
+            <h3 className="text-sm font-medium">{t('MCP')}</h3>
+            {awsBlockModel ? (
+              <AiSettingsForm
+                block={awsBlockModel}
+                providerKey={'AWS'}
+                initialConnection={mcpSettings?.awsCost?.connectionName}
+                onSave={handleSaveMcpConfig}
+                disabled={
+                  isSavingMcpSettings || !isAiConfigured || isSavingAiSettings
+                }
+                displayName={t('AWS Cost')}
+              />
+            ) : (
+              <Skeleton className="h-[78px]" />
+            )}
+            {!isAiConfigured && (
+              <p className="text-sm font-medium text-muted-foreground">
+                {t('* Select an AI connection to use the MCP tools.')}
+              </p>
             )}
           </div>
-        )}
-
-        <div className="flex justify-between mt-[12px] mb-[22px] p-6 border rounded-[11px]">
-          <McpSettingsForm
-            onSave={onSaveMcpSettings}
-            isSaving={isSavingMcpSettings}
-            savedSettings={mcpSettings}
-          />
-          {mcpSettings?.id && (
-            <TooltipWrapper tooltipText={t('Delete')}>
-              <Trash
-                size={24}
-                role="button"
-                className="text-destructive"
-                aria-label="Delete"
-                onClick={() => onDeleteMcpSettings(mcpSettings.id!)}
-              />
-            </TooltipWrapper>
-          )}
         </div>
       </div>
     </div>

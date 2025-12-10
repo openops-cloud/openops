@@ -79,9 +79,11 @@ export const authenticationSession = {
   async logOut({
     userInitiated = false,
     navigate,
+    federatedLoginUrl,
   }: {
     userInitiated: boolean;
     navigate?: NavigateFunction;
+    federatedLoginUrl?: string;
   }) {
     await authenticationApi.signOut();
     localStorage.removeItem(currentUserKey);
@@ -90,6 +92,12 @@ export const authenticationSession = {
     if (userInitiated) {
       navigationUtil.clear();
       localStorage.setItem(LOGOUT_EVENT_KEY, Date.now().toString());
+    }
+
+    if (federatedLoginUrl) {
+      // do not use saved path from navigationUtil as we will get validation error from Frontegg
+      window.location.href = `${federatedLoginUrl}/oauth/logout?post_logout_redirect_uri=${window.location.origin}`;
+      return;
     }
 
     if (

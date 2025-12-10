@@ -1,7 +1,7 @@
-import { LoadingSpinner } from '@openops/components/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
+import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { BuilderPage } from '@/app/features/builder';
 import { BuilderHeader } from '@/app/features/builder/builder-header/builder-header';
@@ -38,11 +38,7 @@ const FlowRunPage = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="bg-background flex h-screen w-screen items-center justify-center ">
-        <LoadingSpinner size={50}></LoadingSpinner>
-      </div>
-    );
+    return <FullPageSpinner />;
   }
 
   return (

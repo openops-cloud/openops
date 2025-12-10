@@ -14,9 +14,15 @@ type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   toolComponents?: Record<string, ReactNode>;
   handleInject?: (codeContent: string | SourceCode) => void;
+  isTitleDefault?: boolean;
 } & ConnectionStatusProps &
   AssistantTopBarProps &
-  ThreadProps;
+  ThreadProps & {
+    stepLogoUrl?: string;
+    stepDisplayName?: string;
+    stepIndex?: number;
+    blockDisplayName?: string;
+  };
 
 const AssistantUiChatContainer = ({
   onClose,
@@ -36,6 +42,11 @@ const AssistantUiChatContainer = ({
   isShowingSlowWarning,
   connectionError,
   chatId,
+  isTitleDefault,
+  stepLogoUrl,
+  stepDisplayName,
+  stepIndex,
+  blockDisplayName,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -53,6 +64,11 @@ const AssistantUiChatContainer = ({
         isHistoryOpen={isHistoryOpen}
         historyContent={children}
         chatId={chatId}
+        isTitleDefault={isTitleDefault}
+        stepLogoUrl={stepLogoUrl}
+        stepDisplayName={stepDisplayName}
+        stepIndex={stepIndex}
+        blockDisplayName={blockDisplayName}
       >
         {null}
       </AssistantTopBar>

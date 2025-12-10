@@ -1,7 +1,6 @@
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
-import { EnvironmentType } from '@openops/shared';
-import { authenticationService } from '../../authentication/authentication-service';
-import { Provider } from '../../authentication/authentication-service/hooks/authentication-service-hooks';
+import { EnvironmentType, Provider } from '@openops/shared';
+import { getAuthenticationService } from '../../authentication/authentication-service-factory';
 import { FlagEntity } from '../../flags/flag.entity';
 import { databaseConnection } from '../database-connection';
 
@@ -31,7 +30,7 @@ const seedDevUser = async (): Promise<void> => {
   const DEV_EMAIL = 'dev@openops.com';
   const DEV_PASSWORD = '12345678';
 
-  await authenticationService.signUp({
+  await getAuthenticationService().signUp({
     email: DEV_EMAIL,
     password: DEV_PASSWORD,
     firstName: 'Dev',

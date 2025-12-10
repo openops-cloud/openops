@@ -15,6 +15,7 @@ import {
   UserId,
   UserMeta,
   UserStatus,
+  UserWithOrganization,
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/basic/password-hasher';
@@ -101,8 +102,18 @@ export const userService = {
   async get({ id }: IdParams): Promise<User | null> {
     return userRepo().findOneBy({ id });
   },
-  async getOneOrFail({ id }: IdParams): Promise<User> {
-    return userRepo().findOneByOrFail({ id });
+  async getOneOrThrow({ id }: IdParams): Promise<User> {
+    const user = await this.get({ id });
+    if (isNil(user)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityId: id,
+          entityType: 'user',
+        },
+      });
+    }
+    return user;
   },
 
   async getDefaultAdmin(): Promise<User | null> {
@@ -139,10 +150,14 @@ export const userService = {
   },
 
   async delete({ id, organizationId }: DeleteParams): Promise<void> {
-    await userRepo().delete({
-      id,
-      organizationId,
-    });
+    const organizationWhereQuery = organizationId ? { organizationId } : {};
+
+    await userRepo()
+      .createQueryBuilder()
+      .delete()
+      .where({ id })
+      .andWhere(organizationWhereQuery)
+      .execute();
   },
 
   async getUserByEmailOrFail({ email }: { email: string }): Promise<User> {
@@ -154,6 +169,11 @@ export const userService = {
       .createQueryBuilder()
       .andWhere('LOWER(email) = LOWER(:email)', { email })
       .getMany();
+  },
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const cleanedEmail = email.toLowerCase().trim();
+    return userRepo().findOneBy({ email: cleanedEmail });
   },
 
   async getByOrganizationAndEmail({
@@ -182,7 +202,7 @@ export const userService = {
   async updatePassword({
     id,
     newPassword,
-  }: UpdatePasswordParams): Promise<void> {
+  }: UpdatePasswordParams): Promise<User> {
     assertValidPassword(newPassword);
 
     const hashedPassword = await passwordHasher.hash(newPassword);
@@ -191,6 +211,8 @@ export const userService = {
       updated: dayjs().toISOString(),
       password: hashedPassword,
     });
+
+    return userService.getOneOrThrow({ id });
   },
 
   async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {
@@ -199,6 +221,16 @@ export const userService = {
     await userRepo().update(id, {
       updated: dayjs().toISOString(),
       email: newEmail,
+    });
+  },
+
+  async updateExternalId({
+    id,
+    newExternalId,
+  }: UpdateExternalIdParams): Promise<void> {
+    await userRepo().update(id, {
+      updated: dayjs().toISOString(),
+      externalId: newExternalId,
     });
   },
 
@@ -252,13 +284,14 @@ export const userService = {
     });
   },
 
-  async addUserToOrganization({
-    id,
-    organizationId,
-  }: UpdateOrganizationIdParams): Promise<void> {
-    await userRepo().update(id, {
-      updated: dayjs().toISOString(),
+  async addUserToOrganization(
+    user: User,
+    organizationId: OrganizationId,
+  ): Promise<UserWithOrganization> {
+    return userRepo().save({
+      ...user,
       organizationRole: OrganizationRole.MEMBER,
+      updated: dayjs().toISOString(),
       organizationId,
     });
   },
@@ -266,7 +299,7 @@ export const userService = {
 
 type DeleteParams = {
   id: UserId;
-  organizationId: OrganizationId;
+  organizationId: OrganizationId | null;
 };
 
 type ListParams = {
@@ -311,6 +344,11 @@ type UpdatePasswordParams = {
 type UpdateEmailParams = {
   id: UserId;
   newEmail: string;
+};
+
+type UpdateExternalIdParams = {
+  id: UserId;
+  newExternalId?: string;
 };
 
 type UpdateTrackingParams = {

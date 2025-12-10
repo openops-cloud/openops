@@ -3,28 +3,24 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import {
-  AppSystemProp,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
-  AuthenticationResponse,
   OpsEdition,
   PrincipalType,
+  Provider,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
-import { FastifyReply } from 'fastify';
-import { jwtDecode } from 'jwt-decode';
-import { getSubDomain } from '../helper/sub-domain';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
-import { authenticationService } from './authentication-service';
-import { Provider } from './authentication-service/hooks/authentication-service-hooks';
+import { getAuthenticationService } from './authentication-service-factory';
+import {
+  removeAuthCookies,
+  setAuthCookies,
+} from './context/authentication-cookies';
 
 const edition = system.getEdition();
 const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
@@ -47,44 +43,9 @@ const AnalyticsGuestTokenRequestOptions = {
 export const authenticationController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
-  app.post('/sign-up', SignUpRequestOptions, async (request, reply) => {
-    const user = await userService.getMetaInfo({
-      id: request.principal.id,
-    });
+  app.post('/sign-up', SignUpRequestOptions, signUpRoute);
+  app.post('/sign-in', SignInRequestOptions, signInRoute);
 
-    if (!user || user.email !== adminEmail) {
-      return reply.code(403).send({
-        statusCode: 403,
-        error: 'Insufficient Permissions',
-        message: 'Adding new users only allowed to admin user.',
-      });
-    }
-
-    const signUpResponse = await authenticationService.signUp({
-      ...request.body,
-      verified: edition === OpsEdition.COMMUNITY,
-      organizationId: null,
-      provider: Provider.EMAIL,
-    });
-
-    return sendResponse(reply, signUpResponse);
-  });
-
-  app.post('/sign-in', SignInRequestOptions, async (request, reply) => {
-    const organizationId = await resolveOrganizationIdForAuthnRequest(
-      request.body.email,
-      request,
-    );
-
-    const signInResponse = await authenticationService.signIn({
-      email: request.body.email,
-      password: request.body.password,
-      organizationId,
-      provider: Provider.EMAIL,
-    });
-
-    return sendResponse(reply, signInResponse);
-  });
   app.post(
     '/sign-out',
     {
@@ -94,17 +55,10 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request, reply) => {
-      return reply
-        .clearCookie('jwt_token', {
-          domain: getOpenOpsSubDomain(),
-          path: '/',
-        })
-        .clearCookie('token', {
-          path: '/',
-        })
-        .send('Cookies removed');
+      return removeAuthCookies(reply).send('Cookies removed');
     },
   );
+
   app.get('/analytics-embed-id', async (request, reply) => {
     const { access_token } = await analyticsAuthenticationService.signIn();
 
@@ -114,6 +68,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
 
     return reply.send(embedId);
   });
+
   app.get(
     '/analytics-guest-token',
     AnalyticsGuestTokenRequestOptions,
@@ -129,6 +84,47 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       return reply.send(guestToken);
     },
   );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const signUpRoute = async (request: any, reply: any) => {
+  const user = await userService.getMetaInfo({
+    id: request.principal.id,
+  });
+
+  if (!user || user.email !== adminEmail) {
+    return reply.code(403).send({
+      statusCode: 403,
+      error: 'Insufficient Permissions',
+      message: 'Adding new users only allowed to admin user.',
+    });
+  }
+
+  const signUpResponse = await getAuthenticationService().signUp({
+    ...request.body,
+    verified: edition === OpsEdition.COMMUNITY,
+    organizationId: null,
+    provider: Provider.EMAIL,
+  });
+
+  return setAuthCookies(reply, signUpResponse).send(signUpResponse);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const signInRoute = async (request: any, reply: any) => {
+  const organizationId = await resolveOrganizationIdForAuthnRequest(
+    request.body.email,
+    request,
+  );
+
+  const signInResponse = await getAuthenticationService().signIn({
+    email: request.body.email,
+    password: request.body.password,
+    organizationId,
+    provider: Provider.EMAIL,
+  });
+
+  return setAuthCookies(reply, signInResponse).send(signInResponse);
 };
 
 const rateLimitOptions: RateLimitOptions = {
@@ -162,36 +158,3 @@ const SignInRequestOptions = {
     body: SignInRequest,
   },
 };
-
-function sendResponse(
-  reply: FastifyReply,
-  response: AuthenticationResponse,
-): FastifyReply {
-  const date = jwtDecode<{ exp: number }>(response.tablesRefreshToken);
-  const cookieExpiryDate = new Date(date.exp * 1000);
-
-  return reply
-    .setCookie('jwt_token', response.tablesRefreshToken, {
-      domain: getOpenOpsSubDomain(),
-      path: '/',
-      signed: true,
-      httpOnly: false,
-      expires: cookieExpiryDate,
-    })
-    .setCookie('token', response.token, {
-      path: '/',
-      signed: true,
-      httpOnly: false,
-      expires: cookieExpiryDate,
-      sameSite: 'lax',
-    })
-    .send(response);
-}
-
-function getOpenOpsSubDomain(): string {
-  const frontendUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
-
-  const tablesUrl = system.getOrThrow(AppSystemProp.OPENOPS_TABLES_PUBLIC_URL);
-
-  return getSubDomain(frontendUrl, tablesUrl);
-}

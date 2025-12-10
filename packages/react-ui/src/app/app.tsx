@@ -3,7 +3,7 @@ import {
   DefaultErrorFunction,
   SetErrorFunction,
 } from '@sinclair/typebox/errors';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemeProvider } from '@/app/common/providers/theme-provider';
 
@@ -13,9 +13,9 @@ import { InitialDataGuard } from './common/guards/intial-data-guard';
 import { Extensions } from './features/extensions';
 import './interceptors';
 import { useLogoutEventListener } from './lib/navigation-events';
+import { queryClient } from './lib/query-client';
 import { ApplicationRouter } from './router';
 
-const queryClient = new QueryClient();
 let typesFormatsAdded = false;
 
 if (!typesFormatsAdded) {

@@ -129,11 +129,162 @@ describe('log-cleaner', () => {
 
     expect(result).toEqual({
       event: {
-        circularObject:
-          'Logger error - could not stringify object. TypeError: Converting circular structure to JSON\n' +
-          "    --> starting at object with constructor 'Object'\n" +
-          "    --- property 'circular' closes the circle",
+        circularObject: '{"key":"value","circular":"[Circular]"}',
       },
+    });
+  });
+
+  describe('sensitive data redaction', () => {
+    const originalEnv = process.env['OPS_LOG_REDACTION'];
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env['OPS_LOG_REDACTION'];
+      } else {
+        process.env['OPS_LOG_REDACTION'] = originalEnv;
+      }
+    });
+
+    it('should redact password field when redaction is enabled', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('[REDACTED]');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should NOT redact password field when redaction is disabled', () => {
+      process.env['OPS_LOG_REDACTION'] = 'false';
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('secret');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should redact password field by default when variable is not set', () => {
+      delete process.env['OPS_LOG_REDACTION'];
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('[REDACTED]');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should redact password field', () => {
+      const logEvent = {
+        event: {
+          email: 'user@example.com',
+          password: 'secret',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.password).toBe('[REDACTED]');
+      expect(result.event.email).toBe('user@example.com');
+    });
+
+    it('should redact authorization field in objects', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          request: {
+            method: 'POST',
+            authorization: 'Bearer token',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('Bearer token');
+    });
+
+    it('should redact password in stringified JSON', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          body: '{"email":"user@example.com","password":"secret"}',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.body).toContain('[REDACTED]');
+      expect(result.event.body).not.toContain('secret');
+    });
+
+    it('should redact password in nested objects', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          request: {
+            email: 'user@example.com',
+            password: 'secret',
+          },
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.request).toContain('[REDACTED]');
+      expect(result.event.request).not.toContain('secret');
+    });
+
+    it('should NOT redact token usage statistics when redaction is disabled', () => {
+      process.env['OPS_LOG_REDACTION'] = 'false';
+      const logEvent = {
+        message: 'Total token usage for stream',
+        event: {
+          usage:
+            '{"inputTokens":"1234","outputTokens":"5678","totalTokens":"6912","cachedInputTokens":"100"}',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.usage).toContain('1234');
+      expect(result.event.usage).toContain('5678');
+      expect(result.event.usage).toContain('6912');
+      expect(result.event.usage).toContain('100');
+      expect(result.event.usage).not.toContain('[REDACTED]');
+    });
+
+    it('should redact token usage statistics when redaction is enabled', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        message: 'Total token usage for stream',
+        event: {
+          usage:
+            '{"inputTokens":"1234","outputTokens":"5678","totalTokens":"6912","cachedInputTokens":"100"}',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.usage).toContain('[REDACTED]');
+      expect(result.event.usage).not.toContain('1234');
     });
   });
 
@@ -261,6 +412,48 @@ describe('log-cleaner', () => {
         },
         message: 'ENTITY_NOT_FOUND',
       });
+    });
+
+    it('should handle error context with circular reference', () => {
+      const error = new Error('test error');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const circularContext: any = { key: 'value' };
+      circularContext.circular = circularContext;
+      Object.assign(error, circularContext);
+
+      const logEvent = {
+        event: error,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.errorContext).toBe(
+        '{"key":"value","circular":{"key":"value","circular":"[Circular]"}}',
+      );
+    });
+
+    it('should handle ApplicationError params with circular reference', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const circularParams: any = {
+        message: 'test',
+        data: {},
+      };
+      circularParams.data.circular = circularParams;
+
+      const appError = new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: circularParams,
+      });
+
+      const logEvent = {
+        event: appError,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.errorParams).toBe(
+        '{"message":"test","data":{"circular":"[Circular]"}}',
+      );
     });
 
     it('should flatten error in correct fields by prefix', () => {

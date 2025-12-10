@@ -1,4 +1,4 @@
-type User = {
+export type WorkspaceUser = {
   id: number;
   name: string;
   email: string;
@@ -12,7 +12,7 @@ type User = {
 export type TableWorkspace = {
   id: number;
   name: string;
-  users: User[];
+  users: WorkspaceUser[];
   order: number;
   permissions: string;
   unread_notifications_count: number;

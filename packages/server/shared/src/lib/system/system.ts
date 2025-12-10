@@ -59,6 +59,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [WorkerSystemProps.SCHEDULED_WORKER_CONCURRENCY]: '10',
   [SharedSystemProp.LOG_LEVEL]: 'info',
   [SharedSystemProp.LOG_PRETTY]: 'false',
+  [SharedSystemProp.LOG_REDACTION]: 'true',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
   [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
@@ -95,9 +96,10 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
   [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
   [AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION]: '100',
-  [AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS]: '86400', // 24 hours
+  [AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS]: '2592000', // 30 days
   [AppSystemProp.TELEMETRY_MODE]: 'COLLECTOR',
   [AppSystemProp.TELEMETRY_COLLECTOR_URL]: 'https://telemetry.openops.com/save',
+  [SharedSystemProp.ENABLE_HOST_VALIDATION]: 'true',
 };
 
 export const system = {

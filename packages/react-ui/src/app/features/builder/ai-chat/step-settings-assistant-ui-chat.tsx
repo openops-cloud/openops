@@ -1,12 +1,13 @@
 import { useTheme } from '@/app/common/providers/theme-provider';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiCliChatContainerSizeState,
   cn,
   StepSettingsAssistantUiChatContainer,
 } from '@openops/components/ui';
-import { FlowVersion } from '@openops/shared';
-import { useCallback } from 'react';
+import { flowHelper, FlowVersion } from '@openops/shared';
+import { useCallback, useMemo } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useNetworkStatusWithWarning } from '../../ai/lib/hooks/use-network-status-with-warning';
 import { useStepSettingsAssistantChat } from '../assistant-ui/hooks/use-step-settings-assistant-chat';
@@ -81,6 +82,16 @@ const StepSettingsAssistantUiChat = ({
   const { isShowingSlowWarning, connectionError } =
     useNetworkStatusWithWarning(chatStatus);
 
+  const { step, stepIndex } = useMemo(
+    () => flowHelper.getStepWithIndex(flowVersion, selectedStep),
+    [flowVersion, selectedStep],
+  );
+
+  const { stepMetadata } = blocksHooks.useStepMetadata({
+    step: step,
+    enabled: !!step,
+  });
+
   return (
     <StepSettingsAssistantUiChatContainer
       parentHeight={middlePanelSize.height}
@@ -107,6 +118,10 @@ const StepSettingsAssistantUiChat = ({
       })}
       isShowingSlowWarning={isShowingSlowWarning}
       connectionError={connectionError}
+      stepLogoUrl={stepMetadata?.logoUrl}
+      stepDisplayName={step?.displayName}
+      stepIndex={stepIndex}
+      blockDisplayName={stepMetadata?.displayName}
     ></StepSettingsAssistantUiChatContainer>
   );
 };

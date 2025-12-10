@@ -13,12 +13,12 @@ jest.mock('jwt-decode', () => ({
 
 jest.mock('@openops/common', () => ({
   authenticateUserInOpenOpsTables: authUserMock,
-  authenticateDefaultUserInOpenOpsTables: authUserMock,
   getAiTelemetrySDK: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('../../../../src/app/openops-tables/index', () => ({
   openopsTables: {
+    authenticateAdminUserInOpenOpsTables: authUserMock,
     createUser: jest.fn().mockResolvedValue({
       token: 'token',
       refresh_token: 'refresh_token',
@@ -38,8 +38,6 @@ jest.mock('../../../../src/app/openops-tables/index', () => ({
 import { PrincipalType, UserStatus } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
-import { authenticationService } from '../../../../src/app/authentication/authentication-service';
-import { Provider } from '../../../../src/app/authentication/authentication-service/hooks/authentication-service-hooks';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
@@ -86,6 +84,7 @@ beforeAll(async () => {
 
   adminToken = await accessTokenManager.generateToken({
     id: mockAdminUser.id,
+    externalId: mockAdminUser.externalId,
     type: PrincipalType.USER,
     projectId: mockProject.id,
     organization: {

@@ -15,7 +15,7 @@ export const buildArnAction = createAction({
     }),
     region: Property.ShortText({
       displayName: 'Region',
-      required: true,
+      required: false,
     }),
     accountId: Property.ShortText({
       displayName: 'Account ID',
@@ -33,7 +33,7 @@ export const buildArnAction = createAction({
       service,
       accountId,
       resource: resourceId,
-      region,
+      region: region ?? '',
     });
 
     return arn;

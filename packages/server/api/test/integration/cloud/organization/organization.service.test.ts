@@ -61,7 +61,6 @@ describe('Organization Service', () => {
       const result = await organizationService.create({
         ownerId: mockOrganization.ownerId,
         name: mockOrganization.name,
-        tablesWorkspaceId: 123,
       });
 
       const savedOrganization = await organizationService.getOneOrThrow(
@@ -69,9 +68,8 @@ describe('Organization Service', () => {
       );
 
       expect(savedOrganization.id).toBe(result.id);
-      expect(savedOrganization.tablesWorkspaceId).toBe(123);
 
-      const savedUser = await userService.getOneOrFail({
+      const savedUser = await userService.getOneOrThrow({
         id: mockOrganization.ownerId,
       });
 
@@ -97,26 +95,6 @@ describe('Organization Service', () => {
         mockOrganization.id,
       );
       expect(savedOrganization.name).toBe('Test Org 2');
-    });
-
-    it('should update the organization tablesWorkspaceId', async () => {
-      const mockOrganization = await createOrganizationInDB();
-      let savedOrganization = await organizationService.getOneOrThrow(
-        mockOrganization.id,
-      );
-      expect(savedOrganization.tablesWorkspaceId).toBe(
-        mockOrganization.tablesWorkspaceId,
-      );
-
-      await organizationService.update({
-        id: mockOrganization.id,
-        tablesWorkspaceId: 4564,
-      });
-
-      savedOrganization = await organizationService.getOneOrThrow(
-        mockOrganization.id,
-      );
-      expect(savedOrganization.tablesWorkspaceId).toBe(4564);
     });
 
     it('should update the organization ownerId', async () => {

@@ -1,48 +1,32 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { IdentityClient } from '@frontegg/client';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
-import { getCloudToken, getCloudUser } from './cloud-auth';
+import {
+  allowAllOriginsHookHandler,
+  registerOptionsEndpoint,
+} from '../helper/allow-all-origins-hook-handler';
+import { getVerifiedUser } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(userInfoController, { prefix: '/v1/user-info' });
 };
 
 export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
-  const fronteggClientId = system.get(AppSystemProp.FRONTEGG_CLIENT_ID);
-  const fronteggApiKey = system.get(AppSystemProp.FRONTEGG_API_KEY);
+  const publicKey = system.get(AppSystemProp.FRONTEGG_PUBLIC_KEY);
+  const connectionPageEnabled = system.getBoolean(
+    AppSystemProp.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
 
-  if (!fronteggClientId || !fronteggApiKey) {
+  if (!publicKey || !connectionPageEnabled) {
     logger.info(
       'Missing Frontegg configuration, disabling cloud templates API',
     );
     return;
   }
 
-  const identityClient = new IdentityClient({
-    FRONTEGG_CLIENT_ID: fronteggClientId,
-    FRONTEGG_API_KEY: fronteggApiKey,
-  });
-
   // user-info is available on any origin
-  app.addHook('onSend', (request, reply, payload, done) => {
-    void reply.header(
-      'Access-Control-Allow-Origin',
-      request.headers.origin || request.headers['Ops-Origin'] || '*',
-    );
-    void reply.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    void reply.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type,Ops-Origin,Authorization',
-    );
-    void reply.header('Access-Control-Allow-Credentials', 'true');
-    if (request.method === 'OPTIONS') {
-      return reply.status(204).send();
-    }
-
-    done(null, payload);
-    return;
-  });
+  app.addHook('onRequest', allowAllOriginsHookHandler);
+  registerOptionsEndpoint(app);
 
   app.get(
     '/',
@@ -53,8 +37,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       },
     },
     async (request, reply) => {
-      const token = getCloudToken(request);
-      const user = await getCloudUser(identityClient, token);
+      const user = getVerifiedUser(request, publicKey);
 
       if (!user) {
         return reply.status(401).send();

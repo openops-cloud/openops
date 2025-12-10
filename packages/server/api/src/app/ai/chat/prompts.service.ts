@@ -3,9 +3,15 @@ import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
 import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { getAdditionalToolDescriptions } from '../mcp/external-tool-descriptions';
 import { hasToolProvider } from '../mcp/tool-utils';
 import { QueryClassification } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
+
+function buildAdditionalToolNotes(selectedTools: ToolSet | undefined): string {
+  const descriptions = getAdditionalToolDescriptions(selectedTools);
+  return descriptions.length > 0 ? descriptions.join('\n\n') : '';
+}
 
 export const getMcpSystemPrompt = async ({
   queryClassification,
@@ -58,7 +64,12 @@ export const getMcpSystemPrompt = async ({
 
   const allPrompts = await Promise.all(promptPromises);
 
-  return allPrompts.join('\n\n');
+  const additionalToolNotes = buildAdditionalToolNotes(selectedTools);
+  const finalPrompts = additionalToolNotes
+    ? [...allPrompts, additionalToolNotes]
+    : allPrompts;
+
+  return finalPrompts.join('\n\n');
 };
 
 export const getBlockSystemPrompt = async (
@@ -137,10 +148,6 @@ export const buildUIContextSection = async (
 
   if (flowContext.currentStepId) {
     contextParts.push(`step id ${flowContext.currentStepId}`);
-  }
-
-  if (flowContext.currentStepName) {
-    contextParts.push(`step name "${flowContext.currentStepName}"`);
   }
 
   if (contextParts.length === 0) {

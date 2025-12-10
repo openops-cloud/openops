@@ -1,12 +1,14 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  authenticateDefaultUserInOpenOpsTables,
   deleteRow,
   getFields,
   getPrimaryKeyFieldFromFields,
   getRowByPrimaryKeyValue,
   getTableIdByTableName,
+  OpenOpsField,
   openopsTablesDropdownProperty,
+  resolveTokenProvider,
+  TokenOrResolver,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
@@ -31,22 +33,22 @@ export const deleteRecordAction = createAction({
     const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      [tableName],
+      [tableName, context.server],
     );
 
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const tokenOrResolver = await resolveTokenProvider(context.server);
 
     const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
-    const fields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
-      tableId,
-      token,
-    ]);
+    const fields = await cacheWrapper.getOrAdd<
+      OpenOpsField[],
+      [number, TokenOrResolver]
+    >(fieldsCacheKey, getFields, [tableId, tokenOrResolver]);
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const rowPrimaryKey = getPrimaryKey(context.propsValue.rowPrimaryKey);
 
     const rowToDelete = await getRowByPrimaryKeyValue(
-      token,
+      tokenOrResolver,
       tableId,
       rowPrimaryKey,
       primaryKeyField.name,
@@ -58,8 +60,8 @@ export const deleteRecordAction = createAction({
 
     return await deleteRow({
       tableId: tableId,
-      token: token,
       rowId: rowToDelete.id,
+      tokenOrResolver,
     });
   },
 });
