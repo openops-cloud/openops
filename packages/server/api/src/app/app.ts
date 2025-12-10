@@ -18,7 +18,6 @@ import {
 } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
-  EnvironmentType,
   Flow,
   FlowImportTemplate,
   FlowRun,
@@ -311,10 +310,11 @@ The application started on ${system.get(
   logger.info(`Node version: ${process.version}`);
   logger.info(`Blocks will be loaded from source type ${blocksSource}`);
 
-  const environment = system.get(SharedSystemProp.ENVIRONMENT);
-  if (environment === EnvironmentType.DEVELOPMENT) {
+  const environmentName =
+    system.get(SharedSystemProp.ENVIRONMENT_NAME) ?? 'unknown';
+  if (system.getBoolean(SharedSystemProp.SHOW_DEV_MODE_WARNING)) {
     logger.warn(
-      `[WARNING]: The application is running in ${environment} mode.`,
+      `[WARNING]: The application is running in ${environmentName} mode.`,
     );
   }
 }

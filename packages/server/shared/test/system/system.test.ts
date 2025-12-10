@@ -1,9 +1,5 @@
 import { ApplicationError } from '@openops/shared';
-import {
-  AppSystemProp,
-  SharedSystemProp,
-  system,
-} from '../../src/lib/system';
+import { AppSystemProp, SharedSystemProp, system } from '../../src/lib/system';
 
 describe('system configuration helpers', () => {
   const originalEnv = process.env;
@@ -12,7 +8,7 @@ describe('system configuration helpers', () => {
     process.env = { ...originalEnv };
     Object.keys(process.env).forEach((key) => {
       if (key.startsWith('OPS_')) {
-        delete process.env[key];
+        Reflect.deleteProperty(process.env, key);
       }
     });
   });
