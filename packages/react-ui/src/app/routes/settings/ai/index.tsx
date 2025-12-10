@@ -149,7 +149,7 @@ const AiSettingsPage = () => {
                 onSave={handleSaveMcp}
                 disabled={
                   isSavingMcpSettings ||
-                  !aiSettings?.[0]?.connection ||
+                  !isAiConfigured ||
                   isSavingAiSettings
                 }
                 displayName={t('AWS Cost')}
@@ -159,7 +159,7 @@ const AiSettingsPage = () => {
             )}
             {!isAiConfigured && (
               <p className="text-sm font-medium text-muted-foreground">
-                {t('* Select AI connection in order to use the MCP tools')}
+                {t('* Select an AI connection to use the MCP tools.')}
               </p>
             )}
           </div>
