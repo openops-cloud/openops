@@ -90,7 +90,7 @@ const AiSettingsPage = () => {
 
   const isAiConfigured = !!aiSettings?.[0]?.connection;
 
-  const handleSaveAi = useCallback(
+  const handleSaveAiConfig = useCallback(
     (connectionName: string) =>
       onSaveAiSettings({
         ...aiSettings?.[0],
@@ -100,7 +100,7 @@ const AiSettingsPage = () => {
     [onSaveAiSettings, aiSettings],
   );
 
-  const handleSaveMcp = useCallback(
+  const handleSaveMcpConfig = useCallback(
     (connectionName: string) =>
       onSaveMcpSettings({
         ...mcpSettings,
@@ -132,7 +132,7 @@ const AiSettingsPage = () => {
                 block={aiBlockModel}
                 providerKey={'AI'}
                 initialConnection={aiSettings?.[0]?.connection}
-                onSave={handleSaveAi}
+                onSave={handleSaveAiConfig}
                 disabled={isSavingAiSettings}
                 displayName={t('Select Connection')}
               />
@@ -146,11 +146,9 @@ const AiSettingsPage = () => {
                 block={awsBlockModel}
                 providerKey={'AWS'}
                 initialConnection={mcpSettings?.awsCost?.connectionName}
-                onSave={handleSaveMcp}
+                onSave={handleSaveMcpConfig}
                 disabled={
-                  isSavingMcpSettings ||
-                  !isAiConfigured ||
-                  isSavingAiSettings
+                  isSavingMcpSettings || !isAiConfigured || isSavingAiSettings
                 }
                 displayName={t('AWS Cost')}
               />
