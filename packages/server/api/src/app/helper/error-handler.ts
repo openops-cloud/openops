@@ -75,7 +75,6 @@ const isValidationError = (error: unknown): error is FastifyValidationError => {
 };
 
 const statusCodeMap: Partial<Record<ErrorCode, StatusCodes>> = {
-  [ErrorCode.INVALID_API_KEY]: StatusCodes.UNAUTHORIZED,
   [ErrorCode.INVALID_BEARER_TOKEN]: StatusCodes.UNAUTHORIZED,
   [ErrorCode.FEATURE_DISABLED]: StatusCodes.PAYMENT_REQUIRED,
   [ErrorCode.PERMISSION_DENIED]: StatusCodes.FORBIDDEN,
