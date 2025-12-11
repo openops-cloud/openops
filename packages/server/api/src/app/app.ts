@@ -306,15 +306,10 @@ The application started on ${system.get(
 
   const blocksSource = system.getOrThrow(SharedSystemProp.BLOCKS_SOURCE);
 
+  const environmentName = system.get(SharedSystemProp.ENVIRONMENT_NAME);
+
   logger.info(`Application version: ${system.get(SharedSystemProp.VERSION)}`);
   logger.info(`Node version: ${process.version}`);
   logger.info(`Blocks will be loaded from source type ${blocksSource}`);
-
-  const environmentName =
-    system.get(SharedSystemProp.ENVIRONMENT_NAME) ?? 'unknown';
-  if (system.getBoolean(SharedSystemProp.SHOW_DEV_MODE_WARNING)) {
-    logger.warn(
-      `[WARNING]: The application is running in ${environmentName} mode.`,
-    );
-  }
+  logger.info(`Environment: ${environmentName}`);
 }

@@ -90,7 +90,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.ENGINE_METADATA_CACHE_ENABLED]: 'true',
   [SharedSystemProp.FAST_SHUTDOWN_ENABLED]: 'false',
   [SharedSystemProp.REQUIRE_ENGINE_VALIDATE_AUTH]: 'true',
-  [SharedSystemProp.SHOW_DEV_MODE_WARNING]: 'false',
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
