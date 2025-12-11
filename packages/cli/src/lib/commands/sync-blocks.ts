@@ -75,10 +75,12 @@ export const syncBlockCommand = new Command('sync')
     'API URL ex: https://app.openops.com/api',
   )
   .action(async (options) => {
-    const apiKey = process.env.OPS_API_KEY;
+    const apiKey = process.env.OPS_ACCESS_TOKEN;
     const apiUrlWithoutTrailSlash = options.apiUrl.replace(/\/$/, '');
     if (!apiKey) {
-      console.error(chalk.red('OPS_API_KEY environment variable is required'));
+      console.error(
+        chalk.red('OPS_ACCESS_TOKEN environment variable is required'),
+      );
       process.exit(1);
     }
     await syncBlocks(apiUrlWithoutTrailSlash, apiKey);
