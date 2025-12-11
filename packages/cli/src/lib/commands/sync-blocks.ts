@@ -74,14 +74,8 @@ export const syncBlockCommand = new Command('sync')
     '-h, --apiUrl <url>',
     'API URL ex: https://app.openops.com/api',
   )
+  .requiredOption('-t, --token <token>', 'Access token for authentication')
   .action(async (options) => {
-    const apiKey = process.env.OPS_ACCESS_TOKEN;
     const apiUrlWithoutTrailSlash = options.apiUrl.replace(/\/$/, '');
-    if (!apiKey) {
-      console.error(
-        chalk.red('OPS_ACCESS_TOKEN environment variable is required'),
-      );
-      process.exit(1);
-    }
-    await syncBlocks(apiUrlWithoutTrailSlash, apiKey);
+    await syncBlocks(apiUrlWithoutTrailSlash, options.token);
   });
