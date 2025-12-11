@@ -7,6 +7,7 @@ import {
   InputPropertyMap,
   PropertyType,
   StaticPropsValue,
+  WorkflowFile,
 } from '@openops/blocks-framework';
 import { tryParseJson } from '@openops/common';
 import { AUTHENTICATION_PROPERTY_NAME, isNil, isObject } from '@openops/shared';
@@ -192,7 +193,7 @@ const validateProperty = (
       });
       break;
     case PropertyType.FILE:
-      schema = z.record(z.any(), z.any(), {
+      schema = z.instanceof(WorkflowFile, {
         error: `Expected a file url or base64 with mimeType, received: ${originalValue}`,
       });
       break;
