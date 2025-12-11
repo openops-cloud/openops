@@ -21,6 +21,7 @@ export const formController: FastifyPluginAsyncTypebox = async (app) => {
 const GetFormRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     description:
