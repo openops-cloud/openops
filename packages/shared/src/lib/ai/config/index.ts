@@ -45,6 +45,7 @@ export const McpConfig = Type.Object({
 
 export type McpConfig = Static<typeof McpConfig>;
 export const AWS_COST_MCP_CONFIG_NAME = 'aws-cost';
+export const GCP_MCP_CONFIG_NAME = 'gcp';
 
 export const SaveMcpConfigRequest = Type.Object({
   id: Type.Optional(Type.String()),

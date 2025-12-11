@@ -38,6 +38,10 @@ const AiSettingsPage = () => {
     name: '@openops/block-aws',
   });
 
+  const { blockModel: gcpBlockModel } = blocksHooks.useBlock({
+    name: '@openops/block-google-cloud',
+  });
+
   const { mutate: onSaveAiSettings, isPending: isSavingAiSettings } =
     useMutation({
       mutationFn: async (aiSettings: AiSettingsFormSchema) => {
@@ -112,6 +116,18 @@ const AiSettingsPage = () => {
     [onSaveMcpSettings, mcpSettings],
   );
 
+  const handleSaveGcpMcpConfig = useCallback(
+    (connectionName: string) =>
+      onSaveMcpSettings({
+        ...mcpSettings,
+        gcp: {
+          enabled: !!connectionName,
+          connectionName: removeConnectionBrackets(connectionName) ?? '',
+        },
+      }),
+    [onSaveMcpSettings, mcpSettings],
+  );
+
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex flex-col gap-4">
@@ -151,6 +167,21 @@ const AiSettingsPage = () => {
                   isSavingMcpSettings || !isAiConfigured || isSavingAiSettings
                 }
                 displayName={t('AWS Cost')}
+                labelPlacement="left"
+              />
+            ) : (
+              <Skeleton className="h-[78px]" />
+            )}
+            {gcpBlockModel ? (
+              <AiSettingsForm
+                block={gcpBlockModel}
+                providerKey={'GCloud'}
+                initialConnection={mcpSettings?.gcp?.connectionName}
+                onSave={handleSaveGcpMcpConfig}
+                disabled={
+                  isSavingMcpSettings || !isAiConfigured || isSavingAiSettings
+                }
+                displayName={t('GCP')}
                 labelPlacement="left"
               />
             ) : (

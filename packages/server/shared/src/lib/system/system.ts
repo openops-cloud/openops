@@ -92,6 +92,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE]: 'false',
   [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
   [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
+  [AppSystemProp.GCP_MCP_PATH]: '/Users/leylabuechel/.mcp/gcp',
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '100',
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
   [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',

@@ -3,6 +3,7 @@ import { ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { getCostTools } from './cost-tools';
 import { getDocsTools } from './docs-tools';
+import { getGcpTools } from './gcp-tools';
 import { safeGetTools } from './load-tools-guard';
 import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
@@ -38,6 +39,12 @@ export const startMCPTools = async (
     toolSet: billingAndCostManagement.toolSet,
   };
 
+  const { gcpMcp } = await getGcpTools(projectId);
+  const gcpTools = {
+    client: gcpMcp.client,
+    toolSet: gcpMcp.toolSet,
+  };
+
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
   );
@@ -59,6 +66,7 @@ export const startMCPTools = async (
     ...costExplorerTools.toolSet,
     ...costAnalysisTools.toolSet,
     ...billingAndCostManagementTools.toolSet,
+    ...gcpTools.toolSet,
   } as ToolSet;
 
   return {
@@ -70,6 +78,7 @@ export const startMCPTools = async (
       costExplorerTools.client,
       costAnalysisTools.client,
       billingAndCostManagementTools.client,
+      gcpTools.client,
     ],
     tools: toolSet,
   };

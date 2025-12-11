@@ -44,6 +44,13 @@ RUN <<-```
     pip install ./src/billing-cost-management-mcp-server
 ```
 
+WORKDIR /root/.mcp/gcp
+RUN <<-```
+    set -ex
+    git clone https://github.com/googleapis/gcloud-mcp.git .
+    npm install
+```
+
 # Set up backend
 WORKDIR /usr/src/app
 

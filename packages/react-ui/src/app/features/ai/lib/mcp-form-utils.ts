@@ -1,6 +1,7 @@
 import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   AWS_COST_MCP_CONFIG_NAME,
+  GCP_MCP_CONFIG_NAME,
   McpConfig,
   SaveMcpConfigRequest,
 } from '@openops/shared';
@@ -17,7 +18,17 @@ export const MCP_SETTINGS_FORM_SCHEMA = Type.Object({
       }),
     }),
   ),
+  gcp: Type.Optional(
+    Type.Object({
+      enabled: Type.Boolean(),
+      connectionName: Type.String({
+        minLength: 1,
+        errorMessage: 'Connection name is required when GCP is enabled',
+      }),
+    }),
+  ),
   id: Type.Optional(Type.String()),
+  gcpId: Type.Optional(Type.String()),
 });
 
 export type McpSettingsFormSchema = Static<typeof MCP_SETTINGS_FORM_SCHEMA>;
@@ -50,6 +61,13 @@ export const mapMcpConfigsToFormSchema = (
         };
         formSchema.id = config.id;
         break;
+      case GCP_MCP_CONFIG_NAME:
+        formSchema.gcp = {
+          enabled: config.config.enabled as boolean,
+          connectionName: config.config.connectionName as string,
+        };
+        formSchema.gcpId = config.id;
+        break;
     }
   });
 
@@ -69,6 +87,17 @@ export const mapFormSchemaToMcpConfigs = (
         connectionName: formSchema.awsCost.connectionName,
       },
       id: formSchema.id,
+    });
+  }
+
+  if (formSchema.gcp) {
+    configs.push({
+      name: GCP_MCP_CONFIG_NAME,
+      config: {
+        enabled: formSchema.gcp.enabled,
+        connectionName: formSchema.gcp.connectionName,
+      },
+      id: formSchema.gcpId,
     });
   }
 
