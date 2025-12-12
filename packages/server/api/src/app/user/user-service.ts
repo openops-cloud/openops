@@ -160,8 +160,18 @@ export const userService = {
       .execute();
   },
 
-  async getUserByEmailOrFail({ email }: { email: string }): Promise<User> {
-    return userRepo().findOneByOrFail({ email });
+  async getUserByEmailOrThrow(email: string): Promise<User> {
+    const user = await userRepo().findOneBy({ email });
+    if (isNil(user)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'user',
+          entityId: email,
+        },
+      });
+    }
+    return user;
   },
 
   async getUsersByEmail({ email }: { email: string }): Promise<User[]> {
