@@ -237,7 +237,7 @@ describe('Update Resource Properties', () => {
       expectedMessage: 'Property name at index 0 contains invalid characters',
     },
   ])(
-    'should throw when $description',
+    ({ description }) => `should throw when ${description}`,
     async ({
       description,
       resourceType,
