@@ -17,6 +17,16 @@ function validateIdentifier(value: string, fieldName: string): void {
   }
 }
 
+/**
+ * Escapes a string for safe use as a shell argument.
+ * 
+ * This function wraps the input value in single quotes and escapes any embedded single quotes
+ * using the POSIX shell pattern: '\''. This is the standard technique for safely passing
+ * arbitrary strings as arguments to POSIX-compliant shells.
+ *
+ * @param value - The string to escape for the shell.
+ * @returns The shell-escaped string.
+ */
 function escapeShellArgument(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
