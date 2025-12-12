@@ -79,6 +79,19 @@ describe('Get Resources', () => {
       'Failed to execute the command to get resources.',
     );
   });
+
+  test('should throw when resource identifiers contain invalid characters', async () => {
+    mockExecuteCommand.mockResolvedValue({
+      exitCode: 0,
+      stdOut: 'resource.aws_instance.example;rm -rf /',
+      stdError: '',
+    });
+
+    await expect(getResources(testTemplate)).rejects.toThrow(
+      'Resource name contains invalid characters',
+    );
+    expect(mockExecuteCommand).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('Update Resource Properties', () => {
@@ -102,6 +115,8 @@ describe('Update Resource Properties', () => {
         { propertyName: 'property_name1', propertyValue: setPropertyValue },
         { propertyName: 'property_name2', propertyValue: appendPropertyValue },
       ];
+      const setValueArgument = `'${setPropertyValueExpected}'`;
+      const appendValueArgument = `'${appendPropertyValueExpected}'`;
 
       mockExecuteCommand
         .mockResolvedValueOnce({
@@ -146,7 +161,7 @@ describe('Update Resource Properties', () => {
         '/bin/bash',
         expect.arrayContaining([
           expect.stringContaining(
-            `attribute set resource.aws_instance.example.property_name1 ${setPropertyValueExpected} | hcledit attribute append resource.aws_instance.example.property_name2 ${appendPropertyValueExpected}`,
+            `attribute set resource.aws_instance.example.property_name1 ${setValueArgument} | hcledit attribute append resource.aws_instance.example.property_name2 ${appendValueArgument}`,
           ),
         ]),
       );
@@ -175,6 +190,73 @@ describe('Update Resource Properties', () => {
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"Error"}',
     );
   });
+
+  test('should escape property values to prevent shell injection', async () => {
+    const modifications = [
+      { propertyName: 'property_name1', propertyValue: 'value; $(whoami)' },
+    ];
+
+    mockExecuteCommand
+      .mockResolvedValueOnce({ exitCode: 1, stdOut: '', stdError: 'missing' })
+      .mockResolvedValueOnce({ exitCode: 0, stdOut: 'result', stdError: '' });
+
+    const result = await updateResourceProperties(
+      testTemplate,
+      'aws_instance',
+      'example',
+      modifications,
+    );
+
+    expect(result).toContain('result');
+    const executedCommand = mockExecuteCommand.mock.calls[1][1][1];
+    expect(executedCommand).toContain(
+      `resource.aws_instance.example.property_name1 '\\"value; $(whoami)\\"'`,
+    );
+  });
+
+  test.each([
+    {
+      description: 'resource type contains invalid characters',
+      resourceType: 'aws_instance; rm -rf /',
+      resourceName: 'example',
+      propertyName: 'property_name1',
+      expectedMessage: 'Resource type contains invalid characters',
+    },
+    {
+      description: 'resource name contains invalid characters',
+      resourceType: 'aws_instance',
+      resourceName: 'example; rm -rf /',
+      propertyName: 'property_name1',
+      expectedMessage: 'Resource name contains invalid characters',
+    },
+    {
+      description: 'property name contains invalid characters',
+      resourceType: 'aws_instance',
+      resourceName: 'example',
+      propertyName: 'property;name',
+      expectedMessage: 'Property name at index 0 contains invalid characters',
+    },
+  ])(
+    'should throw when $description',
+    async ({
+      description,
+      resourceType,
+      resourceName,
+      propertyName,
+      expectedMessage,
+    }) => {
+      await expect(
+        updateResourceProperties(
+          testTemplate,
+          resourceType,
+          resourceName,
+          [{ propertyName, propertyValue: 'value' }],
+        ),
+      ).rejects.toThrow(expectedMessage);
+      expect(mockExecuteCommand).not.toHaveBeenCalled();
+      expect(mockWriteFile).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('Delete Resource', () => {
@@ -218,6 +300,14 @@ describe('Delete Resource', () => {
     ).rejects.toThrow(
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"Error"}',
     );
+  });
+
+  test('should reject unsafe resource identifiers when deleting', async () => {
+    await expect(
+      deleteResource(testTemplate, 'aws_instance', 'example; rm -rf /'),
+    ).rejects.toThrow('Resource name contains invalid characters');
+    expect(mockExecuteCommand).not.toHaveBeenCalled();
+    expect(mockWriteFile).not.toHaveBeenCalled();
   });
 });
 
@@ -265,6 +355,14 @@ describe('Update Variables File', () => {
     ).rejects.toThrow(
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"err"}',
     );
+  });
+
+  test('should reject invalid variable names', async () => {
+    await expect(
+      updateVariablesFile('a=1', [{ variableName: 'name; rm -rf /', variableValue: 3 }]),
+    ).rejects.toThrow('Variable name at index 0 contains invalid characters');
+    expect(mockExecuteCommand).not.toHaveBeenCalled();
+    expect(mockWriteFile).not.toHaveBeenCalled();
   });
 });
 
