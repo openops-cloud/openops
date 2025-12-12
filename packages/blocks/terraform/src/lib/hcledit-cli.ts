@@ -19,7 +19,7 @@ function validateIdentifier(value: string, fieldName: string): void {
 
 /**
  * Escapes a string for safe use as a shell argument.
- * 
+ *
  * This function wraps the input value in single quotes and escapes any embedded single quotes
  * using the POSIX shell pattern: '\''. This is the standard technique for safely passing
  * arbitrary strings as arguments to POSIX-compliant shells.
@@ -36,7 +36,9 @@ export async function getResources(
 ): Promise<TerraformResource[]> {
   const commandResult = await useTempFile(template, async (filePath) => {
     return await executeHclEditCommand(
-      `-f ${escapeShellArgument(filePath)} block get resource | hcledit block list`,
+      `-f ${escapeShellArgument(
+        filePath,
+      )} block get resource | hcledit block list`,
     );
   });
 
@@ -96,7 +98,10 @@ export async function updateResourceProperties(
   validateIdentifier(resourceName, 'Resource name');
 
   modifications.forEach((modification, index) => {
-    validateIdentifier(modification.propertyName, `Property name at index ${index}`);
+    validateIdentifier(
+      modification.propertyName,
+      `Property name at index ${index}`,
+    );
   });
 
   const providedTemplate = template.trim() as string;
@@ -165,7 +170,9 @@ export async function deleteResource(
 
   const commandResult = await useTempFile(template, async (filePath) => {
     return await executeHclEditCommand(
-      `-f ${escapeShellArgument(filePath)} block rm resource.${resourceType}.${resourceName}`,
+      `-f ${escapeShellArgument(
+        filePath,
+      )} block rm resource.${resourceType}.${resourceName}`,
     );
   });
 
@@ -199,7 +206,9 @@ async function getAttributeCommand(
   resourceName: string,
   propertyName: string,
 ): Promise<string> {
-  const command = `-f ${escapeShellArgument(filePath)} attribute get resource.${resourceType}.${resourceName}.${propertyName}`;
+  const command = `-f ${escapeShellArgument(
+    filePath,
+  )} attribute get resource.${resourceType}.${resourceName}.${propertyName}`;
 
   const commandResult = await executeHclEditCommand(command);
 
@@ -218,7 +227,9 @@ async function updateTemplateCommand(
   filePath: string,
   modifications: string[],
 ): Promise<string> {
-  const command = `-f ${escapeShellArgument(filePath)} ${modifications.join(' | hcledit ')}`;
+  const command = `-f ${escapeShellArgument(filePath)} ${modifications.join(
+    ' | hcledit ',
+  )}`;
 
   const commandResult = await executeHclEditCommand(command);
 

@@ -246,12 +246,9 @@ describe('Update Resource Properties', () => {
       expectedMessage,
     }) => {
       await expect(
-        updateResourceProperties(
-          testTemplate,
-          resourceType,
-          resourceName,
-          [{ propertyName, propertyValue: 'value' }],
-        ),
+        updateResourceProperties(testTemplate, resourceType, resourceName, [
+          { propertyName, propertyValue: 'value' },
+        ]),
       ).rejects.toThrow(expectedMessage);
       expect(mockExecuteCommand).not.toHaveBeenCalled();
       expect(mockWriteFile).not.toHaveBeenCalled();
@@ -359,7 +356,9 @@ describe('Update Variables File', () => {
 
   test('should reject invalid variable names', async () => {
     await expect(
-      updateVariablesFile('a=1', [{ variableName: 'name; rm -rf /', variableValue: 3 }]),
+      updateVariablesFile('a=1', [
+        { variableName: 'name; rm -rf /', variableValue: 3 },
+      ]),
     ).rejects.toThrow('Variable name at index 0 contains invalid characters');
     expect(mockExecuteCommand).not.toHaveBeenCalled();
     expect(mockWriteFile).not.toHaveBeenCalled();
