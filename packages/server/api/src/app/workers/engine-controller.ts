@@ -15,7 +15,6 @@ import {
   assertNotNullOrUndefined,
   EngineHttpResponse,
   EnginePrincipal,
-  EnvironmentType,
   ErrorCode,
   ExecutionState,
   FlowRunId,
@@ -83,8 +82,10 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       },
     },
     async (request) => {
-      const environment = system.getOrThrow(SharedSystemProp.ENVIRONMENT);
-      if (environment === EnvironmentType.TESTING) {
+      const queueUpdatesEnabled =
+        system.getBoolean(SharedSystemProp.ENGINE_QUEUE_UPDATES_ENABLED) ??
+        true;
+      if (!queueUpdatesEnabled) {
         return {};
       }
       const enginePrincipal = request.principal as unknown as EnginePrincipal;

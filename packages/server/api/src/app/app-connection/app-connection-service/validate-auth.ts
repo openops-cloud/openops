@@ -3,7 +3,6 @@ import {
   AppConnectionValue,
   ApplicationError,
   EngineResponseStatus,
-  EnvironmentType,
   ErrorCode,
   ProjectId,
 } from '@openops/shared';
@@ -14,8 +13,9 @@ import { findBlockByAuthProviderKey } from '../connection-providers-resolver';
 export const engineValidateAuth = async (
   params: EngineValidateAuthParams,
 ): Promise<void> => {
-  const environment = system.getOrThrow(SharedSystemProp.ENVIRONMENT);
-  if (environment === EnvironmentType.TESTING) {
+  const shouldValidateAuth =
+    system.getBoolean(SharedSystemProp.REQUIRE_ENGINE_VALIDATE_AUTH) ?? true;
+  if (!shouldValidateAuth) {
     return;
   }
   const { authProviderKey, auth, projectId } = params;

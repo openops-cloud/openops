@@ -4,6 +4,8 @@ import { logger, sendLogs } from './logger/index';
 import { SharedSystemProp, system } from './system';
 
 let shuttingDown = false;
+const fastShutdownEnabled =
+  system.getBoolean(SharedSystemProp.FAST_SHUTDOWN_ENABLED) ?? false;
 const stop = async (
   app: FastifyInstance,
   cleanup?: () => Promise<void>,
@@ -11,8 +13,8 @@ const stop = async (
   if (shuttingDown) return;
   shuttingDown = true;
 
-  if (system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev') {
-    console.log('Dev mode, forcing shutdown after 500 ms');
+  if (fastShutdownEnabled) {
+    console.log('Fast shutdown enabled, forcing shutdown after 500 ms');
     await new Promise((resolve) => setTimeout(resolve, 500));
     process.exit(0);
   }

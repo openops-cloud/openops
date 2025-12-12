@@ -1,9 +1,5 @@
-import {
-  AppSystemProp,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
-import { EnvironmentType, isNil } from '@openops/shared';
+import { AppSystemProp, system } from '@openops/server-shared';
+import { isNil } from '@openops/shared';
 import { TlsOptions } from 'node:tls';
 import { DataSource, MigrationInterface } from 'typeorm';
 import { commonProperties } from './database-connection';
@@ -90,9 +86,10 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
 };
 
 const getMigrationConfig = (): MigrationConfig => {
-  const env = system.getOrThrow<EnvironmentType>(SharedSystemProp.ENVIRONMENT);
+  const runDbMigrations =
+    system.getBoolean(AppSystemProp.RUN_DB_MIGRATIONS) ?? true;
 
-  if (env === EnvironmentType.TESTING) {
+  if (!runDbMigrations) {
     return {};
   }
 

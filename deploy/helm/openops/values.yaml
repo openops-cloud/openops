@@ -8,7 +8,6 @@ image:
 openopsEnv:
   OPS_PUBLIC_URL: "http://openops.example.com"
   OPS_FRONTEND_URL: "{{ .Values.openopsEnv.OPS_PUBLIC_URL }}"
-  OPS_ENVIRONMENT: "prod"
   OPS_ENVIRONMENT_NAME: "helm"
   OPS_TRIGGER_DEFAULT_POLL_INTERVAL: "1"
   OPS_WEBHOOK_TIMEOUT_SECONDS: "30"

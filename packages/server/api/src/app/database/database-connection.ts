@@ -1,10 +1,5 @@
-import {
-  AppSystemProp,
-  DatabaseType,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
-import { EnvironmentType, isNil } from '@openops/shared';
+import { AppSystemProp, DatabaseType, system } from '@openops/server-shared';
+import { isNil } from '@openops/shared';
 import {
   ArrayContains,
   DataSource,
@@ -67,13 +62,7 @@ function getEntities(): EntitySchema<unknown>[] {
 }
 
 const getSynchronize = (): boolean => {
-  const env = system.getOrThrow<EnvironmentType>(SharedSystemProp.ENVIRONMENT);
-
-  const value: Partial<Record<EnvironmentType, boolean>> = {
-    [EnvironmentType.TESTING]: true,
-  };
-
-  return value[env] ?? false;
+  return system.getBoolean(AppSystemProp.DB_SYNCHRONIZE_SCHEMA) ?? false;
 };
 
 export const commonProperties = {

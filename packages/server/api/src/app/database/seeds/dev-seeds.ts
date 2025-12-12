@@ -1,14 +1,13 @@
-import { logger, SharedSystemProp, system } from '@openops/server-shared';
-import { EnvironmentType, Provider } from '@openops/shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { Provider } from '@openops/shared';
 import { getAuthenticationService } from '../../authentication/authentication-service-factory';
 import { FlagEntity } from '../../flags/flag.entity';
 import { databaseConnection } from '../database-connection';
 
 const DEV_DATA_SEEDED_FLAG = 'DEV_DATA_SEEDED';
 
-const currentEnvIsNotDev = (): boolean => {
-  const env = system.get(SharedSystemProp.ENVIRONMENT);
-  return env !== EnvironmentType.DEVELOPMENT;
+const devSeedingEnabled = (): boolean => {
+  return system.getBoolean(AppSystemProp.SEED_DEV_DATA) ?? false;
 };
 
 const devDataAlreadySeeded = async (): Promise<boolean> => {
@@ -49,11 +48,8 @@ const seedDevUser = async (): Promise<void> => {
 };
 
 export const seedDevData = async (): Promise<void> => {
-  if (currentEnvIsNotDev()) {
-    logger.info(
-      { name: 'seedDevData' },
-      'skip: not in development environment',
-    );
+  if (!devSeedingEnabled()) {
+    logger.info({ name: 'seedDevData' }, 'skip: dev data seeding disabled');
     return;
   }
 

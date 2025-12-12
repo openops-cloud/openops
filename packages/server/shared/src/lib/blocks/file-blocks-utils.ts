@@ -11,7 +11,8 @@ import { memoryLock } from '../memory-lock';
 import { system } from '../system/system';
 import { SharedSystemProp } from '../system/system-prop';
 
-const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
+const blocksHotReloadEnabled =
+  system.getBoolean(SharedSystemProp.BLOCKS_HOT_RELOAD_ENABLED) ?? false;
 
 async function findAllBlocksFolder(folderPath: string): Promise<string[]> {
   const paths = [];
@@ -94,7 +95,7 @@ async function loadBlocksFromFolder(
   folderPath: string,
 ): Promise<BlockMetadata[]> {
   try {
-    if (isDevEnv) {
+    if (blocksHotReloadEnabled) {
       await eval(
         'Object.keys(require.cache).forEach(x => delete require.cache[x])',
       );
@@ -139,7 +140,9 @@ export async function loadBlockMetadataFromFolder(
 
     // A combination of a random suffix and clearing the "require" cache is
     // needed for reloading blocks in dev mode
-    const suffix = isDevEnv ? '?version=' + new Date().getTime() : '';
+    const suffix = blocksHotReloadEnabled
+      ? '?version=' + new Date().getTime()
+      : '';
     const indexPath = join(folderPath, 'src', 'index.js') + suffix;
     const stats = await fs.stat(packageJsonPath); // Get file stats
 
