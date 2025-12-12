@@ -92,7 +92,10 @@ export async function updateResourceProperties(
   template: string,
   resourceType: string,
   resourceName: string,
-  modifications: { propertyName: string; propertyValue: string }[],
+  modifications: {
+    propertyName: string;
+    propertyValue: string | number | boolean;
+  }[],
 ): Promise<string> {
   validateIdentifier(resourceType, 'Resource type');
   validateIdentifier(resourceName, 'Resource name');
@@ -110,7 +113,9 @@ export async function updateResourceProperties(
     const updates = [];
     for (const modification of modifications) {
       const propertyName = modification.propertyName;
-      const propertyValue = sanitizePropertyValue(modification.propertyValue);
+      const propertyValue = escapeAttributeValue(
+        modification.propertyValue,
+      ).replace(/"/g, '\\"');
 
       const attributeCommand = await getAttributeCommand(
         filePath,
@@ -246,21 +251,4 @@ async function executeHclEditCommand(
   parameters: string,
 ): Promise<CommandResult> {
   return await executeCommand('/bin/bash', ['-c', `hcledit ${parameters}`]);
-}
-
-function sanitizePropertyValue(propertyValue: string): string {
-  // In the future we may need to check the type.
-  // We currently only support number boolean and string
-
-  propertyValue = propertyValue.trim();
-
-  if (
-    Number.isInteger(Number(propertyValue)) ||
-    propertyValue === 'false' ||
-    propertyValue === 'true'
-  ) {
-    return propertyValue;
-  }
-
-  return `\\"${propertyValue}\\"`;
 }

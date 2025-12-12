@@ -214,6 +214,35 @@ describe('Update Resource Properties', () => {
     );
   });
 
+  test('should preserve numeric and boolean property values', async () => {
+    const modifications = [
+      { propertyName: 'enable_feature', propertyValue: true },
+      { propertyName: 'max_count', propertyValue: 3 },
+    ];
+
+    mockExecuteCommand
+      .mockResolvedValueOnce({ exitCode: 1, stdOut: '', stdError: 'missing' })
+      .mockResolvedValueOnce({ exitCode: 0, stdOut: 'current', stdError: '' })
+      .mockResolvedValueOnce({ exitCode: 0, stdOut: 'result', stdError: '' });
+
+    const result = await updateResourceProperties(
+      testTemplate,
+      'aws_instance',
+      'example',
+      modifications,
+    );
+
+    expect(result).toContain('result');
+    expect(mockExecuteCommand).toHaveBeenCalledTimes(3);
+    const executedCommand = mockExecuteCommand.mock.calls[2][1][1];
+    expect(executedCommand).toContain(
+      `attribute append resource.aws_instance.example.enable_feature 'true'`,
+    );
+    expect(executedCommand).toContain(
+      `attribute set resource.aws_instance.example.max_count '3'`,
+    );
+  });
+
   test.each<{
     description: string;
     resourceType: string;
