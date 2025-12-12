@@ -246,7 +246,7 @@ describe('Update Resource Properties', () => {
   });
 
   test('should escape temporary file paths before running hcledit', async () => {
-    const maliciousPath = "/tmp/abc'; rm -rf / #";
+    const maliciousPath = "/tmp/abc'; touch /tmp/pwned #";
     const modifications = [{ propertyName: 'prop', propertyValue: 'value' }];
     const originalUseTempFile = commonMock.useTempFile;
 
