@@ -8,9 +8,11 @@ const fsMock = {
   writeFile: mockWriteFile,
 };
 
+const actualCommon = jest.requireActual('@openops/common');
 const commonMock = {
-  ...jest.requireActual('@openops/common'),
+  ...actualCommon,
   executeCommand: mockExecuteCommand,
+  useTempFile: actualCommon.useTempFile,
 };
 
 jest.mock('node:fs/promises', () => fsMock);
@@ -241,6 +243,36 @@ describe('Update Resource Properties', () => {
     expect(executedCommand).toContain(
       `attribute set resource.aws_instance.example.max_count '3'`,
     );
+  });
+
+  test('should escape temporary file paths before running hcledit', async () => {
+    const maliciousPath = "/tmp/abc'; rm -rf / #";
+    const modifications = [{ propertyName: 'prop', propertyValue: 'value' }];
+    const originalUseTempFile = commonMock.useTempFile;
+
+    commonMock.useTempFile = jest.fn(async (_template, callback) => {
+      return callback(maliciousPath);
+    });
+
+    mockExecuteCommand
+      .mockResolvedValueOnce({ exitCode: 1, stdOut: '', stdError: 'missing' })
+      .mockResolvedValueOnce({ exitCode: 0, stdOut: 'result', stdError: '' });
+
+    try {
+      const result = await updateResourceProperties(
+        testTemplate,
+        'aws_instance',
+        'example',
+        modifications,
+      );
+
+      expect(result).toContain('result');
+      const executedCommand = mockExecuteCommand.mock.calls[1][1][1];
+      const expectedEscapedPath = `'${maliciousPath.replace(/'/g, "'\\''")}'`;
+      expect(executedCommand).toContain(`-f ${expectedEscapedPath}`);
+    } finally {
+      commonMock.useTempFile = originalUseTempFile;
+    }
   });
 
   test.each<{
