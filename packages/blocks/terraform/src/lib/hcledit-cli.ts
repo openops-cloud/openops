@@ -7,12 +7,38 @@ export interface TerraformResource {
   type: string;
 }
 
+const SAFE_IDENTIFIER_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+function validateIdentifier(value: string, fieldName: string): void {
+  if (!value || !SAFE_IDENTIFIER_PATTERN.test(value)) {
+    throw new Error(
+      `${fieldName} contains invalid characters. Only alphanumeric, underscore, and hyphen are allowed.`,
+    );
+  }
+}
+
+/**
+ * Escapes a string for safe use as a shell argument.
+ *
+ * This function wraps the input value in single quotes and escapes any embedded single quotes
+ * using the POSIX shell pattern: '\''. This is the standard technique for safely passing
+ * arbitrary strings as arguments to POSIX-compliant shells.
+ *
+ * @param value - The string to escape for the shell.
+ * @returns The shell-escaped string.
+ */
+function escapeShellArgument(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
 export async function getResources(
   template: string,
 ): Promise<TerraformResource[]> {
   const commandResult = await useTempFile(template, async (filePath) => {
     return await executeHclEditCommand(
-      `-f ${filePath} block get resource | hcledit block list`,
+      `-f ${escapeShellArgument(
+        filePath,
+      )} block get resource | hcledit block list`,
     );
   });
 
@@ -35,15 +61,29 @@ export async function getResources(
     return [];
   }
 
-  const resources = commandResult.stdOut.split('\n').map((line) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, type, name] = line.split('.').map((value) => value.trim());
+  const resources = commandResult.stdOut
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const [blockType, type, name] = line
+        .split('.')
+        .map((value) => value.trim());
 
-    return {
-      name: name,
-      type: type,
-    };
-  });
+      if (blockType !== 'resource' || !type || !name) {
+        throw new Error(
+          `Unexpected resource format received from hcledit. Line: ${line}`,
+        );
+      }
+
+      validateIdentifier(type, 'Resource type');
+      validateIdentifier(name, 'Resource name');
+
+      return {
+        name,
+        type,
+      };
+    });
 
   return resources;
 }
@@ -52,15 +92,30 @@ export async function updateResourceProperties(
   template: string,
   resourceType: string,
   resourceName: string,
-  modifications: { propertyName: string; propertyValue: string }[],
+  modifications: {
+    propertyName: string;
+    propertyValue: string | number | boolean;
+  }[],
 ): Promise<string> {
+  validateIdentifier(resourceType, 'Resource type');
+  validateIdentifier(resourceName, 'Resource name');
+
+  modifications.forEach((modification, index) => {
+    validateIdentifier(
+      modification.propertyName,
+      `Property name at index ${index}`,
+    );
+  });
+
   const providedTemplate = template.trim() as string;
 
   const result = await useTempFile(providedTemplate, async (filePath) => {
     const updates = [];
     for (const modification of modifications) {
       const propertyName = modification.propertyName;
-      const propertyValue = sanitizePropertyValue(modification.propertyValue);
+      const propertyValue = escapeAttributeValue(
+        modification.propertyValue,
+      ).replace(/"/g, '\\"');
 
       const attributeCommand = await getAttributeCommand(
         filePath,
@@ -88,6 +143,13 @@ export async function updateVariablesFile(
 ): Promise<string> {
   const providedTemplate = template.trim();
 
+  modifications.forEach((modification, index) => {
+    validateIdentifier(
+      modification.variableName,
+      `Variable name at index ${index}`,
+    );
+  });
+
   return await useTempFile(providedTemplate, async (filePath) => {
     const updates = [];
 
@@ -107,9 +169,14 @@ export async function deleteResource(
   resourceType: string,
   resourceName: string,
 ): Promise<string> {
+  validateIdentifier(resourceType, 'Resource type');
+  validateIdentifier(resourceName, 'Resource name');
+
   const commandResult = await useTempFile(template, async (filePath) => {
     return await executeHclEditCommand(
-      `-f ${filePath} block rm resource.${resourceType}.${resourceName}`,
+      `-f ${escapeShellArgument(
+        filePath,
+      )} block rm resource.${resourceType}.${resourceName}`,
     );
   });
 
@@ -118,7 +185,7 @@ export async function deleteResource(
     commandResult.exitCode !== 0 ||
     commandResult.stdError
   ) {
-    logger.warn('Failed to modify the template.', { commandResult });
+    logger.warn('Failed to delete resource from template', { commandResult });
     throw new Error(
       `Failed to modify the template. ${JSON.stringify(commandResult)}`,
     );
@@ -131,7 +198,9 @@ export async function listBlocksCommand(
   template: string,
 ): Promise<CommandResult> {
   return await useTempFile(template, async (filePath) => {
-    return await executeHclEditCommand(`-f ${filePath} block list`);
+    return await executeHclEditCommand(
+      `-f ${escapeShellArgument(filePath)} block list`,
+    );
   });
 }
 
@@ -141,7 +210,9 @@ async function getAttributeCommand(
   resourceName: string,
   propertyName: string,
 ): Promise<string> {
-  const command = `-f ${filePath} attribute get resource.${resourceType}.${resourceName}.${propertyName}`;
+  const command = `-f ${escapeShellArgument(
+    filePath,
+  )} attribute get resource.${resourceType}.${resourceName}.${propertyName}`;
 
   const commandResult = await executeHclEditCommand(command);
 
@@ -160,7 +231,9 @@ async function updateTemplateCommand(
   filePath: string,
   modifications: string[],
 ): Promise<string> {
-  const command = `-f ${filePath} ${modifications.join(' | hcledit ')}`;
+  const command = `-f ${escapeShellArgument(filePath)} ${modifications.join(
+    ' | hcledit ',
+  )}`;
 
   const commandResult = await executeHclEditCommand(command);
 
@@ -178,21 +251,4 @@ async function executeHclEditCommand(
   parameters: string,
 ): Promise<CommandResult> {
   return await executeCommand('/bin/bash', ['-c', `hcledit ${parameters}`]);
-}
-
-function sanitizePropertyValue(propertyValue: string): string {
-  // In the future we may need to check the type.
-  // We currently only support number boolean and string
-
-  propertyValue = propertyValue.trim();
-
-  if (
-    Number.isInteger(Number(propertyValue)) ||
-    propertyValue === 'false' ||
-    propertyValue === 'true'
-  ) {
-    return propertyValue;
-  }
-
-  return `\\"${propertyValue}\\"`;
 }
