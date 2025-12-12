@@ -111,7 +111,6 @@ export async function updateResourceProperties(
     for (const modification of modifications) {
       const propertyName = modification.propertyName;
       const propertyValue = sanitizePropertyValue(modification.propertyValue);
-      const safePropertyValue = escapeShellArgument(propertyValue);
 
       const attributeCommand = await getAttributeCommand(
         filePath,
@@ -121,7 +120,7 @@ export async function updateResourceProperties(
       );
 
       updates.push(
-        `attribute ${attributeCommand} resource.${resourceType}.${resourceName}.${propertyName} ${safePropertyValue}`,
+        `attribute ${attributeCommand} resource.${resourceType}.${resourceName}.${propertyName} ${propertyValue}`,
       );
     }
 
@@ -181,7 +180,7 @@ export async function deleteResource(
     commandResult.exitCode !== 0 ||
     commandResult.stdError
   ) {
-    logger.warn('Failed to modify the template.', { commandResult });
+    logger.warn('Failed to delete resource from template', { commandResult });
     throw new Error(
       `Failed to modify the template. ${JSON.stringify(commandResult)}`,
     );
