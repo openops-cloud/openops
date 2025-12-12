@@ -214,7 +214,13 @@ describe('Update Resource Properties', () => {
     );
   });
 
-  test.each([
+  test.each<{
+    description: string;
+    resourceType: string;
+    resourceName: string;
+    propertyName: string;
+    expectedMessage: string;
+  }>([
     {
       description: 'resource type contains invalid characters',
       resourceType: 'aws_instance; rm -rf /',
@@ -237,14 +243,8 @@ describe('Update Resource Properties', () => {
       expectedMessage: 'Property name at index 0 contains invalid characters',
     },
   ])(
-    ({ description }) => `should throw when ${description}`,
-    async ({
-      description,
-      resourceType,
-      resourceName,
-      propertyName,
-      expectedMessage,
-    }) => {
+    'should throw when $description',
+    async ({ resourceType, resourceName, propertyName, expectedMessage }) => {
       await expect(
         updateResourceProperties(testTemplate, resourceType, resourceName, [
           { propertyName, propertyValue: 'value' },
