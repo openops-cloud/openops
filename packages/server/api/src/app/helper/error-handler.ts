@@ -35,6 +35,11 @@ export const errorHandler = async (
         validation: error.validation,
         request: requestSummary,
       });
+    } else if (isFastifyError(error)) {
+      logger.warn('Error handler caught an exception.', {
+        message: error.message,
+        request: requestSummary,
+      });
     } else {
       logger.error('Error handler caught an exception.', {
         message: error.message,
@@ -71,6 +76,15 @@ const isValidationError = (error: unknown): error is FastifyValidationError => {
     error !== null &&
     'validation' in error &&
     Array.isArray((error as FastifyValidationError).validation)
+  );
+};
+
+const isFastifyError = (error: unknown): boolean => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as FastifyError).name === 'FastifyError'
   );
 };
 
