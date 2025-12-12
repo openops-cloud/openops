@@ -12,7 +12,7 @@ const SAFE_IDENTIFIER_PATTERN = /^[a-zA-Z0-9_-]+$/;
 function validateIdentifier(value: string, fieldName: string): void {
   if (!value || !SAFE_IDENTIFIER_PATTERN.test(value)) {
     throw new Error(
-      `${fieldName} contains invalid characters. Only alphanumeric, underscore, and hyphen are allowed. Received: ${value}`,
+      `${fieldName} contains invalid characters. Only alphanumeric, underscore, and hyphen are allowed.`,
     );
   }
 }
