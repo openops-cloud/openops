@@ -17,9 +17,9 @@ export async function assignDefaultOrganization(
 ): Promise<UserWithOrganization> {
   let organization = await organizationService.getOldestOrganization();
 
-  const adminUser = await userService.getUserByEmailOrFail({
-    email: system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL),
-  });
+  const adminUser = await userService.getUserByEmailOrThrow(
+    system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL),
+  );
 
   organization = !isNil(adminUser.organizationId)
     ? await organizationService.getOne(adminUser.organizationId)
