@@ -41,6 +41,7 @@ export const appEventRoutingController: FastifyPluginAsyncTypebox = async (
       config: {
         rawBody: true,
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
+        skipAuth: true,
       },
     },
     async (

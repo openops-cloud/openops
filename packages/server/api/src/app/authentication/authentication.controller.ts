@@ -150,6 +150,7 @@ const SignUpRequestOptions = {
 const SignInRequestOptions = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
     rateLimit: rateLimitOptions,
   },
   schema: {

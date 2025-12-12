@@ -177,6 +177,7 @@ const GetRequest = {
 const ResumeFlowRunRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     description:
