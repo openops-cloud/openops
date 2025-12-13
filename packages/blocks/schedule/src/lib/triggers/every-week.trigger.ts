@@ -39,12 +39,12 @@ function getEveryWeekData(
 export const everyWeekTrigger = createTrigger({
   name: 'every_week',
   displayName: 'Every Week',
-  description: 'Triggers the current flow every week',
+  description: 'Trigger the current flow every week',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     day_of_the_week: Property.StaticDropdown({
-      displayName: 'Day of the week',
+      displayName: 'Day of the Week',
       options: {
         options: WEEK_DAYS.map((d, idx) => {
           return {
@@ -56,7 +56,7 @@ export const everyWeekTrigger = createTrigger({
       required: true,
     }),
     hour_of_the_day: Property.StaticDropdown({
-      displayName: 'Hour of the day',
+      displayName: 'Hour of the Day',
       options: {
         options: DAY_HOURS.map((h, idx) => {
           return {

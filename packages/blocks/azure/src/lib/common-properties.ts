@@ -116,9 +116,8 @@ export function createSubscriptionDynamicProperty(
         if (useHost) {
           dropdown = await getSubscriptionsDropdown(auth, config);
         } else {
-          const staticDropdown = await getAzureSubscriptionsStaticDropdown(
-            auth,
-          );
+          const staticDropdown =
+            await getAzureSubscriptionsStaticDropdown(auth);
           dropdown = createSubscriptionDropdown(config, staticDropdown.options);
         }
 

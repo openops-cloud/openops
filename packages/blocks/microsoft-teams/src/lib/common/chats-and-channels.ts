@@ -7,7 +7,7 @@ import { microsoftTeamsAuth } from './microsoft-teams-auth';
 
 export const chatsAndChannels = Property.Dropdown({
   displayName: 'Channel or Chat',
-  description: 'Channel or Chat to send message to.',
+  description: 'Channel or Chat to send message to',
   refreshers: ['auth'],
   required: true,
   options: async ({ auth }) => {

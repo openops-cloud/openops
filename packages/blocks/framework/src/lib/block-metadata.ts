@@ -70,7 +70,7 @@ export const ActionBase = Type.Object({
   }),
   description: Type.String({
     description:
-      'A concise explanation of the block’s purpose, capabilities, and core functionality.',
+      'A concise explanation of the block’s purpose, capabilities, and core functionality',
   }),
   riskLevel: Type.Optional(Type.Enum(RiskLevel)),
   props: BlockPropertyMap,

@@ -18,7 +18,7 @@ export function getExportTypeProp() {
 
 export function getAccountProp() {
   return Property.ShortText({
-    displayName: 'Account name',
+    displayName: 'Account Name',
     required: false,
   });
 }
@@ -40,7 +40,7 @@ export function getShowCostProp() {
 
 export function getIncludeDependenciesProp() {
   return Property.Checkbox({
-    displayName: 'Include dependencies',
+    displayName: 'Include Dependencies',
     required: true,
     defaultValue: true,
   });

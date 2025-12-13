@@ -22,12 +22,12 @@ function getEveryHourData(runOnWeekends: boolean) {
 export const everyHourTrigger = createTrigger({
   name: 'every_hour',
   displayName: 'Every Hour',
-  description: 'Triggers the current flow every hour',
+  description: 'Trigger the current flow every hour',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     run_on_weekends: Property.Checkbox({
-      displayName: 'Run on weekends (Sat,Sun)',
+      displayName: 'Run on Weekends (Sat, Sun)',
       required: true,
       defaultValue: false,
     }),

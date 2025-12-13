@@ -7,13 +7,13 @@ import { safeFetch } from '../common/safe-fetch';
 export const tagAssetAction = createAction({
   name: 'cloudhealth_tag_asset',
   displayName: 'Add or Update Asset Tags',
-  description: 'Add or Update Asset Tags',
+  description: 'Add or modify tags on CloudHealth assets',
   auth: cloudhealthAuth,
   isWriteAction: true,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',
-      description: 'The type of asset to tag.',
+      description: 'The type of asset to tag',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
@@ -43,7 +43,7 @@ export const tagAssetAction = createAction({
     }),
     assetId: Property.Number({
       displayName: 'Asset ID',
-      description: 'The ID of the asset to tag.',
+      description: 'The ID of the asset to tag',
       required: true,
     }),
     tags: Property.Object({

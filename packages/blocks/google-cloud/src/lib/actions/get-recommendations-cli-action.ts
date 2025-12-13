@@ -19,9 +19,9 @@ export const getRecommendationsAction = createAction({
       'gcloud auth login',
     ),
     filterBySelection: Property.StaticDropdown({
-      displayName: 'Choose filter',
+      displayName: 'Choose Filter',
       description:
-        'Select whether to filter by billing account, folder ID, organization ID, or project ID.',
+        'Select whether to filter by billing account, folder ID, organization ID, or project ID',
       required: true,
       options: {
         options: [
@@ -89,7 +89,7 @@ export const getRecommendationsAction = createAction({
     recommenders: getRecommendersDropdown(),
     location: Property.ShortText({
       displayName: 'Location',
-      description: 'Location to list recommendations for.',
+      description: 'Location to list recommendations for',
       required: true,
     }),
   },
@@ -151,7 +151,7 @@ async function getScopeOptionProperty(
       folder: Property.ShortText({
         displayName: 'Folder ID',
         description:
-          'The Google Cloud Platform folder ID to use for this invocation.',
+          'The Google Cloud Platform folder ID to use for this invocation',
         required: true,
       }),
     };
@@ -166,7 +166,7 @@ async function getScopeOptionProperty(
       }),
       displayName: 'Billing Account',
       description:
-        'The Google Cloud Platform billing account ID to use for this invocation.',
+        'The Google Cloud Platform billing account ID to use for this invocation',
     },
     organization: {
       command: 'gcloud organizations list',
@@ -176,7 +176,7 @@ async function getScopeOptionProperty(
       }),
       displayName: 'Organization ID',
       description:
-        'The Google Cloud Platform organization ID to use for this invocation.',
+        'The Google Cloud Platform organization ID to use for this invocation',
     },
     project: {
       command: 'gcloud projects list',
@@ -185,7 +185,7 @@ async function getScopeOptionProperty(
         value: item.projectId,
       }),
       displayName: 'Project ID',
-      description: 'The Google Cloud Platform project ID.',
+      description: 'The Google Cloud Platform project ID',
     },
   };
 
@@ -241,7 +241,7 @@ function getRecommendersDropdown() {
   return Property.MultiSelectDropdown({
     displayName: 'Recommender',
     description:
-      'The Google Cloud Platform recommenders to use for this invocation.',
+      'The Google Cloud Platform recommenders to use for this invocation',
     required: true,
     refreshers: [
       'auth',

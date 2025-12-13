@@ -10,7 +10,7 @@ const ValidResourceTypes = [
 export function getLogicalIdDropdown() {
   return Property.Dropdown({
     displayName: 'Logical Id',
-    description: 'Logical Id of the resource to be deleted.',
+    description: 'Logical Id of the resource to be deleted',
     refreshers: ['template'],
     required: true,
     options: async ({ template }) => {

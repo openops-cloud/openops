@@ -10,7 +10,7 @@ import { slackAuth } from '../common/authentication';
 export const uploadFile = createAction({
   auth: slackAuth,
   name: 'uploadFile',
-  displayName: 'Upload file',
+  displayName: 'Upload File',
   description: 'Upload file without sharing it to a channel or user',
   isWriteAction: true,
   props: {

@@ -23,13 +23,13 @@ function getEveryXMinutesData(minutes: number) {
 export const everyXMinutesTrigger = createTrigger({
   name: 'every_x_minutes',
   displayName: 'Every X Minutes',
-  description: 'Triggers the current flow every X minutes',
+  description: 'Trigger the current flow every X minutes',
   type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     minutes: Property.StaticDropdown({
       displayName: 'Minutes',
-      description: 'Valid value between 1 to 59.',
+      description: 'Valid value between 1 to 59',
       required: true,
       defaultValue: 1,
       options: {

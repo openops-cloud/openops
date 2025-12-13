@@ -5,13 +5,13 @@ import { flexeraSpotAuth } from '../../auth';
 export const getClustersAction = createAction({
   auth: flexeraSpotAuth,
   name: 'flexera_get_clusters',
-  description: 'Get Clusters',
+  description: 'Get clusters from Flexera Spot',
   displayName: 'Get Clusters',
   isWriteAction: false,
   props: {
     accountId: Property.Dropdown({
       displayName: 'Account',
-      description: 'The account to get clusters from.',
+      description: 'The account to get clusters from',
       required: true,
       refreshers: ['auth'],
       options: async ({ auth }: any) => {
