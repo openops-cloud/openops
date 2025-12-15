@@ -10,7 +10,7 @@ This page lists user-facing changes for each OpenOps release.
 
 ## 🚀
 
-- Released version 0.6.11 with security‑hardened IaC parsing, more reliable file uploads, and clearer error handling for email‑based user lookups.
+- Released version 0.6.11 with security‑hardened IaC parsing.
 
 ## 🐛
 
