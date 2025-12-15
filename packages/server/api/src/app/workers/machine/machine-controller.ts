@@ -55,8 +55,7 @@ export const workerMachineController: FastifyPluginAsyncTypebox = async (
 
 const GenerateWorkerTokenParams = {
   config: {
-    // TODO this should be replaced with the user
-    allowedPrincipals: [PrincipalType.SUPER_USER],
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     description:

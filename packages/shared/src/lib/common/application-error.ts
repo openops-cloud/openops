@@ -33,7 +33,6 @@ export type ApplicationErrorParams =
   | InvalidUserEmailErrorParams
   | InvalidUserPasswordErrorParams
   | InvalidNameForUserErrorParams
-  | InvalidApiKeyParams
   | InvalidAppConnectionParams
   | InvalidBearerTokenParams
   | InvalidClaimParams
@@ -352,11 +351,6 @@ export type PauseMetadataMissingErrorParams = BaseErrorParams<
   Record<string, never>
 >;
 
-export type InvalidApiKeyParams = BaseErrorParams<
-  ErrorCode.INVALID_API_KEY,
-  Record<string, never>
->;
-
 export type EngineOperationFailureParams = BaseErrorParams<
   ErrorCode.ENGINE_OPERATION_FAILURE,
   {
@@ -469,7 +463,6 @@ export enum ErrorCode {
   FLOW_INTERNAL_FORBIDDEN = 'FLOW_INTERNAL_FORBIDDEN',
   FLOW_RUN_NOT_FOUND = 'FLOW_RUN_NOT_FOUND',
   FLOW_RUN_ENDED = 'FLOW_RUN_ENDED',
-  INVALID_API_KEY = 'INVALID_API_KEY',
   INVALID_USER_EMAIL = 'INVALID_USER_EMAIL',
   INVALID_USER_PASSWORD = 'INVALID_USER_PASSWORD',
   INVALID_NAME_FOR_USER = 'INVALID_NAME_FOR_USER',
