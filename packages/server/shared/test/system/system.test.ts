@@ -18,9 +18,11 @@ describe('system configuration helpers', () => {
   });
 
   it('returns environment values through getOrThrow', () => {
-    process.env['OPS_API_KEY'] = 'super-secret';
+    process.env['OPS_OPENOPS_ADMIN_EMAIL'] = 'admin@example.com';
 
-    expect(system.getOrThrow(AppSystemProp.API_KEY)).toBe('super-secret');
+    expect(system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL)).toBe(
+      'admin@example.com',
+    );
   });
 
   it('falls back to default values when env is missing', () => {
@@ -28,7 +30,7 @@ describe('system configuration helpers', () => {
   });
 
   it('throws an ApplicationError when a required value is missing', () => {
-    expect(() => system.getOrThrow(AppSystemProp.API_KEY)).toThrow(
+    expect(() => system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL)).toThrow(
       ApplicationError,
     );
   });
