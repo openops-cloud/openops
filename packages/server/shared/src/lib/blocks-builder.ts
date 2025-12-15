@@ -21,8 +21,8 @@ import { SharedSystemProp, system } from './system';
 
 const isFileBlocks =
   system.getOrThrow(SharedSystemProp.BLOCKS_SOURCE) === 'FILE';
-const blocksBuilderEnabled =
-  system.getBoolean(SharedSystemProp.BLOCKS_BUILDER_ENABLED) ?? false;
+const blocksDevModeEnabled =
+  system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false;
 
 const depBuildCache = loadBuildCache();
 
@@ -107,11 +107,11 @@ async function analyzeDependencies(): Promise<BuildResult> {
 
 export async function blocksBuilder(): Promise<void> {
   // Only run this script if the blocks source is file and incremental building is enabled
-  if (!isFileBlocks || !blocksBuilderEnabled) {
+  if (!isFileBlocks || !blocksDevModeEnabled) {
     return;
   }
 
-  logger.info('Blocks builder enabled - using smart incremental building');
+  logger.info('Blocks dev mode enabled - using smart incremental building');
 
   let lock: Lock | undefined;
   try {
