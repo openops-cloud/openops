@@ -1,0 +1,29 @@
+title: "Release Notes"
+description: "Versioned release notes for OpenOps with categorized highlights."
+icon: "📝"
+iconType: "emoji"
+slug: "/release-notes"
+tags: ["releases"]
+draft: false
+sidebar_order: 99
+hide_toc: false
+
+Below are the latest release notes for OpenOps.
+
+## 🚀
+
+- Improved reliability of file uploads, reducing failures during large or concurrent uploads.
+- Improved reliability of file uploads, including a fix for an issue in the file uploader component.
+
+## 🐛
+
+- Fixed file upload validation that incorrectly rejected valid MIME types and file properties, improving reliability of file uploads.
+
+## ✨
+
+- Strengthened validation and execution safeguards for Terraform and CloudFormation blocks to prevent unsafe code from running.
+- Addressed a remote code execution vulnerability in the Terraform integration identified by the community, improving overall platform security.
+- Removed support for authenticating via a global API key; all API access now relies on standard authentication flows.
+- Acknowledged community contributions: @rashmi-sy for fixing a file uploader issue, and Skywings for reporting the Terraform block RCE vulnerability.
+
+
