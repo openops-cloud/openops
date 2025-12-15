@@ -1,7 +1,3 @@
-import {
-  authenticateUserInOpenOpsTables,
-  resetUserPassword,
-} from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import {
   Organization,
@@ -95,9 +91,6 @@ async function ensureUserExists(
   );
 
   user = await createAdminUser(email, password);
-  const { token } = await authenticateUserInOpenOpsTables(email, password);
-  await resetUserPassword(email, user.password, token);
-
   return user;
 }
 
@@ -188,13 +181,10 @@ async function upsertAdminPassword(
   const email = user.email;
   logger.info(`Updating password for admin [${email}]`, email);
 
-  const updatedUser = await userService.updatePassword({
+  await userService.updateAdminPassword({
     id: user.id,
     newPassword,
   });
-
-  const { token } = await authenticateUserInOpenOpsTables(email, newPassword);
-  await resetUserPassword(email, updatedUser.password, token);
 }
 
 async function upsertAdminEmail(user: User, email: string): Promise<void> {
@@ -204,7 +194,7 @@ async function upsertAdminEmail(user: User, email: string): Promise<void> {
 }
 
 function createAdminUser(email: string, password: string): Promise<User> {
-  return userService.create({
+  return userService.createAdminUser({
     email,
     password,
     organizationRole: OrganizationRole.ADMIN,

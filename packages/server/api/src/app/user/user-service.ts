@@ -1,4 +1,4 @@
-import { cacheWrapper } from '@openops/server-shared';
+import { AppSystemProp, cacheWrapper, system } from '@openops/server-shared';
 import {
   ApplicationError,
   assertValidEmail,
@@ -17,6 +17,7 @@ import {
   UserStatus,
   UserWithOrganization,
 } from '@openops/shared';
+import bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/basic/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
@@ -29,17 +30,24 @@ export const userService = {
   async create(params: CreateParams): Promise<User> {
     const hashedPassword = await passwordHasher.hash(params.password);
 
-    const user: NewUser = {
+    return saveUser({
       id: openOpsId(),
       ...params,
       organizationRole: params.organizationRole,
       status: UserStatus.ACTIVE,
       password: hashedPassword,
-    };
+    });
+  },
+  async createAdminUser(params: CreateParams): Promise<User> {
+    const hashedPassword = await bcrypt.hash(params.password, getStaticSalt());
 
-    sendUserCreatedEvent(user.id, user.organizationId);
-
-    return userRepo().save(user);
+    return saveUser({
+      id: openOpsId(),
+      ...params,
+      organizationRole: params.organizationRole,
+      status: UserStatus.ACTIVE,
+      password: hashedPassword,
+    });
   },
   async update({
     id,
@@ -209,13 +217,13 @@ export const userService = {
     });
   },
 
-  async updatePassword({
+  async updateAdminPassword({
     id,
     newPassword,
   }: UpdatePasswordParams): Promise<User> {
     assertValidPassword(newPassword);
 
-    const hashedPassword = await passwordHasher.hash(newPassword);
+    const hashedPassword = await bcrypt.hash(newPassword, getStaticSalt());
 
     await userRepo().update(id, {
       updated: dayjs().toISOString(),
@@ -306,6 +314,16 @@ export const userService = {
     });
   },
 };
+
+function saveUser(user: NewUser): Promise<User> {
+  sendUserCreatedEvent(user.id, user.organizationId);
+
+  return userRepo().save(user);
+}
+
+function getStaticSalt(): string {
+  return system.getOrThrow<string>(AppSystemProp.OPENOPS_ADMIN_PASSWORD_SALT);
+}
 
 type DeleteParams = {
   id: UserId;
