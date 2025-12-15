@@ -1,7 +1,6 @@
 export type SystemProp = AppSystemProp | SharedSystemProp | WorkerSystemProps;
 
 export enum AppSystemProp {
-  API_KEY = 'API_KEY',
   API_RATE_LIMIT_AUTHN_ENABLED = 'API_RATE_LIMIT_AUTHN_ENABLED',
   API_RATE_LIMIT_AUTHN_MAX = 'API_RATE_LIMIT_AUTHN_MAX',
   API_RATE_LIMIT_AUTHN_WINDOW = 'API_RATE_LIMIT_AUTHN_WINDOW',

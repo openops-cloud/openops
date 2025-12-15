@@ -18,10 +18,10 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-const getUserByEmailOrFailMock = jest.fn().mockResolvedValue({});
+const getUserByEmailOrThrowMock = jest.fn().mockResolvedValue({});
 jest.mock('../../../src/app/user/user-service', () => ({
   userService: {
-    getUserByEmailOrFail: getUserByEmailOrFailMock,
+    getUserByEmailOrThrow: getUserByEmailOrThrowMock,
   },
 }));
 
@@ -41,7 +41,7 @@ describe('Authenticate admin user in OpenOps Tables', () => {
       password: 'secret',
     };
 
-    getUserByEmailOrFailMock.mockResolvedValue(user);
+    getUserByEmailOrThrowMock.mockResolvedValue(user);
   });
 
   it('returns cached tokens when available', async () => {

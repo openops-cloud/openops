@@ -2,12 +2,10 @@ import { Principal } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { AccessTokenAuthnHandler } from './authn/access-token-authn-handler';
 import { AnonymousAuthnHandler } from './authn/anonymous-authn-handler';
-import { GlobalApiKeyAuthnHandler } from './authn/global-api-key-authn-handler';
 import { PrincipalTypeAuthzHandler } from './authz/principal-type-authz-handler';
 import { ProjectAuthzHandler } from './authz/project-authz-handler';
 
 const AUTHN_HANDLERS = [
-  new GlobalApiKeyAuthnHandler(),
   new AccessTokenAuthnHandler(),
   new AnonymousAuthnHandler(),
 ];
