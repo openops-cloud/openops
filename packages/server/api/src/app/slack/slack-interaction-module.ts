@@ -35,7 +35,7 @@ const slackInteractionController: FastifyPluginCallbackTypebox = (
     '/interactions',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
+        allowedPrincipals: [PrincipalType.UNKNOWN],
         skipAuth: true,
         rawBody: true,
       },
