@@ -90,6 +90,7 @@ beforeAll(async () => {
     organization: {
       id: mockOrganization.id,
     },
+    projectSettings: {},
   });
 });
 
