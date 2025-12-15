@@ -3,6 +3,7 @@ export enum PrincipalType {
   ENGINE = 'ENGINE',
   SERVICE = 'SERVICE',
   WORKER = 'WORKER',
+  UNKNOWN = 'UNKNOWN',
 
   /**
    * @deprecated
@@ -10,7 +11,13 @@ export enum PrincipalType {
   SUPER_USER = 'SUPER_USER',
 }
 
-export const ALL_PRINCIPAL_TYPES = Object.values(PrincipalType);
+export const ALL_PRINCIPAL_TYPES = [
+  PrincipalType.USER,
+  PrincipalType.ENGINE,
+  PrincipalType.SERVICE,
+  PrincipalType.WORKER,
+  PrincipalType.SUPER_USER,
+];
 
 export const SERVICE_KEY_SECURITY_OPENAPI = {
   apiKey: [],
