@@ -235,7 +235,7 @@ const ListCategoriesRequest = {
 
 const OptionsBlockRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     operationId: 'Execute Block Properties',
