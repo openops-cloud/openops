@@ -48,19 +48,10 @@ describe('Block Metadata API', () => {
         .getRepository('block_metadata')
         .save(mockBlockMetadata2);
 
-      const testToken = await generateMockToken({
-        type: PrincipalType.UNKNOWN,
-        id: openOpsId(),
-        projectId: openOpsId(),
-      });
-
-      // act
       const response = await app?.inject({
         method: 'GET',
         url: '/v1/blocks/versions?release=1.1.1&name=@ap/a',
-        headers: {
-          authorization: `Bearer ${testToken}`,
-        },
+        headers: {},
       });
 
       // assert
@@ -119,18 +110,10 @@ describe('Block Metadata API', () => {
         .getRepository('block_metadata')
         .save(mockBlockMetadata);
 
-      const testToken = await generateMockToken({
-        projectId: openOpsId(),
-        type: PrincipalType.UNKNOWN,
-        id: openOpsId(),
-      });
-
       const response = await app?.inject({
         method: 'GET',
         url: '/v1/blocks/@openops/a',
-        headers: {
-          authorization: `Bearer ${testToken}`,
-        },
+        headers: {},
       });
 
       // assert

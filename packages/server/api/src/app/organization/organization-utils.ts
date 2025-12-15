@@ -41,9 +41,9 @@ export const resolveOrganizationIdForRequest = async (
 };
 
 const extractOrganizationIdFromAuthenticatedPrincipal = async (
-  principal: Principal,
+  principal?: Principal,
 ): Promise<string | null> => {
-  if (principal.type === PrincipalType.UNKNOWN) {
+  if (!principal) {
     return null;
   }
   return principal.organization.id ?? getDefaultOrganizationId();

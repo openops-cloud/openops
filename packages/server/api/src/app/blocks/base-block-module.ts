@@ -43,16 +43,10 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     async (req): Promise<ListVersionsResponse> => {
       return blockMetadataService.getVersions({
         name: req.query.name,
-        projectId:
-          req.principal.type === PrincipalType.UNKNOWN
-            ? undefined
-            : req.principal.projectId,
+        projectId: req.principal?.projectId,
         release: req.query.release,
         edition: req.query.edition ?? OpsEdition.COMMUNITY,
-        organizationId:
-          req.principal.type === PrincipalType.UNKNOWN
-            ? undefined
-            : req.principal.organization.id,
+        organizationId: req.principal?.organization.id,
       });
     },
   );
@@ -72,14 +66,8 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       const latestRelease = await flagService.getCurrentRelease();
       const release = req.query.release ?? latestRelease;
       const edition = req.query.edition ?? OpsEdition.COMMUNITY;
-      const organizationId =
-        req.principal.type === PrincipalType.UNKNOWN
-          ? undefined
-          : req.principal.organization.id;
-      const projectId =
-        req.principal.type === PrincipalType.UNKNOWN
-          ? undefined
-          : req.principal.projectId;
+      const organizationId = req.principal?.organization.id;
+      const projectId = req.principal?.projectId;
       const blockMetadataSummary = await blockMetadataService.list({
         release,
         includeHidden: req.query.includeHidden ?? false,
@@ -105,10 +93,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 
       const decodeScope = decodeURIComponent(scope);
       const decodedName = decodeURIComponent(name);
-      const projectId =
-        req.principal.type === PrincipalType.UNKNOWN
-          ? undefined
-          : req.principal.projectId;
+      const projectId = req.principal?.projectId;
       return blockMetadataService.getOrThrow({
         projectId,
         name: `${decodeScope}/${decodedName}`,
@@ -125,10 +110,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       const { version } = req.query;
 
       const decodedName = decodeURIComponent(name);
-      const projectId =
-        req.principal.type === PrincipalType.UNKNOWN
-          ? undefined
-          : req.principal.projectId;
+      const projectId = req.principal?.projectId;
       return blockMetadataService.getOrThrow({
         projectId,
         name: decodedName,
@@ -139,7 +121,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.post('/options', OptionsBlockRequest, async (req) => {
     const request = req.body;
-    const { projectId } = req.principal;
+    const { projectId } = req.principal!;
     const flow = await flowService.getOnePopulatedOrThrow({
       projectId,
       id: request.flowId,
@@ -173,7 +155,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.delete('/:id', DeleteBlockRequest, async (req): Promise<void> => {
     return blockMetadataService.delete({
-      projectId: req.principal.projectId,
+      projectId: req.principal!.projectId,
       id: req.params.id,
     });
   });
