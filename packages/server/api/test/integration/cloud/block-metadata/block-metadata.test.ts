@@ -54,6 +54,7 @@ describe('Block Metadata API', () => {
         projectId: openOpsId(),
       });
 
+      // act
       const response = await app?.inject({
         method: 'GET',
         url: '/v1/blocks/versions?release=1.1.1&name=@ap/a',
