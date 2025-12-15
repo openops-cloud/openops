@@ -18,6 +18,7 @@ export class AnonymousAuthnHandler extends BaseSecurityHandler {
         organization: {
           id: `ANONYMOUS_${openOpsId()}`,
         },
+        projectSettings: {},
       };
     }
 

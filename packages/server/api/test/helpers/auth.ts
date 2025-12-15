@@ -1,10 +1,5 @@
 import { faker } from '@faker-js/faker';
-import {
-  openOpsId,
-  Principal,
-  PrincipalType,
-  ProjectMemberRole,
-} from '@openops/shared';
+import { openOpsId, Principal, PrincipalType } from '@openops/shared';
 import jwt, { Algorithm, JwtPayload, SignOptions } from 'jsonwebtoken';
 
 const generateToken = ({
@@ -34,6 +29,7 @@ export const generateMockToken = async (
     organization: principal?.organization ?? {
       id: openOpsId(),
     },
+    projectSettings: principal?.projectSettings ?? {},
   };
 
   return generateToken({

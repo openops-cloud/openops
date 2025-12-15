@@ -78,6 +78,7 @@ describe('Chat Request Router', () => {
     organization: {
       id: 'test-org-id',
     },
+    projectSettings: {},
   };
 
   const mockNewMessage: CoreMessage = {
