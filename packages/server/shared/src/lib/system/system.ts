@@ -63,7 +63,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LOG_REDACTION]: 'true',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
-  [SharedSystemProp.BLOCK_CACHE_ENABLED]: 'true',
   [SharedSystemProp.BLOCKS_DEV_MODE_ENABLED]: 'false',
   [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
   [SharedSystemProp.FLOW_TIMEOUT_SECONDS]: '600',

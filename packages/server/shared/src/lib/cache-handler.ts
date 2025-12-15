@@ -8,7 +8,7 @@ import { SharedSystemProp, system } from './system';
 
 type CacheMap = Record<string, string>;
 const blockCacheEnabled =
-  system.getBoolean(SharedSystemProp.BLOCK_CACHE_ENABLED) ?? true;
+  !(system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false);
 
 const cachePath = (folderPath: string): string =>
   join(folderPath, 'cache.json');
