@@ -8,9 +8,11 @@ const fsMock = {
   writeFile: mockWriteFile,
 };
 
+const actualCommon = jest.requireActual('@openops/common');
 const commonMock = {
-  ...jest.requireActual('@openops/common'),
+  ...actualCommon,
   executeCommand: mockExecuteCommand,
+  useTempFile: actualCommon.useTempFile,
 };
 
 jest.mock('node:fs/promises', () => fsMock);
@@ -82,6 +84,90 @@ describe('Update Resource Property', () => {
     ).rejects.toThrow(
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"Error"}',
     );
+  });
+
+  test('should reject logical ids containing invalid characters', async () => {
+    const template = `
+    Resources:
+      MyResource:
+        Type:AWS::EC2::Instance
+        Properties:
+          BucketName: OldName
+    `;
+
+    const modifications = [
+      { propertyName: 'BucketName', propertyValue: 'NewName' },
+    ];
+
+    await expect(
+      updateResourceProperties(
+        template,
+        'MyResource; touch /tmp/pwned #',
+        modifications,
+      ),
+    ).rejects.toThrow('Logical ID contains invalid characters');
+  });
+
+  test('should reject property names containing invalid characters', async () => {
+    const template = `
+    Resources:
+      MyResource:
+        Type:AWS::EC2::Instance
+        Properties:
+          BucketName: OldName
+    `;
+
+    const modifications = [
+      {
+        propertyName: 'BucketName; touch /tmp/pwned #',
+        propertyValue: 'NewName',
+      },
+    ];
+
+    await expect(
+      updateResourceProperties(template, 'MyResource', modifications),
+    ).rejects.toThrow('Property name at index 0 contains invalid characters');
+  });
+
+  test('should escape temporary file paths before running yq', async () => {
+    const template = `
+    Resources:
+      MyResource:
+        Type:AWS::EC2::Instance
+        Properties:
+          BucketName: OldName
+    `;
+
+    const maliciousPath = "/tmp/cf'; touch /tmp/pwned #";
+    const modifications = [
+      { propertyName: 'BucketName', propertyValue: 'NewName' },
+    ];
+    const originalUseTempFile = commonMock.useTempFile;
+
+    commonMock.useTempFile = jest.fn(async (_template, callback) => {
+      return callback(maliciousPath);
+    });
+
+    mockExecuteCommand.mockResolvedValue({
+      exitCode: 0,
+      stdOut: 'result',
+      stdError: '',
+    });
+
+    try {
+      const result = await updateResourceProperties(
+        template,
+        'MyResource',
+        modifications,
+      );
+
+      expect(result).toContain('result');
+      const executedCommand = mockExecuteCommand.mock.calls[0][1][1];
+      const expectedEscapedPath = `'${maliciousPath.replace(/'/g, "'\\''")}'`;
+      expect(executedCommand).toContain(expectedEscapedPath);
+    } finally {
+      commonMock.useTempFile = originalUseTempFile;
+    }
   });
 });
 
@@ -204,5 +290,19 @@ describe('Delete Resource', () => {
     await expect(deleteResource(template, 'MyResource')).rejects.toThrow(
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"Error"}',
     );
+  });
+
+  test('should reject logical ids with invalid characters during delete', async () => {
+    const template = `
+    Resources:
+      MyResource:
+        Type:AWS::EC2::Instance
+        Properties:
+          BucketName: OldName
+    `;
+
+    await expect(
+      deleteResource(template, 'MyResource; touch /tmp/pwned #'),
+    ).rejects.toThrow('Logical ID contains invalid characters');
   });
 });
