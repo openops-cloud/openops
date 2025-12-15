@@ -20,7 +20,6 @@ openopsEnv:
   OPS_ANALYTICS_VERSION: "{{ .Values.analytics.tag }}"
 
   # Authentication
-  OPS_API_KEY: "api-key"
   OPS_ENCRYPTION_KEY: abcdef123456789abcdef123456789ab
   OPS_JWT_SECRET: please-change-this-secret
   OPS_OPENOPS_ADMIN_EMAIL: admin@openops.com

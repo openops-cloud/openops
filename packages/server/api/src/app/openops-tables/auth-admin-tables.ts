@@ -23,7 +23,7 @@ export async function authenticateAdminUserInOpenOpsTables(
 
   if (!tokens) {
     const email = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
-    const user = await userService.getUserByEmailOrFail({ email });
+    const user = await userService.getUserByEmailOrThrow(email);
 
     tokens = await authenticateUserInOpenOpsTables(
       email,
