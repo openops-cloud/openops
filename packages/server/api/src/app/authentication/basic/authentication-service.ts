@@ -1,6 +1,7 @@
 import { authenticateUserInOpenOpsTables } from '@openops/common';
 import { AuthenticationResponse } from '@openops/shared';
 import { userService } from '../../user/user-service';
+import { AuthenticationService } from '../authentication-service-factory';
 import { getProjectAndToken } from '../context/create-project-auth-context';
 import { createUser } from '../new-user/create-user';
 import {
@@ -14,18 +15,29 @@ import {
   buildAuthResponse,
 } from '../utils';
 
-export const authenticationService = {
-  async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
+export const authenticationService: AuthenticationService = {
+  async signUp(
+    params: SignUpParams,
+    tokenExpirationInSeconds?: number,
+  ): Promise<AuthenticationResponse> {
     const { user, tablesRefreshToken } = await createUser(params);
 
     const updatedUser = await assignDefaultOrganization(user);
     await addUserToDefaultWorkspace(updatedUser);
 
-    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
+    const projectContext = await getProjectAndToken(
+      user,
+      tablesRefreshToken,
+      tokenExpirationInSeconds,
+    );
+
     return buildAuthResponse(projectContext);
   },
 
-  async signIn(request: SignInParams): Promise<AuthenticationResponse> {
+  async signIn(
+    request: SignInParams,
+    tokenExpirationInSeconds?: number,
+  ): Promise<AuthenticationResponse> {
     const user = await userService.getByOrganizationAndEmail({
       organizationId: request.organizationId,
       email: request.email,
@@ -41,7 +53,12 @@ export const authenticationService = {
     const { refresh_token: tablesRefreshToken } =
       await authenticateUserInOpenOpsTables(request.email, user.password);
 
-    const projectContext = await getProjectAndToken(user, tablesRefreshToken);
+    const projectContext = await getProjectAndToken(
+      user,
+      tablesRefreshToken,
+      tokenExpirationInSeconds,
+    );
+
     return buildAuthResponse(projectContext);
   },
 };
