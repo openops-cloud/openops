@@ -24,10 +24,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-import {
-  createUser,
-  createUserWithRandomPassword,
-} from '../../../../src/app/authentication/new-user/create-user';
+import { createUser } from '../../../../src/app/authentication/new-user/create-user';
 
 describe('create-user', () => {
   const baseParams = {
@@ -125,49 +122,6 @@ describe('create-user', () => {
 
     expect(deleteUserServiceMock).toHaveBeenCalledWith({
       id: 'u2',
-      organizationId: baseParams.organizationId,
-    });
-  });
-
-  it('creates user with random password successfully', async () => {
-    generateRandomPasswordMock.mockResolvedValue('Rand#123');
-
-    const createdUser = {
-      id: 'u3',
-      organizationId: baseParams.organizationId,
-      password: '12345678',
-    };
-    createUserServiceMock.mockResolvedValue(createdUser);
-    createTablesUserMock.mockResolvedValue({ refresh_token: 't2' });
-
-    const res = await createUserWithRandomPassword(baseParams);
-
-    expect(createUserServiceMock).toHaveBeenCalledWith(
-      expect.objectContaining({ password: 'Rand#123' }),
-    );
-
-    expect(createTablesUserMock).toHaveBeenCalledWith(
-      expect.objectContaining({ password: '12345678' }),
-    );
-
-    expect(res).toEqual({ user: createdUser, tablesRefreshToken: 't2' });
-  });
-
-  it('rolls back user when tables creation fails with random password flow', async () => {
-    generateRandomPasswordMock.mockResolvedValue('Rand#XYZ');
-    const createdUser = {
-      id: 'u4',
-      organizationId: baseParams.organizationId,
-    };
-    createUserServiceMock.mockResolvedValue(createdUser);
-    createTablesUserMock.mockRejectedValue(new Error('tables err'));
-
-    await expect(
-      createUserWithRandomPassword(baseParams),
-    ).rejects.toBeInstanceOf(Error);
-
-    expect(deleteUserServiceMock).toHaveBeenCalledWith({
-      id: 'u4',
       organizationId: baseParams.organizationId,
     });
   });
