@@ -10,6 +10,7 @@ export type SignUpParams = {
   verified: boolean;
   organizationId: string | null;
   provider: Provider;
+  externalId?: string;
 };
 
 export type SignInParams = {
