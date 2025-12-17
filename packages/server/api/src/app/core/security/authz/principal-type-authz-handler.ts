@@ -29,12 +29,6 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   }
 
   protected doHandle(request: FastifyRequest): Promise<void> {
-    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
-
-    if (skipAuth) {
-      return Promise.resolve();
-    }
-
     const principalType = request.principal.type;
     const configuredPrincipals =
       request.routeOptions?.config?.allowedPrincipals;
@@ -43,7 +37,8 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
     const allowedPrincipals = configuredPrincipals ?? defaultPrincipals;
     const principalTypeNotAllowed = !allowedPrincipals.includes(principalType);
 
-    if (principalTypeNotAllowed) {
+    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
+    if (principalTypeNotAllowed && !skipAuth) {
       throw new ApplicationError({
         code: ErrorCode.AUTHORIZATION,
         params: {
