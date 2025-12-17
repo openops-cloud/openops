@@ -7,8 +7,9 @@ import { memoryLock } from './memory-lock';
 import { SharedSystemProp, system } from './system';
 
 type CacheMap = Record<string, string>;
-const blockCacheEnabled =
-  !(system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false);
+const blockCacheEnabled = !(
+  system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false
+);
 
 const cachePath = (folderPath: string): string =>
   join(folderPath, 'cache.json');
