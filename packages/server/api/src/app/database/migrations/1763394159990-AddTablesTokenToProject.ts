@@ -1,7 +1,7 @@
-import { authenticateUserInOpenOpsTables } from '@openops/common';
-import { AppSystemProp, encryptUtils, system } from '@openops/server-shared';
+import { encryptUtils } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { openopsTables } from '../../openops-tables';
+import { authAdminUserOnTables } from './common/authenticate-tables-admin';
 
 export class AddTablesDatabaseTokenToProject1763394159990
   implements MigrationInterface
@@ -43,9 +43,7 @@ async function createTokensForExistingProjects(
     return;
   }
 
-  const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
-  const password = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_PASSWORD);
-  const { token } = await authenticateUserInOpenOpsTables(adminEmail, password);
+  const token = await authAdminUserOnTables();
   for (const record of projects) {
     const newToken = await openopsTables.createDatabaseToken(
       record.tablesWorkspaceId,
