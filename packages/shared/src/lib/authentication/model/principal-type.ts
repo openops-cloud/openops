@@ -6,7 +6,9 @@ export enum PrincipalType {
   UNKNOWN = 'UNKNOWN',
 }
 
-export const ALL_PRINCIPAL_TYPES = Object.values(PrincipalType);
+export const ALL_PRINCIPAL_TYPES = Object.values(PrincipalType).filter(
+  (type) => type !== PrincipalType.UNKNOWN,
+);
 
 export const SERVICE_KEY_SECURITY_OPENAPI = {
   apiKey: [],
