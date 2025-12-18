@@ -37,7 +37,8 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
     const allowedPrincipals = configuredPrincipals ?? defaultPrincipals;
     const principalTypeNotAllowed = !allowedPrincipals.includes(principalType);
 
-    if (principalTypeNotAllowed) {
+    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
+    if (principalTypeNotAllowed && !skipAuth) {
       throw new ApplicationError({
         code: ErrorCode.AUTHORIZATION,
         params: {

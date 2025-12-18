@@ -34,7 +34,11 @@ const slackInteractionController: FastifyPluginCallbackTypebox = (
   fastify.post(
     '/interactions',
     {
-      config: { allowedPrincipals: [PrincipalType.UNKNOWN], rawBody: true },
+      config: {
+        allowedPrincipals: [PrincipalType.UNKNOWN],
+        skipAuth: true,
+        rawBody: true,
+      },
       schema: { body: CreateSlackInteractionRequest },
     },
     async (

@@ -182,6 +182,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 const ListBlocksRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     operationId: 'List Blocks',
@@ -194,6 +195,7 @@ const ListBlocksRequest = {
 const GetBlockParamsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     operationId: 'Get Block Details',
@@ -207,6 +209,7 @@ const GetBlockParamsRequest = {
 const GetBlockParamsWithScopeRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     operationId: 'Get Scoped Block',
@@ -220,6 +223,7 @@ const GetBlockParamsWithScopeRequest = {
 const ListCategoriesRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     operationId: 'List Block Categories',
@@ -231,7 +235,7 @@ const ListCategoriesRequest = {
 
 const OptionsBlockRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     operationId: 'Execute Block Properties',
@@ -254,6 +258,7 @@ const DeleteBlockRequest = {
 const ListVersionsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    skipAuth: true,
   },
   schema: {
     description:
