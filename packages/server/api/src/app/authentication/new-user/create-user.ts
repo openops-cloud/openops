@@ -1,4 +1,3 @@
-import { cryptoUtils } from '@openops/server-shared';
 import {
   ApplicationError,
   assertValidEmail,
@@ -117,44 +116,6 @@ export async function createUser(
   });
 
   const user = await createEditorUser(params);
-
-  try {
-    const tablesRefreshToken = await createTablesUser(
-      name,
-      params.email,
-      user.password,
-    );
-
-    return {
-      user,
-      tablesRefreshToken,
-    };
-  } catch (e: unknown) {
-    await userService.delete({
-      id: user.id,
-      organizationId: user.organizationId,
-    });
-
-    throw e;
-  }
-}
-
-export async function createUserWithRandomPassword(
-  params: NewUserParams,
-): Promise<NewUserResponse> {
-  const randomPassword = await cryptoUtils.generateRandomPassword();
-
-  const name = `${params.firstName} ${params.lastName}`.trim();
-  await assertValidSignUpParams({
-    ...params,
-    password: randomPassword,
-    name,
-  });
-
-  const user = await createEditorUser({
-    ...params,
-    password: randomPassword,
-  });
 
   try {
     const tablesRefreshToken = await createTablesUser(
