@@ -1,9 +1,7 @@
-import {
-  authenticateUserInOpenOpsTables,
-  resetUserPassword,
-} from '@openops/common';
+import { resetUserPassword } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
+import { authAdminUserOnTables } from './common/authenticate-tables-admin';
 
 export class MigrateTablesUserPassword1763755045436
   implements MigrationInterface
@@ -20,12 +18,7 @@ export class MigrateTablesUserPassword1763755045436
     }
 
     const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
-    const password = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_PASSWORD);
-    const { token } = await authenticateUserInOpenOpsTables(
-      adminEmail,
-      password,
-    );
-
+    const token = await authAdminUserOnTables();
     for (const record of users) {
       if (record.email === adminEmail) {
         continue;
