@@ -31,8 +31,7 @@ export const GetBlockRequestParams = Type.Object({
 
 const AnalyticsGuestTokenRequestOptions = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     description:
