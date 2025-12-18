@@ -17,8 +17,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
     const hasToken = this.getAccessToken(request) !== undefined;
-    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
-    return Promise.resolve(hasToken && !skipAuth);
+    return Promise.resolve(hasToken);
   }
 
   private getAccessToken(request: FastifyRequest): string | undefined {
@@ -36,6 +35,8 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   protected async doHandle(request: FastifyRequest): Promise<void> {
+    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
+
     try {
       const accessToken = this.extractAccessTokenOrThrow(request);
       const principal = await accessTokenManager.extractPrincipal(accessToken);
@@ -58,7 +59,9 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
         body: request.body,
       });
 
-      throw error;
+      if (!skipAuth) {
+        throw error;
+      }
     }
   }
 
