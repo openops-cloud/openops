@@ -21,7 +21,8 @@ import { SharedSystemProp, system } from './system';
 
 const isFileBlocks =
   system.getOrThrow(SharedSystemProp.BLOCKS_SOURCE) === 'FILE';
-const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
+const blocksDevModeEnabled =
+  system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false;
 
 const depBuildCache = loadBuildCache();
 
@@ -105,14 +106,12 @@ async function analyzeDependencies(): Promise<BuildResult> {
 }
 
 export async function blocksBuilder(): Promise<void> {
-  // Only run this script if the blocks source is file and the environment is dev
-  if (!isFileBlocks || !isDevEnv) {
+  // Only run this script if the blocks source is file and incremental building is enabled
+  if (!isFileBlocks || !blocksDevModeEnabled) {
     return;
   }
 
-  logger.info(
-    'Development environment detected - using smart incremental building',
-  );
+  logger.info('Blocks dev mode enabled - using smart incremental building');
 
   let lock: Lock | undefined;
   try {

@@ -5,12 +5,6 @@ export type Flag = {
   value: unknown;
 } & BaseModel<OpenOpsId>;
 
-export enum EnvironmentType {
-  PRODUCTION = 'prod',
-  DEVELOPMENT = 'dev',
-  TESTING = 'test',
-}
-
 export enum OpsEdition {
   COMMUNITY = 'ce',
   ENTERPRISE = 'ee',

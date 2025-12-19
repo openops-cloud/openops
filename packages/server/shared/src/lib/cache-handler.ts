@@ -1,4 +1,4 @@
-import { EnvironmentType, isNil } from '@openops/shared';
+import { isNil } from '@openops/shared';
 import { readFile } from 'node:fs/promises';
 import { join } from 'path';
 import writeFileAtomic from 'write-file-atomic';
@@ -7,9 +7,9 @@ import { memoryLock } from './memory-lock';
 import { SharedSystemProp, system } from './system';
 
 type CacheMap = Record<string, string>;
-const isDev =
-  system.getOrThrow(SharedSystemProp.ENVIRONMENT) ===
-  EnvironmentType.DEVELOPMENT;
+const blockCacheEnabled = !(
+  system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false
+);
 
 const cachePath = (folderPath: string): string =>
   join(folderPath, 'cache.json');
@@ -31,7 +31,7 @@ const getCache = async (folderPath: string): Promise<CacheMap> => {
 export const cacheHandler = (folderPath: string) => {
   return {
     async cacheCheckState(cacheAlias: string): Promise<string | undefined> {
-      if (isDev) {
+      if (!blockCacheEnabled) {
         return undefined;
       }
       const lock = await memoryLock.acquire('cache_' + cacheAlias);

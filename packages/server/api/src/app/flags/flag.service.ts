@@ -43,7 +43,7 @@ export const flagService = {
     flags.push(
       {
         id: FlagId.ENVIRONMENT,
-        value: system.get(SharedSystemProp.ENVIRONMENT),
+        value: system.get(SharedSystemProp.ENVIRONMENT_NAME),
         created,
         updated,
       },
