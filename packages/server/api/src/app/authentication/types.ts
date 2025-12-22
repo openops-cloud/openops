@@ -1,4 +1,9 @@
-import { Project, ProjectMemberRole, Provider, User } from '@openops/shared';
+import {
+  ProjectMemberRole,
+  ProjectWithoutSensitiveData,
+  Provider,
+  User,
+} from '@openops/shared';
 
 export type SignUpParams = {
   email: string;
@@ -27,8 +32,8 @@ export type AssertPasswordsMatchParams = {
 
 export type ProjectContext = {
   user: User;
-  project: Project;
   token: string;
   tablesRefreshToken: string;
   projectRole: ProjectMemberRole;
+  project: ProjectWithoutSensitiveData;
 };
