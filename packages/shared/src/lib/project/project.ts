@@ -42,6 +42,14 @@ export const Project = Type.Object({
 
 export type Project = Static<typeof Project>;
 
+export const ProjectWithoutSensitiveData = Type.Omit(Project, [
+  'tablesDatabaseToken',
+]);
+
+export type ProjectWithoutSensitiveData = Static<
+  typeof ProjectWithoutSensitiveData
+>;
+
 export const UpdateProjectRequestInCommunity = Type.Object({
   displayName: Type.Optional(Type.String()),
 });
