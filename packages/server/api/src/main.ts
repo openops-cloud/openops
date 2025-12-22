@@ -23,6 +23,8 @@ import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
 import { jwtUtils } from './app/helper/jwt-utils';
+import { systemJobsSchedule } from './app/helper/system-jobs';
+import { registerTemplateTablesCreationJobHandler } from './app/openops-tables/template-tables/template-tables-job';
 import { setupServer } from './app/server';
 import { telemetry } from './app/telemetry/telemetry';
 import { workerPostBoot } from './app/worker';
@@ -83,6 +85,10 @@ const main = async (): Promise<void> => {
   if (system.isApp()) {
     await validateEnvPropsOnStartup();
 
+    initializeLock();
+    await systemJobsSchedule.init();
+    registerTemplateTablesCreationJobHandler();
+
     await databaseConnection().initialize();
     await databaseConnection().runMigrations();
 
@@ -98,8 +104,6 @@ const main = async (): Promise<void> => {
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
     await analytics.seedAnalytics();
-
-    initializeLock();
   }
 
   const environmentId = await seedEnvironmentId();
