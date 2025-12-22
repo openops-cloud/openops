@@ -193,7 +193,6 @@ export const setupApp = async (
   });
 
   app.addHook('preHandler', securityHandlerChain);
-  await systemJobsSchedule.init();
   await app.register(fileModule);
   await app.register(flagModule);
   await app.register(storeEntryModule);
