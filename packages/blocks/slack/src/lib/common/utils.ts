@@ -7,7 +7,7 @@ import {
 } from '@openops/blocks-common';
 import { Property, WorkflowFile } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
-import { isEmpty } from '@openops/shared';
+import { isEmpty, openOpsId } from '@openops/shared';
 import * as emoji from 'node-emoji';
 import { MessageInfo } from './message-result';
 
@@ -295,6 +295,7 @@ interface SlackElement {
   text: SlackText;
   style?: string;
   confirm?: ConfirmationPrompt;
+  action_id?: string;
 }
 
 interface SlackText {
@@ -356,6 +357,7 @@ function createButton(action: {
       type: 'plain_text',
       text: buttonText,
     },
+    action_id: `openops_slack_block_button:${openOpsId()}`,
   };
 
   if (buttonStyle === 'danger' || buttonStyle === 'primary') {

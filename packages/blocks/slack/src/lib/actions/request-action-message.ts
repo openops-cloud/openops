@@ -4,6 +4,7 @@ import {
   assertNotNullOrUndefined,
   ExecutionType,
   isEmpty,
+  openOpsId,
 } from '@openops/shared';
 import { slackAuth } from '../common/authentication';
 import { getSlackIdFromPropertyInput } from '../common/get-slack-users';
@@ -161,6 +162,7 @@ interface SlackElement {
   style?: string;
   confirm?: ConfirmationPrompt;
   url?: string;
+  action_id?: string;
 }
 
 interface SlackText {
@@ -198,6 +200,7 @@ function createButton(action: SlackActionDefinition): SlackElement {
       type: 'plain_text',
       text: buttonText,
     },
+    action_id: `openops_slack_block_button:${openOpsId()}`,
     url,
   };
 
