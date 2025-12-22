@@ -13,7 +13,7 @@ async function additionalTemplateTables(
   await createAggregatedCostsTable(tablesContext);
   await createKnownCostTypesByApplicationTable(tablesContext);
   await createAutoInstancesShutdownTable(tablesContext);
-  logger.info('[Seeding additionaltemplate tables] Done');
+  logger.info('[Seeding additional template tables] Done');
 }
 
 export async function createAllTemplateTables(
