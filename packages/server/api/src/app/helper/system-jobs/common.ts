@@ -11,6 +11,7 @@ export enum SystemJobName {
   TRIGGER_DATA_CLEANER = 'trigger-data-cleaner',
   ISSUES_REMINDER = 'issue-reminder',
   LOGS_CLEANUP_TRIGGER = 'logs-cleanup-trigger',
+  CREATE_TEMPLATE_TABLES = 'create-template-tables',
 }
 
 type HardDeleteProjectSystemJobData = {
@@ -20,6 +21,11 @@ type IssuesReminderSystemJobData = {
   projectId: ProjectId;
   projectName: string;
   organizationId: string;
+};
+
+export type CreateTemplateTablesSystemJobData = {
+  tablesDatabaseId: number;
+  userId: string;
 };
 
 type SystemJobDataMap = {
@@ -32,6 +38,7 @@ type SystemJobDataMap = {
   [SystemJobName.TRIAL_TRACKER]: Record<string, never>;
   [SystemJobName.TRIGGER_DATA_CLEANER]: Record<string, never>;
   [SystemJobName.LOGS_CLEANUP_TRIGGER]: Record<string, never>;
+  [SystemJobName.CREATE_TEMPLATE_TABLES]: CreateTemplateTablesSystemJobData;
 };
 
 export type SystemJobData<T extends SystemJobName = SystemJobName> =
