@@ -12,20 +12,20 @@ const templateMetadataDefault = {
   integrations: [
     {
       displayName: 'Block 1',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
     {
       displayName: 'Block 2',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
     {
       displayName: 'Block 3',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
   ],
   owner: {
     name: 'OpenOps',
-    logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    logoUrl: '/logos/logo.icon.positive.svg',
   },
 } as unknown as FlowTemplateMetadataWithIntegrations;
 
@@ -73,36 +73,36 @@ export const templateWithLongText: Story = {
       integrations: [
         {
           displayName: 'Block 1',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 2',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 3',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 4',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 5',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 6',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
         {
           displayName: 'Block 7',
-          logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+          logoUrl: '/logos/logo.icon.positive.svg',
         },
       ],
       owner: {
         name: 'OpenOps',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
     } as unknown as FlowTemplateMetadataWithIntegrations,
   },
@@ -119,12 +119,12 @@ const templateWithMarkdown: FlowTemplateMetadataWithIntegrations = {
   integrations: [
     {
       displayName: 'Block 1',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
   ],
   owner: {
     name: 'OpenOps',
-    logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    logoUrl: '/logos/logo.icon.positive.svg',
   },
 } as unknown as FlowTemplateMetadataWithIntegrations;
 

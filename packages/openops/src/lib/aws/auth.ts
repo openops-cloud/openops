@@ -169,7 +169,7 @@ export function getAwsAccountsSingleSelectDropdown() {
 export const amazonAuth = BlockAuth.CustomAuth({
   authProviderKey: 'AWS',
   authProviderDisplayName: 'AWS',
-  authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+  authProviderLogoUrl: `/blocks/aws.png`,
   description: `
  **🧪 Sandbox or evaluation environment**
  <br>You may use access key credentials by manually providing both the Access Key ID and Secret Access Key.

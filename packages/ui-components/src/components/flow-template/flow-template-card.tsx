@@ -14,7 +14,7 @@ const FlowTemplateCard = ({
   templateMetadata,
   showAuthor,
   //Will be removed
-  ownerLogoUrl = 'https://static.openops.com/logos/logo.icon.positive.svg',
+  ownerLogoUrl = '/logos/logo.icon.positive.svg',
   onClick,
 }: FlowTemplateCardProps) => {
   return (

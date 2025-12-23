@@ -31,13 +31,13 @@ const HeaderWrapper = ({
   if (isMinimized) {
     logoSrc =
       theme === 'Dark'
-        ? 'https://static.openops.com/logos/logo.icon.svg'
-        : 'https://static.openops.com/logos/logo.icon.positive.svg';
+        ? '/logos/logo.icon.svg'
+        : '/logos/logo.icon.positive.svg';
   } else {
     logoSrc =
       theme === 'Dark'
-        ? 'https://static.openops.com/logos/logo.svg'
-        : 'https://static.openops.com/logos/logo.positive.svg';
+        ? '/logos/logo.svg'
+        : '/logos/logo.positive.svg';
   }
 
   return (
@@ -78,7 +78,7 @@ const footerWrapperProps = {
     isCloudLoginEnabled: true,
     onCloudLogin: () => {},
     logout: () => {},
-    logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    logoUrl: '/logos/logo.icon.positive.svg',
     user: { email: mockUser.email },
   },
   settingsLink: {

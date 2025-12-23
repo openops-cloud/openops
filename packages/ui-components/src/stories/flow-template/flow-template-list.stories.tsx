@@ -64,7 +64,7 @@ export const ConnectedToCloud: Story = {
     templates: mockAllTemplates,
     isLoading: false,
     onTemplateSelect: fn(),
-    ownerLogoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    ownerLogoUrl: '/logos/logo.icon.positive.svg',
   },
 } as Story;
 

@@ -23,7 +23,7 @@ You can also visit [OpenOps documentation](https://docs.openops.com/introduction
 export const googleCloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'GCloud',
   authProviderDisplayName: 'Google Cloud (GCP)',
-  authProviderLogoUrl: `https://static.openops.com/blocks/google-cloud.svg`,
+  authProviderLogoUrl: `/blocks/google-cloud.svg`,
   description: markdown,
   props: {
     keyFileContent: Property.SecretText({

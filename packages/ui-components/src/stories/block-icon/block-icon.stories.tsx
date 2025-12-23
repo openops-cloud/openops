@@ -11,7 +11,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     displayName: 'Example Block',
-    logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    logoUrl: '/logos/logo.icon.positive.svg',
     showTooltip: true,
     size: 'md',
     circle: true,

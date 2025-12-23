@@ -37,7 +37,7 @@ export const Default: Story = {
         <img
           className="h-full"
           alt="logo"
-          src="https://static.openops.com/logos/logo.positive.svg"
+          src="/logos/logo.positive.svg"
         />
       </div>
     ),

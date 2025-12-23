@@ -48,7 +48,7 @@ export const generateIndexTsFile = async (
     displayName: "${capitalizeFirstLetter(blockName)}",
     auth: ${authConfig},
     minimumSupportedRelease: '0.20.0',
-    logoUrl: "https://static.openops.com/blocks/${blockName}.png",
+    logoUrl: "/blocks/${blockName}.png",
     authors: [],
     actions: [],
     triggers: [],
@@ -86,7 +86,7 @@ export const ${blockNameCamelCase}Auth = BlockAuth.SecretAuth({
   required: true,
   authProviderKey: '${blockName}',
   authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
+  authProviderLogoUrl: '/blocks/${blockName}.png',
   description: '',
 });
 `;
@@ -99,7 +99,7 @@ import { BlockAuth, Property } from '@openops/blocks-framework';
 export const ${blockNameCamelCase}Auth = BlockAuth.CustomAuth({
   authProviderKey: '${blockName}',
   authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
+  authProviderLogoUrl: '/blocks/${blockName}.png',
   description: 'Configure your ${capitalizeFirstLetter(blockName)} connection',
   required: true,
   props: {
@@ -128,7 +128,7 @@ import { BlockAuth } from '@openops/blocks-framework';
 export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
   authProviderKey: '${blockName}',
   authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
+  authProviderLogoUrl: '/blocks/${blockName}.png',
   description: 'Connect to ${capitalizeFirstLetter(blockName)} using OAuth2',
   required: true,
   authUrl: 'https://${blockName}.com/oauth/authorize',
@@ -179,7 +179,7 @@ export const ${blockNameCamelCase} = createBlock({
   displayName: "${capitalizeFirstLetter(blockName)}",
   auth: ${blockNameCamelCase}Auth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: "https://static.openops.com/blocks/${blockName}.png",
+  logoUrl: "/blocks/${blockName}.png",
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
@@ -206,7 +206,7 @@ export const ${blockNameCamelCase} = createBlock({
   displayName: "${capitalizeFirstLetter(blockName)}",
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.20.0',
-  logoUrl: "https://static.openops.com/blocks/${blockName}.png",
+  logoUrl: "/blocks/${blockName}.png",
   authors: [],
   actions: [],
   triggers: [],
@@ -235,7 +235,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: '${blockName}',
       authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
+      authProviderLogoUrl: '/blocks/${blockName}.png',
     });
   });
 

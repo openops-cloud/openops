@@ -13,15 +13,15 @@ const meta = {
     metadata: [
       {
         displayName: 'Block 1',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 2',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 3',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
     ],
     maxNumberOfIconsToShow: 2,
@@ -66,19 +66,19 @@ export const ShowAllIcons: Story = {
     metadata: [
       {
         displayName: 'Block 1',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 2',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 3',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 4',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
     ],
   },
@@ -93,15 +93,15 @@ export const CompactView: Story = {
     metadata: [
       {
         displayName: 'Block 1',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 2',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
       {
         displayName: 'Block 3',
-        logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+        logoUrl: '/logos/logo.icon.positive.svg',
       },
     ],
   },

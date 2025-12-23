@@ -147,10 +147,10 @@ export function generateTheme({
 export const defaultTheme = generateTheme({
   primaryColor: '#110545',
   websiteName: 'OpenOps',
-  fullLogoUrl: 'https://static.openops.com/logos/logo.svg',
-  fullLogoPositiveUrl: 'https://static.openops.com/logos/logo.positive.svg',
-  favIconUrl: 'https://static.openops.com/logos/favicon.ico',
-  logoIconUrl: 'https://static.openops.com/logos/logo.icon.svg',
+  fullLogoUrl: '/logos/logo.svg',
+  fullLogoPositiveUrl: '/logos/logo.positive.svg',
+  favIconUrl: '/logos/favicon.ico',
+  logoIconUrl: '/logos/logo.icon.svg',
   logoIconPositiveUrl:
-    'https://static.openops.com/logos/logo.icon.positive.svg',
+    '/logos/logo.icon.positive.svg',
 });
