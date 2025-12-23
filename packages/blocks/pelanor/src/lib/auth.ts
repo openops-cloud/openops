@@ -13,7 +13,7 @@ Authenticate with your Pelanor API Token to access Pelanor services.
 export const pelanorAuth = BlockAuth.CustomAuth({
   authProviderKey: 'pelanor',
   authProviderDisplayName: 'Pelanor',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/pelanor.png',
+  authProviderLogoUrl: '/blocks/pelanor.png',
   description: markdown,
   required: true,
   props: {

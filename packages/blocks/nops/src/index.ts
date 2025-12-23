@@ -11,7 +11,7 @@ export const nops = createBlock({
   description: 'Multi-cloud cost optimization and FinOps platform',
   auth: nopsAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/nops.png',
+  logoUrl: '/blocks/nops.png',
   authors: ['nOps'],
   categories: [BlockCategory.FINOPS],
   actions: [

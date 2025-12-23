@@ -14,7 +14,7 @@ export const ternary = createBlock({
   displayName: 'Ternary',
   auth: ternaryCloudAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/ternary.png',
+  logoUrl: '/blocks/ternary.png',
   categories: [BlockCategory.FINOPS],
   authors: ['Quilyx'],
   actions: [

@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'servicenow',
       authProviderDisplayName: 'ServiceNow',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/servicenow.png',
+      authProviderLogoUrl: '/blocks/servicenow.png',
     });
   });
 

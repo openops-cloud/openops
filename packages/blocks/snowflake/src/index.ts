@@ -10,7 +10,7 @@ export const snowflake = createBlock({
   description: 'Data warehouse built for the cloud',
   auth: customAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/snowflake-logo.svg',
+  logoUrl: '/blocks/snowflake-logo.svg',
   authors: [],
   categories: [BlockCategory.DATA_SOURCES],
   actions: [runQuery, runMultipleQueries, insertRow],

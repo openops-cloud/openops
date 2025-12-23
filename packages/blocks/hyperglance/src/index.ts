@@ -13,7 +13,7 @@ export const hyperglance = createBlock({
   displayName: 'Hyperglance',
   auth: hyperglanceAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/hyperglance.svg',
+  logoUrl: '/blocks/hyperglance.svg',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

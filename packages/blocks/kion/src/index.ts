@@ -7,7 +7,7 @@ export const kion = createBlock({
   displayName: 'Kion',
   auth: kionAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/kion.png',
+  logoUrl: '/blocks/kion.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

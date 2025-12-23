@@ -8,7 +8,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'vantage',
       authProviderDisplayName: 'Vantage',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/vantage.png',
+      authProviderLogoUrl: '/blocks/vantage.png',
     });
   });
 

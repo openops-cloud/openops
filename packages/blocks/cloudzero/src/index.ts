@@ -7,7 +7,7 @@ export const cloudzero = createBlock({
   displayName: 'CloudZero',
   auth: cloudzeroAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/cloudzero.png',
+  logoUrl: '/blocks/cloudzero.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

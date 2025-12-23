@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'hyperglance',
       authProviderDisplayName: 'Hyperglance',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/hyperglance.svg',
+      authProviderLogoUrl: '/blocks/hyperglance.svg',
     });
   });
 

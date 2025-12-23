@@ -11,7 +11,7 @@ export interface ServiceNowAuth {
 export const servicenowAuth = BlockAuth.CustomAuth({
   authProviderKey: 'servicenow',
   authProviderDisplayName: 'ServiceNow',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/servicenow.png',
+  authProviderLogoUrl: '/blocks/servicenow.png',
   required: true,
   props: {
     username: Property.ShortText({

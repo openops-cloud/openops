@@ -12,7 +12,7 @@ export const textHelper = createBlock({
   displayName: 'Text Operations',
   description: 'Tools for text processing',
   auth: BlockAuth.None(),
-  logoUrl: 'https://static.openops.com/blocks/text-operations.svg',
+  logoUrl: '/blocks/text-operations.svg',
   authors: [
     'joeworkman',
     'kishanprmr',

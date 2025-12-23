@@ -14,7 +14,7 @@ export const servicenow = createBlock({
   displayName: 'ServiceNow',
   auth: servicenowAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/servicenow.png',
+  logoUrl: '/blocks/servicenow.png',
   authors: [],
   categories: [BlockCategory.COLLABORATION],
   actions: [

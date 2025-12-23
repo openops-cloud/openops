@@ -18,7 +18,7 @@ If you're experiencing delays, double-check that your **Account Identifier** is 
 export const customAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Snowflake',
   authProviderDisplayName: 'Snowflake',
-  authProviderLogoUrl: `https://static.openops.com/blocks/snowflake-logo.svg`,
+  authProviderLogoUrl: `/blocks/snowflake-logo.svg`,
   description: markdown,
   props: {
     account: Property.ShortText({

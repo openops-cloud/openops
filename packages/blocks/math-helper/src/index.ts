@@ -21,7 +21,7 @@ export const math = createBlock({
   description: markdownDescription,
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.9.0',
-  logoUrl: 'https://static.openops.com/blocks/math-operations.svg',
+  logoUrl: '/blocks/math-operations.svg',
   categories: [BlockCategory.CORE],
   authors: ['kishanprmr', 'MoShizzle', 'abuaboud'],
   actions: [

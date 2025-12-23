@@ -8,7 +8,7 @@ export const databricks = createBlock({
   displayName: 'Databricks',
   auth: databricksAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/databricks.png',
+  logoUrl: '/blocks/databricks.png',
   categories: [BlockCategory.DATA_SOURCES],
   authors: [],
   actions: [executeSqlStatement, runJob],

@@ -13,7 +13,7 @@ export interface VegaCloudAuth {
 export const vegacloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'vegacloud',
   authProviderDisplayName: 'Vega Cloud',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/vegacloud.svg',
+  authProviderLogoUrl: '/blocks/vegacloud.svg',
   description: markdown,
   required: true,
   props: {

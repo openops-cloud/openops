@@ -9,7 +9,7 @@ See [Flexera Documentation](https://docs.flexera.com/flexera/EN/FlexeraAPI/Gener
 export const flexeraAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Flexera-One',
   authProviderDisplayName: 'Flexera',
-  authProviderLogoUrl: `https://static.openops.com/blocks/flexera.png`,
+  authProviderLogoUrl: `/blocks/flexera.png`,
   description: markdown,
   required: true,
   props: {

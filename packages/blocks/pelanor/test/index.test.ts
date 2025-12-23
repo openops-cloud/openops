@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'pelanor',
       authProviderDisplayName: 'Pelanor',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/pelanor.png',
+      authProviderLogoUrl: '/blocks/pelanor.png',
     });
   });
 

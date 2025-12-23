@@ -17,7 +17,7 @@ export const cloudhealth = createBlock({
   displayName: 'CloudHealth',
   auth: cloudhealthAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/cloudhealth.png',
+  logoUrl: '/blocks/cloudhealth.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

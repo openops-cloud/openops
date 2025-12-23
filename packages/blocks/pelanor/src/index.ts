@@ -7,7 +7,7 @@ export const pelanor = createBlock({
   displayName: 'Pelanor',
   auth: pelanorAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/pelanor.png',
+  logoUrl: '/blocks/pelanor.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

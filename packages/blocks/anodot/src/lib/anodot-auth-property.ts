@@ -5,7 +5,7 @@ import { getAnodotUsers } from './common/users';
 export const anadotAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Umbrella',
   authProviderDisplayName: 'Umbrella',
-  authProviderLogoUrl: `https://static.openops.com/blocks/umbrella.png`,
+  authProviderLogoUrl: `/blocks/umbrella.png`,
   description: 'The authentication to use to connect to Umbrella',
   required: true,
   props: {

@@ -7,7 +7,7 @@ import { newOrModifiedFile } from './lib/triggers/new-modified-file';
 export const sftpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SFTP',
   authProviderDisplayName: 'SFTP',
-  authProviderLogoUrl: `https://static.openops.com/blocks/sftp.svg`,
+  authProviderLogoUrl: `/blocks/sftp.svg`,
   description: 'Enter the authentication details',
   props: {
     host: Property.ShortText({
@@ -65,7 +65,7 @@ export const sftp = createBlock({
   description: 'Secure file transfer protocol',
 
   minimumSupportedRelease: '0.7.1',
-  logoUrl: 'https://static.openops.com/blocks/sftp.svg',
+  logoUrl: '/blocks/sftp.svg',
   categories: [],
   authors: [
     'Abdallah-Alwarawreh',

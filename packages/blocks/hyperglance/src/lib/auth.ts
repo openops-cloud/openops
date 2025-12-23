@@ -4,7 +4,7 @@ import { makeGetRequest } from './callRestApi';
 export const hyperglanceAuth = BlockAuth.CustomAuth({
   authProviderKey: 'hyperglance',
   authProviderDisplayName: 'Hyperglance',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/hyperglance.svg',
+  authProviderLogoUrl: '/blocks/hyperglance.svg',
   description: `Configure your Hyperglance connection. For more information, visit the [Hyperglance API documentation](https://support.hyperglance.com/knowledge/getting-started-with-the-hyperglance-api).`,
   required: true,
   props: {

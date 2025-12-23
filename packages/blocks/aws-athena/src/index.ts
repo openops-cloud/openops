@@ -7,7 +7,7 @@ export const awsAthena = createBlock({
   displayName: 'AWS Athena',
   auth: amazonAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/aws-athena.png',
+  logoUrl: '/blocks/aws-athena.png',
   categories: [BlockCategory.CLOUD],
   authors: [],
   actions: [runAthenaQueryAction],

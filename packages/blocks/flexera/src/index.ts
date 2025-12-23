@@ -8,7 +8,7 @@ export const flexera = createBlock({
   displayName: 'Flexera Spot',
   auth: flexeraSpotAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/flexera-spot.png',
+  logoUrl: '/blocks/flexera-spot.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

@@ -7,7 +7,7 @@ export const imapBlock = createBlock({
   displayName: 'IMAP',
   description: 'Receive new email trigger',
   minimumSupportedRelease: '0.30.0',
-  logoUrl: 'https://static.openops.com/blocks/imap.png',
+  logoUrl: '/blocks/imap.png',
   categories: [BlockCategory.COLLABORATION],
   authors: [],
   auth: imapAuth,

@@ -15,7 +15,7 @@ For more information, visit the [Kion API documentation](https://support.kion.io
 export const kionAuth = BlockAuth.CustomAuth({
   authProviderKey: 'kion',
   authProviderDisplayName: 'Kion',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/kion.png',
+  authProviderLogoUrl: '/blocks/kion.png',
   description: markdown,
   required: true,
   props: {

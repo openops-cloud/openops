@@ -6,7 +6,7 @@ import { buildClient } from './build-client';
 export const imapAuth = BlockAuth.CustomAuth({
   authProviderKey: 'imap',
   authProviderDisplayName: 'IMAP',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/imap.png',
+  authProviderLogoUrl: '/blocks/imap.png',
   required: true,
   props: {
     host: Property.ShortText({

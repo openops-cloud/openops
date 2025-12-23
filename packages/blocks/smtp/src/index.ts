@@ -8,7 +8,7 @@ const SMTPPorts = [25, 465, 587, 2525];
 export const smtpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SMTP',
   authProviderDisplayName: 'SMTP',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/smtp.svg',
+  authProviderLogoUrl: '/blocks/smtp.svg',
   required: true,
   props: {
     host: Property.ShortText({
@@ -83,7 +83,7 @@ export const smtp = createBlock({
   displayName: 'SMTP',
   description: 'Send emails using Simple Mail Transfer Protocol',
   minimumSupportedRelease: '0.5.0',
-  logoUrl: 'https://static.openops.com/blocks/smtp.svg',
+  logoUrl: '/blocks/smtp.svg',
   categories: [BlockCategory.COLLABORATION],
   authors: [
     'tahboubali',
