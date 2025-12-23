@@ -11,6 +11,7 @@ export type Principal = {
   organization: {
     id: OpenOpsId;
   };
+  projectSettings: Record<string, unknown>;
 };
 
 export type WorkerPrincipal = {

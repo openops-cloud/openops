@@ -48,6 +48,7 @@ export async function getProjectAndToken(
       organization: {
         id: organization.id,
       },
+      projectSettings: {},
     },
     expiresInSeconds,
   );
