@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>Action Received</title>
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="https://static.openops.com/logos/favicon.ico"
+  />
+  <link
+    href="https://fonts.cdnfonts.com/css/satoshi"
+    rel="stylesheet"
+  >
+  <style>
+      body {
+          font-family: "Satoshi", sans-serif;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          background-color: #f9f9f9;
+          color: #333;
+          text-align: center;
+      }
+
+      .container {
+          max-width: 500px;
+          width: 100%;
+      }
+
+      .logo {
+          margin-bottom: 30px;
+      }
+
+      .message {
+          font-size: 1.2rem;
+          margin-bottom: 20px;
+      }
+
+      .note {
+          font-size: 0.9rem;
+          color: #666;
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <img
+    class="logo"
+    src="https://static.openops.com/logos/logo.positive.svg"
+    alt="Logo"
+    width="300"
+  />
+  <h2>Your response has been recorded.</h2>
+  <p class="message">You can close this page or it will be automatically closed in 20 seconds.</p>
+  <p class="note">If the page does not close automatically, you may safely close it manually.</p>
+</div>
+
+<script>
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectUrl = searchParams.get('redirectUrl');
+  const isTest = searchParams.get('isTest') === 'true';
+
+  if (isTest) {
+    document.querySelector('h2').textContent = 'Test succeeded! Actions are disabled in test mode and are only available when running the entire workflow.';
+    setTimeout(() => {
+      window.close();
+    }, 20000);
+  } else if (redirectUrl) {
+    const iframe = document.createElement('iframe');
+    iframe.src = redirectUrl;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+      window.close();
+    }, 20000);
+  } else {
+    console.error('No redirectUrl parameter provided.');
+  }
+
+</script>
+</body>
+</html>
