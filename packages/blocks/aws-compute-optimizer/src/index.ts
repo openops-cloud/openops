@@ -7,8 +7,7 @@ import { getRecommendationsSummaryAction } from './lib/actions/get-recommendatio
 
 export const computeOptimizer = createBlock({
   displayName: 'AWS Compute Optimizer',
-  logoUrl:
-    '/blocks/aws-compute-optimizer.svg',
+  logoUrl: '/blocks/aws-compute-optimizer.svg',
   minimumSupportedRelease: '0.8.0',
   authors: ['OpenOps'],
   categories: [BlockCategory.CLOUD],

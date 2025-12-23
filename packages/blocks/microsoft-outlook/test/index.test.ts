@@ -7,8 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'Microsoft_Outlook',
       authProviderDisplayName: 'Microsoft Outlook',
-      authProviderLogoUrl:
-        '/blocks/microsoft-outlook.png',
+      authProviderLogoUrl: '/blocks/microsoft-outlook.png',
     });
   });
 

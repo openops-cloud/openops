@@ -34,11 +34,7 @@ export const Default: Story = {
   args: {
     appLogo: (
       <div className={cn('h-[60px]')}>
-        <img
-          className="h-full"
-          alt="logo"
-          src="/logos/logo.positive.svg"
-        />
+        <img className="h-full" alt="logo" src="/logos/logo.positive.svg" />
       </div>
     ),
   },

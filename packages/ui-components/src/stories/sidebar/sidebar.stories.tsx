@@ -34,10 +34,7 @@ const HeaderWrapper = ({
         ? '/logos/logo.icon.svg'
         : '/logos/logo.icon.positive.svg';
   } else {
-    logoSrc =
-      theme === 'Dark'
-        ? '/logos/logo.svg'
-        : '/logos/logo.positive.svg';
+    logoSrc = theme === 'Dark' ? '/logos/logo.svg' : '/logos/logo.positive.svg';
   }
 
   return (

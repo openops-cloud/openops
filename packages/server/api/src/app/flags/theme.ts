@@ -151,6 +151,5 @@ export const defaultTheme = generateTheme({
   fullLogoPositiveUrl: '/logos/logo.positive.svg',
   favIconUrl: '/logos/favicon.ico',
   logoIconUrl: '/logos/logo.icon.svg',
-  logoIconPositiveUrl:
-    '/logos/logo.icon.positive.svg',
+  logoIconPositiveUrl: '/logos/logo.icon.positive.svg',
 });
