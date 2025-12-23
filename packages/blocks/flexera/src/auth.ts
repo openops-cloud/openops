@@ -7,7 +7,7 @@ Authenticate with your Flexera API Token to access Flexera services.
 export const flexeraSpotAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Flexera',
   authProviderDisplayName: 'Flexera Spot',
-  authProviderLogoUrl: `https://static.openops.com/blocks/flexera-spot.png`,
+  authProviderLogoUrl: `/blocks/flexera-spot.png`,
   description: markdown,
   displayName: 'API Key',
   required: true,

@@ -96,7 +96,7 @@ export const requestActionMessageAction = createAction({
         );
         return {
           ...action,
-          resumeUrl: `https://static.openops.com/html/resume_execution.html?isTest=${
+          resumeUrl: `/html/resume_execution.html?isTest=${
             context.run.isTest
           }&redirectUrl=${encodeURIComponent(resumeUrl)}`,
         };

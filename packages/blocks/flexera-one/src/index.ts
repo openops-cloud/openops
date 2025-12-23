@@ -10,7 +10,7 @@ export const flexera = createBlock({
   displayName: 'Flexera',
   auth: flexeraAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/flexera.png',
+  logoUrl: '/blocks/flexera.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

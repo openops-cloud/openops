@@ -89,7 +89,7 @@ describe('Props Processor', () => {
     } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
-      authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
+      authProviderLogoUrl: `/blocks/smtp.png`,
       required: true,
       props: {
         age: Property.Number({
@@ -152,7 +152,7 @@ describe('Props Processor', () => {
     } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
-      authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
+      authProviderLogoUrl: `/blocks/smtp.png`,
       required: true,
       props: {
         age: Property.Number({
@@ -344,7 +344,7 @@ describe('Props Processor', () => {
     const { errors } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
-      authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
+      authProviderLogoUrl: `/blocks/smtp.png`,
       required: true,
       props: {
         email: Property.LongText({
@@ -464,7 +464,7 @@ describe('Props Processor', () => {
     } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/smtp.png',
+      authProviderLogoUrl: '/blocks/smtp.png',
       required: false,
       props: {
         age: Property.Number({

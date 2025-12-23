@@ -64,7 +64,7 @@ const sampleLimits = [
 const blockActionMetaMap = {
   slack: {
     displayName: 'Slack',
-    logoUrl: 'https://static.openops.com/blocks/slack.png',
+    logoUrl: '/blocks/slack.png',
     actions: {
       send_message: 'Send Message',
       send_message_2: 'Send Message 2',
@@ -73,7 +73,7 @@ const blockActionMetaMap = {
   },
   aws: {
     displayName: 'AWS',
-    logoUrl: 'https://static.openops.com/blocks/aws.png',
+    logoUrl: '/blocks/aws.png',
     actions: {
       tag_resource: 'Tag Resource',
       tag_resource_2: 'Tag Resource 2',
@@ -82,7 +82,7 @@ const blockActionMetaMap = {
   },
   azure: {
     displayName: 'Azure',
-    logoUrl: 'https://static.openops.com/blocks/azure.svg',
+    logoUrl: '/blocks/azure.svg',
     actions: {
       cli: 'CLI',
       cli_2: 'CLI 2',

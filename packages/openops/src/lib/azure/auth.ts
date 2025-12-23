@@ -31,7 +31,7 @@ const enableHostSession =
 export const azureAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Azure',
   authProviderDisplayName: 'Azure',
-  authProviderLogoUrl: `https://static.openops.com/blocks/azure.svg`,
+  authProviderLogoUrl: `/blocks/azure.svg`,
   props: {
     clientId: Property.ShortText({
       displayName: 'Application (client) ID',

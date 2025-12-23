@@ -27,7 +27,7 @@ import { ssmGenerateRunbookLinkAction } from './lib/actions/ssm/ssm-generate-run
 
 export const aws = createBlock({
   displayName: 'AWS',
-  logoUrl: 'https://static.openops.com/blocks/aws.png',
+  logoUrl: '/blocks/aws.png',
   minimumSupportedRelease: '0.8.0',
   authors: ['OpenOps'],
   auth: amazonAuth,

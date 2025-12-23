@@ -22,7 +22,7 @@ To obtain your API key, follow these steps:
 export const linearAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Linear',
   authProviderDisplayName: 'Linear',
-  authProviderLogoUrl: `https://static.openops.com/blocks/linear.png`,
+  authProviderLogoUrl: `/blocks/linear.png`,
   displayName: 'API Key',
   required: true,
   description: markdown,
@@ -44,7 +44,7 @@ export const linear = createBlock({
 
   auth: linearAuth,
   minimumSupportedRelease: '0.30.0',
-  logoUrl: `https://static.openops.com/blocks/linear.png`,
+  logoUrl: `/blocks/linear.png`,
   authors: ['lldiegon', 'kishanprmr', 'abuaboud'],
   categories: [BlockCategory.COLLABORATION],
   actions: [

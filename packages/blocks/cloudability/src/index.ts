@@ -14,7 +14,7 @@ export const cloudability = createBlock({
   displayName: 'Cloudability',
   auth: cloudabilityAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/cloudability.png',
+  logoUrl: '/blocks/cloudability.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

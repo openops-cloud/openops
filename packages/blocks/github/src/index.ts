@@ -10,7 +10,7 @@ export const github = createBlock({
   displayName: 'Github',
   auth: auth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/github.png',
+  logoUrl: '/blocks/github.png',
   authors: [],
   actions: [
     getFileAction,

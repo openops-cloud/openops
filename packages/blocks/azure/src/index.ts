@@ -10,7 +10,7 @@ export const azure = createBlock({
   displayName: 'Azure',
   auth: azureAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/azure.svg',
+  logoUrl: '/blocks/azure.svg',
   authors: [],
   categories: [BlockCategory.CLOUD],
   actions: [

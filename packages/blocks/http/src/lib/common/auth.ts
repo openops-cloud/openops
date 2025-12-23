@@ -14,7 +14,7 @@ Examples:
 export const httpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'http',
   authProviderDisplayName: 'HTTP',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/http.png',
+  authProviderLogoUrl: '/blocks/http.png',
   required: false,
   description,
   props: {

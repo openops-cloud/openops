@@ -4,8 +4,7 @@ import { getMicrosoftGraphClient } from '@openops/common';
 export const microsoftOutlookAuth = BlockAuth.OAuth2({
   authProviderKey: 'Microsoft_Outlook',
   authProviderDisplayName: 'Microsoft Outlook',
-  authProviderLogoUrl:
-    'https://static.openops.com/blocks/microsoft-outlook.png',
+  authProviderLogoUrl: '/blocks/microsoft-outlook.png',
   required: true,
   scope: ['Mail.ReadWrite', 'Mail.Send', 'offline_access', 'User.Read'],
   authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',

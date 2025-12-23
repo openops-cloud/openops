@@ -8,7 +8,7 @@ export const webhook = createBlock({
   auth: BlockAuth.None(),
   categories: [BlockCategory.CORE],
   minimumSupportedRelease: '0.27.1',
-  logoUrl: 'https://static.openops.com/blocks/openops-webhook.svg',
+  logoUrl: '/blocks/openops-webhook.svg',
   authors: ['abuaboud', 'pfernandez98'],
   actions: [],
   triggers: [catchWebhook],

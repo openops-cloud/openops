@@ -8,7 +8,7 @@ export const ai = createBlock({
   auth: aiAuth,
   categories: [BlockCategory.CORE],
   minimumSupportedRelease: '0.7.1',
-  logoUrl: 'https://static.openops.com/blocks/openops-ai.svg',
+  logoUrl: '/blocks/openops-ai.svg',
   authors: [],
   actions: [aiStep],
   triggers: [],

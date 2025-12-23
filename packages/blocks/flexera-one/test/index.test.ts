@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'Flexera-One',
       authProviderDisplayName: 'Flexera',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/flexera.png',
+      authProviderLogoUrl: '/blocks/flexera.png',
     });
   });
 

@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'cloudfix',
       authProviderDisplayName: 'CloudFix',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/cloudfix.png',
+      authProviderLogoUrl: '/blocks/cloudfix.png',
     });
   });
 

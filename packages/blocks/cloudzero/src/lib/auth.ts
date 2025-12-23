@@ -22,6 +22,6 @@ export const cloudzeroAuth = BlockAuth.SecretAuth({
   required: true,
   authProviderKey: 'cloudzero',
   authProviderDisplayName: 'CloudZero',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/cloudzero.png',
+  authProviderLogoUrl: '/blocks/cloudzero.png',
   description: markdown,
 });

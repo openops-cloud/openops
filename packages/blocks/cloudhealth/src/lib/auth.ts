@@ -18,6 +18,6 @@ export const cloudhealthAuth = BlockAuth.SecretAuth({
   required: true,
   authProviderKey: 'cloudhealth',
   authProviderDisplayName: 'CloudHealth',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/cloudhealth.png',
+  authProviderLogoUrl: '/blocks/cloudhealth.png',
   description: markdown,
 });

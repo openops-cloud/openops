@@ -7,8 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'Microsoft_Outlook',
       authProviderDisplayName: 'Microsoft Outlook',
-      authProviderLogoUrl:
-        'https://static.openops.com/blocks/microsoft-outlook.png',
+      authProviderLogoUrl: '/blocks/microsoft-outlook.png',
     });
   });
 

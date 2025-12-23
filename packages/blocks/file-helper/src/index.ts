@@ -7,7 +7,7 @@ export const filesHelper = createBlock({
   description: 'Read file content and return it in different formats.',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.9.0',
-  logoUrl: 'https://static.openops.com/blocks/file-operations.svg',
+  logoUrl: '/blocks/file-operations.svg',
   categories: [BlockCategory.CORE],
   authors: ['kishanprmr', 'MoShizzle', 'abuaboud'],
   actions: [readFileAction],

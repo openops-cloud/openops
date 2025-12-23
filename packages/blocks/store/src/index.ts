@@ -12,7 +12,7 @@ export const storage = createBlock({
   displayName: 'Storage',
   description: 'Store or retrieve data from key/value database',
   minimumSupportedRelease: '0.5.0',
-  logoUrl: 'https://static.openops.com/blocks/openops-store.svg',
+  logoUrl: '/blocks/openops-store.svg',
   categories: [BlockCategory.DATA_SOURCES],
   auth: BlockAuth.None(),
   authors: [

@@ -12,7 +12,7 @@ export const finout = createBlock({
   displayName: 'Finout',
   auth: finoutAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/finout.png',
+  logoUrl: '/blocks/finout.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

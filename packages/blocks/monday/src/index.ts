@@ -20,7 +20,7 @@ const markdown = `
 export const mondayAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Monday',
   authProviderDisplayName: 'monday.com',
-  authProviderLogoUrl: `https://static.openops.com/blocks/monday.png`,
+  authProviderLogoUrl: `/blocks/monday.png`,
   displayName: 'API v2 Token',
   description: markdown,
   required: true,
@@ -31,7 +31,7 @@ export const monday = createBlock({
   description: 'Work operating system for businesses',
 
   minimumSupportedRelease: '0.5.0',
-  logoUrl: 'https://static.openops.com/blocks/monday.png',
+  logoUrl: '/blocks/monday.png',
   categories: [BlockCategory.COLLABORATION],
   authors: [
     'kanarelo',

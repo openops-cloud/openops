@@ -15,7 +15,7 @@ export const utilityDate = createBlock({
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.8.0',
   categories: [BlockCategory.CORE],
-  logoUrl: 'https://static.openops.com/blocks/date-operations.svg',
+  logoUrl: '/blocks/date-operations.svg',
   authors: ['joeworkman', 'kishanprmr', 'MoShizzle', 'abuaboud'],
   actions: [
     getCurrentDate,

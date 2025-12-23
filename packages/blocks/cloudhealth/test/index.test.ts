@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'cloudhealth',
       authProviderDisplayName: 'CloudHealth',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/cloudhealth.png',
+      authProviderLogoUrl: '/blocks/cloudhealth.png',
     });
   });
 

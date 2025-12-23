@@ -7,7 +7,7 @@ export const stopFlow = createBlock({
   description: 'Stop the current scope execution (flow or loop iteration)',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/end-flow.svg',
+  logoUrl: '/blocks/end-flow.svg',
   authors: [],
   actions: [stopFlowAction],
   triggers: [],

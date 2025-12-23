@@ -9,7 +9,7 @@ export const vegacloud = createBlock({
   displayName: 'Vega Cloud',
   auth: vegacloudAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/vegacloud.svg',
+  logoUrl: '/blocks/vegacloud.svg',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

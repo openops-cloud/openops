@@ -13,7 +13,7 @@ export interface FinOutAuth {
 export const finoutAuth = BlockAuth.CustomAuth({
   authProviderKey: 'finout',
   authProviderDisplayName: 'Finout',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/finout.png',
+  authProviderLogoUrl: '/blocks/finout.png',
   description: markdown,
   required: true,
   props: {

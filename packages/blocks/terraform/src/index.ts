@@ -8,7 +8,7 @@ export const terraform = createBlock({
   displayName: 'Terraform',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/terraform.png',
+  logoUrl: '/blocks/terraform.png',
   authors: ['OpenOps'],
   categories: [BlockCategory.DEVOPS],
   actions: [modifyVariablesFile, modifyTemplate, deleteResourceFromTemplate],

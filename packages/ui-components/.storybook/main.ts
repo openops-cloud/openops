@@ -24,7 +24,7 @@ const config: StorybookConfig = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
-  staticDirs: ['../static'],
+  staticDirs: ['../static', '../../react-ui/public'],
   viteFinal: async (config) =>
     mergeConfig(config, {
       plugins: [

@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'nops',
       authProviderDisplayName: 'nOps',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/nops.png',
+      authProviderLogoUrl: '/blocks/nops.png',
     });
   });
 

@@ -20,6 +20,6 @@ export const nopsAuth = BlockAuth.SecretAuth({
   required: true,
   authProviderKey: 'nops',
   authProviderDisplayName: 'nOps',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/nops.png',
+  authProviderLogoUrl: '/blocks/nops.png',
   description: markdown,
 });

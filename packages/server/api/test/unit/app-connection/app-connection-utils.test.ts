@@ -42,7 +42,7 @@ describe('redactSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: 'some schema',
@@ -94,7 +94,7 @@ describe('redactSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.CUSTOM_AUTH,
       displayName: 'Custom Auth',
       props: {
@@ -138,7 +138,7 @@ describe('redactSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.OAUTH2,
       displayName: 'OAuth2',
       authUrl: '',
@@ -184,7 +184,7 @@ describe('redactSecrets', () => {
       {
         authProviderKey: 'AWS',
         authProviderDisplayName: 'AWS',
-        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        authProviderLogoUrl: `/blocks/aws.png`,
         type: PropertyType.SECRET_TEXT,
         displayName: 'x',
         valueSchema: {} as any,
@@ -210,7 +210,7 @@ describe('redactSecrets', () => {
       const auth: BlockAuthProperty = {
         authProviderKey: 'AWS',
         authProviderDisplayName: 'AWS',
-        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        authProviderLogoUrl: `/blocks/aws.png`,
         type: PropertyType.SECRET_TEXT,
         displayName: 'Secret',
         valueSchema: 'some schema',
@@ -268,7 +268,7 @@ describe('redactSecrets', () => {
       const auth: BlockAuthProperty = {
         authProviderKey: 'AWS',
         authProviderDisplayName: 'AWS',
-        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        authProviderLogoUrl: `/blocks/aws.png`,
         type: PropertyType.CUSTOM_AUTH,
         displayName: 'Custom Auth',
         props: {
@@ -313,7 +313,7 @@ describe('redactSecrets', () => {
       const auth: BlockAuthProperty = {
         authProviderKey: 'AWS',
         authProviderDisplayName: 'AWS',
-        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        authProviderLogoUrl: `/blocks/aws.png`,
         type: PropertyType.OAUTH2,
         displayName: 'OAuth2',
         authUrl: '',
@@ -346,7 +346,7 @@ describe('restoreRedactedSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: {} as any,
@@ -363,7 +363,7 @@ describe('restoreRedactedSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: {} as any,
@@ -406,7 +406,7 @@ describe('restoreRedactedSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.CUSTOM_AUTH,
       displayName: 'Custom',
       props: {
@@ -439,7 +439,7 @@ describe('restoreRedactedSecrets', () => {
     const auth: BlockAuthProperty = {
       authProviderKey: 'AWS',
       authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+      authProviderLogoUrl: `/blocks/aws.png`,
       type: PropertyType.OAUTH2,
       displayName: 'OAuth2',
       authUrl: '',

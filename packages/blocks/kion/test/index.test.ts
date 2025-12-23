@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'kion',
       authProviderDisplayName: 'Kion',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/kion.png',
+      authProviderLogoUrl: '/blocks/kion.png',
     });
   });
 

@@ -127,7 +127,7 @@ const sendMessageAskingForAction = async (
         },
         baseUrl,
       );
-      action.url = `https://static.openops.com/html/resume_execution.html?isTest=${
+      action.url = `/html/resume_execution.html?isTest=${
         context.run.isTest
       }&redirectUrl=${encodeURIComponent(resumeUrl)}`;
     });

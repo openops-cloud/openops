@@ -38,7 +38,7 @@ import { BlockIcon } from '../block-icon/block-icon';
  * const meta: BlockActionLimitMetadata = {
  *   slack: {
  *     displayName: 'Slack',
- *     logoUrl: 'https://static.openops.com/blocks/slack.png',
+ *     logoUrl: '/blocks/slack.png',
  *     actions: {
  *       send_message: 'Send Message',
  *     },

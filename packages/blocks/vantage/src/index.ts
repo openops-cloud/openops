@@ -7,7 +7,7 @@ export const vantage = createBlock({
   displayName: 'Vantage',
   auth: vantageAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/vantage.png',
+  logoUrl: '/blocks/vantage.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [

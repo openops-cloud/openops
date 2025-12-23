@@ -10,20 +10,20 @@ const templateMetadataDefault = {
   integrations: [
     {
       displayName: 'Block 1',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
     {
       displayName: 'Block 2',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
     {
       displayName: 'Block 3',
-      logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+      logoUrl: '/logos/logo.icon.positive.svg',
     },
   ],
   owner: {
     name: 'OpenOps',
-    logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    logoUrl: '/logos/logo.icon.positive.svg',
   },
 } as unknown as FlowTemplateMetadataWithIntegrations;
 /**

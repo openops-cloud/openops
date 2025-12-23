@@ -7,7 +7,7 @@ describe('block declaration tests', () => {
       required: true,
       authProviderKey: 'Ternary',
       authProviderDisplayName: 'Ternary',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/ternary.png',
+      authProviderLogoUrl: '/blocks/ternary.png',
     });
   });
 

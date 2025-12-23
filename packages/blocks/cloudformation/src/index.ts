@@ -10,7 +10,7 @@ export const cloudformation = createBlock({
   displayName: 'AWS CloudFormation',
   auth: amazonAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/cloudformation.png',
+  logoUrl: '/blocks/cloudformation.png',
   authors: ['OpenOps'],
   categories: [BlockCategory.DEVOPS, BlockCategory.CLOUD],
   actions: [getStack, updateStack, modifyTemplate, deleteResourceFromTemplate],

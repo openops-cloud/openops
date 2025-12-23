@@ -8,7 +8,7 @@ export const listOperations = createBlock({
   displayName: 'List Operations',
   auth: BlockAuth.None(),
   minimumSupportedRelease: '0.9.0',
-  logoUrl: 'https://static.openops.com/blocks/list-operations.svg',
+  logoUrl: '/blocks/list-operations.svg',
   authors: [],
   actions: [groupByAction, extractFromListAction, toMapAction],
   triggers: [],

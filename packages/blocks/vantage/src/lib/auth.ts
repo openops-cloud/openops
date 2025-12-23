@@ -9,6 +9,6 @@ export const vantageAuth = BlockAuth.SecretAuth({
   required: true,
   authProviderKey: 'vantage',
   authProviderDisplayName: 'Vantage',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/vantage.png',
+  authProviderLogoUrl: '/blocks/vantage.png',
   description: markdown,
 });

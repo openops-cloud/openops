@@ -14,7 +14,7 @@ export const anodot = createBlock({
   displayName: 'Umbrella',
   auth: anadotAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/umbrella.png',
+  logoUrl: '/blocks/umbrella.png',
   categories: [BlockCategory.FINOPS],
   authors: ['OpenOps'],
   actions: [
