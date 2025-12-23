@@ -13,13 +13,13 @@ import { createFiltersProperties } from './create-filters-properties';
 export const getRecordsAction = createAction({
   auth: servicenowAuth,
   name: 'get_records',
-  description: 'Retrieve records from a specified user table',
+  description: 'Get records from a specified user table',
   displayName: 'Get Records',
   isWriteAction: false,
   props: {
     tableName: servicenowTableDropdownProperty(),
     filterType: Property.StaticDropdown({
-      displayName: 'Filter type',
+      displayName: 'Filter Type',
       required: false,
       options: {
         options: [

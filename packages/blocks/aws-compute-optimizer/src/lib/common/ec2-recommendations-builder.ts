@@ -18,9 +18,10 @@ import {
 } from './get-recommendations';
 import { RecommendationsBuilder } from './recommendations-builder';
 
-export class Ec2RecommendationsBuilder
-  implements RecommendationsBuilder<Finding, AwsRecommendation>
-{
+export class Ec2RecommendationsBuilder implements RecommendationsBuilder<
+  Finding,
+  AwsRecommendation
+> {
   recommendationType: string;
   findingType: Finding;
   credentials: any;

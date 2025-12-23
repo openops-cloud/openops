@@ -230,7 +230,7 @@ export function dynamicBlockKitProperties(): any {
         if (!blockKitEnabled) {
           return {
             headerText: Property.LongText({
-              displayName: 'Message header',
+              displayName: 'Message Header',
               description: 'The header of your message',
               required: false,
             }),
@@ -268,7 +268,7 @@ export function dynamicBlockKitProperties(): any {
         }
         const result: any = {
           blocks: Property.Json({
-            displayName: 'Block Kit blocks',
+            displayName: 'Block Kit Blocks',
             description: 'See https://api.slack.com/block-kit for specs',
             required: true,
             defaultValue: [

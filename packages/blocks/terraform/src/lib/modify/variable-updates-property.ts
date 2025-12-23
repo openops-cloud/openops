@@ -7,7 +7,7 @@ import {
 
 export function getVariableUpdatesProperty() {
   return Property.DynamicProperties({
-    displayName: 'Variables to update',
+    displayName: 'Variables to Update',
     required: true,
     refreshers: ['fileContent'],
     props: async ({ fileContent }): Promise<{ [key: string]: any }> => {
@@ -37,7 +37,7 @@ export function getVariableUpdatesProperty() {
 
 function getErrorMessageProperty(message?: string) {
   return Property.StaticDropdown({
-    displayName: 'Intended modifications',
+    displayName: 'Intended Modifications',
     required: true,
     options: {
       disabled: true,
@@ -52,18 +52,18 @@ function getUpdatesProperty(
   terraformVariables: Record<string, TerraformVariable>,
 ) {
   return Property.Array({
-    displayName: 'Intended modifications',
+    displayName: 'Intended Modifications',
     required: true,
     properties: {
       variableName: Property.StaticDropdown({
-        displayName: 'Variable name',
+        displayName: 'Variable Name',
         required: true,
         options: {
           options: getVariableNameOptions(terraformVariables),
         },
       }),
       variableValue: Property.DynamicProperties({
-        displayName: 'Variable value',
+        displayName: 'Variable Value',
         required: true,
         refreshers: ['variableName'],
         props: async ({ variableName }): Promise<{ [key: string]: any }> => {

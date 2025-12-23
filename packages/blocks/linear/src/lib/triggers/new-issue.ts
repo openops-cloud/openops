@@ -7,7 +7,7 @@ export const linearNewIssue = createTrigger({
   auth: linearAuth,
   name: 'new_issue',
   displayName: 'New Issue',
-  description: 'Triggers when Linear receives a new issue',
+  description: 'Trigger when Linear receives a new issue',
   props: {
     team_id: props.team_id(),
   },
@@ -80,9 +80,8 @@ export const linearNewIssue = createTrigger({
   },
   async onDisable(context) {
     const client = makeClient(context.auth);
-    const response = await context.store?.get<WebhookInformation>(
-      '_new_issue_trigger',
-    );
+    const response =
+      await context.store?.get<WebhookInformation>('_new_issue_trigger');
     if (response?.webhookId) {
       await client.deleteWebhook(response.webhookId);
     }

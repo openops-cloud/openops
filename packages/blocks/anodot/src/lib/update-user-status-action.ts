@@ -39,7 +39,7 @@ export const updateUserStatusAction = createAction({
     }),
     actionParams: Property.DynamicProperties({
       displayName: 'Action Parameters',
-      description: 'Additional parameters based on the selected user status.',
+      description: 'Additional parameters based on the selected user status',
       required: true,
       refreshers: ['userStatus'],
       props: async (props): Promise<{ [key: string]: any }> => {
@@ -49,13 +49,13 @@ export const updateUserStatusAction = createAction({
               label_add: Property.LongText({
                 displayName: 'Add Labels',
                 description:
-                  'A comma seperated list of labels to add to the recommendation.',
+                  'A comma seperated list of labels to add to the recommendation',
                 required: false,
               }),
               label_delete: Property.LongText({
                 displayName: 'Delete Labels',
                 description:
-                  'A comma seperated list of labels to remove from the recommendation.',
+                  'A comma seperated list of labels to remove from the recommendation',
                 required: false,
               }),
             };
@@ -63,7 +63,7 @@ export const updateUserStatusAction = createAction({
             return {
               comment: Property.LongText({
                 displayName: 'Comment',
-                description: 'Comment explaining why the action is excluded.',
+                description: 'Comment explaining why the action is excluded',
                 required: true,
               }),
               until: Property.LongText({

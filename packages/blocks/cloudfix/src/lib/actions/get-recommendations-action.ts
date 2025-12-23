@@ -11,7 +11,7 @@ export const getRecommendationsAction = createAction({
   isWriteAction: false,
   props: {
     status: Property.StaticMultiSelectDropdown({
-      displayName: 'Status filter',
+      displayName: 'Status Filter',
       description: 'Filter recommendations by status',
       required: false,
       options: {
@@ -60,7 +60,7 @@ export const getRecommendationsAction = createAction({
       defaultValue: 'scheduledAt',
     }),
     sortOrder: Property.StaticDropdown({
-      displayName: 'Sort order',
+      displayName: 'Sort Order',
       description: 'The order to sort the recommendations',
       required: false,
       options: {
@@ -72,23 +72,23 @@ export const getRecommendationsAction = createAction({
       defaultValue: 'DESC',
     }),
     includeParameters: Property.Checkbox({
-      displayName: 'Include parameters',
+      displayName: 'Include Parameters',
       description: 'Whether to include parameters in the response',
       required: false,
     }),
     finderFixerId: Property.ShortText({
-      displayName: 'Finder fixer ID',
+      displayName: 'Finder Fixer Id',
       description: 'The ID of the finder fixer',
       required: false,
     }),
     pageNumber: Property.Number({
-      displayName: 'Page number',
+      displayName: 'Page Number',
       description: 'The page number for pagination (starts from 1)',
       required: false,
       defaultValue: 1,
     }),
     pageLimit: Property.Number({
-      displayName: 'Page limit',
+      displayName: 'Page Limit',
       description: 'The maximum number of recommendations per page',
       required: false,
       defaultValue: 200,

@@ -4,7 +4,7 @@ import { ExecutionType } from '@openops/shared';
 export const waitForApprovalLink = createAction({
   name: 'wait_for_approval',
   displayName: 'Wait for Approval',
-  description: 'Pauses the flow and wait for the approval from the user',
+  description: 'Pause the flow and wait for approval from the user',
   isWriteAction: false,
   props: {},
   errorHandlingOptions: {

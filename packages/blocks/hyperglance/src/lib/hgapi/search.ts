@@ -3,7 +3,7 @@ import { HGAuth } from '../auth';
 import { makeGetRequest } from '../callRestApi';
 export function getAccountProp() {
   return Property.ShortText({
-    displayName: 'Filter by Account name',
+    displayName: 'Filter by Account Name',
     required: false,
   });
 }

@@ -24,7 +24,7 @@ export const nextDayofYear = createAction({
   props: {
     month: Property.StaticDropdown({
       displayName: 'Month',
-      description: 'The month that you would like to get the date and time of.',
+      description: 'The month that you would like to get the date and time of',
       options: {
         options: [
           { label: 'January', value: 1 },
@@ -46,7 +46,7 @@ export const nextDayofYear = createAction({
     day: Property.Number({
       displayName: 'Day of Month',
       description:
-        'The day of the month that you would like to get the date and time of.',
+        'The day of the month that you would like to get the date and time of',
       required: true,
       defaultValue: 1,
       validators: [Validators.minValue(1), Validators.maxValue(31)],
@@ -62,7 +62,7 @@ export const nextDayofYear = createAction({
     currentTime: Property.Checkbox({
       displayName: 'Use Current Time',
       description:
-        'If checked, the current time will be used instead of the time specified above.',
+        'If checked, the current time will be used instead of the time specified above',
       required: false,
       defaultValue: false,
     }),

@@ -9,7 +9,7 @@ import { makeGetRequest } from '../common/http-client';
 export const getCostSummaryAction = createAction({
   name: 'nops_get_cost_summary',
   displayName: 'Get Cost Summary',
-  description: 'Retrieve cost summary data with optional filters',
+  description: 'Get cost summary data with optional filters',
   auth: nopsAuth,
   isWriteAction: false,
   props: {

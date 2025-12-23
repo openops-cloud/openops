@@ -52,11 +52,11 @@ export type BlockProperty = InputProperty | BlockAuthProperty;
 
 export const BlockPropertyMap = Type.Record(
   Type.String({
-    description: 'Unique property name within the block.',
+    description: 'Unique property name within the block',
   }),
   BlockProperty,
   {
-    description: 'A mapping of property keys to their definitions.',
+    description: 'A mapping of property keys to their definitions',
   },
 );
 export interface BlockPropertyMap {
@@ -71,8 +71,8 @@ export interface InputPropertyMap {
 export type BlockPropValueSchema<T extends BlockProperty> = T extends undefined
   ? undefined
   : T extends { required: true }
-  ? T['valueSchema']
-  : T['valueSchema'] | undefined;
+    ? T['valueSchema']
+    : T['valueSchema'] | undefined;
 
 export type StaticPropsValue<T extends BlockPropertyMap> = {
   [P in keyof T]: BlockPropValueSchema<T[P]>;

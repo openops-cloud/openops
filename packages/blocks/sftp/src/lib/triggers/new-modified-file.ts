@@ -55,7 +55,7 @@ export const newOrModifiedFile = createTrigger({
   auth: sftpAuth,
   name: 'new_file',
   displayName: 'New File',
-  description: 'Trigger when a new file is created or modified.',
+  description: 'Trigger when a new file is created or modified',
   props: {
     path: Property.ShortText({
       displayName: 'Path',
@@ -64,8 +64,8 @@ export const newOrModifiedFile = createTrigger({
       defaultValue: './',
     }),
     ignoreHiddenFiles: Property.Checkbox({
-      displayName: 'Ignore hidden files',
-      description: 'Ignore hidden files',
+      displayName: 'Ignore Hidden Files',
+      description: 'Skip files that start with a dot',
       required: false,
       defaultValue: false,
     }),

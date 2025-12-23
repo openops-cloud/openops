@@ -6,7 +6,7 @@ import { httpAuth } from './lib/common/auth';
 
 export const http = createBlock({
   displayName: 'HTTP',
-  description: 'Sends HTTP requests and return responses',
+  description: 'Send HTTP requests and return responses',
   logoUrl: 'https://static.openops.com/blocks/http-block.svg',
   categories: [BlockCategory.CORE],
   auth: httpAuth,

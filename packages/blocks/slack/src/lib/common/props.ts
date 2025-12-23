@@ -7,7 +7,7 @@ import { getSlackChannels, getSlackUsers } from './slack-api-request';
 
 export const slackChannel = Property.Dropdown({
   displayName: 'Channel',
-  description: 'Channel, private group, or IM channel to send message to.',
+  description: 'Channel, private group, or IM channel to send message to',
   required: true,
   refreshers: ['auth'],
   async options({ auth }) {
@@ -47,7 +47,7 @@ export const user = Property.Dropdown<string>({
 
 export const usersAndChannels = Property.Dropdown<string>({
   displayName: 'Recipient Channel or User',
-  description: 'Channel or User to send the message to.',
+  description: 'Channel or User to send the message to',
   required: true,
   refreshers: ['auth'],
   async options({ auth }) {
@@ -101,7 +101,7 @@ export const username = Property.ShortText({
 });
 
 export const blocks = Property.Json({
-  displayName: 'Block Kit blocks',
+  displayName: 'Block Kit Blocks',
   description: 'See https://api.slack.com/block-kit for specs',
   required: false,
 });
@@ -133,11 +133,11 @@ export const actions = Property.Array({
   ],
   properties: {
     buttonText: Property.ShortText({
-      displayName: 'Button text',
+      displayName: 'Button Text',
       required: true,
     }),
     buttonStyle: Property.StaticDropdown({
-      displayName: 'Button color',
+      displayName: 'Button Color',
       required: false,
       defaultValue: '',
       options: {
@@ -149,13 +149,13 @@ export const actions = Property.Array({
       },
     }),
     confirmationPrompt: Property.Checkbox({
-      displayName: 'Add confirmation popup',
+      displayName: 'Add Confirmation Popup',
       required: false,
       defaultValue: false,
     }),
     confirmationPromptText: Property.LongText({
-      displayName: `Confirmation popup text`,
-      description: '',
+      displayName: `Confirmation Popup Text`,
+      description: 'Text to display in the confirmation popup dialog',
       required: false,
     }),
   },
@@ -163,14 +163,14 @@ export const actions = Property.Array({
 
 export const timeoutInDays = Property.Number({
   displayName: 'Wait Timeout in Days',
-  description: 'Number of days to wait for an action.',
+  description: 'Number of days to wait for an action',
   defaultValue: 3,
   required: true,
   validators: [Validators.minValue(1)],
 });
 
 export const unfurlLinksAndMedia = Property.Checkbox({
-  displayName: 'Unfurl links and media',
+  displayName: 'Unfurl Links and Media',
   description:
     'When enabled, Slack will automatically expand links and show media previews in the message. Disable to prevent link and media unfurling.',
   required: false,

@@ -24,7 +24,7 @@ export const rdsCreateSnapshotAction = createAction({
     snapshotId: Property.LongText({
       displayName: 'Snapshot Id',
       description:
-        'If not provided, it will be automatically generated using the DB instance ID combined with the current timestamp.',
+        'If not provided, it will be automatically generated using the DB instance ID combined with the current timestamp',
       required: false,
     }),
     tags: Property.Object({

@@ -12,7 +12,7 @@ export const getDefaultCommitmentPlansAction = createAction({
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',
-      description: 'The cloud provider to fetch default commitment plans for.',
+      description: 'The cloud provider to fetch default commitment plans for',
       required: true,
       options: {
         options: [

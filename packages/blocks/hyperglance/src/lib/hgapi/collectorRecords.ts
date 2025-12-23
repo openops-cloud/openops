@@ -8,7 +8,7 @@ import {
 
 export function getAliasDropdownProp() {
   return Property.Dropdown({
-    displayName: 'Account name',
+    displayName: 'Account Name',
     required: true,
     refreshers: ['auth', 'datasource'],
     options: async ({ auth, datasource }) => {
@@ -31,7 +31,7 @@ export function getAliasDropdownProp() {
 
 export function getAliasPlainTextProp() {
   return Property.ShortText({
-    displayName: 'Account name',
+    displayName: 'Account Name',
     required: true,
   });
 }

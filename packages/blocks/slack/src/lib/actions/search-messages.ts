@@ -9,13 +9,13 @@ import { slackAuth } from '../common/authentication';
 
 export const searchMessages = createAction({
   name: 'searchMessages',
-  displayName: 'Search messages',
-  description: 'Searches for messages matching a query',
+  displayName: 'Search Messages',
+  description: 'Search for messages matching a query',
   auth: slackAuth,
   isWriteAction: false,
   props: {
     query: Property.ShortText({
-      displayName: 'Search query',
+      displayName: 'Search Query',
       required: true,
     }),
   },

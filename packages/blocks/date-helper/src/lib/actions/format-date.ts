@@ -10,7 +10,7 @@ import {
 export const formatDateAction = createAction({
   name: 'format_date',
   displayName: 'Format Date',
-  description: 'Converts a date from one format to another',
+  description: 'Convert a date from one format to another',
   errorHandlingOptions: {
     continueOnFailure: {
       hide: true,

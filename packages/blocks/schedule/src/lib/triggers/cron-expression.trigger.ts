@@ -9,11 +9,11 @@ import { timezoneOptions } from '../common';
 export const cronExpressionTrigger = createTrigger({
   name: 'cron_expression',
   displayName: 'Cron Expression',
-  description: 'Trigger based on cron expression',
+  description: 'Trigger based on a cron expression schedule',
   props: {
     cronExpression: Property.ShortText({
       displayName: 'Cron Expression',
-      description: 'Cron expression to trigger',
+      description: 'The cron schedule pattern (e.g., 0/5 * * * * for every 5 minutes)',
       required: true,
       defaultValue: '0/5 * * * *',
     }),

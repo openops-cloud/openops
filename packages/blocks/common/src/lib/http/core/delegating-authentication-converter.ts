@@ -7,9 +7,7 @@ import {
 import { HttpHeader } from './http-header';
 import type { HttpHeaders } from './http-headers';
 
-export class DelegatingAuthenticationConverter
-  implements AuthenticationConverter<Authentication>
-{
+export class DelegatingAuthenticationConverter implements AuthenticationConverter<Authentication> {
   private readonly converters: Record<
     AuthenticationType,
     AuthenticationConverter<any>
@@ -31,9 +29,7 @@ export class DelegatingAuthenticationConverter
   }
 }
 
-class BearerTokenAuthenticationConverter
-  implements AuthenticationConverter<BearerTokenAuthentication>
-{
+class BearerTokenAuthenticationConverter implements AuthenticationConverter<BearerTokenAuthentication> {
   convert(
     authentication: BearerTokenAuthentication,
     headers: HttpHeaders,
@@ -43,9 +39,7 @@ class BearerTokenAuthenticationConverter
   }
 }
 
-class BasicTokenAuthenticationConverter
-  implements AuthenticationConverter<BasicAuthentication>
-{
+class BasicTokenAuthenticationConverter implements AuthenticationConverter<BasicAuthentication> {
   convert(
     authentication: BasicAuthentication,
     headers: HttpHeaders,
