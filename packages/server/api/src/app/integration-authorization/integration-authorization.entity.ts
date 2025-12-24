@@ -7,6 +7,7 @@ import {
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
+  JSONB_COLUMN_TYPE,
   OpenOpsIdSchema,
 } from '../database/database-common';
 
@@ -25,7 +26,7 @@ export const IntegrationAuthorizationEntity =
       projectId: OpenOpsIdSchema,
       organizationId: OpenOpsIdSchema,
       token: {
-        type: String,
+        type: JSONB_COLUMN_TYPE,
       },
       integrationName: {
         type: String,
@@ -45,7 +46,6 @@ export const IntegrationAuthorizationEntity =
       project: {
         type: 'many-to-one',
         target: 'project',
-        cascade: true,
         onDelete: 'CASCADE',
         joinColumn: {
           name: 'projectId',
@@ -55,7 +55,6 @@ export const IntegrationAuthorizationEntity =
       user: {
         type: 'many-to-one',
         target: 'user',
-        cascade: true,
         onDelete: 'CASCADE',
         joinColumn: {
           name: 'userId',
@@ -65,7 +64,6 @@ export const IntegrationAuthorizationEntity =
       organization: {
         type: 'many-to-one',
         target: 'organization',
-        cascade: true,
         onDelete: 'CASCADE',
         joinColumn: {
           name: 'organizationId',

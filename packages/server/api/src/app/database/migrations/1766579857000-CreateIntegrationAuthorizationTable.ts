@@ -15,7 +15,7 @@ export class CreateIntegrationAuthorizationTable1766579857000
         "userId" character varying(21) NOT NULL,
         "projectId" character varying(21) NOT NULL,
         "organizationId" character varying(21) NOT NULL,
-        "token" character varying NOT NULL,
+        "token" jsonb NOT NULL,
         "integrationName" character varying NOT NULL,
         "isRevoked" boolean NOT NULL DEFAULT false,
         CONSTRAINT "PK_integration_authorization_id" PRIMARY KEY ("id"),
