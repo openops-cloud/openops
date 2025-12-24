@@ -149,7 +149,7 @@ export const projectService = {
     await projectRepo().update(query, update);
   },
 
-  async ensureProjectUniqueForOrganization(params: {
+  async projectExistsInOrganization(params: {
     organizationId: string;
     displayName: string;
   }): Promise<boolean> {
