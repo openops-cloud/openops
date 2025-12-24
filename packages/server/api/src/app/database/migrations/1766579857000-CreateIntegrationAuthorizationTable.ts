@@ -17,7 +17,6 @@ export class CreateIntegrationAuthorizationTable1766579857000
         "organizationId" character varying(21) NOT NULL,
         "token" character varying NOT NULL,
         "integrationName" character varying NOT NULL,
-        "name" character varying NOT NULL,
         "isRevoked" boolean NOT NULL DEFAULT false,
         CONSTRAINT "PK_integration_authorization_id" PRIMARY KEY ("id"),
         CONSTRAINT "fk_integration_authorization_user_id" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE CASCADE,
@@ -27,7 +26,7 @@ export class CreateIntegrationAuthorizationTable1766579857000
     `);
 
     await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS "idx_integration_authorization_project_id_and_name" ON "integration_authorization" ("projectId", "name")
+      CREATE INDEX IF NOT EXISTS "idx_integration_authorization_project_id_and_integration_name" ON "integration_authorization" ("projectId", "integrationName")
     `);
 
     logger.info('CreateIntegrationAuthorizationTable1766579857000: completed');

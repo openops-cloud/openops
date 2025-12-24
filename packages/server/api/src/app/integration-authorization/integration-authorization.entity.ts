@@ -30,9 +30,6 @@ export const IntegrationAuthorizationEntity =
       integrationName: {
         type: String,
       },
-      name: {
-        type: String,
-      },
       isRevoked: {
         type: Boolean,
         default: false,
@@ -40,8 +37,8 @@ export const IntegrationAuthorizationEntity =
     },
     indices: [
       {
-        name: 'idx_integration_authorization_project_id_and_name',
-        columns: ['projectId', 'name'],
+        name: 'idx_integration_authorization_project_id_and_integration_name',
+        columns: ['projectId', 'integrationName'],
       },
     ],
     relations: {

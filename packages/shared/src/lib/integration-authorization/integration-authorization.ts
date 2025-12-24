@@ -9,7 +9,6 @@ export const IntegrationAuthorization = Type.Object({
   organizationId: OpenOpsId,
   token: Type.String(),
   integrationName: Type.String(),
-  name: Type.String(),
   isRevoked: Type.Boolean(),
 });
 
