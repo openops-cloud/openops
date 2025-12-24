@@ -36,7 +36,7 @@ export const integrationAuthorizationController: FastifyPluginAsyncTypebox =
         integrationName: request.body.integrationName,
       });
 
-      return response.status(200).send();
+      return response.status(204).send();
     });
   };
 
@@ -84,7 +84,7 @@ const RevokeIntegrationRequest = {
       integrationName: Type.Enum(IntegrationName),
     }),
     response: {
-      200: Type.Null(),
+      204: Type.Null(),
     },
   },
 };
