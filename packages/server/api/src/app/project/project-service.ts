@@ -148,6 +148,17 @@ export const projectService = {
 
     await projectRepo().update(query, update);
   },
+
+  async ensureProjectUniqueForOrganization(params: {
+    organizationId: string;
+    displayName: string;
+  }): Promise<boolean> {
+    return projectRepo().existsBy({
+      displayName: params.displayName,
+      organizationId: params.organizationId,
+      deleted: IsNull(),
+    });
+  },
 };
 
 type UpdateParams = {
