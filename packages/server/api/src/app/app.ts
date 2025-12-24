@@ -52,6 +52,7 @@ import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
 import { systemJobsSchedule } from './helper/system-jobs';
+import { integrationAuthorizationModule } from './integration-authorization/integration-authorization.module';
 import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
 import { slackInteractionModule } from './slack/slack-interaction-module';
@@ -204,6 +205,7 @@ export const setupApp = async (
   await app.register(webhookModule);
   await app.register(appConnectionModule);
   await app.register(triggerEventModule);
+  await app.register(integrationAuthorizationModule);
   await app.register(appEventRoutingModule);
   await app.register(userModule);
   await app.register(authenticationModule);
