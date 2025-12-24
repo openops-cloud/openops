@@ -20,6 +20,14 @@ export const integrationAuthorizationController: FastifyPluginAsyncTypebox =
         integrationName: request.body.integrationName,
       });
     });
+
+    app.get('/exists', GetIntegrationRequest, async (request) => {
+      return integrationAuthorizationService.exists({
+        userId: request.principal.id,
+        projectId: request.principal.projectId,
+        integrationName: request.query.integrationName,
+      });
+    });
   };
 
 const ConnectIntegrationRequest = {
@@ -34,6 +42,23 @@ const ConnectIntegrationRequest = {
     response: {
       200: Type.Object({
         token: Type.String(),
+      }),
+    },
+  },
+};
+
+const GetIntegrationRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    description: 'Check if integration token exists and not revoked',
+    querystring: Type.Object({
+      integrationName: Type.Enum(IntegrationName),
+    }),
+    response: {
+      200: Type.Object({
+        exists: Type.Boolean(),
       }),
     },
   },

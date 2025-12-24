@@ -2,11 +2,13 @@
 
 import { jest } from '@jest/globals';
 const saveMock = jest.fn();
+const findOneByMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...(jest.requireActual('../../../src/app/core/db/repo-factory') as any),
   repoFactory: () => () => ({
     save: saveMock,
+    findOneBy: findOneByMock,
   }),
 }));
 
@@ -89,6 +91,52 @@ describe('IntegrationAuthorizationService', () => {
         isRevoked: false,
       });
       expect(result).toEqual({ token: generatedToken });
+    });
+  });
+
+  describe('exists', () => {
+    it('should return true if a non-revoked authorization exists', async () => {
+      const userId = 'user-id';
+      const projectId = 'project-id';
+      const integrationName = IntegrationName.SLACK_BOT;
+
+      (findOneByMock as any).mockResolvedValue({ id: 'auth-id' });
+
+      const result = await integrationAuthorizationService.exists({
+        userId,
+        projectId,
+        integrationName,
+      });
+
+      expect(findOneByMock).toHaveBeenCalledWith({
+        userId,
+        projectId,
+        integrationName,
+        isRevoked: false,
+      });
+      expect(result).toEqual({ exists: true });
+    });
+
+    it('should return false if no non-revoked authorization exists', async () => {
+      const userId = 'user-id';
+      const projectId = 'project-id';
+      const integrationName = IntegrationName.SLACK_BOT;
+
+      findOneByMock.mockResolvedValue(null as never);
+
+      const result = await integrationAuthorizationService.exists({
+        userId,
+        projectId,
+        integrationName,
+      });
+
+      expect(findOneByMock).toHaveBeenCalledWith({
+        userId,
+        projectId,
+        integrationName,
+        isRevoked: false,
+      });
+      expect(result).toEqual({ exists: false });
     });
   });
 });

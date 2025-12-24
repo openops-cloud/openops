@@ -34,10 +34,34 @@ export const integrationAuthorizationService = {
       token,
     };
   },
+  async exists({
+    userId,
+    projectId,
+    integrationName,
+  }: ExistsParams): Promise<{ exists: boolean }> {
+    const repo = integrationAuthorizationRepo();
+
+    const auth = await repo.findOneBy({
+      userId,
+      projectId,
+      integrationName,
+      isRevoked: false,
+    });
+
+    return {
+      exists: !!auth,
+    };
+  },
 };
 
 type ConnectParams = {
   principal: Principal;
   userToken: string;
+  integrationName: IntegrationName;
+};
+
+type ExistsParams = {
+  userId: string;
+  projectId: string;
   integrationName: IntegrationName;
 };
