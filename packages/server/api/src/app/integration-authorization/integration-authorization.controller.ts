@@ -28,6 +28,16 @@ export const integrationAuthorizationController: FastifyPluginAsyncTypebox =
         integrationName: request.query.integrationName,
       });
     });
+
+    app.delete('/', RevokeIntegrationRequest, async (request, response) => {
+      await integrationAuthorizationService.revoke({
+        userId: request.principal.id,
+        projectId: request.principal.projectId,
+        integrationName: request.body.integrationName,
+      });
+
+      return response.status(200).send();
+    });
   };
 
 const ConnectIntegrationRequest = {
@@ -60,6 +70,21 @@ const GetIntegrationRequest = {
       200: Type.Object({
         exists: Type.Boolean(),
       }),
+    },
+  },
+};
+
+const RevokeIntegrationRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    description: 'Revoke integration token',
+    body: Type.Object({
+      integrationName: Type.Enum(IntegrationName),
+    }),
+    response: {
+      200: Type.Null(),
     },
   },
 };

@@ -3,12 +3,14 @@
 import { jest } from '@jest/globals';
 const saveMock = jest.fn();
 const findOneByMock = jest.fn();
+const updateMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...(jest.requireActual('../../../src/app/core/db/repo-factory') as any),
   repoFactory: () => () => ({
     save: saveMock,
     findOneBy: findOneByMock,
+    update: updateMock,
   }),
 }));
 
@@ -137,6 +139,32 @@ describe('IntegrationAuthorizationService', () => {
         isRevoked: false,
       });
       expect(result).toEqual({ exists: false });
+    });
+  });
+
+  describe('revoke', () => {
+    it('should update the integration authorization as revoked', async () => {
+      const userId = 'user-id';
+      const projectId = 'project-id';
+      const integrationName = IntegrationName.SLACK_BOT;
+
+      await integrationAuthorizationService.revoke({
+        userId,
+        projectId,
+        integrationName,
+      });
+
+      expect(updateMock).toHaveBeenCalledWith(
+        {
+          userId,
+          projectId,
+          integrationName,
+          isRevoked: false,
+        },
+        {
+          isRevoked: true,
+        },
+      );
     });
   });
 });
