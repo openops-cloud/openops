@@ -30,3 +30,13 @@ export type EnginePrincipal = {
   queueToken: string | undefined;
   projectId: ProjectId;
 };
+
+export type TokenGeneratorPrincipal = {
+  id: OpenOpsId;
+  userId: OpenOpsId;
+  type: PrincipalType.TOKEN_GENERATOR;
+  projectId: ProjectId;
+  organization: {
+    id: OpenOpsId;
+  };
+};

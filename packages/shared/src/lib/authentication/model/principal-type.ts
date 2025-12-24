@@ -3,6 +3,7 @@ export enum PrincipalType {
   ENGINE = 'ENGINE',
   SERVICE = 'SERVICE',
   WORKER = 'WORKER',
+  TOKEN_GENERATOR = 'TOKEN_GENERATOR',
   UNKNOWN = 'UNKNOWN',
 }
 
