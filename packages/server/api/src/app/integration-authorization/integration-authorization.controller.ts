@@ -52,7 +52,7 @@ const GetIntegrationRequest = {
     allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
-    description: 'Check if integration token exists and not revoked',
+    description: 'Check if integration token exists and is not revoked',
     querystring: Type.Object({
       integrationName: Type.Enum(IntegrationName),
     }),
