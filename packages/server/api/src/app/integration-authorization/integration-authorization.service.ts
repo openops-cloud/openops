@@ -52,6 +52,25 @@ export const integrationAuthorizationService = {
       exists: !!auth,
     };
   },
+  async revoke({
+    userId,
+    projectId,
+    integrationName,
+  }: RevokeParams): Promise<void> {
+    const repo = integrationAuthorizationRepo();
+
+    await repo.update(
+      {
+        userId,
+        projectId,
+        integrationName,
+        isRevoked: false,
+      },
+      {
+        isRevoked: true,
+      },
+    );
+  },
 };
 
 type ConnectParams = {
@@ -61,6 +80,12 @@ type ConnectParams = {
 };
 
 type ExistsParams = {
+  userId: string;
+  projectId: string;
+  integrationName: IntegrationName;
+};
+
+type RevokeParams = {
   userId: string;
   projectId: string;
   integrationName: IntegrationName;
