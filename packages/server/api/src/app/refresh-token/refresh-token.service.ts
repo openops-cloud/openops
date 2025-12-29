@@ -2,14 +2,13 @@ import { cryptoUtils } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
+  GeneratedRefreshToken,
   openOpsId,
-  RefreshToken,
   RefreshTokenClient,
   RefreshTokenClientPrincipals,
 } from '@openops/shared';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
 import { repoFactory } from '../core/db/repo-factory';
-import { jwtUtils } from '../helper/jwt-utils';
 import { RefreshTokenEntity } from './refresh-token.entity';
 
 export const refreshTokenRepo = repoFactory(RefreshTokenEntity);
@@ -21,7 +20,7 @@ export const refreshTokenService = {
     organizationId,
     client,
     userToken,
-  }: SaveParams): Promise<{ token: string; expirationTime: string }> {
+  }: SaveParams): Promise<GeneratedRefreshToken> {
     const principalTemplate = RefreshTokenClientPrincipals[client];
 
     if (!principalTemplate) {
@@ -33,21 +32,17 @@ export const refreshTokenService = {
       });
     }
 
-    const refreshToken = await accessTokenManager.generateTokenGeneratorToken(
-      userToken,
-    );
+    const { token, expirationTime } =
+      await accessTokenManager.generateTokenGeneratorToken(userToken);
 
-    const decoded = jwtUtils.decode<{ exp: number }>({ jwt: refreshToken });
-    const expirationTime = new Date(decoded.payload.exp * 1000).toISOString();
-
-    const hashedToken = cryptoUtils.hashSHA256(refreshToken);
+    const hashedToken = cryptoUtils.hashSHA256(token);
 
     await refreshTokenRepo().save({
       id: openOpsId(),
       userId,
       projectId,
       client,
-      refresh_token: hashedToken,
+      refreshToken: hashedToken,
       principal: {
         ...principalTemplate,
         projectId,
@@ -55,12 +50,12 @@ export const refreshTokenService = {
           id: organizationId,
         },
       },
-      is_revoked: false,
+      isRevoked: false,
       expirationTime,
     });
 
     return {
-      token: refreshToken,
+      token,
       expirationTime,
     };
   },

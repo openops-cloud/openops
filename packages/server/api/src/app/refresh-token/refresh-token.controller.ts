@@ -3,8 +3,8 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  GeneratedRefreshToken,
   PrincipalType,
-  RefreshToken,
   RefreshTokenClient,
 } from '@openops/shared';
 import { refreshTokenService } from './refresh-token.service';
@@ -33,7 +33,7 @@ const CreateRefreshTokenRequest = {
       client: Type.Enum(RefreshTokenClient),
     }),
     response: {
-      200: RefreshToken,
+      200: GeneratedRefreshToken,
     },
   },
 };

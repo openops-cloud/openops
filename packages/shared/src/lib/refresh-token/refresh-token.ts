@@ -17,6 +17,13 @@ export const RefreshToken = Type.Object({
 
 export type RefreshToken = Static<typeof RefreshToken> & BaseModel<OpenOpsId>;
 
+export const GeneratedRefreshToken = Type.Object({
+  token: Type.String(),
+  expirationTime: Nullable(Type.String()),
+});
+
+export type GeneratedRefreshToken = Static<typeof GeneratedRefreshToken>;
+
 export enum RefreshTokenClient {
   SLACK_BOT = 'SLACK_BOT',
 }
