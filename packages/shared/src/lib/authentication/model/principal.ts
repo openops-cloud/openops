@@ -13,6 +13,15 @@ export type Principal = {
   };
 };
 
+export type AiBotPrincipal = {
+  id: OpenOpsId;
+  type: PrincipalType.AI_CLIENT;
+  projectId: ProjectId;
+  organization: {
+    id: OpenOpsId;
+  };
+};
+
 export type WorkerPrincipal = {
   id: OpenOpsId;
   type: PrincipalType.WORKER;

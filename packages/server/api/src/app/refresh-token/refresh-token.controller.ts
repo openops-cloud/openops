@@ -2,7 +2,11 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { PrincipalType, RefreshToken } from '@openops/shared';
+import {
+  PrincipalType,
+  RefreshToken,
+  RefreshTokenClient,
+} from '@openops/shared';
 import { refreshTokenService } from './refresh-token.service';
 
 export const refreshTokenController: FastifyPluginAsyncTypebox = async (
@@ -10,7 +14,9 @@ export const refreshTokenController: FastifyPluginAsyncTypebox = async (
 ) => {
   app.post('/', CreateRefreshTokenRequest, async (request) => {
     return refreshTokenService.save({
-      principal: request.principal,
+      userId: request.principal.id,
+      projectId: request.principal.projectId,
+      organizationId: request.principal.organization.id,
       client: request.body.client,
       userToken: request.headers.authorization!.split(' ')[1],
     });
@@ -24,7 +30,7 @@ const CreateRefreshTokenRequest = {
   schema: {
     description: 'Create a new refresh token',
     body: Type.Object({
-      client: Type.String(),
+      client: Type.Enum(RefreshTokenClient),
     }),
     response: {
       200: RefreshToken,

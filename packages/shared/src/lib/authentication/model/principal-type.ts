@@ -4,6 +4,7 @@ export enum PrincipalType {
   SERVICE = 'SERVICE',
   WORKER = 'WORKER',
   TOKEN_GENERATOR = 'TOKEN_GENERATOR',
+  AI_CLIENT = 'AI_CLIENT',
   UNKNOWN = 'UNKNOWN',
 }
 
