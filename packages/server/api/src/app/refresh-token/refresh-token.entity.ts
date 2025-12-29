@@ -21,17 +21,18 @@ export const RefreshTokenEntity = new EntitySchema<RefreshTokenSchema>({
     client: {
       type: String,
     },
-    refresh_token: {
+    refreshToken: {
       type: String,
+      unique: true,
     },
     principal: {
       type: JSONB_COLUMN_TYPE,
     },
-    is_revoked: {
+    isRevoked: {
       type: Boolean,
       default: false,
     },
-    revoked_at: {
+    revokedAt: {
       type: TIMESTAMP_COLUMN_TYPE,
       nullable: true,
     },
@@ -44,6 +45,12 @@ export const RefreshTokenEntity = new EntitySchema<RefreshTokenSchema>({
     {
       name: 'idx_refresh_token_project_id_and_client',
       columns: ['projectId', 'client'],
+    },
+    {
+      name: 'idx_refresh_token_token_project_user_client_active',
+      columns: ['refreshToken', 'projectId', 'userId', 'client'],
+      unique: true,
+      where: '"isRevoked" = false',
     },
   ],
   relations: {

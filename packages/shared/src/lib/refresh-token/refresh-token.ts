@@ -7,10 +7,10 @@ export const RefreshToken = Type.Object({
   projectId: OpenOpsId,
   userId: OpenOpsId,
   client: Type.String(),
-  refresh_token: Type.String(),
+  refreshToken: Type.String(),
   principal: Type.Any(),
-  is_revoked: Type.Boolean(),
-  revoked_at: Nullable(Type.String()),
+  isRevoked: Type.Boolean(),
+  revokedAt: Nullable(Type.String()),
   expirationTime: Nullable(Type.String()),
 });
 
