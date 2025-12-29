@@ -1,7 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModel, BaseModelSchema, Nullable } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
-import { EncryptedObject } from '../common/security/encrypted-object';
 
 export const RefreshToken = Type.Object({
   ...BaseModelSchema,
