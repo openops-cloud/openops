@@ -1,3 +1,4 @@
+import { cryptoUtils } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -20,7 +21,7 @@ export const refreshTokenService = {
     organizationId,
     client,
     userToken,
-  }: SaveParams): Promise<RefreshToken> {
+  }: SaveParams): Promise<{ token: string; expirationTime: string }> {
     const principalTemplate = RefreshTokenClientPrincipals[client];
 
     if (!principalTemplate) {
@@ -39,12 +40,14 @@ export const refreshTokenService = {
     const decoded = jwtUtils.decode<{ exp: number }>({ jwt: refreshToken });
     const expirationTime = new Date(decoded.payload.exp * 1000).toISOString();
 
-    return refreshTokenRepo().save({
+    const hashedToken = cryptoUtils.hashSHA256(refreshToken);
+
+    await refreshTokenRepo().save({
       id: openOpsId(),
       userId,
       projectId,
       client,
-      refresh_token: refreshToken,
+      refresh_token: hashedToken,
       principal: {
         ...principalTemplate,
         projectId,
@@ -55,6 +58,11 @@ export const refreshTokenService = {
       is_revoked: false,
       expirationTime,
     });
+
+    return {
+      token: refreshToken,
+      expirationTime,
+    };
   },
 };
 
