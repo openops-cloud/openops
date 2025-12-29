@@ -3,16 +3,24 @@
 import { jest } from '@jest/globals';
 
 jest.mock('@openops/shared', () => {
+  const actual = jest.requireActual('@openops/shared') as any;
   return {
-    __esModule: true,
-    ...(jest.requireActual('@openops/shared') as any),
+    ...actual,
     openOpsId: jest.fn(),
+    RefreshTokenClient: {
+      SLACK_BOT: 'SLACK_BOT',
+    },
+    RefreshTokenClientPrincipals: {
+      SLACK_BOT: {
+        id: 'slack-bot',
+        type: 'AI_CLIENT',
+      },
+    },
   };
 });
 
 const saveMock = jest.fn<any>();
 const generateTokenGeneratorTokenMock = jest.fn<any>();
-const decodeMock = jest.fn<any>();
 const getOrganizationIdMock = jest.fn<any>();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
@@ -37,32 +45,12 @@ jest.mock(
   }),
 );
 
-jest.mock('../../../src/app/helper/jwt-utils', () => ({
-  jwtUtils: {
-    decode: decodeMock,
-  },
-}));
-
 jest.mock('@openops/server-shared', () => ({
   ...(jest.requireActual('@openops/server-shared') as any),
   cryptoUtils: {
     hashSHA256: jest.fn(),
   },
 }));
-
-jest.mock('@openops/shared', () => {
-  const actual = jest.requireActual('@openops/shared') as any;
-  return {
-    ...actual,
-    openOpsId: jest.fn(),
-    RefreshTokenClientPrincipals: {
-      SLACK_BOT: {
-        id: 'slack-bot',
-        type: 'AI_CLIENT',
-      },
-    },
-  };
-});
 
 import { cryptoUtils } from '@openops/server-shared';
 import {
@@ -97,9 +85,11 @@ describe('RefreshTokenService', () => {
       const exp = Math.floor(new Date(expirationTime).getTime() / 1000);
 
       mockOpenOpsId.mockReturnValue(newId);
-      generateTokenGeneratorTokenMock.mockResolvedValue(generatedToken);
+      generateTokenGeneratorTokenMock.mockResolvedValue({
+        token: generatedToken,
+        expirationTime,
+      });
       (cryptoUtils.hashSHA256 as jest.Mock).mockReturnValue(hashedToken);
-      decodeMock.mockReturnValue({ payload: { exp } });
       getOrganizationIdMock.mockResolvedValue(principal.organization.id);
 
       const aiClient = {
@@ -116,9 +106,9 @@ describe('RefreshTokenService', () => {
         userId: principal.id,
         projectId: principal.projectId,
         client,
-        refresh_token: generatedToken,
+        refreshToken: generatedToken,
         principal,
-        is_revoked: false,
+        isRevoked: false,
         expirationTime,
       });
 
@@ -131,16 +121,15 @@ describe('RefreshTokenService', () => {
       });
 
       expect(generateTokenGeneratorTokenMock).toHaveBeenCalledWith(userToken);
-      expect(decodeMock).toHaveBeenCalledWith({ jwt: generatedToken });
       expect(cryptoUtils.hashSHA256).toHaveBeenCalledWith(generatedToken);
       expect(saveMock).toHaveBeenCalledWith({
         id: newId,
         userId: principal.id,
         projectId: principal.projectId,
         client,
-        refresh_token: hashedToken,
+        refreshToken: hashedToken,
         principal: aiClient,
-        is_revoked: false,
+        isRevoked: false,
         expirationTime,
       });
       expect(result).toEqual({
