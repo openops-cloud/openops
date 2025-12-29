@@ -32,7 +32,7 @@ export class CreateRefreshTokenTable1766579857000
     `);
 
     await queryRunner.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS "idx_refresh_token_token_project_user_client_active" ON "refresh_token" ("refreshToken", "projectId", "userId", "client") WHERE "isRevoked" = false
+      CREATE UNIQUE INDEX IF NOT EXISTS "idx_refresh_token_token_project_user_client_active" ON "refresh_token" ("projectId", "userId", "client") WHERE "isRevoked" = false
     `);
 
     logger.info('CreateRefreshTokenTable1766579857000: completed');
