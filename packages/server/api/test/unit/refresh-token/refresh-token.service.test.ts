@@ -82,7 +82,6 @@ describe('RefreshTokenService', () => {
       const hashedToken = 'hashed-token';
       const newId = 'new-id';
       const expirationTime = '2025-12-29T12:00:00.000Z';
-      const exp = Math.floor(new Date(expirationTime).getTime() / 1000);
 
       mockOpenOpsId.mockReturnValue(newId);
       generateTokenGeneratorTokenMock.mockResolvedValue({
