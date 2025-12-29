@@ -21,9 +21,9 @@ import { FlowEntity } from '../flows/flow/flow.entity';
 import { FolderEntity } from '../flows/folder/folder.entity';
 import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 import { TriggerEventEntity } from '../flows/trigger-events/trigger-event.entity';
-import { IntegrationAuthorizationEntity } from '../integration-authorization/integration-authorization.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
+import { RefreshTokenEntity } from '../refresh-token/refresh-token.entity';
 import { StoreEntryEntity } from '../store-entry/store-entry-entity';
 import { UserSettingsEntity } from '../user-settings/user-settings-entity';
 import { UserEntity } from '../user/user-entity';
@@ -57,7 +57,7 @@ function getEntities(): EntitySchema<unknown>[] {
     AiConfigEntity,
     McpConfigEntity,
     FlowStepTestOutputEntity,
-    IntegrationAuthorizationEntity,
+    RefreshTokenEntity,
   ];
 
   return entities;
