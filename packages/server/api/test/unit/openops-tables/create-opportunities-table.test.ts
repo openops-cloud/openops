@@ -28,7 +28,7 @@ describe('createOpportunityTable', () => {
     openopsCommonMock.makeOpenOpsTablesPost.mockReturnValue({ id: 1 });
 
     await createOpportunitiesTable({
-      token: 'some token',
+      bearerToken: 'some token',
       tablesDatabaseId: 2,
     });
 
@@ -143,7 +143,7 @@ describe('createOpportunityTable', () => {
     openopsCommonMock.getFields.mockRejectedValue(new Error('some error'));
 
     await expect(
-      createOpportunitiesTable({ token: 'some token', tablesDatabaseId: 2 }),
+      createOpportunitiesTable({ bearerToken: 'some token', tablesDatabaseId: 2 }),
     ).rejects.toThrow('some error');
   });
 });

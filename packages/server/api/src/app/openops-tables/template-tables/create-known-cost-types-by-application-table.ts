@@ -14,7 +14,7 @@ export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
   'Known cost types by application';
 
 export async function createKnownCostTypesByApplicationTable({
-  token,
+  bearerToken,
   tablesDatabaseId,
 }: TablesContext) {
   logger.debug(
@@ -25,10 +25,10 @@ export async function createKnownCostTypesByApplicationTable({
     tablesDatabaseId,
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
     [['ID']],
-    token,
+    bearerToken,
   );
 
-  const fields = await getFields(table.id, token);
+  const fields = await getFields(table.id, bearerToken);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -40,24 +40,24 @@ export async function createKnownCostTypesByApplicationTable({
       name: 'ID',
       type: 'uuid',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(bearerToken),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Verified',
     type: 'boolean',
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Total Cost',
     type: 'number',
     number_decimal_places: 10,
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Total Consumed Quantity',
     type: 'number',
     number_decimal_places: 0,
@@ -66,7 +66,7 @@ export async function createKnownCostTypesByApplicationTable({
   const fieldNames = ['Application', 'SKU id', 'Service Category'];
 
   for (const fieldName of fieldNames) {
-    await addField(token, table.id, { name: fieldName, type: 'text' });
+    await addField(bearerToken, table.id, { name: fieldName, type: 'text' });
   }
 
   logger.debug(

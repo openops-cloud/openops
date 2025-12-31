@@ -6,7 +6,6 @@ import {
   SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-auto-instances-shutdown-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const AUTO_INSTANCES_SHUTDOWN_TABLE_SEED = 'AUTOINSTANCESSHUTDOWN';
@@ -36,13 +35,14 @@ export const seedAutoInstancesShutdownTable = async (): Promise<void> => {
     return;
   }
 
+  const tablesContext = await getAdminTablesContext();
+
   const table = await getTableByName(
     SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
-    await getDefaultProjectTablesDatabaseToken(),
+    tablesContext,
   );
 
   if (!table) {
-    const tablesContext = await getAdminTablesContext();
     await createAutoInstancesShutdownTable(tablesContext);
   }
 

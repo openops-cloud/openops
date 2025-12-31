@@ -13,7 +13,7 @@ export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
   'Auto instances shutdown';
 
 export async function createAutoInstancesShutdownTable({
-  token,
+  bearerToken,
   tablesDatabaseId,
 }: TablesContext): Promise<void> {
   logger.debug(
@@ -24,10 +24,10 @@ export async function createAutoInstancesShutdownTable({
     tablesDatabaseId,
     SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
     [['Resource ID']],
-    token,
+    bearerToken,
   );
 
-  const fields = await getFields(table.id, token);
+  const fields = await getFields(table.id, bearerToken);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -39,13 +39,13 @@ export async function createAutoInstancesShutdownTable({
       name: 'Resource ID',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(bearerToken),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Shutdown time',
     type: 'date',
     date_format: 'ISO',
@@ -55,7 +55,7 @@ export async function createAutoInstancesShutdownTable({
   const fieldNames = ['Cloud provider', 'Workflow', 'Status'];
 
   for (const fieldName of fieldNames) {
-    await addField(token, table.id, { name: fieldName, type: 'text' });
+    await addField(bearerToken, table.id, { name: fieldName, type: 'text' });
   }
 
   logger.debug(

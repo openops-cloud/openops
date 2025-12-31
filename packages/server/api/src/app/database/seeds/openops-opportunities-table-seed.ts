@@ -6,7 +6,6 @@ import {
   SEED_OPENOPS_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
@@ -36,13 +35,11 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
     return;
   }
 
-  const table = await getTableByName(
-    SEED_OPENOPS_TABLE_NAME,
-    await getDefaultProjectTablesDatabaseToken(),
-  );
+  const tablesContext = await getAdminTablesContext();
+
+  const table = await getTableByName(SEED_OPENOPS_TABLE_NAME, tablesContext);
 
   if (!table) {
-    const tablesContext = await getAdminTablesContext();
     await createOpportunitiesTable(tablesContext);
   }
 

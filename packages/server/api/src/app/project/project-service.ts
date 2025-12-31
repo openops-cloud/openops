@@ -114,6 +114,18 @@ export const projectService = {
     });
   },
 
+  async getAdminProject(
+    ownerId: UserId,
+    organizationId: OpenOpsId,
+  ): Promise<Project | null> {
+    // assertNotNullOrUndefined(user.organizationId, 'user.organizationId');
+    return projectRepo().findOneBy({
+      ownerId,
+      organizationId,
+      deleted: IsNull(),
+    });
+  },
+
   async getUserProjectOrThrow(ownerId: UserId): Promise<Project> {
     const project = await projectRepo().findOneBy({
       ownerId,

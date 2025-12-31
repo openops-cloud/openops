@@ -6,7 +6,6 @@ import {
   SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-known-cost-types-by-application-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const KNOWN_COST_TYPES_BY_APPLICATION = 'KNOWNCOSTTYPES';
@@ -36,13 +35,14 @@ export const seedKnownCostTypesByApplicationTable = async (): Promise<void> => {
     return;
   }
 
+  const tablesContext = await getAdminTablesContext();
+
   const table = await getTableByName(
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
-    await getDefaultProjectTablesDatabaseToken(),
+    tablesContext,
   );
 
   if (!table) {
-    const tablesContext = await getAdminTablesContext();
     await createKnownCostTypesByApplicationTable(tablesContext);
   }
 

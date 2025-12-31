@@ -13,7 +13,7 @@ import { TablesContext } from './types';
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
 export async function createOpportunitiesTable({
-  token,
+  bearerToken,
   tablesDatabaseId,
 }: TablesContext) {
   logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
@@ -22,10 +22,10 @@ export async function createOpportunitiesTable({
     tablesDatabaseId,
     SEED_OPENOPS_TABLE_NAME,
     [['ID']],
-    token,
+    bearerToken,
   );
 
-  const fields = await getFields(table.id, token);
+  const fields = await getFields(table.id, bearerToken);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -37,13 +37,13 @@ export async function createOpportunitiesTable({
       name: 'ID',
       type: 'uuid',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(bearerToken),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Status',
     type: 'single_select',
     select_options: [
@@ -56,7 +56,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Opportunity Type',
     type: 'single_select',
     select_options: [
@@ -66,7 +66,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Estimated savings USD per month',
     type: 'number',
     number_decimal_places: 2,
@@ -85,10 +85,10 @@ export async function createOpportunitiesTable({
   ];
 
   for (const fieldName of fieldNames) {
-    await addField(token, table.id, { name: fieldName, type: 'text' });
+    await addField(bearerToken, table.id, { name: fieldName, type: 'text' });
   }
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Complexity',
     type: 'single_select',
     select_options: [
@@ -100,7 +100,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Risk',
     type: 'single_select',
     select_options: [
@@ -110,31 +110,31 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Opportunity details',
     type: 'long_text',
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Snoozed until',
     type: 'date',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Resolution notes',
     type: 'long_text',
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Creation time',
     type: 'created_on',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await addField(token, table.id, {
+  await addField(bearerToken, table.id, {
     name: 'Last modified time',
     type: 'last_modified',
     date_format: 'ISO',

@@ -6,15 +6,19 @@ import { createTagOwnerMappingTable } from './create-tag-owner-mapping-table';
 import { TablesContext } from './types';
 
 export async function createBaseTemplateTables({
-  token,
+  bearerToken,
   tablesDatabaseId,
 }: TablesContext): Promise<void> {
-  const buTable = await createBusinessUnitsTable(tablesDatabaseId, token);
-  await createTagOwnerMappingTable(tablesDatabaseId, token, buTable.tableId);
-  await createIdleEbsVolumesToDeleteTable(tablesDatabaseId, token);
+  const buTable = await createBusinessUnitsTable(tablesDatabaseId, bearerToken);
+  await createTagOwnerMappingTable(
+    tablesDatabaseId,
+    bearerToken,
+    buTable.tableId,
+  );
+  await createIdleEbsVolumesToDeleteTable(tablesDatabaseId, bearerToken);
   await createResourceBuTagAssignmentTable(
     tablesDatabaseId,
-    token,
+    bearerToken,
     buTable.tableId,
   );
 

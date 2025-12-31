@@ -13,7 +13,7 @@ export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
 
 export async function createAggregatedCostsTable({
-  token,
+  bearerToken,
   tablesDatabaseId,
 }: TablesContext): Promise<{ tableId: number }> {
   logger.debug(`${SEED_LOG_HEADER} Start`);
@@ -22,10 +22,10 @@ export async function createAggregatedCostsTable({
     tablesDatabaseId,
     SEED_TABLE_NAME,
     [['Group Key']],
-    token,
+    bearerToken,
   );
 
-  await addFields(token, table.id);
+  await addFields(bearerToken, table.id);
 
   logger.debug(`${SEED_LOG_HEADER} Done`);
 

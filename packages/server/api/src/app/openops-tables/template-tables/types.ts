@@ -1,4 +1,4 @@
 export type TablesContext = {
-  token: string;
+  bearerToken: string;
   tablesDatabaseId: number;
 };

@@ -14,7 +14,10 @@ export const getDefaultProjectTablesDatabaseToken =
       throw new Error('Default user not found');
     }
 
-    const project = await projectService.getOneForUser(defaultUser);
+    const project = await projectService.getAdminProject(
+      defaultUser.id,
+      defaultUser.organizationId!,
+    );
     if (!project) {
       throw new Error('Project not found');
     }

@@ -20,7 +20,7 @@ export function registerTemplateTablesCreationJobHandler(): void {
       );
       await createAllTemplateTables({
         tablesDatabaseId: data.tablesDatabaseId,
-        token,
+        bearerToken: token,
       });
     },
   );
