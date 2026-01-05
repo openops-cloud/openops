@@ -127,7 +127,8 @@ const sendMessageAskingForAction = async (
         },
         baseUrl,
       );
-      action.url = `/html/resume_execution.html?isTest=${
+      const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
+      action.url = `${normalizedBaseUrl}/html/resume_execution.html?isTest=${
         context.run.isTest
       }&redirectUrl=${encodeURIComponent(resumeUrl)}`;
     });

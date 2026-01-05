@@ -11,12 +11,22 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/packages/react-ui',
 
   server: {
+    allowedHosts: ['sanely-semipurposive-rachael.ngrok-free.dev'],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:3000',
         secure: false,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+        headers: {
+          Host: '127.0.0.1:4200',
+        },
+        ws: true,
+      },
+      '/v1': {
+        target: 'http://127.0.0.1:3000',
+        secure: false,
+        changeOrigin: true,
         headers: {
           Host: '127.0.0.1:4200',
         },
