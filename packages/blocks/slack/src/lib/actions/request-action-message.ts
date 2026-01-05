@@ -108,8 +108,8 @@ const sendMessageAskingForAction = async (
     conversationId,
   );
 
-  const enableSlackInteractions =
-    system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
+  const enableSlackInteractions = false;
+  //system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
 
   if (!enableSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
