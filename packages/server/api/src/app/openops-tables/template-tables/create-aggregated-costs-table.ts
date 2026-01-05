@@ -4,28 +4,29 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
-import { TablesContext } from './types';
 
 export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
 
-export async function createAggregatedCostsTable({
-  token,
-  tablesDatabaseId,
-}: TablesContext): Promise<{ tableId: number }> {
+export async function createAggregatedCostsTable(
+  tablesContext: TablesServerContext,
+): Promise<{ tableId: number }> {
   logger.debug(`${SEED_LOG_HEADER} Start`);
 
   const table = await openopsTables.createTable(
-    tablesDatabaseId,
+    tablesContext,
     SEED_TABLE_NAME,
     [['Group Key']],
-    token,
   );
 
-  await addFields(token, table.id);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
+  await addFields(tokenOrResolver, table.id);
 
   logger.debug(`${SEED_LOG_HEADER} Done`);
 
@@ -34,8 +35,11 @@ export async function createAggregatedCostsTable({
   };
 }
 
-export async function addFields(token: string, tableId: number) {
-  const fields = await getFields(tableId, token);
+export async function addFields(
+  tokenOrResolver: TokenOrResolver,
+  tableId: number,
+): Promise<void> {
+  const fields = await getFields(tableId, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -47,7 +51,7 @@ export async function addFields(token: string, tableId: number) {
       name: 'Group Key',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `${SEED_LOG_HEADER} After adding primary field ${primaryField.name} with id: ${primaryField.id}`,
@@ -66,12 +70,12 @@ export async function addFields(token: string, tableId: number) {
   ];
 
   for (const field of fieldsToAdd) {
-    await addField(token, tableId, field);
+    await addField(tokenOrResolver, tableId, field);
   }
 }
 
 async function addField(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   fieldBody: Record<string, unknown>,
 ): Promise<{ id: number }> {
@@ -82,7 +86,7 @@ async function addField(
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(

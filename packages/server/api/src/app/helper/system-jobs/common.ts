@@ -1,5 +1,6 @@
 import { ProjectId } from '@openops/shared';
 import { Dayjs } from 'dayjs';
+import { TablesServerContext } from '@openops/common';
 
 export enum SystemJobName {
   HARD_DELETE_PROJECT = 'hard-delete-project',
@@ -23,11 +24,6 @@ type IssuesReminderSystemJobData = {
   organizationId: string;
 };
 
-export type CreateTemplateTablesSystemJobData = {
-  tablesDatabaseId: number;
-  userId: string;
-};
-
 type SystemJobDataMap = {
   [SystemJobName.HARD_DELETE_PROJECT]: HardDeleteProjectSystemJobData;
   [SystemJobName.ISSUES_REMINDER]: IssuesReminderSystemJobData;
@@ -38,7 +34,7 @@ type SystemJobDataMap = {
   [SystemJobName.TRIAL_TRACKER]: Record<string, never>;
   [SystemJobName.TRIGGER_DATA_CLEANER]: Record<string, never>;
   [SystemJobName.LOGS_CLEANUP_TRIGGER]: Record<string, never>;
-  [SystemJobName.CREATE_TEMPLATE_TABLES]: CreateTemplateTablesSystemJobData;
+  [SystemJobName.CREATE_TEMPLATE_TABLES]: TablesServerContext;
 };
 
 export type SystemJobData<T extends SystemJobName = SystemJobName> =

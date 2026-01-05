@@ -1,4 +1,9 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
+import {
+  createAxiosHeaders,
+  makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+} from '@openops/common';
 
 export type Table = {
   id: number;
@@ -8,10 +13,9 @@ export type Table = {
 };
 
 export async function createTable(
-  databaseId: number,
+  context: TablesServerContext,
   tableName: string,
   tableColumns: string[][],
-  token: string,
 ): Promise<Table> {
   const requestBody = {
     name: tableName,
@@ -19,9 +23,10 @@ export async function createTable(
     first_row_header: true,
   };
 
+  const tokenOrResolver = await resolveTokenProvider(context);
   return makeOpenOpsTablesPost<Table>(
-    `api/database/tables/database/${databaseId}/`,
+    `api/database/tables/database/${context.tablesDatabaseId}/`,
     requestBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 }

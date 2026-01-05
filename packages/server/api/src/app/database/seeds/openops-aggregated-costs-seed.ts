@@ -6,7 +6,6 @@ import {
   SEED_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-aggregated-costs-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
 import { getAdminTablesContext } from './get-admin-token-and-database';
 
 const AGGREGATED_TABLE_SEED = 'AGGREGATEDCOSTS';
@@ -35,13 +34,10 @@ export const seedFocusDataAggregationTemplateTable =
       return;
     }
 
-    const table = await getTableByName(
-      SEED_TABLE_NAME,
-      await getDefaultProjectTablesDatabaseToken(),
-    );
+    const tablesContext = await getAdminTablesContext();
+    const table = await getTableByName(SEED_TABLE_NAME, tablesContext);
 
     if (!table) {
-      const tablesContext = await getAdminTablesContext();
       await createAggregatedCostsTable(tablesContext);
     }
 
