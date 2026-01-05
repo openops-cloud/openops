@@ -4,7 +4,7 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
-import { networkUtls } from '@openops/server-shared';
+import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
 import { ChannelOption, ChatOption } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
@@ -82,7 +82,10 @@ export const requestActionMessageAction = createAction({
         actions: TeamsMessageAction[];
       };
     if (context.executionType === ExecutionType.BEGIN) {
-      const baseUrl = await networkUtls.getPublicUrl();
+      const apiUrl = await networkUtls.getPublicUrl();
+      const frontendUrl = system
+        .getOrThrow(SharedSystemProp.FRONTEND_URL)
+        .replace(/\/$/, '');
 
       const preparedActions: TeamsMessageButton[] = actions.map((action) => {
         const resumeUrl = context.generateResumeUrl(
@@ -92,11 +95,11 @@ export const requestActionMessageAction = createAction({
               button: action.buttonText,
             },
           },
-          baseUrl,
+          apiUrl,
         );
         return {
           ...action,
-          resumeUrl: `/html/resume_execution.html?isTest=${
+          resumeUrl: `${frontendUrl}/html/resume_execution.html?isTest=${
             context.run.isTest
           }&redirectUrl=${encodeURIComponent(resumeUrl)}`,
         };
