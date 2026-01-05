@@ -1,4 +1,7 @@
 const getBooleanMock = jest.fn();
+const getOrThrowMock = jest
+  .fn()
+  .mockReturnValue('https://mocked-frontend-url.com');
 jest.mock('@openops/server-shared', () => {
   const actual = jest.requireActual('@openops/server-shared');
   return {
@@ -6,6 +9,7 @@ jest.mock('@openops/server-shared', () => {
     system: {
       ...actual.system,
       getBoolean: getBooleanMock,
+      getOrThrow: getOrThrowMock,
     },
     networkUtls: {
       ...actual.networkUtls,
@@ -293,7 +297,7 @@ describe('requestActionMessageAction', () => {
       const action = actionBlock.elements[0];
 
       expect(action.url).toBe(
-        'https://mocked-public-url.com/html/resume_execution.html?isTest=true&redirectUrl=undefined',
+        'https://mocked-frontend-url.com/html/resume_execution.html?isTest=true&redirectUrl=undefined',
       );
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
