@@ -293,7 +293,7 @@ describe('requestActionMessageAction', () => {
       const action = actionBlock.elements[0];
 
       expect(action.url).toBe(
-        '/html/resume_execution.html?isTest=true&redirectUrl=undefined',
+        'https://mocked-public-url.com/html/resume_execution.html?isTest=true&redirectUrl=undefined',
       );
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
