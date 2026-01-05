@@ -1,16 +1,9 @@
-import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
+import { TablesServerContext } from '@openops/common';
 import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
-import { EncryptedObject } from '@openops/shared';
 
-export const getAdminTablesContext = async (): Promise<{
-  bearerToken: string;
-  tablesDatabaseId: number;
-  tablesDatabaseToken: EncryptedObject;
-}> => {
-  const { token: bearerToken } = await authenticateAdminUserInOpenOpsTables();
-
+export const getAdminTablesContext = async (): Promise<TablesServerContext> => {
   const { tablesDatabaseId, tablesDatabaseToken } =
     await getDefaultProjectTablesDatabaseToken();
 
-  return { bearerToken, tablesDatabaseId, tablesDatabaseToken };
+  return { /*bearerToken,*/ tablesDatabaseId, tablesDatabaseToken };
 };

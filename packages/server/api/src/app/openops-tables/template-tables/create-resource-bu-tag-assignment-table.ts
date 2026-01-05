@@ -4,25 +4,27 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createResourceBuTagAssignmentTable(
-  databaseId: number,
-  token: string,
+  context: TablesServerContext,
   buTableId: number,
 ): Promise<{ tableId: number }> {
   logger.debug('[Seeding Resource BU tag assignment table] Start');
 
   const table = await openopsTables.createTable(
-    databaseId,
+    context,
     'Resource BU tag assignment',
     [['Resource identifier']],
-    token,
   );
 
-  await addFields(token, table.id, buTableId);
+  const tokenOrResolver = await resolveTokenProvider(context);
+  await addFields(tokenOrResolver, table.id, buTableId);
 
   logger.debug('[Seeding Resource BU tag assignment table] Done');
   return {
@@ -31,11 +33,11 @@ export async function createResourceBuTagAssignmentTable(
 }
 
 export async function addFields(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   buTableId: number,
-) {
-  const fields = await getFields(tableId, token);
+): Promise<void> {
+  const fields = await getFields(tableId, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -47,22 +49,25 @@ export async function addFields(
       name: 'Resource identifier',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding Resource BU tag assignment table] After adding primary field Resource identifier with id: ${primaryField.id}`,
   );
 
-  await addField(token, tableId, { name: 'Resource type', type: 'text' });
+  await addField(tokenOrResolver, tableId, {
+    name: 'Resource type',
+    type: 'text',
+  });
 
-  const selectOwnerBuField = await addField(token, tableId, {
+  const selectOwnerBuField = await addField(tokenOrResolver, tableId, {
     name: 'Select owner BU',
     type: 'link_row',
     link_row_table_id: buTableId,
     has_related_field: false,
   });
 
-  const buFields = await getFields(buTableId, token);
+  const buFields = await getFields(buTableId, tokenOrResolver);
   const buTargetField = buFields.find((field) => field.name === 'BU code');
   if (!buTargetField) {
     throw new Error(
@@ -70,7 +75,7 @@ export async function addFields(
     );
   }
 
-  await addField(token, tableId, {
+  await addField(tokenOrResolver, tableId, {
     name: 'BU code',
     type: 'lookup',
     through_field_id: selectOwnerBuField.id,
@@ -79,7 +84,7 @@ export async function addFields(
 }
 
 async function addField(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   fieldBody: Record<string, unknown>,
 ): Promise<{ id: number }> {
@@ -92,7 +97,7 @@ async function addField(
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(

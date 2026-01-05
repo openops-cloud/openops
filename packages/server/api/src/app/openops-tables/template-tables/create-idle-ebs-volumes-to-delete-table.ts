@@ -4,24 +4,25 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext, TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createIdleEbsVolumesToDeleteTable(
-  databaseId: number,
-  token: string,
+  context: TablesServerContext,
 ): Promise<{ tableId: number }> {
   logger.debug(`[Seeding Idle EBS Volumes to delete table] Start`);
 
   const table = await openopsTables.createTable(
-    databaseId,
+    context,
     'Idle EBS Volumes to delete',
     [['Arn']],
-    token,
   );
 
-  await addFields(token, table.id);
+  const tokenOrResolver = await resolveTokenProvider(context);
+  await addFields(tokenOrResolver, table.id);
 
   logger.debug(`[Seeding Idle EBS Volumes to delete table] Done`);
 
@@ -30,8 +31,11 @@ export async function createIdleEbsVolumesToDeleteTable(
   };
 }
 
-export async function addFields(token: string, tableId: number) {
-  const fields = await getFields(tableId, token);
+export async function addFields(
+  tokenOrResolver: TokenOrResolver,
+  tableId: number,
+): Promise<void> {
+  const fields = await getFields(tableId, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -44,13 +48,13 @@ export async function addFields(token: string, tableId: number) {
       name: 'Arn',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding Idle EBS Volumes to delete table] After adding primary field Arn with id: ${primaryField.id}`,
   );
 
-  await addField(token, tableId, {
+  await addField(tokenOrResolver, tableId, {
     name: 'Status',
     type: 'single_select',
     select_options: [
@@ -61,22 +65,31 @@ export async function addFields(token: string, tableId: number) {
     ],
   });
 
-  await addField(token, tableId, { name: 'Region', type: 'text' });
-  await addField(token, tableId, { name: 'Account', type: 'text' });
-  await addField(token, tableId, {
+  await addField(tokenOrResolver, tableId, { name: 'Region', type: 'text' });
+  await addField(tokenOrResolver, tableId, { name: 'Account', type: 'text' });
+  await addField(tokenOrResolver, tableId, {
     name: 'Cost USD per month',
     type: 'number',
     number_decimal_places: 2,
   });
-  await addField(token, tableId, { name: 'Name', type: 'text' });
-  await addField(token, tableId, { name: 'Owner', type: 'email' });
-  await addField(token, tableId, { name: 'Is attached?', type: 'boolean' });
-  await addField(token, tableId, { name: 'Volume details', type: 'long_text' });
-  await addField(token, tableId, { name: 'Notes', type: 'long_text' });
+  await addField(tokenOrResolver, tableId, { name: 'Name', type: 'text' });
+  await addField(tokenOrResolver, tableId, { name: 'Owner', type: 'email' });
+  await addField(tokenOrResolver, tableId, {
+    name: 'Is attached?',
+    type: 'boolean',
+  });
+  await addField(tokenOrResolver, tableId, {
+    name: 'Volume details',
+    type: 'long_text',
+  });
+  await addField(tokenOrResolver, tableId, {
+    name: 'Notes',
+    type: 'long_text',
+  });
 }
 
 async function addField(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   fieldBody: Record<string, unknown>,
 ): Promise<{ id: number }> {
@@ -89,7 +102,7 @@ async function addField(
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(

@@ -5,27 +5,24 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TablesContext } from './types';
 
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
-export async function createOpportunitiesTable({
-  bearerToken,
-  tablesDatabaseId,
-}: TablesContext) {
+export async function createOpportunitiesTable(
+  context: TablesServerContext,
+): Promise<void> {
   logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
 
-  const table = await createTable(
-    tablesDatabaseId,
-    SEED_OPENOPS_TABLE_NAME,
-    [['ID']],
-    bearerToken,
-  );
+  const table = await createTable(context, SEED_OPENOPS_TABLE_NAME, [['ID']]);
 
-  const fields = await getFields(table.id, bearerToken);
+  const tokenOrResolver = await resolveTokenProvider(context);
+  const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -37,13 +34,13 @@ export async function createOpportunitiesTable({
       name: 'ID',
       type: 'uuid',
     },
-    createAxiosHeaders(bearerToken),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Status',
     type: 'single_select',
     select_options: [
@@ -56,7 +53,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Opportunity Type',
     type: 'single_select',
     select_options: [
@@ -66,7 +63,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Estimated savings USD per month',
     type: 'number',
     number_decimal_places: 2,
@@ -85,10 +82,13 @@ export async function createOpportunitiesTable({
   ];
 
   for (const fieldName of fieldNames) {
-    await addField(bearerToken, table.id, { name: fieldName, type: 'text' });
+    await addField(tokenOrResolver, table.id, {
+      name: fieldName,
+      type: 'text',
+    });
   }
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Complexity',
     type: 'single_select',
     select_options: [
@@ -100,7 +100,7 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Risk',
     type: 'single_select',
     select_options: [
@@ -110,31 +110,31 @@ export async function createOpportunitiesTable({
     ],
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Opportunity details',
     type: 'long_text',
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Snoozed until',
     type: 'date',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Resolution notes',
     type: 'long_text',
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Creation time',
     type: 'created_on',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await addField(bearerToken, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Last modified time',
     type: 'last_modified',
     date_format: 'ISO',
@@ -144,7 +144,11 @@ export async function createOpportunitiesTable({
   logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Done`);
 }
 
-async function addField(token: string, tableId: number, fieldBody: any) {
+async function addField(
+  tokenOrResolver: TokenOrResolver,
+  tableId: number,
+  fieldBody: any,
+): Promise<void> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
   logger.debug(
@@ -153,7 +157,7 @@ async function addField(token: string, tableId: number, fieldBody: any) {
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(
