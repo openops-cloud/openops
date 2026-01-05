@@ -22,15 +22,6 @@ export default defineConfig({
         },
         ws: true,
       },
-      '/v1': {
-        target: 'http://127.0.0.1:3000',
-        secure: false,
-        changeOrigin: true,
-        headers: {
-          Host: '127.0.0.1:4200',
-        },
-        ws: true,
-      },
     },
     port: 4200,
     host: '0.0.0.0',
