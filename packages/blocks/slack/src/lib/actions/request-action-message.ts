@@ -112,7 +112,10 @@ const sendMessageAskingForAction = async (
   //system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
 
   if (!enableSlackInteractions) {
-    const baseUrl = await networkUtls.getPublicUrl();
+    const apiUrl = await networkUtls.getPublicUrl();
+    const frontendUrl = system
+      .getOrThrow(SharedSystemProp.FRONTEND_URL)
+      .replace(/\/$/, '');
 
     actions.forEach((action: SlackActionDefinition) => {
       const resumeUrl = context.generateResumeUrl(
@@ -125,10 +128,9 @@ const sendMessageAskingForAction = async (
             }),
           },
         },
-        baseUrl,
+        apiUrl,
       );
-      const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
-      action.url = `${normalizedBaseUrl}/html/resume_execution.html?isTest=${
+      action.url = `${frontendUrl}/html/resume_execution.html?isTest=${
         context.run.isTest
       }&redirectUrl=${encodeURIComponent(resumeUrl)}`;
     });
