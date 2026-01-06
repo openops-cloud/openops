@@ -5,18 +5,24 @@ const analyticsDashboardServiceMock = {
   fetchDashboardGuestToken: jest.fn(),
 };
 
-jest.mock('../../../src/app/openops-analytics/analytics-dashboard-service', () => ({
-  analyticsDashboardService: analyticsDashboardServiceMock,
-}));
+jest.mock(
+  '../../../src/app/openops-analytics/analytics-dashboard-service',
+  () => ({
+    analyticsDashboardService: analyticsDashboardServiceMock,
+  }),
+);
 
 const analyticsAuthenticationServiceMock = {
   signIn: jest.fn(),
   signUp: jest.fn(),
 };
 
-jest.mock('../../../src/app/authentication/analytics-authentication-service', () => ({
-  analyticsAuthenticationService: analyticsAuthenticationServiceMock,
-}));
+jest.mock(
+  '../../../src/app/authentication/analytics-authentication-service',
+  () => ({
+    analyticsAuthenticationService: analyticsAuthenticationServiceMock,
+  }),
+);
 
 describe('authenticationController analytics routes', () => {
   const originalEnv = { ...process.env };
@@ -62,6 +68,30 @@ describe('authenticationController analytics routes', () => {
     const app = await registerController();
 
     expect(app.get).not.toHaveBeenCalled();
+
+    // Verify that non-analytics routes are still registered
+    expect(app.post).toHaveBeenCalledTimes(3);
+
+    const signUpRoute = app.post.mock.calls.find(
+      ([path]) => path === '/sign-up',
+    );
+    expect(signUpRoute).toBeDefined();
+    expect(signUpRoute?.[1]).toEqual(expect.any(Object));
+    expect(signUpRoute?.[2]).toEqual(expect.any(Function));
+
+    const signInRoute = app.post.mock.calls.find(
+      ([path]) => path === '/sign-in',
+    );
+    expect(signInRoute).toBeDefined();
+    expect(signInRoute?.[1]).toEqual(expect.any(Object));
+    expect(signInRoute?.[2]).toEqual(expect.any(Function));
+
+    const signOutRoute = app.post.mock.calls.find(
+      ([path]) => path === '/sign-out',
+    );
+    expect(signOutRoute).toBeDefined();
+    expect(signOutRoute?.[1]).toEqual(expect.any(Object));
+    expect(signOutRoute?.[2]).toEqual(expect.any(Function));
   });
 
   it('registers analytics routes when analytics are enabled', async () => {
