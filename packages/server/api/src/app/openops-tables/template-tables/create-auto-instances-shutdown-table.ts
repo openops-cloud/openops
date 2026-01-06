@@ -4,30 +4,31 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TablesContext } from './types';
 
 export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
   'Auto instances shutdown';
 
-export async function createAutoInstancesShutdownTable({
-  token,
-  tablesDatabaseId,
-}: TablesContext): Promise<void> {
+export async function createAutoInstancesShutdownTable(
+  tablesContext: TablesServerContext,
+): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] Start`,
   );
 
   const table = await createTable(
-    tablesDatabaseId,
+    tablesContext,
     SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
     [['Resource ID']],
-    token,
   );
 
-  const fields = await getFields(table.id, token);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
+  const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -39,13 +40,13 @@ export async function createAutoInstancesShutdownTable({
       name: 'Resource ID',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(token, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Shutdown time',
     type: 'date',
     date_format: 'ISO',
@@ -55,7 +56,10 @@ export async function createAutoInstancesShutdownTable({
   const fieldNames = ['Cloud provider', 'Workflow', 'Status'];
 
   for (const fieldName of fieldNames) {
-    await addField(token, table.id, { name: fieldName, type: 'text' });
+    await addField(tokenOrResolver, table.id, {
+      name: fieldName,
+      type: 'text',
+    });
   }
 
   logger.debug(
@@ -64,7 +68,7 @@ export async function createAutoInstancesShutdownTable({
 }
 
 async function addField(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   fieldBody: Record<string, unknown>,
 ): Promise<{ id: number }> {
@@ -77,7 +81,7 @@ async function addField(
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(

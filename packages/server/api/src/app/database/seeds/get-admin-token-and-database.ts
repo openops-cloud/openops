@@ -1,7 +1,6 @@
+import { TablesServerContext } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { Project } from '@openops/shared';
-import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
-import { TablesContext } from '../../openops-tables/template-tables/types';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
 
@@ -25,8 +24,8 @@ const getAdminUserProject = async (): Promise<Project> => {
   return project;
 };
 
-export const getAdminTablesContext = async (): Promise<TablesContext> => {
-  const { token } = await authenticateAdminUserInOpenOpsTables();
-  const { tablesDatabaseId } = await getAdminUserProject();
-  return { token, tablesDatabaseId };
+export const getAdminTablesContext = async (): Promise<TablesServerContext> => {
+  const { tablesDatabaseId, tablesDatabaseToken } = await getAdminUserProject();
+
+  return { tablesDatabaseToken, tablesDatabaseId };
 };

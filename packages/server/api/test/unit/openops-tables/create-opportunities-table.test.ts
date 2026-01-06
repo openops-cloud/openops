@@ -27,18 +27,20 @@ describe('createOpportunityTable', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
     openopsCommonMock.makeOpenOpsTablesPost.mockReturnValue({ id: 1 });
 
-    await createOpportunitiesTable({
-      token: 'some token',
+    const context = {
+      tablesDatabaseToken: {
+        iv: 'iv',
+        data: 'some token',
+      },
       tablesDatabaseId: 2,
-    });
+    };
+
+    await createOpportunitiesTable(context);
 
     expect(createTableMock).toHaveBeenCalledTimes(1);
-    expect(createTableMock).toHaveBeenCalledWith(
-      2,
-      'Opportunities',
-      [['ID']],
-      'some token',
-    );
+    expect(createTableMock).toHaveBeenCalledWith(context, 'Opportunities', [
+      ['ID'],
+    ]);
 
     expect(openopsCommonMock.makeOpenOpsTablesPatch).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.makeOpenOpsTablesPatch).toHaveBeenCalledWith(
@@ -142,8 +144,16 @@ describe('createOpportunityTable', () => {
   it('should throw if something fails', async () => {
     openopsCommonMock.getFields.mockRejectedValue(new Error('some error'));
 
-    await expect(
-      createOpportunitiesTable({ token: 'some token', tablesDatabaseId: 2 }),
-    ).rejects.toThrow('some error');
+    const context = {
+      tablesDatabaseToken: {
+        iv: 'iv',
+        data: 'some token',
+      },
+      tablesDatabaseId: 2,
+    };
+
+    await expect(createOpportunitiesTable(context)).rejects.toThrow(
+      'some error',
+    );
   });
 });

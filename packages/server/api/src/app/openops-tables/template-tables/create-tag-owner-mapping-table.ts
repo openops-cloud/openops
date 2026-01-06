@@ -4,25 +4,27 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createTagOwnerMappingTable(
-  databaseId: number,
-  token: string,
+  tablesContext: TablesServerContext,
   buTableId: number,
 ): Promise<{ tableId: number }> {
   logger.debug('[Seeding Tag-Owner mapping table] Start');
 
   const table = await openopsTables.createTable(
-    databaseId,
+    tablesContext,
     'Tag-Owner mapping',
     [['Owner tag value']],
-    token,
   );
 
-  await addFields(token, table.id, buTableId);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
+  await addFields(tokenOrResolver, table.id, buTableId);
 
   logger.debug('[Seeding Tag-Owner mapping table] Done');
 
@@ -32,11 +34,11 @@ export async function createTagOwnerMappingTable(
 }
 
 export async function addFields(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   buTableId: number,
-) {
-  const fields = await getFields(tableId, token);
+): Promise<void> {
+  const fields = await getFields(tableId, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -48,15 +50,18 @@ export async function addFields(
       name: 'Owner tag value',
       type: 'text',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding Tag-Owner mapping table] After adding primary field Owner tag value with id: ${primaryField.id}`,
   );
 
-  await addField(token, tableId, { name: 'Owner email', type: 'email' });
+  await addField(tokenOrResolver, tableId, {
+    name: 'Owner email',
+    type: 'email',
+  });
 
-  await addField(token, tableId, {
+  await addField(tokenOrResolver, tableId, {
     name: 'BU',
     type: 'link_row',
     link_row_table_id: buTableId,
@@ -64,7 +69,7 @@ export async function addFields(
 }
 
 async function addField(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
   tableId: number,
   fieldBody: Record<string, unknown>,
 ): Promise<{ id: number }> {
@@ -77,7 +82,7 @@ async function addField(
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(

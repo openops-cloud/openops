@@ -5,30 +5,31 @@ import {
   getPrimaryKeyFieldFromFields,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  resolveTokenProvider,
+  TablesServerContext,
+  TokenOrResolver,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { TablesContext } from './types';
 
 export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
   'Known cost types by application';
 
-export async function createKnownCostTypesByApplicationTable({
-  token,
-  tablesDatabaseId,
-}: TablesContext) {
+export async function createKnownCostTypesByApplicationTable(
+  tablesContext: TablesServerContext,
+): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] Start`,
   );
 
   const table = await createTable(
-    tablesDatabaseId,
+    tablesContext,
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
     [['ID']],
-    token,
   );
 
-  const fields = await getFields(table.id, token);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
+  const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
@@ -40,24 +41,24 @@ export async function createKnownCostTypesByApplicationTable({
       name: 'ID',
       type: 'uuid',
     },
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
-  await addField(token, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Verified',
     type: 'boolean',
   });
 
-  await addField(token, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Total Cost',
     type: 'number',
     number_decimal_places: 10,
   });
 
-  await addField(token, table.id, {
+  await addField(tokenOrResolver, table.id, {
     name: 'Total Consumed Quantity',
     type: 'number',
     number_decimal_places: 0,
@@ -66,7 +67,10 @@ export async function createKnownCostTypesByApplicationTable({
   const fieldNames = ['Application', 'SKU id', 'Service Category'];
 
   for (const fieldName of fieldNames) {
-    await addField(token, table.id, { name: fieldName, type: 'text' });
+    await addField(tokenOrResolver, table.id, {
+      name: fieldName,
+      type: 'text',
+    });
   }
 
   logger.debug(
@@ -74,7 +78,11 @@ export async function createKnownCostTypesByApplicationTable({
   );
 }
 
-async function addField(token: string, tableId: number, fieldBody: any) {
+async function addField(
+  tokenOrResolver: TokenOrResolver,
+  tableId: number,
+  fieldBody: any,
+): Promise<void> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
   logger.debug(
@@ -83,7 +91,7 @@ async function addField(token: string, tableId: number, fieldBody: any) {
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 
   logger.debug(
