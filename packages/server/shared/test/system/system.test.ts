@@ -69,9 +69,19 @@ describe('system configuration helpers', () => {
   });
 
   it('enables analytics by default and respects disabling flag', () => {
-    expect(system.isAnalyticsEnabled()).toBe(true);
+    const originalAnalyticsEnabled = process.env['OPS_ANALYTICS_ENABLED'];
 
-    process.env['OPS_ANALYTICS_ENABLED'] = 'false';
-    expect(system.isAnalyticsEnabled()).toBe(false);
+    try {
+      expect(system.isAnalyticsEnabled()).toBe(true);
+
+      process.env['OPS_ANALYTICS_ENABLED'] = 'false';
+      expect(system.isAnalyticsEnabled()).toBe(false);
+    } finally {
+      if (originalAnalyticsEnabled === undefined) {
+        Reflect.deleteProperty(process.env, 'OPS_ANALYTICS_ENABLED');
+      } else {
+        process.env['OPS_ANALYTICS_ENABLED'] = originalAnalyticsEnabled;
+      }
+    }
   });
 });
