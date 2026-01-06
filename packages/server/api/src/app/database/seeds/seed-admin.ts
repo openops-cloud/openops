@@ -14,6 +14,7 @@ import { TalesWorkspaceContext } from '../../openops-tables/default-workspace-da
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
+import { getAdminProject } from './get-admin-project';
 
 const DEFAULT_ORGANIZATION_NAME = 'organization';
 
@@ -33,11 +34,11 @@ export const upsertAdminUser = async (): Promise<void> => {
     );
 
     const talesWorkspaceContext = project
-      ? {
+      ? ({
           databaseToken: project.tablesDatabaseToken,
           workspaceId: project.tablesWorkspaceId,
           databaseId: project.tablesDatabaseId,
-        }
+        } as TalesWorkspaceContext<EncryptedObject>)
       : undefined;
 
     const { workspaceId, databaseId, databaseToken } =
@@ -126,9 +127,7 @@ async function resolveUserOrganizationContext(
       );
     }
 
-    const project =
-      (await projectService.getAdminProject(user.id, user.organizationId)) ??
-      undefined;
+    const project = (await getAdminProject(user)) ?? undefined;
     return {
       organization: existingOrganization,
       project,
@@ -139,7 +138,7 @@ async function resolveUserOrganizationContext(
 }
 
 async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
-  params: TalesWorkspaceContext<EncryptedObject> | undefined,
+  params?: TalesWorkspaceContext<EncryptedObject>,
 ): Promise<TalesWorkspaceContext> {
   const { token } = await authenticateAdminUserInOpenOpsTables();
 
