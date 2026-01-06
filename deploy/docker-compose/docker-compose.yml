@@ -3,8 +3,8 @@ services:
     restart: unless-stopped
     image: nginx:1.27.4
     ports:
-      - 80:80
-      - 443:443
+      - '80:80'
+      - '443:443'
     volumes:
       - ./${OPS_NGINX_CONFIG_FILE:-nginx.gateway.conf}:/etc/nginx/conf.d/default.conf
       - ./nginx.gateway.routing.conf:/etc/nginx/includes/routing.conf
@@ -41,17 +41,17 @@ services:
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
       OPS_COMPONENT: engine
       OPS_SERVER_API_URL: http://openops-app/api/
-    depends_on:
-      - openops-app
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
+    depends_on:
+      - openops-app
   openops-tables:
     image: public.ecr.aws/openops/openops-tables:0.2.14
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
-      BASEROW_PRIVATE_URL: http://openops-tables
+      BASEROW_PRIVATE_URL: ${OPS_OPENOPS_TABLES_API_URL}
       BASEROW_EXTRA_ALLOWED_HOSTS: '*'
       SECRET_KEY: ${OPS_ENCRYPTION_KEY}
       BASEROW_JWT_SIGNING_KEY: ${OPS_JWT_SECRET}
@@ -67,7 +67,7 @@ services:
       DATABASE_PORT: ${OPS_POSTGRES_PORT}
       DATABASE_USER: ${OPS_POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://${OPS_REDIS_HOST}:${OPS_REDIS_PORT}/0
     shm_size: '512mb'
     volumes:
       - 'openops_tables_data:/baserow/data'
@@ -94,8 +94,8 @@ services:
       GUNICORN_LOGLEVEL: 'debug'
       DATABASE_DIALECT: 'postgresql'
       DATABASE_DB: 'analytics'
-      DATABASE_HOST: 'postgres'
-      DATABASE_PORT: '5432'
+      DATABASE_HOST: ${OPS_POSTGRES_HOST}
+      DATABASE_PORT: ${OPS_POSTGRES_PORT}
       DATABASE_USER: ${OPS_POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       DATABASE_HOST_ALT: ${OPS_OPENOPS_TABLES_DB_HOST}
@@ -132,15 +132,15 @@ services:
   redis:
     image: 'redis:7.4.0'
     restart: unless-stopped
-    ports: ['6379:6379']
     command: ['redis-server', '--notify-keyspace-events', 'Ex']
+    ports: ['6379:6379']
+    volumes:
+      - 'redis_data:/data'
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 5s
       timeout: 3s
       retries: 3
-    volumes:
-      - 'redis_data:/data'
 volumes:
   openops_azure_cli_data:
   openops_gcloud_cli_data:
