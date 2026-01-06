@@ -15,10 +15,8 @@ import { createOpenOpsTablesMcpEndpoint } from './app/database/seeds/create-open
 import { seedDevData } from './app/database/seeds/dev-seeds';
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
-import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
 import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-known-cost-types-by-application-seed';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
-import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables-rename-database';
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
@@ -94,8 +92,6 @@ const main = async (): Promise<void> => {
 
     await upsertAdminUser();
     await createOpenOpsTablesMcpEndpoint();
-    await updateOpenopsTablesDatabase();
-    await deleteOldOpportunitiesTable();
     await seedDevData();
 
     await seedTemplateTables();
