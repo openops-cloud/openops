@@ -6,10 +6,15 @@ const listTablesDatabases = async (): Promise<TablesServerContext[]> => {
     select: ['tablesDatabaseId', 'tablesDatabaseToken'],
   });
 
-  return projects.map(({ tablesDatabaseId, tablesDatabaseToken }) => ({
-    tablesDatabaseId,
-    tablesDatabaseToken,
-  }));
+  return projects
+    .filter(
+      ({ tablesDatabaseId, tablesDatabaseToken }) =>
+        tablesDatabaseId != null && tablesDatabaseToken != null,
+    )
+    .map(({ tablesDatabaseId, tablesDatabaseToken }) => ({
+      tablesDatabaseId,
+      tablesDatabaseToken,
+    }));
 };
 
 export const applyToEachTablesDatabase = async (
