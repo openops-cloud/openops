@@ -5,23 +5,32 @@ const analyticsDashboardServiceMock = {
   fetchDashboardGuestToken: jest.fn(),
 };
 
-jest.mock('../../../src/app/openops-analytics/analytics-dashboard-service', () => ({
-  analyticsDashboardService: analyticsDashboardServiceMock,
-}));
+jest.mock(
+  '../../../src/app/openops-analytics/analytics-dashboard-service',
+  () => ({
+    analyticsDashboardService: analyticsDashboardServiceMock,
+  }),
+);
 
 const analyticsAuthenticationServiceMock = {
   signIn: jest.fn(),
   signUp: jest.fn(),
 };
 
-jest.mock('../../../src/app/authentication/analytics-authentication-service', () => ({
-  analyticsAuthenticationService: analyticsAuthenticationServiceMock,
-}));
+jest.mock(
+  '../../../src/app/authentication/analytics-authentication-service',
+  () => ({
+    analyticsAuthenticationService: analyticsAuthenticationServiceMock,
+  }),
+);
 
 describe('authenticationController analytics routes', () => {
   const originalEnv = { ...process.env };
 
-  const registerController = async () => {
+  const registerController = async (): Promise<{
+    post: jest.Mock;
+    get: jest.Mock;
+  }> => {
     const { authenticationController } = await import(
       '../../../src/app/authentication/authentication.controller'
     );
