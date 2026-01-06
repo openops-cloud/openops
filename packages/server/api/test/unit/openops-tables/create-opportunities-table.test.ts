@@ -144,11 +144,6 @@ describe('createOpportunityTable', () => {
   it('should throw if something fails', async () => {
     openopsCommonMock.getFields.mockRejectedValue(new Error('some error'));
 
-<<<<<<< HEAD
-    await expect(
-      createOpportunitiesTable({ bearerToken: 'some token', tablesDatabaseId: 2 }),
-    ).rejects.toThrow('some error');
-=======
     const context = {
       tablesDatabaseToken: {
         iv: 'iv',
@@ -160,6 +155,5 @@ describe('createOpportunityTable', () => {
     await expect(createOpportunitiesTable(context)).rejects.toThrow(
       'some error',
     );
->>>>>>> main
   });
 });
