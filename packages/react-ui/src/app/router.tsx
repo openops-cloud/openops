@@ -69,8 +69,9 @@ const createRoutes = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const { data: analyticsPublicUrl } =
-    flagsHooks.useFlag<string | undefined>(FlagId.ANALYTICS_PUBLIC_URL);
+  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
+    FlagId.ANALYTICS_PUBLIC_URL,
+  );
 
   const routes = [
     {

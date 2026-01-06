@@ -19,8 +19,9 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const { data: analyticsPublicUrl } =
-    flagsHooks.useFlag<string | undefined>(FlagId.ANALYTICS_PUBLIC_URL);
+  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
+    FlagId.ANALYTICS_PUBLIC_URL,
+  );
 
   const menuLinks: MenuLink[] = useMemo(() => {
     const links: MenuLink[] = [
