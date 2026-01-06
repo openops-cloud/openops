@@ -12,18 +12,18 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createResourceBuTagAssignmentTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
   buTableId: number,
 ): Promise<{ tableId: number }> {
   logger.debug('[Seeding Resource BU tag assignment table] Start');
 
   const table = await openopsTables.createTable(
-    context,
+    tablesContext,
     'Resource BU tag assignment',
     [['Resource identifier']],
   );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   await addFields(tokenOrResolver, table.id, buTableId);
 
   logger.debug('[Seeding Resource BU tag assignment table] Done');

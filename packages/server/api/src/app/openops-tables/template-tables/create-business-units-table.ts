@@ -12,15 +12,17 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createBusinessUnitsTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<{ tableId: number }> {
   logger.debug('[Seeding Business units table] Start');
 
-  const table = await openopsTables.createTable(context, 'Business units', [
-    ['BU name'],
-  ]);
+  const table = await openopsTables.createTable(
+    tablesContext,
+    'Business units',
+    [['BU name']],
+  );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   await addFields(tokenOrResolver, table.id);
 
   logger.debug('[Seeding Business units table] Done');

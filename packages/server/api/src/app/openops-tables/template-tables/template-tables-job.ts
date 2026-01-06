@@ -9,23 +9,25 @@ export function registerTemplateTablesCreationJobHandler(): void {
   systemJobHandlers.registerJobHandler(
     SystemJobName.CREATE_TEMPLATE_TABLES,
     async (data) => {
-      await createAllTemplateTables(data);
+      await createAllTemplateTables({
+        tablesDatabaseId: data.tablesDatabaseId,
+        tablesDatabaseToken: data.tablesDatabaseToken,
+      });
     },
   );
 }
 
-export async function addTemplateTablesCreationJob({
-  tablesDatabaseId,
-  tablesDatabaseToken,
-}: TablesServerContext): Promise<void> {
+export async function addTemplateTablesCreationJob(
+  tablesContext: TablesServerContext,
+): Promise<void> {
   await systemJobsSchedule.upsertJob({
     job: {
       name: SystemJobName.CREATE_TEMPLATE_TABLES,
       data: {
-        tablesDatabaseId,
-        tablesDatabaseToken,
+        tablesDatabaseId: tablesContext.tablesDatabaseId,
+        tablesDatabaseToken: tablesContext.tablesDatabaseToken,
       },
-      jobId: `create-template-tables-${tablesDatabaseId}`,
+      jobId: `create-template-tables-${tablesContext.tablesDatabaseId}`,
     },
     schedule: {
       type: 'one-time',

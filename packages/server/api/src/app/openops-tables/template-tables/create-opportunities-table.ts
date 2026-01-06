@@ -15,13 +15,15 @@ import { createTable } from '../create-table';
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
 export async function createOpportunitiesTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<void> {
   logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
 
-  const table = await createTable(context, SEED_OPENOPS_TABLE_NAME, [['ID']]);
+  const table = await createTable(tablesContext, SEED_OPENOPS_TABLE_NAME, [
+    ['ID'],
+  ]);
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 

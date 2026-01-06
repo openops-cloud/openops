@@ -12,16 +12,18 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createTagOwnerMappingTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
   buTableId: number,
 ): Promise<{ tableId: number }> {
   logger.debug('[Seeding Tag-Owner mapping table] Start');
 
-  const table = await openopsTables.createTable(context, 'Tag-Owner mapping', [
-    ['Owner tag value'],
-  ]);
+  const table = await openopsTables.createTable(
+    tablesContext,
+    'Tag-Owner mapping',
+    [['Owner tag value']],
+  );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   await addFields(tokenOrResolver, table.id, buTableId);
 
   logger.debug('[Seeding Tag-Owner mapping table] Done');

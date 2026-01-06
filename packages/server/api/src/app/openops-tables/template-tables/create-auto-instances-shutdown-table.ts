@@ -15,19 +15,19 @@ export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
   'Auto instances shutdown';
 
 export async function createAutoInstancesShutdownTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] Start`,
   );
 
   const table = await createTable(
-    context,
+    tablesContext,
     SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
     [['Resource ID']],
   );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 

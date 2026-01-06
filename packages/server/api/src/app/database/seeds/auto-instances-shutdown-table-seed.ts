@@ -1,4 +1,4 @@
-import { getTableByName } from '@openops/common';
+import { getTableByName, TablesServerContext } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import {
@@ -6,7 +6,7 @@ import {
   SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-auto-instances-shutdown-table';
 import { databaseConnection } from '../database-connection';
-import { getAdminTablesContext } from './get-admin-token-and-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const AUTO_INSTANCES_SHUTDOWN_TABLE_SEED = 'AUTOINSTANCESSHUTDOWN';
 
@@ -35,16 +35,18 @@ export const seedAutoInstancesShutdownTable = async (): Promise<void> => {
     return;
   }
 
-  const tablesContext = await getAdminTablesContext();
+  await applyToEachTablesDatabase(
+    async (tablesContext: TablesServerContext): Promise<void> => {
+      const table = await getTableByName(
+        SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
+        tablesContext,
+      );
 
-  const table = await getTableByName(
-    SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME,
-    tablesContext,
+      if (!table) {
+        await createAutoInstancesShutdownTable(tablesContext);
+      }
+    },
   );
-
-  if (!table) {
-    await createAutoInstancesShutdownTable(tablesContext);
-  }
 
   await setTableSeedFlag();
 };

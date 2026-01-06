@@ -1,4 +1,4 @@
-import { getTableByName } from '@openops/common';
+import { getTableByName, TablesServerContext } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import {
@@ -6,7 +6,7 @@ import {
   SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-known-cost-types-by-application-table';
 import { databaseConnection } from '../database-connection';
-import { getAdminTablesContext } from './get-admin-token-and-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const KNOWN_COST_TYPES_BY_APPLICATION = 'KNOWNCOSTTYPES';
 
@@ -35,16 +35,18 @@ export const seedKnownCostTypesByApplicationTable = async (): Promise<void> => {
     return;
   }
 
-  const tablesContext = await getAdminTablesContext();
+  await applyToEachTablesDatabase(
+    async (tablesContext: TablesServerContext): Promise<void> => {
+      const table = await getTableByName(
+        SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
+        tablesContext,
+      );
 
-  const table = await getTableByName(
-    SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
-    tablesContext,
+      if (!table) {
+        await createKnownCostTypesByApplicationTable(tablesContext);
+      }
+    },
   );
-
-  if (!table) {
-    await createKnownCostTypesByApplicationTable(tablesContext);
-  }
 
   await setTableSeedFlag();
 };

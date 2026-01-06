@@ -1,3 +1,12 @@
+const openopsServerSharedMock = {
+  ...jest.requireActual('@openops/server-shared'),
+  encryptUtils: {
+    decryptString: jest.fn().mockReturnValue('test_token'),
+  },
+};
+
+jest.mock('@openops/server-shared', () => openopsServerSharedMock);
+
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   makeOpenOpsTablesPost: jest.fn(),
@@ -21,7 +30,6 @@ describe('createTable', () => {
       ['Column1', 'Column2'],
       ['Data1', 'Data2'],
     ];
-    const token = 'test_token';
     const mockTable: Table = {
       id: 1,
       name: 'Test Table',
@@ -29,14 +37,16 @@ describe('createTable', () => {
       database_id: databaseId,
     };
 
+    const context = {
+      tablesDatabaseToken: {
+        iv: 'iv',
+        data: 'test_token_encrypted_with_iv',
+      },
+      tablesDatabaseId: databaseId,
+    };
     openopsCommonMock.makeOpenOpsTablesPost.mockResolvedValue(mockTable);
 
-    const result = await createTable(
-      databaseId,
-      tableName,
-      tableColumns,
-      token,
-    );
+    const result = await createTable(context, tableName, tableColumns);
 
     expect(result).toEqual(mockTable);
     expect(openopsCommonMock.makeOpenOpsTablesPost).toHaveBeenCalledWith(
@@ -44,7 +54,7 @@ describe('createTable', () => {
       { name: tableName, data: tableColumns, first_row_header: true },
       new AxiosHeaders({
         'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
+        Authorization: `Token test_token`,
       }),
     );
   });

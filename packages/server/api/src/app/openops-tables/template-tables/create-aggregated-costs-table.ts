@@ -15,15 +15,17 @@ export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
 
 export async function createAggregatedCostsTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<{ tableId: number }> {
   logger.debug(`${SEED_LOG_HEADER} Start`);
 
-  const table = await openopsTables.createTable(context, SEED_TABLE_NAME, [
-    ['Group Key'],
-  ]);
+  const table = await openopsTables.createTable(
+    tablesContext,
+    SEED_TABLE_NAME,
+    [['Group Key']],
+  );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   await addFields(tokenOrResolver, table.id);
 
   logger.debug(`${SEED_LOG_HEADER} Done`);

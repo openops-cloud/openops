@@ -7,18 +7,18 @@ import { createKnownCostTypesByApplicationTable } from './create-known-cost-type
 import { createOpportunitiesTable } from './create-opportunities-table';
 
 async function additionalTemplateTables(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<void> {
-  await createOpportunitiesTable(context);
-  await createAggregatedCostsTable(context);
-  await createKnownCostTypesByApplicationTable(context);
-  await createAutoInstancesShutdownTable(context);
+  await createOpportunitiesTable(tablesContext);
+  await createAggregatedCostsTable(tablesContext);
+  await createKnownCostTypesByApplicationTable(tablesContext);
+  await createAutoInstancesShutdownTable(tablesContext);
   logger.info('[Seeding additional template tables] Done');
 }
 
 export async function createAllTemplateTables(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<void> {
-  await createBaseTemplateTables(context);
-  await additionalTemplateTables(context);
+  await createBaseTemplateTables(tablesContext);
+  await additionalTemplateTables(tablesContext);
 }

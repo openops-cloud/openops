@@ -16,19 +16,19 @@ export const SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME =
   'Known cost types by application';
 
 export async function createKnownCostTypesByApplicationTable(
-  context: TablesServerContext,
+  tablesContext: TablesServerContext,
 ): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME} table] Start`,
   );
 
   const table = await createTable(
-    context,
+    tablesContext,
     SEED_OPENOPS_KNOWN_COST_TYPES_BY_APPLICATION_TABLE_NAME,
     [['ID']],
   );
 
-  const tokenOrResolver = await resolveTokenProvider(context);
+  const tokenOrResolver = await resolveTokenProvider(tablesContext);
   const fields = await getFields(table.id, tokenOrResolver);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 

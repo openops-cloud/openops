@@ -1,4 +1,4 @@
-import { getTableByName } from '@openops/common';
+import { getTableByName, TablesServerContext } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import {
@@ -6,7 +6,7 @@ import {
   SEED_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-aggregated-costs-table';
 import { databaseConnection } from '../database-connection';
-import { getAdminTablesContext } from './get-admin-token-and-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const AGGREGATED_TABLE_SEED = 'AGGREGATEDCOSTS';
 
@@ -34,13 +34,15 @@ export const seedFocusDataAggregationTemplateTable =
       return;
     }
 
-    const tablesContext = await getAdminTablesContext();
+    await applyToEachTablesDatabase(
+      async (tablesContext: TablesServerContext): Promise<void> => {
+        const table = await getTableByName(SEED_TABLE_NAME, tablesContext);
 
-    const table = await getTableByName(SEED_TABLE_NAME, tablesContext);
-
-    if (!table) {
-      await createAggregatedCostsTable(tablesContext);
-    }
+        if (!table) {
+          await createAggregatedCostsTable(tablesContext);
+        }
+      },
+    );
 
     await setTableSeedFlag();
   };
