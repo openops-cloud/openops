@@ -67,4 +67,11 @@ describe('system configuration helpers', () => {
       system.getNumber(AppSystemProp.MAX_CONCURRENT_JOBS_PER_PROJECT),
     ).toBeNull();
   });
+
+  it('enables analytics by default and respects disabling flag', () => {
+    expect(system.isAnalyticsEnabled()).toBe(true);
+
+    process.env['OPS_ANALYTICS_ENABLED'] = 'false';
+    expect(system.isAnalyticsEnabled()).toBe(false);
+  });
 });

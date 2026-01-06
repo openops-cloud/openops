@@ -69,6 +69,9 @@ const createRoutes = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
+  const { data: analyticsPublicUrl } =
+    flagsHooks.useFlag<string | undefined>(FlagId.ANALYTICS_PUBLIC_URL);
+
   const routes = [
     {
       path: 'flows',
@@ -204,19 +207,6 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: 'analytics',
-      element: (
-        <RouteWrapper useEntireInnerViewport>
-          <OpsErrorBoundary>
-            <PageTitle title="Analytics">
-              <OpenOpsAnalyticsPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </RouteWrapper>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
-    {
       path: '404',
       element: (
         <OpsErrorBoundary>
@@ -228,6 +218,22 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
   ];
+
+  if (analyticsPublicUrl) {
+    routes.push({
+      path: 'analytics',
+      element: (
+        <RouteWrapper useEntireInnerViewport>
+          <OpsErrorBoundary>
+            <PageTitle title="Analytics">
+              <OpenOpsAnalyticsPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        </RouteWrapper>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    });
+  }
 
   if (!isFederatedLogin) {
     const regularLoginRoutes = [

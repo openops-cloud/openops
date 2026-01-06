@@ -1,4 +1,6 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { MenuLink, RunsIcon } from '@openops/components/ui';
+import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import {
   Home,
@@ -17,8 +19,11 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const menuLinks: MenuLink[] = useMemo(
-    () => [
+  const { data: analyticsPublicUrl } =
+    flagsHooks.useFlag<string | undefined>(FlagId.ANALYTICS_PUBLIC_URL);
+
+  const menuLinks: MenuLink[] = useMemo(() => {
+    const links: MenuLink[] = [
       {
         to: '/',
         label: t('Overview'),
@@ -44,14 +49,18 @@ export const useMenuLinks = () => {
         label: t('Tables'),
         icon: TableProperties,
       },
-      {
+    ];
+
+    if (analyticsPublicUrl) {
+      links.push({
         to: '/analytics',
         label: t('Analytics'),
         icon: LucideBarChart2,
-      },
-    ],
-    [],
-  );
+      });
+    }
+
+    return links;
+  }, [analyticsPublicUrl]);
 
   return menuLinks;
 };
