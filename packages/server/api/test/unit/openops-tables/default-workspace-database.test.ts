@@ -1,3 +1,11 @@
+const serverSharedMock = {
+  ...jest.requireActual('@openops/server-shared'),
+  encryptUtils: {
+    decryptString: jest.fn(),
+  },
+};
+jest.mock('@openops/server-shared', () => serverSharedMock);
+
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   makeOpenOpsTablesPost: jest.fn(),
@@ -50,7 +58,7 @@ describe('createAdminInOpenOpsTables', () => {
 
   const token = 'some token';
 
-  it('should successfully create new table Opportunities', async () => {
+  it('should successfully create a workspace and a database with a database token', async () => {
     listDatabasesMock.mockResolvedValue([]);
     listWorkspacesMock.mockResolvedValue([]);
     listDatabaseTokensMock.mockResolvedValue([]);
@@ -59,7 +67,7 @@ describe('createAdminInOpenOpsTables', () => {
     createTableMock.mockResolvedValue({ id: 3 });
     createDatabaseTokenMock.mockResolvedValue({ key: 'key' });
 
-    await createDefaultWorkspaceAndDatabase(token);
+    await createDefaultWorkspaceAndDatabase(undefined, token);
 
     expect(createWorkspaceMock).toHaveBeenCalledTimes(1);
     expect(createWorkspaceMock).toHaveBeenCalledWith(
@@ -74,12 +82,42 @@ describe('createAdminInOpenOpsTables', () => {
     );
   });
 
+  it('should successfully fetch the existing workspace and database', async () => {
+    const talesWorkspaceContext = {
+      workspaceId: 2,
+      databaseId: 3,
+      databaseToken: {
+        iv: 'iv',
+        data: 'some token encrypted with iv',
+      },
+    };
+
+    serverSharedMock.encryptUtils.decryptString.mockReturnValue('some token');
+
+    listWorkspacesMock.mockResolvedValue([{ id: 2, name: 'Workspace' }]);
+    listDatabasesMock.mockResolvedValue([{ id: 3, name: 'Database' }]);
+    listDatabaseTokensMock.mockResolvedValue([{ id: 1, key: 'some token' }]);
+
+    const result = await createDefaultWorkspaceAndDatabase(
+      talesWorkspaceContext,
+      token,
+    );
+
+    expect(result).toEqual({
+      workspaceId: 2,
+      databaseId: 3,
+      databaseToken: 'some token',
+    });
+    expect(createWorkspaceMock).not.toHaveBeenCalled();
+    expect(createDbMock).not.toHaveBeenCalled();
+  });
+
   it('should throw if something fails', async () => {
     listWorkspacesMock.mockResolvedValue([]);
     createWorkspaceMock.mockRejectedValue(new Error('some error'));
 
-    await expect(createDefaultWorkspaceAndDatabase(token)).rejects.toThrow(
-      'some error',
-    );
+    await expect(
+      createDefaultWorkspaceAndDatabase(undefined, token),
+    ).rejects.toThrow('some error');
   });
 });
