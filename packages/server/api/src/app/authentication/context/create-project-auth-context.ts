@@ -3,26 +3,20 @@ import {
   ErrorCode,
   isNil,
   PrincipalType,
-  Project,
   ProjectMemberRole,
   User,
 } from '@openops/shared';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
+import { ProjectContext } from '../types';
 import { accessTokenManager } from './access-token-manager';
 
 export async function getProjectAndToken(
   user: User,
   tablesRefreshToken: string,
   expiresInSeconds?: number,
-): Promise<{
-  user: User;
-  project: Project;
-  token: string;
-  tablesRefreshToken: string;
-  projectRole: ProjectMemberRole;
-}> {
+): Promise<ProjectContext> {
   const updatedUser = await userService.getOneOrThrow({ id: user.id });
 
   const project = await projectService.getOneForUser(updatedUser);
@@ -57,6 +51,7 @@ export async function getProjectAndToken(
     token,
     project,
     tablesRefreshToken,
+    isMasterProject: true,
     projectRole: ProjectMemberRole.ADMIN,
   };
 }
