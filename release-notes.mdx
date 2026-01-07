@@ -1,0 +1,26 @@
+---
+title: "Release Notes"
+description: "Latest OpenOps releases with highlights, fixes, and improvements."
+icon: "🚀"
+iconType: "emoji"
+slug: "/release-notes"
+tags: ["releases", "changelog"]
+---
+
+OpenOps release notes provide a concise summary of new features, bug fixes, and improvements for each version.
+
+## 🚀
+
+- Improved project setup and data handling so that projects can use template tables more easily and users can immediately see whether their current project is the primary one. This change added services and helpers for creating template tables for all projects using database tokens, introduced project uniqueness validation and a ProjectWithoutSensitiveData type, and exposed the isMasterProject value from the backend authentication flow to the frontend session state used after login.
+
+## 🐛
+
+- Fixed issues in Slack and Microsoft Teams approval messages so that action buttons and resume links always take users back to the correct request pages. The Slack and Microsoft Teams integrations now use properly generated absolute URLs for request action buttons and resume links, ensuring users reliably return to the intended workflow screens in all environments.
+
+## ✨
+
+- Refined project initialization and data safety so multi-project setups behave more reliably and avoid exposing confidential details. The system now validates project uniqueness, uses a ProjectWithoutSensitiveData representation for safer data handling, and centralizes startup logic around updated template table creation services and helpers.
+- Simplified configuration and deployment so environments are easier to understand and operate for self-hosted and managed setups. The platform removed the opaque ENVIRONMENT flag in favor of clearly named .env configuration keys, reused shared .env values in Docker Compose release definitions, cleaned up unused seed files, and updated Storybook, GitHub Actions, and the Tables service image to newer versions.
+- Improved icons and static assets so interface graphics load more reliably directly from the application. The release imported all block icons and related static assets into the repository, added them under the React UI public assets directory, and updated block, authentication, and template references to use these local static files instead of remote sources.
+
+
