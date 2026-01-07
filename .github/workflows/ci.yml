@@ -116,11 +116,11 @@ jobs:
                 include: blocks-*
                 exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
               - name: Server API Unit Tests
-                key: server-api
+                key: server-api-unit
                 target: test-unit
                 include: server-api
               - name: Server API Integration Tests
-                key: server-api
+                key: server-api-integration
                 include: server-api
               - name: Engine and Libraries
                 key: others
