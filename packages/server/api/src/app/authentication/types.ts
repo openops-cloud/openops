@@ -34,7 +34,7 @@ export type ProjectContext = {
   user: User;
   token: string;
   tablesRefreshToken: string;
-  isMasterProject: boolean;
   projectRole: ProjectMemberRole;
   project: ProjectWithoutSensitiveData;
+  hasTemplatesPrivileges: boolean;
 };
