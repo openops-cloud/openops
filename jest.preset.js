@@ -14,4 +14,24 @@ module.exports = {
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   transformIgnorePatterns: ['node_modules/(?!(lodash-es)/)'],
   setupFilesAfterEnv: [__dirname + '/jest.setup.js'],
+  reporters: [
+    'default',
+    ...(process.env.CI === 'true'
+      ? [
+          [
+            'jest-junit',
+            {
+              outputDirectory: './test-results',
+              outputName: 'junit.xml',
+              classNameTemplate: '{filepath}',
+              titleTemplate: '{title}',
+              ancestorSeparator: ' › ',
+              usePathForSuiteName: true,
+              addFileAttribute: 'true',
+            },
+          ],
+        ]
+      : []),
+  ],
+  verbose: process.env.JEST_VERBOSE === 'true',
 };

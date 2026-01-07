@@ -22,6 +22,8 @@
     "pull-i18n": "crowdin pull --config crowdin.yml",
     "push-i18n": "crowdin upload sources",
     "i18n:extract": "i18next --config packages/react-ui/i18next-parser.config.js && jq 'to_entries | map({(.key): .key}) | add' packages/react-ui/public/locales/en/translation.json > packages/react-ui/public/locales/en/translation.tmp.json && mv packages/react-ui/public/locales/en/translation.tmp.json packages/react-ui/public/locales/en/translation.json",
+    "test:verbose": "cross-env JEST_VERBOSE=true nx run-many --target=test -- --verbose",
+    "test:timing": "cross-env JEST_VERBOSE=true nx run-many --target=test -- --verbose",
     "storybook": "nx run ui-components:storybook",
     "build-storybook": "nx run ui-components:build-storybook --",
     "chromatic": "npx chromatic --",
