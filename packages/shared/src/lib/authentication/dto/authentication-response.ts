@@ -6,6 +6,7 @@ export type UserWithoutPassword = Omit<User, 'password'>;
 export type AuthenticationResponse = UserWithoutPassword & {
   token: string;
   projectId: string;
+  isMasterProject: boolean;
   projectRole: ProjectMemberRole | null;
   tablesRefreshToken: string;
   tablesWorkspaceId: number;
