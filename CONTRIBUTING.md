@@ -68,7 +68,7 @@ To contribute code changes:
    * Follow existing code style and patterns
    * Write clear, self-documenting code with descriptive variable and function names
    * Add comments for complex or non-obvious logic
-5. **Test your changes**. Add or update tests to ensure your code works as expected and doesn't break existing functionality.
+5. **Test your changes**. Add or update tests to ensure your code works as expected and doesn't break existing functionality. See [TESTING.md](./TESTING.md) for details on running tests with timing information.
 6. **Commit changes** with clear, concise commit messages.
 7. **Push to your fork**.
 8. **Open a Pull Request** from your fork to this repository.
