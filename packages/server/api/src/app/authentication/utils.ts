@@ -68,6 +68,7 @@ export function buildAuthResponse(
     token: projectContext.token,
     projectId: projectContext.project.id,
     projectRole: projectContext.projectRole,
+    isMasterProject: projectContext.isMasterProject,
     tablesRefreshToken: projectContext.tablesRefreshToken,
     tablesWorkspaceId: projectContext.project.tablesWorkspaceId,
   };
