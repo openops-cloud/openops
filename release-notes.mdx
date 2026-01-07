@@ -14,20 +14,18 @@ This page lists OpenOps product release notes organized by version, with separat
 
 ## 🚀
 
-- Released version 0.6.13 with several configuration and maintenance improvements plus a small bug fix. This release replaced hardcoded values with environment variables in the Docker Compose configuration, updated the OpenOps tables image, removed an unused ENVIRONMENT system variable and obsolete table seed files, moved assets from static.openops.com into the project, and bumped Storybook to the latest patch of major version 8.
-- Updated the 0.6.13 release notes content so they provide a concise, categorized summary of bug fixes and maintenance work in a consistent format. The notes now describe the configuration bug fix for docker-compose environment variables, the OpenOps tables image update, Storybook’s patch-level upgrade within major version 8, environment variable cleanup including removal of the ENVIRONMENT flag, seed file cleanup, and migration of static assets into the repository.
-- Standardized the creation of template tables across all projects so that new projects start with a consistent baseline of database structures. This change refactored and cleaned up multiple seed scripts, removed the unused get-admin-token-and-database seed, and updated several OpenOps-related table seeds to generate the correct template tables for each project.
-- Updated the OpenOps database tables image to a newer version so environments use the latest compatible platform tables. This maintenance change bumped the tables container image reference in compose.yaml and deploy/helm/openops/values.yaml so deployments automatically pull the refreshed image.
-- Moved previously external OpenOps static images into the application so they now load directly from the product itself. This change imported asset files that were hosted on static.openops.com into the repository and updated the React UI to reference local logos and illustrations instead of remote URLs.
-- Removed the legacy ENVIRONMENT system variable so configuration is now driven by clearer, more explicit settings. This change eliminated the old dev/test/prod ENVIRONMENT flag in favor of clearly named environment variables defined in the appropriate .env files, making platform behavior easier to understand and configure.
-- Exposed each project’s master status to the web application so the interface can distinguish master projects from regular projects after users sign in. This change added an isMasterProject flag to the backend authentication response and wired it through the shared authentication DTO, authentication context, and related frontend types so the UI can react to master-project state.
+- Released version 0.6.13 with configuration and maintenance improvements, plus a small bug fix.
+- Updated the 0.6.13 release notes content to provide a concise, categorized summary of bug fixes and maintenance work in a consistent format.
+- Standardized the creation of template tables across all projects so that new projects start with a consistent baseline of database structures.
+- Updated the OpenOps database tables image to a newer version so environments use the latest compatible platform tables.
+- Moved previously external OpenOps static images into the application so they now load directly from the product itself.
+- Removed the legacy ENVIRONMENT system variable so configuration is now driven by clearer, more explicit settings.
+- Exposed each project’s master status to the web application so the interface can distinguish master projects from regular projects after users sign in.
 
 ## 🐛
 
-- Fixed a configuration issue so Docker-based deployments now read their settings from environment variables instead of hardcoded values. This change updated the docker-compose.yml release and deployment configuration to replace literal values with references to .env-defined environment variables, resolving inflexibility and CI issue CI-129 related to the compose release setup.
-- Fixed the Docker Compose configuration so it uses environment variables consistently instead of hardcoded values for different environments. This change updated deploy/docker-compose/docker-compose.yml and related compose files to rely on runtime environment variables rather than fixed literals, making deployments more flexible, reliable, and environment-aware.
-- Fixed the configuration used by local and development setups so they correctly pick up values from environment variables instead of hardcoded settings. This change replaced hardcoded values in docker-compose.yml with their corresponding environment variable references, ensuring local runs and environment-specific deployments respect the intended configuration.
-- Fixed the links in Microsoft Teams request messages so they now bring users back to their waiting OpenOps flow correctly. This change updated the resume URL generation for the Microsoft Teams request action block to route through the frontend resume_execution.html page with the appropriate query parameters instead of pointing directly at a backend URL, preventing broken or confusing redirects.
-- Fixed Slack request action buttons so they now direct users to the correct OpenOps page when clicked. This change updated the Slack request action message builder and its tests to use absolute URLs instead of relative paths for interactive button links, preventing broken or incorrect destinations in Slack.
-
-
+- Fixed a configuration issue so Docker-based deployments now read their settings from environment variables instead of hardcoded values.
+- Fixed the Docker Compose configuration so it uses environment variables consistently instead of hardcoded values for different environments.
+- Fixed the configuration used by local and development setups so they correctly pick up values from environment variables instead of hardcoded settings.
+- Fixed the links in Microsoft Teams request messages so they now bring users back to their waiting OpenOps flow correctly.
+- Fixed Slack request action buttons so they now direct users to the correct OpenOps page when clicked.
