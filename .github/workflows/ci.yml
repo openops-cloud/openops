@@ -115,7 +115,11 @@ jobs:
               - name: Blocks Shard 3
                 include: blocks-*
                 exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
-              - name: Server API
+              - name: Server API Unit Tests
+                key: server-api
+                target: test-unit
+                include: server-api
+              - name: Server API Integration Tests
                 key: server-api
                 include: server-api
               - name: Engine and Libraries
@@ -148,7 +152,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
+          command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
       - name: Truncate NX cache
