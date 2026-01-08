@@ -1,8 +1,9 @@
+import { TablesServerContext } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import { createBaseTemplateTables } from '../../openops-tables/template-tables/create-base-template-tables';
 import { databaseConnection } from '../database-connection';
-import { getAdminTablesContext } from './get-admin-token-and-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const TEMPLATE_TABLES_SEED = 'TEMPLATE_TABLES_SEED';
 
@@ -31,8 +32,11 @@ export const seedTemplateTables = async (): Promise<void> => {
     return;
   }
 
-  const tablesContext = await getAdminTablesContext();
-  await createBaseTemplateTables(tablesContext);
+  await applyToEachTablesDatabase(
+    async (tablesContext: TablesServerContext): Promise<void> => {
+      await createBaseTemplateTables(tablesContext);
+    },
+  );
 
   await setTableSeedFlag();
 };

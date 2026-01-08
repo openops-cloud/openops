@@ -1,4 +1,4 @@
-import { getTableByName } from '@openops/common';
+import { getTableByName, TablesServerContext } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import {
@@ -6,8 +6,7 @@ import {
   SEED_OPENOPS_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
-import { getDefaultProjectTablesDatabaseToken } from '../get-default-user-db-token';
-import { getAdminTablesContext } from './get-admin-token-and-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
 
@@ -36,15 +35,18 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
     return;
   }
 
-  const table = await getTableByName(
-    SEED_OPENOPS_TABLE_NAME,
-    await getDefaultProjectTablesDatabaseToken(),
-  );
+  await applyToEachTablesDatabase(
+    async (tablesContext: TablesServerContext): Promise<void> => {
+      const table = await getTableByName(
+        SEED_OPENOPS_TABLE_NAME,
+        tablesContext,
+      );
 
-  if (!table) {
-    const tablesContext = await getAdminTablesContext();
-    await createOpportunitiesTable(tablesContext);
-  }
+      if (!table) {
+        await createOpportunitiesTable(tablesContext);
+      }
+    },
+  );
 
   await setTableSeedFlag();
 };
