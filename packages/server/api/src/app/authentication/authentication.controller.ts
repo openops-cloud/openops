@@ -3,17 +3,21 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { authenticateUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
+  assertNotNullOrUndefined,
   OpsEdition,
   PrincipalType,
   Provider,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
+import { StatusCodes } from 'http-status-codes';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
+import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
 import { getAuthenticationService } from './authentication-service-factory';
@@ -21,6 +25,7 @@ import {
   removeAuthCookies,
   setAuthCookies,
 } from './context/authentication-cookies';
+import { getProjectAndToken } from './context/create-project-auth-context';
 
 const edition = system.getEdition();
 const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
@@ -39,6 +44,8 @@ const AnalyticsGuestTokenRequestOptions = {
     querystring: GetBlockRequestParams,
   },
 };
+
+const INSUFFICIENT_PERMISSIONS_ERROR_TEXT = 'Insufficient Permissions';
 
 export const authenticationController: FastifyPluginAsyncTypebox = async (
   app,
@@ -73,6 +80,31 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     '/analytics-guest-token',
     AnalyticsGuestTokenRequestOptions,
     async (request, reply) => {
+      const user = await userService.getOneOrThrow({
+        id: request.principal.id,
+      });
+
+      const project = await projectService.getOneForUser(user);
+      assertNotNullOrUndefined(project, 'Project not found');
+
+      const tokens = await authenticateUserInOpenOpsTables(
+        user.email,
+        user.password,
+      );
+
+      const projectContext = await getProjectAndToken(
+        user,
+        tokens.refresh_token,
+      );
+
+      if (!projectContext.hasAnalyticsPrivileges) {
+        return reply.code(StatusCodes.FORBIDDEN).send({
+          statusCode: StatusCodes.FORBIDDEN,
+          error: INSUFFICIENT_PERMISSIONS_ERROR_TEXT,
+          message: 'Project does not have analytics privileges.',
+        });
+      }
+
       const { access_token } = await analyticsAuthenticationService.signIn();
 
       const guestToken =
@@ -93,9 +125,9 @@ const signUpRoute = async (request: any, reply: any) => {
   });
 
   if (!user || user.email !== adminEmail) {
-    return reply.code(403).send({
-      statusCode: 403,
-      error: 'Insufficient Permissions',
+    return reply.code(StatusCodes.FORBIDDEN).send({
+      statusCode: StatusCodes.FORBIDDEN,
+      error: INSUFFICIENT_PERMISSIONS_ERROR_TEXT,
       message: 'Adding new users only allowed to admin user.',
     });
   }

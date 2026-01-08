@@ -1,3 +1,4 @@
+import { authenticationSession } from '@/app/lib/authentication-session';
 import { MenuLink, RunsIcon } from '@openops/components/ui';
 import { t } from 'i18next';
 import {
@@ -17,6 +18,9 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
+  const hasAnalyticsPrivileges =
+    authenticationSession.getUserHasAnalyticsPrivileges();
+
   const menuLinks: MenuLink[] = useMemo(
     () => [
       {
@@ -44,13 +48,17 @@ export const useMenuLinks = () => {
         label: t('Tables'),
         icon: TableProperties,
       },
-      {
-        to: '/analytics',
-        label: t('Analytics'),
-        icon: LucideBarChart2,
-      },
+      ...(hasAnalyticsPrivileges
+        ? [
+            {
+              to: '/analytics',
+              label: t('Analytics'),
+              icon: LucideBarChart2,
+            },
+          ]
+        : []),
     ],
-    [],
+    [hasAnalyticsPrivileges],
   );
 
   return menuLinks;
