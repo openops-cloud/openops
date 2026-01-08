@@ -1,4 +1,4 @@
-import { analyticsAccessService } from './analytics-access-service';
+import { analyticsAccessService } from './access-service';
 
 export type AnalyticsAccessService = {
   verifyUserAnalyticsAccess(openopsUserId: string): Promise<void> | void;

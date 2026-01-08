@@ -3,7 +3,7 @@ import {
   authenticateOpenOpsAnalyticsAdmin,
 } from '@openops/common';
 import { seedAnalyticsDashboards } from '../openops-analytics/analytics-seeding-service';
-import { getAnalyticsAccessService } from './analytics-access-service-factory';
+import { getAnalyticsAccessService } from './analytics/access-service-factory';
 import { ProjectContext } from './types';
 
 export type AnalyticsAccessContext = {
