@@ -83,7 +83,7 @@ describe('createAdminInOpenOpsTables', () => {
   });
 
   it('should successfully fetch the existing workspace and database', async () => {
-    const talesWorkspaceContext = {
+    const tablesWorkspaceContext = {
       workspaceId: 2,
       databaseId: 3,
       databaseToken: {
@@ -99,7 +99,7 @@ describe('createAdminInOpenOpsTables', () => {
     listDatabaseTokensMock.mockResolvedValue([{ id: 1, key: 'some token' }]);
 
     const result = await createDefaultWorkspaceAndDatabase(
-      talesWorkspaceContext,
+      tablesWorkspaceContext,
       token,
     );
 

@@ -10,7 +10,7 @@ import {
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
 import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
-import { TalesWorkspaceContext } from '../../openops-tables/default-workspace-database';
+import { TablesWorkspaceContext } from '../../openops-tables/default-workspace-database';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
@@ -33,16 +33,16 @@ export const upsertAdminUser = async (): Promise<void> => {
       user,
     );
 
-    const talesWorkspaceContext = project
+    const tablesWorkspaceContext = project
       ? ({
           databaseToken: project.tablesDatabaseToken,
           workspaceId: project.tablesWorkspaceId,
           databaseId: project.tablesDatabaseId,
-        } as TalesWorkspaceContext<EncryptedObject>)
+        } as TablesWorkspaceContext<EncryptedObject>)
       : undefined;
 
     const { workspaceId, databaseId, databaseToken } =
-      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(talesWorkspaceContext);
+      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(tablesWorkspaceContext);
 
     const organizationId = organization
       ? organization.id
@@ -138,8 +138,8 @@ async function resolveUserOrganizationContext(
 }
 
 async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
-  params?: TalesWorkspaceContext<EncryptedObject>,
-): Promise<TalesWorkspaceContext> {
+  params?: TablesWorkspaceContext<EncryptedObject>,
+): Promise<TablesWorkspaceContext> {
   const { token } = await authenticateAdminUserInOpenOpsTables();
 
   const { workspaceId, databaseId, databaseToken } =

@@ -5,16 +5,16 @@ import { openopsTables } from './index';
 
 export const OPENOPS_DEFAULT_WORKSPACE_NAME = 'OpenOps Workspace';
 
-export type TalesWorkspaceContext<TDatabaseToken = string> = {
+export type TablesWorkspaceContext<TDatabaseToken = string> = {
   workspaceId: number;
   databaseId: number;
   databaseToken: TDatabaseToken;
 };
 
 export async function createDefaultWorkspaceAndDatabase(
-  params: TalesWorkspaceContext<EncryptedObject> | undefined,
+  params: TablesWorkspaceContext<EncryptedObject> | undefined,
   token: string,
-): Promise<TalesWorkspaceContext> {
+): Promise<TablesWorkspaceContext> {
   const workspaceId = await ensureTablesWorkspaceExists(
     token,
     params?.workspaceId,
