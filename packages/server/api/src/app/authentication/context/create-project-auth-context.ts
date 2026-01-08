@@ -52,6 +52,7 @@ export async function getProjectAndToken(
     project,
     tablesRefreshToken,
     hasTemplatesPrivileges: true,
+    hasAnalyticsPrivileges: true,
     projectRole: ProjectMemberRole.ADMIN,
   };
 }

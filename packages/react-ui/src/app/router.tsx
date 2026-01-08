@@ -31,6 +31,7 @@ import { ConnectionsHeader } from './features/connections/components/connection-
 import { ConnectionsProvider } from './features/connections/components/connections-context';
 import { GlobalLayout } from './features/navigation/layout/global-layout';
 import { RouteWrapper } from './features/navigation/layout/route-wrapper';
+import { authenticationSession } from './lib/authentication-session';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -68,6 +69,9 @@ const createRoutes = () => {
   const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
+
+  const hasAnalyticsPrivileges =
+    authenticationSession.getUserHasAnalyticsPrivileges();
 
   const routes = [
     {
@@ -203,19 +207,23 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
-    {
-      path: 'analytics',
-      element: (
-        <RouteWrapper useEntireInnerViewport>
-          <OpsErrorBoundary>
-            <PageTitle title="Analytics">
-              <OpenOpsAnalyticsPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </RouteWrapper>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    },
+    ...(hasAnalyticsPrivileges
+      ? [
+          {
+            path: 'analytics',
+            element: (
+              <RouteWrapper useEntireInnerViewport>
+                <OpsErrorBoundary>
+                  <PageTitle title="Analytics">
+                    <OpenOpsAnalyticsPage />
+                  </PageTitle>
+                </OpsErrorBoundary>
+              </RouteWrapper>
+            ),
+            errorElement: <RouteErrorBoundary />,
+          },
+        ]
+      : []),
     {
       path: '404',
       element: (
