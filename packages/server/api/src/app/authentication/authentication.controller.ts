@@ -41,8 +41,6 @@ const AnalyticsGuestTokenRequestOptions = {
   },
 };
 
-const INSUFFICIENT_PERMISSIONS_ERROR_TEXT = 'Insufficient Permissions';
-
 export const authenticationController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
@@ -104,7 +102,7 @@ const signUpRoute = async (request: any, reply: any) => {
   if (!user || user.email !== adminEmail) {
     return reply.code(StatusCodes.FORBIDDEN).send({
       statusCode: StatusCodes.FORBIDDEN,
-      error: INSUFFICIENT_PERMISSIONS_ERROR_TEXT,
+      error: 'Insufficient Permissions',
       message: 'Adding new users only allowed to admin user.',
     });
   }
