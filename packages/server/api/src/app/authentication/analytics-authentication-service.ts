@@ -3,13 +3,8 @@ import {
   authenticateOpenOpsAnalyticsAdmin,
   authenticateUserInOpenOpsTables,
 } from '@openops/common';
-import {
-  ApplicationError,
-  assertNotNullOrUndefined,
-  ErrorCode,
-} from '@openops/shared';
+import { ApplicationError, ErrorCode } from '@openops/shared';
 import { seedAnalyticsDashboards } from '../openops-analytics/analytics-seeding-service';
-import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
 import { getProjectAndToken } from './context/create-project-auth-context';
 import { ProjectContext } from './types';
