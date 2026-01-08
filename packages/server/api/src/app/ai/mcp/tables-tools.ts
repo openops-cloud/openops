@@ -1,12 +1,10 @@
-import { resolveTokenProvider, TablesMcpEndpoint } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
-import { openopsTables } from '../../openops-tables';
 import { projectService } from '../../project/project-service';
 import { MCPTool } from './types';
 
 export async function getTablesTools(projectId: string): Promise<MCPTool> {
-  const mcpEndpoint = await getProjectMcpEndpoint(projectId);
+  const mcpEndpoint = await projectService.getProjectMcpEndpoint(projectId);
 
   if (!mcpEndpoint) {
     logger.error('No MCP endpoints found on OpenOps Tables');
@@ -43,19 +41,4 @@ export async function getTablesTools(projectId: string): Promise<MCPTool> {
     client,
     toolSet,
   };
-}
-
-async function getProjectMcpEndpoint(
-  projectId: string,
-): Promise<TablesMcpEndpoint | undefined> {
-  const project = await projectService.getOneOrThrow(projectId);
-
-  const tokenOrResolver = await resolveTokenProvider({
-    tablesDatabaseId: project.tablesDatabaseId,
-    tablesDatabaseToken: project.tablesDatabaseToken,
-  });
-
-  const endpoints = await openopsTables.getMcpEndpointList(tokenOrResolver);
-
-  return endpoints.find((e) => e.workspace_id === project.tablesWorkspaceId);
 }

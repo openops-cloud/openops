@@ -1,4 +1,9 @@
-import { encryptUtils, rejectedPromiseHandler } from '@openops/server-shared';
+import { resolveTokenProvider, TablesMcpEndpoint } from '@openops/common';
+import {
+  encryptUtils,
+  logger,
+  rejectedPromiseHandler,
+} from '@openops/server-shared';
 import {
   ApplicationError,
   assertNotNullOrUndefined,
@@ -14,6 +19,7 @@ import {
 } from '@openops/shared';
 import { IsNull } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
+import { openopsTables } from '../openops-tables';
 import { ProjectEntity } from './project-entity';
 import { projectHooks } from './project-hooks';
 
@@ -158,6 +164,32 @@ export const projectService = {
       organizationId: params.organizationId,
       deleted: IsNull(),
     });
+  },
+
+  async getProjectMcpEndpoint(
+    projectId: string,
+  ): Promise<TablesMcpEndpoint | undefined> {
+    try {
+      const project = await this.getOneOrThrow(projectId);
+
+      const tokenOrResolver = await resolveTokenProvider({
+        tablesDatabaseId: project.tablesDatabaseId,
+        tablesDatabaseToken: project.tablesDatabaseToken,
+      });
+
+      const endpoints = await openopsTables.getMcpEndpointList(tokenOrResolver);
+
+      return endpoints.find(
+        (e) => e.workspace_id === project.tablesWorkspaceId,
+      );
+    } catch (err) {
+      logger.debug('Failed to get project MCP endpoint', {
+        projectId,
+        err,
+      });
+
+      return undefined;
+    }
   },
 };
 
