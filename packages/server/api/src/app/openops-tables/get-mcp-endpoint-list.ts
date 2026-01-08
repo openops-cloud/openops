@@ -2,15 +2,16 @@ import {
   createAxiosHeaders,
   makeOpenOpsTablesRequest,
   TablesMcpEndpoint,
+  TokenOrResolver,
 } from '@openops/common';
 
 export async function getMcpEndpointList(
-  token: string,
+  tokenOrResolver: TokenOrResolver,
 ): Promise<TablesMcpEndpoint[]> {
   return makeOpenOpsTablesRequest<TablesMcpEndpoint[]>(
     'get',
     `api/mcp/endpoints/`,
     undefined,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 }

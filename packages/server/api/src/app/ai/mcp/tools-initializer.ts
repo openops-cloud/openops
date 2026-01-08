@@ -18,7 +18,9 @@ export const startMCPTools = async (
   tools: ToolSet;
 }> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
-  const tablesTools = await safeGetTools('tables', getTablesTools);
+  const tablesTools = await safeGetTools('tables', () =>
+    getTablesTools(projectId),
+  );
   const openopsTools = await safeGetTools('openops', () =>
     getOpenOpsTools(app, authToken),
   );

@@ -1,24 +1,33 @@
-import { TablesServerContext } from '@openops/common';
+import { EncryptedObject } from '@openops/shared';
 import { projectRepo } from '../../project/project-service';
 
-const listTablesDatabases = async (): Promise<TablesServerContext[]> => {
+type TablesContext = {
+  tablesDatabaseId: number;
+  tablesWorkspaceId: number;
+  tablesDatabaseToken: EncryptedObject;
+};
+
+const listTablesDatabases = async (): Promise<TablesContext[]> => {
   const projects = await projectRepo().find({
-    select: ['tablesDatabaseId', 'tablesDatabaseToken'],
+    select: ['tablesWorkspaceId', 'tablesDatabaseId', 'tablesDatabaseToken'],
   });
 
   return projects
     .filter(
-      ({ tablesDatabaseId, tablesDatabaseToken }) =>
-        tablesDatabaseId != null && tablesDatabaseToken != null,
+      ({ tablesWorkspaceId, tablesDatabaseId, tablesDatabaseToken }) =>
+        tablesWorkspaceId != null &&
+        tablesDatabaseId != null &&
+        tablesDatabaseToken != null,
     )
-    .map(({ tablesDatabaseId, tablesDatabaseToken }) => ({
+    .map(({ tablesWorkspaceId, tablesDatabaseId, tablesDatabaseToken }) => ({
+      tablesWorkspaceId,
       tablesDatabaseId,
       tablesDatabaseToken,
     }));
 };
 
 export const applyToEachTablesDatabase = async (
-  run: (tablesContext: TablesServerContext) => Promise<void>,
+  run: (tablesContext: TablesContext) => Promise<void>,
 ): Promise<void> => {
   const tablesContexts = await listTablesDatabases();
 

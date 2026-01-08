@@ -1,16 +1,15 @@
-import { createAxiosHeaders } from '@openops/common';
+import { resolveTokenProvider, TablesMcpEndpoint } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { isEmpty } from '@openops/shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
-import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
+import { projectService } from '../../project/project-service';
 import { MCPTool } from './types';
 
-export async function getTablesTools(): Promise<MCPTool> {
-  const { token } = await authenticateAdminUserInOpenOpsTables();
-  const mcpEndpoints = await openopsTables.getMcpEndpointList(token);
-  if (isEmpty(mcpEndpoints)) {
-    logger.error('No MCP endpoints found from OpenOps Tables');
+export async function getTablesTools(projectId: string): Promise<MCPTool> {
+  const mcpEndpoint = await getProjectMcpEndpoint(projectId);
+
+  if (!mcpEndpoint) {
+    logger.error('No MCP endpoints found on OpenOps Tables');
     return {
       client: undefined,
       toolSet: {},
@@ -19,13 +18,12 @@ export async function getTablesTools(): Promise<MCPTool> {
 
   const url =
     system.get(AppSystemProp.OPENOPS_TABLES_API_URL) +
-    `/openops-tables/mcp/${mcpEndpoints[0].key}/sse`;
+    `/openops-tables/mcp/${mcpEndpoint.key}/sse`;
 
   const client = await createMCPClient({
     transport: {
       type: 'sse',
       url,
-      headers: createAxiosHeaders(token),
     },
   });
 
@@ -45,4 +43,27 @@ export async function getTablesTools(): Promise<MCPTool> {
     client,
     toolSet,
   };
+}
+
+async function getProjectMcpEndpoint(
+  projectId: string,
+): Promise<TablesMcpEndpoint | undefined> {
+  const project = await projectService.getOneOrThrow(projectId);
+
+  const tokenOrResolver = await resolveTokenProvider({
+    tablesDatabaseId: project.tablesDatabaseId,
+    tablesDatabaseToken: project.tablesDatabaseToken,
+  });
+
+  const mcpEndpoints = await openopsTables.getMcpEndpointList(tokenOrResolver);
+
+  const endpointExists = mcpEndpoints.find(
+    (endpoint) => endpoint.workspace_id === project.tablesWorkspaceId,
+  );
+
+  if (!endpointExists) {
+    return;
+  }
+
+  return endpointExists;
 }
