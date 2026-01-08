@@ -42,7 +42,9 @@ export const upsertAdminUser = async (): Promise<void> => {
       : undefined;
 
     const { workspaceId, databaseId, databaseToken } =
-      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(tablesWorkspaceContext);
+      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(
+        tablesWorkspaceContext,
+      );
 
     const organizationId = organization
       ? organization.id
