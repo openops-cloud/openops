@@ -63,11 +63,10 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
   );
 
   app.get('/analytics-embed-id', async (request, reply) => {
-    const {
-      authTokens: { access_token },
-    } = await analyticsAuthenticationService.authenticateAnalyticsRequest(
-      request.principal.id,
-    );
+    const { access_token } =
+      await analyticsAuthenticationService.authenticateAnalyticsRequest(
+        request.principal.id,
+      );
 
     const embedId = await analyticsDashboardService.fetchFinopsDashboardEmbedId(
       access_token,
@@ -80,11 +79,10 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     '/analytics-guest-token',
     AnalyticsGuestTokenRequestOptions,
     async (request, reply) => {
-      const {
-        authTokens: { access_token },
-      } = await analyticsAuthenticationService.authenticateAnalyticsRequest(
-        request.principal.id,
-      );
+      const { access_token } =
+        await analyticsAuthenticationService.authenticateAnalyticsRequest(
+          request.principal.id,
+        );
 
       const guestToken =
         await analyticsDashboardService.fetchDashboardGuestToken(

@@ -1,12 +1,9 @@
 import {
   AnalyticsAuthTokens,
   authenticateOpenOpsAnalyticsAdmin,
-  authenticateUserInOpenOpsTables,
 } from '@openops/common';
-import { ApplicationError, ErrorCode } from '@openops/shared';
 import { seedAnalyticsDashboards } from '../openops-analytics/analytics-seeding-service';
-import { userService } from '../user/user-service';
-import { getProjectAndToken } from './context/create-project-auth-context';
+import { getAnalyticsAccessService } from './analytics-access-service-factory';
 import { ProjectContext } from './types';
 
 export type AnalyticsAccessContext = {
@@ -21,45 +18,12 @@ export const analyticsAuthenticationService = {
     return authenticateOpenOpsAnalyticsAdmin();
   },
 
-  async signIn(): Promise<AnalyticsAuthTokens> {
-    return authenticateOpenOpsAnalyticsAdmin();
-  },
-
-  async verifyUserAnalyticsAccess(
-    openopsUserId: string,
-  ): Promise<ProjectContext> {
-    const user = await userService.getOneOrThrow({
-      id: openopsUserId,
-    });
-
-    const tokens = await authenticateUserInOpenOpsTables(
-      user.email,
-      user.password,
-    );
-
-    const projectContext = await getProjectAndToken(user, tokens.refresh_token);
-
-    if (!projectContext.hasAnalyticsPrivileges) {
-      throw new ApplicationError({
-        code: ErrorCode.AUTHORIZATION,
-        params: {
-          message: 'Project does not have analytics privileges',
-        },
-      });
-    }
-
-    return projectContext;
-  },
-
   async authenticateAnalyticsRequest(
     userId: string,
-  ): Promise<AnalyticsAccessContext> {
-    const projectContext = await this.verifyUserAnalyticsAccess(userId);
-    const authTokens = await this.signIn();
+  ): Promise<AnalyticsAuthTokens> {
+    await getAnalyticsAccessService().verifyUserAnalyticsAccess(userId);
+    const authTokens = await authenticateOpenOpsAnalyticsAdmin();
 
-    return {
-      authTokens,
-      projectContext,
-    };
+    return authTokens;
   },
 };
