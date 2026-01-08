@@ -55,15 +55,7 @@ async function getProjectMcpEndpoint(
     tablesDatabaseToken: project.tablesDatabaseToken,
   });
 
-  const mcpEndpoints = await openopsTables.getMcpEndpointList(tokenOrResolver);
+  const endpoints = await openopsTables.getMcpEndpointList(tokenOrResolver);
 
-  const endpointExists = mcpEndpoints.find(
-    (endpoint) => endpoint.workspace_id === project.tablesWorkspaceId,
-  );
-
-  if (!endpointExists) {
-    return;
-  }
-
-  return endpointExists;
+  return endpoints.find((e) => e.workspace_id === project.tablesWorkspaceId);
 }
