@@ -3,11 +3,9 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { authenticateUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
-  assertNotNullOrUndefined,
   OpsEdition,
   PrincipalType,
   Provider,
@@ -17,7 +15,6 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
-import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
 import { analyticsAuthenticationService } from './analytics-authentication-service';
 import { getAuthenticationService } from './authentication-service-factory';
@@ -25,7 +22,6 @@ import {
   removeAuthCookies,
   setAuthCookies,
 } from './context/authentication-cookies';
-import { getProjectAndToken } from './context/create-project-auth-context';
 
 const edition = system.getEdition();
 const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
@@ -67,7 +63,11 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
   );
 
   app.get('/analytics-embed-id', async (request, reply) => {
-    const { access_token } = await analyticsAuthenticationService.signIn();
+    const {
+      authTokens: { access_token },
+    } = await analyticsAuthenticationService.authenticateAnalyticsRequest(
+      request.principal.id,
+    );
 
     const embedId = await analyticsDashboardService.fetchFinopsDashboardEmbedId(
       access_token,
@@ -80,32 +80,11 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     '/analytics-guest-token',
     AnalyticsGuestTokenRequestOptions,
     async (request, reply) => {
-      const user = await userService.getOneOrThrow({
-        id: request.principal.id,
-      });
-
-      const project = await projectService.getOneForUser(user);
-      assertNotNullOrUndefined(project, 'Project not found');
-
-      const tokens = await authenticateUserInOpenOpsTables(
-        user.email,
-        user.password,
+      const {
+        authTokens: { access_token },
+      } = await analyticsAuthenticationService.authenticateAnalyticsRequest(
+        request.principal.id,
       );
-
-      const projectContext = await getProjectAndToken(
-        user,
-        tokens.refresh_token,
-      );
-
-      if (!projectContext.hasAnalyticsPrivileges) {
-        return reply.code(StatusCodes.FORBIDDEN).send({
-          statusCode: StatusCodes.FORBIDDEN,
-          error: INSUFFICIENT_PERMISSIONS_ERROR_TEXT,
-          message: 'Project does not have analytics privileges.',
-        });
-      }
-
-      const { access_token } = await analyticsAuthenticationService.signIn();
 
       const guestToken =
         await analyticsDashboardService.fetchDashboardGuestToken(
