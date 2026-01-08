@@ -37,9 +37,6 @@ export const analyticsAuthenticationService = {
       id: openopsUserId,
     });
 
-    const project = await projectService.getOneForUser(user);
-    assertNotNullOrUndefined(project, 'Project not found');
-
     const tokens = await authenticateUserInOpenOpsTables(
       user.email,
       user.password,
