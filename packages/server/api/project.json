@@ -93,14 +93,23 @@
         "testPathPattern": ["packages/server/api/test/integration/cloud"]
       }
     },
+    "test-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "./tools/link-packages.sh",
+          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=cloud nx test-cloud server-api --output-style stream-without-prefixes",
+          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=ce nx test-ce server-api --output-style stream-without-prefixes"
+        ],
+        "parallel": false
+      }
+    },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [
           "nx run-many -t build -p server*,blocks-*,openops*,shared",
-          "./tools/link-packages.sh",
-          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=cloud nx test-cloud server-api --output-style stream-without-prefixes",
-          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=ce nx test-ce server-api --output-style stream-without-prefixes"
+          "nx test-integration server-api"
         ],
         "parallel": false
       }
