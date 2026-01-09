@@ -38,7 +38,7 @@ import { logger } from '../src/lib/logger';
 
 describe('request-oversize-body-handler', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('saveRequestBody', () => {

@@ -6,9 +6,7 @@ jest.mock('langfuse-vercel', () => ({
   })),
 }));
 
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-});
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 afterAll(() => {
   jest.restoreAllMocks();
