@@ -1,19 +1,35 @@
+import { resolveTokenProvider } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../../openops-tables';
-import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
-import { OPENOPS_DEFAULT_WORKSPACE_NAME } from '../../openops-tables/default-workspace-database';
+import { applyToEachTablesDatabase } from './tables-database-iterator';
 
-export const createOpenOpsTablesMcpEndpoint = async () => {
-  const { token } = await authenticateAdminUserInOpenOpsTables();
-  const mcpEndpoints = await openopsTables.getMcpEndpointList(token);
-  const workspace = await openopsTables.getWorkspaceByName(
-    token,
-    OPENOPS_DEFAULT_WORKSPACE_NAME,
-  );
+export const ensureTablesMcpEndpointExists = async (): Promise<void> => {
+  await applyToEachTablesDatabase(async (tablesContext): Promise<void> => {
+    const tokenOrResolver = await resolveTokenProvider(tablesContext);
 
-  if (!mcpEndpoints?.length && workspace) {
-    logger.info(`MCP endpoint does not exist, creating it`);
+    const mcpEndpoints = await openopsTables.getMcpEndpointList(
+      tokenOrResolver,
+    );
 
-    await openopsTables.createMcpEndpoint(workspace?.id, token);
-  }
+    const endpointExists = mcpEndpoints.some(
+      (endpoint) => endpoint.workspace_id === tablesContext.tablesWorkspaceId,
+    );
+
+    if (endpointExists) {
+      logger.info('MCP endpoint already exists; skipping', {
+        tablesWorkspaceId: tablesContext.tablesWorkspaceId,
+      });
+
+      return;
+    }
+
+    logger.info(`MCP endpoint does not exist, creating it`, {
+      tablesWorkspaceId: tablesContext.tablesWorkspaceId,
+    });
+
+    await openopsTables.createMcpEndpoint(
+      tokenOrResolver,
+      tablesContext.tablesWorkspaceId,
+    );
+  });
 };
