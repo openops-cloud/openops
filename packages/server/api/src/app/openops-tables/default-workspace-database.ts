@@ -1,16 +1,36 @@
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
+import { encryptUtils, logger } from '@openops/server-shared';
+import { EncryptedObject } from '@openops/shared';
 import { openopsTables } from './index';
 
 export const OPENOPS_DEFAULT_WORKSPACE_NAME = 'OpenOps Workspace';
 
+export type TablesWorkspaceContext<TDatabaseToken = string> = {
+  workspaceId: number;
+  databaseId: number;
+  databaseToken: TDatabaseToken;
+};
+
 export async function createDefaultWorkspaceAndDatabase(
+  params: TablesWorkspaceContext<EncryptedObject> | undefined,
   token: string,
-): Promise<{ workspaceId: number; databaseId: number; databaseToken: string }> {
-  const workspaceId = await getWorkspaceId(token);
+): Promise<TablesWorkspaceContext> {
+  const workspaceId = await ensureTablesWorkspaceExists(
+    token,
+    params?.workspaceId,
+  );
 
-  const databaseId = await getDatabaseId(workspaceId, token);
+  const databaseId = await ensureTablesDatabaseExists(
+    token,
+    workspaceId,
+    params?.databaseId,
+  );
 
-  const databaseToken = await getDatabaseToken(workspaceId, token);
+  const databaseToken = await ensureDatabaseTokenExists(
+    token,
+    workspaceId,
+    params?.databaseToken,
+  );
 
   return {
     databaseToken,
@@ -19,78 +39,134 @@ export async function createDefaultWorkspaceAndDatabase(
   };
 }
 
-async function getWorkspaceId(token: string): Promise<number> {
-  const workspaces = await openopsTables.listWorkspaces(token);
-
-  let workspaceId = 0;
-  if (workspaces.length > 1) {
-    throw new Error(
-      'The user has multiple workspaces created in OpenOps Tables.',
-    );
-  } else if (workspaces.length === 1) {
-    workspaceId = workspaces[0].id;
-  } else {
-    const workspace = await openopsTables.createWorkspace(
-      OPENOPS_DEFAULT_WORKSPACE_NAME,
-      token,
+async function ensureTablesWorkspaceExists(
+  token: string,
+  workspaceId?: number,
+): Promise<number> {
+  if (workspaceId) {
+    logger.debug(
+      `Workspace ID provided. Verifying existence in OpenOps tables.`,
+      {
+        workspaceId,
+      },
     );
 
-    workspaceId = workspace.id;
+    return getWorkspaceId(token, workspaceId);
   }
 
+  logger.debug(`Creating new workspace in OpenOps tables.`);
+  const workspace = await openopsTables.createWorkspace(
+    OPENOPS_DEFAULT_WORKSPACE_NAME,
+    token,
+  );
+
+  logger.debug(`Workspace (${workspace.id}) created successfully.`);
+  return workspace.id;
+}
+
+async function getWorkspaceId(
+  token: string,
+  workspaceId: number,
+): Promise<number> {
+  const workspaces = await openopsTables.listWorkspaces(token);
+
+  const exists = workspaces.some((w) => w.id === workspaceId);
+  if (!exists) {
+    throw new Error(
+      `Workspace ${workspaceId} was not found in OpenOps Tables.`,
+    );
+  }
+
+  logger.debug(`Workspace (${workspaceId}) already exists in OpenOps tables.`);
   return workspaceId;
 }
 
-async function getDatabaseId(
-  workspaceId: number,
+async function ensureTablesDatabaseExists(
   token: string,
+  workspaceId: number,
+  databaseId?: number,
+): Promise<number> {
+  if (databaseId) {
+    logger.debug(
+      `Database ID provided. Verifying existence in OpenOps tables.`,
+      {
+        workspaceId,
+        databaseId,
+      },
+    );
+
+    return getDatabaseId(token, workspaceId, databaseId);
+  }
+
+  logger.debug(`Creating new database in OpenOps tables.`);
+  const database = await openopsTables.createDatabase(
+    workspaceId,
+    OPENOPS_DEFAULT_DATABASE_NAME,
+    token,
+  );
+
+  logger.debug(`Database (${database.id}) created successfully.`);
+  return database.id;
+}
+
+async function getDatabaseId(
+  token: string,
+  workspaceId: number,
+  databaseId: number,
 ): Promise<number> {
   const databases = await openopsTables.listDatabases(workspaceId, token);
 
-  let databaseId = 0;
-  if (databases.length > 1) {
+  const exists = databases.some((d) => d.id === databaseId);
+  if (!exists) {
     throw new Error(
-      'The user has multiple databases created in OpenOps Tables.',
+      `Database ${databaseId} does not exist in workspace ${workspaceId} in OpenOps Tables.`,
     );
-  } else if (databases.length === 1) {
-    databaseId = databases[0].id;
-  } else {
-    const database = await openopsTables.createDatabase(
-      workspaceId,
-      OPENOPS_DEFAULT_DATABASE_NAME,
-      token,
-    );
-
-    databaseId = database.id;
   }
 
+  logger.debug(`Database (${databaseId}) already exists in OpenOps tables.`);
   return databaseId;
 }
 
-async function getDatabaseToken(
-  workspaceId: number,
+async function ensureDatabaseTokenExists(
   token: string,
+  workspaceId: number,
+  databaseToken?: EncryptedObject,
+): Promise<string> {
+  if (databaseToken) {
+    logger.debug(
+      `Database Token provided. Verifying existence in OpenOps tables.`,
+      {
+        workspaceId,
+        databaseToken,
+      },
+    );
+
+    return getDatabaseToken(token, workspaceId, databaseToken);
+  }
+
+  logger.debug(`Creating new database token in OpenOps tables.`);
+  const newToken = await openopsTables.createDatabaseToken(workspaceId, token);
+
+  logger.debug(`Database token created successfully.`);
+  return newToken.key;
+}
+
+async function getDatabaseToken(
+  token: string,
+  workspaceId: number,
+  databaseToken: EncryptedObject,
 ): Promise<string> {
   const databaseTokens = await openopsTables.listDatabaseTokens(
     workspaceId,
     token,
   );
 
-  let tablesToken = '';
-  if (databaseTokens.length > 1) {
-    throw new Error(
-      'The user has multiple database tokens created in OpenOps Tables.',
-    );
-  } else if (databaseTokens.length === 1) {
-    tablesToken = databaseTokens[0].key;
-  } else {
-    const newToken = await openopsTables.createDatabaseToken(
-      workspaceId,
-      token,
-    );
-
-    tablesToken = newToken.key;
+  const tablesDatabaseToken = encryptUtils.decryptString(databaseToken);
+  const exists = databaseTokens.some((dt) => dt.key === tablesDatabaseToken);
+  if (!exists) {
+    throw new Error(`Database token was not found in OpenOps Tables.`);
   }
 
-  return tablesToken;
+  logger.debug(`Database token already exists in OpenOps tables.`);
+  return tablesDatabaseToken;
 }

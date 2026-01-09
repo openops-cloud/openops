@@ -1,5 +1,6 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import {
+  EncryptedObject,
   Organization,
   OrganizationRole,
   Project,
@@ -9,9 +10,11 @@ import {
 import { authenticationService } from '../../authentication/basic/authentication-service';
 import { openopsTables } from '../../openops-tables';
 import { authenticateAdminUserInOpenOpsTables } from '../../openops-tables/auth-admin-tables';
+import { TablesWorkspaceContext } from '../../openops-tables/default-workspace-database';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
 import { userService } from '../../user/user-service';
+import { getAdminProject } from './get-admin-project';
 
 const DEFAULT_ORGANIZATION_NAME = 'organization';
 
@@ -26,22 +29,49 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     const user = await ensureUserExists(email, password);
 
-    const { workspaceId, databaseId, databaseToken } =
-      await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
+    const { organization, project } = await resolveUserOrganizationContext(
+      user,
+    );
 
-    const organization = await ensureOrganizationExists(user);
+    let tablesWorkspaceContext:
+      | TablesWorkspaceContext<EncryptedObject>
+      | undefined = undefined;
+    if (project) {
+      tablesWorkspaceContext = {
+        databaseToken: project.tablesDatabaseToken,
+        workspaceId: project.tablesWorkspaceId,
+        databaseId: project.tablesDatabaseId,
+      };
+
+      logger.debug(`Project already created`, {
+        ...tablesWorkspaceContext,
+        organizationId: project.organizationId,
+        projectId: project.id,
+      });
+    }
+
+    const { workspaceId, databaseId, databaseToken } =
+      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(
+        tablesWorkspaceContext,
+      );
+
+    const organizationId = organization
+      ? organization.id
+      : (await createOrganization(user)).id;
 
     const userWithOrganization = {
       ...user,
-      organizationId: organization.id,
+      organizationId,
     };
 
-    await ensureProjectExists(
-      userWithOrganization,
-      databaseId,
-      workspaceId,
-      databaseToken,
-    );
+    if (!project) {
+      await createProject(
+        userWithOrganization,
+        databaseId,
+        workspaceId,
+        databaseToken,
+      );
+    }
   }
 };
 
@@ -52,6 +82,7 @@ async function signIn(email: string, password: string): Promise<void> {
     organizationId: null,
     provider: Provider.EMAIL,
   });
+
   logger.info(`Successfully signed in as admin [${email}]`, email);
 }
 
@@ -94,29 +125,9 @@ async function ensureUserExists(
   return user;
 }
 
-async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
-  databaseToken: string;
-  workspaceId: number;
-  databaseId: number;
-}> {
-  const { token } = await authenticateAdminUserInOpenOpsTables();
-
-  const { workspaceId, databaseId, databaseToken } =
-    await openopsTables.createDefaultWorkspaceAndDatabase(token);
-
-  if (!workspaceId || !databaseId || !databaseToken) {
-    throw new Error('Failed to create OpenOps Tables workspace or database');
-  }
-
-  logger.info(`OpenOps Tables workspace and database exist`, {
-    workspaceId,
-    databaseId,
-  });
-
-  return { workspaceId, databaseId, databaseToken };
-}
-
-async function ensureOrganizationExists(user: User): Promise<Organization> {
+async function resolveUserOrganizationContext(
+  user: User,
+): Promise<{ organization?: Organization; project?: Project }> {
   if (user.organizationId) {
     const existingOrganization = await organizationService.getOne(
       user.organizationId,
@@ -128,8 +139,38 @@ async function ensureOrganizationExists(user: User): Promise<Organization> {
       );
     }
 
-    return existingOrganization;
+    const project = (await getAdminProject(user)) ?? undefined;
+    return {
+      organization: existingOrganization,
+      project,
+    };
   }
+
+  return {};
+}
+
+async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
+  params?: TablesWorkspaceContext<EncryptedObject>,
+): Promise<TablesWorkspaceContext> {
+  const { token } = await authenticateAdminUserInOpenOpsTables();
+
+  const { workspaceId, databaseId, databaseToken } =
+    await openopsTables.createDefaultWorkspaceAndDatabase(params, token);
+
+  if (!workspaceId || !databaseId || !databaseToken) {
+    throw new Error('Failed to create OpenOps Tables workspace or database');
+  }
+
+  logger.info(`OpenOps Tables workspace and database available`, {
+    workspaceId,
+    databaseId,
+  });
+
+  return { workspaceId, databaseId, databaseToken };
+}
+
+async function createOrganization(user: User): Promise<Organization> {
+  logger.debug('Creating organization for admin');
 
   return organizationService.create({
     ownerId: user.id,
@@ -141,28 +182,13 @@ type UserWithOrganization = User & {
   organizationId: string;
 };
 
-async function ensureProjectExists(
+async function createProject(
   user: UserWithOrganization,
   databaseId: number,
   workspaceId: number,
   databaseToken: string,
 ): Promise<Project> {
-  const project = await projectService.getOneForUser(user);
-  if (project) {
-    if (project.tablesDatabaseId !== databaseId) {
-      throw new Error(
-        'User project exists but with different tablesDatabaseId',
-      );
-    }
-
-    if (project.tablesWorkspaceId !== workspaceId) {
-      throw new Error(
-        'User project exists but with different tablesWorkspaceId',
-      );
-    }
-
-    return project;
-  }
+  logger.debug('Creating project for admin');
 
   return projectService.create({
     displayName: `${user.firstName}'s Project`,
