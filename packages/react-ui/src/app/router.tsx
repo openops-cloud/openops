@@ -70,8 +70,8 @@ const createRoutes = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
-    FlagId.ANALYTICS_PUBLIC_URL,
+  const { data: isAnalyticsEnabled } = flagsHooks.useFlag<boolean | undefined>(
+    FlagId.ANALYTICS_ENABLED,
   );
   const hasAnalyticsPrivileges =
     authenticationSession.getUserHasAnalyticsPrivileges();
@@ -210,7 +210,7 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
-    ...(!!analyticsPublicUrl && hasAnalyticsPrivileges
+    ...(isAnalyticsEnabled && hasAnalyticsPrivileges
       ? [
           {
             path: 'analytics',

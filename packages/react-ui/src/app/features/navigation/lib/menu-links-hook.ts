@@ -20,8 +20,8 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
-    FlagId.ANALYTICS_PUBLIC_URL,
+  const { data: isAnalyticsEnabled } = flagsHooks.useFlag<string | undefined>(
+    FlagId.ANALYTICS_ENABLED,
   );
 
   const hasAnalyticsPrivileges =
@@ -54,7 +54,7 @@ export const useMenuLinks = () => {
         label: t('Tables'),
         icon: TableProperties,
       },
-      ...(!!analyticsPublicUrl && hasAnalyticsPrivileges
+      ...(isAnalyticsEnabled && hasAnalyticsPrivileges
         ? [
             {
               to: '/analytics',
@@ -66,7 +66,7 @@ export const useMenuLinks = () => {
     ];
 
     return links;
-  }, [analyticsPublicUrl, hasAnalyticsPrivileges]);
+  }, [isAnalyticsEnabled, hasAnalyticsPrivileges]);
 
   return menuLinks;
 };

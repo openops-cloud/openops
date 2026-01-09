@@ -236,6 +236,12 @@ export const flagService = {
         updated,
       },
       {
+        id: FlagId.ANALYTICS_ENABLED,
+        value: system.isAnalyticsEnabled(),
+        created,
+        updated,
+      },
+      {
         id: FlagId.DARK_THEME_ENABLED,
         value: system.getBoolean(AppSystemProp.DARK_THEME_ENABLED),
         created,
