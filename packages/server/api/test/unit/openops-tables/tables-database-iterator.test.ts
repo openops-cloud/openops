@@ -17,8 +17,16 @@ describe('Tables database iterator', () => {
   describe('applyToEachTablesDatabase', () => {
     it('applies a function to each tables database context', async () => {
       const contexts = [
-        { tablesDatabaseId: 'db1', tablesDatabaseToken: 'token1' },
-        { tablesDatabaseId: 'db2', tablesDatabaseToken: 'token2' },
+        {
+          tablesWorkspaceId: 'w1',
+          tablesDatabaseId: 'db1',
+          tablesDatabaseToken: 'token1',
+        },
+        {
+          tablesWorkspaceId: 'w2',
+          tablesDatabaseId: 'db2',
+          tablesDatabaseToken: 'token2',
+        },
       ];
       findMock.mockResolvedValue(contexts);
       const runMock = jest.fn().mockResolvedValue(undefined);

@@ -31,6 +31,7 @@ import { ConnectionsHeader } from './features/connections/components/connection-
 import { ConnectionsProvider } from './features/connections/components/connections-context';
 import { GlobalLayout } from './features/navigation/layout/global-layout';
 import { RouteWrapper } from './features/navigation/layout/route-wrapper';
+import { authenticationSession } from './lib/authentication-session';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -72,6 +73,8 @@ const createRoutes = () => {
   const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
     FlagId.ANALYTICS_PUBLIC_URL,
   );
+  const hasAnalyticsPrivileges =
+    authenticationSession.getUserHasAnalyticsPrivileges();
 
   const routes = [
     {
@@ -207,6 +210,23 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
+    ...(!!analyticsPublicUrl && hasAnalyticsPrivileges
+      ? [
+          {
+            path: 'analytics',
+            element: (
+              <RouteWrapper useEntireInnerViewport>
+                <OpsErrorBoundary>
+                  <PageTitle title="Analytics">
+                    <OpenOpsAnalyticsPage />
+                  </PageTitle>
+                </OpsErrorBoundary>
+              </RouteWrapper>
+            ),
+            errorElement: <RouteErrorBoundary />,
+          },
+        ]
+      : []),
     {
       path: '404',
       element: (
@@ -219,22 +239,6 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
   ];
-
-  if (analyticsPublicUrl) {
-    routes.push({
-      path: 'analytics',
-      element: (
-        <RouteWrapper useEntireInnerViewport>
-          <OpsErrorBoundary>
-            <PageTitle title="Analytics">
-              <OpenOpsAnalyticsPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </RouteWrapper>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    });
-  }
 
   if (!isFederatedLogin) {
     const regularLoginRoutes = [

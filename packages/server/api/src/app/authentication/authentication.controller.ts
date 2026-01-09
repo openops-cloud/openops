@@ -12,6 +12,7 @@ import {
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
+import { StatusCodes } from 'http-status-codes';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
@@ -63,7 +64,10 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
 
   if (analyticsEnabled) {
     app.get('/analytics-embed-id', async (request, reply) => {
-      const { access_token } = await analyticsAuthenticationService.signIn();
+      const { access_token } =
+        await analyticsAuthenticationService.authenticateAnalyticsRequest(
+          request.principal.id,
+        );
 
       const embedId =
         await analyticsDashboardService.fetchFinopsDashboardEmbedId(
@@ -77,15 +81,17 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       '/analytics-guest-token',
       AnalyticsGuestTokenRequestOptions,
       async (request, reply) => {
-        const { access_token } = await analyticsAuthenticationService.signIn();
-
-        const guestToken =
-          await analyticsDashboardService.fetchDashboardGuestToken(
-            access_token,
-            request.query.dashboardEmbedUuid,
+        const { access_token } =
+          await analyticsAuthenticationService.authenticateAnalyticsRequest(
+            request.principal.id,
           );
 
-        return reply.send(guestToken);
+        const embedId =
+          await analyticsDashboardService.fetchFinopsDashboardEmbedId(
+            access_token,
+          );
+
+        return reply.send(embedId);
       },
     );
   }
@@ -98,8 +104,8 @@ const signUpRoute = async (request: any, reply: any) => {
   });
 
   if (!user || user.email !== adminEmail) {
-    return reply.code(403).send({
-      statusCode: 403,
+    return reply.code(StatusCodes.FORBIDDEN).send({
+      statusCode: StatusCodes.FORBIDDEN,
       error: 'Insufficient Permissions',
       message: 'Adding new users only allowed to admin user.',
     });

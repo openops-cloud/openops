@@ -37,4 +37,5 @@ export type ProjectContext = {
   projectRole: ProjectMemberRole;
   project: ProjectWithoutSensitiveData;
   hasTemplatesPrivileges: boolean;
+  hasAnalyticsPrivileges: boolean;
 };
