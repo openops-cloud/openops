@@ -112,6 +112,71 @@ describe('createAdminInOpenOpsTables', () => {
     expect(createDbMock).not.toHaveBeenCalled();
   });
 
+  it('should throw if workspace is not present in OpenOps Tables', async () => {
+    const tablesWorkspaceContext = {
+      workspaceId: 2,
+      databaseId: 3,
+      databaseToken: {
+        iv: 'iv',
+        data: 'some token encrypted with iv',
+      },
+    };
+
+    listWorkspacesMock.mockResolvedValue([]);
+
+    await expect(
+      createDefaultWorkspaceAndDatabase(tablesWorkspaceContext, token),
+    ).rejects.toThrow('Workspace 2 was not found in OpenOps Tables.');
+
+    expect(createWorkspaceMock).not.toHaveBeenCalled();
+    expect(createDbMock).not.toHaveBeenCalled();
+  });
+
+  it('should throw if database is not present in OpenOps Tables', async () => {
+    const tablesWorkspaceContext = {
+      workspaceId: 2,
+      databaseId: 3,
+      databaseToken: {
+        iv: 'iv',
+        data: 'some token encrypted with iv',
+      },
+    };
+
+    listWorkspacesMock.mockResolvedValue([{ id: 2, name: 'Workspace' }]);
+    listDatabasesMock.mockResolvedValue([]);
+
+    await expect(
+      createDefaultWorkspaceAndDatabase(tablesWorkspaceContext, token),
+    ).rejects.toThrow(
+      'Database 3 does not exist in workspace 2 in OpenOps Tables.',
+    );
+
+    expect(createWorkspaceMock).not.toHaveBeenCalled();
+    expect(createDbMock).not.toHaveBeenCalled();
+  });
+
+  it('should throw if database token is not present in OpenOps Tables', async () => {
+    const tablesWorkspaceContext = {
+      workspaceId: 2,
+      databaseId: 3,
+      databaseToken: {
+        iv: 'iv',
+        data: 'some token encrypted with iv',
+      },
+    };
+
+    listWorkspacesMock.mockResolvedValue([{ id: 2, name: 'Workspace' }]);
+    listDatabasesMock.mockResolvedValue([{ id: 3, name: 'Database' }]);
+    listDatabaseTokensMock.mockResolvedValue([]);
+
+    await expect(
+      createDefaultWorkspaceAndDatabase(tablesWorkspaceContext, token),
+    ).rejects.toThrow('Database token was not found in OpenOps Tables.');
+
+    expect(createWorkspaceMock).not.toHaveBeenCalled();
+    expect(createDbMock).not.toHaveBeenCalled();
+  });
+
   it('should throw if something fails', async () => {
     listWorkspacesMock.mockResolvedValue([]);
     createWorkspaceMock.mockRejectedValue(new Error('some error'));
