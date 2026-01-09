@@ -141,9 +141,28 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+  postgres-backup:
+    image: 'postgres:14.4'
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${OPS_POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${OPS_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${OPS_POSTGRES_DATABASE}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}
+    volumes:
+      - postgres_backups:/backups
+      - ./postgres-backup.sh:/usr/local/bin/backup.sh:ro
+    entrypoint: ['/bin/bash', '/usr/local/bin/backup.sh']
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   openops_azure_cli_data:
   openops_gcloud_cli_data:
   openops_tables_data:
   postgres_data:
+  postgres_backups:
   redis_data:
