@@ -99,7 +99,12 @@ const main = async (): Promise<void> => {
     await seedFocusDataAggregationTemplateTable();
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
-    await analytics.seedAnalytics();
+
+    if (system.isAnalyticsEnabled()) {
+      await analytics.seedAnalytics();
+    } else {
+      logger.info('Skipping analytics seed run, analytics disabled');
+    }
   }
 
   const environmentId = await seedEnvironmentId();

@@ -5,6 +5,13 @@ import path from 'path';
 import { MCPTool } from './types';
 
 export async function getSupersetTools(): Promise<MCPTool> {
+  if (!system.isAnalyticsEnabled()) {
+    return {
+      client: undefined,
+      toolSet: {},
+    };
+  }
+
   const basePath = system.get<string>(AppSystemProp.SUPERSET_MCP_SERVER_PATH);
 
   if (!basePath) {

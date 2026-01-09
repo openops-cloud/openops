@@ -229,7 +229,15 @@ export const flagService = {
       },
       {
         id: FlagId.ANALYTICS_PUBLIC_URL,
-        value: system.get(AppSystemProp.ANALYTICS_PUBLIC_URL),
+        value: system.isAnalyticsEnabled()
+          ? system.get(AppSystemProp.ANALYTICS_PUBLIC_URL)
+          : undefined,
+        created,
+        updated,
+      },
+      {
+        id: FlagId.ANALYTICS_ENABLED,
+        value: system.isAnalyticsEnabled(),
         created,
         updated,
       },

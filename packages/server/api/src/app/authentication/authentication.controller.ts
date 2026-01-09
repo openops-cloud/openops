@@ -44,6 +44,8 @@ const AnalyticsGuestTokenRequestOptions = {
 export const authenticationController: FastifyPluginAsyncTypebox = async (
   app,
 ) => {
+  const analyticsEnabled = system.isAnalyticsEnabled();
+
   app.post('/sign-up', SignUpRequestOptions, signUpRoute);
   app.post('/sign-in', SignInRequestOptions, signInRoute);
 
@@ -60,37 +62,40 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     },
   );
 
-  app.get('/analytics-embed-id', async (request, reply) => {
-    const { access_token } =
-      await analyticsAuthenticationService.authenticateAnalyticsRequest(
-        request.principal.id,
-      );
-
-    const embedId = await analyticsDashboardService.fetchFinopsDashboardEmbedId(
-      access_token,
-    );
-
-    return reply.send(embedId);
-  });
-
-  app.get(
-    '/analytics-guest-token',
-    AnalyticsGuestTokenRequestOptions,
-    async (request, reply) => {
+  if (analyticsEnabled) {
+    app.get('/analytics-embed-id', async (request, reply) => {
       const { access_token } =
         await analyticsAuthenticationService.authenticateAnalyticsRequest(
           request.principal.id,
         );
 
-      const guestToken =
-        await analyticsDashboardService.fetchDashboardGuestToken(
+      const embedId =
+        await analyticsDashboardService.fetchFinopsDashboardEmbedId(
           access_token,
-          request.query.dashboardEmbedUuid,
         );
 
-      return reply.send(guestToken);
-    },
-  );
+      return reply.send(embedId);
+    });
+
+    app.get(
+      '/analytics-guest-token',
+      AnalyticsGuestTokenRequestOptions,
+      async (request, reply) => {
+        const { access_token } =
+          await analyticsAuthenticationService.authenticateAnalyticsRequest(
+            request.principal.id,
+          );
+
+        const guestToken =
+          await analyticsDashboardService.fetchDashboardGuestToken(
+            access_token,
+            request.query.dashboardEmbedUuid,
+          );
+
+        return reply.send(guestToken);
+      },
+    );
+  }
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
