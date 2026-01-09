@@ -21,7 +21,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.2.15
+      OPS_OPENOPS_TABLES_VERSION: 0.2.16
       OPS_ANALYTICS_VERSION: 0.14.1
     depends_on:
       openops-tables:
@@ -47,7 +47,7 @@ services:
     depends_on:
       - openops-app
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.2.15
+    image: public.ecr.aws/openops/openops-tables:0.2.16
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
