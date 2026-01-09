@@ -102,68 +102,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
-  test:
-    strategy:
-        matrix:
-            test-suits:
-              - name: UI
-                include: ui-*,*-ui
-              - name: Blocks Shard 1
-                include: blocks-a*,blocks-c*,blocks-d*,
-              - name: Blocks Shard 2
-                include: blocks-f*,blocks-g*,blocks-m*,
-              - name: Blocks Shard 3
-                include: blocks-*
-                exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
-              - name: Server API Unit Tests
-                key: server-api-unit
-                target: test-unit
-                include: server-api
-              - name: Server API Integration Tests
-                key: server-api-integration
-                target: test-integration
-                include: server-api
-              - name: Engine and Libraries
-                key: others
-                exclude: ui-*,*-ui,blocks-*,server-api
-    name: Test ${{ matrix.test-suits.name }}
-    needs: [install, build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.1
-      - name: Restore node_modules cache
-        id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
-        with:
-          path: node_modules
-          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
-          fail-on-cache-miss: true
-      - name: Restore build cache
-        uses: actions/cache/restore@v5.0.1
-        with:
-          path: dist
-          key: dist-${{ github.sha }}
-          fail-on-cache-miss: true
-      - name: Restore NX cache
-        uses: actions/cache@v5.0.1
-        with:
-          path: .nx/cache
-          key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
-          restore-keys: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-
-          save-always: true
-      - name: Test
-        if: steps.nx-test-cache.outputs.cache-hit != 'true'
-        continue-on-error: false
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_on: error
-          command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
-        env:
-          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
-      - name: Truncate NX cache
-        run: ./tools/truncate-nx-cache.sh
   build:
     name: Build Project
     needs: install
@@ -195,6 +133,72 @@ jobs:
         with:
           path: dist
           key: dist-${{ github.sha }}
+  test:
+    strategy:
+      matrix:
+        test-suits:
+          - name: UI
+            include: ui-*,*-ui
+          - name: Blocks Shard 1
+            include: blocks-a*,blocks-c*,blocks-d*,
+          - name: Blocks Shard 2
+            include: blocks-f*,blocks-g*,blocks-m*,
+          - name: Blocks Shard 3
+            include: blocks-*
+            exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
+          - name: Server API Unit Tests
+            key: server-api-unit
+            target: test-unit
+            include: server-api
+          - name: Server API Integration Tests
+            key: server-api-integration
+            target: test-integration
+            include: server-api
+          - name: Engine and Libraries
+            key: others
+            exclude: ui-*,*-ui,blocks-*,server-api
+    name: Test ${{ matrix.test-suits.name }}
+    needs: [ install, build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache/restore@v5.0.1
+        with:
+          path: node_modules
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
+      - name: Restore build cache
+        uses: actions/cache/restore@v5.0.1
+        with:
+          path: dist
+          key: dist-${{ github.sha }}
+          fail-on-cache-miss: true
+      - name: Restore NX cache
+        uses: actions/cache@v5.0.1
+        with:
+          path: .nx/cache
+          key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
+          restore-keys: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-
+          save-always: true
+      - name: Link packages (integration only)
+        if: matrix.test-suits.key == 'server-api-integration' &&
+          steps.nx-test-cache.outputs.cache-hit != 'true'
+        run: ./tools/link-packages.sh
+      - name: Test
+        if: steps.nx-test-cache.outputs.cache-hit != 'true'
+        continue-on-error: false
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_on: error
+          command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+      - name: Truncate NX cache
+        run: ./tools/truncate-nx-cache.sh
   build-images:
     strategy:
         matrix:
