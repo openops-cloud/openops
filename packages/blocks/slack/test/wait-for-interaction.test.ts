@@ -14,7 +14,7 @@ import {
 
 describe('wait-for-interaction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     slackUpdateMessageMock.mockResolvedValue('updated message');
   });
 

@@ -58,7 +58,7 @@ afterAll(async () => {
 
 describe('Slack API', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('POST', () => {

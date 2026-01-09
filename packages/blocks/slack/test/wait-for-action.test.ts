@@ -12,7 +12,7 @@ import { MessageInfo } from '../src/lib/common/message-result';
 
 describe('waitForAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('should create action with correct properties', () => {
