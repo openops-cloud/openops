@@ -33,13 +33,22 @@ export const upsertAdminUser = async (): Promise<void> => {
       user,
     );
 
-    const tablesWorkspaceContext = project
-      ? ({
-          databaseToken: project.tablesDatabaseToken,
-          workspaceId: project.tablesWorkspaceId,
-          databaseId: project.tablesDatabaseId,
-        } as TablesWorkspaceContext<EncryptedObject>)
-      : undefined;
+    let tablesWorkspaceContext:
+      | TablesWorkspaceContext<EncryptedObject>
+      | undefined = undefined;
+    if (project) {
+      tablesWorkspaceContext = {
+        databaseToken: project.tablesDatabaseToken,
+        workspaceId: project.tablesWorkspaceId,
+        databaseId: project.tablesDatabaseId,
+      };
+
+      logger.debug(`Project already created`, {
+        ...tablesWorkspaceContext,
+        organizationId: project.organizationId,
+        projectId: project.id,
+      });
+    }
 
     const { workspaceId, databaseId, databaseToken } =
       await ensureOpenOpsTablesWorkspaceAndDatabaseExist(
@@ -73,6 +82,7 @@ async function signIn(email: string, password: string): Promise<void> {
     organizationId: null,
     provider: Provider.EMAIL,
   });
+
   logger.info(`Successfully signed in as admin [${email}]`, email);
 }
 
@@ -151,7 +161,7 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
     throw new Error('Failed to create OpenOps Tables workspace or database');
   }
 
-  logger.info(`OpenOps Tables workspace and database exist`, {
+  logger.info(`OpenOps Tables workspace and database available`, {
     workspaceId,
     databaseId,
   });
@@ -160,6 +170,8 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
 }
 
 async function createOrganization(user: User): Promise<Organization> {
+  logger.debug('Creating organization for admin');
+
   return organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
@@ -176,6 +188,8 @@ async function createProject(
   workspaceId: number,
   databaseToken: string,
 ): Promise<Project> {
+  logger.debug('Creating project for admin');
+
   return projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
