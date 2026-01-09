@@ -86,12 +86,13 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
             request.principal.id,
           );
 
-        const embedId =
-          await analyticsDashboardService.fetchFinopsDashboardEmbedId(
+        const guestToken =
+          await analyticsDashboardService.fetchDashboardGuestToken(
             access_token,
+            request.query.dashboardEmbedUuid,
           );
 
-        return reply.send(embedId);
+        return reply.send(guestToken);
       },
     );
   }
