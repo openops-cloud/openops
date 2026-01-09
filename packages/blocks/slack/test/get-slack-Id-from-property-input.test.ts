@@ -7,7 +7,7 @@ import { getSlackIdFromPropertyInput } from '../src/lib/common/get-slack-users';
 
 describe('getSlackIdFromPropertyInput', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   const accessToken = 'mockAccessToken';

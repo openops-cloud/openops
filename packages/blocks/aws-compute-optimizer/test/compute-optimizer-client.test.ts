@@ -21,7 +21,7 @@ import { getRecommendationSummaries } from '../src/lib/common/compute-optimizer-
 
 describe('Get recommendations summary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   test('should return recommendations summary', async () => {

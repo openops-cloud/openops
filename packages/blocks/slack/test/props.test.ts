@@ -16,7 +16,7 @@ describe('Props Common', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('channel dropdown', () => {

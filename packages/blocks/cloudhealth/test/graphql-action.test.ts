@@ -20,7 +20,7 @@ describe('GraphQL Action', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should successfully execute a GraphQL query', async () => {
