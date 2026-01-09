@@ -1,7 +1,5 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
+import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
 import { MenuLink, RunsIcon } from '@openops/components/ui';
-import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import {
   Home,
@@ -20,12 +18,7 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const { data: isAnalyticsEnabled } = flagsHooks.useFlag<string | undefined>(
-    FlagId.ANALYTICS_ENABLED,
-  );
-
-  const hasAnalyticsPrivileges =
-    authenticationSession.getUserHasAnalyticsPrivileges();
+  const hasAnalyticsAccess = useHasAnalyticsAccess();
 
   const menuLinks: MenuLink[] = useMemo(() => {
     const links: MenuLink[] = [
@@ -54,7 +47,7 @@ export const useMenuLinks = () => {
         label: t('Tables'),
         icon: TableProperties,
       },
-      ...(isAnalyticsEnabled && hasAnalyticsPrivileges
+      ...(hasAnalyticsAccess
         ? [
             {
               to: '/analytics',
@@ -66,7 +59,7 @@ export const useMenuLinks = () => {
     ];
 
     return links;
-  }, [isAnalyticsEnabled, hasAnalyticsPrivileges]);
+  }, [hasAnalyticsAccess]);
 
   return menuLinks;
 };

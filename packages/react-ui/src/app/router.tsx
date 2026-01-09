@@ -17,6 +17,7 @@ import { FlowsPage } from '../app/routes/flows';
 import { PageHeader } from '@openops/components/ui';
 import { t } from 'i18next';
 
+import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
@@ -31,7 +32,6 @@ import { ConnectionsHeader } from './features/connections/components/connection-
 import { ConnectionsProvider } from './features/connections/components/connections-context';
 import { GlobalLayout } from './features/navigation/layout/global-layout';
 import { RouteWrapper } from './features/navigation/layout/route-wrapper';
-import { authenticationSession } from './lib/authentication-session';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -70,11 +70,7 @@ const createRoutes = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const { data: isAnalyticsEnabled } = flagsHooks.useFlag<boolean | undefined>(
-    FlagId.ANALYTICS_ENABLED,
-  );
-  const hasAnalyticsPrivileges =
-    authenticationSession.getUserHasAnalyticsPrivileges();
+  const hasAnalyticsAccess = useHasAnalyticsAccess();
 
   const routes = [
     {
@@ -210,7 +206,7 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
-    ...(isAnalyticsEnabled && hasAnalyticsPrivileges
+    ...(hasAnalyticsAccess
       ? [
           {
             path: 'analytics',
