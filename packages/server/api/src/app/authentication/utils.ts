@@ -71,5 +71,6 @@ export function buildAuthResponse(
     tablesRefreshToken: projectContext.tablesRefreshToken,
     tablesWorkspaceId: projectContext.project.tablesWorkspaceId,
     hasTemplatesPrivileges: projectContext.hasTemplatesPrivileges,
+    hasAnalyticsPrivileges: projectContext.hasAnalyticsPrivileges,
   };
 }

@@ -2,11 +2,12 @@ import {
   createAxiosHeaders,
   makeOpenOpsTablesPost,
   TablesMcpEndpoint,
+  TokenOrResolver,
 } from '@openops/common';
 
 export async function createMcpEndpoint(
+  tokenOrResolver: TokenOrResolver,
   workspaceId: number,
-  token: string,
 ): Promise<void> {
   const requestBody = {
     name: 'OpenOps MCP Endpoint',
@@ -16,6 +17,6 @@ export async function createMcpEndpoint(
   await makeOpenOpsTablesPost<TablesMcpEndpoint>(
     `api/mcp/endpoints/`,
     requestBody,
-    createAxiosHeaders(token),
+    createAxiosHeaders(tokenOrResolver),
   );
 }

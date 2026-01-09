@@ -1,6 +1,5 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
 import { MenuLink, RunsIcon } from '@openops/components/ui';
-import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import {
   Home,
@@ -19,9 +18,7 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
-    FlagId.ANALYTICS_PUBLIC_URL,
-  );
+  const hasAnalyticsAccess = useHasAnalyticsAccess();
 
   const menuLinks: MenuLink[] = useMemo(() => {
     const links: MenuLink[] = [
@@ -50,18 +47,19 @@ export const useMenuLinks = () => {
         label: t('Tables'),
         icon: TableProperties,
       },
+      ...(hasAnalyticsAccess
+        ? [
+            {
+              to: '/analytics',
+              label: t('Analytics'),
+              icon: LucideBarChart2,
+            },
+          ]
+        : []),
     ];
 
-    if (analyticsPublicUrl) {
-      links.push({
-        to: '/analytics',
-        label: t('Analytics'),
-        icon: LucideBarChart2,
-      });
-    }
-
     return links;
-  }, [analyticsPublicUrl]);
+  }, [hasAnalyticsAccess]);
 
   return menuLinks;
 };

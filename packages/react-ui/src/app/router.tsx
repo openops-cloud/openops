@@ -17,6 +17,7 @@ import { FlowsPage } from '../app/routes/flows';
 import { PageHeader } from '@openops/components/ui';
 import { t } from 'i18next';
 
+import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
@@ -56,23 +57,19 @@ const SettingsRerouter = () => {
   );
 };
 
-const createRoutes = () => {
-  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
-    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
-  );
+interface CreateRoutesParams {
+  isCloudConnectionPageEnabled: any;
+  isDemoHomePage: any;
+  isFederatedLogin: boolean | null | undefined;
+  hasAnalyticsAccess: boolean;
+}
 
-  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
-    FlagId.SHOW_DEMO_HOME_PAGE,
-  );
-
-  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
-    FlagId.FEDERATED_LOGIN_ENABLED,
-  );
-
-  const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
-    FlagId.ANALYTICS_PUBLIC_URL,
-  );
-
+const createRoutes = ({
+  isCloudConnectionPageEnabled,
+  isDemoHomePage,
+  isFederatedLogin,
+  hasAnalyticsAccess,
+}: CreateRoutesParams) => {
   const routes = [
     {
       path: 'flows',
@@ -207,6 +204,23 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
+    ...(hasAnalyticsAccess
+      ? [
+          {
+            path: 'analytics',
+            element: (
+              <RouteWrapper useEntireInnerViewport>
+                <OpsErrorBoundary>
+                  <PageTitle title="Analytics">
+                    <OpenOpsAnalyticsPage />
+                  </PageTitle>
+                </OpsErrorBoundary>
+              </RouteWrapper>
+            ),
+            errorElement: <RouteErrorBoundary />,
+          },
+        ]
+      : []),
     {
       path: '404',
       element: (
@@ -219,22 +233,6 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
   ];
-
-  if (analyticsPublicUrl) {
-    routes.push({
-      path: 'analytics',
-      element: (
-        <RouteWrapper useEntireInnerViewport>
-          <OpsErrorBoundary>
-            <PageTitle title="Analytics">
-              <OpenOpsAnalyticsPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </RouteWrapper>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    });
-  }
 
   if (!isFederatedLogin) {
     const regularLoginRoutes = [
@@ -410,11 +408,30 @@ const createRoutes = () => {
 };
 
 const ApplicationRouter = () => {
+  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
+    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
+
+  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
+    FlagId.SHOW_DEMO_HOME_PAGE,
+  );
+
+  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
+    FlagId.FEDERATED_LOGIN_ENABLED,
+  );
+
+  const hasAnalyticsAccess = useHasAnalyticsAccess();
+
   const router = createBrowserRouter([
     {
       path: '/',
       element: <GlobalLayout />,
-      children: createRoutes(),
+      children: createRoutes({
+        isCloudConnectionPageEnabled,
+        isDemoHomePage,
+        isFederatedLogin,
+        hasAnalyticsAccess,
+      }),
     },
   ]);
   return <RouterProvider router={router}></RouterProvider>;
