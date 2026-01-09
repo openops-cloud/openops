@@ -1,5 +1,5 @@
 import { resolveTokenProvider } from '@openops/common';
-import { ensureTablesMcpEndpointExists } from '../../../src/app/database/seeds/create-open-ops-tables-mcp-endpoint';
+import { ensureTablesMcpEndpointExists } from '../../../src/app/database/seeds/ensure-tables-mcp-endpoint-exists';
 import { applyToEachTablesDatabase } from '../../../src/app/database/seeds/tables-database-iterator';
 import { openopsTables } from '../../../src/app/openops-tables';
 
