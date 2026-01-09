@@ -182,10 +182,6 @@ jobs:
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
           restore-keys: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-
           save-always: true
-      - name: Link packages (integration only)
-        if: matrix.test-suits.key == 'server-api-integration' &&
-          steps.nx-test-cache.outputs.cache-hit != 'true'
-        run: ./tools/link-packages.sh
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
         continue-on-error: false

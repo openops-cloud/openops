@@ -5,3 +5,11 @@ jest.mock('langfuse-vercel', () => ({
     shutdown: jest.fn(),
   })),
 }));
+
+beforeAll(() => {
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
