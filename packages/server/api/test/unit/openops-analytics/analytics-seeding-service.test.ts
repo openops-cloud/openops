@@ -177,7 +177,7 @@ describe('seedAnalyticsDashboards', () => {
     );
   });
 
-  it('should user alternative host name if provided', async () => {
+  it('should use alternative host name if provided', async () => {
     getDefaultProjectTablesServerContextMock.mockResolvedValue(
       mockTablesServerContext,
     );
