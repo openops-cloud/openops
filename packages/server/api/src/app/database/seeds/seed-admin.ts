@@ -52,17 +52,13 @@ export const upsertAdminUser = async (): Promise<void> => {
         tablesWorkspaceContext,
       );
 
-    let organizationId;
-    if (organization) {
-      organizationId = organization.id;
-    } else {
+    if (!organization) {
       organization = await createOrganization(user);
-      organizationId = organization.id;
     }
 
     const userWithOrganization = {
       ...user,
-      organizationId,
+      organizationId: organization.id,
     };
 
     if (!project) {
