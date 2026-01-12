@@ -57,6 +57,7 @@ openopsEnv:
   OPS_OPENOPS_TABLES_DB_HOST: '{{ include "openops.postgresHost" . }}'
 
   # Analytics
+  OPS_ANALYTICS_ENABLED: "true"
   OPS_ANALYTICS_PUBLIC_URL: "{{ .Values.openopsEnv.OPS_PUBLIC_URL }}"
   OPS_ANALYTICS_PRIVATE_URL: '{{ include "openops.analyticsServiceUrl" . }}'
   OPS_ANALYTICS_ADMIN_PASSWORD: please-change-this-password-1
