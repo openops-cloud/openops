@@ -1,8 +1,9 @@
 import { TablesServerContext } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
-import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
+import { getAdminProject } from './seeds/get-admin-project';
 
+// TODO: Change the place where this method is used to not rely on the admin user
 export const getDefaultProjectTablesDatabaseToken =
   async (): Promise<TablesServerContext> => {
     const defaultUserEmail = system.getOrThrow(
@@ -14,7 +15,7 @@ export const getDefaultProjectTablesDatabaseToken =
       throw new Error('Default user not found');
     }
 
-    const project = await projectService.getOneForUser(defaultUser);
+    const project = await getAdminProject(defaultUser);
     if (!project) {
       throw new Error('Project not found');
     }
