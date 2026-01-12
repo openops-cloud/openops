@@ -3,6 +3,7 @@ import { AppSystemProp, system } from '@openops/server-shared';
 import { userService } from '../user/user-service';
 import { getAdminProject } from './seeds/get-admin-project';
 
+// TODO: Change the place where this method is used to not rely on the admin user
 export const getDefaultProjectTablesServerContext =
   async (): Promise<TablesServerContext> => {
     const defaultUserEmail = system.getOrThrow(
