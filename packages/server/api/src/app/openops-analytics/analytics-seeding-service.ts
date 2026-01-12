@@ -6,7 +6,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { organizationService } from '../organization/organization.service';
-import { getProjectSelectorService } from '../project/project-selector-service-factory';
+import { getProjectSelectorService } from '../project/project-selector';
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';

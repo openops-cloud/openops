@@ -60,7 +60,7 @@ jest.mock('../../../src/app/organization/organization.service', () => ({
 }));
 
 const getDefaultProjectForOrganizationMock = jest.fn();
-jest.mock('../../../src/app/project/project-selector-service-factory', () => ({
+jest.mock('../../../src/app/project/project-selector', () => ({
   getProjectSelectorService: jest.fn(() => ({
     getDefaultProjectForOrganization: getDefaultProjectForOrganizationMock,
   })),

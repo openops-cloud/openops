@@ -1,5 +1,5 @@
 import { Project } from '@openops/shared';
-import { projectSelectorService } from './project-selector-service';
+import { projectService } from './project-service';
 
 export type ProjectSelectorService = {
   getDefaultProjectForOrganization(
@@ -8,5 +8,8 @@ export type ProjectSelectorService = {
 };
 
 export const getProjectSelectorService = (): ProjectSelectorService => {
-  return projectSelectorService;
+  return {
+    getDefaultProjectForOrganization: (organizationId: string) =>
+      projectService.getOneForOrganization(organizationId),
+  };
 };
