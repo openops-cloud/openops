@@ -88,7 +88,7 @@ describe('seedAnalyticsDashboards', () => {
     delete process.env.OPS_OPENOPS_TABLES_DB_HOST;
   });
 
-  it('should succesfully create seed related objects', async () => {
+  it('should successfully create seed related objects', async () => {
     getDefaultProjectTablesServerContextMock.mockResolvedValue(
       mockTablesServerContext,
     );
