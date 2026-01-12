@@ -88,7 +88,7 @@ engine:
 tables:
   name: openops-tables
   image: openops-tables
-  tag: "0.2.16"
+  tag: "0.2.17"
   replicas: 1
   env:
     BASEROW_PUBLIC_URL: "{{ .Values.openopsEnv.OPS_OPENOPS_TABLES_PUBLIC_URL }}"
