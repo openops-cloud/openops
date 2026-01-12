@@ -29,10 +29,7 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     const user = await ensureUserExists(email, password);
 
-    const orgContext = await resolveUserOrganizationContext(user);
-    let organization = orgContext.organization;
-    const project = orgContext.project;
-
+    let { organization, project } = await resolveUserOrganizationContext(user);
     let tablesWorkspaceContext:
       | TablesWorkspaceContext<EncryptedObject>
       | undefined = undefined;
@@ -69,7 +66,8 @@ export const upsertAdminUser = async (): Promise<void> => {
     };
 
     if (!project) {
-      await createProject(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      project = await createProject(
         userWithOrganization,
         databaseId,
         workspaceId,
