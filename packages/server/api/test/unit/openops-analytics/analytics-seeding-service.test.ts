@@ -60,10 +60,8 @@ jest.mock('../../../src/app/organization/organization.service', () => ({
 }));
 
 const getDefaultProjectForOrganizationMock = jest.fn();
-jest.mock('../../../src/app/project/project-selector', () => ({
-  getProjectSelectorService: jest.fn(() => ({
-    getDefaultProjectForOrganization: getDefaultProjectForOrganizationMock,
-  })),
+jest.mock('../../../src/app/openops-analytics/project-selector', () => ({
+  getDefaultProjectForOrganization: getDefaultProjectForOrganizationMock,
 }));
 
 import { EncryptedObject } from '@openops/shared';

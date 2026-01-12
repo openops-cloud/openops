@@ -6,11 +6,11 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { organizationService } from '../organization/organization.service';
-import { getProjectSelectorService } from '../project/project-selector';
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';
 import { createHomepageCharts } from './populate-homepage';
+import { getDefaultProjectForOrganization } from './project-selector';
 
 export const HOME_PAGE_DASHBOARD_SLUG = 'homepage';
 
@@ -46,10 +46,7 @@ export async function seedAnalyticsDashboards(): Promise<void> {
     const organization = await organizationService.getOldestOrganization();
     assertNotNullOrUndefined(organization, 'Organization not found');
 
-    const project =
-      await getProjectSelectorService().getDefaultProjectForOrganization(
-        organization.id,
-      );
+    const project = await getDefaultProjectForOrganization(organization.id);
 
     assertNotNullOrUndefined(project, 'Project not found');
 
