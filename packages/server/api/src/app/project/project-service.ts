@@ -22,6 +22,7 @@ import { repoFactory } from '../core/db/repo-factory';
 import { openopsTables } from '../openops-tables';
 import { ProjectEntity } from './project-entity';
 import { projectHooks } from './project-hooks';
+import { getProjectSelectorService } from './project-selector-service-factory';
 
 export const projectRepo = repoFactory(ProjectEntity);
 
@@ -114,10 +115,9 @@ export const projectService = {
 
   async getOneForUser(user: User): Promise<Project | null> {
     assertNotNullOrUndefined(user.organizationId, 'user.organizationId');
-    return projectRepo().findOneBy({
-      organizationId: user.organizationId,
-      deleted: IsNull(),
-    });
+    return getProjectSelectorService().getDefaultProjectForOrganization(
+      user.organizationId,
+    );
   },
 
   async getUserProjectOrThrow(ownerId: UserId): Promise<Project> {
