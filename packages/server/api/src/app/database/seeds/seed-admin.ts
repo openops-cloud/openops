@@ -66,7 +66,6 @@ export const upsertAdminUser = async (): Promise<void> => {
     };
 
     if (!project) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       project = await createProject(
         userWithOrganization,
         databaseId,
