@@ -23,17 +23,18 @@ export function mergeToolResultsIntoMessages(
     const msg = messages[i];
 
     if (isToolMessage(msg)) {
-      if (Array.isArray(msg.content) && msg.content.length > 0) {
-        const toolResult = msg.content[0];
-        if (
-          toolResult &&
-          typeof toolResult === 'object' &&
-          'toolCallId' in toolResult
-        ) {
-          toolResultsToMerge.push({
-            toolResult: toolResult as ToolResultPart,
-            messageIndex: i,
-          });
+      if (Array.isArray(msg.content)) {
+        for (const toolResult of msg.content) {
+          if (
+            toolResult &&
+            typeof toolResult === 'object' &&
+            'toolCallId' in toolResult
+          ) {
+            toolResultsToMerge.push({
+              toolResult: toolResult as ToolResultPart,
+              messageIndex: i,
+            });
+          }
         }
       }
       continue;
