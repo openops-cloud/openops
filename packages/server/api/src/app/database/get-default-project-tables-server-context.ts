@@ -3,7 +3,7 @@ import { AppSystemProp, system } from '@openops/server-shared';
 import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
 
-export const getDefaultProjectTablesDatabaseToken =
+export const getDefaultProjectTablesServerContext =
   async (): Promise<TablesServerContext> => {
     const defaultUserEmail = system.getOrThrow(
       AppSystemProp.OPENOPS_ADMIN_EMAIL,

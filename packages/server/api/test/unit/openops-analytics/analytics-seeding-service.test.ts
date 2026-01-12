@@ -52,14 +52,17 @@ jest.mock('../../../src/app/openops-analytics/populate-homepage', () => {
   };
 });
 
-const getDefaultProjectTablesDatabaseTokenMock = jest.fn();
-jest.mock('../../../src/app/database/get-default-user-db-token', () => ({
-  getDefaultProjectTablesDatabaseToken: jest.fn(),
-}));
+const getDefaultProjectTablesServerContextMock = jest.fn();
+jest.mock(
+  '../../../src/app/database/get-default-project-tables-server-context',
+  () => ({
+    getDefaultProjectTablesServerContext: jest.fn(),
+  }),
+);
 
 import { TablesServerContext } from '@openops/common';
 import { EncryptedObject } from '@openops/shared';
-import { getDefaultProjectTablesDatabaseToken } from '../../../src/app/database/get-default-user-db-token';
+import { getDefaultProjectTablesServerContext } from '../../../src/app/database/get-default-project-tables-server-context';
 import { seedAnalyticsDashboards } from '../../../src/app/openops-analytics/analytics-seeding-service';
 import { SEED_OPENOPS_TABLE_NAME } from '../../../src/app/openops-tables/template-tables/create-opportunities-table';
 
@@ -74,8 +77,8 @@ const mockTablesServerContext: TablesServerContext = {
 describe('seedAnalyticsDashboards', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getDefaultProjectTablesDatabaseToken as jest.Mock).mockImplementation(
-      getDefaultProjectTablesDatabaseTokenMock,
+    (getDefaultProjectTablesServerContext as jest.Mock).mockImplementation(
+      getDefaultProjectTablesServerContextMock,
     );
     process.env.OPS_POSTGRES_PASSWORD = 'some password';
     process.env.OPS_POSTGRES_PORT = 'some port';
@@ -86,7 +89,7 @@ describe('seedAnalyticsDashboards', () => {
   });
 
   it('should succesfully create seed related objects', async () => {
-    getDefaultProjectTablesDatabaseTokenMock.mockResolvedValue(
+    getDefaultProjectTablesServerContextMock.mockResolvedValue(
       mockTablesServerContext,
     );
     openopsCommonMock.getTableIdByTableName.mockResolvedValue(1);
@@ -146,7 +149,7 @@ describe('seedAnalyticsDashboards', () => {
   });
 
   it('should not create dataset and log error if table with seed name was not found.', async () => {
-    getDefaultProjectTablesDatabaseTokenMock.mockResolvedValue(
+    getDefaultProjectTablesServerContextMock.mockResolvedValue(
       mockTablesServerContext,
     );
     openopsCommonMock.getTableIdByTableName.mockRejectedValueOnce(
@@ -175,7 +178,7 @@ describe('seedAnalyticsDashboards', () => {
   });
 
   it('should user alternative host name if provided', async () => {
-    getDefaultProjectTablesDatabaseTokenMock.mockResolvedValue(
+    getDefaultProjectTablesServerContextMock.mockResolvedValue(
       mockTablesServerContext,
     );
     openopsCommonMock.getTableIdByTableName.mockResolvedValue(1);
