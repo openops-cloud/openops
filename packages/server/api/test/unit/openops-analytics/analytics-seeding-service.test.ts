@@ -54,7 +54,7 @@ jest.mock('../../../src/app/openops-analytics/populate-homepage', () => {
 
 const getDefaultProjectTablesServerContextMock = jest.fn();
 jest.mock(
-  '../../../src/app/database/get-default-project-tables-db-token',
+  '../../../src/app/database/get-default-project-tables-server-context',
   () => ({
     getDefaultProjectTablesServerContext: jest.fn(),
   }),
@@ -62,7 +62,7 @@ jest.mock(
 
 import { TablesServerContext } from '@openops/common';
 import { EncryptedObject } from '@openops/shared';
-import { getDefaultProjectTablesServerContext } from '../../../src/app/database/get-default-project-tables-db-token';
+import { getDefaultProjectTablesServerContext } from '../../../src/app/database/get-default-project-tables-server-context';
 import { seedAnalyticsDashboards } from '../../../src/app/openops-analytics/analytics-seeding-service';
 import { SEED_OPENOPS_TABLE_NAME } from '../../../src/app/openops-tables/template-tables/create-opportunities-table';
 
