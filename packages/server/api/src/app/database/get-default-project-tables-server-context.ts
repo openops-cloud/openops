@@ -1,7 +1,7 @@
 import { TablesServerContext } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
-import { projectService } from '../project/project-service';
 import { userService } from '../user/user-service';
+import { getAdminProject } from './seeds/get-admin-project';
 
 export const getDefaultProjectTablesServerContext =
   async (): Promise<TablesServerContext> => {
@@ -14,7 +14,7 @@ export const getDefaultProjectTablesServerContext =
       throw new Error('Default user not found');
     }
 
-    const project = await projectService.getOneForUser(defaultUser);
+    const project = await getAdminProject(defaultUser);
     if (!project) {
       throw new Error('Project not found');
     }
