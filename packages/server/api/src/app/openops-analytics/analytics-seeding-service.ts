@@ -48,6 +48,7 @@ export async function seedAnalyticsDashboards(): Promise<void> {
   } catch (error) {
     logger.error(`Could not find table with name: ${SEED_OPENOPS_TABLE_NAME}`, {
       tableName: SEED_OPENOPS_TABLE_NAME,
+      error,
     });
     return;
   }
