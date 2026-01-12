@@ -29,9 +29,9 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     const user = await ensureUserExists(email, password);
 
-    const { organization, project } = await resolveUserOrganizationContext(
-      user,
-    );
+    const orgContext = await resolveUserOrganizationContext(user);
+    let organization = orgContext.organization;
+    const project = orgContext.project;
 
     let tablesWorkspaceContext:
       | TablesWorkspaceContext<EncryptedObject>
@@ -55,9 +55,13 @@ export const upsertAdminUser = async (): Promise<void> => {
         tablesWorkspaceContext,
       );
 
-    const organizationId = organization
-      ? organization.id
-      : (await createOrganization(user)).id;
+    let organizationId;
+    if (organization) {
+      organizationId = organization.id;
+    } else {
+      organization = await createOrganization(user);
+      organizationId = organization.id;
+    }
 
     const userWithOrganization = {
       ...user,
