@@ -14,28 +14,11 @@ export function mergeToolResultsIntoMessages(
   },
 ): Array<Omit<UIMessage, 'id'>> {
   const uiMessages: Array<Omit<UIMessage, 'id'>> = [];
-  const toolResultsToMerge: Array<{
-    toolResult: ToolResultPart;
-    messageIndex: number;
-  }> = [];
+  const toolResultsToMerge: ToolResultPart[] = [];
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-
+  for (const msg of messages) {
     if (isToolMessage(msg)) {
-      if (Array.isArray(msg.content) && msg.content.length > 0) {
-        const toolResult = msg.content[0];
-        if (
-          toolResult &&
-          typeof toolResult === 'object' &&
-          'toolCallId' in toolResult
-        ) {
-          toolResultsToMerge.push({
-            toolResult: toolResult as ToolResultPart,
-            messageIndex: i,
-          });
-        }
-      }
+      toolResultsToMerge.push(...extractToolResults(msg));
       continue;
     }
 
@@ -45,11 +28,27 @@ export function mergeToolResultsIntoMessages(
     }
   }
 
-  for (const { toolResult } of toolResultsToMerge) {
+  for (const toolResult of toolResultsToMerge) {
     mergeToolResultIntoUIMessage(toolResult, uiMessages);
   }
 
   return uiMessages;
+}
+
+function extractToolResults(msg: ModelMessage): ToolResultPart[] {
+  const toolResults: ToolResultPart[] = [];
+  if (Array.isArray(msg.content)) {
+    for (const part of msg.content) {
+      if (isToolResultPart(part)) {
+        toolResults.push(part);
+      }
+    }
+  }
+  return toolResults;
+}
+
+function isToolResultPart(part: any): part is ToolResultPart {
+  return part && typeof part === 'object' && 'toolCallId' in part;
 }
 
 /**
