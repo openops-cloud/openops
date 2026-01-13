@@ -120,6 +120,18 @@ export const projectService = {
     });
   },
 
+  async getOneForOrganization(organizationId: string): Promise<Project | null> {
+    return projectRepo().findOne({
+      where: {
+        organizationId,
+        deleted: IsNull(),
+      },
+      order: {
+        created: 'ASC',
+      },
+    });
+  },
+
   async getUserProjectOrThrow(ownerId: UserId): Promise<Project> {
     const project = await projectRepo().findOneBy({
       ownerId,
