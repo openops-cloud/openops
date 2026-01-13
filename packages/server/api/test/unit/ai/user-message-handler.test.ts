@@ -227,5 +227,99 @@ describe('User Message Handler', () => {
 
       expect(mockClose).toHaveBeenCalled();
     });
+
+    it('should save chat history with previous messages when stream is aborted', async () => {
+      let capturedOnAbort:
+        | ((event: { readonly steps: unknown[] }) => PromiseLike<void> | void)
+        | undefined;
+
+      getLLMAsyncStream.mockImplementation(
+        ({
+          onAbort,
+        }: {
+          onAbort?: (event: {
+            readonly steps: unknown[];
+          }) => PromiseLike<void> | void;
+        }) => {
+          capturedOnAbort = onAbort;
+
+          return (async function* (): AsyncGenerator<
+            TextStreamPart<ToolSet>,
+            void,
+            unknown
+          > {
+            yield {
+              type: 'text-delta',
+              text: 'Partial response',
+            } as TextStreamPart<ToolSet>;
+          })();
+        },
+      );
+
+      await handleUserMessage(mockParams);
+
+      expect(capturedOnAbort).toBeDefined();
+
+      const step1Messages = [
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'Step 1 response' }],
+        },
+      ];
+
+      const step2Messages = [
+        ...step1Messages,
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'Step 2 response' }],
+        },
+      ];
+
+      const step3Messages = [
+        ...step2Messages,
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'Step 3 response' }],
+        },
+      ];
+
+      if (capturedOnAbort) {
+        (saveChatHistory as jest.Mock).mockClear();
+
+        await capturedOnAbort({
+          steps: [
+            { response: { messages: step1Messages } },
+            { response: { messages: step2Messages } },
+            { response: { messages: step3Messages } },
+          ],
+        });
+      }
+
+      expect(saveChatHistory).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        expect.arrayContaining([
+          expect.objectContaining({ role: 'user', content: 'Hello' }),
+          expect.objectContaining({ role: 'user', content: 'How are you?' }),
+          expect.objectContaining({
+            role: 'assistant',
+            content: [{ type: 'text', text: 'Step 1 response' }],
+          }),
+          expect.objectContaining({
+            role: 'assistant',
+            content: [{ type: 'text', text: 'Step 2 response' }],
+          }),
+          expect.objectContaining({
+            role: 'assistant',
+            content: [{ type: 'text', text: 'Step 3 response' }],
+          }),
+        ]),
+      );
+
+      const callArgs = (saveChatHistory as jest.Mock).mock.calls[0];
+      const [_chatId, _userId, _projectId, savedMessages] = callArgs;
+      expect(savedMessages).toHaveLength(5);
+    });
   });
 });
