@@ -8,34 +8,26 @@ import {
 } from 'ai';
 import { AssistantUITools } from './types';
 
+export const UI_TOOL_PREFIX = 'ui-';
+const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
+
 /**
  * Creates a predicate function that checks whether the last step in a sequence
  * of tool steps contains a tool call whose name matches the provided criteria.
  *
- * The match criteria can be either:
- * - a string, in which case the tool call's name must equal that string, or
- * - a predicate function that receives the tool name and returns a boolean.
- *
- * @param match - Tool name to match, or a predicate function that receives a
- *   tool name and returns true if it matches the desired condition.
+ * @param match - A predicate function that receives a tool name and returns
+ *   true if it matches the desired condition.
  * @returns A predicate function that takes an event object containing a
  *   `steps` array and returns true if the last step includes at least one
  *   tool call whose name satisfies the `match` condition; otherwise false.
  */
-export const UI_TOOL_PREFIX = 'ui-';
-const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
-
 export function hasToolCall(
-  match: string | ((toolName: string) => boolean),
+  match: (toolName: string) => boolean,
 ): (event: { steps: StepResult<ToolSet>[] }) => boolean {
   return ({ steps }) => {
     const lastStep = steps[steps.length - 1];
     return (
-      lastStep?.toolCalls?.some((toolCall) =>
-        typeof match === 'function'
-          ? match(toolCall.toolName)
-          : toolCall.toolName === match,
-      ) ?? false
+      lastStep?.toolCalls?.some((toolCall) => match(toolCall.toolName)) ?? false
     );
   };
 }
