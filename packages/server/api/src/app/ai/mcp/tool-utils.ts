@@ -25,7 +25,7 @@ export function hasToolCall(
   match: (toolName: string) => boolean,
 ): (event: { steps: StepResult<ToolSet>[] }) => boolean {
   return ({ steps }) => {
-    const lastStep = steps[steps.length - 1];
+    const lastStep = steps.at(-1);
     return (
       lastStep?.toolCalls?.some((toolCall) => match(toolCall.toolName)) ?? false
     );
