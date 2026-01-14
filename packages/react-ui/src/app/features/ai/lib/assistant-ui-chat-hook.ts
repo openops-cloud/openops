@@ -281,13 +281,13 @@ export const useAssistantChat = ({
     },
     // send message automatically when there's a frontend tool call
     sendAutomaticallyWhen: ({ messages }) => {
-      const lastMessage = messages[messages.length - 1];
-      const lastMessagePart =
-        lastMessage?.parts?.[lastMessage.parts.length - 1];
-      return (
-        lastMessagePart?.type?.includes('tool-ui') &&
-        'output' in lastMessagePart &&
-        !!lastMessagePart.output
+      return messages.some((message) =>
+        message?.parts?.some(
+          (part) =>
+            part?.type?.includes('tool-ui') &&
+            'output' in part &&
+            !!part.output,
+        ),
       );
     },
   });
