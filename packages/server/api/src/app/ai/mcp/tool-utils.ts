@@ -2,10 +2,35 @@ import {
   AssistantContent,
   jsonSchema,
   ModelMessage,
+  StepResult,
   ToolCallPart,
   ToolSet,
 } from 'ai';
 import { AssistantUITools } from './types';
+
+export const UI_TOOL_PREFIX = 'ui-';
+const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
+
+/**
+ * Creates a predicate function that checks whether the last step in a sequence
+ * of tool steps contains a tool call whose name matches the provided criteria.
+ *
+ * @param match - A predicate function that receives a tool name and returns
+ *   true if it matches the desired condition.
+ * @returns A predicate function that takes an event object containing a
+ *   `steps` array and returns true if the last step includes at least one
+ *   tool call whose name satisfies the `match` condition; otherwise false.
+ */
+export function hasToolCall(
+  match: (toolName: string) => boolean,
+): (event: { steps: StepResult<ToolSet>[] }) => boolean {
+  return ({ steps }) => {
+    const lastStep = steps.at(-1);
+    return (
+      lastStep?.toolCalls?.some((toolCall) => match(toolCall.toolName)) ?? false
+    );
+  };
+}
 
 // format tools from assistant-ui to AI SDK ToolSet
 export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
@@ -18,9 +43,6 @@ export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
       },
     ]),
   );
-
-const UI_TOOL_PREFIX = 'ui-';
-const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
 
 /**
  * Adds separate tool messages for UI tool calls (tools with names starting with 'ui-')
