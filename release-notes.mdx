@@ -10,35 +10,35 @@ iconType: "emoji"
 ### ⚠️ Breaking changes
 
 - **Authentication response field renamed**
-  - The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges` for clearer template-permission semantics. Clients that read `isMasterProject` must update to the new field name.
+  - The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges`.
 
 ### ✨
 
 - **Analytics access control**
-  - Analytics access is now limited to authorized users. The analytics UI and API enforce privilege checks (including gating navigation/routes) before granting access.
+  - Analytics access is now limited to authorized users.
 - **Optional analytics component**
-  - OpenOps can now start and run even when Analytics is not configured or available. Analytics-dependent initialization (including seeding) is skipped when disabled or not configured.
+  - OpenOps can now start and run even when Analytics is not configured or available.
 - **Tables MCP endpoint provisioning**
-  - Tables MCP endpoint creation now uses database tokens. This aligns endpoint provisioning with database-token authentication.
+  - Tables MCP endpoint creation now uses database tokens.
 - **Updated default OpenOps Tables image**
-  - Docker Compose and Helm defaults now pull a newer OpenOps Tables image by default. This delivers updated Tables fixes out of the box.
+  - Docker Compose and Helm defaults now pull a newer OpenOps Tables image by default.
 
 ### 🐛
 
 - **Preserve chat history on abort**
-  - Chat history is now preserved when an in-progress run is aborted. This prevents earlier messages from becoming inconsistent or corrupted.
+  - Chat history is now preserved when an in-progress run is aborted.
 - **Stop streaming on UI tool actions**
-  - Streaming output now stops when a UI tool action is triggered. This prevents the assistant from continuing to stream text unexpectedly.
+  - Streaming output now stops when a UI tool action is triggered.
 - **More reliable admin bootstrap**
-  - The initial admin bootstrap process is now more reliable in environments with multiple projects. Setup no longer fails due to cross-project assumptions during initialization.
+  - The initial admin bootstrap process is now more reliable in environments with multiple projects.
 - **Correct object references on create**
-  - Newly created objects now keep correct references immediately after creation. This prevents stale or missing links between related resources.
+  - Newly created objects now keep correct references immediately after creation.
 - **More reliable analytics dashboard seeding**
-  - Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user. Initial dashboards can be created more consistently with improved error logging when seeding fails.
+  - Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user.
 - **Merge tool results into one assistant message**
-  - Multiple tool results are now merged into a single assistant message instead of being emitted separately. This makes assistant tool outputs easier to follow.
+  - Multiple tool results are now merged into a single assistant message instead of being emitted separately.
 
 ### 🚀
 
 - **OpenAI: GPT-5.2**
-  - The OpenAI integration now supports the `gpt-5.2` model for compatible accounts. You can select it in provider configuration.
+  - The OpenAI integration now supports the `gpt-5.2` model for compatible accounts.
