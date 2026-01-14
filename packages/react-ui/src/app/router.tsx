@@ -22,7 +22,7 @@ import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-head
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
 import { FlagId } from '@openops/shared';
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense } from 'react';
 import {
   OpsErrorBoundary,
   RouteErrorBoundary,
@@ -416,21 +416,17 @@ const ApplicationRouter = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const router = useMemo(
-    () =>
-      createBrowserRouter([
-        {
-          path: '/',
-          element: <GlobalLayout />,
-          children: createRoutes({
-            isCloudConnectionPageEnabled,
-            isDemoHomePage,
-            isFederatedLogin,
-          }),
-        },
-      ]),
-    [isCloudConnectionPageEnabled, isDemoHomePage, isFederatedLogin],
-  );
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <GlobalLayout />,
+      children: createRoutes({
+        isCloudConnectionPageEnabled,
+        isDemoHomePage,
+        isFederatedLogin,
+      }),
+    },
+  ]);
   return <RouterProvider router={router}></RouterProvider>;
 };
 
