@@ -2,10 +2,26 @@ import {
   AssistantContent,
   jsonSchema,
   ModelMessage,
+  StepResult,
   ToolCallPart,
   ToolSet,
 } from 'ai';
 import { AssistantUITools } from './types';
+
+export function hasToolCall(
+  match: string | ((toolName: string) => boolean),
+): (event: { steps: StepResult<ToolSet>[] }) => boolean {
+  return ({ steps }) => {
+    const lastStep = steps[steps.length - 1];
+    return (
+      lastStep?.toolCalls?.some((toolCall) =>
+        typeof match === 'function'
+          ? match(toolCall.toolName)
+          : toolCall.toolName === match,
+      ) ?? false
+    );
+  };
+}
 
 // format tools from assistant-ui to AI SDK ToolSet
 export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>

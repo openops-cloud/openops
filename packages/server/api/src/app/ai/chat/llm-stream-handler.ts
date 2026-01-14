@@ -13,7 +13,7 @@ import {
   TextStreamPart,
   ToolSet,
 } from 'ai';
-import { sanitizeMessages } from '../mcp/tool-utils';
+import { hasToolCall, sanitizeMessages } from '../mcp/tool-utils';
 import { createVoidTool } from '../mcp/void-tool';
 import {
   addCacheControlToMessages,
@@ -88,7 +88,10 @@ export function getLLMAsyncStream(
     tools: toolsProxy,
     toolChoice,
     maxRetries: MAX_RETRIES,
-    stopWhen: stepCountIs(maxRecursionDepth),
+    stopWhen: [
+      stepCountIs(maxRecursionDepth),
+      hasToolCall((name) => name.startsWith('ui-')),
+    ],
     onStepFinish,
     onFinish: async (result) => {
       const outputText = result.text || '';
