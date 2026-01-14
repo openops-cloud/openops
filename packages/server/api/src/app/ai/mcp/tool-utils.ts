@@ -8,6 +8,9 @@ import {
 } from 'ai';
 import { AssistantUITools } from './types';
 
+export const UI_TOOL_PREFIX = 'ui-';
+const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
+
 export function hasToolCall(
   match: string | ((toolName: string) => boolean),
 ): (event: { steps: StepResult<ToolSet>[] }) => boolean {
@@ -34,9 +37,6 @@ export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
       },
     ]),
   );
-
-const UI_TOOL_PREFIX = 'ui-';
-const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
 
 /**
  * Adds separate tool messages for UI tool calls (tools with names starting with 'ui-')
