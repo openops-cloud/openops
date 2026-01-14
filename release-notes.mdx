@@ -10,35 +10,35 @@ iconType: "emoji"
 ### ⚠️ Breaking changes
 
 - **Authentication response field renamed**
-  - The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges`.
+  - The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges`
 
 ### ✨
 
 - **Analytics access control**
-  - Analytics access is now limited to authorized users.
+  - Analytics access is now limited to authorized users
 - **Optional analytics component**
-  - OpenOps can now start and run even when Analytics is not configured or available.
+  - OpenOps can now start and run even when Analytics is not configured or available
 - **Tables MCP endpoint provisioning**
-  - Tables MCP endpoint creation now uses database tokens.
+  - Tables MCP endpoint creation now uses database tokens
 - **Updated default OpenOps Tables image**
-  - Docker Compose and Helm defaults now pull a newer OpenOps Tables image by default.
+  - Docker Compose and Helm defaults now pull a newer OpenOps Tables image by default
 
 ### 🐛
 
 - **Preserve chat history on abort**
-  - Chat history is now preserved when an in-progress run is aborted.
+  - Chat history is now preserved when an in-progress run is aborted
 - **Stop streaming on UI tool actions**
-  - Streaming output now stops when a UI tool action is triggered.
+  - Streaming output now stops when a UI tool action is triggered
 - **More reliable admin bootstrap**
-  - The initial admin bootstrap process is now more reliable in environments with multiple projects.
+  - The initial admin bootstrap process is now more reliable in environments with multiple projects
 - **Correct object references on create**
-  - Newly created objects now keep correct references immediately after creation.
+  - Newly created objects now keep correct references immediately after creation
 - **More reliable analytics dashboard seeding**
-  - Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user.
+  - Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user
 - **Merge tool results into one assistant message**
-  - Multiple tool results are now merged into a single assistant message instead of being emitted separately.
+  - Multiple tool results are now merged into a single assistant message instead of being emitted separately
 
 ### 🚀
 
 - **OpenAI: GPT-5.2**
-  - The OpenAI integration now supports the `gpt-5.2` model for compatible accounts.
+  - The OpenAI integration now supports the `gpt-5.2` model for compatible accounts
