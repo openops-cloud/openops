@@ -7,26 +7,38 @@ iconType: "emoji"
 
 ## 2026-01-14
 
-```json
-{
-  "✨": [
-    "Analytics access is now limited to authorized users so only permitted accounts can view analytics features. The analytics UI and API now enforce privilege checks (including gating navigation/routes) before granting access to analytics resources (PR #1817).",
-    "The application can now start and run even when analytics is not configured or available so deployments are more resilient. Analytics is treated as an optional component and analytics-dependent initialization (including seeding) is skipped when disabled or not configured (PR #1802).",
-    "The authentication response now uses clearer naming for template-related permissions so integrators can interpret privilege intent more easily. The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges`, which is a breaking API rename for clients reading that field (PR #1812).",
-    "Tables MCP endpoint provisioning now uses database tokens so endpoint creation aligns with database-token authentication. The Tables MCP endpoint creation flow was updated to rely on DB tokens instead of the prior credential mechanism (PR #1819).",
-    "Deployment manifests now pull a newer bundled OpenOps Tables image so operators receive updated Tables fixes by default. Docker Compose and Helm defaults were updated to reference `public.ecr.aws/openops/openops-tables` with a newer tag (e.g., `0.2.17`) via `OPS_OPENOPS_TABLES_VERSION` / `tables.tag` (PR #1823/#1830)."
-  ],
-  "🐛": [
-    "Chat history is now preserved when an in-progress run is aborted so earlier messages do not become inconsistent or corrupted. The abort-handling path now persists the full message history and applies the same UI tool-result transformation used on the success path (PR #1831).",
-    "Streaming output now stops when a UI tool action is triggered so the assistant does not keep streaming text unexpectedly. The server-side LLM stream halts when it detects a `ui-` tool call (e.g., via `stopWhen`/`hasToolCall`), and the UI continues the flow after the tool call completes (PR #1832).",
-    "The initial admin bootstrap process is now more reliable in environments with multiple projects so setup does not fail or cross project boundaries. The seed-admin workflow was hardened to reuse existing organization/project context (e.g., `projectService.getOneForUser`) and avoid multi-project assumptions during initialization (PR #1807).",
-    "Newly created objects now keep correct references immediately so related resources remain connected right after creation. The creation flow now updates object reference fields as part of the initial write to prevent stale or missing links (PR #1825).",
-    "Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user so initial dashboards can be created more consistently. The seeding workflow now selects a default organization/project and uses that project’s Tables identifiers/tokens, with improved error logging when seeding fails (PR #1828, #1826).",
-    "Assistant tool outputs are now easier to follow because multiple tool results are merged into a single assistant message instead of being emitted separately. The chat orchestration logic now aggregates `tool-result` payloads by `toolCallId` (including legacy `result` vs `output` fields) before emitting the final assistant message (PR #1829)."
-  ],
-  "🚀": [
-    "The OpenAI integration now lets you choose the GPT-5.2 model for compatible accounts. The OpenAI provider’s supported model list was updated to include `gpt-5.2` (and `gpt-5.2-2025-12-11`) so it can be selected in configuration (PR #1833)."
-  ]
-}
+### ⚠️ Breaking changes
 
-```
+- **Authentication response field renamed**
+  - The `AuthenticationResponse` field `isMasterProject` was renamed to `hasTemplatesPrivileges` for clearer template-permission semantics. Clients that read `isMasterProject` must update to the new field name.
+
+### ✨
+
+- **Analytics access control**
+  - Analytics access is now limited to authorized users. The analytics UI and API enforce privilege checks (including gating navigation/routes) before granting access.
+- **Optional analytics component**
+  - OpenOps can now start and run even when Analytics is not configured or available. Analytics-dependent initialization (including seeding) is skipped when disabled or not configured.
+- **Tables MCP endpoint provisioning**
+  - Tables MCP endpoint creation now uses database tokens. This aligns endpoint provisioning with database-token authentication.
+- **Updated default OpenOps Tables image**
+  - Docker Compose and Helm defaults now pull a newer OpenOps Tables image by default. This delivers updated Tables fixes out of the box.
+
+### 🐛
+
+- **Preserve chat history on abort**
+  - Chat history is now preserved when an in-progress run is aborted. This prevents earlier messages from becoming inconsistent or corrupted.
+- **Stop streaming on UI tool actions**
+  - Streaming output now stops when a UI tool action is triggered. This prevents the assistant from continuing to stream text unexpectedly.
+- **More reliable admin bootstrap**
+  - The initial admin bootstrap process is now more reliable in environments with multiple projects. Setup no longer fails due to cross-project assumptions during initialization.
+- **Correct object references on create**
+  - Newly created objects now keep correct references immediately after creation. This prevents stale or missing links between related resources.
+- **More reliable analytics dashboard seeding**
+  - Analytics dashboard seeding is now more reliable and no longer depends on a specific Tables admin user. Initial dashboards can be created more consistently with improved error logging when seeding fails.
+- **Merge tool results into one assistant message**
+  - Multiple tool results are now merged into a single assistant message instead of being emitted separately. This makes assistant tool outputs easier to follow.
+
+### 🚀
+
+- **OpenAI: GPT-5.2**
+  - The OpenAI integration now supports the `gpt-5.2` model for compatible accounts. You can select it in provider configuration.
