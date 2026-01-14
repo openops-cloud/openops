@@ -3,8 +3,6 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
-  'gpt-5.2',
-  'gpt-5.2-2025-12-11',
   'gpt-5.1-2025-11-13',
   'gpt-5',
   'gpt-5-mini',
