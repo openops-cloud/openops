@@ -8,18 +8,40 @@ draft: false
 ---
 
 <!-- START_RELEASE_NOTES -->
-{
-  "⚠️ NOTICE": [
-    "Breaking Change: The project privilege flag returned by authentication was renamed, which can break clients that expect the old field name. The server and shared authentication response/types changed from `isMasterProject` to `hasTemplatesPrivileges` (PR #1812).",
-    "Analytics access was restricted to only users with the required permissions, and the UI no longer exposed Analytics navigation for ineligible users. The app now gates the `/analytics` route and menu via `hasAnalyticsPrivileges` checks (for example via `AnalyticsGuard` / `useHasAnalyticsAccess`), and the API added a `verifyUserAnalyticsAccess(userId)` gate before issuing analytics admin tokens (PRs #1817, #1837).",
-    "The application could now start and run even when analytics was disabled or not available, so non-analytics deployments no longer blocked startup. Analytics routes and seed steps are now skipped when analytics is not enabled (for example when `OPS_ANALYTICS_ENABLED` is off or required URLs are missing), and the UI hides Analytics unless both the enablement flag and privileges are present (PR #1802).",
-    "Analytics dashboard setup was made more resilient and easier to troubleshoot for operators during seeding and initialization. The seeding flow now selects project context by organization (instead of relying on a Tables admin user) and logs richer error context when seeding fails (PRs #1828, #1826).",
-    "Tables integration was updated to improve provisioning and connectivity behavior for MCP endpoint creation, particularly in more complex deployments. The Tables MCP endpoint creation now uses database tokens and iterates per Tables workspace/database context (for example via a token provider resolver) to ensure an endpoint exists reliably (PRs #1819, #1820, #1823).",
-    "Default deployment manifests were updated so new installations use a newer bundled OpenOps Tables service by default. Docker Compose and Helm image/tag references were bumped to a newer `public.ecr.aws/openops/openops-tables` release (PRs #1818, #1830).",
-    "Administrative bootstrapping was hardened so initial setup worked reliably in multi-project environments and reused existing context when present. The seed-admin flow now resolves the admin’s existing organization/project (and related Tables workspace/database identifiers and tokens) via `getAdminProject()` before creating or updating resources (PRs #1807).",
-    "Chat interactions were made more reliable when tool calls occur and when runs are aborted, reducing the chance of missing tool outputs or corrupted history. Tool results are now merged into a single assistant message by `toolCallId`, abort handling persists full history and applies the UI tool-results transform, and streaming stops after UI tool calls (PRs #1829, #1831, #1832).",
-    "The OpenAI provider added support for additional model identifiers so more configurations work without customization. The model allowlist now includes `gpt-5.2` and `gpt-5.2-2025-12-11`, and related packaging changes were reverted to stabilize dependencies (PRs #1833, #1834)."
-  ]
-}
+## ⚠️ NOTICE
+
+- **Breaking change: project privileges flag rename**
+  - Authentication responses renamed `isMasterProject` to `hasTemplatesPrivileges`, which can break clients that depend on the old field
+
+## 🐛 Fixes
+
+- **Start up without Analytics**
+  - OpenOps now starts even when Analytics is disabled or unavailable
+
+- **More reliable chat tool calls**
+  - Chat tool results are merged by `toolCallId`, and aborted runs preserve message history more reliably
+
+## ✨ Improvements
+
+- **Analytics access controls**
+  - Analytics is now available only to users with the required permissions
+
+- **More resilient Analytics dashboard seeding**
+  - Analytics dashboard seeding selects project context by organization and logs more detail when seeding fails
+
+- **More reliable Tables MCP endpoint provisioning**
+  - Tables MCP endpoint creation now uses database tokens and iterates per workspace and database context
+
+- **Hardened admin bootstrapping**
+  - Admin seeding reuses existing organization and project context when present
+
+## 🚀 Updates
+
+- **Updated OpenOps Tables default version**
+  - Docker Compose and Helm now default to a newer `public.ecr.aws/openops/openops-tables` image
+
+- **Expanded OpenAI model support**
+  - The OpenAI provider now supports `gpt-5.2` and `gpt-5.2-2025-12-11`
+
 
 <!-- END_RELEASE_NOTES -->
