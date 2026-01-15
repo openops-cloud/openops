@@ -17,7 +17,6 @@ import { FlowsPage } from '../app/routes/flows';
 import { PageHeader } from '@openops/components/ui';
 import { t } from 'i18next';
 
-import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
@@ -40,6 +39,7 @@ import { ResetPasswordPage } from './routes/forget-password';
 import { HomePage } from './routes/home';
 import { HomeDemoPage, HomeDemoPageHeader } from './routes/home-demo';
 import { OpenOpsAnalyticsPage } from './routes/openops-analytics';
+import { AnalyticsGuard } from './routes/openops-analytics/analytics-guard';
 import { OpenOpsTablesPage } from './routes/openops-tables';
 import { FlowRunPage } from './routes/runs/id';
 import AppearancePage from './routes/settings/appearance';
@@ -61,14 +61,12 @@ interface CreateRoutesParams {
   isCloudConnectionPageEnabled: any;
   isDemoHomePage: any;
   isFederatedLogin: boolean | null | undefined;
-  hasAnalyticsAccess: boolean;
 }
 
 const createRoutes = ({
   isCloudConnectionPageEnabled,
   isDemoHomePage,
   isFederatedLogin,
-  hasAnalyticsAccess,
 }: CreateRoutesParams) => {
   const routes = [
     {
@@ -204,23 +202,21 @@ const createRoutes = ({
       ),
       errorElement: <RouteErrorBoundary />,
     },
-    ...(hasAnalyticsAccess
-      ? [
-          {
-            path: 'analytics',
-            element: (
-              <RouteWrapper useEntireInnerViewport>
-                <OpsErrorBoundary>
-                  <PageTitle title="Analytics">
-                    <OpenOpsAnalyticsPage />
-                  </PageTitle>
-                </OpsErrorBoundary>
-              </RouteWrapper>
-            ),
-            errorElement: <RouteErrorBoundary />,
-          },
-        ]
-      : []),
+    {
+      path: 'analytics',
+      element: (
+        <AnalyticsGuard>
+          <RouteWrapper useEntireInnerViewport>
+            <OpsErrorBoundary>
+              <PageTitle title="Analytics">
+                <OpenOpsAnalyticsPage />
+              </PageTitle>
+            </OpsErrorBoundary>
+          </RouteWrapper>
+        </AnalyticsGuard>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    },
     {
       path: '404',
       element: (
@@ -420,8 +416,6 @@ const ApplicationRouter = () => {
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const hasAnalyticsAccess = useHasAnalyticsAccess();
-
   const router = createBrowserRouter([
     {
       path: '/',
@@ -430,7 +424,6 @@ const ApplicationRouter = () => {
         isCloudConnectionPageEnabled,
         isDemoHomePage,
         isFederatedLogin,
-        hasAnalyticsAccess,
       }),
     },
   ]);
