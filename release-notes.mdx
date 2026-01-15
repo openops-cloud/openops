@@ -1,0 +1,33 @@
+---
+title: "Release notes"
+description: "User-facing improvements and fixes in each OpenOps release."
+icon: "📝"
+iconType: "emoji"
+---
+
+## 2026-01-15
+
+{
+  "⚠️ NOTICE": [
+    "Breaking Change: This release renames a privilege flag used in project/session privilege checks, which may affect custom integrations that reference it. The `isMasterProject` identifier was renamed to `hasTemplatesPrivileges`, so any custom code or configuration must be updated to use the new name."
+  ],
+  "✨": [
+    "Analytics access is now enforced consistently based on user privileges across projects and sessions. The UI and API now check `hasAnalyticsPrivileges` (defaulting to `true` when it is `undefined` to avoid upgrade/session breakage) and enforce access via `analyticsAuthenticationService.authenticateAnalyticsRequest()` before issuing embedded dashboard tokens.",
+    "OpenAI-based AI workflows now support additional GPT‑5.2 model identifiers for model selection. The OpenAI provider allowlist was updated to include `gpt-5.2` and `gpt-5.2-2025-12-11` in `packages/openops/src/lib/ai/providers/openai.ts`.",
+    "Assistant messages now present multi-tool outputs more cleanly by combining them into a single response when appropriate. The server-side message assembly merges multiple tool results into one assistant message and stops LLM streaming after UI tool calls to keep tool interactions consistent.",
+    "The bundled OpenOps Tables service has been updated so new deployments use a newer default Tables image. Docker Compose and Helm configuration defaults were bumped to `public.ecr.aws/openops/openops-tables:0.2.17` (and `OPS_OPENOPS_TABLES_VERSION=0.2.17`) across the shipped deployment manifests."
+  ],
+  "🐛": [
+    "The Analytics page now loads correctly after you sign in, including when you were redirected to the login page first. The `/analytics` route is now always registered and uses an `AnalyticsGuard` backed by `useHasAnalyticsAccess`, instead of conditionally creating the route during router initialization.",
+    "Assistant conversations no longer end up with corrupted history when a run is interrupted or aborted. The abort handler now preserves the full message history and applies the same `addUiToolResults` transformation used in the success path, and tool-result collection merges all `ToolResultPart` entries rather than only the first one.",
+    "Streaming responses now stop at the right time after a UI tool call so the chat output does not continue generating in the background. The streaming handler uses a stop condition that detects `ui-` prefixed tool calls (e.g., `hasToolCall(UI_TOOL_PREFIX)`) and ends the `streamText` flow immediately after the UI tool call is emitted.",
+    "Analytics demo dashboard seeding is now more resilient and easier to troubleshoot when required seed data is missing. The seeding flow catches failures from `getTableIdByTableName` and logs a structured `logger.error` including the table name and error details instead of failing silently or with unclear output.",
+    "Admin setup and seeding now works more reliably when an admin user already belongs to an organization or when multiple projects exist. The seed-admin workflow reuses existing Tables workspace/database identifiers and decrypted database tokens (workspaceId, databaseId, databaseToken) and only creates missing organization/project records as needed, avoiding conflicts in multi-project environments.",
+    "Newly created objects now update their reference fields immediately so related data does not appear stale right after creation. The creation flow updates object reference fields at creation time to ensure downstream reads see consistent references."
+  ],
+  "🚀": [
+    "The application can now start and keep running even when analytics is unavailable or intentionally turned off. This adds the `OPS_ANALYTICS_ENABLED` flag and skips `analytics.seedAnalytics()` at startup when `system.isAnalyticsEnabled()` is false, while the UI gates the Analytics route and menu link via `useHasAnalyticsAccess`.",
+    "Tables MCP endpoints are now created with the correct token for each database so the integration works reliably across workspaces and projects. The MCP endpoint creation flow resolves a per-database `TokenOrResolver` via `resolveTokenProvider(...)` and uses it when calling the OpenOps Tables `api/mcp/endpoints/` list/create APIs (and when building the SSE client URL), instead of relying on older token handling."
+  ]
+}
+
