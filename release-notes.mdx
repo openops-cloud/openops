@@ -9,22 +9,22 @@ iconType: "emoji"
 
 {
   "✨": [
-    "Default deployments now ship with a newer OpenOps Tables version. The Docker Compose and Helm manifests were updated to point to newer `public.ecr.aws/openops/openops-tables` image tags (bumping across releases such as `0.2.15` → `0.2.17`) and to keep related version variables in sync.",
-    "The Tables integration now uses the correct project-specific credentials when creating and looking up Tables MCP endpoints. It now resolves tokens via `resolveTokenProvider(...)` and uses them in `ensureTablesMcpEndpointExists` / `getMcpEndpointList` / `createMcpEndpoint`, matching endpoints by `workspace_id` and connecting via the endpoint `key` SSE URL.",
-    "Initial admin seeding is now more reliable on fresh installs. The seed logic now correctly refreshes in-memory `organization`/`project` references after creation and consistently uses `organization.id` when building the seeded user context.",
-    "Admin seeding now reuses an existing project’s OpenOps Tables workspace and database when available instead of always creating a new default. The seed flow now passes a `TablesWorkspaceContext` (workspaceId, databaseId, encrypted databaseToken) into `createDefaultWorkspaceAndDatabase`, which validates the provided IDs/token before falling back to creating new resources."
+    "Default deployments now ship with a newer OpenOps Tables version.",
+    "The Tables integration now uses the correct project-specific credentials when creating and looking up Tables MCP endpoints.",
+    "Initial admin seeding is now more reliable on fresh installs.",
+    "Admin seeding now reuses an existing project’s OpenOps Tables workspace and database when available instead of always creating a new default."
   ],
   "🐛": [
-    "Chat transcripts now reliably include outputs from multiple tools running in parallel. The message-merge logic was updated to iterate and deterministically merge all `tool-result` parts (instead of only the first), preventing lost or overwritten results.",
-    "Chat history no longer becomes corrupted when a run is interrupted (for example, by reloading the page). The abort/recovery path was updated to avoid partial writes and to persist the last consistent `chatHistory` state before calling `saveChatHistory()`.",
-    "Chat streaming no longer continues past frontend UI tool invocations, preventing confusing partial responses after a UI action. The stream handler now stops using a `stopWhen` predicate when detecting `ui-` tool calls (via `UI_TOOL_PREFIX` / `hasToolCall`) and records explicit tool result messages for consistent history processing.",
-    "The Analytics page now loads correctly when signing in from a redirected deep link. The `/analytics` route is no longer conditionally created at router initialization time and is instead protected by an `AnalyticsGuard` that uses `useHasAnalyticsAccess()` and redirects to `/` when access is missing.",
-    "Upgrades no longer incorrectly block Analytics for users who already had an active session. The UI now treats an undefined `hasAnalyticsPrivileges` field as `true` in `authenticationSession.getUserHasAnalyticsPrivileges()` until the new session field is populated on the next sign-in."
+    "Chat transcripts now reliably include outputs from multiple tools running in parallel.",
+    "Chat history no longer becomes corrupted when a run is interrupted (for example, by reloading the page).",
+    "Chat streaming no longer continues past frontend UI tool invocations, preventing confusing partial responses after a UI action.",
+    "The Analytics page now loads correctly when signing in from a redirected deep link.",
+    "Upgrades no longer incorrectly block Analytics for users who already had an active session."
   ],
   "🚀": [
-    "You can now choose GPT‑5.2 when configuring OpenAI-powered steps in AI workflows. The OpenAI provider model allowlist and selector were updated to include `gpt-5.2` (including the dated variant `gpt-5.2-2025-12-11`) wherever supported OpenAI chat/completions models are enumerated.",
-    "You can now run the platform without deploying or configuring the analytics service. The runtime and initialization logic was updated to support disabling analytics (for example via an `ANALYTICS_ENABLED` system property), skipping analytics seeding/auth flows and only exposing analytics UI/routes when access is available.",
-    "Analytics is now only visible and usable to people who have the required privileges. The Analytics navigation and `/analytics` access are now gated by checks like `authenticationSession.getUserHasAnalyticsPrivileges()` plus server-side verification (`verifyUserAnalyticsAccess` / `authenticateAnalyticsRequest`)."
+    "You can now choose GPT‑5.2 when configuring OpenAI-powered steps in AI workflows.",
+    "You can now run the platform without deploying or configuring the analytics service.",
+    "Analytics is now only visible and usable to people who have the required privileges."
   ]
 }
 
