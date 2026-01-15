@@ -7,27 +7,27 @@ iconType: "emoji"
 
 ## 2026-01-15
 
-{
-  "⚠️ NOTICE": [
-    "Breaking Change: This release renames a privilege flag used in project/session privilege checks, which may affect custom integrations that reference it."
-  ],
-  "✨": [
-    "Analytics access is now enforced consistently based on user privileges across projects and sessions.",
-    "OpenAI-based AI workflows now support additional GPT‑5.2 model identifiers for model selection.",
-    "Assistant messages now present multi-tool outputs more cleanly by combining them into a single response when appropriate.",
-    "The bundled OpenOps Tables service has been updated so new deployments use a newer default Tables image."
-  ],
-  "🐛": [
-    "The Analytics page now loads correctly after you sign in, including when you were redirected to the login page first.",
-    "Assistant conversations no longer end up with corrupted history when a run is interrupted or aborted.",
-    "Streaming responses now stop at the right time after a UI tool call so the chat output does not continue generating in the background.",
-    "Analytics demo dashboard seeding is now more resilient and easier to troubleshoot when required seed data is missing.",
-    "Admin setup and seeding now works more reliably when an admin user already belongs to an organization or when multiple projects exist.",
-    "Newly created objects now update their reference fields immediately so related data does not appear stale right after creation."
-  ],
-  "🚀": [
-    "The application can now start and keep running even when analytics is unavailable or intentionally turned off.",
-    "Tables MCP endpoints are now created with the correct token for each database so the integration works reliably across workspaces and projects."
-  ]
-}
+### ⚠️ NOTICE
 
+- Breaking change: This release renames a privilege flag used in project/session privilege checks, which may affect custom integrations that reference it.
+
+### ✨
+
+- Analytics access is now enforced consistently based on user privileges across projects and sessions.
+- OpenAI-based AI workflows now support additional GPT‑5.2 model identifiers for model selection.
+- Assistant messages now present multi-tool outputs more cleanly by combining them into a single response when appropriate.
+- The bundled OpenOps Tables service has been updated so new deployments use a newer default Tables image.
+
+### 🐛
+
+- The Analytics page now loads correctly after you sign in, including when you were redirected to the login page first.
+- Assistant conversations no longer end up with corrupted history when a run is interrupted or aborted.
+- Streaming responses now stop at the right time after a UI tool call so the chat output does not continue generating in the background.
+- Analytics demo dashboard seeding is now more resilient and easier to troubleshoot when required seed data is missing.
+- Admin setup and seeding now works more reliably when an admin user already belongs to an organization or when multiple projects exist.
+- Newly created objects now update their reference fields immediately so related data does not appear stale right after creation.
+
+### 🚀
+
+- The application can now start and keep running even when analytics is unavailable or intentionally turned off.
+- Tables MCP endpoints are now created with the correct token for each database so the integration works reliably across workspaces and projects.
