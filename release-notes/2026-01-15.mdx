@@ -10,38 +10,23 @@ draft: false
 <!-- START_RELEASE_NOTES -->
 ## ⚠️ NOTICE
 
-- **Breaking change: project privileges flag rename**
-  - Authentication responses renamed `isMasterProject` to `hasTemplatesPrivileges`, which can break clients that depend on the old field
+- **Breaking change: project privileges flag rename**: Authentication responses renamed `isMasterProject` to `hasTemplatesPrivileges`, which can break clients that depend on the old field
 
 ## 🐛 Fixes
 
-- **Start up without Analytics**
-  - OpenOps now starts even when Analytics is disabled or unavailable
-
-- **More reliable chat tool calls**
-  - Chat tool results are merged by `toolCallId`, and aborted runs preserve message history more reliably
+- **Start up without Analytics**: OpenOps now starts even when Analytics is disabled or unavailable
+- **More reliable chat tool calls**: Chat tool results are merged by `toolCallId`, and aborted runs preserve message history more reliably
 
 ## ✨ Improvements
 
-- **Analytics access controls**
-  - Analytics is now available only to users with the required permissions
-
-- **More resilient Analytics dashboard seeding**
-  - Analytics dashboard seeding selects project context by organization and logs more detail when seeding fails
-
-- **More reliable Tables MCP endpoint provisioning**
-  - Tables MCP endpoint creation now uses database tokens and iterates per workspace and database context
-
-- **Hardened admin bootstrapping**
-  - Admin seeding reuses existing organization and project context when present
+- **Analytics access controls**: Analytics is now available only to users with the required permissions
+- **More resilient Analytics dashboard seeding**: Analytics dashboard seeding selects project context by organization and logs more detail when seeding fails
+- **More reliable Tables MCP endpoint provisioning**: Tables MCP endpoint creation now uses database tokens and iterates per workspace and database context
+- **Hardened admin bootstrapping**: Admin seeding reuses existing organization and project context when present
 
 ## 🚀 Updates
 
-- **Updated OpenOps Tables default version**
-  - Docker Compose and Helm now default to a newer `public.ecr.aws/openops/openops-tables` image
-
-- **Expanded OpenAI model support**
-  - The OpenAI provider now supports `gpt-5.2` and `gpt-5.2-2025-12-11`
-
+- **Updated OpenOps Tables default version**: Docker Compose and Helm now default to a newer `public.ecr.aws/openops/openops-tables` image
+- **Expanded OpenAI model support**: The OpenAI provider now supports `gpt-5.2` and `gpt-5.2-2025-12-11`
 
 <!-- END_RELEASE_NOTES -->
