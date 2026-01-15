@@ -6,7 +6,6 @@ on:
   push:
     paths:
       - 'packages/ui-components/**'
-      - 'packages/shared/**'
       - 'package-lock.json'
 
 jobs:
