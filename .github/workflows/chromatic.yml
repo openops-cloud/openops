@@ -2,13 +2,19 @@
 
 name: "Chromatic"
 
-on: push
+on:
+  push:
+    paths:
+      - 'packages/ui-components/**'
+      - 'packages/shared/**'
+      - 'package-lock.json'
 
 jobs:
   chromatic:
     runs-on: ubuntu-latest
     env:
       CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - name: Checkout code
         uses: actions/checkout@v6.0.1
