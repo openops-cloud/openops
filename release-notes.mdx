@@ -7,22 +7,20 @@ iconType: "emoji"
 
 ## 2026-01-15
 
-## ✨ Improvements
+### ✨ Improvements
 - Default deployments now ship with a newer OpenOps Tables version
 - The Tables integration now uses the correct project-specific credentials when creating and looking up Tables MCP endpoints
 - Initial admin seeding is now more reliable on fresh installs
 - Admin seeding now reuses an existing project’s OpenOps Tables workspace and database when available instead of always creating a new default
 
-## 🐛 Fixes
+### 🐛 Fixes
 - Chat transcripts now reliably include outputs from multiple tools running in parallel
 - Chat history no longer becomes corrupted when a run is interrupted (for example, by reloading the page)
 - Chat streaming no longer continues past frontend UI tool invocations, preventing confusing partial responses after a UI action
 - The Analytics page now loads correctly when signing in from a redirected deep link
 - Upgrades no longer incorrectly block Analytics for users who already had an active session
 
-## 🚀 New
+### 🚀 New
 - You can now choose GPT‑5.2 when configuring OpenAI-powered steps in AI workflows
 - You can now run the platform without deploying or configuring the analytics service
 - Analytics is now only visible and usable to people who have the required privileges
-
-
