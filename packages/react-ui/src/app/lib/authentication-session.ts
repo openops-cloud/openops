@@ -52,7 +52,14 @@ export const authenticationSession = {
   },
 
   getUserHasAnalyticsPrivileges(): boolean {
-    return this.getCurrentUser()?.hasAnalyticsPrivileges ?? false;
+    const hasAnalyticsPrivileges =
+      this.getCurrentUser()?.hasAnalyticsPrivileges;
+
+    if (typeof hasAnalyticsPrivileges === 'undefined') {
+      return true;
+    }
+
+    return hasAnalyticsPrivileges;
   },
 
   getUserOrganizationRole() {
