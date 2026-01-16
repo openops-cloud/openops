@@ -142,7 +142,7 @@ function DataTableInputFilter({
   title,
   filterValue,
   handleFilterChange,
-}: DataTableInputFilterProps) {
+}: Readonly<DataTableInputFilterProps>) {
   const [searchQuery, setSearchQuery] = useState(filterValue);
 
   useEffect(() => {
