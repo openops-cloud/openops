@@ -9,7 +9,7 @@ import {
 } from '@openops/components/ui';
 import { isNil } from '@openops/shared';
 import { t } from 'i18next';
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 import { TextInputWithMentions } from './text-input-with-mentions';
@@ -176,31 +176,6 @@ const AutoFormFieldWrapper = ({
     inputName,
   );
 
-  // This `useEffect` ensures a one-time migration of the dynamic flag for non-array fields.
-  // - The `arrayFieldContext` is checked to skip this logic for array fields, which use a different `dynamic flag` structure .
-  // - This handles cases where `propertyName` was used instead of `inputName`.
-  // TODO: Remove this migration logic once workflows are fully updated. (https://linear.app/openops/issue/OPS-573/remove-migration-logic-from-auto-form-field-wrapper)
-  useEffect(() => {
-    if (!arrayFieldContext && propertyName && inputName) {
-      const oldCustomizedInputFlag = form.getValues(
-        `${CUSTOMIZED_INPUT_KEY}${propertyName}`,
-      );
-
-      if (oldCustomizedInputFlag !== undefined) {
-        setTimeout(() => {
-          form.setValue(`${CUSTOMIZED_INPUT_KEY}${propertyName}`, undefined);
-          form.setValue(
-            `${CUSTOMIZED_INPUT_KEY}${inputName}`,
-            oldCustomizedInputFlag,
-            {
-              shouldValidate: true,
-            },
-          );
-        });
-      }
-    }
-  }, [propertyName, inputName, arrayFieldContext]);
-
   // array fields use the dynamicViewToggled property to specify if a property is toggled
   function handleChange(value: string) {
     const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
@@ -213,11 +188,6 @@ const AutoFormFieldWrapper = ({
         },
       );
     } else {
-      // The structure has changed. Previously we store information based on `propertyName`,
-      // but replaced it with `inputName`, so to avoid migrating existing workflows,
-      // added logic to delete the old structure and replace it with the new one.
-      // TODO: Remove the deletion once all workflows are migrated.
-      form.setValue(`${CUSTOMIZED_INPUT_KEY}${propertyName}`, undefined);
       form.setValue(`${CUSTOMIZED_INPUT_KEY}${inputName}`, isInDynamicView, {
         shouldValidate: true,
       });
@@ -234,8 +204,8 @@ const AutoFormFieldWrapper = ({
           shouldValidate: true,
         });
       } else {
-        // clear value if we go from dynamic to normal value that could be constrained (ex dropdown)
-        form.setValue(inputName, null, {
+        // when switching from dynamic to static, set the default value
+        form.setValue(inputName, property.defaultValue ?? null, {
           shouldValidate: true,
         });
       }
