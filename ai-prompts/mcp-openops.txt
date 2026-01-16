@@ -14,6 +14,20 @@ When you are asked for information about a specific workflow, if you have the na
 ## Operation Types
 - **PATCH**: For updating existing connections (requires existing connection ID)
 
+**NOT available via MCP tools:**
+- Creating new connections (must be done in the OpenOps UI)
+- Deleting connections
+
+### How to Create a Connection in the UI
+When users need to create a new connection, guide them with these steps:
+1. Navigate to the **Connections** page from the left sidebar
+2. Click the **+ New Connection** button in the top right corner
+3. Select the connection type (e.g., AWS, Azure, Slack, Jira)
+4. Fill in the required credentials and configuration fields
+5. Click **Save** to create the connection
+
+Once created, the connection will be available for use in workflows.
+
 ## Step-by-Step Process
 
 ### 1. Verify Required Fields
