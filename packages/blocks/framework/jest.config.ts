@@ -5,7 +5,7 @@ export default {
   globals: {},
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': [
+    '^.+\\.ts$': [
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
