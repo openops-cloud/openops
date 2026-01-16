@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.chromatic.com/config-file.schema.json",
   "projectId": "Project:6728aed37d68c35c74121f66",
+  "storybookBaseDir": "packages/ui-components",
   "zip": true,
   "exitZeroOnChanges": true,
   "exitOnceUploaded": true,
