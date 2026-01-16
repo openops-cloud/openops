@@ -12,6 +12,7 @@ export default {
       },
     ],
   },
+  transformIgnorePatterns: ['^.+\\.js$'],
   moduleFileExtensions: ['ts', 'js', 'html', 'json'],
   coverageDirectory: '../../../coverage/packages/server/api',
 };
