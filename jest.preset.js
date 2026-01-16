@@ -14,4 +14,12 @@ module.exports = {
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   transformIgnorePatterns: ['node_modules/(?!(lodash-es)/)'],
   setupFilesAfterEnv: [__dirname + '/jest.setup.js'],
+  // Reduce log noise in CI
+  silent: process.env.CI === 'true',
+  // Optimize test execution
+  maxWorkers: process.env.CI === 'true' ? '50%' : '75%',
+  // Use minimal reporter in CI for cleaner logs
+  reporters: process.env.CI === 'true' 
+    ? [['default', { summaryThreshold: 0 }]]
+    : ['default'],
 };

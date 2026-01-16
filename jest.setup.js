@@ -5,3 +5,15 @@ jest.mock('langfuse-vercel', () => ({
     shutdown: jest.fn(),
   })),
 }));
+
+// Suppress console output in CI to reduce log noise
+if (process.env.CI === 'true') {
+  global.console = {
+    ...console,
+    log: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+}

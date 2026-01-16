@@ -155,6 +155,7 @@ jobs:
           command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          CI: true
       - name: Truncate NX cache
         run: ./tools/truncate-nx-cache.sh
   build:
