@@ -9,7 +9,12 @@ import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+  ToolSet,
+  UIMessage,
+} from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
@@ -279,17 +284,7 @@ export const useAssistantChat = ({
         }
       }
     },
-    // send message automatically when there's a frontend tool call
-    sendAutomaticallyWhen: ({ messages }) => {
-      const lastMessage = messages[messages.length - 1];
-      const lastMessagePart =
-        lastMessage?.parts?.[lastMessage.parts.length - 1];
-      return (
-        lastMessagePart?.type?.includes('tool-ui') &&
-        'output' in lastMessagePart &&
-        !!lastMessagePart.output
-      );
-    },
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
   useEffect(() => {
