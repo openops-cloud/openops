@@ -1,10 +1,9 @@
 import { Column } from '@tanstack/react-table';
-import * as React from 'react';
 import { DateRange } from 'react-day-picker';
 import { useSearchParams } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { useEffect, useState } from 'react';
+import { ComponentType, useCallback, useEffect, useState } from 'react';
 import { SearchInput } from '../components/search-input/search-input';
 import { SEARCH_DEBOUNCE_DELAY_MS } from '../lib/constants';
 import { DataTableSelectPopover } from './data-table-select-popover';
@@ -17,7 +16,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   options: readonly {
     label: string;
     value: string;
-    icon?: React.ComponentType<{ className?: string }>;
+    icon?: ComponentType<{ className?: string }>;
   }[];
   onFilterChange: (
     filterValue: string | string[] | DateRange | undefined,
@@ -34,7 +33,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   const facets = column?.getFacetedUniqueValues();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const handleFilterChange = React.useCallback(
+  const handleFilterChange = useCallback(
     (filterValue: string | string[] | DateRange | undefined) => {
       setSearchParams(
         (prev) => {
