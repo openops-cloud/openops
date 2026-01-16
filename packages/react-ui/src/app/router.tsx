@@ -31,7 +31,6 @@ import { ConnectionsHeader } from './features/connections/components/connection-
 import { ConnectionsProvider } from './features/connections/components/connections-context';
 import { GlobalLayout } from './features/navigation/layout/global-layout';
 import { RouteWrapper } from './features/navigation/layout/route-wrapper';
-import { authenticationSession } from './lib/authentication-session';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -40,6 +39,7 @@ import { ResetPasswordPage } from './routes/forget-password';
 import { HomePage } from './routes/home';
 import { HomeDemoPage, HomeDemoPageHeader } from './routes/home-demo';
 import { OpenOpsAnalyticsPage } from './routes/openops-analytics';
+import { AnalyticsGuard } from './routes/openops-analytics/analytics-guard';
 import { OpenOpsTablesPage } from './routes/openops-tables';
 import { FlowRunPage } from './routes/runs/id';
 import AppearancePage from './routes/settings/appearance';
@@ -57,22 +57,17 @@ const SettingsRerouter = () => {
   );
 };
 
-const createRoutes = () => {
-  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
-    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
-  );
+interface CreateRoutesParams {
+  isCloudConnectionPageEnabled: any;
+  isDemoHomePage: any;
+  isFederatedLogin: boolean | null | undefined;
+}
 
-  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
-    FlagId.SHOW_DEMO_HOME_PAGE,
-  );
-
-  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
-    FlagId.FEDERATED_LOGIN_ENABLED,
-  );
-
-  const hasAnalyticsPrivileges =
-    authenticationSession.getUserHasAnalyticsPrivileges();
-
+const createRoutes = ({
+  isCloudConnectionPageEnabled,
+  isDemoHomePage,
+  isFederatedLogin,
+}: CreateRoutesParams) => {
   const routes = [
     {
       path: 'flows',
@@ -207,23 +202,21 @@ const createRoutes = () => {
       ),
       errorElement: <RouteErrorBoundary />,
     },
-    ...(hasAnalyticsPrivileges
-      ? [
-          {
-            path: 'analytics',
-            element: (
-              <RouteWrapper useEntireInnerViewport>
-                <OpsErrorBoundary>
-                  <PageTitle title="Analytics">
-                    <OpenOpsAnalyticsPage />
-                  </PageTitle>
-                </OpsErrorBoundary>
-              </RouteWrapper>
-            ),
-            errorElement: <RouteErrorBoundary />,
-          },
-        ]
-      : []),
+    {
+      path: 'analytics',
+      element: (
+        <AnalyticsGuard>
+          <RouteWrapper useEntireInnerViewport>
+            <OpsErrorBoundary>
+              <PageTitle title="Analytics">
+                <OpenOpsAnalyticsPage />
+              </PageTitle>
+            </OpsErrorBoundary>
+          </RouteWrapper>
+        </AnalyticsGuard>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    },
     {
       path: '404',
       element: (
@@ -411,11 +404,27 @@ const createRoutes = () => {
 };
 
 const ApplicationRouter = () => {
+  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
+    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
+
+  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
+    FlagId.SHOW_DEMO_HOME_PAGE,
+  );
+
+  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
+    FlagId.FEDERATED_LOGIN_ENABLED,
+  );
+
   const router = createBrowserRouter([
     {
       path: '/',
       element: <GlobalLayout />,
-      children: createRoutes(),
+      children: createRoutes({
+        isCloudConnectionPageEnabled,
+        isDemoHomePage,
+        isFederatedLogin,
+      }),
     },
   ]);
   return <RouterProvider router={router}></RouterProvider>;

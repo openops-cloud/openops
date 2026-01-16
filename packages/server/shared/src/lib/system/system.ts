@@ -78,6 +78,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.VERSION]: 'local',
   [SharedSystemProp.OPENOPS_TABLES_VERSION]: 'local',
   [SharedSystemProp.ANALYTICS_VERSION]: 'local',
+  [AppSystemProp.ANALYTICS_ENABLED]: 'true',
   [SharedSystemProp.EXECUTION_MODE]: 'SANDBOX_CODE_ONLY',
   [AppSystemProp.JWT_TOKEN_LIFETIME_HOURS]: '168',
   [AppSystemProp.DARK_THEME_ENABLED]: 'false',
@@ -194,6 +195,9 @@ export const system = {
     return [ContainerType.APP, ContainerType.WORKER_AND_APP].includes(
       this.getOrThrow<ContainerType>(SharedSystemProp.CONTAINER_TYPE),
     );
+  },
+  isAnalyticsEnabled(): boolean {
+    return this.getBoolean(AppSystemProp.ANALYTICS_ENABLED) !== false;
   },
   calculateConfigurationHash(): string {
     const props = Object.keys(SharedSystemProp)

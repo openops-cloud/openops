@@ -166,12 +166,11 @@ async function streamLLMResponse(
           chatId: params.chatId,
           provider: params.aiConfig.provider,
         });
-        return saveChatHistory(
-          params.chatId,
-          params.userId,
-          params.projectId,
-          steps.flatMap((step) => step.response.messages),
-        );
+        const partialMessages = steps.at(-1)?.response.messages ?? [];
+        return saveChatHistory(params.chatId, params.userId, params.projectId, [
+          ...params.chatHistory,
+          ...addUiToolResults(partialMessages),
+        ]);
       },
       abortSignal: params.abortSignal,
     });

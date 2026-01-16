@@ -3,12 +3,14 @@ import {
   getTableIdByTableName,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { getDefaultProjectTablesDatabaseToken } from '../database/get-default-user-db-token';
+import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
+import { organizationService } from '../organization/organization.service';
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';
 import { createHomepageCharts } from './populate-homepage';
+import { getDefaultProjectForOrganization } from './project-selector';
 
 export const HOME_PAGE_DASHBOARD_SLUG = 'homepage';
 
@@ -41,13 +43,21 @@ export async function seedAnalyticsDashboards(): Promise<void> {
 
   let seedTableId: number | undefined;
   try {
-    seedTableId = await getTableIdByTableName(
-      SEED_OPENOPS_TABLE_NAME,
-      await getDefaultProjectTablesDatabaseToken(),
-    );
+    const organization = await organizationService.getOldestOrganization();
+    assertNotNullOrUndefined(organization, 'Organization not found');
+
+    const project = await getDefaultProjectForOrganization(organization.id);
+
+    assertNotNullOrUndefined(project, 'Project not found');
+
+    seedTableId = await getTableIdByTableName(SEED_OPENOPS_TABLE_NAME, {
+      tablesDatabaseId: project.tablesDatabaseId,
+      tablesDatabaseToken: project.tablesDatabaseToken,
+    });
   } catch (error) {
     logger.error(`Could not find table with name: ${SEED_OPENOPS_TABLE_NAME}`, {
       tableName: SEED_OPENOPS_TABLE_NAME,
+      error,
     });
     return;
   }

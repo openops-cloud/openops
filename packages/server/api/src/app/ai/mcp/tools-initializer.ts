@@ -43,13 +43,14 @@ export const startMCPTools = async (
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
   );
+  const analyticsEnabled = system.isAnalyticsEnabled();
 
   let supersetTools: Partial<MCPTool> = {
     client: undefined,
     toolSet: {},
   };
 
-  if (loadExperimentalTools) {
+  if (loadExperimentalTools && analyticsEnabled) {
     supersetTools = await safeGetTools('superset', getSupersetTools);
   }
 

@@ -23,6 +23,11 @@ const setAnalyticsDataSeededFlag = async (): Promise<void> => {
 };
 
 export const seedAnalytics = async (): Promise<void> => {
+  if (!system.isAnalyticsEnabled()) {
+    logger.info('Skipping analytics seeding, analytics disabled');
+    return;
+  }
+
   if (!system.get(AppSystemProp.ANALYTICS_PRIVATE_URL)) {
     logger.info('Skipping analytics seeding, no configured private URL');
     return;

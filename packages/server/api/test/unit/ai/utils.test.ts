@@ -802,6 +802,66 @@ describe('mergeToolResultsIntoMessages', () => {
         input: { userId: '123' },
       });
     });
+
+    it('should handle multiple tool results in a single tool message', () => {
+      const messages: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call_1',
+              toolName: 'tool_1',
+              input: { arg: 1 },
+            },
+            {
+              type: 'tool-call',
+              toolCallId: 'call_2',
+              toolName: 'tool_2',
+              input: { arg: 2 },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call_1',
+              toolName: 'tool_1',
+              output: {
+                type: 'text',
+                value: 'result_1',
+              } as any,
+            },
+            {
+              type: 'tool-result',
+              toolCallId: 'call_2',
+              toolName: 'tool_2',
+              output: {
+                type: 'text',
+                value: 'result_2',
+              } as any,
+            },
+          ],
+        },
+      ];
+
+      const result = mergeToolResultsIntoMessages(messages);
+      expect(result).toHaveLength(1);
+      expect(result[0].parts).toHaveLength(2);
+
+      expect(result[0].parts[0]).toMatchObject({
+        toolCallId: 'call_1',
+        state: 'output-available',
+        output: 'result_1',
+      });
+      expect(result[0].parts[1]).toMatchObject({
+        toolCallId: 'call_2',
+        state: 'output-available',
+        output: 'result_2',
+      });
+    });
   });
 });
 
