@@ -11,10 +11,6 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: [
-    '^.+\\.js$',
-    'node_modules/(?!string-replace-async)',
-  ],
   moduleNameMapper: {
     'lodash-es': 'lodash',
   },
