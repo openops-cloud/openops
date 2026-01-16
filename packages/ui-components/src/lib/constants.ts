@@ -39,3 +39,5 @@ export const COPY_PASTE_TOAST_DURATION = 2000;
 export const AI_CHAT_SCROLL_DELAY = 200;
 
 export const TOP_BAR_HEIGHT = 60;
+
+export const SEARCH_DEBOUNCE_DELAY_MS = 300;

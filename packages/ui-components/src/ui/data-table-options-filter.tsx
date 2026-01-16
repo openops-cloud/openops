@@ -2,8 +2,11 @@ import { Column } from '@tanstack/react-table';
 import * as React from 'react';
 import { DateRange } from 'react-day-picker';
 import { useSearchParams } from 'react-router-dom';
+import { useDebouncedCallback } from 'use-debounce';
 
-import { DataTableInputPopover } from './data-table-input-popover';
+import { useEffect, useState } from 'react';
+import { SearchInput } from '../components/search-input/search-input';
+import { SEARCH_DEBOUNCE_DELAY_MS } from '../lib/constants';
 import { DataTableSelectPopover } from './data-table-select-popover';
 import { DatePickerWithRange } from './date-picker-range';
 
@@ -87,9 +90,13 @@ export function DataTableFacetedFilter<TData, TValue>({
 
   switch (type) {
     case 'input': {
-      const filterValue = (column?.getFilterValue() || '') as string;
+      const filterValue =
+        (column?.getFilterValue() as string) ||
+        (searchParams.get(column?.id as string) as string) ||
+        '';
+
       return (
-        <DataTableInputPopover
+        <DataTableInputFilter
           title={title}
           filterValue={filterValue}
           handleFilterChange={handleFilterChange}
@@ -123,4 +130,41 @@ export function DataTableFacetedFilter<TData, TValue>({
       );
     }
   }
+}
+
+type DataTableInputFilterProps = {
+  title?: string;
+  filterValue: string;
+  handleFilterChange: (filterValue: string) => void;
+};
+
+function DataTableInputFilter({
+  title,
+  filterValue,
+  handleFilterChange,
+}: DataTableInputFilterProps) {
+  const [searchQuery, setSearchQuery] = useState(filterValue);
+
+  useEffect(() => {
+    setSearchQuery(filterValue);
+  }, [filterValue]);
+
+  const debouncedFilterChange = useDebouncedCallback(
+    handleFilterChange,
+    SEARCH_DEBOUNCE_DELAY_MS,
+  );
+
+  const onChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedFilterChange(value);
+  };
+
+  return (
+    <SearchInput
+      value={searchQuery}
+      onChange={onChange}
+      placeholder={title}
+      className="max-w-[327px]"
+    />
+  );
 }
