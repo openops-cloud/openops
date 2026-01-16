@@ -5,19 +5,10 @@ export default {
   globals: {},
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(t|j)s$': [
-      '@swc/jest',
+    '^.+\\.[tj]s$': [
+      'ts-jest',
       {
-        jsc: {
-          parser: {
-            syntax: 'typescript',
-            decorators: true,
-          },
-          transform: {
-            legacyDecorator: true,
-            decoratorMetadata: true,
-          },
-        },
+        tsconfig: '<rootDir>/tsconfig.spec.json',
       },
     ],
   },

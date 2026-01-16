@@ -5,10 +5,3 @@ jest.mock('langfuse-vercel', () => ({
     shutdown: jest.fn(),
   })),
 }));
-
-jest.mock('bcrypt', () => ({
-  hashSync: jest.fn().mockReturnValue('mocked-hash'),
-  compareSync: jest.fn().mockReturnValue(true),
-  hash: jest.fn().mockResolvedValue('mocked-hash'),
-  compare: jest.fn().mockResolvedValue(true),
-}));
