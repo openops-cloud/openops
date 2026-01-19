@@ -101,7 +101,6 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const signUpRoute = async (request: any, reply: any) => {
   const user = await userService.getMetaInfo({
-    id: request.principal.id,
     principal: request.principal,
   });
 
