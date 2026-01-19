@@ -24,7 +24,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-jest.mock('ai', () => ({
+jest.mock('@ai-sdk/mcp', () => ({
   createMCPClient: jest.fn(),
 }));
 
@@ -38,10 +38,8 @@ const mockTransport = {
   },
 };
 
-jest.mock('ai/mcp-stdio', () => ({
-  Experimental_StdioMCPTransport: jest
-    .fn()
-    .mockImplementation(() => mockTransport),
+jest.mock('@modelcontextprotocol/sdk/client/stdio.js', () => ({
+  StdioClientTransport: jest.fn().mockImplementation(() => mockTransport),
 }));
 
 jest.mock(
