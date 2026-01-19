@@ -1,18 +1,18 @@
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { FlagId } from '@openops/shared';
 import { useMemo } from 'react';
 import { flagsHooks } from './flags-hooks';
+import { userHooks } from './user-hooks';
 
 export const useHasAnalyticsAccess = (): boolean => {
   const { data: isAnalyticsEnabled } = flagsHooks.useFlag<boolean | undefined>(
     FlagId.ANALYTICS_ENABLED,
   );
 
-  const hasAnalyticsPrivileges =
-    authenticationSession.getUserHasAnalyticsPrivileges();
+  const { userMeta } = userHooks.useUserMeta();
+  const hasAnalyticsAccess = userMeta?.projectPermissions?.analytics ?? false;
 
   return useMemo(
-    () => Boolean(isAnalyticsEnabled && hasAnalyticsPrivileges),
-    [isAnalyticsEnabled, hasAnalyticsPrivileges],
+    () => Boolean(isAnalyticsEnabled && hasAnalyticsAccess),
+    [isAnalyticsEnabled, hasAnalyticsAccess],
   );
 };

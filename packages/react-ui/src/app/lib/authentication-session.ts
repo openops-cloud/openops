@@ -51,10 +51,6 @@ export const authenticationSession = {
     return this.getCurrentUser()?.projectRole ?? null;
   },
 
-  getUserHasAnalyticsPrivileges(): boolean {
-    return this.getCurrentUser()?.hasAnalyticsPrivileges ?? false;
-  },
-
   getUserOrganizationRole() {
     return this.getCurrentUser()?.organizationRole ?? null;
   },
