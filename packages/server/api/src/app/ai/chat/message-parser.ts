@@ -1,4 +1,4 @@
-import { NewMessageRequest } from '@openops/shared';
+import { isNil, NewMessageRequest } from '@openops/shared';
 
 export type ParsedMessage = {
   content: string;
@@ -35,8 +35,13 @@ export function parseUserMessage(
     };
   }
 
+  const content =
+    firstContentElement.type !== 'reasoning' && !isNil(firstContentElement.text)
+      ? String(firstContentElement.text)
+      : 'continue';
+
   return {
     isValid: true,
-    content: String(firstContentElement.text ?? 'continue'),
+    content,
   };
 }
