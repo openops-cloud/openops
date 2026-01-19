@@ -67,6 +67,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       const { access_token } =
         await analyticsAuthenticationService.authenticateAnalyticsRequest(
           request.principal.id,
+          request.principal.projectId,
         );
 
       const embedId =
@@ -84,6 +85,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
         const { access_token } =
           await analyticsAuthenticationService.authenticateAnalyticsRequest(
             request.principal.id,
+            request.principal.projectId,
           );
 
         const guestToken =

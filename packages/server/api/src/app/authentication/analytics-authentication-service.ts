@@ -14,8 +14,12 @@ export const analyticsAuthenticationService = {
 
   async authenticateAnalyticsRequest(
     userId: string,
+    projectId: string,
   ): Promise<AnalyticsAuthTokens> {
-    await getAnalyticsAccessService().verifyUserAnalyticsAccess(userId);
+    await getAnalyticsAccessService().verifyUserAnalyticsAccess(
+      userId,
+      projectId,
+    );
     const authTokens = await authenticateOpenOpsAnalyticsAdmin();
 
     return authTokens;
