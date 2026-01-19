@@ -1,5 +1,11 @@
 import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
-import { LanguageModel, ModelMessage, ToolSet, UserModelMessage } from 'ai';
+import {
+  LanguageModel,
+  ModelMessage,
+  Tool,
+  ToolSet,
+  UserModelMessage,
+} from 'ai';
 import { FastifyInstance } from 'fastify';
 
 const startMCPToolsMock = jest.fn();
@@ -93,10 +99,8 @@ describe('getMCPToolsContext', () => {
 
   it('should handle tools with no descriptions', async () => {
     const mockTools: ToolSet = {
-      tool1: {},
-      tool2: {
-        description: 'Tool 2 description',
-      },
+      tool1: {} as Tool,
+      tool2: { description: 'Tool 2 description' } as Tool,
     };
 
     startMCPToolsMock.mockResolvedValue({
@@ -192,9 +196,9 @@ describe('getMCPToolsContext', () => {
 
   describe('Redis integration and tool filtering', () => {
     const mockTools: ToolSet = {
-      tool1: { description: 'Tool 1' },
-      tool2: { description: 'Tool 2' },
-      tool3: { description: 'Tool 3' },
+      tool1: { description: 'Tool 1' } as Tool,
+      tool2: { description: 'Tool 2' } as Tool,
+      tool3: { description: 'Tool 3' } as Tool,
     };
 
     beforeEach(() => {

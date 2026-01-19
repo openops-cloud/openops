@@ -1,5 +1,6 @@
+import { createMCPClient } from '@ai-sdk/mcp';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
+import { Tool, ToolSet } from 'ai';
 import { projectService } from '../../project/project-service';
 import { MCPTool } from './types';
 
@@ -33,7 +34,7 @@ export async function getTablesTools(projectId: string): Promise<MCPTool> {
       toolSet[name] = {
         ...tool,
         toolProvider: 'tables',
-      } as typeof tool & { toolProvider: string };
+      } as Tool & { toolProvider: string };
     }
   }
 
