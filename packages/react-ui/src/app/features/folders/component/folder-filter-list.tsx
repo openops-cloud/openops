@@ -2,6 +2,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
+  SEARCH_DEBOUNCE_DELAY_MS,
   SearchInput,
   TooltipProvider,
 } from '@openops/components/ui';
@@ -16,7 +17,6 @@ import { AddNewFolderDialog } from './add-new-folder-dialog';
 import { FlowsTreeView } from './flows-tree-view';
 
 const PAGINATION_LIMIT = 100;
-const FOLDER_FILTER_DEBOUNCE_DELAY = 300;
 
 const FolderFilterList = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -26,7 +26,7 @@ const FolderFilterList = () => {
 
   const debouncedSetSearchTerm = useDebounceCallback(
     setSearchTerm,
-    FOLDER_FILTER_DEBOUNCE_DELAY,
+    SEARCH_DEBOUNCE_DELAY_MS,
   );
 
   const [searchValue, setSearchValue] = useState('');
