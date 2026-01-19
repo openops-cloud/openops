@@ -1,6 +1,5 @@
 import {
   distributedLock,
-  exceptionHandler,
   flowTimeoutSandbox,
   JobStatus,
   logger,
@@ -129,23 +128,25 @@ async function executeFlow(
       return;
     }
 
+    const terminationReason =
+      extractPropertyString(result, ['message']) || 'Engine execution failed.';
+
+    logger.info('Engine execution failed.', {
+      engineResponseStatus: status,
+      flowRunStatus: result.status,
+      terminationReason,
+    });
+
+
     await updateRunWithError(
       jobData,
       engineToken,
       failedRunStatus,
-      extractPropertyString(result, ['message']),
+      terminationReason,
     );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
-      const errorMessage = result.error?.message ?? 'internal error';
-
-      exceptionHandler.handle(
-        new ApplicationError({
-          code: ErrorCode.ENGINE_OPERATION_FAILURE,
-          params: { message: errorMessage },
-        }),
-      );
-
+      const errorMessage = result.error?.message ?? terminationReason;
       jobStatus = JobStatus.FAILED;
       jobFinalMessage = `Internal error reported by engine. Error message: ${errorMessage}`;
     }
@@ -162,6 +163,12 @@ async function executeFlow(
       ? 'Engine execution timed out.'
       : 'Flow execution encountered an internal error';
 
+    logger.info('Engine execution failed.', {
+      flowRunStatus: failedRunStatus,
+      terminationReason,
+      error: e,
+    });
+
     await updateRunWithError(
       jobData,
       engineToken,
@@ -170,7 +177,6 @@ async function executeFlow(
     );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
-      exceptionHandler.handle(e as Error);
       jobStatus = JobStatus.FAILED;
       jobFinalMessage = `Internal error reported by engine. Error message: ${
         (e as Error).message
