@@ -1,5 +1,4 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { cacheWrapper } from '@openops/server-shared';
 import { PrincipalType, UpdateTrackingRequestBody } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { userService } from './user-service';
@@ -11,7 +10,7 @@ export const userModule: FastifyPluginAsyncTypebox = async (app) => {
 const usersController: FastifyPluginAsyncTypebox = async (app) => {
   app.get('/me', async (request: FastifyRequest) => {
     const user = await userService.getMetaInfo({
-      id: request.principal.id,
+      principal: request.principal,
     });
     return user;
   });

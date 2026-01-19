@@ -55,6 +55,9 @@ export const UserMeta = Type.Object({
   organizationRole: Type.Enum(OrganizationRole),
   lastName: Type.String(),
   trackEvents: Type.Boolean(),
+  projectPermissions: Type.Object({
+    analytics: Type.Boolean(),
+  }),
 });
 
 export type UserMeta = Static<typeof UserMeta>;

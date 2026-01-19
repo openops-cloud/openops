@@ -8,6 +8,7 @@ import {
   openOpsId,
   OrganizationId,
   OrganizationRole,
+  Principal,
   SeekPage,
   SignUpRequest,
   spreadIfDefined,
@@ -22,6 +23,7 @@ import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/basic/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
 import { sendUserCreatedEvent } from '../telemetry/event-models';
+import { getProjectPermissionsService } from './project-permissions-service-factory';
 import { UserEntity } from './user-entity';
 
 export const userRepo = repoFactory(UserEntity);
@@ -139,12 +141,22 @@ export const userService = {
     return adminUsers[0];
   },
 
-  async getMetaInfo({ id }: IdParams): Promise<UserMeta | null> {
-    const user = await this.get({ id });
+  async getMetaInfo({
+    principal,
+  }: {
+    principal: Principal;
+  }): Promise<UserMeta | null> {
+    const user = await this.get({ id: principal.id });
 
     if (isNil(user)) {
       return null;
     }
+
+    const projectPermissions =
+      await getProjectPermissionsService().getProjectPermissions(
+        principal,
+        user.organizationRole,
+      );
 
     return {
       id: user.id,
@@ -154,6 +166,7 @@ export const userService = {
       organizationRole: user.organizationRole,
       lastName: user.lastName,
       trackEvents: user.trackEvents,
+      projectPermissions,
     };
   },
 

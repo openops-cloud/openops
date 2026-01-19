@@ -102,6 +102,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
 const signUpRoute = async (request: any, reply: any) => {
   const user = await userService.getMetaInfo({
     id: request.principal.id,
+    principal: request.principal,
   });
 
   if (!user || user.email !== adminEmail) {
