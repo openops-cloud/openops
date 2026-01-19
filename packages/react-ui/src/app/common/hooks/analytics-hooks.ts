@@ -9,7 +9,7 @@ export const useHasAnalyticsAccess = (): boolean => {
   );
 
   const { userMeta } = userHooks.useUserMeta();
-  const hasAnalyticsAccess = userMeta?.projectPermissions.analytics ?? false;
+  const hasAnalyticsAccess = userMeta?.projectPermissions?.analytics ?? false;
 
   return useMemo(
     () => Boolean(isAnalyticsEnabled && hasAnalyticsAccess),
