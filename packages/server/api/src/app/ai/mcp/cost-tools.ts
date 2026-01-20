@@ -1,3 +1,5 @@
+import { createMCPClient } from '@ai-sdk/mcp';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { AwsAuth } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import {
@@ -5,8 +7,6 @@ import {
   CustomAuthConnectionValue,
   isEmpty,
 } from '@openops/shared';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { mcpConfigService } from '../../mcp/config/mcp-config.service';
@@ -91,8 +91,8 @@ async function initializeMcpClient(
     },
   );
 
-  const client = await experimental_createMCPClient({
-    transport: new Experimental_StdioMCPTransport({
+  const client = await createMCPClient({
+    transport: new StdioClientTransport({
       command: pythonPath,
       args: [serverPath],
       env: {

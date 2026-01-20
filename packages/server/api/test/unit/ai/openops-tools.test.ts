@@ -39,8 +39,13 @@ jest.mock(
 );
 
 const createMcpClientMock = jest.fn();
-jest.mock('ai', () => ({
-  experimental_createMCPClient: createMcpClientMock,
+jest.mock('@ai-sdk/mcp', () => ({
+  createMCPClient: createMcpClientMock,
+}));
+
+const mockTransport = {};
+jest.mock('@modelcontextprotocol/sdk/client/stdio.js', () => ({
+  StdioClientTransport: jest.fn().mockImplementation(() => mockTransport),
 }));
 
 jest.mock('@openops/server-shared', () => ({
@@ -68,6 +73,7 @@ jest.mock('os', () => ({
 }));
 
 import '@fastify/swagger';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
 import path from 'path';
@@ -234,19 +240,19 @@ describe('getOpenOpsTools', () => {
     });
 
     expect(createMcpClientMock).toHaveBeenCalledWith({
-      transport: expect.objectContaining({
-        serverParams: {
-          command: `${mockBasePath}/.venv/bin/python`,
-          args: [`${mockBasePath}/main.py`],
-          env: expect.objectContaining({
-            OPENAPI_SCHEMA_PATH: expect.any(String),
-            AUTH_TOKEN: 'auth-service-token',
-            API_BASE_URL: mockApiBaseUrl,
-            OPENOPS_MCP_SERVER_PATH: mockBasePath,
-            LOGZIO_TOKEN: 'test-logzio-token',
-            ENVIRONMENT: 'test-environment',
-          }),
-        },
+      transport: mockTransport,
+    });
+
+    expect(StdioClientTransport).toHaveBeenCalledWith({
+      command: `${mockBasePath}/.venv/bin/python`,
+      args: [`${mockBasePath}/main.py`],
+      env: expect.objectContaining({
+        OPENAPI_SCHEMA_PATH: expect.any(String),
+        AUTH_TOKEN: 'auth-service-token',
+        API_BASE_URL: mockApiBaseUrl,
+        OPENOPS_MCP_SERVER_PATH: mockBasePath,
+        LOGZIO_TOKEN: 'test-logzio-token',
+        ENVIRONMENT: 'test-environment',
       }),
     });
   });

@@ -1,3 +1,4 @@
+import { createMCPClient } from '@ai-sdk/mcp';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import {
   AppConnection,
@@ -6,7 +7,6 @@ import {
   AWS_COST_MCP_CONFIG_NAME,
   CustomAuthConnectionValue,
 } from '@openops/shared';
-import { experimental_createMCPClient } from 'ai';
 import { getCostTools } from '../../../src/app/ai/mcp/cost-tools';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
 import { mcpConfigService } from '../../../src/app/mcp/config/mcp-config.service';
@@ -24,8 +24,8 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-jest.mock('ai', () => ({
-  experimental_createMCPClient: jest.fn(),
+jest.mock('@ai-sdk/mcp', () => ({
+  createMCPClient: jest.fn(),
 }));
 
 const mockTransport = {
@@ -38,10 +38,8 @@ const mockTransport = {
   },
 };
 
-jest.mock('ai/mcp-stdio', () => ({
-  Experimental_StdioMCPTransport: jest
-    .fn()
-    .mockImplementation(() => mockTransport),
+jest.mock('@modelcontextprotocol/sdk/client/stdio.js', () => ({
+  StdioClientTransport: jest.fn().mockImplementation(() => mockTransport),
 }));
 
 jest.mock(
@@ -196,7 +194,7 @@ describe('getCostTools', () => {
     const mockClient = {
       tools: jest.fn().mockResolvedValue(mockTools),
     };
-    (experimental_createMCPClient as jest.Mock).mockResolvedValue(mockClient);
+    (createMCPClient as jest.Mock).mockResolvedValue(mockClient);
 
     (mcpConfigService.list as jest.Mock).mockResolvedValue([
       {
@@ -256,13 +254,12 @@ describe('getCostTools', () => {
       },
     });
 
-    expect(experimental_createMCPClient).toHaveBeenCalledTimes(3);
-    expect(experimental_createMCPClient).toHaveBeenCalledWith({
+    expect(createMCPClient).toHaveBeenCalledTimes(3);
+    expect(createMCPClient).toHaveBeenCalledWith({
       transport: expect.any(Object),
     });
 
-    const transportCalls = (experimental_createMCPClient as jest.Mock).mock
-      .calls;
+    const transportCalls = (createMCPClient as jest.Mock).mock.calls;
     expect(transportCalls[0][0].transport).toBeDefined();
     expect(transportCalls[1][0].transport).toBeDefined();
     expect(transportCalls[2][0].transport).toBeDefined();

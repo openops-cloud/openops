@@ -4,6 +4,7 @@ import {
   generateObject,
   LanguageModel,
   ModelMessage,
+  Tool,
   ToolSet,
   UserModelMessage,
 } from 'ai';
@@ -105,10 +106,12 @@ describe('selectToolsAndQuery', () => {
 
     it('should handle tools with no descriptions', async () => {
       const mockTools: ToolSet = {
-        tool1: {},
+        tool1: {
+          description: 'Tool 1 description',
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -144,10 +147,10 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -180,10 +183,10 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -220,10 +223,10 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -256,13 +259,13 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
         tool3: {
           description: 'Tool 3 description',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -302,10 +305,10 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
         tool2: {
           description: 'Tool 2 description',
-        },
+        } as Tool,
       };
 
       const mockError = new Error('LLM error');
@@ -342,7 +345,7 @@ describe('selectToolsAndQuery', () => {
       for (let i = 1; i <= 150; i++) {
         mockTools[`tool${i}`] = {
           description: `Tool ${i} description`,
-        };
+        } as Tool;
       }
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -371,7 +374,7 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
       };
 
       const complexMessages: ModelMessage[] = [
@@ -418,7 +421,7 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
       };
 
       const aiConfigWithSettings = {
@@ -461,7 +464,7 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-        },
+        } as Tool,
       };
       await routeQuery({
         messages: mockMessages,
@@ -574,7 +577,7 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         other_tool: {
           description: 'Other tool',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -602,7 +605,7 @@ describe('selectToolsAndQuery', () => {
       const mockTools: ToolSet = {
         general_tool: {
           description: 'General tool',
-        },
+        } as Tool,
       };
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -629,10 +632,10 @@ describe('selectToolsAndQuery', () => {
 
   describe('Append-only tool tracking', () => {
     const mockTools: ToolSet = {
-      tool1: { description: 'Tool 1' },
-      tool2: { description: 'Tool 2' },
-      tool3: { description: 'Tool 3' },
-      tool4: { description: 'Tool 4' },
+      tool1: { description: 'Tool 1' } as Tool,
+      tool2: { description: 'Tool 2' } as Tool,
+      tool3: { description: 'Tool 3' } as Tool,
+      tool4: { description: 'Tool 4' } as Tool,
     };
 
     beforeEach(() => {

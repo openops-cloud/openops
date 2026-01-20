@@ -1,6 +1,6 @@
+import { createMCPClient } from '@ai-sdk/mcp';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { AppSystemProp, system } from '@openops/server-shared';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
 import { MCPTool } from './types';
 
@@ -28,8 +28,8 @@ export async function getSupersetTools(): Promise<MCPTool> {
     system.get(AppSystemProp.ANALYTICS_PRIVATE_URL) + '/openops-analytics';
   const password = system.getOrThrow(AppSystemProp.ANALYTICS_ADMIN_PASSWORD);
 
-  const supersetClient = await experimental_createMCPClient({
-    transport: new Experimental_StdioMCPTransport({
+  const supersetClient = await createMCPClient({
+    transport: new StdioClientTransport({
       command: pythonPath,
       args: [serverPath],
       env: {
