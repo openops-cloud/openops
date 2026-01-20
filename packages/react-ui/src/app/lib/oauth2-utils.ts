@@ -20,11 +20,12 @@ async function openOAuth2Popup(
 ): Promise<OAuth2PopupResponse> {
   closeOAuth2Popup();
   const pckeChallenge = nanoid();
-  const state = nanoid();
+  const nonce = nanoid();
+  const state = `${nonce}_${btoa(window.location.origin)}`;
   const url = constructUrl(params, pckeChallenge, state);
   currentPopup = openWindow(url);
   return {
-    code: await getCode(params.redirectUrl, state),
+    code: await getCode(params.redirectUrl, nonce),
     codeChallenge: params.pkce ? pckeChallenge : undefined,
   };
 }
