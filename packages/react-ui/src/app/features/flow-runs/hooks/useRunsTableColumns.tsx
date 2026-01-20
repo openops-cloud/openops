@@ -35,7 +35,11 @@ type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
   accessorKey: string;
 };
 
-export const useRunsTableColumns = (): Column[] => {
+export const useRunsTableColumns = ({
+  refetch,
+}: {
+  refetch: () => void;
+}): Column[] => {
   const durationEnabled = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_DURATION,
   ).data;
@@ -48,7 +52,7 @@ export const useRunsTableColumns = (): Column[] => {
     mutationFn: (data) =>
       flowRunsApi.retry(data.row.id, { strategy: data.strategy }),
     onSuccess: (updatedRun, { row }) => {
-      row.update(updatedRun);
+      refetch();
     },
     onError: (error) => {
       console.error(error);

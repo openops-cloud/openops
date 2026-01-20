@@ -37,14 +37,14 @@ const fetchData = async (
 const FlowRunsPage = () => {
   const navigate = useNavigate();
   const [refresh, setRefresh] = useState(false);
-  const { data, isFetching } = flowsHooks.useFlows({
+  const { data, isFetching, refetch } = flowsHooks.useFlows({
     limit: 1000,
     cursor: undefined,
   });
 
   const flows = data?.data;
 
-  const columns = useRunsTableColumns();
+  const columns = useRunsTableColumns({ refetch });
 
   const filters = useMemo(
     () => [

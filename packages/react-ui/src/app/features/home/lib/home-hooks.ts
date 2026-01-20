@@ -13,10 +13,11 @@ import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { homeApi } from './home-api';
 
 export const useDashboardData = () => {
-  const { data: runsResponse, isLoading: runsLoading } = useQuery<
-    SeekPage<FlowRun>,
-    Error
-  >({
+  const {
+    data: runsResponse,
+    isLoading: runsLoading,
+    refetch: refetchRuns,
+  } = useQuery<SeekPage<FlowRun>, Error>({
     queryKey: [QueryKeys.homeRuns],
     queryFn: fetchRuns,
   });
@@ -44,6 +45,7 @@ export const useDashboardData = () => {
     isLoadingFlows: isLoadingFlows || isLoadingExistingFlows,
     existingFlowsResponse,
     refetchFlows,
+    refetchRuns,
   };
 };
 
