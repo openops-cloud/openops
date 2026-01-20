@@ -25,6 +25,7 @@ import { engineApiService } from '../api/server-api.service';
 import { engineRunner } from '../engine';
 
 type EngineConstants = 'internalApiUrl' | 'publicUrl' | 'engineToken';
+const ENGINE_EXECUTION_ERROR_MESSAGE = 'Engine execution failed.';
 
 async function prepareInput(
   flowVersion: FlowVersion,
@@ -129,9 +130,10 @@ async function executeFlow(
     }
 
     const terminationReason =
-      extractPropertyString(result, ['message']) || 'Engine execution failed.';
+      extractPropertyString(result, ['message']) ||
+      ENGINE_EXECUTION_ERROR_MESSAGE;
 
-    logger.info('Engine execution failed.', {
+    logger.info(ENGINE_EXECUTION_ERROR_MESSAGE, {
       engineResponseStatus: status,
       flowRunStatus: result.status,
       terminationReason,
@@ -162,7 +164,7 @@ async function executeFlow(
       ? 'Engine execution timed out.'
       : 'Flow execution encountered an internal error';
 
-    logger.info('Engine execution failed.', {
+    logger.info(ENGINE_EXECUTION_ERROR_MESSAGE, {
       flowRunStatus: failedRunStatus,
       terminationReason,
       error: e,
