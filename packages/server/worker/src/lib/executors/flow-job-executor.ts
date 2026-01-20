@@ -1,6 +1,5 @@
 import {
   distributedLock,
-  exceptionHandler,
   flowTimeoutSandbox,
   JobStatus,
   logger,
@@ -26,6 +25,7 @@ import { engineApiService } from '../api/server-api.service';
 import { engineRunner } from '../engine';
 
 type EngineConstants = 'internalApiUrl' | 'publicUrl' | 'engineToken';
+const ENGINE_EXECUTION_ERROR_MESSAGE = 'Engine execution failed.';
 
 async function prepareInput(
   flowVersion: FlowVersion,
@@ -129,23 +129,25 @@ async function executeFlow(
       return;
     }
 
+    const terminationReason =
+      extractPropertyString(result, ['message']) ||
+      ENGINE_EXECUTION_ERROR_MESSAGE;
+
+    logger.info(ENGINE_EXECUTION_ERROR_MESSAGE, {
+      engineResponseStatus: status,
+      flowRunStatus: result.status,
+      terminationReason,
+    });
+
     await updateRunWithError(
       jobData,
       engineToken,
       failedRunStatus,
-      extractPropertyString(result, ['message']),
+      terminationReason,
     );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
-      const errorMessage = result.error?.message ?? 'internal error';
-
-      exceptionHandler.handle(
-        new ApplicationError({
-          code: ErrorCode.ENGINE_OPERATION_FAILURE,
-          params: { message: errorMessage },
-        }),
-      );
-
+      const errorMessage = result.error?.message ?? terminationReason;
       jobStatus = JobStatus.FAILED;
       jobFinalMessage = `Internal error reported by engine. Error message: ${errorMessage}`;
     }
@@ -162,6 +164,12 @@ async function executeFlow(
       ? 'Engine execution timed out.'
       : 'Flow execution encountered an internal error';
 
+    logger.info(ENGINE_EXECUTION_ERROR_MESSAGE, {
+      flowRunStatus: failedRunStatus,
+      terminationReason,
+      error: e,
+    });
+
     await updateRunWithError(
       jobData,
       engineToken,
@@ -170,7 +178,6 @@ async function executeFlow(
     );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
-      exceptionHandler.handle(e as Error);
       jobStatus = JobStatus.FAILED;
       jobFinalMessage = `Internal error reported by engine. Error message: ${
         (e as Error).message

@@ -1,11 +1,11 @@
+import { createMCPClient } from '@ai-sdk/mcp';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import {
   AppSystemProp,
   networkUtls,
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
-import { experimental_createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
 import { OpenAPI } from 'openapi-types';
@@ -84,8 +84,8 @@ export async function getOpenOpsTools(
     userAuthToken,
   );
 
-  const openopsClient = await experimental_createMCPClient({
-    transport: new Experimental_StdioMCPTransport({
+  const openopsClient = await createMCPClient({
+    transport: new StdioClientTransport({
       command: pythonPath,
       args: [serverPath],
       env: {

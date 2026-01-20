@@ -4,13 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 
 export const userHooks = {
   useUserMeta: () => {
-    const { data } = useQuery({
+    const { data, isPending } = useQuery({
       queryKey: [QueryKeys.userMetadata],
       queryFn: usersApi.me,
     });
 
     return {
       userMeta: data,
+      isPending,
     };
   },
 };
