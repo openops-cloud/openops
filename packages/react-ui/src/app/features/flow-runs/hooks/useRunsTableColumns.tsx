@@ -51,7 +51,7 @@ export const useRunsTableColumns = ({
   >({
     mutationFn: (data) =>
       flowRunsApi.retry(data.row.id, { strategy: data.strategy }),
-    onSuccess: (updatedRun, { row }) => {
+    onSuccess: () => {
       refetch();
     },
     onError: (error) => {
