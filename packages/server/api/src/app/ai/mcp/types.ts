@@ -1,9 +1,13 @@
-import { ToolSet } from 'ai';
+import { Tool, ToolSet } from 'ai';
 import type { JSONSchema7 } from 'json-schema';
+
+export type ToolWithProvider = Tool & { toolProvider: string };
+
+export type ToolSetWithProvider = Record<string, ToolWithProvider>;
 
 export type MCPTool = {
   client: unknown;
-  toolSet: ToolSet;
+  toolSet: ToolSet | ToolSetWithProvider;
 };
 
 export type AssistantUITools = Record<

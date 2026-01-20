@@ -1,4 +1,4 @@
-import { ModelMessage, ToolSet } from 'ai';
+import { ModelMessage, Tool, ToolSet } from 'ai';
 import {
   addCacheControlToMessages,
   addCacheControlToTools,
@@ -152,9 +152,9 @@ describe('context-cache-helper', () => {
       };
 
       const tools: ToolSet = {
-        tool1: mockTool,
-        tool2: mockTool,
-        tool3: mockTool,
+        tool1: mockTool as unknown as Tool,
+        tool2: mockTool as unknown as Tool,
+        tool3: mockTool as unknown as Tool,
       };
 
       const result = addCacheControlToTools(tools);
@@ -197,11 +197,11 @@ describe('context-cache-helper', () => {
         firstTool: {
           description: 'First tool',
           execute: mockExecute1,
-        },
+        } as unknown as Tool,
         lastTool: {
           description: 'Last tool',
           execute: mockExecute2,
-        },
+        } as unknown as Tool,
       };
 
       const result = addCacheControlToTools(tools);
@@ -233,7 +233,7 @@ describe('context-cache-helper', () => {
         onlyTool: {
           description: 'Only tool',
           execute: mockExecute,
-        },
+        } as unknown as Tool,
       };
 
       const result = addCacheControlToTools(tools);
@@ -255,9 +255,9 @@ describe('context-cache-helper', () => {
       };
 
       const tools: ToolSet = {
-        alpha: mockTool,
-        beta: mockTool,
-        gamma: mockTool,
+        alpha: mockTool as unknown as Tool,
+        beta: mockTool as unknown as Tool,
+        gamma: mockTool as unknown as Tool,
       };
 
       const result = addCacheControlToTools(tools);
