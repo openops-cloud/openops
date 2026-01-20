@@ -5,7 +5,7 @@ import {
   CODE_BLOCK_NAME,
   Principal,
 } from '@openops/shared';
-import { CoreMessage, LanguageModel } from 'ai';
+import { LanguageModel, ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { routeChatRequest } from '../../../src/app/ai/chat/chat-request-router';
@@ -80,7 +80,7 @@ describe('Chat Request Router', () => {
     },
   };
 
-  const mockNewMessage: CoreMessage = {
+  const mockNewMessage: ModelMessage = {
     role: 'user',
     content: 'How are you?',
   };
@@ -102,7 +102,7 @@ describe('Chat Request Router', () => {
     raw: mockRaw,
   };
 
-  const mockChatHistory: CoreMessage[] = [
+  const mockChatHistory: ModelMessage[] = [
     {
       role: 'user',
       content: 'Hello',
