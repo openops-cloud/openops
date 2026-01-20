@@ -18,7 +18,7 @@ import { useMemo } from 'react';
  *
  */
 export const useMenuLinks = () => {
-  const hasAnalyticsAccess = useHasAnalyticsAccess();
+  const { hasAnalyticsAccess } = useHasAnalyticsAccess();
 
   const menuLinks: MenuLink[] = useMemo(() => {
     const links: MenuLink[] = [
