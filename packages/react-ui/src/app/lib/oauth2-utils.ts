@@ -10,7 +10,7 @@ export const oauth2Utils = {
 async function openWithLoginUrl(loginUrl: string, redirectUrl: string) {
   currentPopup = openWindow(loginUrl);
   return {
-    code: await getCode(redirectUrl),
+    code: await getCode(redirectUrl, null),
     codeChallenge: undefined,
   };
 }
@@ -20,10 +20,11 @@ async function openOAuth2Popup(
 ): Promise<OAuth2PopupResponse> {
   closeOAuth2Popup();
   const pckeChallenge = nanoid();
-  const url = constructUrl(params, pckeChallenge);
+  const state = nanoid();
+  const url = constructUrl(params, pckeChallenge, state);
   currentPopup = openWindow(url);
   return {
-    code: await getCode(params.redirectUrl),
+    code: await getCode(params.redirectUrl, state),
     codeChallenge: params.pkce ? pckeChallenge : undefined,
   };
 }
@@ -49,13 +50,17 @@ function closeOAuth2Popup() {
   currentPopup?.close();
 }
 
-function constructUrl(params: OAuth2PopupParams, pckeChallenge: string) {
+function constructUrl(
+  params: OAuth2PopupParams,
+  pckeChallenge: string,
+  state: string,
+) {
   const queryParams: Record<string, string> = {
     response_type: 'code',
     client_id: params.clientId,
     redirect_uri: params.redirectUrl,
     access_type: 'offline',
-    state: nanoid(),
+    state,
     prompt: 'consent',
     scope: params.scope,
     ...(params.extraParams || {}),
@@ -71,19 +76,52 @@ function constructUrl(params: OAuth2PopupParams, pckeChallenge: string) {
   return url.toString();
 }
 
-function getCode(redirectUrl: string): Promise<string> {
+const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
+
+function getCode(redirectUrl: string, state: string | null): Promise<string> {
   return new Promise<string>((resolve) => {
-    window.addEventListener('message', function handler(event) {
+    let resolved = false;
+    let channel: BroadcastChannel | null = null;
+
+    const channelName = state
+      ? `${OAUTH_CHANNEL_PREFIX}${state}`
+      : OAUTH_CHANNEL_PREFIX;
+
+    const cleanup = () => {
+      if (resolved) return;
+      resolved = true;
+      currentPopup?.close();
+      window.removeEventListener('message', messageHandler);
+      channel?.close();
+    };
+
+    const handleCode = (code: string) => {
+      if (resolved) return;
+      cleanup();
+      resolve(decodeURIComponent(code));
+    };
+
+    try {
+      channel = new BroadcastChannel(channelName);
+      channel.onmessage = (event) => {
+        if (event.data?.code) {
+          handleCode(event.data.code);
+        }
+      };
+    } catch {
+      console.warn('BroadcastChannel not supported...');
+    }
+
+    function messageHandler(event: MessageEvent) {
       if (
         redirectUrl &&
         redirectUrl.startsWith(event.origin) &&
-        event.data['code']
+        event.data?.['code']
       ) {
-        resolve(decodeURIComponent(event.data.code));
-        currentPopup?.close();
-        window.removeEventListener('message', handler);
+        handleCode(event.data.code);
       }
-    });
+    }
+    window.addEventListener('message', messageHandler);
   });
 }
 
