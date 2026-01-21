@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 
 let currentPopup: Window | null = null;
+let currentResolve: ((value: string | null) => void) | null = null;
 
 export const oauth2Utils = {
   openOAuth2Popup,
@@ -8,6 +9,7 @@ export const oauth2Utils = {
 };
 
 async function openWithLoginUrl(loginUrl: string, redirectUrl: string) {
+  closeOAuth2Popup();
   currentPopup = openWindow(loginUrl);
   return {
     code: await getCode(redirectUrl, null),
@@ -19,14 +21,14 @@ async function openOAuth2Popup(
   params: OAuth2PopupParams,
 ): Promise<OAuth2PopupResponse> {
   closeOAuth2Popup();
-  const pckeChallenge = nanoid();
+  const pkceChallenge = nanoid();
   const nonce = nanoid();
   const state = `${nonce}_${btoa(window.location.origin)}`;
-  const url = constructUrl(params, pckeChallenge, state);
+  const url = constructUrl(params, pkceChallenge, state);
   currentPopup = openWindow(url);
   return {
-    code: await getCode(params.redirectUrl, nonce),
-    codeChallenge: params.pkce ? pckeChallenge : undefined,
+    code: (await getCode(params.redirectUrl, nonce)) ?? '',
+    codeChallenge: params.pkce ? pkceChallenge : undefined,
   };
 }
 
@@ -49,11 +51,14 @@ function openWindow(url: string): Window | null {
 
 function closeOAuth2Popup() {
   currentPopup?.close();
+  currentPopup = null;
+  currentResolve?.(null);
+  currentResolve = null;
 }
 
 function constructUrl(
   params: OAuth2PopupParams,
-  pckeChallenge: string,
+  pkceChallenge: string,
   state: string,
 ) {
   const queryParams: Record<string, string> = {
@@ -68,7 +73,7 @@ function constructUrl(
   };
   if (params.pkce) {
     queryParams['code_challenge_method'] = 'plain';
-    queryParams['code_challenge'] = pckeChallenge;
+    queryParams['code_challenge'] = pkceChallenge;
   }
   const url = new URL(params.authUrl);
   Object.entries(queryParams).forEach(([key, value]) => {
@@ -79,9 +84,13 @@ function constructUrl(
 
 const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
 
-function getCode(redirectUrl: string, state: string | null): Promise<string> {
-  return new Promise<string>((resolve) => {
+function getCode(
+  redirectUrl: string,
+  state: string | null,
+): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
     let resolved = false;
+    currentResolve = resolve;
     let channel: BroadcastChannel | null = null;
 
     const channelName = state
@@ -94,6 +103,9 @@ function getCode(redirectUrl: string, state: string | null): Promise<string> {
       currentPopup?.close();
       window.removeEventListener('message', messageHandler);
       channel?.close();
+      if (currentResolve === resolve) {
+        currentResolve = null;
+      }
     };
 
     const handleCode = (code: string) => {
@@ -119,6 +131,10 @@ function getCode(redirectUrl: string, state: string | null): Promise<string> {
         redirectUrl.startsWith(event.origin) &&
         event.data?.['code']
       ) {
+        const eventState = event.data?.['state'];
+        if (state && eventState && eventState !== state) {
+          return;
+        }
         handleCode(event.data.code);
       }
     }
