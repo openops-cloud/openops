@@ -54,9 +54,7 @@ const RedirectPage: React.FC = React.memo(() => {
     } catch {
       setStatus('error');
       setErrorMessage(
-        t(
-          'Unable to communicate with the main window. Please close this window and try again.',
-        ),
+        t('Something went wrong. Please close this window and try again.'),
       );
     }
   }, [searchParams]);
