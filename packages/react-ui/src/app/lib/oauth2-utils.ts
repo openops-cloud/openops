@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 
 let currentPopup: Window | null = null;
-let currentResolve: ((value: any) => void) | null = null;
+let currentResolve: ((value: string | null) => void) | null = null;
 
 export const oauth2Utils = {
   openOAuth2Popup,
@@ -27,7 +27,7 @@ async function openOAuth2Popup(
   const url = constructUrl(params, pkceChallenge, state);
   currentPopup = openWindow(url);
   return {
-    code: await getCode(params.redirectUrl, nonce),
+    code: (await getCode(params.redirectUrl, nonce)) ?? '',
     codeChallenge: params.pkce ? pkceChallenge : undefined,
   };
 }
@@ -84,8 +84,11 @@ function constructUrl(
 
 const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
 
-function getCode(redirectUrl: string, state: string | null): Promise<string> {
-  return new Promise<string>((resolve) => {
+function getCode(
+  redirectUrl: string,
+  state: string | null,
+): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
     let resolved = false;
     currentResolve = resolve;
     let channel: BroadcastChannel | null = null;
