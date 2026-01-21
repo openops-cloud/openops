@@ -9,7 +9,7 @@ export const oauth2Utils = {
 };
 
 async function openWithLoginUrl(loginUrl: string, redirectUrl: string) {
-  closeOAuth2Popup();
+  disposeOAuth2Popup();
   currentPopup = openWindow(loginUrl);
   return {
     code: await getCode(redirectUrl, null),
@@ -20,7 +20,7 @@ async function openWithLoginUrl(loginUrl: string, redirectUrl: string) {
 async function openOAuth2Popup(
   params: OAuth2PopupParams,
 ): Promise<OAuth2PopupResponse> {
-  closeOAuth2Popup();
+  disposeOAuth2Popup();
   const pkceChallenge = nanoid();
   const nonce = nanoid();
   const state = `${nonce}_${btoa(window.location.origin)}`;
@@ -49,8 +49,7 @@ function openWindow(url: string): Window | null {
   return window.open(url, '_blank', winFeatures);
 }
 
-function closeOAuth2Popup() {
-  currentPopup?.close();
+function disposeOAuth2Popup() {
   currentPopup = null;
   currentResolve?.(null);
   currentResolve = null;
