@@ -46,15 +46,19 @@ const RedirectPage: React.FC = React.memo(() => {
       const channel = new BroadcastChannel(channelName);
       channel.postMessage({ code });
       channel.close();
+      setStatus('success');
+
+      setTimeout(() => {
+        window.close();
+      }, 300);
     } catch {
-      console.warn('BroadcastChannel not supported');
+      setStatus('error');
+      setErrorMessage(
+        t(
+          'Unable to communicate with the main window. Please close this window and try again.',
+        ),
+      );
     }
-
-    setStatus('success');
-
-    setTimeout(() => {
-      window.close();
-    }, 300);
   }, [searchParams]);
 
   return (
