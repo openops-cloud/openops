@@ -18,7 +18,6 @@ import {
   isEmpty,
   isFlowStateTerminal,
   isNil,
-  OpenOpsId,
   openOpsId,
   PauseMetadata,
   ProgressUpdateType,
@@ -80,41 +79,6 @@ const getFlowRunOrCreate = async (
     triggerSource,
   };
 };
-
-async function duplicateFlowRunWithUpdatedVersion(
-  flowRunId: FlowRunId,
-): Promise<{
-  newFlowRunId: OpenOpsId;
-  payload: unknown;
-}> {
-  const flowRun = await flowRunService.getOnePopulatedOrThrow({
-    id: flowRunId,
-    projectId: undefined,
-  });
-
-  const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
-    flowRun.flowId,
-  );
-
-  const savedFlowRun = await flowRunRepo().save({
-    id: openOpsId(),
-    projectId: flowRun.projectId,
-    flowId: flowRun.flowId,
-    flowVersionId: flowVersion.id,
-    environment: flowRun.environment,
-    flowDisplayName: flowVersion.displayName,
-    startTime: new Date().toISOString(),
-    triggerSource: flowRun.triggerSource,
-    status: FlowRunStatus.SCHEDULED,
-  });
-
-  return {
-    newFlowRunId: savedFlowRun.id,
-    payload: flowRun.steps
-      ? flowRun.steps[flowVersion.trigger.name]?.output
-      : undefined,
-  };
-}
 
 function returnHandlerId(
   pauseMetadata: PauseMetadata | undefined,
@@ -305,17 +269,30 @@ export const flowRunService = {
       return null;
     }
 
-    const { newFlowRunId, payload } = await duplicateFlowRunWithUpdatedVersion(
-      flowRunId,
+    const flowRun = await flowRunService.getOnePopulatedOrThrow({
+      id: flowRunId,
+      projectId: undefined,
+    });
+
+    const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
+      flowRun.flowId,
     );
 
-    return flowRunService.addToQueue({
-      executionCorrelationId: nanoid(),
+    const executionCorrelationId = nanoid();
+    const payload = flowRun.steps
+      ? flowRun.steps[flowVersion.trigger.name]?.output
+      : undefined;
+
+    return flowRunService.start({
       payload,
-      flowRunId: newFlowRunId,
+      projectId: flowRun.projectId,
+      flowVersionId: flowVersion.id,
+      executionCorrelationId: nanoid(),
       executionType: ExecutionType.BEGIN,
+      triggerSource: flowRun.triggerSource,
+      environment: RunEnvironment.PRODUCTION,
       progressUpdateType: ProgressUpdateType.NONE,
-      flowRetryStrategy: strategy,
+      synchronousHandlerId: returnHandlerId(undefined, executionCorrelationId),
     });
   },
   async addToQueue({
