@@ -80,24 +80,6 @@ const getFlowRunOrCreate = async (
   };
 };
 
-async function updateFlowRunToLatestFlowVersionIdAndReturnPayload(
-  flowRunId: FlowRunId,
-): Promise<unknown> {
-  const flowRun = await flowRunService.getOnePopulatedOrThrow({
-    id: flowRunId,
-    projectId: undefined,
-  });
-  const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
-    flowRun.flowId,
-  );
-  await flowRunRepo().update(flowRunId, {
-    flowVersionId: flowVersion.id,
-  });
-  return flowRun.steps
-    ? flowRun.steps[flowVersion.trigger.name]?.output
-    : undefined;
-}
-
 function returnHandlerId(
   pauseMetadata: PauseMetadata | undefined,
   executionCorrelationId: string,
@@ -287,17 +269,30 @@ export const flowRunService = {
       return null;
     }
 
-    const payload = await updateFlowRunToLatestFlowVersionIdAndReturnPayload(
-      flowRunId,
+    const flowRun = await flowRunService.getOnePopulatedOrThrow({
+      id: flowRunId,
+      projectId: undefined,
+    });
+
+    const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
+      flowRun.flowId,
     );
 
-    return flowRunService.addToQueue({
-      executionCorrelationId: nanoid(),
+    const executionCorrelationId = nanoid();
+    const payload = flowRun.steps
+      ? flowRun.steps[flowVersion.trigger.name]?.output
+      : undefined;
+
+    return flowRunService.start({
       payload,
-      flowRunId,
+      projectId: flowRun.projectId,
+      flowVersionId: flowVersion.id,
+      executionCorrelationId: nanoid(),
       executionType: ExecutionType.BEGIN,
+      triggerSource: flowRun.triggerSource,
+      environment: RunEnvironment.PRODUCTION,
       progressUpdateType: ProgressUpdateType.NONE,
-      flowRetryStrategy: strategy,
+      synchronousHandlerId: returnHandlerId(undefined, executionCorrelationId),
     });
   },
   async addToQueue({
