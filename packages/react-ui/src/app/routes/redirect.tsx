@@ -46,6 +46,17 @@ const RedirectPage: React.FC = React.memo(() => {
       const channel = new BroadcastChannel(channelName);
       channel.postMessage({ code });
       channel.close();
+
+      // for backwards compatibility
+      if (window.opener && code) {
+        window.opener.postMessage(
+          {
+            code: code,
+          },
+          '*',
+        );
+      }
+
       setStatus('success');
 
       setTimeout(() => {
