@@ -92,7 +92,7 @@ async function claim({
       };
     }
 
-    logger.error('The claim request failed.', logParams);
+    logger.error('Failed to claim token through OAuth proxy', logParams);
     throw new ApplicationError({
       code: ErrorCode.INVALID_CLOUD_CLAIM,
       params: {
