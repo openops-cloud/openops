@@ -24,7 +24,7 @@ async function findAllBlocksFolder(folderPath: string): Promise<string[]> {
     const fileStats = await stat(filePath);
     if (
       fileStats.isDirectory() &&
-      !getBlockFolderExclusionService().isFolderExcluded(filePath)
+      !getBlockFolderExclusionService().isFolderExcluded(file)
     ) {
       paths.push(...(await findAllBlocksFolder(filePath)));
     } else if (file === 'package.json') {
