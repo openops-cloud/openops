@@ -1,5 +1,6 @@
 import { EncryptedObject } from '@openops/shared';
 import { projectRepo } from '../../project/project-service';
+import { IsNull } from 'typeorm';
 
 type TablesContext = {
   tablesDatabaseId: number;
@@ -10,6 +11,9 @@ type TablesContext = {
 const listTablesDatabases = async (): Promise<TablesContext[]> => {
   const projects = await projectRepo().find({
     select: ['tablesWorkspaceId', 'tablesDatabaseId', 'tablesDatabaseToken'],
+    where: {
+      deleted: IsNull(),
+    },
   });
 
   return projects
