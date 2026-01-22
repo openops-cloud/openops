@@ -1,30 +1,112 @@
 import { t } from 'i18next';
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
+
+function getNonceFromState(state: string | null): string | null {
+  if (!state) return null;
+  const underscoreIndex = state.indexOf('_');
+  if (underscoreIndex > 0) {
+    return state.substring(0, underscoreIndex);
+  }
+  return state;
+}
 
 const RedirectPage: React.FC = React.memo(() => {
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState<'processing' | 'success' | 'error'>(
+    'processing',
+  );
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const code = params.get('code');
-    if (window.opener && code) {
-      window.opener.postMessage(
-        {
-          code: code,
-        },
-        '*',
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+
+    if (error) {
+      setStatus('error');
+      setErrorMessage(error);
+      return;
+    }
+
+    if (!code) {
+      setStatus('error');
+      setErrorMessage(t('The authorization code is missing.'));
+      return;
+    }
+
+    const nonce = getNonceFromState(state);
+    const channelName = nonce
+      ? `${OAUTH_CHANNEL_PREFIX}${nonce}`
+      : OAUTH_CHANNEL_PREFIX;
+
+    try {
+      const channel = new BroadcastChannel(channelName);
+      channel.postMessage({ code });
+      channel.close();
+
+      // for backwards compatibility
+      if (window.opener && code) {
+        window.opener.postMessage(
+          {
+            code: code,
+          },
+          '*',
+        );
+      }
+
+      setStatus('success');
+
+      setTimeout(() => {
+        window.close();
+      }, 300);
+    } catch {
+      setStatus('error');
+      setErrorMessage(
+        t('Something went wrong. Please close this window and try again.'),
       );
     }
-  }, [location.search]);
+  }, [searchParams]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">{t('The redirection works!')}</h1>
-        <p className="text-muted-foreground">
-          {t('You will be redirected in a few seconds.')}
-        </p>
+    <div className="flex flex-col items-center justify-center h-screen bg-background">
+      <div className="text-center p-8">
+        {status === 'processing' && (
+          <>
+            <div className="mb-4 h-8 w-8 mx-auto animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <h1 className="text-lg font-semibold text-foreground">
+              {t('Processing...')}
+            </h1>
+          </>
+        )}
+        {status === 'success' && (
+          <>
+            <div className="mb-4 text-4xl text-green-600">✓</div>
+            <h1 className="text-lg font-semibold text-foreground">
+              {t('Authorization successful!')}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {t('This window will close automatically.')}
+            </p>
+          </>
+        )}
+        {status === 'error' && (
+          <>
+            <div className="mb-4 text-4xl text-red-600">✗</div>
+            <h1 className="text-lg font-semibold text-foreground">
+              {t('Authorization failed')}
+            </h1>
+            <p className="text-muted-foreground mt-2">{errorMessage}</p>
+            <button
+              onClick={() => window.close()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            >
+              {t('Close')}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
