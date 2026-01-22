@@ -5,22 +5,21 @@ icon: "📝"
 iconType: "emoji"
 ---
 
-{
-  "✨": [
-    "Documentation and UI guidance was improved so it’s clearer what MCP can and cannot do and how to set up connections successfully.",
-    "Flow run retries now create a fresh run using the latest version of the flow, and the run list updates reliably after a retry.",
-    "The app’s tool execution lifecycle is now more consistent and less dependent on server-side UI assumptions.",
-    "The analytics and permissions stack was modernized to be more maintainable and consistent across endpoints.",
-    "Search filtering is now smoother and more consistent across the UI, reducing jittery updates while typing.",
-    "Dynamic flag inputs now behave more predictably when switching modes, preventing unexpected empty or stale values.",
-    "Operational logging is now more useful when engine executions fail, making failures easier to diagnose.",
-    "AI/MCP dependencies were upgraded to newer major versions to keep the platform current and compatible with upstream changes.",
-    "Chromatic runs are now more targeted, reducing unnecessary CI work when unrelated packages change.",
-    "Chat messages are now parsed more cleanly so hidden reasoning does not leak into displayed content, and fallback behavior is less aggressive.",
-    "Project metadata and licensing were refreshed to stay current and accurate for 2026."
-  ],
-  "🐛": [
-    "Analytics access now defaults to “no access” when a user’s privileges or project permissions have not loaded yet, instead of briefly treating the user as allowed."
-  ]
-}
+## ✨ Improvements
+
+- Improved documentation and UI guidance so it’s clearer what MCP can and cannot do and how to set up connections successfully
+- Flow run retries now create a fresh run using the latest version of the flow, and the run list updates reliably after a retry
+- Made the app’s tool execution lifecycle more consistent and less dependent on server-side UI assumptions
+- Modernized the analytics and permissions stack to be more maintainable and consistent across endpoints
+- Made search filtering smoother and more consistent across the UI, reducing jittery updates while typing
+- Made dynamic flag inputs behave more predictably when switching modes, preventing unexpected empty or stale values
+- Improved operational logging when engine executions fail to make failures easier to diagnose
+- Upgraded AI/MCP dependencies to newer major versions to keep the platform current and compatible with upstream changes
+- Made Chromatic runs more targeted to reduce unnecessary CI work when unrelated packages change
+- Improved chat message parsing so hidden reasoning does not leak into displayed content, and fallback behavior is less aggressive
+- Refreshed project metadata and licensing to stay current and accurate for 2026
+
+## 🐛 Fixes
+
+- Analytics access now defaults to “no access” when a user’s privileges or project permissions have not loaded yet, instead of briefly treating the user as allowed
 
