@@ -1,12 +1,12 @@
 import { BlockFolderExclusionService } from './block-folder-exclusion-factory';
 
 export const blockFolderExclusionService: BlockFolderExclusionService = {
-  isFolderExcluded: (folderPath: string) => {
+  isFolderExcluded: (folderName: string) => {
     return (
-      folderPath === 'node_modules' ||
-      folderPath === 'dist' ||
-      folderPath === 'framework' ||
-      folderPath === 'common'
+      folderName === 'node_modules' ||
+      folderName === 'dist' ||
+      folderName === 'framework' ||
+      folderName === 'common'
     );
   },
 };
