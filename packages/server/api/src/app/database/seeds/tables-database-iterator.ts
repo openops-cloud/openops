@@ -1,6 +1,6 @@
 import { EncryptedObject } from '@openops/shared';
-import { projectRepo } from '../../project/project-service';
 import { IsNull } from 'typeorm';
+import { projectRepo } from '../../project/project-service';
 
 type TablesContext = {
   tablesDatabaseId: number;
