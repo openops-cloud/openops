@@ -8,16 +8,14 @@ iconType: "emoji"
 ## ✨ Improvements
 
 - Improved documentation and UI guidance so it’s clearer what MCP can and cannot do and how to set up connections successfully
-- Flow run retries now create a fresh run using the latest version of the flow, and the run list updates reliably after a retry
-- Made the app’s tool execution lifecycle more consistent and less dependent on server-side UI assumptions
-- Modernized the analytics and permissions stack to be more maintainable and consistent across endpoints
+- Workflow run retries now create a fresh run using the latest version of the workflow, and the run list updates reliably after a retry
+- Improved tool runs to be more consistent and less dependent on server-side UI assumptions
+- Improved analytics access handling and permissions checks for more consistent behavior across endpoints
 - Made search filtering smoother and more consistent across the UI, reducing jittery updates while typing
 - Made dynamic flag inputs behave more predictably when switching modes, preventing unexpected empty or stale values
-- Improved operational logging when engine executions fail to make failures easier to diagnose
-- Upgraded AI/MCP dependencies to newer major versions to keep the platform current and compatible with upstream changes
-- Made Chromatic runs more targeted to reduce unnecessary CI work when unrelated packages change
+- Improved error details for failed engine executions to make troubleshooting easier
+- Updated MCP support to stay compatible with upstream changes
 - Improved chat message parsing so hidden reasoning does not leak into displayed content, and fallback behavior is less aggressive
-- Refreshed project metadata and licensing to stay current and accurate for 2026
 
 ## 🐛 Fixes
 
