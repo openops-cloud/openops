@@ -11,11 +11,12 @@ import { HomeTableWrapper } from '../components/home-table-wrapper';
 type Props = {
   data: FlowRun[];
   loading: boolean;
+  refetch: () => void;
 };
 
-const HomeRunsTable = ({ data, loading }: Props) => {
+const HomeRunsTable = ({ data, loading, refetch }: Props) => {
   const navigate = useNavigate();
-  const runsColumns = useRunsTableColumns();
+  const runsColumns = useRunsTableColumns({ refetch });
 
   return (
     <HomeTableWrapper

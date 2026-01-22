@@ -30,6 +30,7 @@ const HomeOperationalView = ({
     isLoadingFlows,
     existingFlowsResponse,
     refetchFlows,
+    refetchRuns,
   } = useDashboardData();
 
   const { overviewResponse } = useWorkflowsOverview(
@@ -96,7 +97,11 @@ const HomeOperationalView = ({
         onExploreTemplatesClick={onExploreTemplatesClick}
       />
 
-      <HomeRunsTable data={runsResponse?.data || []} loading={runsLoading} />
+      <HomeRunsTable
+        data={runsResponse?.data || []}
+        loading={runsLoading}
+        refetch={refetchRuns}
+      />
     </>
   );
 };
