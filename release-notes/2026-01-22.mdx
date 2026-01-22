@@ -1,0 +1,26 @@
+---
+title: "Release Notes (2026-01-22)"
+description: "Product updates shipped on 2026-01-22."
+icon: "📝"
+iconType: "emoji"
+---
+
+{
+  "✨": [
+    "Documentation and UI guidance was improved so it’s clearer what MCP can and cannot do and how to set up connections successfully. Specifically, the MCP limitations section was clarified and new UI instructions for creating MCP connections were added.",
+    "Flow run retries now create a fresh run using the latest version of the flow, and the run list updates reliably after a retry. Concretely, “rerun” was changed to start a new run on the newest flow version, and the UI now refetches run lists after retries rather than patching rows locally.",
+    "The app’s tool execution lifecycle is now more consistent and less dependent on server-side UI assumptions. In implementation terms, tool handling was refactored to use shared client-side completion detection and removed UI-tool-based stopping logic from the server.",
+    "The analytics and permissions stack was modernized to be more maintainable and consistent across endpoints. This introduced a `projectPermissions` field on user metadata plus a dedicated project-permissions service, wired into `/me` and signup metadata lookup while removing the legacy authentication-session helper.",
+    "Search filtering is now smoother and more consistent across the UI, reducing jittery updates while typing. The table popover filter was replaced with a debounced `SearchInput` using a shared `SEARCH_DEBOUNCE_DELAY_MS` constant, and the folder filter was updated to use the same debounce value.",
+    "Dynamic flag inputs now behave more predictably when switching modes, preventing unexpected empty or stale values. Internally, dynamic flag handling was simplified and default values are applied when switching from dynamic to static input mode.",
+    "Operational logging is now more useful when engine executions fail, making failures easier to diagnose. The flow job executor now emits structured logs for engine execution failures and no longer relies on the prior `exceptionHandler` path.",
+    "AI/MCP dependencies were upgraded to newer major versions to keep the platform current and compatible with upstream changes. Server code, TypeScript typings, tests, and third-party license attributions were updated to match the new APIs and dependency set.",
+    "Chromatic runs are now more targeted, reducing unnecessary CI work when unrelated packages change. The configuration was updated to trigger only on specific package changes and to use the `ui-components` Storybook build output.",
+    "Chat messages are now parsed more cleanly so hidden reasoning does not leak into displayed content, and fallback behavior is less aggressive. The parser now ignores `reasoning` content and only falls back to sending `continue` when the message `text` is `null` or `undefined`.",
+    "Project metadata and licensing were refreshed to stay current and accurate for 2026. This updates the LICENSE copyright year from 2025 to 2026."
+  ],
+  "🐛": [
+    "Analytics access now defaults to “no access” when a user’s privileges or project permissions have not loaded yet, instead of briefly treating the user as allowed. Technically, analytics authorization was refactored to rely on `user.meta.projectPermissions` (with `projectId` passed through verification), removed `hasTemplatesPrivileges`/`hasAnalyticsPrivileges` from auth context/types, and added a loading state that renders a full-page spinner rather than redirecting during metadata fetches."
+  ]
+}
+
