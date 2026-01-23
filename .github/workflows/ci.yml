@@ -9,9 +9,6 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
-env:
-  CACHE_VERSION: v1
-
 jobs:
   install:
     name: Install Dependencies
@@ -23,7 +20,7 @@ jobs:
         uses: actions/cache@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           lookup-only: true
           save-always: true
       - name: Install dependencies
@@ -40,7 +37,7 @@ jobs:
         uses: actions/cache/restore@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Run npm audit
         run: npm audit --audit-level=critical
@@ -55,13 +52,13 @@ jobs:
         uses: actions/cache/restore@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v5.0.1
         with:
           path: .nx/cache
-          key: nx-lint-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: nx-lint-${{ github.sha }}
           restore-keys: nx-lint-${{ env.CACHE_VERSION }}-
       - name: Lint
         if: steps.nx-lint-cache.outputs.cache-hit != 'true'
@@ -91,7 +88,7 @@ jobs:
         uses: actions/cache/restore@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Check licenses
         run: |
@@ -138,14 +135,14 @@ jobs:
         uses: actions/cache/restore@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v5.0.1
         with:
           path: .nx/cache
-          key: nx-test-${{ env.CACHE_VERSION }}-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
-          restore-keys: nx-test-${{ env.CACHE_VERSION }}-${{ matrix.test-suits.key || matrix.test-suits.name }}-
+          key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
+          restore-keys: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-
           save-always: true
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
@@ -171,13 +168,13 @@ jobs:
         uses: actions/cache/restore@v5.0.1
         with:
           path: node_modules
-          key: node-modules-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('package-lock.json', '.npmrc') }}
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v5.0.1
         with:
           path: .nx/cache
-          key: nx-build-${{ env.CACHE_VERSION }}-${{ github.sha }}
+          key: nx-build-${{ github.sha }}
           restore-keys: nx-build-${{ env.CACHE_VERSION }}-
       - name: Build project
         env:
