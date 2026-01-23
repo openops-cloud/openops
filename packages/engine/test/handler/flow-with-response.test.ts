@@ -8,45 +8,45 @@ jest.mock('../../src/lib/services/progress.service', () => ({
     },
 }))
 
-describe('flow with response', () => {
+const hookMock = jest.fn(async () => undefined);
+jest.mock('../../src/lib/handler/create-webhook-response-hook', () => ({
+  createWebhookResponseHook: jest.fn(() => hookMock),
+}));
 
-    it('should execute return response successfully', async () => {
-        const input = {
-            status: 200,
-            headers: {
-                'random': 'header',
-            },
-            body: {
-                data: {
-                    'hello': 'world',
-                },
-                body_type: 'json',
-            },
-        }
-        const response = {
-            status: 200,
-            headers: {
-                'random': 'header',
-            },
-            body: {
-                'hello': 'world',
-            },
-        }
-        const result = await flowExecutor.executeFromAction({
-            action: buildBlockAction({
-                name: 'http',
-                blockName: '@openops/block-http',
-                actionName: 'return_response',
-                input,
-            }), executionState: FlowExecutorContext.empty(), constants: generateMockEngineConstants(),
-        })
+describe('flow with webhook response', () => {
+  it('should execute send the webhook response successfully', async () => {
+    const input = {
+      status: 200,
+      headers: {
+        'random': 'header',
+      },
+      body: {
+        data: {
+          'hello': 'world',
+        },
+        body_type: 'json',
+      },
+      }
+      const response = {
+        status: 200,
+        headers: {
+          'random': 'header',
+        },
+        body: {
+          'hello': 'world',
+        },
+      }
+      const result = await flowExecutor.executeFromAction({
+        action: buildBlockAction({
+          name: 'http',
+          blockName: '@openops/block-http',
+          actionName: 'return_response',
+          input,
+        }), executionState: FlowExecutorContext.empty(), constants: generateMockEngineConstants(),
+      })
 
-        expect(result.verdict).toBe(ExecutionVerdict.RUNNING)
-        expect(result.verdictResponse).toEqual({
-            reason: VerdictReason.STOPPED,
-            stopResponse: response,
-        })
-        expect(result.steps.http.output).toEqual(response)
-    })
-
+      expect(result.verdict).toBe(ExecutionVerdict.RUNNING)
+      expect(result.steps.http.output).toEqual(response)
+      expect(hookMock).toHaveBeenCalledWith(response);
+  })
 })
