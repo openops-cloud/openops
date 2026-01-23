@@ -59,7 +59,7 @@ jobs:
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
-          restore-keys: nx-lint-${{ env.CACHE_VERSION }}-
+          restore-keys: nx-lint-
       - name: Lint
         if: steps.nx-lint-cache.outputs.cache-hit != 'true'
         env:
@@ -152,7 +152,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet --skip-nx-cache
+          command: npx nx run-many --target ${{ matrix.test-suits.target || 'test' }} --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
       - name: Truncate NX cache
@@ -175,7 +175,7 @@ jobs:
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
-          restore-keys: nx-build-${{ env.CACHE_VERSION }}-
+          restore-keys: nx-build-
       - name: Build project
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
