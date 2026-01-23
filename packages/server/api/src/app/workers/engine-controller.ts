@@ -128,16 +128,9 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post('/send-webhook-response', SendWebhookResponse, async (request) => {
-    const { executionCorrelationId, workerHandlerId, flowRunId, response } =
-      request.body;
+    const { workerHandlerId, flowRunId, response } = request.body;
 
-    if (workerHandlerId && executionCorrelationId) {
-      await webhookResponseWatcher.publish(
-        flowRunId,
-        workerHandlerId,
-        response,
-      );
-    }
+    await webhookResponseWatcher.publish(flowRunId, workerHandlerId, response);
   });
 
   app.post('/update-run', UpdateStepProgress, async (request) => {
@@ -412,7 +405,7 @@ const SendWebhookResponse = {
   },
   schema: {
     description:
-      'Send a webhook update for a flow execution. This endpoint allows workers to send status updates, including response status, body, and headers, for a specific flow execution.',
+      'Send the HTTP response back to the original webhook call that triggered the flow execution.',
     body: SendWebhookResponseRequest,
   },
 };

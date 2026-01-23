@@ -17,7 +17,6 @@ export type UpdateRunProgressRequest = Static<typeof UpdateRunProgressRequest>;
 export const SendWebhookResponseRequest = Type.Object({
   flowRunId: Type.String(),
   workerHandlerId: Type.String(),
-  executionCorrelationId: Type.String(),
   response: EngineHttpResponse,
 });
 
