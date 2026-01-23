@@ -30,15 +30,14 @@ const RedirectPage: React.FC = React.memo(() => {
       return;
     }
 
-    const params: Record<string, string> = {};
+    const callbackData: Record<string, string> = {};
     searchParams.forEach((value, key) => {
-      if (key !== 'error') {
-        params[key] = value;
+      if (key !== 'error' && key !== 'state') {
+        callbackData[key] = value;
       }
     });
 
-    const hasCallbackData = Object.keys(params).some((k) => k !== 'state');
-    if (!hasCallbackData) {
+    if (Object.keys(callbackData).length === 0) {
       setStatus('error');
       setErrorMessage(t('Missing required parameters.'));
       return;
@@ -49,13 +48,16 @@ const RedirectPage: React.FC = React.memo(() => {
       ? `${OAUTH_CHANNEL_PREFIX}${nonce}`
       : OAUTH_CHANNEL_PREFIX;
 
+    // for backwards compatibility with old code that expects a code parameter only
+    const payload = state ? { ...callbackData, state } : callbackData;
+
     try {
       const channel = new BroadcastChannel(channelName);
-      channel.postMessage(params);
+      channel.postMessage(payload);
       channel.close();
 
       if (window.opener) {
-        window.opener.postMessage(params, '*');
+        window.opener.postMessage(payload, '*');
       }
 
       setStatus('success');
