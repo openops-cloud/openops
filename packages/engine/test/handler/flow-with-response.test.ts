@@ -14,7 +14,7 @@ jest.mock('../../src/lib/handler/create-webhook-response-hook', () => ({
 }));
 
 describe('flow with webhook response', () => {
-  it('should execute send the webhook response successfully', async () => {
+  it('should send the webhook response successfully', async () => {
     const input = {
       status: 200,
       headers: {
