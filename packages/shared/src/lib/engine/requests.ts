@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { Nullable } from '../common';
 import { FlowRunResponse } from '../flow-run/execution/flow-execution';
+import { EngineHttpResponse } from './engine-operation';
 import { ProgressUpdateType } from './types';
 
 export const UpdateRunProgressRequest = Type.Object({
@@ -12,6 +13,17 @@ export const UpdateRunProgressRequest = Type.Object({
 });
 
 export type UpdateRunProgressRequest = Static<typeof UpdateRunProgressRequest>;
+
+export const SendWebhookResponseRequest = Type.Object({
+  flowRunId: Type.String(),
+  workerHandlerId: Type.String(),
+  executionCorrelationId: Type.String(),
+  response: EngineHttpResponse,
+});
+
+export type SendWebhookResponseRequest = Static<
+  typeof SendWebhookResponseRequest
+>;
 
 export const RemoveStableJobEngineRequest = Type.Object({
   flowId: Type.Optional(Type.String()),
