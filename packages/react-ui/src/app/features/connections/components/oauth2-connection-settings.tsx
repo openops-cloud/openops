@@ -183,6 +183,8 @@ const OAuth2ConnectionSettings = ({
       pkce: authProperty.pkce ?? false,
       extraParams: authProperty.extra ?? {},
     });
+    // eslint-disable-next-line no-console
+    console.debug('received auth code', !isNil(code));
     form.setValue('request.value.code', code, { shouldValidate: true });
     form.setValue('request.value.code_challenge', codeChallenge, {
       shouldValidate: true,
