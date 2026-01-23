@@ -10,6 +10,7 @@ import { logger } from '../logger';
 import { memoryLock } from '../memory-lock';
 import { system } from '../system/system';
 import { SharedSystemProp } from '../system/system-prop';
+import { getBlockFolderExclusionService } from './block-folder-exclusion-factory';
 
 const blocksDevModeEnabled =
   system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED) ?? false;
@@ -23,10 +24,7 @@ async function findAllBlocksFolder(folderPath: string): Promise<string[]> {
     const fileStats = await stat(filePath);
     if (
       fileStats.isDirectory() &&
-      file !== 'node_modules' &&
-      file !== 'dist' &&
-      file !== 'framework' &&
-      file !== 'common'
+      !getBlockFolderExclusionService().isFolderExcluded(file)
     ) {
       paths.push(...(await findAllBlocksFolder(filePath)));
     } else if (file === 'package.json') {

@@ -81,8 +81,18 @@ async function claim({
       token_url: request.tokenUrl,
       props: request.props,
     };
-  } catch (e: unknown) {
-    logger.error(e);
+  } catch (error: unknown) {
+    let logParams: unknown = { error };
+    if (axios.isAxiosError(error)) {
+      logParams = {
+        request: error.request,
+        response: error.response,
+        stack: error.stack,
+        code: error.code,
+      };
+    }
+
+    logger.error('Failed to claim token through OAuth proxy', logParams);
     throw new ApplicationError({
       code: ErrorCode.INVALID_CLOUD_CLAIM,
       params: {
