@@ -28,6 +28,7 @@ import {
   PrincipalType,
   ProgressUpdateType,
   RemoveStableJobEngineRequest,
+  SendWebhookResponseRequest,
   StepOutput,
   UpdateRunProgressRequest,
   WebsocketClientEvent,
@@ -124,6 +125,12 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         triggerInput,
       });
     }
+  });
+
+  app.post('/send-webhook-response', SendWebhookResponse, async (request) => {
+    const { workerHandlerId, flowRunId, response } = request.body;
+
+    await webhookResponseWatcher.publish(flowRunId, workerHandlerId, response);
   });
 
   app.post('/update-run', UpdateStepProgress, async (request) => {
@@ -335,8 +342,10 @@ async function getFlowResponse(
       };
     case FlowRunStatus.SUCCEEDED:
       return {
-        status: StatusCodes.NO_CONTENT,
-        body: {},
+        status: StatusCodes.OK,
+        body: {
+          message: 'Request completed.',
+        },
         headers: {},
       };
     default:
@@ -387,6 +396,17 @@ const UpdateStepProgress = {
   },
   schema: {
     body: UpdateRunProgressRequest,
+  },
+};
+
+const SendWebhookResponse = {
+  config: {
+    allowedPrincipals: [PrincipalType.ENGINE],
+  },
+  schema: {
+    description:
+      'Send the HTTP response back to the original webhook call that triggered the flow execution.',
+    body: SendWebhookResponseRequest,
   },
 };
 
