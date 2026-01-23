@@ -31,3 +31,4 @@ export * from './lib/system';
 export * from './lib/truncation-utils';
 export * from './lib/webhook-secrets-util';
 export * from './lib/workflow-cancellation-manager';
+export * from './lib/workflow-deleted-manager';
