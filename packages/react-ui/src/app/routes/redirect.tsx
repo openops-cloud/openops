@@ -48,8 +48,7 @@ const RedirectPage: React.FC = React.memo(() => {
       ? `${OAUTH_CHANNEL_PREFIX}${nonce}`
       : OAUTH_CHANNEL_PREFIX;
 
-    // for backwards compatibility with old code that expects a code parameter only
-    const payload = state ? { ...callbackData, state } : callbackData;
+    const payload = { ...callbackData, state };
 
     try {
       const channel = new BroadcastChannel(channelName);
