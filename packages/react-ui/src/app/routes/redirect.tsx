@@ -21,7 +21,6 @@ const RedirectPage: React.FC = React.memo(() => {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    const code = searchParams.get('code');
     const state = searchParams.get('state');
     const error = searchParams.get('error');
 
@@ -31,9 +30,17 @@ const RedirectPage: React.FC = React.memo(() => {
       return;
     }
 
-    if (!code) {
+    const params: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      if (key !== 'error') {
+        params[key] = value;
+      }
+    });
+
+    const hasCallbackData = Object.keys(params).some((k) => k !== 'state');
+    if (!hasCallbackData) {
       setStatus('error');
-      setErrorMessage(t('The authorization code is missing.'));
+      setErrorMessage(t('Missing required parameters.'));
       return;
     }
 
@@ -44,17 +51,11 @@ const RedirectPage: React.FC = React.memo(() => {
 
     try {
       const channel = new BroadcastChannel(channelName);
-      channel.postMessage({ code });
+      channel.postMessage(params);
       channel.close();
 
-      // for backwards compatibility
-      if (window.opener && code) {
-        window.opener.postMessage(
-          {
-            code: code,
-          },
-          '*',
-        );
+      if (window.opener) {
+        window.opener.postMessage(params, '*');
       }
 
       setStatus('success');
