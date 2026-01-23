@@ -39,6 +39,7 @@ import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { progressService } from './services/progress.service';
 import { EngineTimeoutError } from './timeout-validator';
+import { WorkflowDeletionRequestedError } from './workflow-deletion-validator';
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
@@ -316,7 +317,10 @@ function evaluateError(error: Error): {
     message = error.message;
   }
 
-  if (error instanceof CancellationRequestedError) {
+  if (
+    error instanceof CancellationRequestedError ||
+    error instanceof WorkflowDeletionRequestedError
+  ) {
     status = FlowRunStatus.STOPPED;
     message = error.message;
   }

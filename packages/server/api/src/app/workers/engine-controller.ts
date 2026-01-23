@@ -9,6 +9,7 @@ import {
   system,
   UpdateFailureCountRequest,
   UpdateJobRequest,
+  wasWorkflowDeletionRequested,
 } from '@openops/server-shared';
 import {
   ApplicationError,
@@ -134,10 +135,24 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post('/update-run', UpdateStepProgress, async (request) => {
-    const { executionCorrelationId, runId, workerHandlerId, runDetails } =
-      request.body;
+    const {
+      executionCorrelationId,
+      runId,
+      workerHandlerId,
+      runDetails,
+      flowId,
+    } = request.body;
     const progressUpdateType =
       request.body.progressUpdateType ?? ProgressUpdateType.NONE;
+
+    const wasDeletionRequested = await wasWorkflowDeletionRequested(flowId);
+    if (wasDeletionRequested) {
+      logger.info('Update run skipped: workflow deletion has been requested.', {
+        flowRunId: runId,
+        flowId,
+      });
+      return;
+    }
 
     if (
       progressUpdateType === ProgressUpdateType.WEBHOOK_RESPONSE &&

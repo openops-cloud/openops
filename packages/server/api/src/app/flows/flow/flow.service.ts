@@ -1,4 +1,9 @@
-import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  distributedLock,
+  signalWorkflowDeletion,
+  system,
+} from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
@@ -421,6 +426,8 @@ export const flowService = {
       await flowSideEffects.preDelete({
         flowToDelete,
       });
+
+      await signalWorkflowDeletion(id);
 
       await flowRepo().delete({ id });
 
