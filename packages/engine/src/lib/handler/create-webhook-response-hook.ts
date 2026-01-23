@@ -25,9 +25,11 @@ export function createWebhookResponseHook(
       return;
     }
 
-    const url = new URL(
-      `${constants.internalApiUrl}v1/engine/send-webhook-response`,
-    );
+    const baseUrl = constants.internalApiUrl.endsWith('/')
+      ? constants.internalApiUrl
+      : `${constants.internalApiUrl}/`;
+
+    const url = new URL(`${baseUrl}v1/engine/send-webhook-response`);
 
     await sendWebhookResponse(response, constants, url);
   };
