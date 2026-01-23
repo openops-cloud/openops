@@ -29,37 +29,14 @@ describe('createWebhookResponseHook', () => {
     jest.clearAllMocks();
   });
 
-  it('should skip when serverHandlerId is missing', async () => {
+  test.each(['serverHandlerId', 'executionCorrelationId'])(
+    'should skip when %p is missing', async (param: string) => {
     const constants = generateMockEngineConstants({
       executionCorrelationId: 'test-correlation-id',
+      serverHandlerId: 'test-server-handler-id',
       flowRunId: 'test-flow-run-id',
     });
-    Object.assign(constants, { serverHandlerId: null });
-
-    const response: EngineHttpResponse = {
-      status: 200,
-      body: {},
-      headers: {},
-    };
-
-    const hook = createWebhookResponseHook(constants);
-    await hook(response);
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Skipping webhook response due to missing required identifiers',
-      {
-        flowRunId: 'test-flow-run-id',
-      },
-    );
-    expect(makeHttpRequest).not.toHaveBeenCalled();
-  });
-
-  it('should skip when executionCorrelationId is missing', async () => {
-    const constants = generateMockEngineConstants({
-      serverHandlerId: 'test-handler-id',
-      flowRunId: 'test-flow-run-id',
-    });
-    Object.assign(constants, { executionCorrelationId: null });
+    Object.assign(constants, { [param]: null });
 
     const response: EngineHttpResponse = {
       status: 200,
