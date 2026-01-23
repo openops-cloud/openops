@@ -42,6 +42,7 @@ import {
   FlowExecutorContext,
   VerdictReason,
 } from './context/flow-execution-context';
+import { createWebhookResponseHook } from './create-webhook-response-hook';
 
 type HookResponse = {
   stopResponse: StopHookParams | undefined;
@@ -212,6 +213,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
           executionState.pauseId,
         ),
         isTest: constants.testSingleStepMode,
+        sendWebhookResponse: createWebhookResponseHook(constants),
       },
       project: {
         id: constants.projectId,
