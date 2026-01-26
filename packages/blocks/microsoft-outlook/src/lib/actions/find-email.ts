@@ -16,7 +16,7 @@ export const findEmailAction = createAction({
     searchQuery: Property.ShortText({
       displayName: 'Search Query',
       description:
-        'Search terms to find emails (e.g., "from:john@example.com", "subject:urgent", "hasAttachments:true")',
+        'Search terms to find emails (e.g., from:john@example.com, subject:urgent, hasAttachments:true)',
       required: true,
     }),
     folderId: mailFolderIdDropdown({
