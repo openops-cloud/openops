@@ -94,6 +94,7 @@ describe('Engine Controller - update-run endpoint', () => {
     (webhookResponseWatcher.publish as jest.Mock).mockResolvedValue({});
 
     await flowEngineWorker(mockApp, {} as FastifyPluginOptions);
+    mockWorkflowDeletionRequested.mockReturnValue(false);
   });
 
   describe('POST /update-run', () => {
