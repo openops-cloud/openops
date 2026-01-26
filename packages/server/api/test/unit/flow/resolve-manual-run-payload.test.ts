@@ -4,7 +4,7 @@ import { TriggerHookType, TriggerType } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { engineRunner, webhookUtils } from 'server-worker';
 import { accessTokenManager } from '../../../src/app/authentication/context/access-token-manager';
-import { prepareManualTriggerInput } from '../../../src/app/flows/flow/manual-trigger-input';
+import { resolveManualPayload } from '../../../src/app/flows/flow/resolve-manual-run-payload';
 import { triggerUtils } from '../../../src/app/flows/trigger/hooks/trigger-utils';
 
 jest.mock('@openops/server-shared', () => ({
@@ -37,7 +37,7 @@ jest.mock('../../../src/app/flows/trigger/hooks/trigger-utils', () => ({
   },
 }));
 
-describe('Manual Trigger Input', () => {
+describe('Manual Run payload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -55,7 +55,7 @@ describe('Manual Trigger Input', () => {
       },
     };
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: false,
@@ -81,7 +81,7 @@ describe('Manual Trigger Input', () => {
       new Error('Trigger not found'),
     );
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: false,
@@ -120,7 +120,7 @@ describe('Manual Trigger Input', () => {
       },
     });
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: true,
@@ -164,7 +164,7 @@ describe('Manual Trigger Input', () => {
       },
     });
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: true,
@@ -190,7 +190,7 @@ describe('Manual Trigger Input', () => {
       type: TriggerStrategy.WEBHOOK,
     });
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: true,
@@ -219,7 +219,7 @@ describe('Manual Trigger Input', () => {
       type: 'UNSUPPORTED',
     });
 
-    const result = await prepareManualTriggerInput(request, flow as never);
+    const result = await resolveManualPayload(request, flow as never);
 
     expect(result).toEqual({
       success: false,

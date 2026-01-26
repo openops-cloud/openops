@@ -6,7 +6,7 @@ import { engineRunner, webhookUtils } from 'server-worker';
 import { accessTokenManager } from '../../authentication/context/access-token-manager';
 import { triggerUtils } from '../trigger/hooks/trigger-utils';
 
-type ManualTriggerInputResult =
+type ManualRunValidationResult =
   | {
       success: true;
       payload: unknown;
@@ -16,10 +16,10 @@ type ManualTriggerInputResult =
       message: string;
     };
 
-export async function prepareManualTriggerInput(
+export async function resolveManualPayload(
   request: FastifyRequest,
   flow: PopulatedFlow,
-): Promise<ManualTriggerInputResult> {
+): Promise<ManualRunValidationResult> {
   const projectId = request.principal.projectId;
   const blockTrigger = flow.version.trigger;
 

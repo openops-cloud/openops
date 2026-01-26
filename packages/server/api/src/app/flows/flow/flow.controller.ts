@@ -41,7 +41,7 @@ import {
   assertThatFlowIsNotInternal,
 } from './flow-validations';
 import { flowService } from './flow.service';
-import { prepareManualTriggerInput } from './manual-trigger-input';
+import { resolveManualPayload } from './resolve-manual-run-payload';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -175,7 +175,7 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         versionId: flow.publishedVersionId,
       });
 
-      const validationResult = await prepareManualTriggerInput(
+      const validationResult = await resolveManualPayload(
         request,
         publishedFlow,
       );
