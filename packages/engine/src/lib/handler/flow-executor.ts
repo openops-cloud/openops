@@ -11,6 +11,7 @@ import { throwIfCancellationRequested } from '../cancellation-request-validator'
 import { throwIfExecutionLimitReached } from '../execution-limit-reached';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
+import { throwIfWorkflowDeletionRequested } from '../workflow-deletion-validator';
 import { BaseExecutor } from './base-executor';
 import { blockExecutor } from './block-executor';
 import { branchExecutor } from './branch-executor';
@@ -86,6 +87,7 @@ export const flowExecutor = {
     while (!isNil(currentAction)) {
       throwIfExecutionTimeExceeded();
       await throwIfCancellationRequested(constants.flowRunId);
+      await throwIfWorkflowDeletionRequested(constants.flowId);
 
       const handler = this.getExecutorForAction(currentAction.type);
 
