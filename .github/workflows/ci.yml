@@ -14,10 +14,10 @@ jobs:
     name: Install Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Lookup node_modules cache
         id: node-modules-cache
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -31,10 +31,10 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -46,16 +46,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
@@ -77,15 +77,15 @@ jobs:
     steps:
       - name: Checkout for Dependabot PR
         if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           ref: ${{ github.head_ref }}
       - name: Checkout for others
         if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -129,16 +129,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           path: .nx/cache
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
@@ -162,16 +162,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
@@ -184,7 +184,7 @@ jobs:
           npx nx run-many --target=build
           ./tools/truncate-nx-cache.sh
       - name: Save build cache
-        uses: actions/cache/save@v5.0.1
+        uses: actions/cache/save@v5.0.2
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -203,9 +203,9 @@ jobs:
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Restore build cache
-        uses: actions/cache/restore@v5.0.1
+        uses: actions/cache/restore@v5.0.2
         with:
           path: dist
           key: dist-${{ github.sha }}
