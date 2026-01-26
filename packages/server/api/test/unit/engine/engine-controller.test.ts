@@ -1,20 +1,3 @@
-import {
-  FlowRunStatus,
-  PrincipalType,
-  ProgressUpdateType,
-  WebsocketClientEvent,
-} from '@openops/shared';
-import {
-  FastifyInstance,
-  FastifyPluginOptions,
-  FastifyReply,
-  FastifyRequest,
-} from 'fastify';
-import { StatusCodes } from 'http-status-codes';
-import { flowRunService } from '../../../src/app/flows/flow-run/flow-run-service';
-import { flowEngineWorker } from '../../../src/app/workers/engine-controller';
-import { webhookResponseWatcher } from '../../../src/app/workers/helper/webhook-response-watcher';
-
 jest.mock('../../../src/app/flows/flow-run/flow-run-service', () => ({
   flowRunService: {
     updateStatus: jest.fn(),
@@ -31,6 +14,29 @@ jest.mock('../../../src/app/workers/helper/webhook-response-watcher', () => ({
 jest.mock('../../../src/app/authentication/authorization', () => ({
   entitiesMustBeOwnedByCurrentProject: jest.fn(),
 }));
+
+const mockWorkflowDeletionRequested = jest.fn().mockReturnValue(false);
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  wasWorkflowDeletionRequested: mockWorkflowDeletionRequested,
+}));
+
+import {
+  FlowRunStatus,
+  PrincipalType,
+  ProgressUpdateType,
+  WebsocketClientEvent,
+} from '@openops/shared';
+import {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyReply,
+  FastifyRequest,
+} from 'fastify';
+import { StatusCodes } from 'http-status-codes';
+import { flowRunService } from '../../../src/app/flows/flow-run/flow-run-service';
+import { flowEngineWorker } from '../../../src/app/workers/engine-controller';
+import { webhookResponseWatcher } from '../../../src/app/workers/helper/webhook-response-watcher';
 
 describe('Engine Controller - update-run endpoint', () => {
   type RouteHandler = (
@@ -88,6 +94,7 @@ describe('Engine Controller - update-run endpoint', () => {
     (webhookResponseWatcher.publish as jest.Mock).mockResolvedValue({});
 
     await flowEngineWorker(mockApp, {} as FastifyPluginOptions);
+    mockWorkflowDeletionRequested.mockReturnValue(false);
   });
 
   describe('POST /update-run', () => {
@@ -126,6 +133,19 @@ describe('Engine Controller - update-run endpoint', () => {
         projectId: 'test-project-id',
         tags: [],
       });
+    });
+
+    it('should skip update if workflow deletion was requested', async () => {
+      mockWorkflowDeletionRequested.mockReturnValue(true);
+      const updateRunHandler = handlers['/update-run'];
+      expect(updateRunHandler).toBeDefined();
+
+      await updateRunHandler(
+        baseRequest as unknown as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(flowRunService.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should handle STOPPED status', async () => {
