@@ -88,24 +88,25 @@ async function executeFlow(
     timeout: (flowTimeoutSandbox + 3) * 1000, // Engine timeout plus 3 more seconds
   });
 
+  const flow = await engineApiService(engineToken).getFlowWithExactBlocks({
+    versionId: jobData.flowVersionId,
+    type: GetFlowVersionForWorkerRequestType.EXACT,
+  });
+
+  if (isNil(flow)) {
+    return;
+  }
+
   let jobStatus: JobStatus | undefined;
   let jobFinalMessage: string | undefined;
   try {
-    const flow = await engineApiService(engineToken).getFlowWithExactBlocks({
-      versionId: jobData.flowVersionId,
-      type: GetFlowVersionForWorkerRequestType.EXACT,
-    });
-
-    if (isNil(flow)) {
-      return;
-    }
-
     if (jobData.executionType === ExecutionType.BEGIN) {
       await setFirstRunningState(
         jobData,
         engineToken,
         flow.version.trigger.name,
         flow.version.trigger.type,
+        flow.id,
       );
     }
 
@@ -142,6 +143,7 @@ async function executeFlow(
     await updateRunWithError(
       jobData,
       engineToken,
+      flow.id,
       failedRunStatus,
       terminationReason,
     );
@@ -173,6 +175,7 @@ async function executeFlow(
     await updateRunWithError(
       jobData,
       engineToken,
+      flow.id,
       failedRunStatus,
       terminationReason,
     );
@@ -194,6 +197,7 @@ async function setFirstRunningState(
   engineToken: string,
   triggerName: string,
   triggerType: string,
+  flowId: string,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
@@ -213,12 +217,14 @@ async function setFirstRunningState(
     progressUpdateType: jobData.progressUpdateType,
     workerHandlerId: jobData.synchronousHandlerId,
     runId: jobData.runId,
+    flowId,
   });
 }
 
 async function updateRunWithError(
   jobData: OneTimeJobData,
   engineToken: string,
+  flowId: string,
   status:
     | FlowRunStatus.TIMEOUT
     | FlowRunStatus.STOPPED
@@ -238,6 +244,7 @@ async function updateRunWithError(
     progressUpdateType: jobData.progressUpdateType,
     workerHandlerId: jobData.synchronousHandlerId,
     runId: jobData.runId,
+    flowId,
   });
 }
 
