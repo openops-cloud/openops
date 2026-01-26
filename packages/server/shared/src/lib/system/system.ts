@@ -109,6 +109,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.TELEMETRY_COLLECTOR_URL]: 'https://telemetry.openops.com/save',
   [SharedSystemProp.ENABLE_HOST_VALIDATION]: 'true',
   [AppSystemProp.OPENOPS_ADMIN_PASSWORD_SALT]: '$2b$10$6zuoB5d8Dz9bzV91gpuynO',
+  [SharedSystemProp.SMTP_ALLOWED_PORTS]: '25,465,587,2525',
 };
 
 export const system = {

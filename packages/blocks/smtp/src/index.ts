@@ -1,9 +1,15 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
+import { SharedSystemProp, system } from '@openops/server-shared';
 import { BlockCategory } from '@openops/shared';
 import { sendEmail } from './lib/actions/send-email';
 import { smtpCommon } from './lib/common';
+import { connectionErrorHandler } from './lib/connection-error-handler';
 
-const SMTPPorts = [25, 465, 587, 2525];
+const SMTPPorts = system
+  .getOrThrow(SharedSystemProp.SMTP_ALLOWED_PORTS)
+  .split(',')
+  .map((p) => Number(p.trim()))
+  .filter(Number.isFinite);
 
 export const smtpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SMTP',
@@ -48,33 +54,15 @@ export const smtpAuth = BlockAuth.CustomAuth({
       return new Promise((resolve, reject) => {
         transporter.verify(function (error, success) {
           if (error) {
-            resolve({ valid: false, error: JSON.stringify(error) });
+            const errorResult = connectionErrorHandler(error);
+            resolve(errorResult);
           } else {
             resolve({ valid: true });
           }
         });
       });
     } catch (e) {
-      const castedError = e as Record<string, unknown>;
-      const code = castedError?.['code'];
-      switch (code) {
-        case 'EDNS':
-          return {
-            valid: false,
-            error: 'SMTP server not found or unreachable with error code: EDNS',
-          };
-        case 'CONN':
-          return {
-            valid: false,
-            error: 'SMTP server connection failed with error code: CONN',
-          };
-        default:
-          break;
-      }
-      return {
-        valid: false,
-        error: JSON.stringify(e),
-      };
+      return connectionErrorHandler(e);
     }
   },
 });
