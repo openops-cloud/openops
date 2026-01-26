@@ -3,13 +3,13 @@ import {
   Property,
   createAction,
 } from '@openops/blocks-framework';
-import { StopResponse } from '@openops/shared';
+import { EngineHttpResponse } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 
 export const httpReturnResponse = createAction({
   name: 'return_response',
-  displayName: 'Return Response',
-  description: 'return a response',
+  displayName: 'Send Webhook Response',
+  description: 'Send a response to the webhook caller.',
   isWriteAction: false,
   props: {
     status: Property.Number({
@@ -73,9 +73,10 @@ export const httpReturnResponse = createAction({
     const { status, body, body_type, headers } = context.propsValue;
     const bodyInput = body['data'];
 
-    const response: StopResponse = {
+    const response: EngineHttpResponse = {
       status: status ?? StatusCodes.OK,
       headers: (headers as Record<string, string>) ?? {},
+      body: {},
     };
 
     if (body_type == 'json') {
@@ -84,9 +85,8 @@ export const httpReturnResponse = createAction({
       response.body = bodyInput;
     }
 
-    context.run.stop({
-      response: response,
-    });
+    await context.run.sendWebhookResponse(response);
+
     return response;
   },
 });

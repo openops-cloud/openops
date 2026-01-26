@@ -1,6 +1,7 @@
 import {
   AppConnectionValue,
   EncryptedObject,
+  EngineHttpResponse,
   ExecutionType,
   FlowRunId,
   PauseMetadata,
@@ -91,6 +92,8 @@ export type TestOrRunHookContext<
   files: FilesService;
 };
 
+export type WebhookResponseHook = (params: EngineHttpResponse) => Promise<void>;
+
 export type StopHookParams = {
   response: StopResponse;
 };
@@ -147,6 +150,7 @@ export type BaseActionContext<
     stop: StopHook;
     pause: PauseHook;
     isTest: boolean;
+    sendWebhookResponse: WebhookResponseHook;
   };
   generateResumeUrl: (
     params: {
