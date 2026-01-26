@@ -1,4 +1,5 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { BlockCategory } from '@openops/shared';
 import { sendEmail } from './lib/actions/send-email';
 import { smtpCommon } from './lib/common';
@@ -57,6 +58,9 @@ export const smtpAuth = BlockAuth.CustomAuth({
     } catch (e) {
       const castedError = e as Record<string, unknown>;
       const code = castedError?.['code'];
+
+      logger.info('SMTP validation error:', e);
+
       switch (code) {
         case 'EDNS':
           return {
