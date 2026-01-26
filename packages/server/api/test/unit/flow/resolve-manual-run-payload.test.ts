@@ -111,7 +111,7 @@ describe('Manual Run payload', () => {
       'engine-token',
     );
     (webhookUtils.getWebhookUrl as jest.Mock).mockResolvedValue(
-      'http://webhook.url',
+      'https://webhook.url',
     );
     (engineRunner.executeTrigger as jest.Mock).mockResolvedValue({
       result: {
@@ -129,7 +129,7 @@ describe('Manual Run payload', () => {
     expect(engineRunner.executeTrigger).toHaveBeenCalledWith('engine-token', {
       hookType: TriggerHookType.RUN,
       flowVersion: flow.version,
-      webhookUrl: 'http://webhook.url',
+      webhookUrl: 'https://webhook.url',
       projectId: 'project-1',
       test: false,
     });
@@ -156,7 +156,7 @@ describe('Manual Run payload', () => {
       'engine-token',
     );
     (webhookUtils.getWebhookUrl as jest.Mock).mockResolvedValue(
-      'http://webhook.url',
+      'https://webhook.url',
     );
     (engineRunner.executeTrigger as jest.Mock).mockResolvedValue({
       result: {
