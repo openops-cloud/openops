@@ -85,6 +85,7 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
     workerHandlerId: engineConstants.serverHandlerId ?? null,
     runDetails: await flowExecutorContext.toResponse(),
     progressUpdateType: engineConstants.progressUpdateType,
+    flowId: engineConstants.flowId,
   };
 
   logger.debug(
