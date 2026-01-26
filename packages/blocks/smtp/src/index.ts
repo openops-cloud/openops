@@ -48,6 +48,7 @@ export const smtpAuth = BlockAuth.CustomAuth({
       const transporter = smtpCommon.createSMTPTransport(auth);
       return new Promise((resolve, reject) => {
         transporter.verify(function (error, success) {
+          logger.info('Promise: SMTP validation error:', error);
           if (error) {
             resolve({ valid: false, error: JSON.stringify(error) });
           } else {
