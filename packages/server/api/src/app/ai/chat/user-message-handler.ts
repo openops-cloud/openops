@@ -57,6 +57,27 @@ type StreamCallSettings = RequestContext &
     abortSignal: AbortSignal;
   };
 
+type ToolErrorStreamPart = {
+  type: 'tool-error';
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+  error: unknown;
+};
+
+function isToolErrorPart(
+  message: TextStreamPart<ToolSet>,
+): message is ToolErrorStreamPart {
+  return message.type === 'tool-error';
+}
+
+type MessagePart = {
+  type: string;
+  toolCallId?: string;
+  output?: unknown;
+  isError?: boolean;
+};
+
 export async function handleUserMessage(
   params: UserMessageParams,
 ): Promise<void> {
@@ -131,6 +152,7 @@ async function streamLLMResponse(
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
   const tokenUsageReporter = new TokenUsageReporter();
+  const errorToolCallIds = new Set<string>();
 
   try {
     const fullStream = getLLMAsyncStream({
@@ -169,7 +191,9 @@ async function streamLLMResponse(
         const partialMessages = steps.at(-1)?.response.messages ?? [];
         return saveChatHistory(params.chatId, params.userId, params.projectId, [
           ...params.chatHistory,
-          ...addUiToolResults(partialMessages),
+          ...addUiToolResults(
+            markToolResultsWithErrors(partialMessages, errorToolCallIds),
+          ),
         ]);
       },
       abortSignal: params.abortSignal,
@@ -184,6 +208,55 @@ async function streamLLMResponse(
   }
 
   return newMessages;
+}
+
+/**
+ * Marks tool-result parts with isError flag if their toolCallId is in the error set
+ * This ensures tool errors are properly persisted with error status
+ */
+function markToolResultsWithErrors(
+  messages: ModelMessage[],
+  errorToolCallIds: Set<string>,
+): ModelMessage[] {
+  if (errorToolCallIds.size === 0) {
+    return messages;
+  }
+
+  return messages.map((message) => {
+    if (!Array.isArray(message.content) || message.content.length === 0) {
+      return message;
+    }
+
+    const updatedContent = message.content.map((part) => {
+      const typedPart = part as MessagePart;
+      if (shouldMarkPartAsError(typedPart, errorToolCallIds)) {
+        return { ...part, isError: true };
+      }
+      return part;
+    });
+
+    return {
+      ...message,
+      content: updatedContent,
+    } as ModelMessage;
+  });
+}
+
+function shouldMarkPartAsError(
+  part: MessagePart,
+  errorToolCallIds: Set<string>,
+): boolean {
+  const isToolResultPart =
+    part.type === 'tool-result' &&
+    !!part.toolCallId &&
+    errorToolCallIds.has(part.toolCallId);
+  const isToolCallPartWithOutput =
+    part.type === 'tool-call' &&
+    part.output != null &&
+    !!part.toolCallId &&
+    errorToolCallIds.has(part.toolCallId);
+
+  return isToolResultPart || isToolCallPartWithOutput;
 }
 
 function unrecoverableError(
@@ -315,6 +388,24 @@ function sendMessageToStream(
     case 'finish':
     case 'tool-input-end':
     case 'tool-error':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: {
+            content: [
+              {
+                type: 'text',
+                text:
+                  (message as any).error?.message ||
+                  String((message as any).error),
+              },
+            ],
+            isError: true,
+          },
+        })}`,
+      );
+      break;
     case 'error':
       return;
     default:
