@@ -1,7 +1,7 @@
-import { SharedSystemProp, system } from '@openops/server-shared';
-import { getSmtpPortsOptions } from './get-smtp-ports';
+import { SharedSystemProp, system } from 'packages/server/shared';
+import { getSmtpPortsOptions } from '../src/lib/get-smtp-ports';
 
-jest.mock('@openops/server-shared', () => ({
+jest.mock('packages/server/shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   system: {
     getOrThrow: jest.fn(),
