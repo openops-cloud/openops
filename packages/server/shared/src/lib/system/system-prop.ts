@@ -159,6 +159,7 @@ export enum SharedSystemProp {
   LANGFUSE_HOST = 'LANGFUSE_HOST',
 
   ENABLE_HOST_VALIDATION = 'ENABLE_HOST_VALIDATION',
+  SMTP_ALLOWED_PORTS = 'SMTP_ALLOWED_PORTS',
 }
 
 export enum WorkerSystemProps {
