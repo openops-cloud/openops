@@ -1,0 +1,22 @@
+---
+title: "Release Notes (2026-01-22)"
+description: "Product updates shipped on 2026-01-22."
+icon: "📝"
+iconType: "emoji"
+---
+
+## ✨ Improvements
+
+- Improved documentation and UI guidance so it’s clearer what MCP can and cannot do and how to set up connections successfully
+- Workflow run retries now create a fresh run using the latest version of the workflow, and the run list updates reliably after a retry
+- Improved tool runs to be more consistent and less dependent on server-side UI assumptions
+- Improved analytics access handling and permissions checks for more consistent behavior across endpoints
+- Made search filtering smoother and more consistent across the UI, reducing jittery updates while typing
+- Made dynamic flag inputs behave more predictably when switching modes, preventing unexpected empty or stale values
+- Improved error details for failed engine executions to make troubleshooting easier
+- Updated MCP support to stay compatible with upstream changes
+- Improved chat message parsing so hidden reasoning does not leak into displayed content, and fallback behavior is less aggressive
+
+## 🐛 Fixes
+
+- Analytics access now defaults to “no access” when a user’s privileges or project permissions have not loaded yet, instead of briefly treating the user as allowed
