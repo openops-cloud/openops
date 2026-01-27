@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ToolResult } from '@openops/shared';
 import { ModelMessage } from 'ai';
-import { sanitizeMessages } from '../../../src/app/ai/mcp/tool-utils';
+import {
+  addMissingUiToolResults,
+  createToolResultsMap,
+  sanitizeMessages,
+} from '../../../src/app/ai/mcp/tool-utils';
 
 describe('sanitizeMessages', () => {
   describe('Tool call input sanitization', () => {
@@ -403,6 +408,327 @@ describe('sanitizeMessages', () => {
         input: { test: true },
         metadata: { custom: 'data' },
       });
+    });
+  });
+});
+
+describe('createToolResultsMap', () => {
+  it('should create an empty map when no results provided', () => {
+    const result = createToolResultsMap(undefined);
+    expect(result.size).toBe(0);
+  });
+
+  it('should create an empty map when empty array provided', () => {
+    const result = createToolResultsMap([]);
+    expect(result.size).toBe(0);
+  });
+
+  it('should create a map indexed by toolCallId', () => {
+    const toolResults: ToolResult[] = [
+      { toolCallId: 'call1', toolName: 'ui-navigate', output: 'result1' },
+      { toolCallId: 'call2', toolName: 'ui-search', output: 'result2' },
+    ];
+
+    const result = createToolResultsMap(toolResults);
+
+    expect(result.size).toBe(2);
+    expect(result.get('call1')).toEqual({
+      toolCallId: 'call1',
+      toolName: 'ui-navigate',
+      output: 'result1',
+    });
+    expect(result.get('call2')).toEqual({
+      toolCallId: 'call2',
+      toolName: 'ui-search',
+      output: 'result2',
+    });
+  });
+});
+
+describe('addMissingUiToolResults', () => {
+  describe('empty frontend results', () => {
+    it('should return history unchanged when no frontend results', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'user',
+          content: 'Navigate to flows',
+        },
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              input: { url: '/flows' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const result = addMissingUiToolResults(chatHistory, new Map());
+
+      expect(result).toEqual(chatHistory);
+    });
+  });
+
+  describe('adding missing tool results', () => {
+    it('should add tool-result for UI tool call without existing result', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'user',
+          content: 'Navigate to flows',
+        },
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              input: { url: '/flows' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call1',
+          toolName: 'ui-navigate',
+          output: 'Successfully navigated to /flows',
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      expect(result).toHaveLength(3);
+      expect(result[2]).toEqual({
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 'call1',
+            toolName: 'ui-navigate',
+            output: {
+              type: 'text',
+              value: 'Successfully navigated to /flows',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should NOT add tool-result if one already exists in history', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              input: { url: '/flows' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              output: { type: 'text', value: 'Already exists' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call1',
+          toolName: 'ui-navigate',
+          output: 'New result that should be ignored',
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      // Should not add duplicate, history unchanged
+      expect(result).toHaveLength(2);
+      expect(result).toEqual(chatHistory);
+    });
+
+    it('should handle multiple UI tool calls, adding only missing results', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              input: { url: '/flows' },
+            },
+            {
+              type: 'tool-call',
+              toolCallId: 'call2',
+              toolName: 'ui-search',
+              input: { query: 'test' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              output: { type: 'text', value: 'Existing result' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call1',
+          toolName: 'ui-navigate',
+          output: 'Should be ignored - already exists',
+        },
+        {
+          toolCallId: 'call2',
+          toolName: 'ui-search',
+          output: 'Search completed',
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      // Should add result for call2 only
+      expect(result).toHaveLength(3);
+      expect(result[2]).toEqual({
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 'call2',
+            toolName: 'ui-search',
+            output: {
+              type: 'text',
+              value: 'Search completed',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should NOT add tool-result for non-UI tool calls', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'get_data',
+              input: { id: '123' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call1',
+          toolName: 'get_data',
+          output: 'Some result',
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      // Should not add - not a UI tool
+      expect(result).toHaveLength(1);
+      expect(result).toEqual(chatHistory);
+    });
+
+    it('should handle complex output objects by JSON stringifying them', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-showTestRunDetails',
+              input: { flowRun: { id: 'run-123' } },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const complexOutput = {
+        message: 'Details shown',
+        runId: 'run-123',
+      };
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call1',
+          toolName: 'ui-showTestRunDetails',
+          output: complexOutput,
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      expect(result[1]).toEqual({
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 'call1',
+            toolName: 'ui-showTestRunDetails',
+            output: {
+              type: 'text',
+              value: JSON.stringify(complexOutput),
+            },
+          },
+        ],
+      });
+    });
+
+    it('should skip tool calls without matching frontend results', () => {
+      const chatHistory: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call1',
+              toolName: 'ui-navigate',
+              input: { url: '/flows' },
+            },
+          ],
+        },
+      ] as ModelMessage[];
+
+      const frontendResults = createToolResultsMap([
+        {
+          toolCallId: 'call2',
+          toolName: 'ui-search',
+          output: 'Different tool result',
+        },
+      ]);
+
+      const result = addMissingUiToolResults(chatHistory, frontendResults);
+
+      // No matching result for call1, so nothing added
+      expect(result).toHaveLength(1);
+      expect(result).toEqual(chatHistory);
     });
   });
 });
