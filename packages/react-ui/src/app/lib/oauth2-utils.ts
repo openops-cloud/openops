@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 
-export const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
+import { OAUTH_CHANNEL_PREFIX } from '@/app/shared/oauth-channel-prefix';
 
 let currentPopup: Window | null = null;
 let currentResolve: ((value: string | null) => void) | null = null;

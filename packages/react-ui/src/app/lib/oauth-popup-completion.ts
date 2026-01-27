@@ -1,4 +1,4 @@
-import { OAUTH_CHANNEL_PREFIX } from './oauth2-utils';
+import { OAUTH_CHANNEL_PREFIX } from '@/app/shared/oauth-channel-prefix';
 
 export type WaitForOAuthPopupOptions = {
   isSuccess: (data: Record<string, string>) => boolean;
@@ -22,23 +22,23 @@ export function waitForOAuthPopupCompletion(
     const channel = new BroadcastChannel(channelName);
     let isCompleted = false;
 
-    const popupCheckInterval = setInterval(() => {
-      if (popup?.closed && !isCompleted) {
-        isCompleted = true;
-        cleanup();
-        reject(new Error('cancelled'));
-      }
-    }, 500);
-
-    const cleanup = () => {
-      clearInterval(popupCheckInterval);
+    const cleanup = (intervalId: ReturnType<typeof setInterval>): void => {
+      clearInterval(intervalId);
       channel.close();
       globalThis.removeEventListener('message', messageHandler);
     };
 
+    const popupCheckInterval = setInterval(() => {
+      if (popup?.closed && !isCompleted) {
+        isCompleted = true;
+        cleanup(popupCheckInterval);
+        reject(new Error('cancelled'));
+      }
+    }, 500);
+
     const handleSuccess = async (params: Record<string, string>) => {
       isCompleted = true;
-      cleanup();
+      cleanup(popupCheckInterval);
       try {
         await onSuccess(params);
         resolve();
@@ -52,7 +52,7 @@ export function waitForOAuthPopupCompletion(
 
     const handleError = (errorMessage: string | undefined) => {
       isCompleted = true;
-      cleanup();
+      cleanup(popupCheckInterval);
       reject(new Error(errorMessage ?? 'OAuth failed'));
     };
 

@@ -1,4 +1,4 @@
-import { OAUTH_CHANNEL_PREFIX } from '@/app/lib/oauth2-utils';
+import { OAUTH_CHANNEL_PREFIX } from '@/app/shared/oauth-channel-prefix';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
