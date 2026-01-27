@@ -3,6 +3,7 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from '@openops/common';
 import { microsoftOutlookAuth } from '../common/auth';
 import { messageIdDropdown } from '../common/props';
+import { mapEmailsToRecipients } from '../common/utils';
 
 export const forwardEmailAction = createAction({
   auth: microsoftOutlookAuth,
@@ -20,6 +21,16 @@ export const forwardEmailAction = createAction({
       displayName: 'To Email(s)',
       required: true,
     }),
+    ccRecipients: Property.Array({
+      displayName: 'CC Email(s)',
+      required: false,
+      defaultValue: [],
+    }),
+    bccRecipients: Property.Array({
+      displayName: 'BCC Email(s)',
+      required: false,
+      defaultValue: [],
+    }),
     comment: Property.LongText({
       displayName: 'Comment',
       description: 'Optional comment to include with the forwarded message.',
@@ -29,17 +40,21 @@ export const forwardEmailAction = createAction({
   async run(context) {
     const { messageId, comment } = context.propsValue;
     const recipients = context.propsValue.recipients as string[];
+    const ccRecipients = context.propsValue.ccRecipients as
+      | string[]
+      | undefined;
+    const bccRecipients = context.propsValue.bccRecipients as
+      | string[]
+      | undefined;
 
     const client = getMicrosoftGraphClient(context.auth.access_token);
 
     const message = await client.api(`/me/messages/${messageId}`).get();
 
     const messagePayload: Message = {
-      toRecipients: recipients.map((mail) => ({
-        emailAddress: {
-          address: mail,
-        },
-      })),
+      toRecipients: mapEmailsToRecipients(recipients),
+      ccRecipients: mapEmailsToRecipients(ccRecipients),
+      bccRecipients: mapEmailsToRecipients(bccRecipients),
       body: {
         contentType: 'html',
         content: (comment ?? '') + '<br><br>' + message.body.content,

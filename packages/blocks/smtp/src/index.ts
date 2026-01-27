@@ -2,8 +2,8 @@ import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { sendEmail } from './lib/actions/send-email';
 import { smtpCommon } from './lib/common';
-
-const SMTPPorts = [25, 465, 587, 2525];
+import { connectionErrorHandler } from './lib/connection-error-handler';
+import { getSmtpPortsOptions } from './lib/get-smtp-ports';
 
 export const smtpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SMTP',
@@ -26,15 +26,7 @@ export const smtpAuth = BlockAuth.CustomAuth({
     port: Property.StaticDropdown({
       displayName: 'Port',
       required: true,
-      options: {
-        disabled: false,
-        options: SMTPPorts.map((port) => {
-          return {
-            label: port.toString(),
-            value: port,
-          };
-        }),
-      },
+      options: getSmtpPortsOptions(),
     }),
     TLS: Property.Checkbox({
       displayName: 'Require TLS?',
@@ -48,33 +40,15 @@ export const smtpAuth = BlockAuth.CustomAuth({
       return new Promise((resolve, reject) => {
         transporter.verify(function (error, success) {
           if (error) {
-            resolve({ valid: false, error: JSON.stringify(error) });
+            const errorResult = connectionErrorHandler(error);
+            resolve(errorResult);
           } else {
             resolve({ valid: true });
           }
         });
       });
     } catch (e) {
-      const castedError = e as Record<string, unknown>;
-      const code = castedError?.['code'];
-      switch (code) {
-        case 'EDNS':
-          return {
-            valid: false,
-            error: 'SMTP server not found or unreachable with error code: EDNS',
-          };
-        case 'CONN':
-          return {
-            valid: false,
-            error: 'SMTP server connection failed with error code: CONN',
-          };
-        default:
-          break;
-      }
-      return {
-        valid: false,
-        error: JSON.stringify(e),
-      };
+      return connectionErrorHandler(e);
     }
   },
 });
