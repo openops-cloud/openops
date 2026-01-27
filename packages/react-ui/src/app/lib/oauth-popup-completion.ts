@@ -50,20 +50,20 @@ export function waitForOAuthPopupCompletion(
       }
     };
 
-    const handleError = (data: Record<string, string>) => {
-      const message = getErrorMessage(data);
+    const handleError = (errorMessage: string | undefined) => {
       isCompleted = true;
       cleanup();
-      reject(new Error(message ?? 'OAuth failed'));
+      reject(new Error(errorMessage ?? 'OAuth failed'));
     };
 
     const routeMessage = (data: Record<string, string> | undefined) => {
-      if (!data) return;
+      if (!data || isCompleted) return;
       const errorMessage = getErrorMessage(data);
       if (errorMessage) {
-        handleError(data);
+        handleError(errorMessage);
       } else if (isSuccess(data)) {
-        handleSuccess(data);
+        isCompleted = true;
+        void handleSuccess(data);
       }
     };
 
