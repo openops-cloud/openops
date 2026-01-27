@@ -387,6 +387,8 @@ function sendMessageToStream(
     case 'finish-step':
     case 'finish':
     case 'tool-input-end':
+    case 'error':
+      return;
     case 'tool-error':
       responseStream.write(
         `data: ${JSON.stringify({
@@ -406,8 +408,6 @@ function sendMessageToStream(
         })}`,
       );
       break;
-    case 'error':
-      return;
     default:
       responseStream.write(`data: ${JSON.stringify(message)}`);
       break;
