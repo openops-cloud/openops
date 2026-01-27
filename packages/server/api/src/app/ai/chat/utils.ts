@@ -349,7 +349,8 @@ function findToolCallPart(
   const toolCallPart = message.parts.find(
     (part) =>
       (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
-      (part as any).toolCallId === toolCallId,
+      'toolCallId' in part &&
+      part.toolCallId === toolCallId,
   );
 
   return toolCallPart ?? null;
