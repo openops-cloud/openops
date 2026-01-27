@@ -347,6 +347,14 @@ function mergeToolResultIntoUIMessage(
 ): void {
   const extendedToolResult = toolResult as ExtendedToolResultPart;
 
+  const raw = extendedToolResult.output ?? extendedToolResult.result;
+  const normalized =
+    raw != null && typeof raw === 'object' && 'value' in raw ? raw.value : raw;
+  const finalOutput =
+    extendedToolResult.isError === true
+      ? wrapErrorOutputInMCPStructure(normalized)
+      : normalized;
+
   for (let j = uiMessages.length - 1; j >= 0; j--) {
     const prev = uiMessages[j];
     if (prev.role === 'assistant') {
@@ -357,18 +365,7 @@ function mergeToolResultIntoUIMessage(
       );
       if (toolCallPart) {
         (toolCallPart as any).state = 'output-available';
-        const raw = extendedToolResult.output ?? extendedToolResult.result;
-        const normalized =
-          raw != null && typeof raw === 'object' && 'value' in raw
-            ? raw.value
-            : raw;
-
-        if (extendedToolResult.isError === true) {
-          (toolCallPart as any).output =
-            wrapErrorOutputInMCPStructure(normalized);
-        } else {
-          (toolCallPart as any).output = normalized;
-        }
+        (toolCallPart as any).output = finalOutput;
         return;
       }
     }
