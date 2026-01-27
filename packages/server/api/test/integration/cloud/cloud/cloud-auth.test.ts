@@ -49,8 +49,7 @@ describe('getVerifiedUser', () => {
 
     const result = getVerifiedUser(mockRequest, publicKey);
 
-    // expect(result).toBeUndefined();
-    expect(result).toBeDefined();
+    expect(result).toBeUndefined();
     expect(jwt.verify).not.toHaveBeenCalled();
   });
 
