@@ -1,8 +1,7 @@
+import { OAUTH_CHANNEL_PREFIX } from '@/app/lib/oauth2-utils';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
-const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
 
 function getNonceFromState(state: string | null): string | null {
   if (!state) return null;
