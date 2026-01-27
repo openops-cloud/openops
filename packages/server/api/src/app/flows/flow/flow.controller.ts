@@ -2,8 +2,6 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { TriggerStrategy } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   CountFlowsRequest,
@@ -30,7 +28,6 @@ import {
   RunFlowResponses,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
-  TriggerType,
   TriggerWithOptionalId,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
@@ -39,12 +36,12 @@ import { projectService } from '../../project/project-service';
 import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-models';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
-import { triggerUtils } from '../trigger/hooks/trigger-utils';
 import {
   assertThatFlowIsNotBeingUsed,
   assertThatFlowIsNotInternal,
 } from './flow-validations';
 import { flowService } from './flow.service';
+import { resolveManualPayload } from './resolve-manual-run-payload';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -178,30 +175,22 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         versionId: flow.publishedVersionId,
       });
 
-      const validationResult = await validateTriggerType(
+      const validationResult = await resolveManualPayload(
+        request,
         publishedFlow,
-        request.principal.projectId,
       );
+
       if (!validationResult.success) {
         return await reply
           .status(StatusCodes.BAD_REQUEST)
           .send(validationResult);
       }
 
-      const payload =
-        validationResult.triggerStrategy === TriggerStrategy.WEBHOOK
-          ? {
-              body: {},
-              headers: {},
-              queryParams: (request.query ?? {}) as Record<string, string>,
-            }
-          : {};
-
       const flowRun = await flowRunService.start({
         environment: RunEnvironment.PRODUCTION,
         flowVersionId: publishedFlow.version.id,
         projectId: request.principal.projectId,
-        payload,
+        payload: validationResult.payload,
         executionType: ExecutionType.BEGIN,
         synchronousHandlerId: undefined,
         executionCorrelationId: openOpsId(),
@@ -272,57 +261,6 @@ async function extractUserIdFromPrincipal(
   // TODO currently it's same as api service, but it's better to get it from api key service, in case we introduced more admin users
   const project = await projectService.getOneOrThrow(principal.projectId);
   return project.ownerId;
-}
-
-async function validateTriggerType(
-  flow: PopulatedFlow,
-  projectId: string,
-): Promise<{
-  success: boolean;
-  message: string;
-  triggerStrategy?: TriggerStrategy;
-}> {
-  const blockTrigger = flow.version.trigger;
-
-  if (blockTrigger.type !== TriggerType.BLOCK) {
-    logger.warn(
-      `Blocktype is not of type ${TriggerType.BLOCK}. This should never happen. `,
-    );
-    return {
-      success: false,
-      message: `Trigger type is not a block: type: ${blockTrigger.type}`,
-    };
-  }
-
-  try {
-    const metadata = await triggerUtils.getBlockTriggerOrThrow({
-      trigger: blockTrigger,
-      projectId,
-    });
-
-    if (
-      metadata.type === TriggerStrategy.SCHEDULED ||
-      metadata.type == TriggerStrategy.WEBHOOK
-    ) {
-      return {
-        success: true,
-        message: 'Trigger type validation successful',
-        triggerStrategy: metadata.type,
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Only polling and webhook workflows can be triggered manually',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Something went wrong while validating the trigger type. ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    };
-  }
 }
 
 const CreateFlowRequestOptions = {
