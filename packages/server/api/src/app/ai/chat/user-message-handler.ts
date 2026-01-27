@@ -210,7 +210,7 @@ async function streamLLMResponse(
     newMessages.push(errorMessage);
   }
 
-  return newMessages;
+  return markToolResultsWithErrors(newMessages, errorToolCallIds);
 }
 
 /**
