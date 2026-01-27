@@ -1,5 +1,7 @@
 import { nanoid } from 'nanoid';
 
+export const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
+
 let currentPopup: Window | null = null;
 let currentResolve: ((value: string | null) => void) | null = null;
 
@@ -80,8 +82,6 @@ function constructUrl(
   });
   return url.toString();
 }
-
-const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
 
 function getCode(
   redirectUrl: string,
