@@ -1,15 +1,9 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
-import { SharedSystemProp, system } from '@openops/server-shared';
 import { BlockCategory } from '@openops/shared';
 import { sendEmail } from './lib/actions/send-email';
 import { smtpCommon } from './lib/common';
 import { connectionErrorHandler } from './lib/connection-error-handler';
-
-const SMTPPorts = system
-  .getOrThrow(SharedSystemProp.SMTP_ALLOWED_PORTS)
-  .split(',')
-  .map((p) => Number(p.trim()))
-  .filter(Number.isFinite);
+import { getSmtpPortsOptions } from './lib/get-smtp-ports';
 
 export const smtpAuth = BlockAuth.CustomAuth({
   authProviderKey: 'SMTP',
@@ -32,15 +26,7 @@ export const smtpAuth = BlockAuth.CustomAuth({
     port: Property.StaticDropdown({
       displayName: 'Port',
       required: true,
-      options: {
-        disabled: false,
-        options: SMTPPorts.map((port) => {
-          return {
-            label: port.toString(),
-            value: port,
-          };
-        }),
-      },
+      options: getSmtpPortsOptions(),
     }),
     TLS: Property.Checkbox({
       displayName: 'Require TLS?',
