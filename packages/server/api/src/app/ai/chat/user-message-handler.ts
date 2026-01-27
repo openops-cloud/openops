@@ -231,8 +231,7 @@ function markToolResultsWithErrors(
     }
 
     const updatedContent = message.content.map((part) => {
-      const typedPart = part as MessagePart;
-      if (shouldMarkPartAsError(typedPart, errorToolCallIds)) {
+      if (shouldMarkPartAsError(part, errorToolCallIds)) {
         return { ...part, isError: true };
       }
       return part;

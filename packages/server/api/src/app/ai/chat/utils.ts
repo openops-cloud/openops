@@ -338,6 +338,23 @@ function wrapErrorOutputInMCPStructure(output: unknown): {
   };
 }
 
+function findToolCallPart(
+  message: Omit<UIMessage, 'id'>,
+  toolCallId: string,
+): any {
+  if (message.role !== 'assistant') {
+    return null;
+  }
+
+  const toolCallPart = message.parts.find(
+    (part) =>
+      (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
+      (part as any).toolCallId === toolCallId,
+  );
+
+  return toolCallPart ?? null;
+}
+
 /**
  * Merges tool result into the corresponding assistant UI message
  */
@@ -356,18 +373,11 @@ function mergeToolResultIntoUIMessage(
       : normalized;
 
   for (let j = uiMessages.length - 1; j >= 0; j--) {
-    const prev = uiMessages[j];
-    if (prev.role === 'assistant') {
-      const toolCallPart = prev.parts.find(
-        (part) =>
-          (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
-          (part as any).toolCallId === toolResult.toolCallId,
-      );
-      if (toolCallPart) {
-        (toolCallPart as any).state = 'output-available';
-        (toolCallPart as any).output = finalOutput;
-        return;
-      }
+    const toolCallPart = findToolCallPart(uiMessages[j], toolResult.toolCallId);
+    if (toolCallPart) {
+      toolCallPart.state = 'output-available';
+      toolCallPart.output = finalOutput;
+      return;
     }
   }
 }
