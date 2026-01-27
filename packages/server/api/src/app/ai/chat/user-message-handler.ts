@@ -249,17 +249,14 @@ function shouldMarkPartAsError(
   part: MessagePart,
   errorToolCallIds: Set<string>,
 ): boolean {
-  const isToolResultPart =
-    part.type === 'tool-result' &&
-    !!part.toolCallId &&
-    errorToolCallIds.has(part.toolCallId);
-  const isToolCallPartWithOutput =
-    part.type === 'tool-call' &&
-    part.output != null &&
-    !!part.toolCallId &&
-    errorToolCallIds.has(part.toolCallId);
+  if (!part.toolCallId || !errorToolCallIds.has(part.toolCallId)) {
+    return false;
+  }
 
-  return isToolResultPart || isToolCallPartWithOutput;
+  return (
+    part.type === 'tool-result' ||
+    (part.type === 'tool-call' && part.output != null)
+  );
 }
 
 function unrecoverableError(
