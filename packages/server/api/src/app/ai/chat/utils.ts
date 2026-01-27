@@ -3,7 +3,7 @@ import { ModelMessage, ToolResultPart, ToolSet, UIMessage } from 'ai';
 
 type ExtendedToolResultPart = ToolResultPart & {
   isError?: boolean;
-  result?: unknown; // Alternative property name used in some contexts
+  result?: unknown;
 };
 
 /**

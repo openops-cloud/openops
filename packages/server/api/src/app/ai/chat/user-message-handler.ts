@@ -200,6 +200,9 @@ async function streamLLMResponse(
     });
 
     for await (const message of fullStream) {
+      if (isToolErrorPart(message)) {
+        errorToolCallIds.add(message.toolCallId);
+      }
       sendMessageToStream(params.serverResponse, message);
     }
   } catch (error) {
