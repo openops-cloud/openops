@@ -65,7 +65,7 @@ const AssistantTopBar = ({
   return (
     <div
       className={cn(
-        'flex flex-col px-4 py-2 gap-1 flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200 justify-center',
+        'flex flex-col px-4 py-2 gap-1 flex-shrink-0 text-sm dark:text-primary font-bold border-b border-gray-200 justify-center',
       )}
       style={{ minHeight: `${TOP_BAR_HEIGHT}px` }}
     >
@@ -121,7 +121,9 @@ const AssistantTopBar = ({
               <MessageSquarePlus size={13} />
             </Button>
           </TooltipWrapper>
-          <span className="min-w-0 max-w-[240px] truncate">{displayTitle}</span>
+          <span className="min-w-0 max-w-[240px] text-sm truncate">
+            {displayTitle}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           {children}
@@ -135,7 +137,7 @@ const AssistantTopBar = ({
               }}
               className="text-outline size-[36px]"
             >
-              <SquareArrowOutDownLeft size={20} />
+              <SquareArrowOutDownLeft size={16} />
             </Button>
           </TooltipWrapper>
         </div>
