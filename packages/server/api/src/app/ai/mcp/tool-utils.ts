@@ -71,6 +71,87 @@ function isUiToolCall(part: AssistantContent[number]): part is ToolCallPart {
 }
 
 /**
+ * Collects all existing tool result IDs from tool messages in the chat history.
+ */
+function collectExistingToolResultIds(
+  chatHistory: ModelMessage[],
+): Set<string> {
+  const ids = new Set<string>();
+  for (const msg of chatHistory) {
+    if (msg.role === 'tool' && Array.isArray(msg.content)) {
+      for (const part of msg.content) {
+        if (part.type === 'tool-result' && 'toolCallId' in part) {
+          ids.add(part.toolCallId);
+        }
+      }
+    }
+  }
+  return ids;
+}
+
+/**
+ * Creates a tool result message from a tool call and its result.
+ */
+function createToolResultMessage(
+  toolCall: ToolCallPart,
+  result: ToolResult,
+): ModelMessage {
+  const outputValue = result.output;
+  const output = {
+    type: 'text' as const,
+    value:
+      typeof outputValue === 'string'
+        ? outputValue
+        : JSON.stringify(outputValue),
+  };
+
+  return {
+    role: 'tool',
+    content: [
+      {
+        type: 'tool-result',
+        toolCallId: toolCall.toolCallId,
+        toolName: toolCall.toolName,
+        output,
+      },
+    ],
+  };
+}
+
+/**
+ * Finds UI tool calls missing results and creates tool result messages for them.
+ */
+function findMissingUiToolResultMessages(
+  chatHistory: ModelMessage[],
+  frontendToolResults: FrontendToolResultsMap,
+  existingToolResultIds: Set<string>,
+): ModelMessage[] {
+  const missingMessages: ModelMessage[] = [];
+
+  for (const msg of chatHistory) {
+    if (msg.role !== 'assistant' || !Array.isArray(msg.content)) {
+      continue;
+    }
+
+    for (const toolCall of msg.content.filter(isUiToolCall)) {
+      if (existingToolResultIds.has(toolCall.toolCallId)) {
+        continue;
+      }
+
+      const actualResult = frontendToolResults.get(toolCall.toolCallId);
+      if (!actualResult) {
+        continue;
+      }
+
+      missingMessages.push(createToolResultMessage(toolCall, actualResult));
+      existingToolResultIds.add(toolCall.toolCallId);
+    }
+  }
+
+  return missingMessages;
+}
+
+/**
  * Adds missing tool-result messages for UI tool calls in chat history.
  * Scans history for assistant messages with UI tool calls that don't have
  * corresponding tool-result messages, and adds them using the provided frontend results.
@@ -87,64 +168,18 @@ export function addMissingUiToolResults(
     return chatHistory;
   }
 
-  const existingToolResultIds = new Set<string>();
-  for (const msg of chatHistory) {
-    if (msg.role === 'tool' && Array.isArray(msg.content)) {
-      for (const part of msg.content) {
-        if (part.type === 'tool-result' && 'toolCallId' in part) {
-          existingToolResultIds.add(part.toolCallId);
-        }
-      }
-    }
-  }
+  const existingIds = collectExistingToolResultIds(chatHistory);
+  const missingMessages = findMissingUiToolResultMessages(
+    chatHistory,
+    frontendToolResults,
+    existingIds,
+  );
 
-  const missingToolMessages: ModelMessage[] = [];
-
-  for (const msg of chatHistory) {
-    if (msg.role === 'assistant' && Array.isArray(msg.content)) {
-      const uiToolCalls = msg.content.filter(isUiToolCall);
-
-      for (const toolCall of uiToolCalls) {
-        if (existingToolResultIds.has(toolCall.toolCallId)) {
-          continue;
-        }
-
-        const actualResult = frontendToolResults.get(toolCall.toolCallId);
-        if (!actualResult) {
-          continue;
-        }
-
-        const outputValue = actualResult.output;
-        const output = {
-          type: 'text' as const,
-          value:
-            typeof outputValue === 'string'
-              ? outputValue
-              : JSON.stringify(outputValue),
-        };
-
-        const toolMessage: ModelMessage = {
-          role: 'tool',
-          content: [
-            {
-              type: 'tool-result',
-              toolCallId: toolCall.toolCallId,
-              toolName: toolCall.toolName,
-              output,
-            },
-          ],
-        };
-        missingToolMessages.push(toolMessage);
-        existingToolResultIds.add(toolCall.toolCallId);
-      }
-    }
-  }
-
-  if (missingToolMessages.length === 0) {
+  if (missingMessages.length === 0) {
     return chatHistory;
   }
 
-  return [...chatHistory, ...missingToolMessages];
+  return [...chatHistory, ...missingMessages];
 }
 
 export function collectToolsByProvider(
