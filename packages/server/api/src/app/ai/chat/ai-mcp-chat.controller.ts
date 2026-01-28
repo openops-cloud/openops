@@ -222,7 +222,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       await withLangfuseSession(
         chatId,
         userId,
-        isToolResultOnly ? '[tool-result-submission]' : messageContent,
+        isToolResultOnly ? UI_TOOL_RESULT_SUBMISSION_MESSAGE : messageContent,
         async () => {
           await routeChatRequest({
             app,
