@@ -1,0 +1,111 @@
+---
+title: "Release Notes"
+description: "New features, improvements, and fixes in OpenOps."
+icon: "📝"
+iconType: "emoji"
+---
+
+export const eventTime = "2026-01-28T08:54:25Z";
+
+// NOTE: {
+  "✨": [
+    "The AI chat panel layout is more flexible on smaller screens while still remaining usable. When visible, the minimum width of the AI chat panel was reduced from 388px to 300px.",
+    "Internal prompt guidance for OpenOps Tables is now more explicit, making tool usage more consistent. The Tables prompt now emphasizes `list_tables` and `list_table_rows` with clear usage rules.",
+    "OAuth implementation details are now more consistent across modules, reducing duplication and drift. A shared `OAUTH_CHANNEL_PREFIX` constant is now reused across OAuth utilities and the redirect route.",
+    "Test and build tooling was updated to improve maintainability and keep dependencies current. Assistant UI packages and related dependencies were updated, third-party license metadata was refreshed, Jest transform ignore patterns were standardized, and Jest/Nx + TypeScript spec configs were added for the SMTP block package."
+  ],
+  "🐛": [
+    "OAuth redirect handling now correctly returns more of the callback information to the original window, avoiding lost parameters in some connection flows. The redirect page now sends all non-error/non-state query parameters plus `state` to both the opener and the BroadcastChannel instead of only sending an authorization code.",
+    "Progress update calls now include the information needed to reliably associate updates with the correct flow run. The `update-run` progress request now requires `flowId`, and that value is propagated through the worker and engine.",
+    "SMTP connection setup now provides clearer failures and supports more environments by allowing port configuration. SMTP ports are now configurable via system property, and SMTP connection error handling is centralized with improved error messages and logging.",
+    "Outlook forwarding now supports additional recipients, matching common email client behavior more closely. The Outlook `forward-email` action now supports optional CC/BCC and uses a shared recipient-mapping utility.",
+    "The Outlook email search help text is now easier to follow, reducing mistakes when building queries. The `searchQuery` description for the Outlook `find-email` action reformats example search terms for clarity."
+  ],
+  "🚀": [
+    "Folder exclusion handling is now more consistent across the product, reducing the chance of blocks being missed due to differing rules. Block discovery now uses a shared “block folder exclusion” service so all exclusion checks run through the same code path.",
+    "OAuth connections are now more resilient and easier to troubleshoot during sign-in and redirect handling. The OAuth flow now uses a nonce-based `state`, BroadcastChannel messaging, improved redirect UI, safer popup lifecycle handling, and more detailed server-side OAuth error logging.",
+    "Webhooks can now return a response without prematurely ending a run, enabling more predictable webhook-based integrations. The engine adds a webhook response hook and an engine-only `/send-webhook-response` endpoint, and the `return_response` HTTP action now sends webhook responses via an internal API while successful flow-run HTTP responses change from `204` (empty body) to `200` with a message.",
+    "Workflow deletions now stop runs cleanly so execution doesn’t continue after a delete request is issued. The engine uses cache-based deletion signaling plus a guard to stop execution, skips run updates when deletion is requested, and treats workflow-deletion errors as stopped runs.",
+    "Manual workflow runs now behave more like scheduled runs, producing the same kind of trigger payload when appropriate. Manual-run execution now runs scheduled trigger code and centralizes payload resolution logic with test coverage."
+  ]
+}
+ is interpolated at publish/commit time as structured JSON.
+const releaseNotes = {
+  "✨": [
+    "The AI chat panel layout is more flexible on smaller screens while still remaining usable. When visible, the minimum width of the AI chat panel was reduced from 388px to 300px.",
+    "Internal prompt guidance for OpenOps Tables is now more explicit, making tool usage more consistent. The Tables prompt now emphasizes `list_tables` and `list_table_rows` with clear usage rules.",
+    "OAuth implementation details are now more consistent across modules, reducing duplication and drift. A shared `OAUTH_CHANNEL_PREFIX` constant is now reused across OAuth utilities and the redirect route.",
+    "Test and build tooling was updated to improve maintainability and keep dependencies current. Assistant UI packages and related dependencies were updated, third-party license metadata was refreshed, Jest transform ignore patterns were standardized, and Jest/Nx + TypeScript spec configs were added for the SMTP block package."
+  ],
+  "🐛": [
+    "OAuth redirect handling now correctly returns more of the callback information to the original window, avoiding lost parameters in some connection flows. The redirect page now sends all non-error/non-state query parameters plus `state` to both the opener and the BroadcastChannel instead of only sending an authorization code.",
+    "Progress update calls now include the information needed to reliably associate updates with the correct flow run. The `update-run` progress request now requires `flowId`, and that value is propagated through the worker and engine.",
+    "SMTP connection setup now provides clearer failures and supports more environments by allowing port configuration. SMTP ports are now configurable via system property, and SMTP connection error handling is centralized with improved error messages and logging.",
+    "Outlook forwarding now supports additional recipients, matching common email client behavior more closely. The Outlook `forward-email` action now supports optional CC/BCC and uses a shared recipient-mapping utility.",
+    "The Outlook email search help text is now easier to follow, reducing mistakes when building queries. The `searchQuery` description for the Outlook `find-email` action reformats example search terms for clarity."
+  ],
+  "🚀": [
+    "Folder exclusion handling is now more consistent across the product, reducing the chance of blocks being missed due to differing rules. Block discovery now uses a shared “block folder exclusion” service so all exclusion checks run through the same code path.",
+    "OAuth connections are now more resilient and easier to troubleshoot during sign-in and redirect handling. The OAuth flow now uses a nonce-based `state`, BroadcastChannel messaging, improved redirect UI, safer popup lifecycle handling, and more detailed server-side OAuth error logging.",
+    "Webhooks can now return a response without prematurely ending a run, enabling more predictable webhook-based integrations. The engine adds a webhook response hook and an engine-only `/send-webhook-response` endpoint, and the `return_response` HTTP action now sends webhook responses via an internal API while successful flow-run HTTP responses change from `204` (empty body) to `200` with a message.",
+    "Workflow deletions now stop runs cleanly so execution doesn’t continue after a delete request is issued. The engine uses cache-based deletion signaling plus a guard to stop execution, skips run updates when deletion is requested, and treats workflow-deletion errors as stopped runs.",
+    "Manual workflow runs now behave more like scheduled runs, producing the same kind of trigger payload when appropriate. Manual-run execution now runs scheduled trigger code and centralizes payload resolution logic with test coverage."
+  ]
+}
+;
+
+const emojiForCategory = (category) => {
+  const c = String(category ?? '').toLowerCase();
+  if (c.includes('breaking')) return '⚠️';
+  if (c.includes('feature') || c.includes('new') || c.includes('added')) return '🚀';
+  if (c.includes('fix') || c.includes('bug')) return '🐛';
+  return '✨';
+};
+
+const sortCategories = (a, b) => {
+  const order = [
+    'breaking',
+    'feature',
+    'new',
+    'improvement',
+    'enhancement',
+    'bug',
+    'fix',
+  ];
+
+  const idx = (k) => {
+    const c = String(k ?? '').toLowerCase();
+    const i = order.findIndex((o) => c.includes(o));
+    return i === -1 ? 999 : i;
+  };
+
+  return idx(a) - idx(b) || String(a).localeCompare(String(b));
+};
+
+const normalizeListItem = (text) =>
+  String(text ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[.。]\s*$/, '');
+
+## {new Date(eventTime).toISOString().slice(0, 10)}
+
+{Object.keys(releaseNotes ?? {})
+  .sort(sortCategories)
+  .map((category) => {
+    const items = releaseNotes?.[category] ?? [];
+    if (!items.length) return null;
+
+    const emoji = emojiForCategory(category);
+
+    return (
+      <section key={category}>
+        <h2>{`${emoji} ${category}`}</h2>
+        <ul>
+          {items.map((item, idx) => (
+            <li key={`${category}-${idx}`}>{normalizeListItem(item)}</li>
+          ))}
+        </ul>
+      </section>
+    );
+  })}
