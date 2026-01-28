@@ -12,15 +12,15 @@ iconType: "emoji"
 ### 🚀 Improvements
 
 - Respond to incoming webhooks without interrupting automation runs.
-- Manual runs of scheduled triggers now generate the correct scheduled trigger payload.
+- Generate the correct scheduled trigger payload for manual runs of scheduled triggers.
 - Forward Outlook emails with optional CC and BCC recipients.
 
 ### 🐛 Fixes
 
-- More reliable OAuth account connections during redirect.
-- Deleting a workflow now stops runs and avoids misleading progress updates.
+- Improve OAuth account connections during redirect.
+- Stop runs and avoid misleading progress updates when deleting a workflow.
 
 ### ✨ Quality of life
 
-- The AI chat panel now uses less space when opened.
-- Clearer help text for Outlook email search queries.
+- Reduce the AI chat panel width when opened.
+- Clarify help text for Outlook email search queries.
