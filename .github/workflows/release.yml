@@ -84,7 +84,7 @@ jobs:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Create a release file
         run: |
           cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
