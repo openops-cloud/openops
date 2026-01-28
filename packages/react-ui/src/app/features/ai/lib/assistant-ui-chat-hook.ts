@@ -273,13 +273,21 @@ export const useAssistantChat = ({
               toolCall.input || toolCall.args,
               {} as any,
             );
-            chat.addToolResult({
+
+            chat.addToolOutput({
+              state: 'output-available',
               tool: toolCall.toolName,
               toolCallId: toolCall.toolCallId,
               output: result,
             });
           }
         } catch (error) {
+          chat.addToolOutput({
+            state: 'output-error',
+            tool: toolCall.toolName,
+            toolCallId: toolCall.toolCallId,
+            errorText: String(error),
+          });
           console.error('Error executing frontend tool:', error);
         }
       }

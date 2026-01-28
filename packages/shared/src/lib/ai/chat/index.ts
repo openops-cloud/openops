@@ -58,19 +58,30 @@ export const ChatFlowContext = Type.Object({
 
 export type ChatFlowContext = Static<typeof ChatFlowContext>;
 
+export const ToolResult = Type.Object({
+  toolCallId: Type.String(),
+  toolName: Type.String(),
+  output: Type.Any(),
+});
+
+export type ToolResult = Static<typeof ToolResult>;
+
+export const AIChatMessage = Type.Union([
+  Type.String(),
+  Type.Object({
+    role: Type.Union([
+      Type.Literal('user'),
+      Type.Literal('assistant'),
+      Type.Literal('tool'),
+    ]),
+    parts: Type.Any(),
+  }),
+]);
+export type AIChatMessage = Static<typeof AIChatMessage>;
+
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
-  message: Type.Union([
-    Type.String({}),
-    Type.Object({
-      role: Type.Union([
-        Type.Literal('user'),
-        Type.Literal('assistant'),
-        Type.Literal('tool'),
-      ]),
-      parts: Type.Any(),
-    }),
-  ]),
+  message: AIChatMessage,
   additionalContext: Type.Optional(ChatFlowContext),
   tools: Type.Optional(Type.Record(Type.String(), Type.Any())),
 });
