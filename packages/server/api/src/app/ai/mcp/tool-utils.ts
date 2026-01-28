@@ -98,11 +98,9 @@ export function addMissingUiToolResults(
     }
   }
 
-  const result: ModelMessage[] = [];
+  const missingToolMessages: ModelMessage[] = [];
 
   for (const msg of chatHistory) {
-    result.push(msg);
-
     if (msg.role === 'assistant' && Array.isArray(msg.content)) {
       const uiToolCalls = msg.content.filter(isUiToolCall);
 
@@ -136,13 +134,17 @@ export function addMissingUiToolResults(
             },
           ],
         };
-        result.push(toolMessage);
+        missingToolMessages.push(toolMessage);
         existingToolResultIds.add(toolCall.toolCallId);
       }
     }
   }
 
-  return result;
+  if (missingToolMessages.length === 0) {
+    return chatHistory;
+  }
+
+  return [...chatHistory, ...missingToolMessages];
 }
 
 export function collectToolsByProvider(
