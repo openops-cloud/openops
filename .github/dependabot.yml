@@ -1,47 +1,13 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: ""
-    cooldown:
-      default-days: 5
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 14
-    groups:
-      react:
-        dependency-type: production
-        patterns:
-          - @radix-ui/*
-          - react-*
-      aws:
-        patterns:
-          - @aws-sdk/*
-      fastify:
-        dependency-type: production
-        patterns:
-          - @fastify/*
-          - fastify
-          - fastify-*
-      production-dependencies:
-        dependency-type: "production"
-      development-dependencies:
-        dependency-type: "development"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: ""
-    cooldown:
-      default-days: 5
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 14
-    groups:
-      actions:
-        patterns:
-          - "*"
+      interval: weekly
+    open-pull-requests-limit: 0
