@@ -29,7 +29,7 @@ export const buildQueryKey = (
 };
 
 export function hasCompletedUIToolCalls(messages: UIMessage[]): boolean {
-  const message = messages[messages.length - 1];
+  const message = messages.at(-1);
 
   if (!message || message.role !== 'assistant') {
     return false;
