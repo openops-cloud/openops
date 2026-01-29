@@ -136,6 +136,7 @@ async function fetchMessages(
     .api(baseUrl)
     .select(SELECT_FIELDS)
     .orderby('receivedDateTime desc')
+    .top(50)
     .headers(headers);
 
   const shouldFetchAll = lastFetchEpochMS !== 0;
