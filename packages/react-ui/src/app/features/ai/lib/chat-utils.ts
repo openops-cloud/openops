@@ -1,4 +1,5 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { UI_TOOL_PREFIX } from '@openops/shared';
 import { UIMessage } from 'ai';
 import { ChatMode } from './types';
 
@@ -26,8 +27,6 @@ export const buildQueryKey = (
 
   return baseKey;
 };
-
-const UI_TOOL_PREFIX = 'ui-';
 
 export function hasCompletedUIToolCalls(messages: UIMessage[]): boolean {
   const message = messages[messages.length - 1];

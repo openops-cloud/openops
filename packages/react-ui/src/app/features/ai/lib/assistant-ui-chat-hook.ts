@@ -6,7 +6,7 @@ import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper, FlowVersion } from '@openops/shared';
+import { flowHelper, FlowVersion, UI_TOOL_PREFIX } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
@@ -258,7 +258,7 @@ export const useAssistantChat = ({
     // https://github.com/assistant-ui/assistant-ui/issues/2327
     // handle frontend tool calls manually until this is fixed
     onToolCall: async ({ toolCall }: { toolCall: any }) => {
-      if (toolCall.toolName?.startsWith('ui-')) {
+      if (toolCall.toolName?.startsWith(UI_TOOL_PREFIX)) {
         try {
           const tool =
             frontendTools[toolCall.toolName as keyof typeof frontendTools];
