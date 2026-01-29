@@ -321,6 +321,47 @@ describe('mergeToolResultsIntoMessages', () => {
       });
     });
 
+    it('should wrap error tool results in MCP structure', () => {
+      const messages: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call_error',
+              toolName: 'failing_tool',
+              input: { test: 'input' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call_error',
+              toolName: 'failing_tool',
+              output: 'Operation failed',
+              isError: true,
+            } as any,
+          ],
+        },
+      ];
+
+      const result = mergeToolResultsIntoMessages(messages);
+
+      expect(result[0].parts[0]).toMatchObject({
+        type: 'dynamic-tool',
+        toolName: 'failing_tool',
+        toolCallId: 'call_error',
+        state: 'output-available',
+        output: {
+          content: [{ type: 'text', text: 'Operation failed' }],
+          isError: true,
+        },
+      });
+    });
+
     it('should not merge tool result if no matching toolCallId found', () => {
       const messages: ModelMessage[] = [
         {

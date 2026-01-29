@@ -61,6 +61,27 @@ type StreamCallSettings = RequestContext &
     abortSignal: AbortSignal;
   };
 
+type ToolErrorStreamPart = {
+  type: 'tool-error';
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+  error: unknown;
+};
+
+function isToolErrorPart(
+  message: TextStreamPart<ToolSet>,
+): message is ToolErrorStreamPart {
+  return message.type === 'tool-error';
+}
+
+type MessagePart = {
+  type: string;
+  toolCallId?: string;
+  output?: unknown;
+  isError?: boolean;
+};
+
 export async function handleUserMessage(
   params: UserMessageParams,
 ): Promise<void> {
@@ -148,6 +169,7 @@ async function streamLLMResponse(
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
   const tokenUsageReporter = new TokenUsageReporter();
+  const errorToolCallIds = new Set<string>();
 
   try {
     const fullStream = getLLMAsyncStream({
@@ -186,13 +208,16 @@ async function streamLLMResponse(
         const partialMessages = steps.at(-1)?.response.messages ?? [];
         return saveChatHistory(params.chatId, params.userId, params.projectId, [
           ...params.chatHistory,
-          ...partialMessages,
+          ...markToolResultsWithErrors(partialMessages, errorToolCallIds),
         ]);
       },
       abortSignal: params.abortSignal,
     });
 
     for await (const message of fullStream) {
+      if (isToolErrorPart(message)) {
+        errorToolCallIds.add(message.toolCallId);
+      }
       sendMessageToStream(params.serverResponse, message);
     }
   } catch (error) {
@@ -200,7 +225,52 @@ async function streamLLMResponse(
     newMessages.push(errorMessage);
   }
 
-  return newMessages;
+  return markToolResultsWithErrors(newMessages, errorToolCallIds);
+}
+
+/**
+ * Marks tool-result parts with isError flag if their toolCallId is in the error set
+ * This ensures tool errors are properly persisted with error status
+ */
+function markToolResultsWithErrors(
+  messages: ModelMessage[],
+  errorToolCallIds: Set<string>,
+): ModelMessage[] {
+  if (errorToolCallIds.size === 0) {
+    return messages;
+  }
+
+  return messages.map((message) => {
+    if (!Array.isArray(message.content) || message.content.length === 0) {
+      return message;
+    }
+
+    const updatedContent = message.content.map((part) => {
+      if (shouldMarkPartAsError(part, errorToolCallIds)) {
+        return { ...part, isError: true };
+      }
+      return part;
+    });
+
+    return {
+      ...message,
+      content: updatedContent,
+    } as ModelMessage;
+  });
+}
+
+function shouldMarkPartAsError(
+  part: MessagePart,
+  errorToolCallIds: Set<string>,
+): boolean {
+  if (!part.toolCallId || !errorToolCallIds.has(part.toolCallId)) {
+    return false;
+  }
+
+  return (
+    part.type === 'tool-result' ||
+    (part.type === 'tool-call' && part.output != null)
+  );
 }
 
 function unrecoverableError(
@@ -331,9 +401,27 @@ function sendMessageToStream(
     case 'finish-step':
     case 'finish':
     case 'tool-input-end':
-    case 'tool-error':
     case 'error':
       return;
+    case 'tool-error':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: {
+            content: [
+              {
+                type: 'text',
+                text:
+                  (message as any).error?.message ||
+                  String((message as any).error),
+              },
+            ],
+            isError: true,
+          },
+        })}`,
+      );
+      break;
     default:
       responseStream.write(`data: ${JSON.stringify(message)}`);
       break;

@@ -1,4 +1,4 @@
-import { AIChatMessage, ToolResult } from '@openops/shared';
+import { AIChatMessage, ToolResult, UI_TOOL_PREFIX } from '@openops/shared';
 import {
   AssistantContent,
   jsonSchema,
@@ -8,8 +8,6 @@ import {
   ToolSet,
 } from 'ai';
 import { AssistantUITools } from './types';
-
-export const UI_TOOL_PREFIX = 'ui-';
 
 export type FrontendToolResultsMap = Map<string, ToolResult>;
 
