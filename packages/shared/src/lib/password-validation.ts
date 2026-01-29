@@ -14,7 +14,7 @@ const ALLOWED_CHARACTERS = [
   UPPERCASE_REGEX.source,
   NUMBER_REGEX.source,
 ]
-  .map((source) => source.replace(/[[\]]/g, ''))
+  .map((source) => source.replace(/^\[|\]$/g, ''))
   .join('');
 
 type ValidationRule = {
