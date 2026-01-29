@@ -1,3 +1,4 @@
+import { UI_TOOL_PREFIX } from '@openops/shared';
 import {
   AssistantContent,
   jsonSchema,
@@ -8,7 +9,6 @@ import {
 } from 'ai';
 import { AssistantUITools } from './types';
 
-export const UI_TOOL_PREFIX = 'ui-';
 const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
 
 /**
