@@ -6,6 +6,7 @@ import { ExpandIcon, MinimizeIcon } from 'lucide-react';
 import { useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
+import { AiModelSelectorProps } from '../ai-chat-container/ai-model-selector';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiCliChatContainerSizeState,
@@ -32,7 +33,7 @@ type StepSettingsAssistantUiChatContainerProps = {
   className?: string;
   isModelSelectorLoading: boolean;
   selectedModel?: string;
-  availableModels: string[];
+  availableModels: AiModelSelectorProps['availableModels'];
   onModelSelected: (modelName: string) => void;
   runtime: AssistantRuntime;
   theme: Theme;

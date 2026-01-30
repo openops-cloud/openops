@@ -14,10 +14,16 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { ScrollArea } from '../../ui/scroll-area';
 import { LoadingSpinner } from '../../ui/spinner';
+import { AiProviderIcon } from './ai-provider-icon';
+
+type AiModelInfo = {
+  name: string;
+  provider?: string;
+};
 
 type AiModelSelectorProps = {
   selectedModel?: string;
-  availableModels: string[];
+  availableModels: AiModelInfo[];
   onModelSelected: (modelName: string) => void;
   isModelSelectorLoading: boolean;
   className?: string;
@@ -87,20 +93,26 @@ const AiModelSelector = ({
                   >
                     {availableModels.map((model) => (
                       <CommandItem
-                        key={model}
-                        value={model}
-                        onSelect={() => handleSelect(model)}
+                        key={model.name}
+                        value={model.name}
+                        onSelect={() => handleSelect(model.name)}
                       >
+                        <div className="flex items-center gap-2 flex-1">
+                          <AiProviderIcon
+                            provider={model.provider}
+                            className="text-muted-foreground"
+                          />
+                          <span>{model.name}</span>
+                        </div>
                         <Check
                           size={16}
                           className={cn(
                             'mr-2',
-                            selectedModel === model
+                            selectedModel === model.name
                               ? 'opacity-100'
                               : 'opacity-0',
                           )}
                         />
-                        {model}
                       </CommandItem>
                     ))}
                   </ScrollArea>

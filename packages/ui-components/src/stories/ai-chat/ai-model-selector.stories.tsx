@@ -22,14 +22,16 @@ const meta = {
   args: {
     selectedModel: 'gpt-4',
     availableModels: [
-      'gpt-3.5-turbo',
-      'gpt-4',
-      'gpt-4-turbo',
-      'claude-2',
-      'claude-instant',
-      'gemini-pro',
-      'llama-2-70b',
-      'mistral-7b',
+      { name: 'gpt-3.5-turbo', provider: 'OpenAI' },
+      { name: 'gpt-4', provider: 'OpenAI' },
+      { name: 'gpt-4-turbo', provider: 'OpenAI' },
+      { name: 'claude-2', provider: 'Anthropic' },
+      { name: 'claude-instant', provider: 'Anthropic' },
+      { name: 'gemini-pro', provider: 'Google Generative AI' },
+      { name: 'llama-2-70b', provider: 'Groq' },
+      { name: 'mistral-7b', provider: 'Mistral' },
+      { name: 'llama-3-deepinfra', provider: 'Deep Infra' },
+      { name: 'together-model', provider: 'Together.ai' },
     ],
     onModelSelected: action('Model selected'),
     isModelSelectorLoading: false,
@@ -56,7 +58,7 @@ export const Default: Story = {};
  */
 export const SingleModelOnly: Story = {
   args: {
-    availableModels: ['gpt-4'],
+    availableModels: [{ name: 'gpt-4', provider: 'OpenAI' }],
   },
 };
 
