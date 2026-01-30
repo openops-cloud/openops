@@ -1,0 +1,31 @@
+---
+title: "Release Notes"
+description: "New features, improvements, and fixes in OpenOps."
+icon: "📝"
+iconType: "emoji"
+---
+
+## 2026-01-28
+
+### 🚀 Features
+
+- Improved OAuth connections with safer sign-in, clearer redirects, and better error handling
+- Webhooks can now return a response without ending the workflow run
+- Deleting a workflow now stops any in-progress workflow runs cleanly
+- Manual runs now generate the same trigger payload as scheduled runs when applicable
+- Block discovery now applies folder exclusions consistently
+
+### ✨ Improvements
+
+- Improved AI chat panel layout on small screens (minimum width reduced to 300px)
+- Updated OpenOps Tables AI guidance to improve tool selection and results
+- Standardized OAuth behavior across modules for more consistent sign-in flows
+- Improved overall stability and compatibility
+
+### 🐛 Fixes
+
+- Fixed OAuth redirects to return all callback parameters to the original window
+- Fixed progress updates so they reliably attach to the correct workflow run
+- Improved SMTP connections with configurable ports and clearer error messages
+- Outlook forward-email now supports CC and BCC recipients
+- Clarified Outlook email search query help text
