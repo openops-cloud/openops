@@ -220,7 +220,7 @@
     "langfuse": "3.38.6",
     "langfuse-vercel": "3.38.4",
     "localforage": "1.10.0",
-    "lodash-es": "4.17.21",
+    "lodash-es": "4.17.23",
     "lodash.debounce": "4.0.8",
     "logzio-nodejs": "2.5.0",
     "lottie-web": "5.12.2",
