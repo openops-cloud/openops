@@ -214,9 +214,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         hasToolResults && messageContent === UI_TOOL_RESULT_SUBMISSION_MESSAGE;
 
       updateActiveObservation({
-        input: isToolResultOnly
-          ? UI_TOOL_RESULT_SUBMISSION_MESSAGE
-          : messageContent,
+        input: messageContent,
       });
 
       await withLangfuseSession(
