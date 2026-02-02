@@ -21,6 +21,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     selectedModel: 'gpt-4',
+    selectedProvider: 'OpenAI',
     availableModels: [
       { name: 'gpt-3.5-turbo', provider: 'OpenAI' },
       { name: 'gpt-4', provider: 'OpenAI' },
@@ -60,6 +61,7 @@ export const Default: Story = {};
 export const SingleModelOnly: Story = {
   args: {
     availableModels: [{ name: 'gpt-4', provider: 'OpenAI' }],
+    selectedProvider: 'OpenAI',
   },
 };
 
@@ -84,6 +86,7 @@ export const Loading: Story = {
 export const AlternativeModelSelected: Story = {
   args: {
     selectedModel: 'claude-2',
+    selectedProvider: 'Anthropic',
   },
 };
 
