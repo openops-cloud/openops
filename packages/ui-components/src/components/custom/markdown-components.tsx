@@ -15,7 +15,7 @@ export function createMarkdownComponents({
   return {
     h1: ({ node, children, ...props }: any) => (
       <h1
-        className="scroll-m-20 text-3xl font-bold tracking-tight mt-1"
+        className="scroll-m-20 text-[24px] font-bold tracking-tight mt-1"
         {...props}
       >
         {children}
@@ -23,7 +23,7 @@ export function createMarkdownComponents({
     ),
     h2: ({ node, children, ...props }: any) => (
       <h2
-        className="scroll-m-20 text-2xl font-semibold tracking-tight mt-4"
+        className="scroll-m-20 text-xl font-bold tracking-tight mt-4"
         {...props}
       >
         {children}
@@ -31,7 +31,7 @@ export function createMarkdownComponents({
     ),
     h3: ({ node, children, ...props }: any) => (
       <h3
-        className="scroll-m-20 text-xl font-semibold tracking-tight mt-2"
+        className="scroll-m-20 text-base font-bold tracking-tight mt-2"
         {...props}
       >
         {children}
@@ -39,7 +39,7 @@ export function createMarkdownComponents({
     ),
     h4: ({ node, children, ...props }: any) => (
       <h4
-        className="scroll-m-20 text-lg font-semibold tracking-tight mt-2"
+        className="scroll-m-20 text-sm font-bold tracking-tight mt-2"
         {...props}
       >
         {children}
@@ -47,7 +47,7 @@ export function createMarkdownComponents({
     ),
     h5: ({ node, children, ...props }: any) => (
       <h5
-        className="scroll-m-20 text-base font-semibold tracking-tight mt-2"
+        className="scroll-m-20 text-sm font-bold tracking-tight mt-2"
         {...props}
       >
         {children}
@@ -55,7 +55,7 @@ export function createMarkdownComponents({
     ),
     h6: ({ node, children, ...props }: any) => (
       <h6
-        className="scroll-m-20 text-sm font-semibold tracking-tight mt-2"
+        className="scroll-m-20 text-sm font-bold tracking-tight mt-2"
         {...props}
       >
         {children}
@@ -64,7 +64,7 @@ export function createMarkdownComponents({
     p: ({ node, children, ...props }: any) => (
       <p
         className={cn(
-          'leading-7 mt-2 [&:not(:first-child)]:my-2',
+          'text-sm leading-5 mt-2 [&:not(:first-child)]:my-2',
           textClassName,
         )}
         {...props}
@@ -74,14 +74,17 @@ export function createMarkdownComponents({
     ),
     ul: ({ node, ...props }: any) => (
       <ul
-        className={cn('my-2 ml-6 list-disc [&>li]:mt-2', listClassName)}
+        className={cn(
+          'my-2 ml-6 list-disc [&>li]:mt-2 text-sm leading-5',
+          listClassName,
+        )}
         {...props}
       />
     ),
     ol: ({ node, ...props }: any) => (
       <ol
         className={cn(
-          'my-6 list-decimal [&>li]:mt-2 ol-responsive-margins',
+          'my-6 list-decimal [&>li]:mt-2 ol-responsive-margins text-sm leading-5',
           listClassName,
         )}
         {...props}

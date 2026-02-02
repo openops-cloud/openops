@@ -89,6 +89,7 @@ module.exports = {
         greyBlue: {
           DEFAULT: 'hsl(var(--grey-blue))',
           50: 'hsl(var(--grey-blue-50))',
+          100: 'hsl(var(--grey-blue-100))',
         },
         success: {
           DEFAULT: 'hsl(var(--success))',

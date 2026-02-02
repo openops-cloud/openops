@@ -72,7 +72,7 @@ export const Thread = ({
     [theme],
   );
   return (
-    <ThreadPrimitive.Root className="bg-background box-border flex h-full flex-col overflow-hidden">
+    <ThreadPrimitive.Root className="bg-greyBlue-100 box-border flex h-full flex-col overflow-hidden">
       <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8">
         <ThreadWelcome />
 
@@ -153,7 +153,7 @@ const Composer = ({
   const isDisabled = !!connectionError;
 
   return (
-    <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in pb-9">
+    <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-background px-2.5 shadow-sm transition-colors ease-in pb-9">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
@@ -207,7 +207,7 @@ const ComposerAction: FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
 const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full  py-4">
-      <div className="bg-muted text-foreground break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
+      <div className="bg-muted text-foreground break-words rounded-sm pl-[15px] pr-[10px] py-3 col-start-2 row-start-2">
         <MessagePrimitive.Content />
       </div>
     </MessagePrimitive.Root>
