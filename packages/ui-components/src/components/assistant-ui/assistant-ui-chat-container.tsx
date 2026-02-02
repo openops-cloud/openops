@@ -55,7 +55,7 @@ const AssistantUiChatContainer = ({
   }, [handleInject]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-greyBlue-100 overflow-hidden relative">
+    <div className="h-full w-full flex flex-col bg-background overflow-hidden relative">
       <AssistantTopBar
         onClose={onClose}
         onNewChat={onNewChat}

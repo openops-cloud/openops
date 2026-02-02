@@ -153,7 +153,7 @@ const Composer = ({
   const isDisabled = !!connectionError;
 
   return (
-    <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in pb-9">
+    <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-background px-2.5 shadow-sm transition-colors ease-in pb-9">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
