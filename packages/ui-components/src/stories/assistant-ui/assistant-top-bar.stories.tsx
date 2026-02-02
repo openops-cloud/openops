@@ -78,7 +78,7 @@ export const WithActionButtons: Story = {
           size="icon"
           className="text-outline size-[36px]"
         >
-          <Settings size={20} />
+          <Settings size={16} />
         </Button>
         <Button
           onClick={action('Help clicked')}
@@ -86,7 +86,7 @@ export const WithActionButtons: Story = {
           size="icon"
           className="text-outline size-[36px]"
         >
-          <HelpCircle size={20} />
+          <HelpCircle size={16} />
         </Button>
       </>
     ),
