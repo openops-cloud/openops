@@ -106,7 +106,7 @@ export const WithSingleButton: Story = {
         size="icon"
         className="text-outline size-[36px]"
       >
-        <Bell size={20} />
+        <Bell size={16} />
       </Button>
     ),
   },
@@ -126,7 +126,7 @@ export const ComplexExample: Story = {
           size="icon"
           className="text-outline size-[36px]"
         >
-          <BookOpen size={20} />
+          <BookOpen size={16} />
         </Button>
         <Button
           onClick={action('Settings clicked')}
@@ -134,7 +134,7 @@ export const ComplexExample: Story = {
           size="icon"
           className="text-outline size-[36px]"
         >
-          <Settings size={20} />
+          <Settings size={16} />
         </Button>
       </>
     ),
