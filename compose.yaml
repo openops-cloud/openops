@@ -74,7 +74,7 @@ services:
       - 'redis_data:/data'
   analytics:
     container_name: analytics
-    image: public.ecr.aws/openops/openops-analytics:0.14.1
+    image: public.ecr.aws/openops/openops-analytics:0.14.2
     ports: ['8088:8088']
     environment:
       DATABASE_DIALECT: 'postgresql'
