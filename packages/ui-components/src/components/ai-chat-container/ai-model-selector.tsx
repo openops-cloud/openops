@@ -23,6 +23,7 @@ type AiModelInfo = {
 
 type AiModelSelectorProps = {
   selectedModel?: string;
+  selectedProvider?: string;
   availableModels: AiModelInfo[];
   onModelSelected: (modelName: string) => void;
   isModelSelectorLoading: boolean;
@@ -31,6 +32,7 @@ type AiModelSelectorProps = {
 
 const AiModelSelector = ({
   selectedModel,
+  selectedProvider,
   availableModels,
   onModelSelected,
   isModelSelectorLoading,
@@ -38,10 +40,6 @@ const AiModelSelector = ({
 }: AiModelSelectorProps) => {
   const [open, setOpen] = useState(false);
   const hasOptions = availableModels.length > 1;
-
-  const selectedModelInfo = availableModels.find(
-    (m) => m.name === selectedModel,
-  );
 
   const handleSelect = useCallback(
     (model: string) => {
@@ -77,7 +75,7 @@ const AiModelSelector = ({
               className="flex items-center gap-1 rounded-xs"
             >
               <AiProviderIcon
-                provider={selectedModelInfo?.provider}
+                provider={selectedProvider}
                 className="text-muted-foreground"
               />
               {selectedModel}

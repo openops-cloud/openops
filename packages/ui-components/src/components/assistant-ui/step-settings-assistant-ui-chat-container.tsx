@@ -33,6 +33,7 @@ type StepSettingsAssistantUiChatContainerProps = {
   className?: string;
   isModelSelectorLoading: boolean;
   selectedModel?: string;
+  selectedProvider?: string;
   availableModels: AiModelSelectorProps['availableModels'];
   onModelSelected: (modelName: string) => void;
   runtime: AssistantRuntime;
@@ -56,6 +57,7 @@ const StepSettingsAssistantUiChatContainer = ({
   className,
   isModelSelectorLoading,
   selectedModel,
+  selectedProvider,
   availableModels,
   onModelSelected,
   runtime,
@@ -107,6 +109,7 @@ const StepSettingsAssistantUiChatContainer = ({
       <AssistantUiChatContainer
         handleInject={handleInject}
         selectedModel={selectedModel}
+        selectedProvider={selectedProvider}
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}
         runtime={runtime}
