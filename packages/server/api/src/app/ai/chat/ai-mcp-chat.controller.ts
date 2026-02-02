@@ -203,35 +203,29 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const frontendToolResults = extractUiToolResultsFromMessage(
         request.body.message,
       );
-      const hasToolResults = frontendToolResults.length > 0;
-
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
         return;
       }
 
       const isToolResultOnly =
-        hasToolResults && messageContent === UI_TOOL_RESULT_SUBMISSION_MESSAGE;
+        frontendToolResults.length > 0 &&
+        messageContent === UI_TOOL_RESULT_SUBMISSION_MESSAGE;
 
       updateActiveObservation({
         input: messageContent,
       });
 
-      await withLangfuseSession(
-        chatId,
-        userId,
-        isToolResultOnly ? UI_TOOL_RESULT_SUBMISSION_MESSAGE : messageContent,
-        async () => {
-          await routeChatRequest({
-            app,
-            request,
-            newMessage: createUserMessage(messageContent),
-            isToolResultOnly,
-            frontendToolResults,
-            reply,
-          });
-        },
-      );
+      await withLangfuseSession(chatId, userId, messageContent, async () => {
+        await routeChatRequest({
+          app,
+          request,
+          newMessage: createUserMessage(messageContent),
+          isToolResultOnly,
+          frontendToolResults,
+          reply,
+        });
+      });
     },
     {
       name: 'openops-chat-message',
