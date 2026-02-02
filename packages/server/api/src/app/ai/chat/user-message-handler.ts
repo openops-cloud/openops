@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext, ToolResult } from '@openops/shared';
 import {
   AssistantModelMessage,
   LanguageModel,
@@ -14,7 +14,10 @@ import {
   sendAiChatAbortedEvent,
   sendAiChatFailureEvent,
 } from '../../telemetry/event-models';
-import { addUiToolResults } from '../mcp/tool-utils';
+import {
+  addMissingUiToolResults,
+  createToolResultsMap,
+} from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
@@ -41,6 +44,7 @@ type UserMessageParams = RequestContext &
     abortSignal: AbortSignal;
   } & {
     frontendTools: AssistantUITools;
+    frontendToolResults?: ToolResult[];
     additionalContext?: ChatFlowContext;
   };
 
@@ -92,18 +96,26 @@ export async function handleUserMessage(
     serverResponse,
     conversation: { chatContext, chatHistory },
     frontendTools,
+    frontendToolResults,
     additionalContext,
     abortSignal,
   } = params;
 
   const messageId = generateMessageId();
 
+  const toolResultsMap = createToolResultsMap(frontendToolResults);
+
+  const updatedChatHistory = addMissingUiToolResults(
+    chatHistory,
+    toolResultsMap,
+  );
+
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
     projectId,
     authToken,
     aiConfig,
-    messages: chatHistory,
+    messages: updatedChatHistory,
     chatContext,
     languageModel,
     frontendTools,
@@ -121,7 +133,7 @@ export async function handleUserMessage(
         userId,
         projectId,
         aiConfig,
-        chatHistory,
+        chatHistory: updatedChatHistory,
         systemPrompt,
         languageModel,
         serverResponse,
@@ -134,10 +146,15 @@ export async function handleUserMessage(
     serverResponse.write(finishStepPart);
     serverResponse.write(finishMessagePart);
 
-    await saveChatHistory(chatId, userId, projectId, [
-      ...chatHistory,
-      ...addUiToolResults(newMessages),
-    ]);
+    await saveChatHistory(
+      chatId,
+      userId,
+      projectId,
+      addMissingUiToolResults(
+        [...updatedChatHistory, ...newMessages],
+        toolResultsMap,
+      ),
+    );
   } finally {
     await closeMCPClients(mcpClients);
     serverResponse.write(doneMarker);
@@ -191,9 +208,7 @@ async function streamLLMResponse(
         const partialMessages = steps.at(-1)?.response.messages ?? [];
         return saveChatHistory(params.chatId, params.userId, params.projectId, [
           ...params.chatHistory,
-          ...addUiToolResults(
-            markToolResultsWithErrors(partialMessages, errorToolCallIds),
-          ),
+          ...markToolResultsWithErrors(partialMessages, errorToolCallIds),
         ]);
       },
       abortSignal: params.abortSignal,

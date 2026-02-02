@@ -1,4 +1,4 @@
-import { isNil, NewMessageRequest } from '@openops/shared';
+import { AIChatMessage, isNil } from '@openops/shared';
 
 export type ParsedMessage = {
   content: string;
@@ -12,9 +12,9 @@ export type InvalidMessage = {
 
 export type MessageParseResult = ParsedMessage | InvalidMessage;
 
-export function parseUserMessage(
-  message: NewMessageRequest['message'],
-): MessageParseResult {
+export const UI_TOOL_RESULT_SUBMISSION_MESSAGE = '[ui-tool-result-submission]';
+
+export function parseUserMessage(message: AIChatMessage): MessageParseResult {
   if (typeof message === 'string') {
     return { isValid: true, content: message };
   }
@@ -38,7 +38,7 @@ export function parseUserMessage(
   const content =
     firstContentElement.type !== 'reasoning' && !isNil(firstContentElement.text)
       ? String(firstContentElement.text)
-      : 'continue';
+      : UI_TOOL_RESULT_SUBMISSION_MESSAGE;
 
   return {
     isValid: true,
