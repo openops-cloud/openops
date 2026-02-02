@@ -39,6 +39,10 @@ const AiModelSelector = ({
   const [open, setOpen] = useState(false);
   const hasOptions = availableModels.length > 1;
 
+  const selectedModelInfo = availableModels.find(
+    (m) => m.name === selectedModel,
+  );
+
   const handleSelect = useCallback(
     (model: string) => {
       if (selectedModel !== model) {
@@ -72,6 +76,10 @@ const AiModelSelector = ({
               variant="secondary"
               className="flex items-center gap-1 rounded-xs"
             >
+              <AiProviderIcon
+                provider={selectedModelInfo?.provider}
+                className="text-muted-foreground"
+              />
               {selectedModel}
               {isModelSelectorLoading && <LoadingSpinner size={12} />}
               {hasOptions && !isModelSelectorLoading && (
