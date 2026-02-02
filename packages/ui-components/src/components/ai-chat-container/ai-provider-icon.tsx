@@ -6,6 +6,7 @@ import CohereIcon from '../../icons/cohere.icon';
 import DeepInfraIcon from '../../icons/deepinfra.icon';
 import DeepSeekIcon from '../../icons/deepseek.icon';
 import GeminiIcon from '../../icons/gemini.icon';
+import GoogleIcon from '../../icons/google.icon';
 import GrokIcon from '../../icons/grok.icon';
 import MistralIcon from '../../icons/mistral.icon';
 import OpenAiIcon from '../../icons/open-ai.icon';
@@ -36,8 +37,9 @@ const AiProviderIcon = ({
     case AiProviderEnum.ANTHROPIC:
       return <AnthropicIcon {...iconProps} />;
     case AiProviderEnum.GOOGLE:
-    case AiProviderEnum.GOOGLE_VERTEX:
       return <GeminiIcon {...iconProps} />;
+    case AiProviderEnum.GOOGLE_VERTEX:
+      return <GoogleIcon {...iconProps} />;
     case AiProviderEnum.MISTRAL:
       return <MistralIcon {...iconProps} />;
     case AiProviderEnum.GROQ:

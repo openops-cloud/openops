@@ -28,6 +28,7 @@ const meta = {
       { name: 'claude-2', provider: 'Anthropic' },
       { name: 'claude-instant', provider: 'Anthropic' },
       { name: 'gemini-pro', provider: 'Google Generative AI' },
+      { name: 'google-vertex-model', provider: 'Google Vertex AI' },
       { name: 'llama-2-70b', provider: 'Groq' },
       { name: 'mistral-7b', provider: 'Mistral' },
       { name: 'llama-3-deepinfra', provider: 'Deep Infra' },
