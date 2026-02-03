@@ -71,6 +71,7 @@ const StepSettingsAssistantUiChat = ({
 
   const {
     selectedModel,
+    selectedProvider,
     availableModels,
     onModelSelected,
     isLoading: isModelSelectorLoading,
@@ -106,6 +107,7 @@ const StepSettingsAssistantUiChat = ({
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}
       selectedModel={selectedModel}
+      selectedProvider={selectedProvider}
       availableModels={availableModels}
       theme={theme}
       runtime={runtime}

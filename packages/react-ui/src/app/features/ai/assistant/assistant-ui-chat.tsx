@@ -67,6 +67,7 @@ const AssistantUiChat = ({
 
   const {
     selectedModel,
+    selectedProvider,
     availableModels,
     onModelSelected,
     isLoading: isModelSelectorLoading,
@@ -146,6 +147,7 @@ const AssistantUiChat = ({
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}
         selectedModel={selectedModel}
+        selectedProvider={selectedProvider}
         theme={theme}
         handleInject={handleInject}
         toolComponents={toolComponents}

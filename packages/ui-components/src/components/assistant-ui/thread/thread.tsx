@@ -58,6 +58,7 @@ export const Thread = ({
   theme,
   availableModels,
   selectedModel,
+  selectedProvider,
   onModelSelected,
   isModelSelectorLoading,
   isShowingSlowWarning,
@@ -101,6 +102,7 @@ export const Thread = ({
           <Composer
             availableModels={availableModels}
             selectedModel={selectedModel}
+            selectedProvider={selectedProvider}
             onModelSelected={onModelSelected}
             isModelSelectorLoading={isModelSelectorLoading}
             connectionError={connectionError}
@@ -146,6 +148,7 @@ type ComposerProps = AiModelSelectorProps & {
 const Composer = ({
   availableModels,
   selectedModel,
+  selectedProvider,
   onModelSelected,
   isModelSelectorLoading,
   connectionError,
@@ -166,6 +169,7 @@ const Composer = ({
       <AiModelSelector
         availableModels={availableModels}
         selectedModel={selectedModel}
+        selectedProvider={selectedProvider}
         onModelSelected={onModelSelected}
         isModelSelectorLoading={isModelSelectorLoading}
         className="absolute left-3 bottom-3"
