@@ -88,6 +88,7 @@
     "@frontegg/client": "5.3.2",
     "@frontegg/js": "7.92.0",
     "@hookform/resolvers": "3.9.0",
+    "@isaacs/brace-expansion": "5.0.1",
     "@langfuse/otel": "4.2.0",
     "@langfuse/tracing": "4.5.1",
     "@linear/sdk": "7.0.1",
