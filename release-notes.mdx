@@ -1,0 +1,29 @@
+---
+title: "Release notes"
+description: "Product updates and fixes for OpenOps."
+icon: "📝"
+iconType: "emoji"
+---
+
+## 2026-02-04
+
+```json
+{
+  "✨": [
+    "The assistant UI has refreshed styling for improved readability and consistency. This introduces a new `greyBlue-100` color token and adjusts typography classes (sizes, weights, and styles) for Markdown headings, paragraphs, and lists.",
+    "Analytics deployment references were updated to the latest published image/version so environments stay aligned. Docker Compose and Helm values were updated from `0.14.1` to `0.14.2` for the analytics image/version references.",
+    "Dependencies were updated to use a safer and newer brace expansion library version. The project now depends directly on `@isaacs/brace-expansion@5.0.1` after updating it to that version."
+  ],
+  "🐛": [
+    "Password rules now correctly accept all supported special characters without edge-case failures. The password allowed-characters regex construction was refined and is now covered by a test that includes every allowed special character, including square brackets (`[` and `]`)."
+  ],
+  "🚀": [
+    "Tool results and tool failures are now preserved and shown consistently during conversations. The system now propagates `tool-error` events end-to-end, persists them, streams them as structured outputs with `isError` flags, and wraps error tool outputs in an MCP-style `ToolResult`/tool-result message shape when merging into chat history.",
+    "The chat experience now supports structured tool outputs from the frontend all the way to the server. The client extracts tool outputs from messages and forwards them as `ToolResult` objects, and the server inserts corresponding tool-result messages into chat history so tools render reliably.",
+    "The Outlook “new email” trigger is now capped to avoid pulling too many messages at once. The trigger query now fetches at most 50 messages per polling request.",
+    "The assistant now sends follow-up UI-tool messages more predictably after you finish interacting with UI tools. This adds a shared UI tool prefix constant and a custom autosend predicate that only triggers when UI tools in the last assistant step have completed.",
+    "The AI model picker now shows clearer model identities across providers. The model selector and related chat UI now use provider-aware model metadata and display corresponding provider/model icons."
+  ]
+}
+
+```
