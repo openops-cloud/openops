@@ -7,18 +7,17 @@ iconType: "emoji"
 
 ## 2026-02-04
 
-## ✨
-- The assistant UI has refreshed styling for improved readability and consistency.
-- Analytics deployment references were updated to the latest published image/version so environments stay aligned.
-- Dependencies were updated to use a safer and newer brace expansion library version.
+### ✨
+- Updated assistant UI styles and typography.
+- Updated analytics image references to v0.14.2 in Docker Compose and Helm values.
+- Updated `@isaacs/brace-expansion` to v5.0.1.
 
-## 🐛
-- Password rules now correctly accept all supported special characters without edge-case failures.
+### 🐛
+- Fixed password validation to accept all supported special characters, including `[` and `]`.
 
-## 🚀
-- Tool results and tool failures are now preserved and shown consistently during conversations.
-- The chat experience now supports structured tool outputs from the frontend to the server.
-- The Outlook “new email” trigger is now capped to avoid pulling too many messages at once.
-- The assistant now sends follow-up UI-tool messages more predictably after you finish interacting with UI tools.
-- The AI model picker now shows clearer model identities across providers.
-
+### 🚀
+- Preserved and displayed tool results and tool errors consistently in chats.
+- Added end-to-end support for structured `ToolResult` outputs from the frontend to the server.
+- Capped the Outlook new email trigger to 50 messages per polling request.
+- Updated assistant autosend logic for UI tool follow-ups to trigger only after UI tools complete.
+- Updated the AI model picker to show provider and model icons.
