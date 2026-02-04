@@ -94,7 +94,7 @@
     "@linear/sdk": "7.0.1",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "@microsoft/microsoft-graph-types": "2.40.0",
-    "@modelcontextprotocol/sdk": "1.25.2",
+    "@modelcontextprotocol/sdk": "1.26.0",
     "@monaco-editor/react": "4.7.0",
     "@nx/devkit": "19.8.8",
     "@opentelemetry/api-logs": "0.203.0",
