@@ -10,18 +10,17 @@ iconType: "emoji"
 ```json
 {
   "✨": [
-    "The analytics deployment references were refreshed so new installs pull the latest published image version. Docker Compose and Helm values were updated to use analytics version `0.14.2` instead of `0.14.1`.",
-    "Chat UI styling is more consistent and readable across the assistant experience. The UI added a `greyBlue-100` color token and updated typography classes for Markdown headings, paragraphs, and lists (including font sizes and weights).",
-    "Automatic sending now waits until interactive UI tools have finished, reducing accidental early sends. A shared UI tool prefix constant and a custom autosend predicate were added so autosend only triggers when UI tools in the last assistant step are completed."
+    "Analytics deployments now pull the latest published image version, updating Docker Compose and Helm defaults to analytics `0.14.2`.",
+    "Chat UI styling is more consistent and readable, adding a `greyBlue-100` color token and refreshed Markdown typography.",
+    "Autosend now waits for interactive UI tools to finish, reducing accidental early sends."
   ],
   "🐛": [
-    "Passwords now accept the full intended set of special characters, including square brackets, without being incorrectly rejected. The password allowed-characters regex construction was refined and a new test was added to cover all allowed special characters (including `[` and `]`).",
-    "The Outlook new-email trigger is less likely to time out or over-fetch by limiting how many messages it pulls in one request. The trigger now caps each query at 50 messages per fetch."
+    "Passwords now accept the full intended set of special characters, including `[` and `]`.",
+    "The Outlook new-email trigger now caps each fetch at 50 messages to reduce timeouts and over-fetching."
   ],
   "🚀": [
-    "The AI model picker now shows clearer choices by displaying provider-specific names and icons in the chat interface. The model selector and related chat UI components now render provider-aware model metadata and icon assets.",
-    "Tool results and failures are now reliably recorded and shown so you can understand what happened when a tool runs. Tool execution now propagates structured `ToolResult` objects end-to-end, persists and streams `tool-error` events with `isError` flags, and inserts MCP-style tool-result messages into chat history with updated merge logic and tests."
+    "The AI model picker now shows provider-specific model names and icons in chat.",
+    "Tool runs now capture and display results and errors more reliably."
   ]
 }
-
 ```
