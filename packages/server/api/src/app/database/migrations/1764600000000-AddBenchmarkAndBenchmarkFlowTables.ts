@@ -16,7 +16,7 @@ export class AddBenchmarkAndBenchmarkFlowTables1764600000000
         "provider" varchar NOT NULL,
         "folderId" varchar(21),
         "connectionId" varchar(21),
-        "scope" jsonb,
+        "payload" jsonb,
         "deletedAt" timestamp with time zone,
         "lastRunId" varchar(21),
         CONSTRAINT "PK_benchmark" PRIMARY KEY ("id"),
