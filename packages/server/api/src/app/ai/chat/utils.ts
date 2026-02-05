@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelMessage, ToolResultPart, ToolSet, UIMessage } from 'ai';
 
+type ExtendedToolResultPart = ToolResultPart & {
+  isError?: boolean;
+  result?: unknown;
+};
+
 /**
  * Merges tool result messages into their corresponding assistant tool-call parts
  * and converts them to UI messages in a single pass.
@@ -318,32 +323,62 @@ function createToolCallPartUI(
   return base as UIMessage['parts'][0];
 }
 
+function wrapErrorOutputInMCPStructure(output: unknown): {
+  content: Array<{ type: string; text: string }>;
+  isError: boolean;
+} {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: typeof output === 'string' ? output : String(output),
+      },
+    ],
+    isError: true,
+  };
+}
+
+function findToolCallPart(
+  message: Omit<UIMessage, 'id'>,
+  toolCallId: string,
+): any {
+  if (message.role !== 'assistant') {
+    return null;
+  }
+
+  const toolCallPart = message.parts.find(
+    (part) =>
+      (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
+      'toolCallId' in part &&
+      part.toolCallId === toolCallId,
+  );
+
+  return toolCallPart ?? null;
+}
+
 /**
  * Merges tool result into the corresponding assistant UI message
  */
 function mergeToolResultIntoUIMessage(
   toolResult: ToolResultPart,
   uiMessages: Array<Omit<UIMessage, 'id'>>,
-): boolean {
+): void {
+  const extendedToolResult = toolResult as ExtendedToolResultPart;
+
+  const raw = extendedToolResult.output ?? extendedToolResult.result;
+  const normalized =
+    raw != null && typeof raw === 'object' && 'value' in raw ? raw.value : raw;
+  const finalOutput =
+    extendedToolResult.isError === true
+      ? wrapErrorOutputInMCPStructure(normalized)
+      : normalized;
+
   for (let j = uiMessages.length - 1; j >= 0; j--) {
-    const prev = uiMessages[j];
-    if (prev.role === 'assistant') {
-      const toolCallPart = prev.parts.find(
-        (part) =>
-          (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
-          (part as any).toolCallId === toolResult.toolCallId,
-      );
-      if (toolCallPart) {
-        (toolCallPart as any).state = 'output-available';
-        const raw = (toolResult as any).output ?? (toolResult as any).result;
-        const normalized =
-          raw != null && typeof raw === 'object' && 'value' in raw
-            ? raw.value
-            : raw;
-        (toolCallPart as any).output = normalized;
-        return true;
-      }
+    const toolCallPart = findToolCallPart(uiMessages[j], toolResult.toolCallId);
+    if (toolCallPart) {
+      toolCallPart.state = 'output-available';
+      toolCallPart.output = finalOutput;
+      return;
     }
   }
-  return false;
 }

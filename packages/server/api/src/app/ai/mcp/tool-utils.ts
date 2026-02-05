@@ -1,3 +1,4 @@
+import { AIChatMessage, ToolResult, UI_TOOL_PREFIX } from '@openops/shared';
 import {
   AssistantContent,
   jsonSchema,
@@ -8,8 +9,7 @@ import {
 } from 'ai';
 import { AssistantUITools } from './types';
 
-export const UI_TOOL_PREFIX = 'ui-';
-const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
+export type FrontendToolResultsMap = Map<string, ToolResult>;
 
 /**
  * Creates a predicate function that checks whether the last step in a sequence
@@ -45,49 +45,18 @@ export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
   );
 
 /**
- * Adds separate tool messages for UI tool calls (tools with names starting with 'ui-')
- * This ensures frontend tools have results in chat history for proper conversation flow
- * In the future, we should refactor to make the FE save the real results to the chat history
+ * Creates a map of tool results indexed by toolCallId for efficient lookup.
  */
-export function addUiToolResults(messages: ModelMessage[]): ModelMessage[] {
-  const newMessages: ModelMessage[] = [];
-
-  for (const msg of messages) {
-    if (msg.role === 'assistant' && Array.isArray(msg.content)) {
-      const uiToolCalls = msg.content.filter(isUiToolCall);
-
-      if (uiToolCalls.length > 0) {
-        // In AI SDK v5, tool calls don't have embedded results, so we don't need to clean them
-        newMessages.push(msg);
-
-        for (const toolCall of uiToolCalls) {
-          const toolMessage: ModelMessage = {
-            role: 'tool',
-            content: [
-              {
-                type: 'tool-result',
-                toolCallId: toolCall.toolCallId,
-                toolName: toolCall.toolName,
-                output: {
-                  type: 'text',
-                  value: UI_TOOL_RESULT_MESSAGE,
-                },
-              },
-            ],
-          };
-          newMessages.push(toolMessage);
-        }
-      } else {
-        // No UI tool calls, keep the message as is
-        newMessages.push(msg);
-      }
-    } else {
-      // Not an assistant message or not an array content, keep as is
-      newMessages.push(msg);
+export function createToolResultsMap(
+  toolResults?: ToolResult[],
+): FrontendToolResultsMap {
+  const map = new Map<string, ToolResult>();
+  if (toolResults) {
+    for (const result of toolResults) {
+      map.set(result.toolCallId, result);
     }
   }
-
-  return newMessages;
+  return map;
 }
 
 function isToolCallPart(part: AssistantContent[number]): part is ToolCallPart {
@@ -97,6 +66,118 @@ function isToolCallPart(part: AssistantContent[number]): part is ToolCallPart {
 // opinionated type guard for UI tool calls
 function isUiToolCall(part: AssistantContent[number]): part is ToolCallPart {
   return isToolCallPart(part) && part.toolName?.startsWith(UI_TOOL_PREFIX);
+}
+
+/**
+ * Collects all existing tool result IDs from tool messages in the chat history.
+ */
+function collectExistingToolResultIds(
+  chatHistory: ModelMessage[],
+): Set<string> {
+  const ids = new Set<string>();
+  for (const msg of chatHistory) {
+    if (msg.role === 'tool' && Array.isArray(msg.content)) {
+      for (const part of msg.content) {
+        if (part.type === 'tool-result' && 'toolCallId' in part) {
+          ids.add(part.toolCallId);
+        }
+      }
+    }
+  }
+  return ids;
+}
+
+/**
+ * Creates a tool result message from a tool call and its result.
+ */
+function createToolResultMessage(
+  toolCall: ToolCallPart,
+  result: ToolResult,
+): ModelMessage {
+  const outputValue = result.output;
+  const output = {
+    type: 'text' as const,
+    value:
+      typeof outputValue === 'string'
+        ? outputValue
+        : JSON.stringify(outputValue),
+  };
+
+  return {
+    role: 'tool',
+    content: [
+      {
+        type: 'tool-result',
+        toolCallId: toolCall.toolCallId,
+        toolName: toolCall.toolName,
+        output,
+      },
+    ],
+  };
+}
+
+/**
+ * Finds UI tool calls missing results and creates tool result messages for them.
+ */
+function findMissingUiToolResultMessages(
+  chatHistory: ModelMessage[],
+  frontendToolResults: FrontendToolResultsMap,
+  existingToolResultIds: Set<string>,
+): ModelMessage[] {
+  const missingMessages: ModelMessage[] = [];
+
+  for (const msg of chatHistory) {
+    if (msg.role !== 'assistant' || !Array.isArray(msg.content)) {
+      continue;
+    }
+
+    for (const toolCall of msg.content.filter(isUiToolCall)) {
+      if (existingToolResultIds.has(toolCall.toolCallId)) {
+        continue;
+      }
+
+      const actualResult = frontendToolResults.get(toolCall.toolCallId);
+      if (!actualResult) {
+        continue;
+      }
+
+      missingMessages.push(createToolResultMessage(toolCall, actualResult));
+      existingToolResultIds.add(toolCall.toolCallId);
+    }
+  }
+
+  return missingMessages;
+}
+
+/**
+ * Adds missing tool-result messages for UI tool calls in chat history.
+ * Scans history for assistant messages with UI tool calls that don't have
+ * corresponding tool-result messages, and adds them using the provided frontend results.
+ *
+ * @param chatHistory - The existing chat history to process
+ * @param frontendToolResults - Map of actual tool results from the frontend
+ * @returns Updated chat history with missing tool-results added
+ */
+export function addMissingUiToolResults(
+  chatHistory: ModelMessage[],
+  frontendToolResults: FrontendToolResultsMap,
+): ModelMessage[] {
+  if (frontendToolResults.size === 0) {
+    return chatHistory;
+  }
+
+  const existingIds = collectExistingToolResultIds(chatHistory);
+  const missingMessages = findMissingUiToolResultMessages(
+    chatHistory,
+    frontendToolResults,
+    existingIds,
+  );
+
+  if (missingMessages.length === 0) {
+    return chatHistory;
+  }
+
+  return [...chatHistory, ...missingMessages];
 }
 
 export function collectToolsByProvider(
@@ -171,4 +252,46 @@ export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
       content: sanitizedContent,
     } as ModelMessage;
   });
+}
+
+const UI_TOOL_TYPE_PREFIX = 'tool-ui-';
+
+type MessagePart = {
+  type?: string;
+  state?: string;
+  toolCallId?: string;
+  output?: unknown;
+};
+
+function isUiToolResultPart(part: MessagePart): boolean {
+  return (
+    typeof part.type === 'string' &&
+    part.type.startsWith(UI_TOOL_TYPE_PREFIX) &&
+    part.state === 'output-available' &&
+    !!part.toolCallId &&
+    part.output !== undefined
+  );
+}
+
+export function extractUiToolResultsFromMessage(
+  message: AIChatMessage,
+): ToolResult[] {
+  if (typeof message === 'string') {
+    return [];
+  }
+
+  const results: ToolResult[] = [];
+
+  for (const part of message.parts as MessagePart[]) {
+    if (isUiToolResultPart(part) && part.toolCallId && part.type) {
+      results.push({
+        toolCallId: part.toolCallId,
+        // 'tool-ui-navigate' -> 'ui-navigate'
+        toolName: part.type.replace('tool-', ''),
+        output: part.output,
+      });
+    }
+  }
+
+  return results;
 }

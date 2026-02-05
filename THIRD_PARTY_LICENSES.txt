@@ -27021,7 +27021,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @isaacs/brace-expansion@5.0.0
+ - @isaacs/brace-expansion@5.0.1
 
 This package contains the following license:
 

@@ -31,6 +31,7 @@ const AssistantUiChatContainer = ({
   title,
   availableModels,
   selectedModel,
+  selectedProvider,
   onModelSelected,
   isModelSelectorLoading,
   theme,
@@ -86,6 +87,7 @@ const AssistantUiChatContainer = ({
                 availableModels={availableModels}
                 onModelSelected={onModelSelected}
                 selectedModel={selectedModel}
+                selectedProvider={selectedProvider}
                 isModelSelectorLoading={isModelSelectorLoading}
                 theme={theme}
                 isShowingSlowWarning={isShowingSlowWarning}
