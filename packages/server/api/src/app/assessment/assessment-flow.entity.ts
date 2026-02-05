@@ -63,7 +63,6 @@ export const AssessmentFlowEntity = new EntitySchema<AssessmentFlowSchema>({
       name: 'idx_assessment_flow_flow_id',
       columns: ['flowId'],
     },
-    // Partial unique (assessmentId, flowId) WHERE deletedAt IS NULL is in migration only
   ],
   relations: {
     assessment: {
