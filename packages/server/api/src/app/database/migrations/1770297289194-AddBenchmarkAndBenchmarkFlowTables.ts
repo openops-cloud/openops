@@ -1,11 +1,11 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBenchmarkAndBenchmarkFlowTables1764600000000
+export class AddBenchmarkAndBenchmarkFlowTables1770297289194
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('AddBenchmarkAndBenchmarkFlowTables1764600000000: starting');
+    logger.info('AddBenchmarkAndBenchmarkFlowTables1770297289194: starting');
 
     await queryRunner.query(`
       CREATE TABLE "benchmark" (
@@ -77,7 +77,7 @@ export class AddBenchmarkAndBenchmarkFlowTables1764600000000
       WHERE "deletedAt" IS NULL;
     `);
 
-    logger.info('AddBenchmarkAndBenchmarkFlowTables1764600000000: completed');
+    logger.info('AddBenchmarkAndBenchmarkFlowTables1770297289194: completed');
   }
 
   public async down(_queryRunner: QueryRunner): Promise<void> {
