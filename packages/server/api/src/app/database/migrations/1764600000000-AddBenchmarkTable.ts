@@ -1,12 +1,12 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAssessmentTable1764600000000 implements MigrationInterface {
+export class AddBenchmarkTable1764600000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('AddAssessmentTable1764600000000: starting');
+    logger.info('AddBenchmarkTable1764600000000: starting');
 
     await queryRunner.query(`
-      CREATE TABLE "assessment" (
+      CREATE TABLE "benchmark" (
         "id" varchar(21) NOT NULL,
         "created" timestamp with time zone DEFAULT now() NOT NULL,
         "updated" timestamp with time zone DEFAULT now() NOT NULL,
@@ -17,65 +17,65 @@ export class AddAssessmentTable1764600000000 implements MigrationInterface {
         "scope" jsonb,
         "deletedAt" timestamp with time zone,
         "lastRunId" varchar(21),
-        CONSTRAINT "PK_assessment" PRIMARY KEY ("id"),
-        CONSTRAINT "fk_assessment_project" FOREIGN KEY ("projectId")
+        CONSTRAINT "PK_benchmark" PRIMARY KEY ("id"),
+        CONSTRAINT "fk_benchmark_project" FOREIGN KEY ("projectId")
           REFERENCES "project" ("id") ON DELETE CASCADE,
-        CONSTRAINT "fk_assessment_folder" FOREIGN KEY ("folderId")
+        CONSTRAINT "fk_benchmark_folder" FOREIGN KEY ("folderId")
           REFERENCES "folder" ("id") ON DELETE SET NULL
       );
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "idx_assessment_project_id_deleted_at"
-      ON "assessment" ("projectId", "deletedAt");
+      CREATE INDEX "idx_benchmark_project_id_deleted_at"
+      ON "benchmark" ("projectId", "deletedAt");
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "idx_assessment_project_id_deleted_at_created_desc"
-      ON "assessment" ("projectId", "deletedAt", "created" DESC);
+      CREATE INDEX "idx_benchmark_project_id_deleted_at_created_desc"
+      ON "benchmark" ("projectId", "deletedAt", "created" DESC);
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "idx_assessment_project_id_provider_deleted_at"
-      ON "assessment" ("projectId", "provider", "deletedAt");
+      CREATE INDEX "idx_benchmark_project_id_provider_deleted_at"
+      ON "benchmark" ("projectId", "provider", "deletedAt");
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "assessment_flow" (
+      CREATE TABLE "benchmark_flow" (
         "id" varchar(21) NOT NULL,
         "created" timestamp with time zone DEFAULT now() NOT NULL,
         "updated" timestamp with time zone DEFAULT now() NOT NULL,
-        "assessmentId" varchar(21) NOT NULL,
+        "benchmarkId" varchar(21) NOT NULL,
         "flowId" varchar(21) NOT NULL,
         "isOrchestrator" boolean NOT NULL DEFAULT false,
         "displayName" varchar,
         "sortOrder" integer,
         "deletedAt" timestamp with time zone,
-        CONSTRAINT "PK_assessment_flow" PRIMARY KEY ("id"),
-        CONSTRAINT "fk_assessment_flow_assessment" FOREIGN KEY ("assessmentId")
-          REFERENCES "assessment" ("id") ON DELETE CASCADE,
-        CONSTRAINT "fk_assessment_flow_flow" FOREIGN KEY ("flowId")
+        CONSTRAINT "PK_benchmark_flow" PRIMARY KEY ("id"),
+        CONSTRAINT "fk_benchmark_flow_benchmark" FOREIGN KEY ("benchmarkId")
+          REFERENCES "benchmark" ("id") ON DELETE CASCADE,
+        CONSTRAINT "fk_benchmark_flow_flow" FOREIGN KEY ("flowId")
           REFERENCES "flow" ("id") ON DELETE CASCADE
       );
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "idx_assessment_flow_assessment_id"
-      ON "assessment_flow" ("assessmentId");
+      CREATE INDEX "idx_benchmark_flow_benchmark_id"
+      ON "benchmark_flow" ("benchmarkId");
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "idx_assessment_flow_flow_id"
-      ON "assessment_flow" ("flowId");
+      CREATE INDEX "idx_benchmark_flow_flow_id"
+      ON "benchmark_flow" ("flowId");
     `);
 
     await queryRunner.query(`
-      CREATE UNIQUE INDEX "uq_assessment_flow_assessment_id_flow_id"
-      ON "assessment_flow" ("assessmentId", "flowId")
+      CREATE UNIQUE INDEX "uq_benchmark_flow_benchmark_id_flow_id"
+      ON "benchmark_flow" ("benchmarkId", "flowId")
       WHERE "deletedAt" IS NULL;
     `);
 
-    logger.info('AddAssessmentTable1764600000000: completed');
+    logger.info('AddBenchmarkTable1764600000000: completed');
   }
 
   public async down(_queryRunner: QueryRunner): Promise<void> {

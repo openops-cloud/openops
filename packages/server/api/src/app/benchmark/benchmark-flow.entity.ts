@@ -5,13 +5,13 @@ import {
   OpenOpsIdSchema,
   TIMESTAMP_COLUMN_TYPE,
 } from '../database/database-common';
-import { AssessmentRow } from './assessment.entity';
+import { BenchmarkRow } from './benchmark.entity';
 
-export type AssessmentFlowRow = {
+export type BenchmarkFlowRow = {
   id: string;
   created: string;
   updated: string;
-  assessmentId: string;
+  benchmarkId: string;
   flowId: string;
   isOrchestrator: boolean;
   displayName: string | null;
@@ -19,16 +19,16 @@ export type AssessmentFlowRow = {
   deletedAt: string | null;
 };
 
-export type AssessmentFlowSchema = {
-  assessment?: AssessmentRow;
+export type BenchmarkFlowSchema = {
+  benchmark?: BenchmarkRow;
   flow?: Flow;
-} & AssessmentFlowRow;
+} & BenchmarkFlowRow;
 
-export const AssessmentFlowEntity = new EntitySchema<AssessmentFlowSchema>({
-  name: 'assessment_flow',
+export const BenchmarkFlowEntity = new EntitySchema<BenchmarkFlowSchema>({
+  name: 'benchmark_flow',
   columns: {
     ...BaseColumnSchemaPart,
-    assessmentId: {
+    benchmarkId: {
       ...OpenOpsIdSchema,
       nullable: false,
     },
@@ -56,23 +56,23 @@ export const AssessmentFlowEntity = new EntitySchema<AssessmentFlowSchema>({
   },
   indices: [
     {
-      name: 'idx_assessment_flow_assessment_id',
-      columns: ['assessmentId'],
+      name: 'idx_benchmark_flow_benchmark_id',
+      columns: ['benchmarkId'],
     },
     {
-      name: 'idx_assessment_flow_flow_id',
+      name: 'idx_benchmark_flow_flow_id',
       columns: ['flowId'],
     },
   ],
   relations: {
-    assessment: {
+    benchmark: {
       type: 'many-to-one',
-      target: 'assessment',
+      target: 'benchmark',
       onDelete: 'CASCADE',
       joinColumn: {
-        name: 'assessmentId',
+        name: 'benchmarkId',
         referencedColumnName: 'id',
-        foreignKeyConstraintName: 'fk_assessment_flow_assessment',
+        foreignKeyConstraintName: 'fk_benchmark_flow_benchmark',
       },
     },
     flow: {
@@ -82,7 +82,7 @@ export const AssessmentFlowEntity = new EntitySchema<AssessmentFlowSchema>({
       joinColumn: {
         name: 'flowId',
         referencedColumnName: 'id',
-        foreignKeyConstraintName: 'fk_assessment_flow_flow',
+        foreignKeyConstraintName: 'fk_benchmark_flow_flow',
       },
     },
   },

@@ -7,12 +7,12 @@ import {
   TIMESTAMP_COLUMN_TYPE,
 } from '../database/database-common';
 
-export type AssessmentSchema = {
+export type BenchmarkSchema = {
   project: Project;
   folder?: Folder;
-} & AssessmentRow;
+} & BenchmarkRow;
 
-export type AssessmentRow = {
+export type BenchmarkRow = {
   id: string;
   created: string;
   updated: string;
@@ -25,8 +25,8 @@ export type AssessmentRow = {
   lastRunId: string | null;
 };
 
-export const AssessmentEntity = new EntitySchema<AssessmentSchema>({
-  name: 'assessment',
+export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
+  name: 'benchmark',
   columns: {
     ...BaseColumnSchemaPart,
     projectId: {
@@ -60,15 +60,15 @@ export const AssessmentEntity = new EntitySchema<AssessmentSchema>({
   },
   indices: [
     {
-      name: 'idx_assessment_project_id_deleted_at',
+      name: 'idx_benchmark_project_id_deleted_at',
       columns: ['projectId', 'deletedAt'],
     },
     {
-      name: 'idx_assessment_project_id_deleted_at_created_desc',
+      name: 'idx_benchmark_project_id_deleted_at_created_desc',
       columns: ['projectId', 'deletedAt', 'created'],
     },
     {
-      name: 'idx_assessment_project_id_provider_deleted_at',
+      name: 'idx_benchmark_project_id_provider_deleted_at',
       columns: ['projectId', 'provider', 'deletedAt'],
     },
   ],
@@ -80,7 +80,7 @@ export const AssessmentEntity = new EntitySchema<AssessmentSchema>({
       joinColumn: {
         name: 'projectId',
         referencedColumnName: 'id',
-        foreignKeyConstraintName: 'fk_assessment_project',
+        foreignKeyConstraintName: 'fk_benchmark_project',
       },
     },
     folder: {
@@ -91,7 +91,7 @@ export const AssessmentEntity = new EntitySchema<AssessmentSchema>({
       joinColumn: {
         name: 'folderId',
         referencedColumnName: 'id',
-        foreignKeyConstraintName: 'fk_assessment_folder',
+        foreignKeyConstraintName: 'fk_benchmark_folder',
       },
     },
   },
