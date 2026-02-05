@@ -23,6 +23,7 @@ import {
 } from '@/app/constants/sidebar';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
 import { AiChatResizablePanel } from '@/app/features/ai/assistant/ai-chat-resizable-panel';
+import { UNAUTHENTICATED_ROUTES } from '@/app/lib/public-routes';
 import { useAppStore } from '@/app/store/app-store';
 import { DashboardSideMenu } from '../side-menu/dashboard/dashboard-side-menu';
 import LeftSidebarResizablePanel from '../side-menu/left-sidebar';
@@ -32,19 +33,6 @@ const MINIMIZED_NAVIGATION_ROUTES = [
   '/templates/',
   '/tables',
   '/analytics',
-];
-
-const UNAUTHENTICATED_ROUTES = [
-  '/sign-in',
-  '/sign-up',
-  '/forget-password',
-  '/reset-password',
-  '/verify-email',
-  '/404',
-  '/redirect',
-  '/connect',
-  '/oauth/callback',
-  '/oauth/logout',
 ];
 
 export function GlobalLayout() {
