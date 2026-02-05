@@ -50,8 +50,6 @@ export class AddBenchmarkAndBenchmarkFlowTables1770297289194
         "benchmarkId" varchar(21) NOT NULL,
         "flowId" varchar(21) NOT NULL,
         "isOrchestrator" boolean NOT NULL DEFAULT false,
-        "displayName" varchar,
-        "sortOrder" integer,
         "deletedAt" timestamp with time zone,
         CONSTRAINT "PK_benchmark_flow" PRIMARY KEY ("id"),
         CONSTRAINT "fk_benchmark_flow_benchmark" FOREIGN KEY ("benchmarkId")

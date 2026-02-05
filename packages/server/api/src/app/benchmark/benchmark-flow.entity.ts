@@ -14,8 +14,6 @@ export type BenchmarkFlowRow = {
   benchmarkId: string;
   flowId: string;
   isOrchestrator: boolean;
-  displayName: string | null;
-  sortOrder: number | null;
   deletedAt: string | null;
 };
 
@@ -40,14 +38,6 @@ export const BenchmarkFlowEntity = new EntitySchema<BenchmarkFlowSchema>({
       type: Boolean,
       nullable: false,
       default: false,
-    },
-    displayName: {
-      type: String,
-      nullable: true,
-    },
-    sortOrder: {
-      type: Number,
-      nullable: true,
     },
     deletedAt: {
       type: TIMESTAMP_COLUMN_TYPE,
