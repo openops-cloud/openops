@@ -14,7 +14,7 @@ export async function getOrCreatePostgresDatabaseConnection(
   dbUserName: string,
   host: string,
   connectionName: string,
-): Promise<{ id: number }> {
+): Promise<{ id: number; uuid: string }> {
   const authenticationHeader = createAxiosHeadersForAnalytics(token);
 
   const existingConnection = await getDatabaseConnection(
@@ -50,7 +50,7 @@ export async function getOrCreatePostgresDatabaseConnection(
 async function getDatabaseConnection(
   name: string,
   authenticationHeader: AxiosHeaders,
-): Promise<{ id: number } | undefined> {
+): Promise<{ id: number; uuid: string } | undefined> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response = await makeOpenOpsAnalyticsGet<{ result: any[] }>(
     `database?q=(filters:!((col:database_name,opr:eq,value:'${name}')))`,
@@ -58,6 +58,10 @@ async function getDatabaseConnection(
   );
 
   return response && response?.result && response.result.length === 1
-    ? { id: response.result[0].id, ...response.result[0] }
+    ? {
+        id: response.result[0].id,
+        uuid: response.result[0].uuid,
+        ...response.result[0],
+      }
     : undefined;
 }

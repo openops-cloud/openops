@@ -11,6 +11,7 @@ import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';
 import { createHomepageCharts } from './populate-homepage';
 import { getDefaultProjectForOrganization } from './project-selector';
+import { seedAwsAssessmentDashboard } from './seed-aws-assessment-dashboard';
 
 export const HOME_PAGE_DASHBOARD_SLUG = 'homepage';
 
@@ -74,4 +75,7 @@ export async function seedAnalyticsDashboards(): Promise<void> {
     homepage.id,
     seedTableId,
   );
+
+  // TODO: Delete this after testing, production should call it on demand at 'Create Assessment' step
+  await seedAwsAssessmentDashboard();
 }
