@@ -14,7 +14,7 @@ export class AddBenchmarkAndBenchmarkFlowTables1770297289194
         "updated" timestamp with time zone DEFAULT now() NOT NULL,
         "projectId" varchar(21) NOT NULL,
         "provider" varchar NOT NULL,
-        "folderId" varchar(21) NOT NULL,
+        "folderId" varchar(21),
         "connectionId" varchar(21) NOT NULL,
         "payload" jsonb NOT NULL,
         "deletedAt" timestamp with time zone,
@@ -23,7 +23,7 @@ export class AddBenchmarkAndBenchmarkFlowTables1770297289194
         CONSTRAINT "fk_benchmark_project" FOREIGN KEY ("projectId")
           REFERENCES "project" ("id") ON DELETE CASCADE,
         CONSTRAINT "fk_benchmark_folder" FOREIGN KEY ("folderId")
-          REFERENCES "folder" ("id") ON DELETE CASCADE
+          REFERENCES "folder" ("id") ON DELETE SET NULL
       );
     `);
 
