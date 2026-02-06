@@ -9,7 +9,7 @@ import {
 
 export type BenchmarkSchema = {
   project: Project;
-  folder?: Folder;
+  folder: Folder;
 } & BenchmarkRow;
 
 export type BenchmarkRow = {
@@ -18,9 +18,9 @@ export type BenchmarkRow = {
   updated: string;
   projectId: string;
   provider: string;
-  folderId: string | null;
-  connectionId: string | null;
-  payload: Record<string, unknown> | null;
+  folderId: string;
+  connectionId: string;
+  payload: Record<string, unknown>;
   deletedAt: string | null;
   lastRunId: string | null;
 };
@@ -39,15 +39,15 @@ export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
     },
     folderId: {
       ...OpenOpsIdSchema,
-      nullable: true,
+      nullable: false,
     },
     connectionId: {
       ...OpenOpsIdSchema,
-      nullable: true,
+      nullable: false,
     },
     payload: {
       type: JSONB_COLUMN_TYPE,
-      nullable: true,
+      nullable: false,
     },
     deletedAt: {
       type: TIMESTAMP_COLUMN_TYPE,
@@ -86,8 +86,7 @@ export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
     folder: {
       type: 'many-to-one',
       target: 'folder',
-      onDelete: 'SET NULL',
-      nullable: true,
+      onDelete: 'CASCADE',
       joinColumn: {
         name: 'folderId',
         referencedColumnName: 'id',
