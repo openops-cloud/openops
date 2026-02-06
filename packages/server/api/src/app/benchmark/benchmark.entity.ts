@@ -19,7 +19,7 @@ export type BenchmarkRow = {
   projectId: string;
   provider: string;
   folderId: string | null;
-  connectionId: string;
+  connectionId: string | null;
   payload: Record<string, unknown>;
   deletedAt: string | null;
   lastRunId: string | null;
@@ -43,7 +43,7 @@ export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
     },
     connectionId: {
       ...OpenOpsIdSchema,
-      nullable: false,
+      nullable: true,
     },
     payload: {
       type: JSONB_COLUMN_TYPE,
