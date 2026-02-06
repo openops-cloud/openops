@@ -1,4 +1,4 @@
-import { Folder, Project } from '@openops/shared';
+import { AppConnection, Folder, Project } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
@@ -10,6 +10,7 @@ import {
 export type BenchmarkSchema = {
   project: Project;
   folder?: Folder;
+  connection?: AppConnection;
 } & BenchmarkRow;
 
 export type BenchmarkRow = {
@@ -92,6 +93,17 @@ export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
         name: 'folderId',
         referencedColumnName: 'id',
         foreignKeyConstraintName: 'fk_benchmark_folder',
+      },
+    },
+    connection: {
+      type: 'many-to-one',
+      target: 'app_connection',
+      onDelete: 'SET NULL',
+      nullable: true,
+      joinColumn: {
+        name: 'connectionId',
+        referencedColumnName: 'id',
+        foreignKeyConstraintName: 'fk_benchmark_connection',
       },
     },
   },
