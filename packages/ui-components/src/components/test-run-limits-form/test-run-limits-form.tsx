@@ -137,7 +137,8 @@ function TestRunLimitsForm({
 
   useEffect(() => {
     form.trigger();
-  }, [schema, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
 
   useEffect(() => {
     form.reset({
