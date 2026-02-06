@@ -10,6 +10,8 @@ import {
 } from '../helper/allow-all-origins-hook-handler';
 import { getVerifiedUser } from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
+import { FastifyRequest } from 'fastify';
+import { JwtPayload } from 'jsonwebtoken';
 
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   app,
@@ -26,6 +28,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     return;
   }
 
+  const publicKeys = [publicKey];
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
 
@@ -54,7 +57,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request) => {
-      const user = getVerifiedUser(request, publicKey);
+      const user = verifyUserWithPublicKeys(request, publicKeys);
 
       return flowTemplateService.getFlowTemplates({
         search: request.query.search,
@@ -89,7 +92,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       },
     },
     async (request, reply) => {
-      const user = getVerifiedUser(request, publicKey);
+      const user = verifyUserWithPublicKeys(request, publicKeys);
 
       if (!user) {
         const template = await flowTemplateService.getFlowTemplate(
@@ -103,3 +106,18 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     },
   );
 };
+
+function verifyUserWithPublicKeys(
+  request: FastifyRequest,
+  keysToCheck: string[],
+): string | JwtPayload | undefined {
+  for (const key of keysToCheck) {
+    const user = getVerifiedUser(request, key);
+
+    if (user) {
+      return user;
+    }
+  }
+
+  return undefined;
+}
