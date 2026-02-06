@@ -17682,6 +17682,7 @@ The following npm packages may be included in this product:
 
  - pino-std-serializers@6.2.2
  - pino-std-serializers@7.0.0
+ - pino-std-serializers@7.1.0
 
 These packages each contain the following license:
 
@@ -19030,6 +19031,16 @@ http://github.com/garycourt/JSV/raw/master/jsv.js
 
 The following npm package may be included in this product:
 
+ - buildcheck@0.0.7
+
+This package contains the following license:
+
+http://github.com/mscdex/buildcheck/raw/master/LICENSE
+
+-----------
+
+The following npm package may be included in this product:
+
  - ssh2@1.15.0
 
 This package contains the following license:
@@ -19085,6 +19096,16 @@ The following npm package may be included in this product:
 This package contains the following license:
 
 https://github.com/Gozala/enchain/License.md
+
+-----------
+
+The following npm package may be included in this product:
+
+ - cpu-features@0.0.10
+
+This package contains the following license:
+
+https://github.com/mscdex/cpu-features/raw/master/LICENSE
 
 -----------
 
@@ -20241,6 +20262,7 @@ The following npm packages may be included in this product:
  - @frontegg/types@7.92.0
  - @hono/node-server@1.19.9
  - @linear/sdk@7.0.1
+ - @msgpackr-extract/msgpackr-extract-linux-x64@3.0.2
  - @nx/nx-linux-x64-gnu@19.8.8
  - @polka/url@1.0.0-next.25
  - @radix-ui/number@1.1.0
@@ -20422,6 +20444,8 @@ The following npm packages may be included in this product:
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1
+ - sass-embedded-linux-musl-x64@1.85.1
+ - sass-embedded-linux-x64@1.85.1
  - select@1.1.2
  - sirv@2.0.4
  - socks-proxy-agent@6.2.1
@@ -21333,16 +21357,13 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fastify@5.4.0
+ - stylis@4.3.6
 
 This package contains the following license:
 
 MIT License
 
-Copyright (c) 2016-2025 The Fastify Team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team
-and in the README file.
+Copyright (c) 2016-present Sultan Tarimo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21366,13 +21387,13 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - stylis@4.3.6
+ - fastify@5.7.3
 
 This package contains the following license:
 
 MIT License
 
-Copyright (c) 2016-present Sultan Tarimo
+Copyright (c) 2016-present The Fastify Team (members are listed in the README file)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22131,11 +22152,13 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - @parcel/watcher-linux-x64-glibc@2.5.1
+ - @parcel/watcher-linux-x64-musl@2.5.1
  - @parcel/watcher@2.5.1
 
-This package contains the following license:
+These packages each contain the following license:
 
 MIT License
 
@@ -24389,6 +24412,7 @@ The following npm packages may be included in this product:
  - on-exit-leak-free@2.1.2
  - thread-stream@2.7.0
  - thread-stream@3.1.0
+ - thread-stream@4.0.0
 
 These packages each contain the following license:
 
@@ -24452,6 +24476,7 @@ The following npm packages may be included in this product:
 
  - pino-abstract-transport@1.2.0
  - pino-abstract-transport@2.0.0
+ - pino-abstract-transport@3.0.0
 
 These packages each contain the following license:
 
@@ -25076,6 +25101,38 @@ This package contains the following license:
 MIT License
 
 Copyright (c) 2022-present Johnson Chu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - @fastify/ajv-compiler@4.0.5
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2022-present The Fastify team
+
+The Fastify team members are listed at https://github.com/fastify/fastify#team.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25758,6 +25815,36 @@ This package contains the following license:
 MIT License
 
 Copyright (c) 2025 Jordan Harband
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - @pinojs/redact@0.4.0
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2025 pinojs contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26857,39 +26944,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 The following npm package may be included in this product:
 
  - @fastify/deepmerge@2.0.2
-
-This package contains the following license:
-
-MIT License
-
-Copyright (c) The Fastify Team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team
-and in the README file.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - @fastify/ajv-compiler@4.0.2
 
 This package contains the following license:
 
@@ -31743,12 +31797,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
  - pino@8.21.0
- - pino@9.7.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
@@ -31774,11 +31827,12 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - pino@10.3.0
  - pino@9.9.5
 
-This package contains the following license:
+These packages each contain the following license:
 
 The MIT License (MIT)
 
@@ -32171,6 +32225,24 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - nan@2.25.0
+
+This package contains the following license:
+
+The MIT License (MIT)
+
+Copyright (c) 2018 [NAN contributors](<https://github.com/nodejs/nan#wg-members--collaborators>)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
