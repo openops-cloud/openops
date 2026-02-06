@@ -1,0 +1,23 @@
+---
+title: "Release notes"
+description: "Product updates and fixes for OpenOps."
+icon: "📝"
+iconType: "emoji"
+---
+
+## 2026-02-04
+
+### ✨
+- Updated assistant UI styles and typography.
+- Updated analytics image references to v0.14.2 in Docker Compose and Helm values.
+- Updated `@isaacs/brace-expansion` to v5.0.1.
+
+### 🐛
+- Fixed password validation to accept all supported special characters, including `[` and `]`.
+
+### 🚀
+- Preserved and displayed tool results and tool errors consistently in chats.
+- Added end-to-end support for structured `ToolResult` outputs from the frontend to the server.
+- Capped the Outlook new email trigger to 50 messages per polling request.
+- Updated assistant autosend logic for UI tool follow-ups to trigger only after UI tools complete.
+- Updated the AI model picker to show provider and model icons.
