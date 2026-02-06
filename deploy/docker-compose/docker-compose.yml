@@ -22,7 +22,7 @@ services:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.2.17
-      OPS_ANALYTICS_VERSION: 0.14.2
+      OPS_ANALYTICS_VERSION: 0.14.2-importv9
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -36,7 +36,7 @@ services:
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
-    command: ["cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?"]
+    command: ['cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?']
     environment:
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
       OPS_COMPONENT: engine
@@ -86,7 +86,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.14.2
+    image: public.ecr.aws/openops/openops-analytics:0.14.2-importv9
     restart: unless-stopped
     environment:
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
@@ -137,7 +137,7 @@ services:
     volumes:
       - 'redis_data:/data'
     healthcheck:
-      test: [ 'CMD', 'redis-cli', 'ping' ]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 3
