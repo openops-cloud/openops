@@ -1,0 +1,51 @@
+{
+  "provider": "aws",
+  "steps": [
+    {
+      "id": "connection",
+      "title": "Choose the AWS connection you want to use",
+      "description": "**Choose the AWS connection you want to use**\n\nOpenOps can pull data from AWS using the connection you select here. We provide a CloudFormation stack that installs the required permissions for you.\n\nCloudFormation stack: [Create a read-only role](https://example.com/cloudformation-readonly)\n\nDocumentation: [How to set up AWS read-only permissions](https://example.com/docs/aws-readonly)",
+      "selectionType": "single",
+      "optionsSource": { "type": "dynamic", "method": "listConnections" },
+      "nextStep": "accounts"
+    },
+    {
+      "id": "accounts",
+      "title": "Which accounts should we include in the report?",
+      "selectionType": "multi-select",
+      "optionsSource": { "type": "dynamic", "method": "getConnectionAccounts" },
+      "conditional": { "when": "connection.supportsMultiAccount", "skipToStep": "regions" },
+      "nextStep": "regions"
+    },
+    {
+      "id": "regions",
+      "title": "Which regions should we include in the report?",
+      "selectionType": "multi-select",
+      "optionsSource": {
+        "type": "static",
+        "values": [
+          { "id": "us-east-1", "type": "region", "displayName": "US East (N. Virginia)", "icon": "" },
+          { "id": "us-west-2", "type": "region", "displayName": "US West (Oregon)" }
+        ]
+      },
+      "nextStep": "services"
+    },
+    {
+      "id": "services",
+      "title": "Which AWS services should we analyze?",
+      "selectionType": "multi-select",
+      "optionsSource": {
+        "type": "static",
+        "values": [
+          { "id": "unattached-ebs", "type": "service", "displayName": "Unattached EBS Volumes" },
+          { "id": "asg-compute-optimizer", "type": "service", "displayName": "ASG Compute Optimizer" }
+        ]
+      },
+      "nextStep": "create_assessment"
+    },
+    {
+      "id": "create_assessment",
+      "action": "import_workflows_and_persist"
+    }
+  ]
+}
