@@ -1,17 +1,17 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const BenchmarkWorkflowItem = Type.Object({
+export const BenchmarkWorkflowBase = Type.Object({
   flowId: Type.String(),
   displayName: Type.String(),
   isOrchestrator: Type.Boolean(),
 });
 
-export type BenchmarkWorkflowItem = Static<typeof BenchmarkWorkflowItem>;
+export type BenchmarkWorkflowBase = Static<typeof BenchmarkWorkflowBase>;
 
 export const CreateBenchmarkResponse = Type.Object({
   assessmentId: Type.String(),
   folderId: Type.String(),
-  workflows: Type.Array(BenchmarkWorkflowItem),
+  workflows: Type.Array(BenchmarkWorkflowBase),
   webhookPayload: Type.Object({
     data: Type.Record(Type.String(), Type.Unknown()),
   }),

@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
+import { BenchmarkWorkflowBase } from './create-benchmark-response';
 
 export const BenchmarkStatus = Type.Union([
   Type.Literal('idle'),
@@ -9,13 +10,13 @@ export const BenchmarkStatus = Type.Union([
 
 export type BenchmarkStatus = Static<typeof BenchmarkStatus>;
 
-export const BenchmarkWorkflowStatusItem = Type.Object({
-  flowId: Type.String(),
-  displayName: Type.String(),
-  isOrchestrator: Type.Boolean(),
-  runStatus: Type.String(),
-  runId: Type.Optional(Type.String()),
-});
+export const BenchmarkWorkflowStatusItem = Type.Intersect([
+  BenchmarkWorkflowBase,
+  Type.Object({
+    runStatus: Type.String(),
+    runId: Type.Optional(Type.String()),
+  }),
+]);
 
 export type BenchmarkWorkflowStatusItem = Static<
   typeof BenchmarkWorkflowStatusItem
