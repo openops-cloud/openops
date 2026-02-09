@@ -6,7 +6,7 @@ function wrapWithResumePage(
   baseUrl: string,
   isTest: boolean,
 ): string {
-  return `${baseUrl}html/resume_execution.html?isTest=${isTest}&redirectUrl=${encodeURIComponent(
+  return `${baseUrl}/html/resume_execution.html?isTest=${isTest}&redirectUrl=${encodeURIComponent(
     backendUrl,
   )}`;
 }
