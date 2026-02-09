@@ -2,13 +2,14 @@ import { createAction } from '@openops/blocks-framework';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 
 function wrapWithResumePage(
-  backendUrl: string,
-  baseUrl: string,
+  redirectUrl: string,
+  frontendUrl: string,
   isTest: boolean,
 ): string {
-  return `${baseUrl}/html/resume_execution.html?isTest=${isTest}&redirectUrl=${encodeURIComponent(
-    backendUrl,
-  )}`;
+  const url = new URL('/html/resume_execution.html', frontendUrl);
+  url.searchParams.set('isTest', String(isTest));
+  url.searchParams.set('redirectUrl', redirectUrl);
+  return url.toString();
 }
 
 export const createApprovalLink = createAction({
