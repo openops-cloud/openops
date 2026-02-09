@@ -9,7 +9,7 @@ export const BenchmarkWorkflowBase = Type.Object({
 export type BenchmarkWorkflowBase = Static<typeof BenchmarkWorkflowBase>;
 
 export const CreateBenchmarkResponse = Type.Object({
-  assessmentId: Type.String(),
+  benchmarkId: Type.String(),
   folderId: Type.String(),
   workflows: Type.Array(BenchmarkWorkflowBase),
   webhookPayload: Type.Object({
