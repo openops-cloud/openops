@@ -1,5 +1,6 @@
 const commonMock = {
   runCliCommand: jest.fn(),
+  validateAzureCredentials: jest.fn(),
 };
 
 jest.mock('@openops/common', () => commonMock);
