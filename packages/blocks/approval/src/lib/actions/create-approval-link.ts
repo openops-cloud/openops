@@ -1,5 +1,5 @@
 import { createAction } from '@openops/blocks-framework';
-import { SharedSystemProp, system } from '@openops/server-shared';
+import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 
 function wrapWithResumePage(
   backendUrl: string,
@@ -31,12 +31,20 @@ export const createApprovalLink = createAction({
       .getOrThrow(SharedSystemProp.FRONTEND_URL)
       .replace(/\/$/, '');
 
-    const approvalBackendUrl = ctx.generateResumeUrl({
-      queryParams: { action: 'approve' },
-    });
-    const disapprovalBackendUrl = ctx.generateResumeUrl({
-      queryParams: { action: 'disapprove' },
-    });
+    const apiUrl = await networkUtls.getPublicUrl();
+
+    const approvalBackendUrl = ctx.generateResumeUrl(
+      {
+        queryParams: { action: 'approve' },
+      },
+      apiUrl,
+    );
+    const disapprovalBackendUrl = ctx.generateResumeUrl(
+      {
+        queryParams: { action: 'disapprove' },
+      },
+      apiUrl,
+    );
 
     return {
       approvalLink: wrapWithResumePage(
