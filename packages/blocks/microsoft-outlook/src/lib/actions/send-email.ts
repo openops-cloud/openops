@@ -115,7 +115,7 @@ export const sendEmailAction = createAction({
         '@odata.type': '#microsoft.graph.fileAttachment',
         name: attachment.fileName || attachment.file.filename,
         contentBytes: attachment.file.base64,
-        isInline: attachment.isInline || undefined,
+        isInline: attachment.isInline,
         contentId: attachment.contentId || undefined,
         contentLocation: attachment.contentLocation || undefined,
       })),
