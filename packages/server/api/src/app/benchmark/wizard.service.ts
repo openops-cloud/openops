@@ -1,51 +1,51 @@
 import {
-  AppConnectionStatus,
+  ApplicationError,
   BenchmarkWizardOption,
   BenchmarkWizardStepResponse,
+  ErrorCode,
 } from '@openops/shared';
-import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { removeSensitiveData } from '../app-connection/app-connection-utils';
 import {
   getWizardConfig,
-  type StaticOptionValue,
+  SUPPORTED_WIZARD_PROVIDERS,
   type WizardConfig,
   type WizardConfigStep,
 } from './wizard-config-loader';
+import {
+  resolveListConnectionsOptions,
+  resolveStaticOptions,
+} from './wizard-option-resolvers';
 
-const SUPPORTED_PROVIDERS = ['aws'] as const;
+function getStepProgress(
+  steps: WizardConfigStep[],
+  stepToReturn: WizardConfigStep,
+): { totalSteps: number; stepIndex: number } {
+  const stepsWithOptions = steps.filter((s) => s.optionsSource);
+  const totalSteps = stepsWithOptions.length;
+  const stepIndexOneBased =
+    stepsWithOptions.findIndex((s) => s.id === stepToReturn.id) + 1;
+  const stepIndex = stepIndexOneBased > 0 ? stepIndexOneBased : 0;
+  return { totalSteps, stepIndex };
+}
 
 function resolveNextStep(
   step: WizardConfigStep,
-  _answers: Record<string, string[]>,
   config: WizardConfig,
 ): string | null {
-  const next = step.nextStep;
-  if (!next) {
+  const nextStepId = step.nextStep;
+  if (!nextStepId) {
     return null;
   }
-  const nextStepDef = config.steps.find((s) => s.id === next);
+  const nextStepDef = config.steps.find((s) => s.id === nextStepId);
   if (!nextStepDef) {
     return null;
   }
   if (nextStepDef.action) {
     return null;
   }
-  // Skip accounts step (getConnectionAccounts not implemented)
-  if (next === 'accounts') {
-    return nextStepDef.conditional?.skipToStep ?? 'regions';
+  if (nextStepDef.conditional) {
+    return nextStepDef.conditional.skipToStep ?? nextStepId;
   }
-  return next;
-}
-
-function staticValuesToOptions(
-  values: StaticOptionValue[],
-): BenchmarkWizardOption[] {
-  return values.map((v) => ({
-    id: v.id,
-    name: v.displayName ?? v.id,
-    imageLogoUrl: v.icon || undefined,
-    metadata: v.type ? { type: v.type } : undefined,
-  }));
+  return nextStepId;
 }
 
 async function resolveOptionsForStep(
@@ -58,29 +58,11 @@ async function resolveOptionsForStep(
     return [];
   }
   if (source.type === 'static' && source.values) {
-    return staticValuesToOptions(source.values);
+    return resolveStaticOptions(source.values);
   }
   if (source.type === 'dynamic' && source.method === 'listConnections') {
-    const authProvider = provider.toLowerCase();
-    const page = await appConnectionService.list({
-      projectId,
-      cursorRequest: null,
-      name: undefined,
-      status: [AppConnectionStatus.ACTIVE],
-      limit: 100,
-      authProviders: [authProvider],
-    });
-    return page.data.map((conn) => {
-      const safe = removeSensitiveData(conn);
-      return {
-        id: safe.id,
-        name: safe.name,
-        imageLogoUrl: undefined,
-        metadata: { authProviderKey: safe.authProviderKey },
-      };
-    });
+    return resolveListConnectionsOptions(provider, projectId);
   }
-  // getConnectionAccounts not implemented; accounts step is skipped via conditional
   return [];
 }
 
@@ -89,44 +71,48 @@ export async function getWizardStep(
   request: { currentStep?: string; answers?: Record<string, string[]> },
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
-  if (
-    !SUPPORTED_PROVIDERS.includes(
-      provider as (typeof SUPPORTED_PROVIDERS)[number],
-    )
-  ) {
-    throw new Error(`Unsupported wizard provider: ${provider}`);
+  if (!SUPPORTED_WIZARD_PROVIDERS.has(provider)) {
+    const message = `Unsupported wizard provider: ${provider}`;
+    throw new ApplicationError(
+      { code: ErrorCode.VALIDATION, params: { message } },
+      message,
+    );
   }
   const config = getWizardConfig(provider);
   const steps = config.steps;
-  const answers = request.answers ?? {};
   const currentStepId = request.currentStep;
 
   let stepToReturn: WizardConfigStep;
   let nextStep: string | null;
 
   if (!currentStepId) {
-    // First call: return first step (connection)
     stepToReturn = steps[0];
-    nextStep = resolveNextStep(stepToReturn, answers, config);
+    nextStep = resolveNextStep(stepToReturn, config);
   } else {
     const currentIndex = steps.findIndex((s) => s.id === currentStepId);
     if (currentIndex < 0) {
-      throw new Error(`Unknown step: ${currentStepId}`);
+      const message = `Unknown step: ${currentStepId}`;
+      throw new ApplicationError(
+        { code: ErrorCode.VALIDATION, params: { message } },
+        message,
+      );
     }
     const currentStep = steps[currentIndex];
-    const resolvedNext = resolveNextStep(currentStep, answers, config);
-    if (resolvedNext === null) {
-      // User just completed the last selection step (services); return same step with nextStep: null
+    const nextStepId = resolveNextStep(currentStep, config);
+    if (nextStepId === null) {
       stepToReturn = currentStep;
       nextStep = null;
     } else {
-      // Return the next step
-      const nextStepDef = steps.find((s) => s.id === resolvedNext);
+      const nextStepDef = steps.find((s) => s.id === nextStepId);
       if (!nextStepDef) {
-        throw new Error(`Next step not found: ${resolvedNext}`);
+        const message = `Next step not found: ${nextStepId}`;
+        throw new ApplicationError(
+          { code: ErrorCode.VALIDATION, params: { message } },
+          message,
+        );
       }
       stepToReturn = nextStepDef;
-      nextStep = resolveNextStep(stepToReturn, answers, config);
+      nextStep = resolveNextStep(stepToReturn, config);
     }
   }
 
@@ -136,6 +122,8 @@ export async function getWizardStep(
     projectId,
   );
 
+  const { totalSteps, stepIndex } = getStepProgress(steps, stepToReturn);
+
   return {
     currentStep: stepToReturn.id,
     title: stepToReturn.title,
@@ -143,5 +131,7 @@ export async function getWizardStep(
     nextStep,
     selectionType: stepToReturn.selectionType,
     options,
+    totalSteps,
+    stepIndex,
   };
 }

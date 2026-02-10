@@ -24,8 +24,8 @@
       "optionsSource": {
         "type": "static",
         "values": [
-          { "id": "us-east-1", "type": "region", "displayName": "US East (N. Virginia)", "icon": "" },
-          { "id": "us-west-2", "type": "region", "displayName": "US West (Oregon)" }
+          { "id": "us-east-1", "displayName": "US East (N. Virginia)", "imageLogoUrl": "" },
+          { "id": "us-west-2", "displayName": "US West (Oregon)" }
         ]
       },
       "nextStep": "services"
@@ -37,8 +37,8 @@
       "optionsSource": {
         "type": "static",
         "values": [
-          { "id": "unattached-ebs", "type": "service", "displayName": "Unattached EBS Volumes" },
-          { "id": "asg-compute-optimizer", "type": "service", "displayName": "ASG Compute Optimizer" }
+          { "id": "unattached-ebs", "displayName": "Unattached EBS Volumes" },
+          { "id": "asg-compute-optimizer", "displayName": "ASG Compute Optimizer" }
         ]
       },
       "nextStep": "create_assessment"

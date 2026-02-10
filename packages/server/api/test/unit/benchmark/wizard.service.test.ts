@@ -38,6 +38,60 @@ describe('wizard.service', () => {
     });
   });
 
+  describe('stepIndex and totalSteps (based on optionsSource)', () => {
+    it('returns stepIndex 1 and totalSteps 4 for first step (connection)', async () => {
+      const result = await getWizardStep('aws', {}, projectId);
+      expect(result.stepIndex).toBe(1);
+      expect(result.totalSteps).toBe(4);
+    });
+
+    it('returns stepIndex 3 and totalSteps 4 for regions step', async () => {
+      const result = await getWizardStep(
+        'aws',
+        { currentStep: 'connection', answers: { connection: ['conn-1'] } },
+        projectId,
+      );
+      expect(result.currentStep).toBe('regions');
+      expect(result.stepIndex).toBe(3);
+      expect(result.totalSteps).toBe(4);
+    });
+
+    it('returns stepIndex 4 and totalSteps 4 for services step', async () => {
+      const result = await getWizardStep(
+        'aws',
+        {
+          currentStep: 'regions',
+          answers: {
+            connection: ['conn-1'],
+            regions: ['us-east-1'],
+          },
+        },
+        projectId,
+      );
+      expect(result.currentStep).toBe('services');
+      expect(result.stepIndex).toBe(4);
+      expect(result.totalSteps).toBe(4);
+    });
+
+    it('keeps stepIndex 4 and totalSteps 4 when wizard complete (nextStep null)', async () => {
+      const result = await getWizardStep(
+        'aws',
+        {
+          currentStep: 'services',
+          answers: {
+            connection: ['conn-1'],
+            regions: ['us-east-1'],
+            services: ['unattached-ebs'],
+          },
+        },
+        projectId,
+      );
+      expect(result.nextStep).toBeNull();
+      expect(result.stepIndex).toBe(4);
+      expect(result.totalSteps).toBe(4);
+    });
+  });
+
   describe('config load for aws', () => {
     it('loads aws config and returns first step (connection) with options', async () => {
       const result = await getWizardStep('aws', {}, projectId);
@@ -57,7 +111,7 @@ describe('wizard.service', () => {
       expect(result.options).toHaveLength(2);
       expect(result.options[0]).toMatchObject({
         id: 'conn-1',
-        name: 'AWS Prod',
+        displayName: 'AWS Prod',
         metadata: { authProviderKey: 'aws' },
       });
     });
@@ -79,7 +133,7 @@ describe('wizard.service', () => {
       ).toBe(true);
       expect(
         result.options.find((o: BenchmarkWizardOption) => o.id === 'us-east-1')
-          ?.name,
+          ?.displayName,
       ).toBe('US East (N. Virginia)');
     });
 
@@ -106,7 +160,7 @@ describe('wizard.service', () => {
       expect(
         result.options.find(
           (o: BenchmarkWizardOption) => o.id === 'unattached-ebs',
-        )?.name,
+        )?.displayName,
       ).toBe('Unattached EBS Volumes');
     });
   });

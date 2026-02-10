@@ -2,9 +2,8 @@ import awsWizardConfig from './wizard-config/aws.json';
 
 export type StaticOptionValue = {
   id: string;
-  displayName?: string;
-  type?: string;
-  icon?: string;
+  displayName: string;
+  imageLogoUrl?: string;
 };
 
 export type WizardStepOptionsSource =
@@ -35,6 +34,10 @@ export type WizardConfig = {
 const WIZARD_CONFIGS: Record<string, WizardConfig> = {
   aws: awsWizardConfig as WizardConfig,
 };
+
+export const SUPPORTED_WIZARD_PROVIDERS: ReadonlySet<string> = new Set(
+  Object.keys(WIZARD_CONFIGS),
+);
 
 export function getWizardConfig(provider: string): WizardConfig {
   const config = WIZARD_CONFIGS[provider];
