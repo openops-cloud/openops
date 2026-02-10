@@ -19,6 +19,8 @@ export const BenchmarkWizardStepResponse = Type.Object({
     Type.Literal('multi-select'),
   ]),
   options: Type.Array(BenchmarkWizardOption),
+  stepIndex: Type.Optional(Type.Number()),
+  totalSteps: Type.Optional(Type.Number()),
 });
 
 export type BenchmarkWizardStepResponse = Static<

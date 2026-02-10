@@ -23,8 +23,6 @@ export const BenchmarkStatusResponse = Type.Object({
   benchmarkId: Type.String(),
   status: Type.Enum(BenchmarkStatus),
   workflows: Type.Array(BenchmarkWorkflowStatusItem),
-  lastRunId: Type.Optional(Type.String()),
-  lastRunFinishedAt: Type.Optional(Type.String()),
 });
 
 export type BenchmarkStatusResponse = Static<typeof BenchmarkStatusResponse>;
