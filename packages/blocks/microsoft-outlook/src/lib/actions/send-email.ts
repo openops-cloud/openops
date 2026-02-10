@@ -61,6 +61,18 @@ export const sendEmailAction = createAction({
           displayName: 'File Name',
           required: false,
         }),
+        isInline: Property.Checkbox({
+          displayName: 'Inline',
+          required: false,
+        }),
+        contentId: Property.ShortText({
+          displayName: 'Content ID',
+          required: false,
+        }),
+        contentLocation: Property.ShortText({
+          displayName: 'Content Location',
+          required: false,
+        }),
       },
     }),
   },
@@ -71,6 +83,9 @@ export const sendEmailAction = createAction({
     const attachments = context.propsValue.attachments as Array<{
       file: WorkflowFile;
       fileName: string;
+      isInline: boolean;
+      contentId: string;
+      contentLocation: string;
     }>;
 
     const { subject, body, bodyFormat } = context.propsValue;
@@ -100,6 +115,9 @@ export const sendEmailAction = createAction({
         '@odata.type': '#microsoft.graph.fileAttachment',
         name: attachment.fileName || attachment.file.filename,
         contentBytes: attachment.file.base64,
+        isInline: attachment.isInline || undefined,
+        contentId: attachment.contentId || undefined,
+        contentLocation: attachment.contentLocation || undefined,
       })),
     };
 
