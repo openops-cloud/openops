@@ -71,7 +71,10 @@ export const azureAuth = BlockAuth.CustomAuth({
     } catch (error) {
       return {
         valid: false,
-        error: String(error),
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Azure authentication failed',
       };
     }
   },
