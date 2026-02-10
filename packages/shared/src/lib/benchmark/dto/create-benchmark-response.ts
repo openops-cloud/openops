@@ -12,9 +12,6 @@ export const CreateBenchmarkResponse = Type.Object({
   benchmarkId: Type.String(),
   folderId: Type.String(),
   workflows: Type.Array(BenchmarkWorkflowBase),
-  webhookPayload: Type.Object({
-    data: Type.Record(Type.String(), Type.Unknown()),
-  }),
 });
 
 export type CreateBenchmarkResponse = Static<typeof CreateBenchmarkResponse>;
