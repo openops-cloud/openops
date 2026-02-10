@@ -119,7 +119,7 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
       __name__: `${event.name}_total`,
       environmentId: `${environmentId}`,
       timestamp: timestamp.toISOString(),
-      environment: environmentName ?? 'unknown',
+      environmentName1: environmentName ?? 'unknown',
     },
     samples: [
       {
