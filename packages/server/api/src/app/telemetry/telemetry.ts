@@ -119,7 +119,10 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
       __name__: `${event.name}_total`,
       environmentId: `${environmentId}`,
       timestamp: timestamp.toISOString(),
-      environmentName1: environmentName ?? 'unknown',
+      environment:
+        environmentName && environmentName !== 'local'
+          ? environmentName
+          : 'unknown',
     },
     samples: [
       {
@@ -144,8 +147,6 @@ async function sendToCollector(
   telemetryCollectorUrl: string,
   requestBody: Timeseries,
 ): Promise<void> {
-  requestBody.labels['environment'] = 'unknown';
-
   await axios.post(telemetryCollectorUrl, requestBody, {
     timeout: 10000,
   });
