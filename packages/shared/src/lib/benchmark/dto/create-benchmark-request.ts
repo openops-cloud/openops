@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const BenchmarkConfiguration = Type.Object({
-  answers: Type.Record(Type.String(), Type.Array(Type.String())),
+export const CreateBenchmarkRequest = Type.Object({
+  benchmarkConfiguration: Type.Record(Type.String(), Type.Array(Type.String())),
 });
 
-export type BenchmarkConfiguration = Static<typeof BenchmarkConfiguration>;
+export type CreateBenchmarkRequest = Static<typeof CreateBenchmarkRequest>;
