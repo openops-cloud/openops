@@ -1,5 +1,16 @@
 import { createAction } from '@openops/blocks-framework';
-import { networkUtls } from '@openops/server-shared';
+import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
+
+function wrapWithResumePage(
+  redirectUrl: string,
+  frontendUrl: string,
+  isTest: boolean,
+): string {
+  const url = new URL('/html/resume_execution.html', frontendUrl);
+  url.searchParams.set('isTest', String(isTest));
+  url.searchParams.set('redirectUrl', redirectUrl);
+  return url.toString();
+}
 
 export const createApprovalLink = createAction({
   name: 'create_approval_links',
@@ -17,20 +28,35 @@ export const createApprovalLink = createAction({
     },
   },
   async run(ctx) {
-    const baseUrl = await networkUtls.getPublicUrl();
+    const frontendUrl = system
+      .getOrThrow(SharedSystemProp.FRONTEND_URL)
+      .replace(/\/$/, '');
+
+    const apiUrl = await networkUtls.getPublicUrl();
+
+    const approvalBackendUrl = ctx.generateResumeUrl(
+      {
+        queryParams: { action: 'approve' },
+      },
+      apiUrl,
+    );
+    const disapprovalBackendUrl = ctx.generateResumeUrl(
+      {
+        queryParams: { action: 'disapprove' },
+      },
+      apiUrl,
+    );
 
     return {
-      approvalLink: ctx.generateResumeUrl(
-        {
-          queryParams: { action: 'approve' },
-        },
-        baseUrl,
+      approvalLink: wrapWithResumePage(
+        approvalBackendUrl,
+        frontendUrl,
+        ctx.run.isTest,
       ),
-      disapprovalLink: ctx.generateResumeUrl(
-        {
-          queryParams: { action: 'disapprove' },
-        },
-        baseUrl,
+      disapprovalLink: wrapWithResumePage(
+        disapprovalBackendUrl,
+        frontendUrl,
+        ctx.run.isTest,
       ),
     };
   },
