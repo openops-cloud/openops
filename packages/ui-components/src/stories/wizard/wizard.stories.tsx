@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
@@ -186,6 +185,287 @@ const ServiceCheckbox = ({
   </ListItem>
 );
 
+const WizardExample = () => {
+  const [currentStep, setCurrentStep] = useState('step1');
+  const [cloudProvider, setCloudProvider] = useState('');
+  const [awsConnection, setAwsConnection] = useState('');
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+  const handleAccountToggle = (accountId: string) => {
+    setSelectedAccounts((prev) =>
+      prev.includes(accountId)
+        ? prev.filter((id) => id !== accountId)
+        : [...prev, accountId],
+    );
+  };
+
+  const handleSelectAllAccounts = () => {
+    const allAccountIds = ACCOUNTS.map((account) => account.id);
+    setSelectedAccounts(
+      selectedAccounts.length === allAccountIds.length ? [] : allAccountIds,
+    );
+  };
+  const handleRegionToggle = (region: string) => {
+    setSelectedRegions((prev) =>
+      prev.includes(region)
+        ? prev.filter((r) => r !== region)
+        : [...prev, region],
+    );
+  };
+
+  const handleSelectAllRegions = () => {
+    const allRegionIds = REGIONS.map((region) => region.id);
+    setSelectedRegions(
+      selectedRegions.length === allRegionIds.length ? [] : allRegionIds,
+    );
+  };
+  const handleServiceToggle = (service: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(service)
+        ? prev.filter((s) => s !== service)
+        : [...prev, service],
+    );
+  };
+
+  const handleSelectAllServices = () => {
+    const allServiceIds = SERVICES.map((service) => service.id);
+    setSelectedServices(
+      selectedServices.length === allServiceIds.length ? [] : allServiceIds,
+    );
+  };
+
+  return (
+    <div className="w-[500px] h-[600px]">
+      <Wizard value={currentStep} onValueChange={setCurrentStep}>
+        <WizardHeader>
+          <WizardTitle>Run a Benchmark</WizardTitle>
+          <WizardClose onClose={() => alert('Wizard closed')} />
+        </WizardHeader>
+
+        <WizardContent>
+          <WizardStep value="step1">
+            <StepTitle>Let&apos;s create your Benchmark Report!</StepTitle>
+            <StepDescription>
+              <a href="#" className="text-blue-600">
+                Read more here →
+              </a>
+            </StepDescription>
+            <StepDescription className="mt-4">
+              In order to do so, we need to create your FinOps Benchmark Report
+              of all your potential opportunities.
+              <br />
+              Which cloud provider do you use?
+            </StepDescription>
+            <StepBody>
+              <RadioGroup
+                value={cloudProvider}
+                onValueChange={setCloudProvider}
+                className="gap-0"
+              >
+                <div className="flex items-center border-b border-border px-3">
+                  <RadioGroupItem value="aws" id="provider-aws" />
+                  <Label
+                    htmlFor="provider-aws"
+                    className="flex items-center justify-between w-full cursor-pointer p-3 hover:bg-accent/50"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src="/blocks/aws.png"
+                        alt="AWS"
+                        className="w-6 h-6 object-contain"
+                      />
+                      <span className="font-semibold">AWS</span>
+                      <span>(Not connected)</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          alert('Connect AWS');
+                        }}
+                        className="text-primary-200 text-sm"
+                      >
+                        Connect
+                      </button>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center border-b border-border opacity-50 px-3">
+                  <RadioGroupItem value="azure" id="provider-azure" disabled />
+                  <Label
+                    htmlFor="provider-azure"
+                    className="flex items-center justify-between w-full cursor-not-allowed p-3"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src="/blocks/azure.svg"
+                        alt="Azure"
+                        className="w-6 h-6"
+                      />
+                      <span>Azure</span>
+                    </div>
+                    <span className="text-xs text-gray-500">COMING SOON</span>
+                  </Label>
+                </div>
+                <div className="flex items-center opacity-50 px-3">
+                  <RadioGroupItem value="gcp" id="provider-gcp" disabled />
+                  <Label
+                    htmlFor="provider-gcp"
+                    className="flex items-center justify-between w-full cursor-not-allowed p-3"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src="/blocks/google-cloud.svg"
+                        alt="Google Cloud"
+                        className="w-6 h-6"
+                      />
+                      <span>GCP</span>
+                    </div>
+                    <span className="text-xs text-gray-500">COMING SOON</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </StepBody>
+          </WizardStep>
+
+          <WizardStep value="step2">
+            <StepTitle>Great! Which AWS connection?</StepTitle>
+            <StepDescription>
+              Pick the AWS connection you would like to use
+            </StepDescription>
+            <StepBody>
+              <RadioGroup
+                value={awsConnection}
+                onValueChange={setAwsConnection}
+                className="gap-0"
+              >
+                {CONNECTIONS.map((connection, index) => (
+                  <ConnectionRadioButton
+                    key={connection.id}
+                    connection={connection}
+                    isLast={index === CONNECTIONS.length - 1}
+                  />
+                ))}
+              </RadioGroup>
+            </StepBody>
+          </WizardStep>
+
+          <WizardStep value="step3">
+            <StepTitle>Select Accounts</StepTitle>
+            <StepDescription>
+              Choose which AWS accounts to include in your benchmark report
+            </StepDescription>
+            <StepBody>
+              <ListItem hasSeparator>
+                <SelectAllCheckbox
+                  id="select-all-accounts"
+                  checked={
+                    selectedAccounts.length === ACCOUNTS.length
+                      ? true
+                      : selectedAccounts.length > 0
+                      ? 'indeterminate'
+                      : false
+                  }
+                  onCheckedChange={() => handleSelectAllAccounts()}
+                  label="Select all"
+                />
+              </ListItem>
+              {ACCOUNTS.map((account, index) => (
+                <AccountCheckbox
+                  key={account.id}
+                  account={account}
+                  checked={selectedAccounts.includes(account.id)}
+                  onToggle={() => handleAccountToggle(account.id)}
+                  isLast={index === ACCOUNTS.length - 1}
+                />
+              ))}
+            </StepBody>
+          </WizardStep>
+
+          <WizardStep value="step4">
+            <StepTitle>Select Regions</StepTitle>
+            <StepDescription>
+              Choose which AWS regions to include in your benchmark report
+            </StepDescription>
+            <StepBody>
+              <ListItem hasSeparator>
+                <SelectAllCheckbox
+                  id="select-all-regions"
+                  checked={
+                    selectedRegions.length === REGIONS.length
+                      ? true
+                      : selectedRegions.length > 0
+                      ? 'indeterminate'
+                      : false
+                  }
+                  onCheckedChange={() => handleSelectAllRegions()}
+                  label="Select all"
+                />
+              </ListItem>
+              {REGIONS.map((region, index) => (
+                <RegionCheckbox
+                  key={region.id}
+                  region={region}
+                  checked={selectedRegions.includes(region.id)}
+                  onToggle={() => handleRegionToggle(region.id)}
+                  isLast={index === REGIONS.length - 1}
+                />
+              ))}
+            </StepBody>
+          </WizardStep>
+
+          <WizardStep value="step5">
+            <StepTitle>Select Services</StepTitle>
+            <StepDescription>
+              Choose which AWS services to include in your benchmark report
+            </StepDescription>
+            <StepBody>
+              <ListItem hasSeparator>
+                <SelectAllCheckbox
+                  id="select-all-services"
+                  checked={
+                    selectedServices.length === SERVICES.length
+                      ? true
+                      : selectedServices.length > 0
+                      ? 'indeterminate'
+                      : false
+                  }
+                  onCheckedChange={() => handleSelectAllServices()}
+                  label="Select all"
+                />
+              </ListItem>
+              {SERVICES.map((service, index) => (
+                <ServiceCheckbox
+                  key={service.id}
+                  service={service}
+                  checked={selectedServices.includes(service.id)}
+                  onToggle={() => handleServiceToggle(service.id)}
+                  isLast={index === SERVICES.length - 1}
+                />
+              ))}
+            </StepBody>
+          </WizardStep>
+        </WizardContent>
+
+        <WizardFooter>
+          {steps.indexOf(currentStep) > 0 ? (
+            <WizardPrevious />
+          ) : (
+            <div className="w-[112px]" />
+          )}
+          <StepCounter current={steps.indexOf(currentStep) + 1} total={5} />
+          <WizardNext />
+        </WizardFooter>
+      </Wizard>
+    </div>
+  );
+};
+
 const meta = {
   title: 'ui/Wizard',
   component: Wizard,
@@ -199,287 +479,5 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {
-  render: () => {
-    const [currentStep, setCurrentStep] = useState('step1');
-    const [cloudProvider, setCloudProvider] = useState('');
-    const [awsConnection, setAwsConnection] = useState('');
-    const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
-    const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-    const [selectedServices, setSelectedServices] = useState<string[]>([]);
-
-    const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
-    const handleAccountToggle = (accountId: string) => {
-      setSelectedAccounts((prev) =>
-        prev.includes(accountId)
-          ? prev.filter((id) => id !== accountId)
-          : [...prev, accountId],
-      );
-    };
-
-    const handleSelectAllAccounts = () => {
-      const allAccountIds = ACCOUNTS.map((account) => account.id);
-      setSelectedAccounts(
-        selectedAccounts.length === allAccountIds.length ? [] : allAccountIds,
-      );
-    };
-    const handleRegionToggle = (region: string) => {
-      setSelectedRegions((prev) =>
-        prev.includes(region)
-          ? prev.filter((r) => r !== region)
-          : [...prev, region],
-      );
-    };
-
-    const handleSelectAllRegions = () => {
-      const allRegionIds = REGIONS.map((region) => region.id);
-      setSelectedRegions(
-        selectedRegions.length === allRegionIds.length ? [] : allRegionIds,
-      );
-    };
-    const handleServiceToggle = (service: string) => {
-      setSelectedServices((prev) =>
-        prev.includes(service)
-          ? prev.filter((s) => s !== service)
-          : [...prev, service],
-      );
-    };
-
-    const handleSelectAllServices = () => {
-      const allServiceIds = SERVICES.map((service) => service.id);
-      setSelectedServices(
-        selectedServices.length === allServiceIds.length ? [] : allServiceIds,
-      );
-    };
-
-    return (
-      <div className="w-[500px] h-[600px]">
-        <Wizard value={currentStep} onValueChange={setCurrentStep}>
-          <WizardHeader>
-            <WizardTitle>Run a Benchmark</WizardTitle>
-            <WizardClose onClose={() => alert('Wizard closed')} />
-          </WizardHeader>
-
-          <WizardContent>
-            <WizardStep value="step1">
-              <StepTitle>Let&apos;s create your Benchmark Report!</StepTitle>
-              <StepDescription>
-                <a href="#" className="text-blue-600">
-                  Read more here →
-                </a>
-              </StepDescription>
-              <StepDescription className="mt-4">
-                In order to do so, we need to create your FinOps Benchmark
-                Report of all your potential opportunities.
-                <br />
-                Which cloud provider do you use?
-              </StepDescription>
-              <StepBody>
-                <RadioGroup
-                  value={cloudProvider}
-                  onValueChange={setCloudProvider}
-                  className="gap-0"
-                >
-                  <div className="flex items-center border-b border-border px-3">
-                    <RadioGroupItem value="aws" id="provider-aws" />
-                    <Label
-                      htmlFor="provider-aws"
-                      className="flex items-center justify-between w-full cursor-pointer p-3 hover:bg-accent/50"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <img
-                          src="/blocks/aws.png"
-                          alt="AWS"
-                          className="w-6 h-6 object-contain"
-                        />
-                        <span className="font-semibold">AWS</span>
-                        <span>(Not connected)</span>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            alert('Connect AWS');
-                          }}
-                          className="text-primary-200 text-sm"
-                        >
-                          Connect
-                        </button>
-                      </div>
-                    </Label>
-                  </div>
-                  <div className="flex items-center border-b border-border opacity-50 px-3">
-                    <RadioGroupItem
-                      value="azure"
-                      id="provider-azure"
-                      disabled
-                    />
-                    <Label
-                      htmlFor="provider-azure"
-                      className="flex items-center justify-between w-full cursor-not-allowed p-3"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <img
-                          src="/blocks/azure.svg"
-                          alt="Azure"
-                          className="w-6 h-6"
-                        />
-                        <span>Azure</span>
-                      </div>
-                      <span className="text-xs text-gray-500">COMING SOON</span>
-                    </Label>
-                  </div>
-                  <div className="flex items-center opacity-50 px-3">
-                    <RadioGroupItem value="gcp" id="provider-gcp" disabled />
-                    <Label
-                      htmlFor="provider-gcp"
-                      className="flex items-center justify-between w-full cursor-not-allowed p-3"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <img
-                          src="/blocks/google-cloud.svg"
-                          alt="Google Cloud"
-                          className="w-6 h-6"
-                        />
-                        <span>GCP</span>
-                      </div>
-                      <span className="text-xs text-gray-500">COMING SOON</span>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </StepBody>
-            </WizardStep>
-
-            <WizardStep value="step2">
-              <StepTitle>Choose the AWS connection you want to use</StepTitle>
-              <StepDescription className="text-sm text-foreground leading-normal">
-                <div className="space-y-4">
-                  <p className="text-sm text-foreground">
-                    OpenOps can pull data from AWS using the connection you
-                    select here. We provide a CloudFormation stack that installs
-                    the required permissions for you.
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <p className="text-sm text-foreground">
-                      CloudFormation stack:{' '}
-                      <span className="underline cursor-pointer">
-                        Create a read-only role
-                      </span>
-                    </p>
-                    <p className="text-sm text-foreground">
-                      Documentation:{' '}
-                      <span className="underline cursor-pointer">
-                        How to set up AWS read-only permissions
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </StepDescription>
-              <StepBody>
-                <RadioGroup
-                  value={awsConnection}
-                  onValueChange={setAwsConnection}
-                  className="gap-0"
-                >
-                  {CONNECTIONS.map((connection, index, array) => (
-                    <ConnectionRadioButton
-                      key={connection.id}
-                      connection={connection}
-                      isLast={index === array.length - 1}
-                    />
-                  ))}
-                </RadioGroup>
-              </StepBody>
-            </WizardStep>
-
-            <WizardStep value="step3">
-              <StepDescription>
-                This connection supports multiple accounts, which of them would
-                like to include in the report?
-              </StepDescription>
-              <StepBody>
-                <ListItem hasSeparator>
-                  <SelectAllCheckbox
-                    id="select-all-accounts"
-                    checked={selectedAccounts.length === ACCOUNTS.length}
-                    onCheckedChange={handleSelectAllAccounts}
-                    label="Select all"
-                  />
-                </ListItem>
-
-                {ACCOUNTS.map((account, index, array) => (
-                  <AccountCheckbox
-                    key={account.id}
-                    account={account}
-                    checked={selectedAccounts.includes(account.id)}
-                    onToggle={() => handleAccountToggle(account.id)}
-                    isLast={index === array.length - 1}
-                  />
-                ))}
-              </StepBody>
-            </WizardStep>
-
-            <WizardStep value="step4">
-              <StepDescription>
-                Which regions should we include in the report?
-              </StepDescription>
-              <StepBody>
-                <ListItem hasSeparator>
-                  <SelectAllCheckbox
-                    id="select-all-regions"
-                    checked={selectedRegions.length === REGIONS.length}
-                    onCheckedChange={handleSelectAllRegions}
-                    label="Select all"
-                  />
-                </ListItem>
-
-                {REGIONS.map((region, index, array) => (
-                  <RegionCheckbox
-                    key={region.id}
-                    region={region}
-                    checked={selectedRegions.includes(region.id)}
-                    onToggle={() => handleRegionToggle(region.id)}
-                    isLast={index === array.length - 1}
-                  />
-                ))}
-              </StepBody>
-            </WizardStep>
-
-            <WizardStep value="step5">
-              <StepDescription>
-                Which AWS services should we analyze?
-              </StepDescription>
-              <StepBody>
-                <ListItem hasSeparator>
-                  <SelectAllCheckbox
-                    id="select-all-services"
-                    checked={selectedServices.length === SERVICES.length}
-                    onCheckedChange={handleSelectAllServices}
-                    label="Select all"
-                  />
-                </ListItem>
-
-                {SERVICES.map((service, index, array) => (
-                  <ServiceCheckbox
-                    key={service.id}
-                    service={service}
-                    checked={selectedServices.includes(service.id)}
-                    onToggle={() => handleServiceToggle(service.id)}
-                    isLast={index === array.length - 1}
-                  />
-                ))}
-              </StepBody>
-            </WizardStep>
-          </WizardContent>
-
-          <WizardFooter>
-            {steps.indexOf(currentStep) > 0 ? <WizardPrevious /> : <div />}
-            <StepCounter current={steps.indexOf(currentStep) + 1} total={5} />
-            <WizardNext />
-          </WizardFooter>
-        </Wizard>
-      </div>
-    );
-  },
+  render: () => <WizardExample />,
 };
