@@ -1,41 +1,103 @@
-import { BenchmarkWizardOption } from '@openops/shared';
 import { getWizardStep } from '../../../src/app/benchmark/wizard.service';
 
-const mockList = jest.fn();
-jest.mock(
-  '../../../src/app/app-connection/app-connection-service/app-connection-service',
-  () => ({
-    appConnectionService: {
-      list: (...args: unknown[]): ReturnType<typeof mockList> =>
-        mockList(...args),
-    },
-  }),
-);
-
-jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
-  removeSensitiveData: (conn: {
-    id: string;
-    name: string;
-    authProviderKey: string;
-  }): { id: string; name: string; authProviderKey: string } => ({
-    id: conn.id,
-    name: conn.name,
-    authProviderKey: conn.authProviderKey,
-  }),
+const mockGetWizardConfig = jest.fn();
+jest.mock('../../../src/app/benchmark/wizard-config-loader', () => ({
+  getWizardConfig: (
+    ...args: unknown[]
+  ): ReturnType<typeof mockGetWizardConfig> => mockGetWizardConfig(...args),
+  SUPPORTED_WIZARD_PROVIDERS: new Set(['aws']),
 }));
+
+const mockResolveStaticOptions = jest.fn();
+const mockResolveListConnectionsOptions = jest.fn();
+jest.mock('../../../src/app/benchmark/wizard-option-resolvers', () => ({
+  resolveStaticOptions: (
+    ...args: unknown[]
+  ): ReturnType<typeof mockResolveStaticOptions> =>
+    mockResolveStaticOptions(...args),
+  resolveListConnectionsOptions: (
+    ...args: unknown[]
+  ): ReturnType<typeof mockResolveListConnectionsOptions> =>
+    mockResolveListConnectionsOptions(...args),
+}));
+
+const MOCK_WIZARD_CONFIG = {
+  provider: 'aws',
+  steps: [
+    {
+      id: 'connection',
+      title: 'Choose the AWS connection you want to use',
+      selectionType: 'single' as const,
+      optionsSource: { type: 'dynamic' as const, method: 'listConnections' },
+      nextStep: 'accounts',
+    },
+    {
+      id: 'accounts',
+      title: 'Which accounts?',
+      selectionType: 'multi-select' as const,
+      optionsSource: {
+        type: 'dynamic' as const,
+        method: 'getConnectionAccounts',
+      },
+      conditional: {
+        when: 'connection.supportsMultiAccount',
+        skipToStep: 'regions',
+      },
+      nextStep: 'regions',
+    },
+    {
+      id: 'regions',
+      title: 'Which regions?',
+      selectionType: 'multi-select' as const,
+      optionsSource: {
+        type: 'static' as const,
+        values: [{ id: 'r1', displayName: 'Region 1' }],
+      },
+      nextStep: 'services',
+    },
+    {
+      id: 'services',
+      title: 'Which services?',
+      selectionType: 'multi-select' as const,
+      optionsSource: {
+        type: 'static' as const,
+        values: [{ id: 's1', displayName: 'Service 1' }],
+      },
+      nextStep: 'create_assessment',
+    },
+    {
+      id: 'create_assessment',
+      action: 'import_workflows_and_persist',
+    },
+  ],
+};
+
+const MOCK_CONNECTION_OPTIONS = [
+  {
+    id: 'conn-1',
+    displayName: 'AWS Prod',
+    imageLogoUrl: undefined as string | undefined,
+    metadata: { authProviderKey: 'aws' },
+  },
+];
+const MOCK_STATIC_OPTIONS = [
+  {
+    id: 'static-1',
+    displayName: 'Static Option',
+    imageLogoUrl: undefined as string | undefined,
+  },
+];
 
 describe('wizard.service', () => {
   const projectId = 'project-1';
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockList.mockResolvedValue({
-      data: [
-        { id: 'conn-1', name: 'AWS Prod', authProviderKey: 'aws' },
-        { id: 'conn-2', name: 'AWS Staging', authProviderKey: 'aws' },
-      ],
-      cursor: null,
-    });
+    mockGetWizardConfig.mockReturnValue(MOCK_WIZARD_CONFIG);
+    mockResolveListConnectionsOptions.mockResolvedValue(
+      MOCK_CONNECTION_OPTIONS,
+    );
+    mockResolveStaticOptions.mockReturnValue(MOCK_STATIC_OPTIONS);
   });
 
   describe('stepIndex and totalSteps (based on optionsSource)', () => {
@@ -96,32 +158,24 @@ describe('wizard.service', () => {
   });
 
   describe('config load for aws', () => {
-    it('loads aws config and returns first step (connection) with options', async () => {
+    it('uses config from loader and returns first step (connection) with options', async () => {
       const result = await getWizardStep('aws', {}, projectId);
 
+      expect(mockGetWizardConfig).toHaveBeenCalledWith('aws');
       expect(result.currentStep).toBe('connection');
       expect(result.title).toContain('AWS connection');
       expect(result.selectionType).toBe('single');
       expect(result.nextStep).toBe('regions'); // accounts skipped
-      expect(mockList).toHaveBeenCalledWith(
-        expect.objectContaining({
-          projectId,
-          authProviders: ['aws'],
-          status: expect.any(Array),
-          limit: 100,
-        }),
+      expect(mockResolveListConnectionsOptions).toHaveBeenCalledWith(
+        'aws',
+        projectId,
       );
-      expect(result.options).toHaveLength(2);
-      expect(result.options[0]).toMatchObject({
-        id: 'conn-1',
-        displayName: 'AWS Prod',
-        metadata: { authProviderKey: 'aws' },
-      });
+      expect(result.options).toEqual(MOCK_CONNECTION_OPTIONS);
     });
   });
 
   describe('option resolution', () => {
-    it('returns static options for regions step', async () => {
+    it('calls resolveStaticOptions for regions step and returns its result', async () => {
       const result = await getWizardStep(
         'aws',
         {
@@ -133,17 +187,11 @@ describe('wizard.service', () => {
 
       expect(result.currentStep).toBe('regions');
       expect(result.selectionType).toBe('multi-select');
-      expect(result.options.length).toBeGreaterThanOrEqual(1);
-      expect(
-        result.options.some((o: BenchmarkWizardOption) => o.id === 'us-east-1'),
-      ).toBe(true);
-      expect(
-        result.options.find((o: BenchmarkWizardOption) => o.id === 'us-east-1')
-          ?.displayName,
-      ).toBe('US East (N. Virginia)');
+      expect(mockResolveStaticOptions).toHaveBeenCalled();
+      expect(result.options).toEqual(MOCK_STATIC_OPTIONS);
     });
 
-    it('returns static options for services step', async () => {
+    it('calls resolveStaticOptions for services step and returns its result', async () => {
       const result = await getWizardStep(
         'aws',
         {
@@ -158,16 +206,8 @@ describe('wizard.service', () => {
 
       expect(result.currentStep).toBe('services');
       expect(result.selectionType).toBe('multi-select');
-      expect(
-        result.options.some(
-          (o: BenchmarkWizardOption) => o.id === 'unattached-ebs',
-        ),
-      ).toBe(true);
-      expect(
-        result.options.find(
-          (o: BenchmarkWizardOption) => o.id === 'unattached-ebs',
-        )?.displayName,
-      ).toBe('Unattached EBS Volumes');
+      expect(mockResolveStaticOptions).toHaveBeenCalled();
+      expect(result.options).toEqual(MOCK_STATIC_OPTIONS);
     });
   });
 
@@ -204,11 +244,7 @@ describe('wizard.service', () => {
 
       expect(result.currentStep).toBe('services');
       expect(result.nextStep).toBeNull();
-      expect(
-        result.options.some(
-          (o: BenchmarkWizardOption) => o.id === 'unattached-ebs',
-        ),
-      ).toBe(true);
+      expect(result.options).toEqual(MOCK_STATIC_OPTIONS);
     });
   });
 
@@ -217,7 +253,9 @@ describe('wizard.service', () => {
       await expect(getWizardStep('azure', {}, projectId)).rejects.toThrow(
         'Unsupported wizard provider: azure',
       );
-      expect(mockList).not.toHaveBeenCalled();
+      expect(mockGetWizardConfig).not.toHaveBeenCalled();
+      expect(mockResolveListConnectionsOptions).not.toHaveBeenCalled();
+      expect(mockResolveStaticOptions).not.toHaveBeenCalled();
     });
   });
 
