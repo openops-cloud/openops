@@ -30,6 +30,7 @@ function getStepProgress(
 function resolveNextStep(
   step: WizardConfigStep,
   config: WizardConfig,
+  _benchmarkConfiguration: Record<string, string[]>,
 ): string | null {
   const nextStepId = step.nextStep;
   if (!nextStepId) {
@@ -43,6 +44,7 @@ function resolveNextStep(
     return null;
   }
   if (nextStepDef.conditional) {
+    // TODO: evaluate conditional.when against benchmarkConfiguration; for now always skip to skipToStep
     return nextStepDef.conditional.skipToStep ?? nextStepId;
   }
   return nextStepId;
@@ -86,13 +88,14 @@ export async function getWizardStep(
   const config = getWizardConfig(provider);
   const steps = config.steps;
   const currentStepId = request.currentStep;
+  const benchmarkConfiguration = request.benchmarkConfiguration ?? {};
 
   let stepToReturn: WizardConfigStep;
   let nextStep: string | null;
 
   if (!currentStepId) {
     stepToReturn = steps[0];
-    nextStep = resolveNextStep(stepToReturn, config);
+    nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
   } else {
     const currentIndex = steps.findIndex((s) => s.id === currentStepId);
     if (currentIndex < 0) {
@@ -103,7 +106,11 @@ export async function getWizardStep(
       );
     }
     const currentStep = steps[currentIndex];
-    const nextStepId = resolveNextStep(currentStep, config);
+    const nextStepId = resolveNextStep(
+      currentStep,
+      config,
+      benchmarkConfiguration,
+    );
     if (nextStepId === null) {
       stepToReturn = currentStep;
       nextStep = null;
@@ -117,7 +124,7 @@ export async function getWizardStep(
         );
       }
       stepToReturn = nextStepDef;
-      nextStep = resolveNextStep(stepToReturn, config);
+      nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
     }
   }
 
