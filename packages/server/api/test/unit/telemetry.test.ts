@@ -133,6 +133,7 @@ describe('telemetry', () => {
         projectId: 'projectId',
         environmentId: 'undefined',
         __name__: `${event.name}_total`,
+        environment: 'environment-name',
         timestamp: '2023-11-25T12:00:00.000Z',
       },
       samples: [
@@ -232,6 +233,10 @@ function setupSystemMock(
 
     if (key === 'VERSION') {
       return '0.0.1';
+    }
+
+    if (key === 'ENVIRONMENT_NAME') {
+      return 'environment-name';
     }
 
     return null;

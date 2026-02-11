@@ -10,9 +10,23 @@ export type AzureCredentials = {
   token_type: string;
 };
 
+export function validateAzureCredentials(credentials: any): void {
+  if (
+    !credentials?.clientId ||
+    !credentials?.clientSecret ||
+    !credentials?.tenantId
+  ) {
+    throw new Error(
+      'Azure credentials are required. Please provide clientId, clientSecret, and tenantId.',
+    );
+  }
+}
+
 export async function authenticateUserWithAzure(
   credentials: any,
 ): Promise<AzureCredentials> {
+  validateAzureCredentials(credentials);
+
   const response = await makeHttpRequest<AzureCredentials>(
     'POST',
     `https://login.microsoftonline.com/${credentials.tenantId}/oauth2/v2.0/token`,
@@ -50,4 +64,18 @@ export const azureAuth = BlockAuth.CustomAuth({
     }),
   },
   required: !enableHostSession,
+  validate: async ({ auth }) => {
+    try {
+      await authenticateUserWithAzure(auth);
+      return { valid: true };
+    } catch (error) {
+      return {
+        valid: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Azure authentication failed',
+      };
+    }
+  },
 });
