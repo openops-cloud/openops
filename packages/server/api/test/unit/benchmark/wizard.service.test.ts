@@ -48,7 +48,10 @@ describe('wizard.service', () => {
     it('returns stepIndex 3 and totalSteps 4 for regions step', async () => {
       const result = await getWizardStep(
         'aws',
-        { currentStep: 'connection', answers: { connection: ['conn-1'] } },
+        {
+          currentStep: 'connection',
+          benchmarkConfiguration: { connection: ['conn-1'] },
+        },
         projectId,
       );
       expect(result.currentStep).toBe('regions');
@@ -61,7 +64,7 @@ describe('wizard.service', () => {
         'aws',
         {
           currentStep: 'regions',
-          answers: {
+          benchmarkConfiguration: {
             connection: ['conn-1'],
             regions: ['us-east-1'],
           },
@@ -78,7 +81,7 @@ describe('wizard.service', () => {
         'aws',
         {
           currentStep: 'services',
-          answers: {
+          benchmarkConfiguration: {
             connection: ['conn-1'],
             regions: ['us-east-1'],
             services: ['unattached-ebs'],
@@ -121,7 +124,10 @@ describe('wizard.service', () => {
     it('returns static options for regions step', async () => {
       const result = await getWizardStep(
         'aws',
-        { currentStep: 'connection', answers: { connection: ['conn-1'] } },
+        {
+          currentStep: 'connection',
+          benchmarkConfiguration: { connection: ['conn-1'] },
+        },
         projectId,
       );
 
@@ -142,7 +148,7 @@ describe('wizard.service', () => {
         'aws',
         {
           currentStep: 'regions',
-          answers: {
+          benchmarkConfiguration: {
             connection: ['conn-1'],
             regions: ['us-east-1'],
           },
@@ -169,7 +175,10 @@ describe('wizard.service', () => {
     it('skips accounts step: after connection, next step is regions', async () => {
       const result = await getWizardStep(
         'aws',
-        { currentStep: 'connection', answers: { connection: ['conn-1'] } },
+        {
+          currentStep: 'connection',
+          benchmarkConfiguration: { connection: ['conn-1'] },
+        },
         projectId,
       );
 
@@ -184,7 +193,7 @@ describe('wizard.service', () => {
         'aws',
         {
           currentStep: 'services',
-          answers: {
+          benchmarkConfiguration: {
             connection: ['conn-1'],
             regions: ['us-east-1'],
             services: ['unattached-ebs'],
@@ -217,7 +226,7 @@ describe('wizard.service', () => {
       await expect(
         getWizardStep(
           'aws',
-          { currentStep: 'unknown_step', answers: {} },
+          { currentStep: 'unknown_step', benchmarkConfiguration: {} },
           projectId,
         ),
       ).rejects.toThrow('Unknown step: unknown_step');

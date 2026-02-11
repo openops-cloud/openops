@@ -68,7 +68,10 @@ async function resolveOptionsForStep(
 
 export async function getWizardStep(
   provider: string,
-  request: { currentStep?: string; answers?: Record<string, string[]> },
+  request: {
+    currentStep?: string;
+    benchmarkConfiguration?: Record<string, string[]>;
+  },
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
   if (!SUPPORTED_WIZARD_PROVIDERS.has(provider)) {

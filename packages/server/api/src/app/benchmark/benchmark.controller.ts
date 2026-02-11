@@ -3,7 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  BenchmarkWizardConfiguration,
+  BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
   PrincipalType,
 } from '@openops/shared';
@@ -19,7 +19,7 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
         request.params.provider,
         {
           currentStep: request.body.currentStep,
-          answers: request.body.answers,
+          benchmarkConfiguration: request.body.benchmarkConfiguration,
         },
         request.principal.projectId,
       );
@@ -35,11 +35,11 @@ const WizardStepRequestOptions = {
   schema: {
     tags: ['benchmarks'],
     description:
-      'Get the benchmark wizard step to display. Omit currentStep for the first step; send currentStep and accumulated answers to advance. Response includes options; nextStep is null when the wizard is complete.',
+      'Get the benchmark wizard step to display. Omit currentStep for the first step; send currentStep and accumulated benchmarkConfiguration to advance. Response includes options; nextStep is null when the wizard is complete.',
     params: Type.Object({
       provider: Type.String(),
     }),
-    body: BenchmarkWizardConfiguration,
+    body: BenchmarkWizardRequest,
     response: {
       [StatusCodes.OK]: BenchmarkWizardStepResponse,
       [StatusCodes.CONFLICT]: Type.Object({
