@@ -206,6 +206,22 @@ describe('POST /v1/block-variable/execute-variable', () => {
       },
     });
 
+    expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+  });
+
+  it('should require valid principal', async () => {
+    const response = await makeRequest({
+      token: await generateMockToken({
+        type: PrincipalType.ENGINE,
+        projectId: 'test-project-id',
+      }),
+      body: {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-version-id',
+        variableExpression: '{{trigger.headers}}',
+      },
+    });
+
     expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 
