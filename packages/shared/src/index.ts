@@ -14,6 +14,7 @@ export * from './lib/authentication/dto/sign-up-request';
 export * from './lib/authentication/model/authentication-type';
 export * from './lib/authentication/model/principal';
 export * from './lib/authentication/model/principal-type';
+export * from './lib/benchmark';
 export * from './lib/blocks';
 export * from './lib/code/dto/code-request';
 export * from './lib/common';
