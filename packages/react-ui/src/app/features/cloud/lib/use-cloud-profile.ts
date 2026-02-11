@@ -18,7 +18,7 @@ export const useCloudProfile = () => {
     flags?.CLOUD_CONNECTION_PAGE_ENABLED,
   );
   const { data, refetch, isSuccess } = useQuery({
-    queryKey: [QueryKeys.cloudUserInfo],
+    queryKey: [QueryKeys.cloudUserInfo, federatedLoginEnabled],
     queryFn: () => {
       if (federatedLoginEnabled) {
         const currentUser = authenticationSession.getCurrentUser();
