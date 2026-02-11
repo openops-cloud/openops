@@ -52,6 +52,7 @@ async function resolveOptionsForStep(
   step: WizardConfigStep,
   provider: string,
   projectId: string,
+  _benchmarkConfiguration?: Record<string, string[]>,
 ): Promise<BenchmarkWizardOption[]> {
   const source = step.optionsSource;
   if (!source) {
@@ -81,6 +82,7 @@ export async function getWizardStep(
       message,
     );
   }
+
   const config = getWizardConfig(provider);
   const steps = config.steps;
   const currentStepId = request.currentStep;
@@ -123,6 +125,7 @@ export async function getWizardStep(
     stepToReturn,
     provider,
     projectId,
+    request.benchmarkConfiguration,
   );
 
   const { totalSteps, stepIndex } = getStepProgress(steps, stepToReturn);
