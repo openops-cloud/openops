@@ -21,9 +21,8 @@ function getStepProgress(
 ): { totalSteps: number; stepIndex: number } {
   const stepsWithOptions = steps.filter((s) => s.optionsSource);
   const totalSteps = stepsWithOptions.length;
-  const stepIndexOneBased =
+  const stepIndex =
     stepsWithOptions.findIndex((s) => s.id === stepToReturn.id) + 1;
-  const stepIndex = stepIndexOneBased > 0 ? stepIndexOneBased : 0;
   return { totalSteps, stepIndex };
 }
 
@@ -97,15 +96,15 @@ export async function getWizardStep(
     stepToReturn = steps[0];
     nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
   } else {
-    const currentIndex = steps.findIndex((s) => s.id === currentStepId);
-    if (currentIndex < 0) {
+    const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
+    if (currentStepIndex < 0) {
       const message = `Unknown step: ${currentStepId}`;
       throw new ApplicationError(
         { code: ErrorCode.VALIDATION, params: { message } },
         message,
       );
     }
-    const currentStep = steps[currentIndex];
+    const currentStep = steps[currentStepIndex];
     const nextStepId = resolveNextStep(
       currentStep,
       config,
