@@ -16,8 +16,9 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   private static readonly HEADER_PREFIX = 'Bearer ';
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
+    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
     const hasToken = this.getAccessToken(request) !== undefined;
-    return Promise.resolve(hasToken);
+    return Promise.resolve(hasToken || !skipAuth);
   }
 
   private getAccessToken(request: FastifyRequest): string | undefined {
