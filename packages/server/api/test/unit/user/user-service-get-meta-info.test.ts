@@ -1,4 +1,5 @@
 const getProjectPermissionsMock = jest.fn();
+const findOneByMock = jest.fn();
 jest.mock('../../../src/app/user/project-permissions-service-factory', () => ({
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getProjectPermissionsService: () => ({
@@ -12,8 +13,6 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
     findOneBy: findOneByMock,
   }),
 }));
-
-const findOneByMock = jest.fn();
 
 import { OrganizationRole, Principal, PrincipalType } from '@openops/shared';
 import { userService } from '../../../src/app/user/user-service';
