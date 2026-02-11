@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-import { jwtDecode } from 'jwt-decode';
 import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
@@ -18,21 +16,6 @@ import { navigationUtil } from '@/app/lib/navigation-util';
 import { FlagId } from '@openops/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { userHooks } from '../hooks/user-hooks';
-
-function isJwtExpired(token: string): boolean {
-  if (!token) {
-    return true;
-  }
-  try {
-    const decoded = jwtDecode(token);
-    if (decoded && decoded.exp && dayjs().isAfter(dayjs.unix(decoded.exp))) {
-      return true;
-    }
-    return false;
-  } catch (e) {
-    return true;
-  }
-}
 
 const LoggedIn = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -65,13 +48,11 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     FlagId.FEDERATED_LOGIN_ENABLED,
   );
 
-  const token = authenticationSession.getToken();
   const fronteggToken =
     getFronteggApp()?.store.getState().auth.user?.accessToken;
   const isLoggedIn = isFederatedLogin
     ? fronteggToken
     : authenticationSession.isLoggedIn();
-  const expired = !token || isJwtExpired(token);
 
   useEffect(() => {
     let isMounted = true;
@@ -92,7 +73,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
         }
       }
     }
-    if (!isLoggedIn || expired) {
+    if (!isLoggedIn) {
       navigationUtil.save(location.pathname + location.search);
       doLogout();
     }
@@ -101,7 +82,6 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     };
   }, [
     isLoggedIn,
-    expired,
     location.pathname,
     location.search,
     navigate,
@@ -109,7 +89,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     isFederatedLogin,
   ]);
 
-  if ((!isLoggedIn || expired) && !isFederatedLogin) {
+  if (!isLoggedIn && !isFederatedLogin) {
     return <Navigate to="/sign-in" replace />;
   } else if (!isLoggedIn && isFederatedLogin) {
     return <Navigate to="/" replace />;

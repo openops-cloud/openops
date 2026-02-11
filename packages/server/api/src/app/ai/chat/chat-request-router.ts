@@ -21,6 +21,7 @@ export type ChatRequestContext = {
   request: {
     body: NewMessageRequest;
     principal: Principal;
+    cookies?: Record<string, string>;
     headers: {
       authorization?: string;
     };
@@ -56,7 +57,10 @@ export async function routeChatRequest(
   const chatId = request.body.chatId;
   const userId = request.principal.id;
   const projectId = request.principal.projectId;
-  const authToken = request.headers.authorization?.replace('Bearer ', '') ?? '';
+  const authToken =
+    request.cookies?.token ??
+    request.headers.authorization?.replace('Bearer ', '') ??
+    '';
 
   const conversation = await getConversation(chatId, userId, projectId);
   const isCodeGenerationRequest =
