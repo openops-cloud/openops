@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
@@ -72,6 +73,12 @@ export const Disabled: Story = {
 };
 
 export const Interactive: Story = {
+  args: {
+    id: 'select-all-interactive',
+    checked: false,
+    label: 'Select all items',
+    onCheckedChange: () => {},
+  },
   render: () => {
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
