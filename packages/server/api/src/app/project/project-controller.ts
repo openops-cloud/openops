@@ -2,12 +2,7 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import {
-  ApplicationError,
-  ErrorCode,
-  Project,
-  SeekPage,
-} from '@openops/shared';
+import { ApplicationError, Project, SeekPage } from '@openops/shared';
 import { paginationHelper } from '../helper/pagination/pagination-utils';
 import { projectService } from './project-service';
 
