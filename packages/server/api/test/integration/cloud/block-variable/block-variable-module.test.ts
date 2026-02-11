@@ -210,6 +210,15 @@ describe('POST /v1/block-variable/execute-variable', () => {
   });
 
   it('should require valid principal', async () => {
+    accessTokenManagerMock.extractPrincipal.mockResolvedValue({
+      id: 'test-user-id',
+      type: PrincipalType.ENGINE,
+      projectId: 'test-project-id',
+      organization: {
+        id: 'test-org-id',
+      },
+    });
+
     const response = await makeRequest({
       token: await generateMockToken({
         type: PrincipalType.ENGINE,
