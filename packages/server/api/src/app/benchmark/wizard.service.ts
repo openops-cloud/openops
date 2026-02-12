@@ -91,10 +91,7 @@ export async function getWizardStep(
   let stepToReturn: WizardConfigStep;
   let nextStep: string | null;
 
-  if (!currentStepId) {
-    stepToReturn = steps[0];
-    nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
-  } else {
+  if (currentStepId) {
     const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
     if (currentStepIndex < 0) {
       const message = `Unknown step: ${currentStepId}`;
@@ -124,6 +121,9 @@ export async function getWizardStep(
       stepToReturn = nextStepDef;
       nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
     }
+  } else {
+    stepToReturn = steps[0];
+    nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
   }
 
   const options = await resolveOptionsForStep(
