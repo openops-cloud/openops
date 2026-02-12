@@ -1,5 +1,6 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -11,13 +12,24 @@ export const useCloudProfile = () => {
     setCloudUser: s.setCloudUser,
   }));
 
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const { data: flags } = flagsHooks.useFlags();
+  const federatedLoginEnabled = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
+  const cloudConnectionPageEnabled = Boolean(
+    flags?.CLOUD_CONNECTION_PAGE_ENABLED,
+  );
   const { data, refetch, isSuccess } = useQuery({
-    queryKey: [QueryKeys.cloudUserInfo],
+    queryKey: [QueryKeys.cloudUserInfo, federatedLoginEnabled],
     queryFn: () => {
+      if (federatedLoginEnabled) {
+        const currentUser = authenticationSession.getCurrentUser();
+        return {
+          email: currentUser?.email ?? '',
+        };
+      }
+
       return cloudUserApi.getUserInfo();
     },
-    enabled: useCloudTemplates,
+    enabled: !cloudConnectionPageEnabled,
     retry: false,
     staleTime: 0,
     gcTime: 0,

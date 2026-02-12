@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import {
   OPENOPS_CONNECT_MAX_POLL_ATTEMPTS,
@@ -67,7 +68,11 @@ export const useUserInfoPolling = () => {
     setPollInterval(interval);
   }, [queryClient, refetchIsConnectedToCloudTemplates, updateUserSettings]);
 
+  const { data: flags } = flagsHooks.useFlags();
+  const federatedLoginEnabled = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
   return {
-    createPollingInterval,
+    createPollingInterval: federatedLoginEnabled
+      ? () => {}
+      : createPollingInterval,
   };
 };
