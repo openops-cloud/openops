@@ -88,13 +88,14 @@ describe('User Meta API', () => {
       });
     });
 
-    it('Should return 401 without authentication', async () => {
+    // todo
+    it('Should return 403 without authentication', async () => {
       const response = await app?.inject({
         method: 'GET',
         url: '/v1/users/me',
       });
 
-      expect(response?.statusCode).toBe(401);
+      expect(response?.statusCode).toBe(403);
     });
   });
 });

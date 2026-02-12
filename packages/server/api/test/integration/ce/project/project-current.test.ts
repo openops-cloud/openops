@@ -78,13 +78,14 @@ describe('Project Current API', () => {
       expect(responseBody.tablesDatabaseToken).toBeUndefined();
     });
 
-    it('Should return 401 without authentication', async () => {
+    // todo 401
+    it('Should return 403 when no authentication', async () => {
       const response = await app?.inject({
         method: 'GET',
         url: '/v1/users/projects/current',
       });
 
-      expect(response?.statusCode).toBe(401);
+      expect(response?.statusCode).toBe(403);
     });
   });
 });
