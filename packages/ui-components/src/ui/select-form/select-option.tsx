@@ -9,11 +9,15 @@ import { useSelectForm } from './select-form';
 interface SelectOptionProps extends React.HTMLAttributes<HTMLLabelElement> {
   value: string;
   icon?: React.ReactNode;
+  iconClassName?: string;
   disabled?: boolean;
 }
 
 const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
-  ({ className, value, icon, disabled, children, ...props }, ref) => {
+  (
+    { className, value, icon, iconClassName, disabled, children, ...props },
+    ref,
+  ) => {
     const {
       type,
       value: formValue,
@@ -81,7 +85,7 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
         htmlFor={inputId}
         className={cn(
           'flex items-center gap-4 px-4 py-3 cursor-pointer border-b border-border last:border-b-0 transition-colors',
-          'hover:bg-accent focus-within:bg-accent',
+          'hover:bg-accent focus-within:bg-accent first:rounded-t-lg first:rounded-t-lg last:rounded-b-lg last:rounded-b-lg',
           isSelected && 'bg-accent/50',
           isDisabled && 'cursor-not-allowed opacity-50',
           className,
@@ -95,20 +99,44 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
             ...inputProps,
           })}
           {type === 'single' ? (
-            <RadioGroupItem value={value} {...visualComponentProps} />
+            <RadioGroupItem
+              value={value}
+              {...visualComponentProps}
+              className={cn(
+                '!border-input !text-primary-200',
+                'data-[state=checked]:!border-primary-200',
+                'data-[state=checked]:!text-primary-200',
+              )}
+            />
           ) : (
-            <Checkbox {...visualComponentProps} />
+            <Checkbox
+              {...visualComponentProps}
+              className={cn(
+                '!border-input',
+                'data-[state=checked]:!bg-primary-200',
+                'data-[state=indeterminate]:!bg-primary-200',
+                'data-[state=checked]:!border-primary-200',
+                'data-[state=indeterminate]:!border-primary-200',
+                'data-[state=checked]:!text-white',
+                'data-[state=indeterminate]:!text-white',
+              )}
+            />
           )}
         </div>
         {icon && (
-          <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+          <div
+            className={cn(
+              'flex-shrink-0 w-6 h-6 flex items-center justify-center',
+              iconClassName,
+            )}
+          >
             {icon}
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div
             id={children ? `${inputId}-description` : undefined}
-            className="text-sm font-medium text-foreground"
+            className="flex text-sm font-normal text-foreground"
           >
             {children}
           </div>

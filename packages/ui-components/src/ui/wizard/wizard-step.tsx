@@ -41,7 +41,7 @@ const StepTitle = React.forwardRef<HTMLHeadingElement, StepTitleProps>(
       <h3
         ref={ref}
         className={cn(
-          'text-lg font-semibold leading-6 bg-background text-foreground',
+          'text-sm font-semibold leading-6 dark:bg-background text-foreground',
           className,
         )}
         {...props}
@@ -61,7 +61,7 @@ const StepDescription = React.forwardRef<HTMLDivElement, StepDescriptionProps>(
       <div
         ref={ref}
         className={cn(
-          'text-sm leading-5 bg-background text-foreground',
+          'text-sm leading-5 bg-neutral text-foreground',
           className,
         )}
         {...props}
@@ -80,7 +80,7 @@ const StepBody = React.forwardRef<HTMLDivElement, StepBodyProps>(
     return (
       <div
         ref={ref}
-        className={cn('bg-white border border-border rounded-lg', className)}
+        className={cn('bg-neutral border border-border rounded-lg', className)}
         {...props}
       >
         {children}

@@ -13,7 +13,7 @@ const WizardFooter = React.forwardRef<HTMLDivElement, WizardFooterProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-between p-6 border-t border-border gap-4',
+          'flex items-center justify-between px-6 py-3 gap-4',
           className,
         )}
         {...props}

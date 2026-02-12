@@ -4,13 +4,10 @@ import { useState } from 'react';
 import {
   Avatar,
   AvatarFallback,
-  Checkbox,
-  Label,
-  ListItem,
-  RadioGroup,
-  RadioGroupItem,
   RegionIcon,
   SelectAllCheckbox,
+  SelectForm,
+  SelectOption,
   StepBody,
   StepCounter,
   StepDescription,
@@ -66,125 +63,6 @@ const SERVICES = [
   { id: 'redshift', name: 'Redshift', code: 'Re' },
 ];
 
-interface ConnectionRadioButtonProps {
-  connection: { id: string; name: string };
-  isLast: boolean;
-}
-
-const ConnectionRadioButton = ({
-  connection,
-  isLast,
-}: ConnectionRadioButtonProps) => (
-  <ListItem hasSeparator={!isLast}>
-    <RadioGroupItem value={connection.id} id={`connection-${connection.id}`} />
-    <Label
-      htmlFor={`connection-${connection.id}`}
-      className="flex items-center space-x-4 cursor-pointer dark:text-foreground "
-    >
-      <img src="/blocks/aws.png" alt="AWS" className="w-6 h-6 object-contain" />
-      <span>{connection.name}</span>
-    </Label>
-  </ListItem>
-);
-
-interface AccountCheckboxProps {
-  account: { id: string; name: string; accountId: string };
-  checked: boolean;
-  onToggle: () => void;
-  isLast: boolean;
-}
-
-const AccountCheckbox = ({
-  account,
-  checked,
-  onToggle,
-  isLast,
-}: AccountCheckboxProps) => (
-  <ListItem hasSeparator={!isLast}>
-    <Checkbox
-      id={`account-${account.id}`}
-      checked={checked}
-      onCheckedChange={onToggle}
-      className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
-    />
-    <Label
-      htmlFor={`account-${account.id}`}
-      className="flex items-center space-x-4 cursor-pointer"
-    >
-      <img src="/blocks/aws.png" alt="AWS" className="w-6 h-6 object-contain" />
-      <span>
-        {account.name} ({account.accountId})
-      </span>
-    </Label>
-  </ListItem>
-);
-
-interface RegionCheckboxProps {
-  region: { id: string; name: string };
-  checked: boolean;
-  onToggle: () => void;
-  isLast: boolean;
-}
-
-const RegionCheckbox = ({
-  region,
-  checked,
-  onToggle,
-  isLast,
-}: RegionCheckboxProps) => (
-  <ListItem hasSeparator={!isLast}>
-    <Checkbox
-      id={`region-${region.id}`}
-      checked={checked}
-      onCheckedChange={onToggle}
-      className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
-    />
-    <Label
-      htmlFor={`region-${region.id}`}
-      className="flex items-center space-x-4 cursor-pointer"
-    >
-      <div className="w-6 h-6 p-1 rounded bg-[#DBEAFE] flex items-center justify-center">
-        <RegionIcon size={16} color="#155DFC" />
-      </div>
-      <span>{region.name}</span>
-    </Label>
-  </ListItem>
-);
-
-interface ServiceCheckboxProps {
-  service: { id: string; name: string; code: string };
-  checked: boolean;
-  onToggle: () => void;
-  isLast: boolean;
-}
-
-const ServiceCheckbox = ({
-  service,
-  checked,
-  onToggle,
-  isLast,
-}: ServiceCheckboxProps) => (
-  <ListItem hasSeparator={!isLast}>
-    <Checkbox
-      id={`service-${service.id}`}
-      checked={checked}
-      onCheckedChange={onToggle}
-      className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
-    />
-    <Label
-      htmlFor={`service-${service.id}`}
-      className="flex items-center space-x-4 cursor-pointer"
-    >
-      <Avatar className="w-6 h-6">
-        <AvatarFallback className="bg-[#FFEDD4] text-[#F54900] text-xs font-bold">
-          {service.code}
-        </AvatarFallback>
-      </Avatar>
-      <span>{service.name}</span>
-    </Label>
-  </ListItem>
-);
-
 type WizardStep = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
 
 const WizardExample = () => {
@@ -217,13 +95,6 @@ const WizardExample = () => {
         return false;
     }
   };
-  const handleAccountToggle = (accountId: string) => {
-    setSelectedAccounts((prev) =>
-      prev.includes(accountId)
-        ? prev.filter((id) => id !== accountId)
-        : [...prev, accountId],
-    );
-  };
 
   const handleSelectAllAccounts = () => {
     const allAccountIds = ACCOUNTS.map((account) => account.id);
@@ -231,25 +102,11 @@ const WizardExample = () => {
       selectedAccounts.length === allAccountIds.length ? [] : allAccountIds,
     );
   };
-  const handleRegionToggle = (region: string) => {
-    setSelectedRegions((prev) =>
-      prev.includes(region)
-        ? prev.filter((r) => r !== region)
-        : [...prev, region],
-    );
-  };
 
   const handleSelectAllRegions = () => {
     const allRegionIds = REGIONS.map((region) => region.id);
     setSelectedRegions(
       selectedRegions.length === allRegionIds.length ? [] : allRegionIds,
-    );
-  };
-  const handleServiceToggle = (service: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(service)
-        ? prev.filter((s) => s !== service)
-        : [...prev, service],
     );
   };
 
@@ -278,7 +135,7 @@ const WizardExample = () => {
   };
 
   return (
-    <div className="w-[500px] h-[600px]">
+    <div className="w-[500px] h-[600px] bg-[#FBFBFE] dark:bg-background">
       <Wizard value={currentStep} onValueChange={handleStepChange}>
         <WizardHeader>
           <WizardTitle>Run a Benchmark</WizardTitle>
@@ -288,7 +145,7 @@ const WizardExample = () => {
         <WizardContent>
           <WizardStep value="step1">
             <StepTitle>Let&apos;s create your Benchmark Report!</StepTitle>
-            <StepDescription>
+            <StepDescription className="!mt-0">
               <button
                 type="button"
                 onClick={() => alert('Read more functionality')}
@@ -304,179 +161,255 @@ const WizardExample = () => {
               Which cloud provider do you use?
             </StepDescription>
             <StepBody>
-              <RadioGroup
+              <SelectForm
+                type="single"
                 value={cloudProvider}
                 onValueChange={setCloudProvider}
-                className="gap-0 bg-background"
               >
-                <div className="flex items-center border-b border-border px-3">
-                  <RadioGroupItem value="aws" id="provider-aws" />
-                  <Label
-                    htmlFor="provider-aws"
-                    className="flex items-center justify-between w-full cursor-pointer p-3 hover:bg-accent/50"
+                <SelectOption
+                  value="aws"
+                  icon={
+                    <img
+                      src="/blocks/aws.png"
+                      alt="AWS"
+                      className="w-6 h-6 object-contain"
+                    />
+                  }
+                  className="justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>AWS</span>
+                    <span className="font-light">(Not connected)</span>
+                  </div>
+                  <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      alert('Connect AWS');
+                    }}
+                    className="text-primary-200 text-sm"
                   >
-                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
+                    Connect
+                  </button>
+                </SelectOption>
+                <SelectOption
+                  value="azure"
+                  icon={
+                    <img
+                      src="/blocks/azure.svg"
+                      alt="Azure"
+                      className="w-6 h-6"
+                    />
+                  }
+                  disabled
+                  className="justify-between opacity-50"
+                >
+                  <span>Azure</span>
+                  <div className="flex-1" />
+                  <span className="text-xs text-gray-500">COMING SOON</span>
+                </SelectOption>
+                <SelectOption
+                  value="gcp"
+                  icon={
+                    <img
+                      src="/blocks/google-cloud.svg"
+                      alt="Google Cloud"
+                      className="w-6 h-6"
+                    />
+                  }
+                  disabled
+                  className="justify-between opacity-50"
+                >
+                  <span>GCP</span>
+                  <div className="flex-1" />
+                  <span className="text-xs text-gray-500">COMING SOON</span>
+                </SelectOption>
+              </SelectForm>
+            </StepBody>
+          </WizardStep>
+
+          <WizardStep value="step2">
+            <StepTitle>Choose the AWS connection you want to use</StepTitle>
+            <StepDescription className="!mt-0">
+              OpenOps can pull data from AWS using the connection you select
+              here. We provide a CloudFormation stack that installs the required
+              permissions for you.
+              <br />
+              <br />
+              CloudFormation stack:{' '}
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Create a read-only role
+              </a>
+              <br />
+              Documentation:{' '}
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                How to set up AWS read-only permissions
+              </a>
+            </StepDescription>
+            <StepBody>
+              <SelectForm
+                type="single"
+                value={awsConnection}
+                onValueChange={setAwsConnection}
+              >
+                {CONNECTIONS.map((connection) => (
+                  <SelectOption
+                    key={connection.id}
+                    value={connection.id}
+                    icon={
                       <img
                         src="/blocks/aws.png"
                         alt="AWS"
                         className="w-6 h-6 object-contain"
                       />
-                      <span className="font-semibold">AWS</span>
-                      <span>(Not connected)</span>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          alert('Connect AWS');
-                        }}
-                        className="text-primary-200 text-sm"
-                      >
-                        Connect
-                      </button>
-                    </div>
-                  </Label>
-                </div>
-                <div className="flex items-center border-b border-border opacity-50 px-3">
-                  <RadioGroupItem value="azure" id="provider-azure" disabled />
-                  <Label
-                    htmlFor="provider-azure"
-                    className="flex items-center justify-between w-full cursor-not-allowed p-3"
+                    }
                   >
-                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
-                      <img
-                        src="/blocks/azure.svg"
-                        alt="Azure"
-                        className="w-6 h-6"
-                      />
-                      <span>Azure</span>
-                    </div>
-                    <span className="text-xs text-gray-500">COMING SOON</span>
-                  </Label>
-                </div>
-                <div className="flex items-center opacity-50 px-3">
-                  <RadioGroupItem value="gcp" id="provider-gcp" disabled />
-                  <Label
-                    htmlFor="provider-gcp"
-                    className="flex items-center justify-between w-full cursor-not-allowed p-3"
-                  >
-                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
-                      <img
-                        src="/blocks/google-cloud.svg"
-                        alt="Google Cloud"
-                        className="w-6 h-6"
-                      />
-                      <span>GCP</span>
-                    </div>
-                    <span className="text-xs text-gray-500">COMING SOON</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </StepBody>
-          </WizardStep>
-
-          <WizardStep value="step2">
-            <StepTitle>Great! Which AWS connection?</StepTitle>
-            <StepDescription>
-              Pick the AWS connection you would like to use
-            </StepDescription>
-            <StepBody>
-              <RadioGroup
-                value={awsConnection}
-                onValueChange={setAwsConnection}
-                className="gap-0 bg-background"
-              >
-                {CONNECTIONS.map((connection, index) => (
-                  <ConnectionRadioButton
-                    key={connection.id}
-                    connection={connection}
-                    isLast={index === CONNECTIONS.length - 1}
-                  />
+                    {connection.name}
+                  </SelectOption>
                 ))}
-              </RadioGroup>
+              </SelectForm>
             </StepBody>
           </WizardStep>
 
           <WizardStep value="step3">
-            <StepTitle>Select Accounts</StepTitle>
             <StepDescription>
-              Choose which AWS accounts to include in your benchmark report
+              This connection supports multiple accounts, which of them would
+              like to include in the report?
             </StepDescription>
             <StepBody>
-              <ListItem hasSeparator>
-                <SelectAllCheckbox
-                  id="select-all-accounts"
-                  checked={getSelectAllState(selectedAccounts, ACCOUNTS)}
-                  onCheckedChange={() => handleSelectAllAccounts()}
-                  labelClassName="dark:text-black"
-                  label="Select all"
-                />
-              </ListItem>
-              {ACCOUNTS.map((account, index) => (
-                <AccountCheckbox
-                  key={account.id}
-                  account={account}
-                  checked={selectedAccounts.includes(account.id)}
-                  onToggle={() => handleAccountToggle(account.id)}
-                  isLast={index === ACCOUNTS.length - 1}
-                />
-              ))}
+              <div className="rounded-lg bg-background shadow-sm">
+                <SelectForm
+                  type="multi"
+                  value={selectedAccounts}
+                  onValueChange={setSelectedAccounts}
+                  className="border-none shadow-none"
+                >
+                  <>
+                    <div className="px-4 py-3 border-b border-border h-12 flex items-center">
+                      <SelectAllCheckbox
+                        id="select-all-accounts"
+                        checked={getSelectAllState(selectedAccounts, ACCOUNTS)}
+                        onCheckedChange={() => handleSelectAllAccounts()}
+                        label="Select all"
+                      />
+                    </div>
+                    {ACCOUNTS.map((account) => (
+                      <SelectOption
+                        key={account.id}
+                        value={account.id}
+                        icon={
+                          <img
+                            src="/blocks/aws.png"
+                            alt="AWS"
+                            className="w-6 h-6 object-contain"
+                          />
+                        }
+                      >
+                        <div className="flex gap-2">
+                          <div>{account.name}</div>
+                          <div>({account.accountId})</div>
+                        </div>
+                      </SelectOption>
+                    ))}
+                  </>
+                </SelectForm>
+              </div>
             </StepBody>
           </WizardStep>
 
           <WizardStep value="step4">
-            <StepTitle>Select Regions</StepTitle>
             <StepDescription>
               Choose which AWS regions to include in your benchmark report
             </StepDescription>
             <StepBody>
-              <ListItem hasSeparator>
-                <SelectAllCheckbox
-                  id="select-all-regions"
-                  labelClassName="dark:text-black"
-                  checked={getSelectAllState(selectedRegions, REGIONS)}
-                  onCheckedChange={() => handleSelectAllRegions()}
-                  label="Select all"
-                />
-              </ListItem>
-              {REGIONS.map((region, index) => (
-                <RegionCheckbox
-                  key={region.id}
-                  region={region}
-                  checked={selectedRegions.includes(region.id)}
-                  onToggle={() => handleRegionToggle(region.id)}
-                  isLast={index === REGIONS.length - 1}
-                />
-              ))}
+              <div className="border border-border rounded-lg bg-background shadow-sm">
+                <SelectForm
+                  type="multi"
+                  value={selectedRegions}
+                  onValueChange={setSelectedRegions}
+                  className="border-none shadow-none"
+                >
+                  <>
+                    <div className="px-4 py-3 border-b border-border h-12 flex items-center">
+                      <SelectAllCheckbox
+                        id="select-all-regions"
+                        checked={getSelectAllState(selectedRegions, REGIONS)}
+                        onCheckedChange={() => handleSelectAllRegions()}
+                        label="Select all"
+                      />
+                    </div>
+                    {REGIONS.map((region) => (
+                      <SelectOption
+                        key={region.id}
+                        value={region.id}
+                        iconClassName="w-8 h-8"
+                        icon={
+                          <div className="rounded-sm bg-[#DBEAFE] flex items-center justify-center w-full h-full">
+                            <RegionIcon className="w-4 h-4" />
+                          </div>
+                        }
+                      >
+                        {region.name}
+                      </SelectOption>
+                    ))}
+                  </>
+                </SelectForm>
+              </div>
             </StepBody>
           </WizardStep>
 
           <WizardStep value="step5">
-            <StepTitle>Select Services</StepTitle>
             <StepDescription>
               Choose which AWS services to include in your benchmark report
             </StepDescription>
             <StepBody>
-              <ListItem hasSeparator>
-                <SelectAllCheckbox
-                  id="select-all-services"
-                  labelClassName="dark:text-black"
-                  checked={getSelectAllState(selectedServices, SERVICES)}
-                  onCheckedChange={() => handleSelectAllServices()}
-                  label="Select all"
-                />
-              </ListItem>
-              {SERVICES.map((service, index) => (
-                <ServiceCheckbox
-                  key={service.id}
-                  service={service}
-                  checked={selectedServices.includes(service.id)}
-                  onToggle={() => handleServiceToggle(service.id)}
-                  isLast={index === SERVICES.length - 1}
-                />
-              ))}
+              <div className="border border-border rounded-lg bg-background shadow-sm">
+                <SelectForm
+                  type="multi"
+                  value={selectedServices}
+                  onValueChange={setSelectedServices}
+                  className="border-none shadow-none"
+                >
+                  <>
+                    <div className="px-4 py-3 border-b border-border h-12 flex items-center">
+                      <SelectAllCheckbox
+                        id="select-all-services"
+                        checked={getSelectAllState(selectedServices, SERVICES)}
+                        onCheckedChange={() => handleSelectAllServices()}
+                        label="Select all"
+                      />
+                    </div>
+
+                    {SERVICES.map((service) => (
+                      <SelectOption
+                        key={service.id}
+                        value={service.id}
+                        icon={
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-orange-500 bg-[#FFEDD4] text-[#F54900] text-xs">
+                              {service.code}
+                            </AvatarFallback>
+                          </Avatar>
+                        }
+                      >
+                        {service.name}
+                      </SelectOption>
+                    ))}
+                  </>
+                </SelectForm>
+              </div>
             </StepBody>
           </WizardStep>
         </WizardContent>
@@ -507,6 +440,6 @@ const meta = {
 export default meta;
 
 type Story = StoryObj<typeof meta>;
-export const Default: Story = {
+export const BenchmarkWizard: Story = {
   render: () => <WizardExample />,
 };

@@ -94,13 +94,12 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
           <RadioGroup
             ref={ref}
             className={cn(
-              'space-y-1 border border-border rounded-lg bg-background shadow-sm',
+              'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
               className,
             )}
             value={contextValue.value as string}
             onValueChange={(val) => handleValueChange(val)}
             disabled={disabled}
-            {...props}
           >
             {children}
           </RadioGroup>
@@ -113,7 +112,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
         <div
           ref={ref}
           className={cn(
-            'space-y-1 border border-border rounded-lg bg-background shadow-sm',
+            'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
             className,
           )}
           {...props}

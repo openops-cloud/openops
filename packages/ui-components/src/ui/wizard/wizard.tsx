@@ -71,7 +71,7 @@ const Wizard = React.forwardRef<HTMLDivElement, WizardProps>(
         <div
           ref={ref}
           className={cn(
-            'relative flex flex-col bg-background border border-border rounded-lg shadow-lg',
+            'relative flex flex-col bg-neutral border border-border shadow-lg h-full',
             className,
           )}
           {...props}

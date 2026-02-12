@@ -12,7 +12,7 @@ const WizardHeader = React.forwardRef<HTMLDivElement, WizardHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-between p-6 border-b border-border',
+          'flex items-center justify-between px-6 py-4 border-b border-border bg-background',
           className,
         )}
         {...props}
@@ -29,16 +29,16 @@ type WizardTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 const WizardTitle = React.forwardRef<HTMLHeadingElement, WizardTitleProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <h2
+      <b
         ref={ref}
         className={cn(
-          'text-lg font-semibold leading-none tracking-tight',
+          'text-md font-semibold leading-none tracking-tight text-foreground',
           className,
         )}
         {...props}
       >
         {children}
-      </h2>
+      </b>
     );
   },
 );
@@ -62,7 +62,7 @@ const WizardClose = React.forwardRef<HTMLButtonElement, WizardCloseProps>(
         variant="ghost"
         size="icon"
         className={cn(
-          'h-6 w-6 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+          'h-6 w-6 rounded-sm opacity-70 text-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
           className,
         )}
         onClick={handleClick}

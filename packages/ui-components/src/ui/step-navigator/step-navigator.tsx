@@ -44,7 +44,7 @@ const StepCounter = React.forwardRef<HTMLDivElement, StepCounterProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-center text-sm font-medium bg-background text-foreground',
+          'flex items-center justify-center text-sm bg-neutral text-foreground',
           className,
         )}
         {...props}

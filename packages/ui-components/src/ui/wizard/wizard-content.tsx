@@ -9,7 +9,7 @@ const WizardContent = React.forwardRef<HTMLDivElement, WizardContentProps>(
     return (
       <div
         ref={ref}
-        className={cn('flex-1 p-6 space-y-6 overflow-auto', className)}
+        className={cn('flex-1 px-6 py-2 space-y-6 overflow-auto', className)}
         {...props}
       >
         {children}
