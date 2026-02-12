@@ -1,3 +1,4 @@
+import { ApplicationError, ErrorCode } from '@openops/shared';
 import awsWizardConfig from './wizard-config/aws.json';
 
 export type StaticOptionValue = {
@@ -35,14 +36,14 @@ const WIZARD_CONFIGS: Record<string, WizardConfig> = {
   aws: awsWizardConfig as WizardConfig,
 };
 
-export const SUPPORTED_WIZARD_PROVIDERS: ReadonlySet<string> = new Set(
-  Object.keys(WIZARD_CONFIGS),
-);
-
 export function getWizardConfig(provider: string): WizardConfig {
   const config = WIZARD_CONFIGS[provider];
   if (!config) {
-    throw new Error(`Wizard config not found for provider: ${provider}`);
+    const message = `Wizard config not found for provider: ${provider}`;
+    throw new ApplicationError(
+      { code: ErrorCode.VALIDATION, params: { message } },
+      message,
+    );
   }
   return config;
 }

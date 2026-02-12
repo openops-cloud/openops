@@ -5,7 +5,6 @@ jest.mock('../../../src/app/benchmark/wizard-config-loader', () => ({
   getWizardConfig: (
     ...args: unknown[]
   ): ReturnType<typeof mockGetWizardConfig> => mockGetWizardConfig(...args),
-  SUPPORTED_WIZARD_PROVIDERS: new Set(['aws']),
 }));
 
 const mockResolveStaticOptions = jest.fn();
@@ -216,11 +215,15 @@ describe('wizard.service', () => {
   });
 
   describe('unsupported provider', () => {
-    it('throws for unsupported provider', async () => {
+    it('throws when wizard config is not found for provider', async () => {
+      mockGetWizardConfig.mockImplementation(() => {
+        throw new Error('Wizard config not found for provider: azure');
+      });
+
       await expect(getWizardStep('azure', {}, projectId)).rejects.toThrow(
-        'Unsupported wizard provider: azure',
+        'Wizard config not found for provider: azure',
       );
-      expect(mockGetWizardConfig).not.toHaveBeenCalled();
+      expect(mockGetWizardConfig).toHaveBeenCalledWith('azure');
       expect(mockResolveListConnectionsOptions).not.toHaveBeenCalled();
       expect(mockResolveStaticOptions).not.toHaveBeenCalled();
     });
