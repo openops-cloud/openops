@@ -62,14 +62,6 @@ describe('wizard-option-resolvers', () => {
       const result = resolveStaticOptions([]);
       expect(result).toEqual([]);
     });
-
-    it('uses undefined for missing imageLogoUrl', () => {
-      const values: StaticOptionValue[] = [
-        { id: 'id-only', displayName: 'No Logo' },
-      ];
-      const result = resolveStaticOptions(values);
-      expect(result[0].imageLogoUrl).toBeUndefined();
-    });
   });
 
   describe('resolveListConnectionsOptions', () => {

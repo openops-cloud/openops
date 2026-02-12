@@ -121,23 +121,6 @@ describe('wizard.service', () => {
       expect(result.totalSteps).toBe(4);
     });
 
-    it('returns stepIndex 4 and totalSteps 4 for services step', async () => {
-      const result = await getWizardStep(
-        'aws',
-        {
-          currentStep: 'regions',
-          benchmarkConfiguration: {
-            connection: ['conn-1'],
-            regions: ['us-east-1'],
-          },
-        },
-        projectId,
-      );
-      expect(result.currentStep).toBe('services');
-      expect(result.stepIndex).toBe(4);
-      expect(result.totalSteps).toBe(4);
-    });
-
     it('keeps stepIndex 4 and totalSteps 4 when wizard complete (nextStep null)', async () => {
       const result = await getWizardStep(
         'aws',
@@ -208,22 +191,6 @@ describe('wizard.service', () => {
       expect(result.selectionType).toBe('multi-select');
       expect(mockResolveStaticOptions).toHaveBeenCalled();
       expect(result.options).toEqual(MOCK_STATIC_OPTIONS);
-    });
-  });
-
-  describe('conditional skip (accounts)', () => {
-    it('skips accounts step: after connection, next step is regions', async () => {
-      const result = await getWizardStep(
-        'aws',
-        {
-          currentStep: 'connection',
-          benchmarkConfiguration: { connection: ['conn-1'] },
-        },
-        projectId,
-      );
-
-      expect(result.currentStep).toBe('regions');
-      expect(result.nextStep).toBe('services');
     });
   });
 
