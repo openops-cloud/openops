@@ -19,7 +19,7 @@ export const userProjectController: FastifyPluginCallbackTypebox = (
         return await projectService.getOneOrThrow(request.principal.projectId);
       } catch (err) {
         if (err instanceof ApplicationError) {
-          return response.code(401).send();
+          return response.code(404).send();
         }
         throw err;
       }
