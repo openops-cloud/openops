@@ -260,6 +260,23 @@ const WizardExample = () => {
     );
   };
 
+  const getSelectAllState = (
+    selectedItems: string[],
+    allItems: any[],
+  ): boolean | 'indeterminate' => {
+    const allSelected = selectedItems.length === allItems.length;
+    const someSelected =
+      selectedItems.length > 0 && selectedItems.length < allItems.length;
+
+    if (allSelected) {
+      return true;
+    } else if (someSelected) {
+      return 'indeterminate';
+    } else {
+      return false;
+    }
+  };
+
   return (
     <div className="w-[500px] h-[600px]">
       <Wizard value={currentStep} onValueChange={handleStepChange}>
@@ -272,9 +289,13 @@ const WizardExample = () => {
           <WizardStep value="step1">
             <StepTitle>Let&apos;s create your Benchmark Report!</StepTitle>
             <StepDescription>
-              <a href="#" className="text-blue-600">
+              <button
+                type="button"
+                onClick={() => alert('Read more functionality')}
+                className="text-blue-600 hover:text-blue-700 underline bg-transparent border-none cursor-pointer p-0 font-inherit"
+              >
                 Read more here →
-              </a>
+              </button>
             </StepDescription>
             <StepDescription className="mt-4">
               In order to do so, we need to create your FinOps Benchmark Report
@@ -387,13 +408,7 @@ const WizardExample = () => {
               <ListItem hasSeparator>
                 <SelectAllCheckbox
                   id="select-all-accounts"
-                  checked={
-                    selectedAccounts.length === ACCOUNTS.length
-                      ? true
-                      : selectedAccounts.length > 0
-                      ? 'indeterminate'
-                      : false
-                  }
+                  checked={getSelectAllState(selectedAccounts, ACCOUNTS)}
                   onCheckedChange={() => handleSelectAllAccounts()}
                   label="Select all"
                 />
@@ -419,13 +434,7 @@ const WizardExample = () => {
               <ListItem hasSeparator>
                 <SelectAllCheckbox
                   id="select-all-regions"
-                  checked={
-                    selectedRegions.length === REGIONS.length
-                      ? true
-                      : selectedRegions.length > 0
-                      ? 'indeterminate'
-                      : false
-                  }
+                  checked={getSelectAllState(selectedRegions, REGIONS)}
                   onCheckedChange={() => handleSelectAllRegions()}
                   label="Select all"
                 />
@@ -451,13 +460,7 @@ const WizardExample = () => {
               <ListItem hasSeparator>
                 <SelectAllCheckbox
                   id="select-all-services"
-                  checked={
-                    selectedServices.length === SERVICES.length
-                      ? true
-                      : selectedServices.length > 0
-                      ? 'indeterminate'
-                      : false
-                  }
+                  checked={getSelectAllState(selectedServices, SERVICES)}
                   onCheckedChange={() => handleSelectAllServices()}
                   label="Select all"
                 />

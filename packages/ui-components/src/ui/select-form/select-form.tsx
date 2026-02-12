@@ -8,6 +8,7 @@ interface SelectFormContextValue {
   value: string | string[];
   onValueChange: (value: string | string[]) => void;
   disabled?: boolean;
+  groupName?: string;
 }
 
 const SelectFormContext = React.createContext<SelectFormContextValue | null>(
@@ -57,6 +58,8 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
     const [internalValue, setInternalValue] = React.useState<string | string[]>(
       value || defaultValue || (type === 'single' ? '' : []),
     );
+    
+    const groupName = React.useId();
 
     const handleValueChange = React.useCallback(
       (newValue: string | string[]) => {
@@ -80,8 +83,9 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
         value: value ?? internalValue,
         onValueChange: handleValueChange,
         disabled,
+        groupName,
       }),
-      [type, value, internalValue, handleValueChange, disabled],
+      [type, value, internalValue, handleValueChange, disabled, groupName],
     );
 
     if (type === 'single') {

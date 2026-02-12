@@ -13,11 +13,14 @@ const InteractiveExample = () => {
   const allSelected = selectedItems.length === items.length;
   const someSelected =
     selectedItems.length > 0 && selectedItems.length < items.length;
-  const selectAllState: boolean | 'indeterminate' = allSelected
-    ? true
-    : someSelected
-    ? 'indeterminate'
-    : false;
+  let selectAllState: boolean | 'indeterminate';
+  if (allSelected) {
+    selectAllState = true;
+  } else if (someSelected) {
+    selectAllState = 'indeterminate';
+  } else {
+    selectAllState = false;
+  }
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedItems(checked ? items : []);

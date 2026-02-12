@@ -2,87 +2,102 @@ import * as React from 'react';
 
 import { cn } from '../../lib/cn';
 import { Checkbox } from '../checkbox';
+import { Label } from '../label';
 import { RadioGroupItem } from '../radio-group';
 import { useSelectForm } from './select-form';
 
-interface SelectOptionProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SelectOptionProps extends React.HTMLAttributes<HTMLLabelElement> {
   value: string;
   icon?: React.ReactNode;
   disabled?: boolean;
 }
 
-const SelectOption = React.forwardRef<HTMLDivElement, SelectOptionProps>(
-  ({ className, value, icon, disabled, children, onClick, ...props }, ref) => {
+const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
+  ({ className, value, icon, disabled, children, ...props }, ref) => {
     const {
       type,
       value: formValue,
       onValueChange,
       disabled: formDisabled,
+      groupName,
     } = useSelectForm();
 
     const isDisabled = disabled || formDisabled;
-    const isSelected =
-      type === 'single'
-        ? formValue === value
-        : Array.isArray(formValue) && formValue.includes(value);
 
-    const handleClick = React.useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
+    const isSelected = React.useMemo(() => {
+      if (type === 'single') {
+        return formValue === value;
+      } else {
+        const currentValues = Array.isArray(formValue) ? formValue : [];
+        return currentValues.includes(value);
+      }
+    }, [type, formValue, value]);
+
+    const inputId = React.useId();
+
+    const handleInputChange = React.useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         if (isDisabled) return;
-
-        onClick?.(e);
 
         if (type === 'single') {
           onValueChange(value);
         } else {
           const currentValues = Array.isArray(formValue) ? formValue : [];
-          if (currentValues.includes(value)) {
-            onValueChange(currentValues.filter((v) => v !== value));
-          } else {
-            onValueChange([...currentValues, value]);
-          }
+          const newValues = e.target.checked
+            ? [...currentValues, value]
+            : currentValues.filter((v) => v !== value);
+          onValueChange(newValues);
         }
       },
-      [type, value, formValue, onValueChange, isDisabled, onClick],
+      [type, value, formValue, onValueChange, isDisabled],
     );
 
-    const handleKeyDown = React.useCallback(
-      (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick(e as any);
-        }
-      },
-      [handleClick],
+    const inputProps = React.useMemo(
+      () => ({
+        id: inputId,
+        value,
+        checked: isSelected,
+        onChange: handleInputChange,
+        disabled: isDisabled,
+        className: 'sr-only',
+        'aria-describedby': children ? `${inputId}-description` : undefined,
+      }),
+      [inputId, value, isSelected, handleInputChange, isDisabled, children],
+    );
+
+    const visualComponentProps = React.useMemo(
+      () => ({
+        checked: isSelected,
+        disabled: isDisabled,
+        'aria-hidden': 'true' as const,
+        tabIndex: -1,
+      }),
+      [isSelected, isDisabled],
     );
 
     return (
-      <div
+      <Label
         ref={ref}
+        htmlFor={inputId}
         className={cn(
           'flex items-center gap-4 px-4 py-3 cursor-pointer border-b border-border last:border-b-0 transition-colors',
-          'hover:bg-accent focus:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          'hover:bg-accent focus-within:bg-accent',
           isSelected && 'bg-accent/50',
           isDisabled && 'cursor-not-allowed opacity-50',
           className,
         )}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={isDisabled ? -1 : 0}
-        role={type === 'single' ? 'radio' : 'checkbox'}
-        aria-checked={isSelected}
-        aria-disabled={isDisabled}
         {...props}
       >
         <div className="flex-shrink-0">
+          {React.createElement('input', {
+            type: type === 'single' ? 'radio' : 'checkbox',
+            name: type === 'single' ? groupName : undefined,
+            ...inputProps,
+          })}
           {type === 'single' ? (
-            <RadioGroupItem value={value} disabled={isDisabled} />
+            <RadioGroupItem value={value} {...visualComponentProps} />
           ) : (
-            <Checkbox
-              checked={isSelected}
-              disabled={isDisabled}
-              aria-hidden="true"
-            />
+            <Checkbox {...visualComponentProps} />
           )}
         </div>
         {icon && (
@@ -91,9 +106,14 @@ const SelectOption = React.forwardRef<HTMLDivElement, SelectOptionProps>(
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-foreground">{children}</div>
+          <div
+            id={children ? `${inputId}-description` : undefined}
+            className="text-sm font-medium text-foreground"
+          >
+            {children}
+          </div>
         </div>
-      </div>
+      </Label>
     );
   },
 );
