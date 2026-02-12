@@ -479,7 +479,7 @@ const WizardExample = () => {
         </WizardContent>
 
         <WizardFooter>
-          {steps.indexOf(currentStep) > 0 ? (
+          {steps.includes(currentStep) && steps.indexOf(currentStep) !== 0 ? (
             <WizardPrevious />
           ) : (
             <div className="w-[112px]" />
