@@ -185,15 +185,38 @@ const ServiceCheckbox = ({
   </ListItem>
 );
 
+type WizardStep = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
+
 const WizardExample = () => {
-  const [currentStep, setCurrentStep] = useState('step1');
+  const [currentStep, setCurrentStep] = useState<WizardStep>('step1');
   const [cloudProvider, setCloudProvider] = useState('');
   const [awsConnection, setAwsConnection] = useState('');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
-  const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+  const steps: WizardStep[] = ['step1', 'step2', 'step3', 'step4', 'step5'];
+
+  const handleStepChange = (value: string) => {
+    setCurrentStep(value as WizardStep);
+  };
+
+  const isCurrentStepValid = (): boolean => {
+    switch (currentStep) {
+      case 'step1':
+        return cloudProvider !== '';
+      case 'step2':
+        return awsConnection !== '';
+      case 'step3':
+        return selectedAccounts.length > 0;
+      case 'step4':
+        return selectedRegions.length > 0;
+      case 'step5':
+        return selectedServices.length > 0;
+      default:
+        return false;
+    }
+  };
   const handleAccountToggle = (accountId: string) => {
     setSelectedAccounts((prev) =>
       prev.includes(accountId)
@@ -239,7 +262,7 @@ const WizardExample = () => {
 
   return (
     <div className="w-[500px] h-[600px]">
-      <Wizard value={currentStep} onValueChange={setCurrentStep}>
+      <Wizard value={currentStep} onValueChange={handleStepChange}>
         <WizardHeader>
           <WizardTitle>Run a Benchmark</WizardTitle>
           <WizardClose onClose={() => alert('Wizard closed')} />
@@ -459,7 +482,7 @@ const WizardExample = () => {
             <div className="w-[112px]" />
           )}
           <StepCounter current={steps.indexOf(currentStep) + 1} total={5} />
-          <WizardNext />
+          <WizardNext disabled={!isCurrentStepValid()} />
         </WizardFooter>
       </Wizard>
     </div>
