@@ -56,7 +56,12 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         setInternalValue(newValue);
 
         if (newValue === '') {
-          onChange?.(undefined);
+          if (min !== undefined) {
+            setInternalValue(String(min));
+            onChange?.(min);
+          } else {
+            onChange?.(undefined);
+          }
           return;
         }
 
@@ -67,7 +72,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           onChange?.(numValue);
         }
       },
-      [onChange, integerOnly],
+      [onChange, integerOnly, min],
     );
 
     const handleIncrement = useCallback(() => {
