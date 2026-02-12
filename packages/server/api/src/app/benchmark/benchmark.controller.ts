@@ -8,21 +8,22 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getWizardStep } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/:provider/wizard',
     WizardStepRequestOptions,
-    async (_request, reply) => {
-      return reply.status(StatusCodes.OK).send({
-        currentStep: 'connection',
-        title: 'Stub',
-        nextStep: null,
-        selectionType: 'single',
-        options: [],
-        stepIndex: 1,
-        totalSteps: 1,
-      });
+    async (request, reply) => {
+      const step = await getWizardStep(
+        request.params.provider,
+        {
+          currentStep: request.body.currentStep,
+          benchmarkConfiguration: request.body.benchmarkConfiguration,
+        },
+        request.principal.projectId,
+      );
+      return reply.status(StatusCodes.OK).send(step);
     },
   );
 };
