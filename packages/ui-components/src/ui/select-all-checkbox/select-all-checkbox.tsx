@@ -52,7 +52,7 @@ const SelectAllCheckbox = React.forwardRef<
         <Label
           htmlFor={id}
           className={cn(
-            'font-medium cursor-pointer select-none',
+            'font-medium cursor-pointer select-none dark:text-foreground',
             disabled && 'cursor-not-allowed opacity-70',
             labelClassName,
           )}

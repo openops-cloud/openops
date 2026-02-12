@@ -79,7 +79,7 @@ const ConnectionRadioButton = ({
     <RadioGroupItem value={connection.id} id={`connection-${connection.id}`} />
     <Label
       htmlFor={`connection-${connection.id}`}
-      className="flex items-center space-x-4 cursor-pointer"
+      className="flex items-center space-x-4 cursor-pointer dark:text-foreground "
     >
       <img src="/blocks/aws.png" alt="AWS" className="w-6 h-6 object-contain" />
       <span>{connection.name}</span>
@@ -292,7 +292,7 @@ const WizardExample = () => {
               <button
                 type="button"
                 onClick={() => alert('Read more functionality')}
-                className="text-blue-600 hover:text-blue-700 underline bg-transparent border-none cursor-pointer p-0 font-inherit"
+                className="text-blue-600 hover:text-blue-700 bg-transparent border-none cursor-pointer p-0 font-inherit"
               >
                 Read more here →
               </button>
@@ -307,7 +307,7 @@ const WizardExample = () => {
               <RadioGroup
                 value={cloudProvider}
                 onValueChange={setCloudProvider}
-                className="gap-0"
+                className="gap-0 bg-background"
               >
                 <div className="flex items-center border-b border-border px-3">
                   <RadioGroupItem value="aws" id="provider-aws" />
@@ -315,7 +315,7 @@ const WizardExample = () => {
                     htmlFor="provider-aws"
                     className="flex items-center justify-between w-full cursor-pointer p-3 hover:bg-accent/50"
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
                       <img
                         src="/blocks/aws.png"
                         alt="AWS"
@@ -345,7 +345,7 @@ const WizardExample = () => {
                     htmlFor="provider-azure"
                     className="flex items-center justify-between w-full cursor-not-allowed p-3"
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
                       <img
                         src="/blocks/azure.svg"
                         alt="Azure"
@@ -362,7 +362,7 @@ const WizardExample = () => {
                     htmlFor="provider-gcp"
                     className="flex items-center justify-between w-full cursor-not-allowed p-3"
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 dark:bg-accent-foreground">
                       <img
                         src="/blocks/google-cloud.svg"
                         alt="Google Cloud"
@@ -386,7 +386,7 @@ const WizardExample = () => {
               <RadioGroup
                 value={awsConnection}
                 onValueChange={setAwsConnection}
-                className="gap-0"
+                className="gap-0 bg-background"
               >
                 {CONNECTIONS.map((connection, index) => (
                   <ConnectionRadioButton
@@ -410,6 +410,7 @@ const WizardExample = () => {
                   id="select-all-accounts"
                   checked={getSelectAllState(selectedAccounts, ACCOUNTS)}
                   onCheckedChange={() => handleSelectAllAccounts()}
+                  labelClassName="dark:text-black"
                   label="Select all"
                 />
               </ListItem>
@@ -434,6 +435,7 @@ const WizardExample = () => {
               <ListItem hasSeparator>
                 <SelectAllCheckbox
                   id="select-all-regions"
+                  labelClassName="dark:text-black"
                   checked={getSelectAllState(selectedRegions, REGIONS)}
                   onCheckedChange={() => handleSelectAllRegions()}
                   label="Select all"
@@ -460,6 +462,7 @@ const WizardExample = () => {
               <ListItem hasSeparator>
                 <SelectAllCheckbox
                   id="select-all-services"
+                  labelClassName="dark:text-black"
                   checked={getSelectAllState(selectedServices, SERVICES)}
                   onCheckedChange={() => handleSelectAllServices()}
                   label="Select all"

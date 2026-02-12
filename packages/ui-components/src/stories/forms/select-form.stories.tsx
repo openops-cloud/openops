@@ -63,7 +63,7 @@ export const SingleSelect: Story = {
             AWS - Platform Team
           </SelectOption>
         </SelectForm>
-        <div className="mt-4 p-3 bg-muted rounded text-sm">
+        <div className="mt-4 p-3 bg-muted rounded text-sm dark:text-foreground">
           Selected: <code>{value || 'None'}</code>
         </div>
       </div>
@@ -112,7 +112,7 @@ export const MultiSelect: Story = {
             Storage & Backup
           </SelectOption>
         </SelectForm>
-        <div className="mt-4 p-3 bg-muted rounded text-sm">
+        <div className="mt-4 p-3 bg-muted rounded text-sm dark:text-foreground">
           Selected: <code>{value.length > 0 ? value.join(', ') : 'None'}</code>
         </div>
       </div>
@@ -135,7 +135,7 @@ export const WithoutIcons: Story = {
           <SelectOption value="option3">Third Option</SelectOption>
           <SelectOption value="option4">Fourth Option</SelectOption>
         </SelectForm>
-        <div className="mt-4 p-3 bg-muted rounded text-sm">
+        <div className="mt-4 p-3 bg-muted rounded text-sm dark:text-foreground">
           Selected: <code>{value || 'None'}</code>
         </div>
       </div>
@@ -179,7 +179,7 @@ export const Compact: Story = {
           <SelectOption value="yes">Yes, enable this feature</SelectOption>
           <SelectOption value="no">No, keep disabled</SelectOption>
         </SelectForm>
-        <div className="mt-4 p-3 bg-muted rounded text-sm">
+        <div className="mt-4 p-3 bg-muted rounded text-sm dark:text-foreground">
           Selected: <code>{value}</code>
         </div>
       </div>

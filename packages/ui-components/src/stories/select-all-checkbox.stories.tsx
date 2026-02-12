@@ -51,7 +51,10 @@ const InteractiveExample = () => {
             onCheckedChange={() => handleItemToggle(item)}
             className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
           />
-          <Label htmlFor={`item-${index}`} className="cursor-pointer">
+          <Label
+            htmlFor={`item-${index}`}
+            className="cursor-pointer dark:text-foreground"
+          >
             {item}
           </Label>
         </ListItem>
@@ -88,9 +91,12 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+const backgroundClass = 'bg-background p-6';
+
 export const Default: Story = {
   args: {
     id: 'select-all-default',
+    className: backgroundClass,
     checked: false,
     label: 'Select all',
     onCheckedChange: () => {},
@@ -100,6 +106,7 @@ export const Default: Story = {
 export const Checked: Story = {
   args: {
     id: 'select-all-checked',
+    className: backgroundClass,
     checked: true,
     label: 'Select all',
     onCheckedChange: () => {},
@@ -109,6 +116,7 @@ export const Checked: Story = {
 export const Indeterminate: Story = {
   args: {
     id: 'select-all-indeterminate',
+    className: backgroundClass,
     checked: 'indeterminate',
     label: 'Select all',
     onCheckedChange: () => {},
@@ -118,6 +126,7 @@ export const Indeterminate: Story = {
 export const Disabled: Story = {
   args: {
     id: 'select-all-disabled',
+    className: backgroundClass,
     checked: false,
     disabled: true,
     label: 'Select all (disabled)',
