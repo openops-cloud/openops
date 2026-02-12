@@ -37,7 +37,11 @@ function resolveNextStep(
   }
   const nextStepDef = config.steps.find((s) => s.id === nextStepId);
   if (!nextStepDef) {
-    return null;
+    const message = `Next step not found: ${nextStepId}`;
+    throw new ApplicationError(
+      { code: ErrorCode.VALIDATION, params: { message } },
+      message,
+    );
   }
   if (nextStepDef.action) {
     return null;
@@ -75,7 +79,8 @@ export async function getWizardStep(
   },
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
-  if (!SUPPORTED_WIZARD_PROVIDERS.has(provider)) {
+  const normalizedProvider = provider.toLowerCase();
+  if (!SUPPORTED_WIZARD_PROVIDERS.has(normalizedProvider)) {
     const message = `Unsupported wizard provider: ${provider}`;
     throw new ApplicationError(
       { code: ErrorCode.VALIDATION, params: { message } },
@@ -83,7 +88,7 @@ export async function getWizardStep(
     );
   }
 
-  const config = getWizardConfig(provider);
+  const config = getWizardConfig(normalizedProvider);
   const steps = config.steps;
   const currentStepId = request.currentStep;
   const benchmarkConfiguration = request.benchmarkConfiguration ?? {};
@@ -128,7 +133,7 @@ export async function getWizardStep(
 
   const options = await resolveOptionsForStep(
     stepToReturn,
-    provider,
+    normalizedProvider,
     projectId,
     request.benchmarkConfiguration,
   );
