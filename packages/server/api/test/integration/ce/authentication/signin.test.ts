@@ -153,4 +153,64 @@ describe('Sign in Endpoint', () => {
     const responseBody = response?.json();
     expect(responseBody?.code).toBe('INVALID_CREDENTIALS');
   });
+
+  it('Sets HttpOnly cookies with correct security flags on successful login', async () => {
+    const mockEmail = faker.internet.email();
+    const mockPassword = 'password';
+
+    const mockUser = createMockUser({
+      email: mockEmail,
+      password: mockPassword,
+      verified: true,
+      status: UserStatus.ACTIVE,
+    });
+    await databaseConnection().getRepository('user').save(mockUser);
+
+    const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+    await databaseConnection()
+      .getRepository('organization')
+      .save(mockOrganization);
+
+    await databaseConnection().getRepository('user').update(mockUser.id, {
+      organizationId: mockOrganization.id,
+    });
+
+    const mockProject = createMockProject({
+      ownerId: mockUser.id,
+      organizationId: mockOrganization.id,
+    });
+    await databaseConnection().getRepository('project').save(mockProject);
+
+    const mockSignInRequest = createMockSignInRequest({
+      email: mockEmail,
+      password: mockPassword,
+    });
+
+    const response = await app?.inject({
+      method: 'POST',
+      url: '/v1/authentication/sign-in',
+      body: mockSignInRequest,
+      headers: {
+        origin: 'http://localhost:4200',
+      },
+    });
+
+    expect(response?.statusCode).toBe(StatusCodes.OK);
+
+    const setCookieHeaders = response?.headers['set-cookie'];
+    expect(setCookieHeaders).toBeDefined();
+
+    const tokenCookie = Array.isArray(setCookieHeaders)
+      ? setCookieHeaders.find((cookie) => cookie.startsWith('token='))
+      : setCookieHeaders;
+
+    expect(tokenCookie).toBeDefined();
+    expect(tokenCookie).toContain('HttpOnly');
+    expect(tokenCookie).toContain('SameSite=Lax');
+    // Secure flag is only set for HTTPS frontends (not localhost HTTP in tests)
+    const frontendUrl = process.env.OPS_FRONTEND_URL || '';
+    if (frontendUrl.startsWith('https://')) {
+      expect(tokenCookie).toContain('Secure');
+    }
+  });
 });

@@ -160,7 +160,7 @@ describe('GET /v1/dashboards/workflows-stats', () => {
 
   it('should require authentication', async () => {
     const response = await makeRequest({});
-    expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+    expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 
   it('should return workflow stats for the project', async () => {

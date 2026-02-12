@@ -111,8 +111,15 @@ export const setupApp = async (
     },
   });
 
+  const openapiRoutePrefix = '/v1/openapi';
+  app.addHook('onRoute', (route) => {
+    if (route.url.startsWith(openapiRoutePrefix)) {
+      route.config = { ...(route.config ?? {}), skipAuth: true };
+    }
+  });
+
   await app.register(swaggerUi, {
-    routePrefix: '/v1/openapi',
+    routePrefix: openapiRoutePrefix,
     staticCSP: true,
     transformSpecificationClone: true,
     uiConfig: {
