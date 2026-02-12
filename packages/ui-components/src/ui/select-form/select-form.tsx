@@ -58,7 +58,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
     const [internalValue, setInternalValue] = React.useState<string | string[]>(
       value || defaultValue || (type === 'single' ? '' : []),
     );
-    
+
     const groupName = React.useId();
 
     const handleValueChange = React.useCallback(
