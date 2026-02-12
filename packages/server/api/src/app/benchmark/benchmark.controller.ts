@@ -44,7 +44,7 @@ const WizardStepRequestOptions = {
       [StatusCodes.OK]: BenchmarkWizardStepResponse,
       [StatusCodes.CONFLICT]: Type.Object({
         code: Type.String(),
-        params: Type.Object({ message: Type.Optional(Type.String()) }),
+        params: Type.Object({ message: Type.String() }),
       }),
       [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Object({
         statusCode: Type.Number(),

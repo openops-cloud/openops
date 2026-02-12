@@ -43,7 +43,6 @@ function resolveNextStep(
     return null;
   }
   if (nextStepDef.conditional) {
-    // TODO: evaluate conditional.when against benchmarkConfiguration; for now always skip to skipToStep
     return nextStepDef.conditional.skipToStep ?? nextStepId;
   }
   return nextStepId;
