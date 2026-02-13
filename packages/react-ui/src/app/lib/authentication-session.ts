@@ -1,14 +1,9 @@
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
-
 import { authenticationApi } from '@/app/lib/authentication-api';
-import { AuthenticationResponse, isNil } from '@openops/shared';
+import { AuthenticationResponse } from '@openops/shared';
 import { NavigateFunction } from 'react-router-dom';
 import { LOGOUT_EVENT_KEY } from './navigation-constants';
 import { navigationUtil } from './navigation-util';
-import { projectAuth } from './project-auth';
 
-const tokenKey = 'token';
 const currentUserKey = 'currentUser';
 
 export const authenticationSession = {
@@ -25,17 +20,8 @@ export const authenticationSession = {
     window.dispatchEvent(new Event('storage'));
   },
 
-  getToken(): string | null {
-    return Cookies.get(tokenKey) ?? null;
-  },
-
   getProjectId(): string | null {
-    const token = this.getToken();
-    if (isNil(token)) {
-      return null;
-    }
-    const decodedJwt = jwtDecode<{ projectId: string }>(token);
-    return decodedJwt.projectId;
+    return this.getCurrentUser()?.projectId ?? null;
   },
 
   getOrganizationId(): string | null {
@@ -55,25 +41,8 @@ export const authenticationSession = {
     return this.getCurrentUser()?.organizationRole ?? null;
   },
 
-  // TODO: We don't have a way to switch between projects yet
-  async switchToSession(projectId: string) {
-    const result = await projectAuth.getTokenForProject(projectId);
-
-    const decodedJwt = jwtDecode<{ exp: number }>(result.token);
-    const expiration = new Date(decodedJwt.exp * 1000);
-
-    Cookies.set(tokenKey, result.token, {
-      secure: true,
-      sameSite: 'strict',
-      expires: expiration,
-      signed: true,
-      httpOnly: false,
-      path: '/',
-    });
-  },
-
   isLoggedIn(): boolean {
-    return !!this.getToken() && !!this.getCurrentUser();
+    return !!this.getCurrentUser();
   },
 
   async logOut({

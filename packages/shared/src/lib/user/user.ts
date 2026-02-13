@@ -55,6 +55,7 @@ export const UserMeta = Type.Object({
   organizationRole: Type.Enum(OrganizationRole),
   lastName: Type.String(),
   trackEvents: Type.Boolean(),
+  projectId: Type.String(),
   projectPermissions: Type.Object({
     analytics: Type.Boolean(),
   }),
