@@ -247,6 +247,7 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+      [StatusCodes.BAD_REQUEST]: Type.Unknown(),
     },
   },
 };
@@ -264,6 +265,7 @@ const GetConnectionMetadataRequest = {
       'Retrieve comprehensive metadata about all available connection types and their authentication requirements. This endpoint provides detailed information about supported authentication methods, required fields, and configuration options for each connection type. Useful for building connection configuration interfaces.',
     response: {
       [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
+      [StatusCodes.BAD_REQUEST]: Type.Unknown(),
     },
   },
 };

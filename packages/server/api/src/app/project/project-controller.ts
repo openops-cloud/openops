@@ -56,6 +56,8 @@ const GetUserProjectRequestOptions = {
   schema: {
     response: {
       200: ProjectWithoutToken,
+      401: Type.Unknown(),
+      404: Type.Unknown(),
     },
   },
 };
