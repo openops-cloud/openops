@@ -15,14 +15,10 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      const step = await getWizardStep(
-        request.params.provider,
-        {
-          currentStep: request.body.currentStep,
-          benchmarkConfiguration: request.body.benchmarkConfiguration,
-        },
-        request.principal.projectId,
-      );
+      const step = await getWizardStep(request.params.provider, {
+        currentStep: request.body.currentStep,
+        benchmarkConfiguration: request.body.benchmarkConfiguration,
+      });
       return reply.status(StatusCodes.OK).send(step);
     },
   );
