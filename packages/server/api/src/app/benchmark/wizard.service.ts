@@ -29,7 +29,7 @@ function getStepProgress(
   return { totalSteps, stepIndex };
 }
 
-function resolveNextStep(
+function resolveNextStepId(
   step: WizardConfigStep,
   config: WizardConfig,
 ): string | null {
@@ -50,15 +50,13 @@ function resolveNextStep(
   return nextStepId;
 }
 
-function resolveStepToReturnAndNextStep(
+function getStepToReturn(
   config: WizardConfig,
   steps: WizardConfigStep[],
   currentStepId: string | undefined,
-): { stepToReturn: WizardConfigStep; nextStep: string | null } {
+): WizardConfigStep {
   if (!currentStepId) {
-    const stepToReturn = steps[0];
-    const nextStep = resolveNextStep(stepToReturn, config);
-    return { stepToReturn, nextStep };
+    return steps[0];
   }
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
@@ -66,18 +64,17 @@ function resolveStepToReturnAndNextStep(
     throwValidationError(`Unknown step: ${currentStepId}`);
   }
   const currentStep = steps[currentStepIndex];
-  const nextStepId = resolveNextStep(currentStep, config);
+  const nextStepId = resolveNextStepId(currentStep, config);
 
   if (nextStepId === null) {
-    return { stepToReturn: currentStep, nextStep: null };
+    return currentStep;
   }
 
   const nextStepDef = steps.find((s) => s.id === nextStepId);
   if (!nextStepDef) {
     throwValidationError(`Next step not found: ${nextStepId}`);
   }
-  const nextStep = resolveNextStep(nextStepDef, config);
-  return { stepToReturn: nextStepDef, nextStep };
+  return nextStepDef;
 }
 
 export async function getWizardStep(
@@ -88,11 +85,8 @@ export async function getWizardStep(
   const config = getWizardConfig(normalizedProvider);
   const steps = config.steps;
 
-  const { stepToReturn, nextStep } = resolveStepToReturnAndNextStep(
-    config,
-    steps,
-    request.currentStep,
-  );
+  const stepToReturn = getStepToReturn(config, steps, request.currentStep);
+  const nextStep = resolveNextStepId(stepToReturn, config);
 
   const options: BenchmarkWizardOption[] = [];
 
