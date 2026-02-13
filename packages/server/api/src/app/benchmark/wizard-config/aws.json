@@ -14,7 +14,10 @@
       "title": "Which accounts should we include in the report?",
       "selectionType": "multi-select",
       "optionsSource": { "type": "dynamic", "method": "getConnectionAccounts" },
-      "conditional": { "when": "connection.supportsMultiAccount", "skipToStep": "regions" },
+      "conditional": {
+        "when": "connection.supportsMultiAccount",
+        "skipToStep": "regions"
+      },
       "nextStep": "regions"
     },
     {
@@ -24,7 +27,11 @@
       "optionsSource": {
         "type": "static",
         "values": [
-          { "id": "us-east-1", "displayName": "US East (N. Virginia)", "imageLogoUrl": "" },
+          {
+            "id": "us-east-1",
+            "displayName": "US East (N. Virginia)",
+            "imageLogoUrl": ""
+          },
           { "id": "us-west-2", "displayName": "US West (Oregon)" }
         ]
       },
@@ -38,14 +45,13 @@
         "type": "static",
         "values": [
           { "id": "unattached-ebs", "displayName": "Unattached EBS Volumes" },
-          { "id": "asg-compute-optimizer", "displayName": "ASG Compute Optimizer" }
+          {
+            "id": "asg-compute-optimizer",
+            "displayName": "ASG Compute Optimizer"
+          }
         ]
       },
       "nextStep": "create_assessment"
-    },
-    {
-      "id": "create_assessment",
-      "action": "import_workflows_and_persist"
     }
   ]
 }
