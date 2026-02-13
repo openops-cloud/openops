@@ -6,7 +6,6 @@ import {
 } from '@openops/shared';
 import {
   getWizardConfig,
-  SUPPORTED_WIZARD_PROVIDERS,
   type WizardConfig,
   type WizardConfigStep,
 } from './wizard-config-loader';
@@ -14,6 +13,13 @@ import {
   resolveListConnectionsOptions,
   resolveStaticOptions,
 } from './wizard-option-resolvers';
+
+function throwValidationError(message: string): never {
+  throw new ApplicationError(
+    { code: ErrorCode.VALIDATION, params: { message } },
+    message,
+  );
+}
 
 function getStepProgress(
   steps: WizardConfigStep[],
@@ -37,11 +43,7 @@ function resolveNextStep(
   }
   const nextStepDef = config.steps.find((s) => s.id === nextStepId);
   if (!nextStepDef) {
-    const message = `Next step not found: ${nextStepId}`;
-    throw new ApplicationError(
-      { code: ErrorCode.VALIDATION, params: { message } },
-      message,
-    );
+    throwValidationError(`Next step not found: ${nextStepId}`);
   }
   if (nextStepDef.action) {
     return null;
@@ -50,6 +52,45 @@ function resolveNextStep(
     return nextStepDef.conditional.skipToStep ?? nextStepId;
   }
   return nextStepId;
+}
+
+function resolveStepToReturnAndNextStep(
+  config: WizardConfig,
+  steps: WizardConfigStep[],
+  currentStepId: string | undefined,
+  benchmarkConfiguration: Record<string, string[]>,
+): { stepToReturn: WizardConfigStep; nextStep: string | null } {
+  if (!currentStepId) {
+    const stepToReturn = steps[0];
+    const nextStep = resolveNextStep(
+      stepToReturn,
+      config,
+      benchmarkConfiguration,
+    );
+    return { stepToReturn, nextStep };
+  }
+
+  const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
+  if (currentStepIndex < 0) {
+    throwValidationError(`Unknown step: ${currentStepId}`);
+  }
+  const currentStep = steps[currentStepIndex];
+  const nextStepId = resolveNextStep(
+    currentStep,
+    config,
+    benchmarkConfiguration,
+  );
+
+  if (nextStepId === null) {
+    return { stepToReturn: currentStep, nextStep: null };
+  }
+
+  const nextStepDef = steps.find((s) => s.id === nextStepId);
+  if (!nextStepDef) {
+    throwValidationError(`Next step not found: ${nextStepId}`);
+  }
+  const nextStep = resolveNextStep(nextStepDef, config, benchmarkConfiguration);
+  return { stepToReturn: nextStepDef, nextStep };
 }
 
 async function resolveOptionsForStep(
@@ -80,56 +121,16 @@ export async function getWizardStep(
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
-  if (!SUPPORTED_WIZARD_PROVIDERS.has(normalizedProvider)) {
-    const message = `Unsupported wizard provider: ${provider}`;
-    throw new ApplicationError(
-      { code: ErrorCode.VALIDATION, params: { message } },
-      message,
-    );
-  }
-
   const config = getWizardConfig(normalizedProvider);
   const steps = config.steps;
-  const currentStepId = request.currentStep;
   const benchmarkConfiguration = request.benchmarkConfiguration ?? {};
 
-  let stepToReturn: WizardConfigStep;
-  let nextStep: string | null;
-
-  if (currentStepId) {
-    const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
-    if (currentStepIndex < 0) {
-      const message = `Unknown step: ${currentStepId}`;
-      throw new ApplicationError(
-        { code: ErrorCode.VALIDATION, params: { message } },
-        message,
-      );
-    }
-    const currentStep = steps[currentStepIndex];
-    const nextStepId = resolveNextStep(
-      currentStep,
-      config,
-      benchmarkConfiguration,
-    );
-    if (nextStepId === null) {
-      stepToReturn = currentStep;
-      nextStep = null;
-    } else {
-      const nextStepDef = steps.find((s) => s.id === nextStepId);
-      if (!nextStepDef) {
-        const message = `Next step not found: ${nextStepId}`;
-        throw new ApplicationError(
-          { code: ErrorCode.VALIDATION, params: { message } },
-          message,
-        );
-      }
-      stepToReturn = nextStepDef;
-      nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
-    }
-  } else {
-    stepToReturn = steps[0];
-    nextStep = resolveNextStep(stepToReturn, config, benchmarkConfiguration);
-  }
+  const { stepToReturn, nextStep } = resolveStepToReturnAndNextStep(
+    config,
+    steps,
+    request.currentStep,
+    benchmarkConfiguration,
+  );
 
   const options = await resolveOptionsForStep(
     stepToReturn,
