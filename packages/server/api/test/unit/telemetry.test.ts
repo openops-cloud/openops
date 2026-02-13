@@ -195,6 +195,7 @@ describe('telemetry', () => {
         );
       } finally {
         jest.useRealTimers();
+        jest.restoreAllMocks();
       }
     });
   });
