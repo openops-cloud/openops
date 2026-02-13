@@ -81,7 +81,7 @@ export async function getPriceListFromAws(
     return [];
   }
 
-  const priceList = pricingProducts.PriceList.map((item) =>
+  const priceList = pricingProducts.PriceList.map((item: string) =>
     JSON.parse(item as string),
   );
 

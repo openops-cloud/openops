@@ -40,7 +40,7 @@ export async function getPrincipalFromWebsocket(
   try {
     const parsedCookies = cookie.parse(rawCookies);
     principal = await accessTokenManager.extractPrincipal(
-      parsedCookies['token'],
+      parsedCookies['token'] as string,
     );
   } catch (e) {
     logger.debug('Failed to extract principal from the socket.', {
