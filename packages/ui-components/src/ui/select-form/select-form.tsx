@@ -42,8 +42,8 @@ interface MultiSelectFormProps extends React.HTMLAttributes<HTMLDivElement> {
 type SelectFormProps = SingleSelectFormProps | MultiSelectFormProps;
 
 const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
-  (
-    {
+  (props, ref) => {
+    const {
       className,
       type,
       value,
@@ -51,10 +51,9 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
       defaultValue,
       disabled,
       children,
-      ...props
-    },
-    ref,
-  ) => {
+      ...divProps
+    } = props;
+
     const [internalValue, setInternalValue] = React.useState<string | string[]>(
       value || defaultValue || (type === 'single' ? '' : []),
     );
@@ -66,9 +65,13 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
         if (value === undefined) {
           setInternalValue(newValue);
         }
-        onValueChange?.(newValue as any);
+        if (props.type === 'single' && typeof newValue === 'string') {
+          props.onValueChange?.(newValue);
+        } else if (props.type === 'multi' && Array.isArray(newValue)) {
+          props.onValueChange?.(newValue);
+        }
       },
-      [value, onValueChange],
+      [value, props],
     );
 
     React.useEffect(() => {
@@ -88,7 +91,10 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
       [type, value, internalValue, handleValueChange, disabled, groupName],
     );
 
+    const currentValue = value ?? internalValue;
+
     if (type === 'single') {
+      const radioValue = typeof currentValue === 'string' ? currentValue : '';
       return (
         <SelectFormContext.Provider value={contextValue}>
           <RadioGroup
@@ -97,7 +103,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
               'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
               className,
             )}
-            value={contextValue.value as string}
+            value={radioValue}
             onValueChange={(val) => handleValueChange(val)}
             disabled={disabled}
           >
@@ -115,7 +121,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
             'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
             className,
           )}
-          {...props}
+          {...divProps}
         >
           {children}
         </div>
