@@ -185,10 +185,7 @@ describe('telemetry', () => {
 
       try {
         telemetry.trackEvent(event);
-
-        // wait for two timer ticks
-        await Promise.resolve();
-        await Promise.resolve();
+        await jest.runAllTimersAsync();
 
         expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
           expectedTimeseries,
