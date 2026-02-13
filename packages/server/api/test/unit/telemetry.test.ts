@@ -180,15 +180,22 @@ describe('telemetry', () => {
       telemetry = getSUT();
 
       const fixedDate = new Date('2023-11-25T12:00:00Z');
-      jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
+      jest.useFakeTimers();
+      jest.setSystemTime(fixedDate);
 
-      telemetry.trackEvent(event);
-      await new Promise((r) => setTimeout(r, 500));
+      try {
+        telemetry.trackEvent(event);
 
-      expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
-        expectedTimeseries,
-      );
-      jest.restoreAllMocks();
+        // wait for two timer ticks
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
+          expectedTimeseries,
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 
