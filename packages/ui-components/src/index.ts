@@ -31,7 +31,6 @@ export * from './ui/form';
 export * from './ui/image-with-fallback';
 export * from './ui/input';
 export * from './ui/label';
-export * from './ui/list-item';
 export * from './ui/numeric-input';
 export * from './ui/permission-needed-tooltip';
 export * from './ui/popover';
