@@ -93,11 +93,11 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
         {...props}
       >
         <div className="flex-shrink-0">
-          {React.createElement('input', {
-            type: type === 'single' ? 'radio' : 'checkbox',
-            name: type === 'single' ? groupName : undefined,
-            ...inputProps,
-          })}
+          {type === 'single' ? (
+            <input type="radio" name={groupName} {...inputProps} />
+          ) : (
+            <input type="checkbox" {...inputProps} />
+          )}
           {type === 'single' ? (
             <RadioGroupItem
               value={value}
