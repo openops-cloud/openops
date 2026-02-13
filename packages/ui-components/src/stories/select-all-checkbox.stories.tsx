@@ -6,7 +6,10 @@ import { useState } from 'react';
 import { cn } from '../lib/cn';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
-import { SelectAllCheckbox } from '../ui/select-all-checkbox';
+import {
+  SelectAllCheckbox,
+  type SelectAllChangeAction,
+} from '../ui/select-all-checkbox';
 
 const listItemVariants = cva('flex items-center px-4 py-3 min-h-[49px]', {
   variants: {
@@ -48,24 +51,13 @@ const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
 
 ListItem.displayName = 'ListItem';
 
+const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+
 const InteractiveExample = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
 
-  const allSelected = selectedItems.length === items.length;
-  const someSelected =
-    selectedItems.length > 0 && selectedItems.length < items.length;
-  let selectAllState: boolean | 'indeterminate';
-  if (allSelected) {
-    selectAllState = true;
-  } else if (someSelected) {
-    selectAllState = 'indeterminate';
-  } else {
-    selectAllState = false;
-  }
-
-  const handleSelectAll = (checked: boolean) => {
-    setSelectedItems(checked ? items : []);
+  const handleSelectAllChange = (action: SelectAllChangeAction) => {
+    setSelectedItems(action === 'selectAll' ? items : []);
   };
 
   const handleItemToggle = (item: string) => {
@@ -79,9 +71,9 @@ const InteractiveExample = () => {
       <ListItem hasSeparator>
         <SelectAllCheckbox
           id="select-all-interactive"
-          checked={selectAllState}
-          onCheckedChange={handleSelectAll}
-          label="Select all items"
+          selectedCount={selectedItems.length}
+          totalCount={items.length}
+          onSelectAllChange={handleSelectAllChange}
         />
       </ListItem>
 
@@ -113,18 +105,22 @@ const meta = {
     layout: 'padded',
   },
   argTypes: {
-    checked: {
+    selectedCount: {
+      control: 'number',
+      description: 'Number of currently selected items',
+    },
+    totalCount: {
+      control: 'number',
+      description: 'Total number of items',
+    },
+    variant: {
       control: 'select',
-      options: [true, false, 'indeterminate'],
-      description: 'The checked state of the checkbox',
+      options: ['default', 'primary'],
+      description: 'Checkbox color variant',
     },
     disabled: {
       control: 'boolean',
       description: 'Whether the checkbox is disabled',
-    },
-    label: {
-      control: 'text',
-      description: 'The label text for the checkbox',
     },
   },
 } satisfies Meta<typeof SelectAllCheckbox>;
@@ -135,33 +131,33 @@ type Story = StoryObj<typeof meta>;
 
 const backgroundClass = 'bg-background p-6';
 
-export const Default: Story = {
+export const NoneSelected: Story = {
   args: {
-    id: 'select-all-default',
+    id: 'select-all-none',
     className: backgroundClass,
-    checked: false,
-    label: 'Select all',
-    onCheckedChange: () => {},
+    selectedCount: 0,
+    totalCount: 5,
+    onSelectAllChange: () => {},
   },
 };
 
-export const Checked: Story = {
+export const AllSelected: Story = {
   args: {
-    id: 'select-all-checked',
+    id: 'select-all-all',
     className: backgroundClass,
-    checked: true,
-    label: 'Select all',
-    onCheckedChange: () => {},
+    selectedCount: 5,
+    totalCount: 5,
+    onSelectAllChange: () => {},
   },
 };
 
-export const Indeterminate: Story = {
+export const SomeSelected: Story = {
   args: {
-    id: 'select-all-indeterminate',
+    id: 'select-all-some',
     className: backgroundClass,
-    checked: 'indeterminate',
-    label: 'Select all',
-    onCheckedChange: () => {},
+    selectedCount: 3,
+    totalCount: 5,
+    onSelectAllChange: () => {},
   },
 };
 
@@ -169,19 +165,30 @@ export const Disabled: Story = {
   args: {
     id: 'select-all-disabled',
     className: backgroundClass,
-    checked: false,
+    selectedCount: 0,
+    totalCount: 5,
     disabled: true,
-    label: 'Select all (disabled)',
-    onCheckedChange: () => {},
+    onSelectAllChange: () => {},
+  },
+};
+
+export const DefaultVariant: Story = {
+  args: {
+    id: 'select-all-default-variant',
+    className: backgroundClass,
+    selectedCount: 3,
+    totalCount: 5,
+    variant: 'default',
+    onSelectAllChange: () => {},
   },
 };
 
 export const Interactive: Story = {
   args: {
     id: 'select-all-interactive',
-    checked: false,
-    label: 'Select all items',
-    onCheckedChange: () => {},
+    selectedCount: 0,
+    totalCount: 4,
+    onSelectAllChange: () => {},
   },
   render: () => <InteractiveExample />,
 };

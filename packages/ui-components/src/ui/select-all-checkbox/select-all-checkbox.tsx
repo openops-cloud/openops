@@ -1,17 +1,34 @@
+import { cva, type VariantProps } from 'class-variance-authority';
+import { t } from 'i18next';
 import * as React from 'react';
 
 import { cn } from '../../lib/cn';
 import { Checkbox } from '../checkbox';
 import { Label } from '../label';
 
+export type SelectAllChangeAction = 'selectAll' | 'clear';
+
+const checkboxVariants = cva('flex items-center justify-center rounded-xs', {
+  variants: {
+    variant: {
+      default: 'dark:data-[state=indeterminate]:!text-background',
+      primary:
+        'data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200',
+    },
+  },
+  defaultVariants: {
+    variant: 'primary',
+  },
+});
+
 export interface SelectAllCheckboxProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  id: string;
-  checked: boolean | 'indeterminate';
-  onCheckedChange: (checked: boolean) => void;
-  label: string;
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof checkboxVariants> {
+  id?: string;
+  selectedCount: number;
+  totalCount: number;
+  onSelectAllChange: (action: SelectAllChangeAction) => void;
   disabled?: boolean;
-  checkboxClassName?: string;
   labelClassName?: string;
 }
 
@@ -22,17 +39,41 @@ const SelectAllCheckbox = React.forwardRef<
   (
     {
       className,
-      id,
-      checked,
-      onCheckedChange,
-      label,
+      id: externalId,
+      selectedCount,
+      totalCount,
+      onSelectAllChange,
+      variant,
       disabled,
-      checkboxClassName,
       labelClassName,
       ...props
     },
     ref,
   ) => {
+    const generatedId = React.useId();
+    const id = externalId ?? generatedId;
+
+    const checkedState = React.useMemo(() => {
+      if (totalCount > 0 && selectedCount === totalCount) {
+        return true;
+      }
+      if (selectedCount > 0) {
+        return 'indeterminate' as const;
+      }
+      return false;
+    }, [selectedCount, totalCount]);
+
+    const handleCheckedChange = React.useCallback(() => {
+      const action: SelectAllChangeAction =
+        checkedState === false ? 'selectAll' : 'clear';
+      onSelectAllChange(action);
+    }, [checkedState, onSelectAllChange]);
+
+    const displayLabel =
+      checkedState === true || checkedState === 'indeterminate'
+        ? t('Clear all')
+        : t('Select all');
+
     return (
       <div
         ref={ref}
@@ -41,13 +82,10 @@ const SelectAllCheckbox = React.forwardRef<
       >
         <Checkbox
           id={id}
-          checked={checked}
-          onCheckedChange={onCheckedChange}
+          checked={checkedState}
+          onCheckedChange={handleCheckedChange}
           disabled={disabled}
-          className={cn(
-            'flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200',
-            checkboxClassName,
-          )}
+          className={checkboxVariants({ variant })}
         />
         <Label
           htmlFor={id}
@@ -57,7 +95,7 @@ const SelectAllCheckbox = React.forwardRef<
             labelClassName,
           )}
         >
-          {label}
+          {displayLabel}
         </Label>
       </div>
     );
