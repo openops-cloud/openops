@@ -103,6 +103,7 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
               value={value}
               {...visualComponentProps}
               className={cn(
+                'pointer-events-none',
                 '!border-input !text-primary-200',
                 'data-[state=checked]:!border-primary-200',
                 'data-[state=checked]:!text-primary-200',
@@ -112,6 +113,7 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
             <Checkbox
               {...visualComponentProps}
               className={cn(
+                'pointer-events-none',
                 '!border-input',
                 'data-[state=checked]:!bg-primary-200',
                 'data-[state=indeterminate]:!bg-primary-200',
