@@ -58,15 +58,11 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
     let isMounted = true;
     async function doLogout() {
       try {
-        if (isFederatedLogin) {
-          getFronteggApp()?.logout();
-        } else {
-          await authenticationSession.logOut({
-            userInitiated: false,
-            navigate,
-            federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
-          });
-        }
+        await authenticationSession.logOut({
+          userInitiated: false,
+          navigate,
+          federatedLoginUrl: getFederatedUrlBasedOnFlags(flags),
+        });
       } catch (e) {
         if (isMounted) {
           console.error('Logout failed:', e);
