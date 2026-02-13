@@ -5,8 +5,11 @@ import {
   BenchmarkWizardStepResponse,
   ErrorCode,
 } from '@openops/shared';
+import { getOptionProvider } from './option-provider';
+import './register-option-providers';
 import {
   getWizardConfig,
+  type StaticOptionValue,
   type WizardConfig,
   type WizardConfigStep,
 } from './wizard-config-loader';
@@ -74,9 +77,42 @@ function getStepToReturn(
   return nextStepDef;
 }
 
+function staticValuesToOptions(
+  values: StaticOptionValue[],
+): BenchmarkWizardOption[] {
+  return values.map((v) => ({
+    id: v.id,
+    displayName: v.displayName,
+    ...(v.imageLogoUrl !== undefined && { imageLogoUrl: v.imageLogoUrl }),
+  }));
+}
+
+async function resolveOptions(
+  provider: string,
+  step: WizardConfigStep,
+  request: BenchmarkWizardRequest,
+  projectId: string | undefined,
+): Promise<BenchmarkWizardOption[]> {
+  const optionsSource = step.optionsSource;
+  if (!optionsSource) {
+    return [];
+  }
+  if (optionsSource.type === 'static') {
+    return staticValuesToOptions(optionsSource.values);
+  }
+  const context = {
+    benchmarkConfiguration: request.benchmarkConfiguration,
+    projectId,
+    provider,
+  };
+  const adapter = getOptionProvider(provider);
+  return adapter.getOptions(optionsSource.method, context);
+}
+
 export async function getWizardStep(
   provider: string,
   request: BenchmarkWizardRequest,
+  projectId?: string,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
   const config = getWizardConfig(normalizedProvider);
@@ -85,7 +121,12 @@ export async function getWizardStep(
   const stepToReturn = getStepToReturn(config, steps, request.currentStep);
   const nextStep = resolveNextStepId(stepToReturn, config);
 
-  const options: BenchmarkWizardOption[] = [];
+  const options = await resolveOptions(
+    normalizedProvider,
+    stepToReturn,
+    request,
+    projectId,
+  );
 
   const { totalSteps, stepIndex } = getStepProgress(steps, stepToReturn);
 
