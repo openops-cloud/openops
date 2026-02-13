@@ -21,6 +21,7 @@ import {
   WizardPrevious,
   WizardStep,
   WizardTitle,
+  type SelectAllChangeAction,
 } from '../../index';
 
 const CONNECTIONS = [
@@ -96,42 +97,20 @@ const WizardExample = () => {
     }
   };
 
-  const handleSelectAllAccounts = () => {
-    const allAccountIds = ACCOUNTS.map((account) => account.id);
+  const handleSelectAllAccounts = (action: SelectAllChangeAction) => {
     setSelectedAccounts(
-      selectedAccounts.length === allAccountIds.length ? [] : allAccountIds,
+      action === 'selectAll' ? ACCOUNTS.map((a) => a.id) : [],
     );
   };
 
-  const handleSelectAllRegions = () => {
-    const allRegionIds = REGIONS.map((region) => region.id);
-    setSelectedRegions(
-      selectedRegions.length === allRegionIds.length ? [] : allRegionIds,
-    );
+  const handleSelectAllRegions = (action: SelectAllChangeAction) => {
+    setSelectedRegions(action === 'selectAll' ? REGIONS.map((r) => r.id) : []);
   };
 
-  const handleSelectAllServices = () => {
-    const allServiceIds = SERVICES.map((service) => service.id);
+  const handleSelectAllServices = (action: SelectAllChangeAction) => {
     setSelectedServices(
-      selectedServices.length === allServiceIds.length ? [] : allServiceIds,
+      action === 'selectAll' ? SERVICES.map((s) => s.id) : [],
     );
-  };
-
-  const getSelectAllState = (
-    selectedItems: string[],
-    allItems: any[],
-  ): boolean | 'indeterminate' => {
-    const allSelected = selectedItems.length === allItems.length;
-    const someSelected =
-      selectedItems.length > 0 && selectedItems.length < allItems.length;
-
-    if (allSelected) {
-      return true;
-    } else if (someSelected) {
-      return 'indeterminate';
-    } else {
-      return false;
-    }
   };
 
   return (
@@ -300,9 +279,9 @@ const WizardExample = () => {
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
                         id="select-all-accounts"
-                        checked={getSelectAllState(selectedAccounts, ACCOUNTS)}
-                        onCheckedChange={() => handleSelectAllAccounts()}
-                        label="Select all"
+                        selectedCount={selectedAccounts.length}
+                        totalCount={ACCOUNTS.length}
+                        onSelectAllChange={handleSelectAllAccounts}
                       />
                     </div>
                     {ACCOUNTS.map((account) => (
@@ -345,9 +324,9 @@ const WizardExample = () => {
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
                         id="select-all-regions"
-                        checked={getSelectAllState(selectedRegions, REGIONS)}
-                        onCheckedChange={() => handleSelectAllRegions()}
-                        label="Select all"
+                        selectedCount={selectedRegions.length}
+                        totalCount={REGIONS.length}
+                        onSelectAllChange={handleSelectAllRegions}
                       />
                     </div>
                     {REGIONS.map((region) => (
@@ -386,9 +365,9 @@ const WizardExample = () => {
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
                         id="select-all-services"
-                        checked={getSelectAllState(selectedServices, SERVICES)}
-                        onCheckedChange={() => handleSelectAllServices()}
-                        label="Select all"
+                        selectedCount={selectedServices.length}
+                        totalCount={SERVICES.length}
+                        onSelectAllChange={handleSelectAllServices}
                       />
                     </div>
 

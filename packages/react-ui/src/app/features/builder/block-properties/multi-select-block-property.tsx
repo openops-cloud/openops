@@ -1,4 +1,9 @@
-import { Button, CommandEmpty } from '@openops/components/ui';
+import {
+  Button,
+  CommandEmpty,
+  SelectAllCheckbox,
+  type SelectAllChangeAction,
+} from '@openops/components/ui';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
 import { useMemo, useState } from 'react';
@@ -12,10 +17,6 @@ import {
   MultiSelectTrigger,
   MultiSelectValue,
 } from '@/app/common/components/multi-select';
-import {
-  SelectOrClear,
-  SelectOrClearChange,
-} from '@/app/features/builder/block-properties/select-or-clear/select-or-clear';
 
 type MultiSelectBlockPropertyProps = {
   placeholder: string;
@@ -74,8 +75,8 @@ const MultiSelectBlockProperty = ({
     onChange(newSelectedIndicies.map((index) => options[Number(index)].value));
   };
 
-  const onSelectOrClearChanged = (changeType: SelectOrClearChange) => {
-    if (changeType === 'selectAll') {
+  const onSelectAllChange = (action: SelectAllChangeAction) => {
+    if (action === 'selectAll') {
       onChange(options.map((o) => o.value));
     } else {
       onChange([]);
@@ -101,10 +102,11 @@ const MultiSelectBlockProperty = ({
       <MultiSelectContent>
         <MultiSelectSearch placeholder={placeholder} />
         {selectClearEnabled && (
-          <SelectOrClear
+          <SelectAllCheckbox
             selectedCount={initialValues?.length || 0}
             totalCount={options.length}
-            sendChanges={onSelectOrClearChanged}
+            onSelectAllChange={onSelectAllChange}
+            className="py-2 px-1 space-x-2"
           />
         )}
         <MultiSelectList>

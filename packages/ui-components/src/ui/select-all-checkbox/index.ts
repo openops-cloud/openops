@@ -1,4 +1,4 @@
 export {
   SelectAllCheckbox,
-  type SelectAllCheckboxProps,
+  type SelectAllChangeAction,
 } from './select-all-checkbox';

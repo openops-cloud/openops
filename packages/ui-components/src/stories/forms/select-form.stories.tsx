@@ -7,7 +7,6 @@ import { SelectForm, SelectOption } from '@/ui/select-form';
 
 /**
  * Form components for single and multi-selection with optional icons and labels.
- * Built on top of Radix UI primitives for accessibility.
  */
 const meta = {
   title: 'ui/Select Form',
