@@ -7,6 +7,14 @@ jest.mock('../../../src/app/benchmark/wizard-config-loader', () => ({
   ): ReturnType<typeof mockGetWizardConfig> => mockGetWizardConfig(...args),
 }));
 
+const mockGetOptions = jest.fn().mockResolvedValue([]);
+jest.mock('../../../src/app/benchmark/option-provider', () => ({
+  getOptionProvider: jest.fn(() => ({
+    getOptions: mockGetOptions,
+  })),
+  registerOptionProvider: jest.fn(),
+}));
+
 const MOCK_WIZARD_CONFIG = {
   provider: 'test',
   steps: [
@@ -66,7 +74,7 @@ describe('getWizardStep', () => {
     expect(result.totalSteps).toBe(4);
   });
 
-  it('uses config from loader and returns first step with stub options', async () => {
+  it('uses config from loader and returns first step with dynamic options from adapter', async () => {
     const result = await getWizardStep('test', {});
 
     expect(mockGetWizardConfig).toHaveBeenCalledWith('test');
@@ -75,22 +83,26 @@ describe('getWizardStep', () => {
     expect(result.selectionType).toBe('single');
     expect(result.nextStep).toBe('step2');
     expect(result.options).toEqual([]);
+    expect(mockGetOptions).toHaveBeenCalledWith(
+      'listOptions',
+      expect.any(Object),
+    );
   });
 
-  it('returns step3 after step2', async () => {
+  it('returns step3 after step2 with static options', async () => {
     const result = await getWizardStep('test', { currentStep: 'step2' });
     expect(result.currentStep).toBe('step3');
     expect(result.nextStep).toBe('last_step');
     expect(result.stepIndex).toBe(3);
-    expect(result.options).toEqual([]);
+    expect(result.options).toEqual([{ id: 'opt1', displayName: 'Option 1' }]);
   });
 
-  it('returns last_step after step3', async () => {
+  it('returns last_step after step3 with static options', async () => {
     const result = await getWizardStep('test', { currentStep: 'step3' });
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
     expect(result.stepIndex).toBe(4);
-    expect(result.options).toEqual([]);
+    expect(result.options).toEqual([{ id: 'opt2', displayName: 'Option 2' }]);
   });
 
   it('returns stepIndex 1 and totalSteps 4 for first step', async () => {
