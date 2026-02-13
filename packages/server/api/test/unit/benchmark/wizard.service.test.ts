@@ -49,11 +49,6 @@ const MOCK_WIZARD_CONFIG = {
         type: 'static' as const,
         values: [{ id: 'opt2', displayName: 'Option 2' }],
       },
-      nextStep: 'complete',
-    },
-    {
-      id: 'complete',
-      action: 'finish',
     },
   ],
 };

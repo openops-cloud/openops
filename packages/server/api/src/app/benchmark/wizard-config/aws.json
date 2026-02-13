@@ -50,8 +50,7 @@
             "displayName": "ASG Compute Optimizer"
           }
         ]
-      },
-      "nextStep": "create_assessment"
+      }
     }
   ]
 }

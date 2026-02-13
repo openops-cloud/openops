@@ -41,9 +41,6 @@ function resolveNextStepId(
   if (!nextStepDef) {
     throwValidationError(`Next step not found: ${nextStepId}`);
   }
-  if (nextStepDef.action) {
-    return null;
-  }
   if (nextStepDef.conditional) {
     // TODO: Implement conditional logic
   }
