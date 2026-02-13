@@ -85,7 +85,7 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
         htmlFor={inputId}
         className={cn(
           'flex items-center gap-4 px-4 py-3 cursor-pointer border-b border-border last:border-b-0 transition-colors',
-          'hover:bg-accent focus-within:bg-accent first:rounded-t-lg first:rounded-t-lg last:rounded-b-lg last:rounded-b-lg',
+          'hover:bg-accent focus-within:bg-accent first:rounded-t-lg last:rounded-b-lg',
           isSelected && 'bg-accent/50',
           isDisabled && 'cursor-not-allowed opacity-50',
           className,
@@ -93,11 +93,11 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
         {...props}
       >
         <div className="flex-shrink-0">
-          {React.createElement('input', {
-            type: type === 'single' ? 'radio' : 'checkbox',
-            name: type === 'single' ? groupName : undefined,
-            ...inputProps,
-          })}
+          {type === 'single' ? (
+            <input type="radio" name={groupName} {...inputProps} />
+          ) : (
+            <input type="checkbox" {...inputProps} />
+          )}
           {type === 'single' ? (
             <RadioGroupItem
               value={value}
