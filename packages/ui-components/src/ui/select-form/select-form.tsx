@@ -100,7 +100,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
           <RadioGroup
             ref={ref}
             className={cn(
-              'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
+              'gap-0 rounded-lg bg-background shadow-sm',
               className,
             )}
             value={radioValue}
@@ -117,10 +117,7 @@ const SelectForm = React.forwardRef<HTMLDivElement, SelectFormProps>(
       <SelectFormContext.Provider value={contextValue}>
         <div
           ref={ref}
-          className={cn(
-            'gap-0 space-y-1 rounded-lg bg-background shadow-sm',
-            className,
-          )}
+          className={cn('gap-0 rounded-lg bg-background shadow-sm', className)}
           {...divProps}
         >
           {children}
