@@ -4,14 +4,14 @@ import {
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
 import { throwValidationError } from './errors';
-import { getOptionProvider } from './option-provider';
-import './register-option-providers';
 import {
-  getWizardConfig,
+  getProvider,
+  type ProviderAdapter,
   type StaticOptionValue,
   type WizardConfig,
   type WizardConfigStep,
-} from './wizard-config-loader';
+} from './provider-adapter';
+import './register-providers';
 
 function getStepProgress(
   config: WizardConfig,
@@ -24,10 +24,10 @@ function getStepProgress(
   return { totalSteps, stepIndex };
 }
 
-function resolveNextStepId(
+async function resolveNextStepId(
   step: WizardConfigStep,
   config: WizardConfig,
-): string | null {
+): Promise<string | null> {
   const nextStepId = step.nextStep;
   if (!nextStepId) {
     return null;
@@ -42,42 +42,10 @@ function resolveNextStepId(
   return nextStepId;
 }
 
-function staticValuesToOptions(
-  values: StaticOptionValue[],
-): BenchmarkWizardOption[] {
-  return values.map((v) => ({
-    id: v.id,
-    displayName: v.displayName,
-    ...(v.imageLogoUrl !== undefined && { imageLogoUrl: v.imageLogoUrl }),
-  }));
-}
-
-async function resolveOptions(
-  provider: string,
-  step: WizardConfigStep,
-  request: BenchmarkWizardRequest,
-  projectId: string,
-): Promise<BenchmarkWizardOption[]> {
-  const optionsSource = step.optionsSource;
-  if (!optionsSource) {
-    return [];
-  }
-  if (optionsSource.type === 'static') {
-    return staticValuesToOptions(optionsSource.values);
-  }
-  const context = {
-    benchmarkConfiguration: request.benchmarkConfiguration,
-    projectId,
-    provider,
-  };
-  const adapter = getOptionProvider(provider);
-  return adapter.getOptions(optionsSource.method, context);
-}
-
-function computeWizardStepResponse(
+async function computeWizardStepResponse(
   config: WizardConfig,
   currentStepId: string | undefined,
-): { stepToShow: WizardConfigStep; nextStep: string | null } {
+): Promise<{ stepToShow: WizardConfigStep; nextStep: string | null }> {
   const steps = config.steps;
   let stepToShow: WizardConfigStep;
 
@@ -87,7 +55,7 @@ function computeWizardStepResponse(
       throwValidationError(`Unknown step: ${currentStepId}`);
     }
     const currentStep = steps[currentStepIndex];
-    const nextStepId = resolveNextStepId(currentStep, config);
+    const nextStepId = await resolveNextStepId(currentStep, config);
 
     if (nextStepId === null) {
       stepToShow = currentStep;
@@ -102,8 +70,39 @@ function computeWizardStepResponse(
     stepToShow = steps[0];
   }
 
-  const nextStep = resolveNextStepId(stepToShow, config);
+  const nextStep = await resolveNextStepId(stepToShow, config);
   return { stepToShow, nextStep };
+}
+
+function staticValuesToOptions(
+  values: StaticOptionValue[],
+): BenchmarkWizardOption[] {
+  return values.map((v) => ({
+    id: v.id,
+    displayName: v.displayName,
+    ...(v.imageLogoUrl !== undefined && { imageLogoUrl: v.imageLogoUrl }),
+  }));
+}
+
+async function resolveOptions(
+  providerAdapter: ProviderAdapter,
+  step: WizardConfigStep,
+  request: BenchmarkWizardRequest,
+  projectId: string,
+): Promise<BenchmarkWizardOption[]> {
+  const optionsSource = step.optionsSource;
+  if (!optionsSource) {
+    return [];
+  }
+  if (optionsSource.type === 'static') {
+    return staticValuesToOptions(optionsSource.values);
+  }
+  const context = {
+    benchmarkConfiguration: request.benchmarkConfiguration,
+    projectId,
+    provider: providerAdapter.config.provider,
+  };
+  return providerAdapter.resolveOptions(optionsSource.method, context);
 }
 
 export async function resolveWizardNavigation(
@@ -112,15 +111,16 @@ export async function resolveWizardNavigation(
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
-  const config = getWizardConfig(normalizedProvider);
+  const providerAdapter = getProvider(normalizedProvider);
+  const config = providerAdapter.config;
 
-  const { stepToShow, nextStep } = computeWizardStepResponse(
+  const { stepToShow, nextStep } = await computeWizardStepResponse(
     config,
     request.currentStep,
   );
 
   const options = await resolveOptions(
-    normalizedProvider,
+    providerAdapter,
     stepToShow,
     request,
     projectId,

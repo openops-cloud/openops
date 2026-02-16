@@ -15,7 +15,7 @@
       "selectionType": "multi-select",
       "optionsSource": { "type": "dynamic", "method": "getConnectionAccounts" },
       "conditional": {
-        "when": "connection.supportsMultiAccount",
+        "when": "!connection.supportsMultiAccount",
         "skipToStep": "regions"
       },
       "nextStep": "regions"
