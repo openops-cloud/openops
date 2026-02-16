@@ -19,10 +19,10 @@ function throwValidationError(message: string): never {
 }
 
 function getStepProgress(
-  steps: WizardConfigStep[],
+  config: WizardConfig,
   stepToReturn: WizardConfigStep,
 ): { totalSteps: number; stepIndex: number } {
-  const stepsWithOptions = steps.filter((s) => s.optionsSource);
+  const stepsWithOptions = config.steps.filter((s) => s.optionsSource);
   const totalSteps = stepsWithOptions.length;
   const stepIndex =
     stepsWithOptions.findIndex((s) => s.id === stepToReturn.id) + 1;
@@ -49,9 +49,9 @@ function resolveNextStepId(
 
 function getStepToReturn(
   config: WizardConfig,
-  steps: WizardConfigStep[],
   currentStepId: string | undefined,
 ): WizardConfigStep {
+  const steps = config.steps;
   if (!currentStepId) {
     return steps[0];
   }
@@ -74,20 +74,19 @@ function getStepToReturn(
   return nextStepDef;
 }
 
-export async function getWizardStep(
+export async function resolveWizardNavigation(
   provider: string,
   request: BenchmarkWizardRequest,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
   const config = getWizardConfig(normalizedProvider);
-  const steps = config.steps;
 
-  const stepToReturn = getStepToReturn(config, steps, request.currentStep);
+  const stepToReturn = getStepToReturn(config, request.currentStep);
   const nextStep = resolveNextStepId(stepToReturn, config);
 
   const options: BenchmarkWizardOption[] = [];
 
-  const { totalSteps, stepIndex } = getStepProgress(steps, stepToReturn);
+  const { totalSteps, stepIndex } = getStepProgress(config, stepToReturn);
 
   return {
     currentStep: stepToReturn.id,
