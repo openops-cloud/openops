@@ -99,6 +99,9 @@ describe('Chat Request Router', () => {
     headers: {
       authorization: 'Bearer test-auth-token',
     },
+    cookies: {
+      token: 'test-cookie-token',
+    },
     raw: mockRaw,
   };
 
@@ -145,7 +148,7 @@ describe('Chat Request Router', () => {
       expect(handleCodeGenerationRequest).toHaveBeenCalledWith(
         expect.objectContaining({
           app: mockApp,
-          authToken: 'test-auth-token',
+          authToken: 'test-cookie-token',
           chatId: 'test-chat-id',
           userId: 'test-user-id',
           projectId: 'test-project-id',
@@ -187,7 +190,7 @@ describe('Chat Request Router', () => {
       expect(handleUserMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           app: mockApp,
-          authToken: 'test-auth-token',
+          authToken: 'test-cookie-token',
           chatId: 'test-chat-id',
           userId: 'test-user-id',
           projectId: 'test-project-id',
@@ -252,12 +255,68 @@ describe('Chat Request Router', () => {
       });
     });
 
-    it('should handle missing authorization header', async () => {
+    it('should use cookie token when authorization header is missing', async () => {
+      const paramsWithCookieOnly = {
+        ...mockParams,
+        request: {
+          ...mockRequest,
+          headers: {},
+          cookies: {
+            token: 'cookie-auth-token',
+          },
+        },
+      };
+
+      getConversation.mockResolvedValue({
+        chatContext: { blockName: 'some-other-block' },
+        chatHistory: [...mockChatHistory],
+      });
+
+      getLLMConfig.mockResolvedValue({
+        aiConfig: mockAiConfig,
+        languageModel: mockLanguageModel,
+      });
+
+      handleUserMessage.mockResolvedValue(undefined);
+
+      await routeChatRequest(paramsWithCookieOnly);
+
+      expect(handleUserMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          authToken: 'cookie-auth-token',
+        }),
+      );
+    });
+
+    it('should prioritize cookie token over authorization header', async () => {
+      getConversation.mockResolvedValue({
+        chatContext: { blockName: 'some-other-block' },
+        chatHistory: [...mockChatHistory],
+      });
+
+      getLLMConfig.mockResolvedValue({
+        aiConfig: mockAiConfig,
+        languageModel: mockLanguageModel,
+      });
+
+      handleUserMessage.mockResolvedValue(undefined);
+
+      await routeChatRequest(mockParams);
+
+      expect(handleUserMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          authToken: 'test-cookie-token',
+        }),
+      );
+    });
+
+    it('should handle missing both cookie and authorization header', async () => {
       const paramsWithoutAuth = {
         ...mockParams,
         request: {
           ...mockRequest,
           headers: {},
+          cookies: {},
         },
       };
 

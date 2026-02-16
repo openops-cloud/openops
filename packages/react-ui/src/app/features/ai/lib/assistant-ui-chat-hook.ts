@@ -1,7 +1,6 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
@@ -195,9 +194,7 @@ export const useAssistantChat = ({
     id: chatId ?? undefined,
     transport: new DefaultChatTransport({
       api: '/api/v1/ai/conversation',
-      headers: {
-        Authorization: `Bearer ${authenticationSession.getToken()}`,
-      },
+      credentials: 'include',
       prepareSendMessagesRequest: ({ messages, requestMetadata }) => ({
         body: {
           ...(requestMetadata as Record<string, unknown>),

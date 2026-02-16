@@ -2,10 +2,7 @@ import { Suspense, useEffect, useState } from 'react';
 
 import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import {
-  setupRequestInterceptor,
-  setupResponseInterceptor,
-} from '@/app/interceptors';
+import { setupResponseInterceptor } from '@/app/interceptors';
 
 type InitialDataGuardProps = {
   children: React.ReactNode;
@@ -22,9 +19,6 @@ export const InitialDataGuard = ({
       return;
     }
     const isFederatedAuth = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
-    setupRequestInterceptor({
-      isFederatedAuth,
-    });
     setupResponseInterceptor({
       isFederatedAuth,
     });
