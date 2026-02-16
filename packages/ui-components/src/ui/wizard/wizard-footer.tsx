@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '../../lib/cn';
-import { Button } from '../button';
+import { Button, ButtonProps } from '../button';
 import { useWizard } from './wizard';
 
 type WizardFooterProps = React.HTMLAttributes<HTMLDivElement>;
@@ -25,8 +25,7 @@ const WizardFooter = React.forwardRef<HTMLDivElement, WizardFooterProps>(
 );
 WizardFooter.displayName = 'WizardFooter';
 
-interface WizardPreviousProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface WizardPreviousProps extends ButtonProps {
   onPrevious?: () => void;
 }
 
@@ -63,8 +62,7 @@ const WizardPrevious = React.forwardRef<HTMLButtonElement, WizardPreviousProps>(
 );
 WizardPrevious.displayName = 'WizardPrevious';
 
-interface WizardNextProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface WizardNextProps extends ButtonProps {
   onNext?: () => void;
 }
 
