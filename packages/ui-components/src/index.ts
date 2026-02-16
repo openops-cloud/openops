@@ -48,6 +48,7 @@ export * from './ui/skeleton';
 export * from './ui/sortable';
 export * from './ui/spinner';
 export * from './ui/status-icon-with-text';
+export * from './ui/step-counter';
 export * from './ui/switch';
 export * from './ui/table';
 export * from './ui/tabs';
@@ -62,7 +63,6 @@ export * from './ui/use-toast';
 export * from './ui/user-avatar-menu';
 export * from './ui/vertical-divider';
 export * from './ui/warning-with-icon';
-
 /* export dashboard widgets */
 export * from './ui/big-number-chart';
 
