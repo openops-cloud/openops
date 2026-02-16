@@ -54,9 +54,7 @@ function computeWizardStepResponse(
   const steps = config.steps;
   let stepToShow: WizardConfigStep;
 
-  if (!currentStepId) {
-    stepToShow = steps[0];
-  } else {
+  if (currentStepId) {
     const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
     if (currentStepIndex < 0) {
       throwValidationError(`Unknown step: ${currentStepId}`);
@@ -73,6 +71,8 @@ function computeWizardStepResponse(
       }
       stepToShow = nextStepDef;
     }
+  } else {
+    stepToShow = steps[0];
   }
 
   const nextStep = resolveNextStepId(stepToShow, config);
