@@ -20,6 +20,7 @@ export * from './dashboard-overview';
 export * from './dismissible-panel/dismissible-panel';
 export * from './expandable-markdown';
 export * from './explore-templates';
+export * from './finops-benchmark-banner/finops-benchmark-banner';
 export * from './flow-canvas/ai-widget';
 export * from './flow-canvas/canvas-context';
 export * from './flow-canvas/canvas-controls';

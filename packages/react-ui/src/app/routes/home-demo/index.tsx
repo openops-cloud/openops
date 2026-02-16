@@ -87,7 +87,7 @@ const HomeDemoPage = () => {
           </div>
 
           {isFinOpsBenchmarkEnabled && (
-            <FinOpsBenchmarkBanner onActionClick={() => noop()} />
+            <FinOpsBenchmarkBanner onActionClick={noop} />
           )}
 
           <HomeFlowsTable

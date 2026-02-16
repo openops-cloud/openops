@@ -52,16 +52,16 @@ const FinOpsBenchmarkBanner = ({
   onViewReportClick,
   className,
 }: FinOpsBenchmarkBannerProps) => {
-  const activeVariation = variation ?? 'default';
-  const providerLabel = PROVIDER_LABELS[provider ?? 'aws'];
+  const providerLabel = PROVIDER_LABELS[provider];
 
   const content =
-    activeVariation === 'report'
+    variation === 'report'
       ? {
           title: t('FinOps Benchmark'),
-          description: t(`Your ${providerLabel} benchmark report is ready.`),
+          description:
+            t('Your') + ` ${providerLabel} ` + t('benchmark report is ready.'),
           actionLabel: t('Re-run a Benchmark'),
-          reportLabel: t(`See ${providerLabel} Benchmark Report`),
+          reportLabel: t('See') + ` ${providerLabel} ` + t('Benchmark Report'),
         }
       : {
           title: t('FinOps Benchmark'),
@@ -83,8 +83,8 @@ const FinOpsBenchmarkBanner = ({
           {content.description}
         </p>
       </div>
-      <div className={finOpsActionsVariants({ variation: activeVariation })}>
-        {activeVariation === 'report' && (
+      <div className={finOpsActionsVariants({ variation })}>
+        {variation === 'report' && (
           <Button
             type="button"
             variant="ghost"
