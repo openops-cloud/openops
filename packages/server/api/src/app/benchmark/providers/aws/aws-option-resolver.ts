@@ -1,26 +1,21 @@
 import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
 import { throwValidationError } from '../../errors';
-import type {
-  BenchmarkWizardOptionProvider,
-  WizardContext,
-} from '../../option-provider';
+import type { WizardContext } from '../../provider-adapter';
 
-const awsOptionProvider: BenchmarkWizardOptionProvider = {
-  async getOptions(
-    method: string,
-    context: WizardContext,
-  ): Promise<BenchmarkWizardOption[]> {
-    switch (method) {
-      case 'listConnections':
-        return listConnections(context);
-      case 'getConnectionAccounts':
-        return getConnectionAccounts(context);
-      default:
-        throw new Error(`Unknown AWS wizard option method: ${method}`);
-    }
-  },
-};
+export async function resolveOptions(
+  method: string,
+  context: WizardContext,
+): Promise<BenchmarkWizardOption[]> {
+  switch (method) {
+    case 'listConnections':
+      return listConnections(context);
+    case 'getConnectionAccounts':
+      return getConnectionAccounts(context);
+    default:
+      throw new Error(`Unknown AWS wizard option method: ${method}`);
+  }
+}
 
 async function listConnections(
   context: WizardContext,
@@ -49,9 +44,5 @@ async function listConnections(
 async function getConnectionAccounts(
   _context: WizardContext,
 ): Promise<BenchmarkWizardOption[]> {
-  // TODO: Get selected connection id from context.benchmarkConfiguration?.connection,
-  // then call provider-specific API to list accounts for that connection.
   return [];
 }
-
-export { awsOptionProvider };
