@@ -36,7 +36,6 @@ import { aiModule } from './ai/ai.module';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
-import { benchmarkModule } from './benchmark/benchmark.module';
 import { blockVariableModule } from './block-variable/block-variable-module';
 import { blockModule } from './blocks/base-block-module';
 import { blockSyncService } from './blocks/block-sync-service';
@@ -217,7 +216,6 @@ export const setupApp = async (
   await app.register(authenticationModule);
   await app.register(organizationModule);
   await app.register(formModule);
-  await app.register(benchmarkModule);
   await blockSyncService.setup();
   await app.register(workerModule);
   await app.register(slackInteractionModule);
