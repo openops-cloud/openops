@@ -44,7 +44,10 @@ async function resolveNextStepId(
       projectId,
       provider: config.provider,
     };
-    const shouldSkip = await provider.evaluateCondition(nextStepDef.conditional, context);
+    const shouldSkip = await provider.evaluateCondition(
+      nextStepDef.conditional,
+      context,
+    );
     if (shouldSkip) {
       return nextStepDef.conditional.skipToStep;
     }
