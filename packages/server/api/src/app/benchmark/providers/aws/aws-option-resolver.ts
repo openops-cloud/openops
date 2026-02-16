@@ -3,16 +3,6 @@ import { appConnectionService } from '../../../app-connection/app-connection-ser
 import { throwValidationError } from '../../errors';
 import type { WizardContext } from '../../provider-adapter';
 
-/** IAM role ARN format: arn:partition:iam::accountId:role/roleName */
-function getAccountIdFromRoleArn(assumeRoleArn: string): string {
-  const parts = assumeRoleArn.split(':');
-  return parts.length >= 5 ? parts[4] : assumeRoleArn;
-}
-
-type AwsConnectionValue = {
-  roles?: Array<{ assumeRoleArn: string; accountName: string }>;
-};
-
 export async function resolveOptions(
   method: string,
   context: WizardContext,
@@ -52,26 +42,9 @@ async function listConnections(
 }
 
 async function getConnectionAccounts(
-  context: WizardContext,
+  _context: WizardContext,
 ): Promise<BenchmarkWizardOption[]> {
-  const connectionId = context.benchmarkConfiguration?.connection?.[0];
-  if (!connectionId) {
-    return [];
-  }
-
-  const connection = await appConnectionService.getOneOrThrow({
-    id: connectionId,
-    projectId: context.projectId,
-  });
-
-  const value = connection.value as AwsConnectionValue | undefined;
-  const roles = value?.roles ?? [];
-  if (roles.length === 0) {
-    return [];
-  }
-
-  return roles.map((role) => ({
-    id: getAccountIdFromRoleArn(role.assumeRoleArn),
-    displayName: role.accountName || getAccountIdFromRoleArn(role.assumeRoleArn),
-  }));
+  // TODO: Get selected connection id from context.benchmarkConfiguration?.connection,
+  // then call provider-specific API to list accounts for that connection.
+  return [];
 }
