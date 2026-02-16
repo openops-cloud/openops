@@ -8,14 +8,14 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { getWizardStep } from './wizard.service';
+import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      const step = await getWizardStep(
+      const step = await resolveWizardNavigation(
         request.params.provider,
         {
           currentStep: request.body.currentStep,
