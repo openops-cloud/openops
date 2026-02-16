@@ -10,10 +10,8 @@ import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
   cn,
-  FinOpsBenchmarkBanner,
   FlowTemplateMetadataWithIntegrations,
 } from '@openops/components/ui';
-import { noop } from 'lodash-es';
 import { useState } from 'react';
 
 const HomePage = () => {
