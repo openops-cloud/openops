@@ -42,6 +42,7 @@ async function listConnections(
   return page.data.map((connection) => ({
     id: connection.id,
     displayName: connection.name,
+    metadata: { authProviderKey: connection.authProviderKey },
   }));
 }
 
