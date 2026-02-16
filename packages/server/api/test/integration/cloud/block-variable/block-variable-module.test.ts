@@ -206,6 +206,31 @@ describe('POST /v1/block-variable/execute-variable', () => {
       },
     });
 
+    expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+  });
+
+  it('should require valid principal', async () => {
+    accessTokenManagerMock.extractPrincipal.mockResolvedValue({
+      id: 'test-user-id',
+      type: PrincipalType.ENGINE,
+      projectId: 'test-project-id',
+      organization: {
+        id: 'test-org-id',
+      },
+    });
+
+    const response = await makeRequest({
+      token: await generateMockToken({
+        type: PrincipalType.ENGINE,
+        projectId: 'test-project-id',
+      }),
+      body: {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-version-id',
+        variableExpression: '{{trigger.headers}}',
+      },
+    });
+
     expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
   });
 
