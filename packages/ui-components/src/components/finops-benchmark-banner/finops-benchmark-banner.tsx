@@ -1,23 +1,11 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { t } from 'i18next';
 import { LucideBarChart2, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 
-const finOpsBenchmarkBannerVariants = cva(
-  'flex w-full items-center justify-between gap-4 rounded-[8px] border border-input bg-background-800 p-4',
-  {
-    variants: {
-      variation: {
-        default: '',
-        report: '',
-      },
-    },
-    defaultVariants: {
-      variation: 'default',
-    },
-  },
-);
+const finOpsBenchmarkBannerClasses =
+  'flex w-full items-center justify-between gap-4 rounded-[8px] border border-input bg-background-800 p-4';
 
 const finOpsActionsVariants = cva('flex shrink-0 items-center', {
   variants: {
@@ -36,9 +24,8 @@ const PROVIDER_LABELS: Record<string, string> = {
   azure: 'Azure',
 };
 
-type FinOpsBenchmarkBannerProps = VariantProps<
-  typeof finOpsBenchmarkBannerVariants
-> & {
+type FinOpsBenchmarkBannerProps = {
+  variation?: 'default' | 'report';
   provider?: 'aws' | 'azure';
   onActionClick?: () => void;
   onViewReportClick?: () => void;
@@ -72,9 +59,7 @@ const FinOpsBenchmarkBanner = ({
         };
 
   return (
-    <div
-      className={cn(finOpsBenchmarkBannerVariants({ variation }), className)}
-    >
+    <div className={cn(finOpsBenchmarkBannerClasses, className)}>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold leading-5 text-black dark:text-white">
           {content.title}
