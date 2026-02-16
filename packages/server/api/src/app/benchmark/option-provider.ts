@@ -1,13 +1,9 @@
-import {
-  ApplicationError,
-  BenchmarkConfiguration,
-  BenchmarkWizardOption,
-  ErrorCode,
-} from '@openops/shared';
+import { BenchmarkConfiguration, BenchmarkWizardOption } from '@openops/shared';
+import { throwValidationError } from './errors';
 
 export type WizardContext = {
   benchmarkConfiguration?: BenchmarkConfiguration;
-  projectId?: string;
+  projectId: string;
   provider: string;
 };
 
@@ -33,11 +29,7 @@ export function getOptionProvider(
   const normalized = provider.toLowerCase();
   const adapter = providers.get(normalized);
   if (!adapter) {
-    const message = `Option provider not found for provider: ${provider}`;
-    throw new ApplicationError(
-      { code: ErrorCode.VALIDATION, params: { message } },
-      message,
-    );
+    throwValidationError(`Option provider not found for provider: ${provider}`);
   }
   return adapter;
 }

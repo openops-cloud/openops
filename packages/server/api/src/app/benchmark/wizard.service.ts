@@ -1,10 +1,9 @@
 import {
-  ApplicationError,
   BenchmarkWizardOption,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  ErrorCode,
 } from '@openops/shared';
+import { throwValidationError } from './errors';
 import { getOptionProvider } from './option-provider';
 import './register-option-providers';
 import {
@@ -13,13 +12,6 @@ import {
   type WizardConfig,
   type WizardConfigStep,
 } from './wizard-config-loader';
-
-function throwValidationError(message: string): never {
-  throw new ApplicationError(
-    { code: ErrorCode.VALIDATION, params: { message } },
-    message,
-  );
-}
 
 function getStepProgress(
   steps: WizardConfigStep[],
@@ -91,7 +83,7 @@ async function resolveOptions(
   provider: string,
   step: WizardConfigStep,
   request: BenchmarkWizardRequest,
-  projectId: string | undefined,
+  projectId: string,
 ): Promise<BenchmarkWizardOption[]> {
   const optionsSource = step.optionsSource;
   if (!optionsSource) {
@@ -112,7 +104,7 @@ async function resolveOptions(
 export async function getWizardStep(
   provider: string,
   request: BenchmarkWizardRequest,
-  projectId?: string,
+  projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
   const config = getWizardConfig(normalizedProvider);

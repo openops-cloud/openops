@@ -1,5 +1,6 @@
 import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
+import { throwValidationError } from '../../errors';
 import type {
   BenchmarkWizardOptionProvider,
   WizardContext,
@@ -25,7 +26,7 @@ async function listConnections(
   context: WizardContext,
 ): Promise<BenchmarkWizardOption[]> {
   if (!context.projectId) {
-    return [];
+    throwValidationError('projectId is required to list connections');
   }
 
   const page = await appConnectionService.list({

@@ -61,6 +61,8 @@ const MOCK_WIZARD_CONFIG = {
   ],
 };
 
+const TEST_PROJECT_ID = 'test-project-id';
+
 describe('getWizardStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,14 +70,18 @@ describe('getWizardStep', () => {
   });
 
   it('returns last_step with nextStep null when wizard complete', async () => {
-    const result = await getWizardStep('test', { currentStep: 'last_step' });
+    const result = await getWizardStep(
+      'test',
+      { currentStep: 'last_step' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
     expect(result.totalSteps).toBe(4);
   });
 
   it('uses config from loader and returns first step with dynamic options from adapter', async () => {
-    const result = await getWizardStep('test', {});
+    const result = await getWizardStep('test', {}, TEST_PROJECT_ID);
 
     expect(mockGetWizardConfig).toHaveBeenCalledWith('test');
     expect(result.currentStep).toBe('step1');
@@ -90,7 +96,11 @@ describe('getWizardStep', () => {
   });
 
   it('returns step3 after step2 with static options', async () => {
-    const result = await getWizardStep('test', { currentStep: 'step2' });
+    const result = await getWizardStep(
+      'test',
+      { currentStep: 'step2' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('step3');
     expect(result.nextStep).toBe('last_step');
     expect(result.stepIndex).toBe(3);
@@ -98,7 +108,11 @@ describe('getWizardStep', () => {
   });
 
   it('returns last_step after step3 with static options', async () => {
-    const result = await getWizardStep('test', { currentStep: 'step3' });
+    const result = await getWizardStep(
+      'test',
+      { currentStep: 'step3' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
     expect(result.stepIndex).toBe(4);
@@ -106,13 +120,17 @@ describe('getWizardStep', () => {
   });
 
   it('returns stepIndex 1 and totalSteps 4 for first step', async () => {
-    const result = await getWizardStep('test', {});
+    const result = await getWizardStep('test', {}, TEST_PROJECT_ID);
     expect(result.stepIndex).toBe(1);
     expect(result.totalSteps).toBe(4);
   });
 
   it('returns stepIndex 2 and totalSteps 4 for step2 (after step1)', async () => {
-    const result = await getWizardStep('test', { currentStep: 'step1' });
+    const result = await getWizardStep(
+      'test',
+      { currentStep: 'step1' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('step2');
     expect(result.nextStep).toBe('step3');
     expect(result.stepIndex).toBe(2);
@@ -124,7 +142,7 @@ describe('getWizardStep', () => {
       throw new Error('Wizard config not found for provider: unknown');
     });
 
-    await expect(getWizardStep('unknown', {})).rejects.toThrow(
+    await expect(getWizardStep('unknown', {}, TEST_PROJECT_ID)).rejects.toThrow(
       'Wizard config not found for provider: unknown',
     );
     expect(mockGetWizardConfig).toHaveBeenCalledWith('unknown');
@@ -132,7 +150,7 @@ describe('getWizardStep', () => {
 
   it('throws for unknown currentStep', async () => {
     await expect(
-      getWizardStep('test', { currentStep: 'unknown_step' }),
+      getWizardStep('test', { currentStep: 'unknown_step' }, TEST_PROJECT_ID),
     ).rejects.toThrow('Unknown step: unknown_step');
   });
 });
