@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   Avatar,
   AvatarFallback,
-  RegionIcon,
   SelectAllCheckbox,
   SelectForm,
   SelectOption,
@@ -335,9 +334,11 @@ const WizardExample = () => {
                         value={region.id}
                         iconClassName="w-8 h-8"
                         icon={
-                          <div className="rounded-sm bg-[#DBEAFE] flex items-center justify-center w-full h-full">
-                            <RegionIcon className="w-4 h-4" />
-                          </div>
+                          <img
+                            src="/blocks/region.svg"
+                            alt="Region"
+                            className="w-full h-full"
+                          />
                         }
                       >
                         {region.name}
