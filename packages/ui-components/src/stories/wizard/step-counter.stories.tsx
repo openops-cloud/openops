@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { StepCounter } from '../../ui/step-counter';
 
 /**
@@ -9,6 +10,7 @@ import { StepCounter } from '../../ui/step-counter';
 const meta = {
   title: 'ui/Step Counter',
   component: StepCounter,
+  decorators: [ThemeAwareDecorator],
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
