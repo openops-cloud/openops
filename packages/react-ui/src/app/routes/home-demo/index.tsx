@@ -1,12 +1,7 @@
-import {
-  DasbhoardOverview,
-  FinOpsBenchmarkBanner,
-  PageHeader,
-} from '@openops/components/ui';
+import { DasbhoardOverview, PageHeader } from '@openops/components/ui';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { CreateNewFlowInFolder } from '@/app/features/flows/components/create-new-flow-in-folder';
 import { HomeFlowsTable } from '@/app/features/home/flows-table';
 import {
@@ -18,8 +13,6 @@ import {
   formatNumber,
 } from '@/app/features/home/lib/home-utils';
 import { HomeRunsTable } from '@/app/features/home/runs-table';
-import { FlagId } from '@openops/shared';
-import { noop } from 'lodash-es';
 
 const DEFAULT_DATABASE_ID = 1;
 
@@ -53,10 +46,6 @@ const HomeDemoPage = () => {
     }
   };
 
-  const { data: isFinOpsBenchmarkEnabled } = flagsHooks.useFlag<
-    boolean | undefined
-  >(FlagId.FINOPS_BENCHMARK_ENABLED);
-
   return (
     <div className="flex-col w-full overflow-x-auto">
       <div className="mb-4 flex flex-col gap-4">
@@ -85,10 +74,6 @@ const HomeDemoPage = () => {
               isLoading={isOverviewLoading}
             />
           </div>
-
-          {isFinOpsBenchmarkEnabled && (
-            <FinOpsBenchmarkBanner onActionClick={noop} />
-          )}
 
           <HomeFlowsTable
             data={flowsResponse?.data || []}
