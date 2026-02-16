@@ -46,5 +46,6 @@ async function getConnectionAccounts(
 ): Promise<BenchmarkWizardOption[]> {
   // TODO: Get selected connection id from context.benchmarkConfiguration?.connection,
   // then call provider-specific API to list accounts for that connection.
+  // Returns empty array until we implement the API.
   return [];
 }
