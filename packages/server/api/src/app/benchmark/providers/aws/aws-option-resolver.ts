@@ -13,7 +13,7 @@ export async function resolveOptions(
     case 'getConnectionAccounts':
       return getConnectionAccounts(context);
     default:
-      throw new Error(`Unknown AWS wizard option method: ${method}`);
+      throwValidationError(`Unknown AWS wizard option method: ${method}`);
   }
 }
 
