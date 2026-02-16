@@ -47,31 +47,36 @@ function resolveNextStepId(
   return nextStepId;
 }
 
-function getStepToReturn(
+function computeWizardStepResponse(
   config: WizardConfig,
   currentStepId: string | undefined,
-): WizardConfigStep {
+): { stepToShow: WizardConfigStep; nextStep: string | null } {
   const steps = config.steps;
+  let stepToShow: WizardConfigStep;
+
   if (!currentStepId) {
-    return steps[0];
+    stepToShow = steps[0];
+  } else {
+    const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
+    if (currentStepIndex < 0) {
+      throwValidationError(`Unknown step: ${currentStepId}`);
+    }
+    const currentStep = steps[currentStepIndex];
+    const nextStepId = resolveNextStepId(currentStep, config);
+
+    if (nextStepId === null) {
+      stepToShow = currentStep;
+    } else {
+      const nextStepDef = steps.find((s) => s.id === nextStepId);
+      if (!nextStepDef) {
+        throwValidationError(`Next step not found: ${nextStepId}`);
+      }
+      stepToShow = nextStepDef;
+    }
   }
 
-  const currentStepIndex = steps.findIndex((s) => s.id === currentStepId);
-  if (currentStepIndex < 0) {
-    throwValidationError(`Unknown step: ${currentStepId}`);
-  }
-  const currentStep = steps[currentStepIndex];
-  const nextStepId = resolveNextStepId(currentStep, config);
-
-  if (nextStepId === null) {
-    return currentStep;
-  }
-
-  const nextStepDef = steps.find((s) => s.id === nextStepId);
-  if (!nextStepDef) {
-    throwValidationError(`Next step not found: ${nextStepId}`);
-  }
-  return nextStepDef;
+  const nextStep = resolveNextStepId(stepToShow, config);
+  return { stepToShow, nextStep };
 }
 
 export async function resolveWizardNavigation(
@@ -81,19 +86,21 @@ export async function resolveWizardNavigation(
   const normalizedProvider = provider.toLowerCase();
   const config = getWizardConfig(normalizedProvider);
 
-  const stepToReturn = getStepToReturn(config, request.currentStep);
-  const nextStep = resolveNextStepId(stepToReturn, config);
+  const { stepToShow, nextStep } = computeWizardStepResponse(
+    config,
+    request.currentStep,
+  );
 
   const options: BenchmarkWizardOption[] = [];
 
-  const { totalSteps, stepIndex } = getStepProgress(config, stepToReturn);
+  const { totalSteps, stepIndex } = getStepProgress(config, stepToShow);
 
   return {
-    currentStep: stepToReturn.id,
-    title: stepToReturn.title,
-    description: stepToReturn.description,
+    currentStep: stepToShow.id,
+    title: stepToShow.title,
+    description: stepToShow.description,
     nextStep,
-    selectionType: stepToReturn.selectionType,
+    selectionType: stepToShow.selectionType,
     options,
     totalSteps,
     stepIndex,
