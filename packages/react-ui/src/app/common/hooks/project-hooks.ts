@@ -6,7 +6,6 @@ import {
 } from '@tanstack/react-query';
 
 import { QueryKeys } from '@/app/constants/query-keys';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { projectApi } from '@/app/lib/project-api';
 import { Project } from '@openops/shared';
 
@@ -47,10 +46,13 @@ export const projectHooks = {
 };
 
 const updateProject = async (queryClient: QueryClient, request: any) => {
-  queryClient.setQueryData([QueryKeys.currentProject], {
-    ...queryClient.getQueryData([QueryKeys.currentProject])!,
-    ...request,
-  });
+  const currentProject = queryClient.getQueryData([QueryKeys.currentProject]);
+  if (currentProject) {
+    queryClient.setQueryData([QueryKeys.currentProject], {
+      ...currentProject,
+      ...request,
+    });
+  }
 };
 
 const setCurrentProject = async (
@@ -58,10 +60,10 @@ const setCurrentProject = async (
   project: Project,
   shouldReload = true,
 ) => {
-  const projectChanged = authenticationSession.getProjectId() !== project.id;
-  if (projectChanged) {
-    await authenticationSession.switchToSession(project.id);
-  }
+  const currentProject = queryClient.getQueryData<Project>([
+    QueryKeys.currentProject,
+  ]);
+  const projectChanged = currentProject?.id !== project.id;
   queryClient.setQueryData([QueryKeys.currentProject], project);
   if (projectChanged && shouldReload) {
     window.location.reload();

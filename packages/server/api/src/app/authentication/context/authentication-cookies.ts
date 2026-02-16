@@ -32,7 +32,8 @@ export function setAuthCookies(
     .setCookie('token', response.token, {
       path: '/',
       signed: true,
-      httpOnly: false,
+      httpOnly: true,
+      secure: isFrontendHttps(),
       expires: cookieExpiryDate,
       sameSite: 'lax',
     })
@@ -67,4 +68,9 @@ export function getOpenOpsSubDomain(): string {
   const tablesUrl = system.getOrThrow(AppSystemProp.OPENOPS_TABLES_PUBLIC_URL);
 
   return getSubDomain(frontendUrl, tablesUrl);
+}
+
+function isFrontendHttps(): boolean {
+  const frontendUrl = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
+  return frontendUrl.startsWith('https://');
 }

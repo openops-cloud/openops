@@ -166,6 +166,7 @@ export const userService = {
       organizationRole: user.organizationRole,
       lastName: user.lastName,
       trackEvents: user.trackEvents,
+      projectId: principal.projectId,
       projectPermissions,
     };
   },
