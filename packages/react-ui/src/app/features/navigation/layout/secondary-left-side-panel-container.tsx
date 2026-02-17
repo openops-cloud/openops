@@ -57,25 +57,26 @@ const SecondaryLeftSidePanelContainer = ({
       return;
     }
 
-    const prevState = prevVisibilityRef.current;
-    const stateChanged =
-      prevState.shouldShowBenchmark !== isBenchmarkWizardOpen ||
-      prevState.shouldShowAiChat !== shouldShowAiChat;
+    const shouldUpdatePanel = shouldUpdatePanelVisibility(
+      prevVisibilityRef.current,
+      isBenchmarkWizardOpen,
+      shouldShowAiChat,
+    );
 
-    if (stateChanged) {
-      if (shouldShowPanelContent) {
-        const savedSize =
-          getPanelSize(RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR) ?? 20;
-        resizablePanelRef.current.expand(savedSize);
-      } else {
-        resizablePanelRef.current.collapse();
-      }
-
-      prevVisibilityRef.current = {
-        shouldShowBenchmark: isBenchmarkWizardOpen,
-        shouldShowAiChat,
-      };
+    if (!shouldUpdatePanel) {
+      return;
     }
+
+    updatePanelState(
+      resizablePanelRef.current,
+      shouldShowPanelContent,
+      getPanelSize,
+    );
+
+    prevVisibilityRef.current = {
+      shouldShowBenchmark: isBenchmarkWizardOpen,
+      shouldShowAiChat,
+    };
   }, [
     shouldShowPanelContent,
     getPanelSize,
@@ -123,6 +124,31 @@ const SecondaryLeftSidePanelContainer = ({
       )}
     </>
   );
+};
+
+const shouldUpdatePanelVisibility = (
+  prevState: { shouldShowBenchmark: boolean; shouldShowAiChat: boolean },
+  currentBenchmarkState: boolean,
+  currentAiChatState: boolean,
+): boolean => {
+  return (
+    prevState.shouldShowBenchmark !== currentBenchmarkState ||
+    prevState.shouldShowAiChat !== currentAiChatState
+  );
+};
+
+const updatePanelState = (
+  panelRef: ImperativePanelHandle,
+  shouldShowContent: boolean,
+  getPanelSize: (id: string) => number | undefined,
+): void => {
+  if (shouldShowContent) {
+    const savedSize =
+      getPanelSize(RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR) ?? 20;
+    panelRef.expand(savedSize);
+  } else {
+    panelRef.collapse();
+  }
 };
 
 /**
