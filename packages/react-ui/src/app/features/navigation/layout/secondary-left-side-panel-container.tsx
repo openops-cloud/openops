@@ -67,11 +67,11 @@ const SecondaryLeftSidePanelContainer = ({
       return;
     }
 
-    updatePanelState(
-      resizablePanelRef.current,
-      shouldShowPanelContent,
-      getPanelSize,
-    );
+    if (shouldShowPanelContent) {
+      expandPanel(resizablePanelRef.current, getPanelSize);
+    } else {
+      collapsePanel(resizablePanelRef.current);
+    }
 
     prevVisibilityRef.current = {
       shouldShowBenchmark: isBenchmarkWizardOpen,
@@ -137,18 +137,17 @@ const shouldUpdatePanelVisibility = (
   );
 };
 
-const updatePanelState = (
+const expandPanel = (
   panelRef: ImperativePanelHandle,
-  shouldShowContent: boolean,
   getPanelSize: (id: string) => number | undefined,
 ): void => {
-  if (shouldShowContent) {
-    const savedSize =
-      getPanelSize(RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR) ?? 20;
-    panelRef.expand(savedSize);
-  } else {
-    panelRef.collapse();
-  }
+  const savedSize =
+    getPanelSize(RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR) ?? 20;
+  panelRef.expand(savedSize);
+};
+
+const collapsePanel = (panelRef: ImperativePanelHandle): void => {
+  panelRef.collapse();
 };
 
 /**
