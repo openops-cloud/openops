@@ -1,11 +1,9 @@
+import type { ProviderAdapter } from '../../../src/app/benchmark/provider-adapter';
 import { resolveWizardNavigation } from '../../../src/app/benchmark/wizard.service';
 
-const mockGetWizardConfig = jest.fn();
-jest.mock('../../../src/app/benchmark/wizard-config-loader', () => ({
-  getWizardConfig: (
-    ...args: unknown[]
-  ): ReturnType<typeof mockGetWizardConfig> => mockGetWizardConfig(...args),
-}));
+jest.mock('../../../src/app/benchmark/register-providers', () => ({}));
+
+const mockResolveOptions = jest.fn().mockResolvedValue([]);
 
 const MOCK_WIZARD_CONFIG = {
   provider: 'test',
@@ -53,82 +51,116 @@ const MOCK_WIZARD_CONFIG = {
   ],
 };
 
+const mockProviderAdapter: ProviderAdapter = {
+  config: MOCK_WIZARD_CONFIG,
+  resolveOptions: mockResolveOptions,
+};
+
+const mockGetProvider = jest.fn((provider: string): ProviderAdapter => {
+  if (provider === 'test') {
+    return mockProviderAdapter;
+  }
+  throw new Error(`Provider not found: ${provider}`);
+});
+
+jest.mock('../../../src/app/benchmark/provider-adapter', () => ({
+  ...jest.requireActual('../../../src/app/benchmark/provider-adapter'),
+  getProvider: (p: string): ProviderAdapter => mockGetProvider(p),
+}));
+
+const TEST_PROJECT_ID = 'test-project-id';
+
 describe('resolveWizardNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetWizardConfig.mockReturnValue(MOCK_WIZARD_CONFIG);
+    mockResolveOptions.mockResolvedValue([]);
   });
 
   it('returns last_step with nextStep null when wizard complete', async () => {
-    const result = await resolveWizardNavigation('test', {
-      currentStep: 'last_step',
-    });
+    const result = await resolveWizardNavigation(
+      'test',
+      { currentStep: 'last_step' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
     expect(result.totalSteps).toBe(4);
   });
 
-  it('uses config from loader and returns first step with stub options', async () => {
-    const result = await resolveWizardNavigation('test', {});
+  it('uses provider adapter config and returns first step with dynamic options', async () => {
+    const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
 
-    expect(mockGetWizardConfig).toHaveBeenCalledWith('test');
+    expect(mockGetProvider).toHaveBeenCalledWith('test');
     expect(result.currentStep).toBe('step1');
     expect(result.title).toContain('first');
     expect(result.selectionType).toBe('single');
     expect(result.nextStep).toBe('step2');
     expect(result.options).toEqual([]);
+    expect(mockResolveOptions).toHaveBeenCalledWith(
+      'listOptions',
+      expect.objectContaining({
+        projectId: TEST_PROJECT_ID,
+        provider: 'test',
+      }),
+    );
   });
 
-  it('returns step3 after step2', async () => {
-    const result = await resolveWizardNavigation('test', {
-      currentStep: 'step2',
-    });
+  it('returns step3 after step2 with static options', async () => {
+    const result = await resolveWizardNavigation(
+      'test',
+      { currentStep: 'step2' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('step3');
     expect(result.nextStep).toBe('last_step');
     expect(result.stepIndex).toBe(3);
-    expect(result.options).toEqual([]);
+    expect(result.options).toEqual([{ id: 'opt1', displayName: 'Option 1' }]);
   });
 
-  it('returns last_step after step3', async () => {
-    const result = await resolveWizardNavigation('test', {
-      currentStep: 'step3',
-    });
+  it('returns last_step after step3 with static options', async () => {
+    const result = await resolveWizardNavigation(
+      'test',
+      { currentStep: 'step3' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
     expect(result.stepIndex).toBe(4);
-    expect(result.options).toEqual([]);
+    expect(result.options).toEqual([{ id: 'opt2', displayName: 'Option 2' }]);
   });
 
   it('returns stepIndex 1 and totalSteps 4 for first step', async () => {
-    const result = await resolveWizardNavigation('test', {});
+    const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
     expect(result.stepIndex).toBe(1);
     expect(result.totalSteps).toBe(4);
   });
 
   it('returns stepIndex 2 and totalSteps 4 for step2 (after step1)', async () => {
-    const result = await resolveWizardNavigation('test', {
-      currentStep: 'step1',
-    });
+    const result = await resolveWizardNavigation(
+      'test',
+      { currentStep: 'step1' },
+      TEST_PROJECT_ID,
+    );
     expect(result.currentStep).toBe('step2');
     expect(result.nextStep).toBe('step3');
     expect(result.stepIndex).toBe(2);
     expect(result.totalSteps).toBe(4);
   });
 
-  it('throws when wizard config is not found for provider', async () => {
-    mockGetWizardConfig.mockImplementation(() => {
-      throw new Error('Wizard config not found for provider: unknown');
-    });
-
-    await expect(resolveWizardNavigation('unknown', {})).rejects.toThrow(
-      'Wizard config not found for provider: unknown',
-    );
-    expect(mockGetWizardConfig).toHaveBeenCalledWith('unknown');
+  it('throws when provider is not found', async () => {
+    await expect(
+      resolveWizardNavigation('unknown', {}, TEST_PROJECT_ID),
+    ).rejects.toThrow('Provider not found: unknown');
+    expect(mockGetProvider).toHaveBeenCalledWith('unknown');
   });
 
   it('throws for unknown currentStep', async () => {
     await expect(
-      resolveWizardNavigation('test', { currentStep: 'unknown_step' }),
+      resolveWizardNavigation(
+        'test',
+        { currentStep: 'unknown_step' },
+        TEST_PROJECT_ID,
+      ),
     ).rejects.toThrow('Unknown step: unknown_step');
   });
 });

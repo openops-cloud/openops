@@ -1,22 +1,17 @@
 import {
-  ApplicationError,
   BenchmarkWizardOption,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  ErrorCode,
 } from '@openops/shared';
+import { throwValidationError } from './errors';
 import {
-  getWizardConfig,
+  getProvider,
+  type ProviderAdapter,
+  type StaticOptionValue,
   type WizardConfig,
   type WizardConfigStep,
-} from './wizard-config-loader';
-
-function throwValidationError(message: string): never {
-  throw new ApplicationError(
-    { code: ErrorCode.VALIDATION, params: { message } },
-    message,
-  );
-}
+} from './provider-adapter';
+import './register-providers';
 
 function getStepProgress(
   config: WizardConfig,
@@ -79,19 +74,57 @@ function computeWizardStepResponse(
   return { stepToShow, nextStep };
 }
 
+function staticValuesToOptions(
+  values: StaticOptionValue[],
+): BenchmarkWizardOption[] {
+  return values.map((v) => ({
+    id: v.id,
+    displayName: v.displayName,
+    ...(v.imageLogoUrl !== undefined && { imageLogoUrl: v.imageLogoUrl }),
+  }));
+}
+
+async function resolveOptions(
+  providerAdapter: ProviderAdapter,
+  step: WizardConfigStep,
+  request: BenchmarkWizardRequest,
+  projectId: string,
+): Promise<BenchmarkWizardOption[]> {
+  const optionsSource = step.optionsSource;
+  if (!optionsSource) {
+    return [];
+  }
+  if (optionsSource.type === 'static') {
+    return staticValuesToOptions(optionsSource.values);
+  }
+  const context = {
+    benchmarkConfiguration: request.benchmarkConfiguration,
+    projectId,
+    provider: providerAdapter.config.provider,
+  };
+  return providerAdapter.resolveOptions(optionsSource.method, context);
+}
+
 export async function resolveWizardNavigation(
   provider: string,
   request: BenchmarkWizardRequest,
+  projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
   const normalizedProvider = provider.toLowerCase();
-  const config = getWizardConfig(normalizedProvider);
+  const providerAdapter = getProvider(normalizedProvider);
+  const config = providerAdapter.config;
 
   const { stepToShow, nextStep } = computeWizardStepResponse(
     config,
     request.currentStep,
   );
 
-  const options: BenchmarkWizardOption[] = [];
+  const options = await resolveOptions(
+    providerAdapter,
+    stepToShow,
+    request,
+    projectId,
+  );
 
   const { totalSteps, stepIndex } = getStepProgress(config, stepToShow);
 
