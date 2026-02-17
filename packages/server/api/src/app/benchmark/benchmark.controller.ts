@@ -2,17 +2,13 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { logger } from '@openops/server-shared';
 import {
-  ApplicationError,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  ErrorCode,
-  FlagId,
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { flagService } from '../flags/flag.service';
+import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
@@ -20,25 +16,10 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      const benchmarkFlag = await flagService.getOne(
-        FlagId.FINOPS_BENCHMARK_ENABLED,
-      );
-      if (benchmarkFlag?.value !== true) {
-        logger.info(
-          'Benchmark wizard access denied: FINOPS_BENCHMARK_ENABLED flag is not enabled',
-          {
-            provider: request.params.provider,
-            projectId: request.principal.projectId,
-          },
-        );
-        throw new ApplicationError(
-          {
-            code: ErrorCode.FEATURE_DISABLED,
-            params: { message: 'Benchmark feature is not enabled' },
-          },
-          'Benchmark feature is not enabled',
-        );
-      }
+      await assertBenchmarkFeatureEnabled({
+        provider: request.params.provider,
+        projectId: request.principal.projectId,
+      });
 
       const step = await resolveWizardNavigation(
         request.params.provider,

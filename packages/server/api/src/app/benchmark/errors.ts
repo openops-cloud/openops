@@ -6,3 +6,10 @@ export function throwValidationError(message: string): never {
     message,
   );
 }
+
+export function throwFeatureDisabledError(message: string): never {
+  throw new ApplicationError(
+    { code: ErrorCode.FEATURE_DISABLED, params: { message } },
+    message,
+  );
+}
