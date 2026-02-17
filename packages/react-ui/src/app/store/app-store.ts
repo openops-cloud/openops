@@ -29,6 +29,8 @@ type AppState = {
   aiChatInput: string;
   setAiChatInput: (input: string) => void;
   clearAiChatInput: () => void;
+  isBenchmarkWizardOpen: boolean;
+  setIsBenchmarkWizardOpen: (isOpen: boolean) => void;
 };
 
 const getInitialSidebarState = (key: string, defaultValue = false): boolean => {
@@ -65,5 +67,9 @@ export const useAppStore = create<AppState>((set) => ({
   },
   clearAiChatInput: () => {
     set({ aiChatInput: '' });
+  },
+  isBenchmarkWizardOpen: false,
+  setIsBenchmarkWizardOpen: (isOpen: boolean) => {
+    set({ isBenchmarkWizardOpen: isOpen });
   },
 }));

@@ -18,9 +18,9 @@ import {
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import { noop } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 
 type HomeOnboardingViewProps = {
@@ -59,6 +59,7 @@ const HomeOnboardingView = ({
   }));
 
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
+  const openBenchmarkWizard = useOpenBenchmarkWizard();
 
   useEffect(() => {
     setSelectedDomains([]);
@@ -97,7 +98,7 @@ const HomeOnboardingView = ({
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={noop} />
+        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}

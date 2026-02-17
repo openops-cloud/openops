@@ -7,7 +7,6 @@ import { HomeRunsTable } from '@/app/features/home/runs-table';
 import { FinOpsBenchmarkBanner, OverviewCard } from '@openops/components/ui';
 import { subDays } from 'date-fns';
 import { t } from 'i18next';
-import { noop } from 'lodash-es';
 import {
   CalendarCheck2,
   CalendarClock,
@@ -15,6 +14,7 @@ import {
   CircleCheckBig,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 
 type HomeOperationalViewProps = {
@@ -43,6 +43,7 @@ const HomeOperationalView = ({
   const flowsExist = !!existingFlowsResponse?.data?.length;
 
   const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const openBenchmarkWizard = useOpenBenchmarkWizard();
 
   return (
     <>
@@ -94,7 +95,7 @@ const HomeOperationalView = ({
       )}
 
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={noop} />
+        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
       )}
 
       <HomeFlowsTable
