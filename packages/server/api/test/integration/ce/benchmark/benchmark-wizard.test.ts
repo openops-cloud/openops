@@ -176,25 +176,6 @@ describe('Benchmark wizard API', () => {
       );
     });
 
-    it('returns 200 and mocked step for SERVICE principal', async () => {
-      const { token, project } = await createAndInsertMocks({
-        principalType: PrincipalType.SERVICE,
-      });
-
-      const response = await postWizard({ token, body: {} });
-
-      expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(response?.json()).toEqual(mockWizardStep);
-      expect(resolveWizardNavigationMock).toHaveBeenCalledWith(
-        'aws',
-        {
-          currentStep: undefined,
-          benchmarkConfiguration: undefined,
-        },
-        project.id,
-      );
-    });
-
     it('returns 409 with VALIDATION code when resolveWizardNavigation throws', async () => {
       resolveWizardNavigationMock.mockRejectedValue(
         new ApplicationError(

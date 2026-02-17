@@ -55,7 +55,7 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
 
 const WizardStepRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     tags: ['benchmarks'],
