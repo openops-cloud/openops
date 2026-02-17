@@ -297,7 +297,7 @@ export const flagService = {
       },
       {
         id: FlagId.FINOPS_BENCHMARK_ENABLED,
-        value: false,
+        value: system.getBoolean(AppSystemProp.FINOPS_BENCHMARK_ENABLED),
         created,
         updated,
       },

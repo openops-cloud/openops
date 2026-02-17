@@ -6,13 +6,6 @@ jest.mock(
   () => wizardServiceMock,
 );
 
-const flagServiceMock = {
-  getOne: jest.fn(),
-};
-jest.mock('../../../../src/app/flags/flag.service', () => ({
-  flagService: flagServiceMock,
-}));
-
 import {
   ApplicationError,
   BenchmarkProviders,
@@ -42,11 +35,12 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
   totalSteps: 3,
 };
 
+const originalEnv = { ...process.env };
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
   wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
-  flagServiceMock.getOne.mockResolvedValue({ value: true });
+  process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
   await databaseConnection().initialize();
   app = await setupServer();
 });
@@ -54,6 +48,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await databaseConnection().destroy();
   await app?.close();
+  process.env = originalEnv;
 });
 
 describe('Benchmark wizard API', () => {
@@ -106,7 +101,7 @@ describe('Benchmark wizard API', () => {
       wizardServiceMock.resolveWizardNavigation.mockResolvedValue(
         mockWizardStep,
       );
-      flagServiceMock.getOne.mockResolvedValue({ value: true });
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
     });
 
     it('calls resolveWizardNavigation with AWS provider, body, and projectId and returns mocked step', async () => {
@@ -198,7 +193,7 @@ describe('Benchmark wizard API', () => {
     });
 
     it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
-      flagServiceMock.getOne.mockResolvedValue({ value: false });
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'false';
       wizardServiceMock.resolveWizardNavigation.mockClear();
 
       const { token } = await createAndInsertMocks();
