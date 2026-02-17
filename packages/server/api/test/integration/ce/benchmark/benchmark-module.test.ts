@@ -68,10 +68,6 @@ describe('Benchmark wizard API', () => {
       .getRepository('organization')
       .save(mockOrganization);
 
-    await databaseConnection().getRepository('user').update(mockUser.id, {
-      organizationId: mockOrganization.id,
-    });
-
     const mockProject = createMockProject({
       ownerId: mockUser.id,
       organizationId: mockOrganization.id,
