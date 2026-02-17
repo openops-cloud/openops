@@ -11679,9 +11679,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm packages may be included in this product:
 
- - qs@6.11.2
  - qs@6.13.0
- - qs@6.14.1
+ - qs@6.14.2
 
 These packages each contain the following license:
 
