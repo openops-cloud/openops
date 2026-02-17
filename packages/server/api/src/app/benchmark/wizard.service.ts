@@ -24,10 +24,10 @@ function getStepProgress(
   return { totalSteps, stepIndex };
 }
 
-async function resolveNextStepId(
+function resolveNextStepId(
   step: WizardConfigStep,
   config: WizardConfig,
-): Promise<string | null> {
+): string | null {
   const nextStepId = step.nextStep;
   if (!nextStepId) {
     return null;
@@ -42,10 +42,10 @@ async function resolveNextStepId(
   return nextStepId;
 }
 
-async function computeWizardStepResponse(
+function computeWizardStepResponse(
   config: WizardConfig,
   currentStepId: string | undefined,
-): Promise<{ stepToShow: WizardConfigStep; nextStep: string | null }> {
+): { stepToShow: WizardConfigStep; nextStep: string | null } {
   const steps = config.steps;
   let stepToShow: WizardConfigStep;
 
@@ -55,7 +55,7 @@ async function computeWizardStepResponse(
       throwValidationError(`Unknown step: ${currentStepId}`);
     }
     const currentStep = steps[currentStepIndex];
-    const nextStepId = await resolveNextStepId(currentStep, config);
+    const nextStepId = resolveNextStepId(currentStep, config);
 
     if (nextStepId === null) {
       stepToShow = currentStep;
@@ -70,7 +70,7 @@ async function computeWizardStepResponse(
     stepToShow = steps[0];
   }
 
-  const nextStep = await resolveNextStepId(stepToShow, config);
+  const nextStep = resolveNextStepId(stepToShow, config);
   return { stepToShow, nextStep };
 }
 
@@ -114,7 +114,7 @@ export async function resolveWizardNavigation(
   const providerAdapter = getProvider(normalizedProvider);
   const config = providerAdapter.config;
 
-  const { stepToShow, nextStep } = await computeWizardStepResponse(
+  const { stepToShow, nextStep } = computeWizardStepResponse(
     config,
     request.currentStep,
   );
