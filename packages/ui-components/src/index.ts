@@ -63,6 +63,8 @@ export * from './ui/use-toast';
 export * from './ui/user-avatar-menu';
 export * from './ui/vertical-divider';
 export * from './ui/warning-with-icon';
+export * from './ui/wizard';
+
 /* export dashboard widgets */
 export * from './ui/big-number-chart';
 
