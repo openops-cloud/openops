@@ -207,6 +207,8 @@ describe('Benchmark wizard API', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
+      resolveWizardNavigationMock.mockClear();
+
       const response = await postWizard({ body: {} });
 
       expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
