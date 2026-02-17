@@ -9,6 +9,13 @@ jest.mock(
   }),
 );
 
+const flagServiceMock = {
+  getOne: jest.fn(),
+};
+jest.mock('../../../../src/app/flags/flag.service', () => ({
+  flagService: flagServiceMock,
+}));
+
 import {
   ApplicationError,
   type BenchmarkWizardStepResponse,
@@ -43,6 +50,7 @@ let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
   resolveWizardNavigationMock.mockResolvedValue(mockWizardStep);
+  flagServiceMock.getOne.mockResolvedValue({ value: true });
   await databaseConnection().initialize();
   app = await setupServer();
 });
@@ -113,6 +121,7 @@ describe('Benchmark wizard API', () => {
   describe('POST /v1/benchmarks/:provider/wizard', () => {
     beforeEach(() => {
       resolveWizardNavigationMock.mockResolvedValue(mockWizardStep);
+      flagServiceMock.getOne.mockResolvedValue({ value: true });
     });
 
     it('calls resolveWizardNavigation with provider, body, and projectId and returns mocked step', async () => {
@@ -204,6 +213,20 @@ describe('Benchmark wizard API', () => {
       const data = response?.json();
       expect(data?.code).toBe('VALIDATION');
       expect(data?.params).toBeDefined();
+    });
+
+    it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
+      flagServiceMock.getOne.mockResolvedValue({ value: false });
+      resolveWizardNavigationMock.mockClear();
+
+      const { token } = await createAndInsertMocks();
+      const response = await postWizard({ token, body: {} });
+
+      expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+      const data = response?.json();
+      expect(data?.code).toBe('FEATURE_DISABLED');
+      expect(data?.params).toBeDefined();
+      expect(resolveWizardNavigationMock).not.toHaveBeenCalled();
     });
 
     it('returns 401 when not authenticated', async () => {
