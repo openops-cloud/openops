@@ -1,12 +1,9 @@
-const resolveWizardNavigationMock = jest.fn();
+const wizardServiceMock = {
+  resolveWizardNavigation: jest.fn(),
+};
 jest.mock(
   '../../../../src/app/benchmark/wizard.service',
-  (): {
-    resolveWizardNavigation: (...args: unknown[]) => unknown;
-  } => ({
-    resolveWizardNavigation: (...args: unknown[]) =>
-      resolveWizardNavigationMock(...args),
-  }),
+  () => wizardServiceMock,
 );
 
 const flagServiceMock = {
@@ -49,7 +46,7 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
-  resolveWizardNavigationMock.mockResolvedValue(mockWizardStep);
+  wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
   flagServiceMock.getOne.mockResolvedValue({ value: true });
   await databaseConnection().initialize();
   app = await setupServer();
@@ -120,7 +117,9 @@ describe('Benchmark wizard API', () => {
 
   describe('POST /v1/benchmarks/:provider/wizard', () => {
     beforeEach(() => {
-      resolveWizardNavigationMock.mockResolvedValue(mockWizardStep);
+      wizardServiceMock.resolveWizardNavigation.mockResolvedValue(
+        mockWizardStep,
+      );
       flagServiceMock.getOne.mockResolvedValue({ value: true });
     });
 
@@ -132,8 +131,10 @@ describe('Benchmark wizard API', () => {
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(response?.json()).toEqual(mockWizardStep);
-      expect(resolveWizardNavigationMock).toHaveBeenCalledTimes(1);
-      expect(resolveWizardNavigationMock).toHaveBeenCalledWith(
+      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
         'aws',
         {
           currentStep: undefined,
@@ -154,7 +155,7 @@ describe('Benchmark wizard API', () => {
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(response?.json()).toEqual(mockWizardStep);
-      expect(resolveWizardNavigationMock).toHaveBeenCalledWith(
+      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
         'aws',
         {
           currentStep: 'connection',
@@ -169,7 +170,7 @@ describe('Benchmark wizard API', () => {
 
       await postWizard({ provider: 'gcp', token, body: {} });
 
-      expect(resolveWizardNavigationMock).toHaveBeenCalledWith(
+      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
         'gcp',
         expect.any(Object),
         project.id,
@@ -177,7 +178,7 @@ describe('Benchmark wizard API', () => {
     });
 
     it('returns 409 with VALIDATION code when resolveWizardNavigation throws', async () => {
-      resolveWizardNavigationMock.mockRejectedValue(
+      wizardServiceMock.resolveWizardNavigation.mockRejectedValue(
         new ApplicationError(
           {
             code: ErrorCode.VALIDATION,
@@ -198,7 +199,7 @@ describe('Benchmark wizard API', () => {
 
     it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
       flagServiceMock.getOne.mockResolvedValue({ value: false });
-      resolveWizardNavigationMock.mockClear();
+      wizardServiceMock.resolveWizardNavigation.mockClear();
 
       const { token } = await createAndInsertMocks();
       const response = await postWizard({ token, body: {} });
@@ -207,16 +208,16 @@ describe('Benchmark wizard API', () => {
       const data = response?.json();
       expect(data?.code).toBe('FEATURE_DISABLED');
       expect(data?.params).toBeDefined();
-      expect(resolveWizardNavigationMock).not.toHaveBeenCalled();
+      expect(wizardServiceMock.resolveWizardNavigation).not.toHaveBeenCalled();
     });
 
     it('returns 401 when not authenticated', async () => {
-      resolveWizardNavigationMock.mockClear();
+      wizardServiceMock.resolveWizardNavigation.mockClear();
 
       const response = await postWizard({ body: {} });
 
       expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
-      expect(resolveWizardNavigationMock).not.toHaveBeenCalled();
+      expect(wizardServiceMock.resolveWizardNavigation).not.toHaveBeenCalled();
     });
   });
 });
