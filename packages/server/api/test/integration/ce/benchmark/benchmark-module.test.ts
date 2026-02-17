@@ -17,10 +17,8 @@ import {
   ApplicationError,
   type BenchmarkWizardStepResponse,
   ErrorCode,
-  Organization,
   PrincipalType,
   Project,
-  User,
 } from '@openops/shared';
 import { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -34,9 +32,9 @@ import {
 } from '../../../helpers/mocks';
 
 const mockWizardStep: BenchmarkWizardStepResponse = {
-  currentStep: 'mock-step',
-  title: 'Mock step',
-  nextStep: 'next-step',
+  currentStep: 'mock-current-step-id',
+  title: 'Mock current step title',
+  nextStep: 'mock-next-step-id',
   selectionType: 'single',
   options: [],
   stepIndex: 1,
@@ -58,12 +56,8 @@ afterAll(async () => {
 });
 
 describe('Benchmark wizard API', () => {
-  const createAndInsertMocks = async (options?: {
-    principalType?: PrincipalType;
-  }): Promise<{
+  const createAndInsertMocks = async (): Promise<{
     token: string;
-    user: User;
-    organization: Organization;
     project: Project;
   }> => {
     const mockUser = createMockUser();
@@ -86,17 +80,12 @@ describe('Benchmark wizard API', () => {
 
     const mockToken = await generateMockToken({
       id: mockUser.id,
-      type: options?.principalType ?? PrincipalType.USER,
+      type: PrincipalType.USER,
       projectId: mockProject.id,
       organization: { id: mockOrganization.id },
     });
 
-    return {
-      token: mockToken,
-      user: mockUser,
-      organization: mockOrganization,
-      project: mockProject,
-    };
+    return { token: mockToken, project: mockProject };
   };
 
   const postWizard = async ({
