@@ -15,7 +15,7 @@ interface BenchmarkWizardProps {
 export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
   return (
     <div className="h-full w-full flex flex-col bg-greyBlue-100 dark:bg-background">
-      <Wizard onValueChange={noop} className="border-none">
+      <Wizard onValueChange={noop} className="border-l-0 border-t-0">
         <WizardHeader className="min-h-[60px] border-gray-200">
           <WizardTitle>{t('Run a Benchmark')}</WizardTitle>
           <WizardClose onClose={onClose} />
