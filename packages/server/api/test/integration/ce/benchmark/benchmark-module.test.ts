@@ -15,6 +15,7 @@ jest.mock('../../../../src/app/flags/flag.service', () => ({
 
 import {
   ApplicationError,
+  BenchmarkProviders,
   type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
@@ -85,11 +86,11 @@ describe('Benchmark wizard API', () => {
   };
 
   const postWizard = async ({
-    provider = 'aws',
+    provider,
     token,
     body = {},
   }: {
-    provider?: string;
+    provider: string;
     token?: string;
     body?: Record<string, unknown>;
   }): Promise<LightMyRequestResponse | undefined> =>
@@ -108,11 +109,15 @@ describe('Benchmark wizard API', () => {
       flagServiceMock.getOne.mockResolvedValue({ value: true });
     });
 
-    it('calls resolveWizardNavigation with provider, body, and projectId and returns mocked step', async () => {
+    it('calls resolveWizardNavigation with AWS provider, body, and projectId and returns mocked step', async () => {
       const { token, project } = await createAndInsertMocks();
       const body = {};
 
-      const response = await postWizard({ token, body });
+      const response = await postWizard({
+        provider: BenchmarkProviders.AWS,
+        token,
+        body,
+      });
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(response?.json()).toEqual(mockWizardStep);
@@ -120,7 +125,7 @@ describe('Benchmark wizard API', () => {
         1,
       );
       expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
-        'aws',
+        BenchmarkProviders.AWS,
         {
           currentStep: undefined,
           benchmarkConfiguration: undefined,
@@ -136,12 +141,16 @@ describe('Benchmark wizard API', () => {
         benchmarkConfiguration: { connection: ['conn-1'] },
       };
 
-      const response = await postWizard({ token, body });
+      const response = await postWizard({
+        provider: BenchmarkProviders.AWS,
+        token,
+        body,
+      });
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(response?.json()).toEqual(mockWizardStep);
       expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
-        'aws',
+        BenchmarkProviders.AWS,
         {
           currentStep: 'connection',
           benchmarkConfiguration: { connection: ['conn-1'] },
@@ -176,7 +185,11 @@ describe('Benchmark wizard API', () => {
       );
       const { token } = await createAndInsertMocks();
 
-      const response = await postWizard({ token, body: {} });
+      const response = await postWizard({
+        provider: BenchmarkProviders.AWS,
+        token,
+        body: {},
+      });
 
       expect(response?.statusCode).toBe(StatusCodes.CONFLICT);
       const data = response?.json();
@@ -189,7 +202,11 @@ describe('Benchmark wizard API', () => {
       wizardServiceMock.resolveWizardNavigation.mockClear();
 
       const { token } = await createAndInsertMocks();
-      const response = await postWizard({ token, body: {} });
+      const response = await postWizard({
+        provider: BenchmarkProviders.AWS,
+        token,
+        body: {},
+      });
 
       expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
       const data = response?.json();
@@ -201,7 +218,10 @@ describe('Benchmark wizard API', () => {
     it('returns 401 when not authenticated', async () => {
       wizardServiceMock.resolveWizardNavigation.mockClear();
 
-      const response = await postWizard({ body: {} });
+      const response = await postWizard({
+        provider: BenchmarkProviders.AWS,
+        body: {},
+      });
 
       expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
       expect(wizardServiceMock.resolveWizardNavigation).not.toHaveBeenCalled();

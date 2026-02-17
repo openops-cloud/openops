@@ -17,10 +17,10 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      await assertBenchmarkFeatureEnabled({
-        provider: request.params.provider,
-        projectId: request.principal.projectId,
-      });
+      await assertBenchmarkFeatureEnabled(
+        request.params.provider,
+        request.principal.projectId,
+      );
 
       const step = await resolveWizardNavigation(
         request.params.provider,

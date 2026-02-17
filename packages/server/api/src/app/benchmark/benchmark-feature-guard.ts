@@ -4,7 +4,8 @@ import { flagService } from '../flags/flag.service';
 import { throwFeatureDisabledError } from './errors';
 
 export async function assertBenchmarkFeatureEnabled(
-  context?: Record<string, unknown>,
+  provider: string,
+  projectId: string,
 ): Promise<void> {
   const benchmarkFlag = await flagService.getOne(
     FlagId.FINOPS_BENCHMARK_ENABLED,
@@ -12,7 +13,7 @@ export async function assertBenchmarkFeatureEnabled(
   if (benchmarkFlag?.value !== true) {
     logger.info(
       'Benchmark access denied: FINOPS_BENCHMARK_ENABLED flag is not enabled',
-      context ?? {},
+      { provider, projectId },
     );
     throwFeatureDisabledError('Benchmark feature is not enabled');
   }
