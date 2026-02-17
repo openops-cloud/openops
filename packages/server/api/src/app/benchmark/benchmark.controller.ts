@@ -3,6 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  BenchmarkProviders,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
   PrincipalType,
@@ -43,7 +44,7 @@ const WizardStepRequestOptions = {
     description:
       'Returns a step in the benchmark configuration wizard for the specified provider, including options and progress.',
     params: Type.Object({
-      provider: Type.String(),
+      provider: Type.Enum(BenchmarkProviders),
     }),
     body: BenchmarkWizardRequest,
     response: {

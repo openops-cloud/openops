@@ -150,16 +150,18 @@ describe('Benchmark wizard API', () => {
       );
     });
 
-    it('passes provider from URL params to resolveWizardNavigation', async () => {
-      const { token, project } = await createAndInsertMocks();
+    it('returns 400 when provider is not in BenchmarkProviders enum', async () => {
+      const { token } = await createAndInsertMocks();
+      wizardServiceMock.resolveWizardNavigation.mockClear();
 
-      await postWizard({ provider: 'gcp', token, body: {} });
+      const response = await postWizard({
+        provider: 'invalidprovider',
+        token,
+        body: {},
+      });
 
-      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
-        'gcp',
-        expect.any(Object),
-        project.id,
-      );
+      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(wizardServiceMock.resolveWizardNavigation).not.toHaveBeenCalled();
     });
 
     it('returns 409 with VALIDATION code when resolveWizardNavigation throws', async () => {
