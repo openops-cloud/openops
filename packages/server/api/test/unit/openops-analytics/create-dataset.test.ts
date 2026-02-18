@@ -1,9 +1,16 @@
 const loggerMock = {
   info: jest.fn(),
+  warn: jest.fn(),
 };
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   logger: loggerMock,
+  system: {
+    get: jest.fn().mockReturnValue('http://localhost:8088'),
+    getBoolean: jest.fn().mockReturnValue(false),
+    getNumber: jest.fn().mockReturnValue(10),
+    getOrThrow: jest.fn((key) => `mock-${key}`),
+  },
 }));
 
 const axiosMock = {
@@ -11,6 +18,14 @@ const axiosMock = {
   isAxiosError: jest.fn(),
 };
 jest.mock('axios', () => axiosMock);
+
+const deleteDatasetMock = {
+  deleteDataset: jest.fn(),
+};
+jest.mock(
+  '../../../src/app/openops-analytics/delete-dataset',
+  () => deleteDatasetMock,
+);
 
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
@@ -20,76 +35,170 @@ const openopsCommonMock = {
 };
 jest.mock('@openops/common', () => openopsCommonMock);
 
-import { getOrCreateDataset } from '../../../src/app/openops-analytics/create-dataset';
+import { createDataset } from '../../../src/app/openops-analytics/create-dataset';
 
-describe('getOrCreateDataset', () => {
+describe('createDataset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('should return dataset after succesful creation', async () => {
+  test('should create virtual dataset with SQL', async () => {
     openopsCommonMock.makeOpenOpsAnalyticsPost.mockResolvedValue({
-      id: 1,
-      result: { someOtherProperty: 'mock dataset' },
+      id: 2,
+      uuid: 'virtual-uuid-456',
+      result: {},
     });
     openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
       'some header',
     );
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [],
+    });
 
-    const result = await getOrCreateDataset(
-      'some token',
-      'some table name',
-      1,
-      'some schema name',
-    );
+    const result = await createDataset('some token', {
+      tableName: 'virtual_dataset',
+      databaseId: 1,
+      schema: 'public',
+      sql: 'SELECT * FROM table',
+      recreateIfExists: false,
+    });
 
-    expect(result).toEqual({ id: 1, someOtherProperty: 'mock dataset' });
-    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ id: 2, uuid: 'virtual-uuid-456' });
     expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(
       'dataset',
       {
         database: 1,
-        table_name: 'some table name',
-        schema: 'some schema name',
+        table_name: 'virtual_dataset',
+        schema: 'public',
+        sql: 'SELECT * FROM table',
       },
       'some header',
     );
-    expect(
-      openopsCommonMock.createAxiosHeadersForAnalytics,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.createAxiosHeadersForAnalytics,
-    ).toHaveBeenCalledWith('some token');
   });
 
-  test('should return database if it already exists', async () => {
+  test('should create physical dataset without SQL', async () => {
     openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
-      result: [{ id: 1, otherProperty: 'some dataset' }],
+      result: [],
+    });
+    openopsCommonMock.makeOpenOpsAnalyticsPost.mockResolvedValue({
+      id: 20,
+      uuid: 'physical-uuid',
+      result: {},
     });
     openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
       'some header',
     );
-    axiosMock.isAxiosError.mockReturnValue(false);
 
-    const result = await getOrCreateDataset(
-      'some token',
-      'some table name',
-      1,
-      'some schema name',
-    );
+    const result = await createDataset('some token', {
+      tableName: 'physical_table',
+      databaseId: 2,
+      schema: 'analytics',
+      recreateIfExists: false,
+    });
 
-    expect(result).toEqual({ id: 1, otherProperty: 'some dataset' });
-    expect(openopsCommonMock.makeOpenOpsAnalyticsGet).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.makeOpenOpsAnalyticsGet).toHaveBeenCalledWith(
-      `dataset?q=(filters:!((col:table_name,opr:eq,value:'some table name')))`,
+    expect(result).toEqual({ id: 20, uuid: 'physical-uuid' });
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(
+      'dataset',
+      {
+        database: 2,
+        table_name: 'physical_table',
+        schema: 'analytics',
+      },
       'some header',
     );
+    expect(loggerMock.info).toHaveBeenCalledWith(
+      expect.stringContaining('Created dataset'),
+      expect.objectContaining({
+        isVirtual: false,
+      }),
+    );
+  });
+
+  test('should delete and recreate dataset when recreateIfExists is true', async () => {
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [{ id: 3, uuid: 'old-uuid', otherProperty: 'existing dataset' }],
+    });
+    openopsCommonMock.makeOpenOpsAnalyticsPost.mockResolvedValue({
+      id: 4,
+      uuid: 'new-uuid-789',
+      result: {},
+    });
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+    deleteDatasetMock.deleteDataset.mockResolvedValue(undefined);
+
+    const result = await createDataset('some token', {
+      tableName: 'recreated_dataset',
+      databaseId: 1,
+      schema: 'public',
+      sql: 'SELECT * FROM updated_table',
+      recreateIfExists: true,
+    });
+
+    expect(result).toEqual({ id: 4, uuid: 'new-uuid-789' });
+    expect(deleteDatasetMock.deleteDataset).toHaveBeenCalledTimes(1);
+    expect(deleteDatasetMock.deleteDataset).toHaveBeenCalledWith(
+      'some token',
+      3,
+    );
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(
+      'dataset',
+      {
+        database: 1,
+        table_name: 'recreated_dataset',
+        schema: 'public',
+        sql: 'SELECT * FROM updated_table',
+      },
+      'some header',
+    );
+  });
+
+  test('should return existing dataset when found and recreateIfExists is false', async () => {
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [{ id: 10, uuid: 'existing-uuid-abc' }],
+    });
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+
+    const result = await createDataset('some token', {
+      tableName: 'existing_table',
+      databaseId: 1,
+      schema: 'public',
+      recreateIfExists: false,
+    });
+
+    expect(result).toEqual({ id: 10, uuid: 'existing-uuid-abc' });
+    expect(deleteDatasetMock.deleteDataset).not.toHaveBeenCalled();
     expect(openopsCommonMock.makeOpenOpsAnalyticsPost).not.toHaveBeenCalled();
-    expect(
-      openopsCommonMock.createAxiosHeadersForAnalytics,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      openopsCommonMock.createAxiosHeadersForAnalytics,
-    ).toHaveBeenCalledWith('some token');
+  });
+
+  test('should always include uuid in response', async () => {
+    openopsCommonMock.makeOpenOpsAnalyticsPost.mockResolvedValue({
+      id: 5,
+      uuid: 'always-included-uuid',
+      result: { property: 'value' },
+    });
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [],
+    });
+
+    const result = await createDataset('some token', {
+      tableName: 'physical_dataset',
+      databaseId: 1,
+      schema: 'public',
+      recreateIfExists: false,
+    });
+
+    expect(result).toEqual({
+      id: 5,
+      uuid: 'always-included-uuid',
+      property: 'value',
+    });
+    expect(result.uuid).toBe('always-included-uuid');
   });
 });
