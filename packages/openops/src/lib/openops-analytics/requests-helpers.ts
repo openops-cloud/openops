@@ -37,6 +37,20 @@ export async function makeOpenOpsAnalyticsGet<T>(
   );
 }
 
+export async function makeOpenOpsAnalyticsDelete<T>(
+  route: string,
+  headers?: AxiosHeaders,
+  allowErrors?: boolean,
+): Promise<T> {
+  return makeOpenOpsAnalyticsV1ApiRequest<T>(
+    'DELETE',
+    route,
+    undefined,
+    headers,
+    allowErrors,
+  );
+}
+
 async function makeOpenOpsAnalyticsV1ApiRequest<T>(
   method: Method,
   route: string,
