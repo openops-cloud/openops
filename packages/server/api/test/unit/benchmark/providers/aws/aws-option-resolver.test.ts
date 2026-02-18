@@ -50,14 +50,14 @@ describe('resolveOptions', () => {
     expect(mockListConnections).not.toHaveBeenCalled();
   });
 
-  it('returns regions as BenchmarkWizardOption[] for listRegions', async () => {
+  it('delegates to getRegionsList and returns its result for getRegionsList', async () => {
     const regionsList = [
       { id: 'us-east-1', displayName: 'US East (N. Virginia)' },
       { id: 'eu-west-1', displayName: 'Europe (Ireland)' },
     ];
     mockGetRegionsList.mockReturnValue(regionsList);
 
-    const result = await resolveOptions('listRegions', {
+    const result = await resolveOptions('getRegionsList', {
       projectId,
       provider,
     });

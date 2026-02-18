@@ -24,7 +24,7 @@
       "id": "regions",
       "title": "Which regions should we include in the report?",
       "selectionType": "multi-select",
-      "optionsSource": { "type": "dynamic", "method": "listRegions" },
+      "optionsSource": { "type": "dynamic", "method": "getRegionsList" },
       "nextStep": "services"
     },
     {
