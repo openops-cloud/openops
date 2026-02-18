@@ -13,10 +13,17 @@
       "id": "accounts",
       "title": "Which accounts should we include in the report?",
       "selectionType": "multi-select",
-      "optionsSource": { "type": "dynamic", "method": "getConnectionAccounts" },
       "conditional": {
         "when": "connection.supportsMultiAccount",
-        "skipToStep": "regions"
+        "onSuccess": {
+          "optionsSource": {
+            "type": "dynamic",
+            "method": "getConnectionAccounts"
+          }
+        },
+        "onFailure": {
+          "skipToStep": "regions"
+        }
       },
       "nextStep": "regions"
     },
