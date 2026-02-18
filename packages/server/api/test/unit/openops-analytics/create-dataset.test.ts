@@ -114,6 +114,52 @@ describe('createDataset', () => {
     );
   });
 
+  test('should throw error when sql is empty string', async () => {
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [],
+    });
+
+    await expect(
+      createDataset('some token', {
+        tableName: 'invalid_virtual_dataset',
+        databaseId: 1,
+        schema: 'public',
+        sql: '',
+        recreateIfExists: false,
+      }),
+    ).rejects.toThrow(
+      'SQL query cannot be empty or whitespace when creating a virtual dataset',
+    );
+
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).not.toHaveBeenCalled();
+  });
+
+  test('should throw error when sql is only whitespace', async () => {
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
+      result: [],
+    });
+
+    await expect(
+      createDataset('some token', {
+        tableName: 'invalid_virtual_dataset',
+        databaseId: 1,
+        schema: 'public',
+        sql: '   \n\t  ',
+        recreateIfExists: false,
+      }),
+    ).rejects.toThrow(
+      'SQL query cannot be empty or whitespace when creating a virtual dataset',
+    );
+
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).not.toHaveBeenCalled();
+  });
+
   test('should delete and recreate dataset when recreateIfExists is true', async () => {
     openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
       result: [{ id: 3, uuid: 'old-uuid', otherProperty: 'existing dataset' }],

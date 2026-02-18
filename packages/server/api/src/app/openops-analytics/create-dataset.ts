@@ -55,7 +55,13 @@ async function findDatasetByTableName(
 function buildDatasetRequestBody(
   config: DatasetConfig,
 ): Record<string, unknown> {
-  if (config.sql) {
+  if ('sql' in config) {
+    if (!config.sql?.trim()) {
+      throw new Error(
+        'SQL query cannot be empty or whitespace when creating a virtual dataset',
+      );
+    }
+
     return {
       database: config.databaseId,
       schema: config.schema,
