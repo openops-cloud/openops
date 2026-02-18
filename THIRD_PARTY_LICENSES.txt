@@ -16405,7 +16405,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 The following npm package may be included in this product:
 
- - follow-redirects@1.15.6
+ - follow-redirects@1.15.11
 
 This package contains the following license:
 
