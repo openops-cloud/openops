@@ -151,7 +151,7 @@
     "@vercel/otel": "1.13.0",
     "@xyflow/react": "12.4.4",
     "ai": "6.0.40",
-    "ajv": "8.12.0",
+    "ajv": "8.18.0",
     "async-mutex": "0.4.0",
     "aws-lambda": "1.0.7",
     "axios": "1.12.1",
