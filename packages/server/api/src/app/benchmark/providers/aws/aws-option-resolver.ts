@@ -14,17 +14,10 @@ export async function resolveOptions(
     case 'getConnectionAccounts':
       return getConnectionAccounts(context);
     case 'listRegions':
-      return listRegions();
+      return getRegionsList();
     default:
       throwValidationError(`Unknown AWS wizard option method: ${method}`);
   }
-}
-
-function listRegions(): BenchmarkWizardOption[] {
-  return getRegionsList().map(({ id, displayName }) => ({
-    id,
-    displayName,
-  }));
 }
 
 async function getConnectionAccounts(
