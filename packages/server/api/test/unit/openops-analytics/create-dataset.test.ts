@@ -156,7 +156,14 @@ describe('createDataset', () => {
 
   test('should return existing dataset when found and recreateIfExists is false', async () => {
     openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({
-      result: [{ id: 10, uuid: 'existing-uuid-abc' }],
+      result: [
+        {
+          id: 10,
+          uuid: 'existing-uuid-abc',
+          table_name: 'existing_table',
+          schema: 'public',
+        },
+      ],
     });
     openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
       'some header',
@@ -169,7 +176,12 @@ describe('createDataset', () => {
       recreateIfExists: false,
     });
 
-    expect(result).toEqual({ id: 10, uuid: 'existing-uuid-abc' });
+    expect(result).toEqual({
+      id: 10,
+      uuid: 'existing-uuid-abc',
+      table_name: 'existing_table',
+      schema: 'public',
+    });
     expect(deleteDatasetMock.deleteDataset).not.toHaveBeenCalled();
     expect(openopsCommonMock.makeOpenOpsAnalyticsPost).not.toHaveBeenCalled();
   });

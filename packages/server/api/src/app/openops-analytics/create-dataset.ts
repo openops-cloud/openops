@@ -26,7 +26,7 @@ async function findDatasetByTableName(
   tableName: string,
   authenticationHeader: AxiosHeaders,
   throwOnError = false,
-): Promise<{ id: number; uuid: string } | undefined> {
+): Promise<DatasetResult | undefined> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await makeOpenOpsAnalyticsGet<{ result: any[] }>(
@@ -35,9 +35,15 @@ async function findDatasetByTableName(
       !throwOnError,
     );
 
-    return response?.result?.length > 0
-      ? { id: response.result[0].id, uuid: response.result[0].uuid }
-      : undefined;
+    if (response?.result?.length > 0) {
+      const dataset = response.result[0];
+      return {
+        id: dataset.id,
+        uuid: dataset.uuid,
+        ...dataset,
+      };
+    }
+    return undefined;
   } catch (error) {
     if (throwOnError) {
       throw error;
