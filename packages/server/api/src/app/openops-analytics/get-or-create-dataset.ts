@@ -1,11 +1,11 @@
-import { createDataset } from './create-dataset';
+import { createDataset, DatasetResult } from './create-dataset';
 
 export async function getOrCreateDataset(
   token: string,
   tableName: string,
   databaseId: number,
   schemaName: string,
-): Promise<{ id: number; uuid: string }> {
+): Promise<DatasetResult> {
   return createDataset(token, {
     tableName,
     databaseId,

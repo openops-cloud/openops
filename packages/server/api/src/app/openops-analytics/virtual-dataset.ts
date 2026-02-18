@@ -1,23 +1,12 @@
-import { createDataset } from './create-dataset';
+import { createDataset, DatasetConfig, DatasetResult } from './create-dataset';
 
-export type VirtualDatasetConfig = {
-  table_name: string;
+export type VirtualDatasetConfig = Omit<DatasetConfig, 'sql'> & {
   sql: string;
-  database: number;
-  schema: string;
 };
 
 export async function createVirtualDataset(
   token: string,
   config: VirtualDatasetConfig,
-): Promise<{ id: number; uuid: string }> {
-  const result = await createDataset(token, {
-    tableName: config.table_name,
-    databaseId: config.database,
-    schema: config.schema,
-    sql: config.sql,
-    recreateIfExists: true,
-  });
-
-  return { id: result.id, uuid: result.uuid };
+): Promise<DatasetResult> {
+  return createDataset(token, config);
 }
