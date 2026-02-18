@@ -1,3 +1,4 @@
+import { getRegionsList } from '@openops/common';
 import { BenchmarkWizardOption } from '@openops/shared';
 import { listConnections } from '../../common-resolvers';
 import { throwValidationError } from '../../errors';
@@ -12,9 +13,18 @@ export async function resolveOptions(
       return listConnections(context);
     case 'getConnectionAccounts':
       return getConnectionAccounts(context);
+    case 'listRegions':
+      return listRegions();
     default:
       throwValidationError(`Unknown AWS wizard option method: ${method}`);
   }
+}
+
+function listRegions(): BenchmarkWizardOption[] {
+  return getRegionsList().map(({ id, displayName }) => ({
+    id,
+    displayName,
+  }));
 }
 
 async function getConnectionAccounts(

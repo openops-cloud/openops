@@ -24,17 +24,7 @@
       "id": "regions",
       "title": "Which regions should we include in the report?",
       "selectionType": "multi-select",
-      "optionsSource": {
-        "type": "static",
-        "values": [
-          {
-            "id": "us-east-1",
-            "displayName": "US East (N. Virginia)",
-            "imageLogoUrl": ""
-          },
-          { "id": "us-west-2", "displayName": "US West (Oregon)" }
-        ]
-      },
+      "optionsSource": { "type": "dynamic", "method": "listRegions" },
       "nextStep": "services"
     },
     {

@@ -37,6 +37,18 @@ const staticRegions = {
   'sa-east-1 (South America (São Paulo))': 'sa-east-1',
 };
 
+export type RegionListItem = {
+  id: string;
+  displayName: string;
+};
+
+export function getRegionsList(): RegionListItem[] {
+  return Object.entries(staticRegions).map(([displayName, id]) => ({
+    id,
+    displayName,
+  }));
+}
+
 export function getRegionsDropdownState(): DropdownState<string> {
   return {
     disabled: false,
