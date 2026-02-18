@@ -52,8 +52,8 @@ describe('resolveOptions', () => {
 
   it('returns regions as BenchmarkWizardOption[] for listRegions', async () => {
     const regionsList = [
-      { id: 'us-east-1', displayName: 'us-east-1 (US East (N. Virginia))' },
-      { id: 'eu-west-1', displayName: 'eu-west-1 (Europe (Ireland))' },
+      { id: 'us-east-1', displayName: 'US East (N. Virginia)' },
+      { id: 'eu-west-1', displayName: 'Europe (Ireland)' },
     ];
     mockGetRegionsList.mockReturnValue(regionsList);
 
@@ -68,7 +68,7 @@ describe('resolveOptions', () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
       id: 'us-east-1',
-      displayName: 'us-east-1 (US East (N. Virginia))',
+      displayName: 'US East (N. Virginia)',
     });
   });
 

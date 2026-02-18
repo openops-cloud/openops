@@ -122,11 +122,11 @@ describe('getRegionsList', () => {
     const euWest1 = result.find((r) => r.id === 'eu-west-1');
     expect(usEast1).toEqual({
       id: 'us-east-1',
-      displayName: 'us-east-1 (US East (N. Virginia))',
+      displayName: 'US East (N. Virginia)',
     });
     expect(euWest1).toEqual({
       id: 'eu-west-1',
-      displayName: 'eu-west-1 (Europe (Ireland))',
+      displayName: 'Europe (Ireland)',
     });
   });
 });
