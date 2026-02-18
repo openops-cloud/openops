@@ -12,14 +12,14 @@ import {
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
 
-export const SEED_OPENOPS_TABLE_NAME = 'Timeseries';
+export const TIMESERIES_TABLE_NAME = 'Timeseries';
 
 export async function createTimeseriesTable(
   tablesContext: TablesServerContext,
 ): Promise<void> {
-  logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
+  logger.debug(`[Seeding ${TIMESERIES_TABLE_NAME} table] Start`);
 
-  const table = await createTable(tablesContext, SEED_OPENOPS_TABLE_NAME, [
+  const table = await createTable(tablesContext, TIMESERIES_TABLE_NAME, [
     ['ID'],
   ]);
 
@@ -28,7 +28,7 @@ export async function createTimeseriesTable(
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Before adding primary field ID with id: ${primaryField.id}`,
+    `[Seeding ${TIMESERIES_TABLE_NAME} table] Before adding primary field ID with id: ${primaryField.id}`,
   );
 
   await makeOpenOpsTablesPatch<unknown>(
@@ -41,7 +41,7 @@ export async function createTimeseriesTable(
   );
 
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
+    `[Seeding ${TIMESERIES_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
   await addField(tokenOrResolver, table.id, {
@@ -72,7 +72,7 @@ export async function createTimeseriesTable(
     });
   }
 
-  logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Done`);
+  logger.debug(`[Seeding ${TIMESERIES_TABLE_NAME} table] Done`);
 }
 
 async function addField(
@@ -83,7 +83,7 @@ async function addField(
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Before adding field ${fieldBody.name}`,
+    `[Seeding ${TIMESERIES_TABLE_NAME} table] Before adding field ${fieldBody.name}`,
   );
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
@@ -92,6 +92,6 @@ async function addField(
   );
 
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding ${TIMESERIES_TABLE_NAME} table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 }

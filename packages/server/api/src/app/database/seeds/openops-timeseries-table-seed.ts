@@ -3,7 +3,7 @@ import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import {
   createTimeseriesTable,
-  SEED_OPENOPS_TABLE_NAME,
+  TIMESERIES_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-timeseries-table';
 import { databaseConnection } from '../database-connection';
 import { applyToEachTablesDatabase } from './tables-database-iterator';
@@ -37,10 +37,7 @@ export const seedTimeseriesTemplateTable = async (): Promise<void> => {
 
   await applyToEachTablesDatabase(
     async (tablesContext: TablesServerContext): Promise<void> => {
-      const table = await getTableByName(
-        SEED_OPENOPS_TABLE_NAME,
-        tablesContext,
-      );
+      const table = await getTableByName(TIMESERIES_TABLE_NAME, tablesContext);
 
       if (!table) {
         await createTimeseriesTable(tablesContext);
