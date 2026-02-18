@@ -22,36 +22,6 @@ export type DatasetResult = {
   [key: string]: any;
 };
 
-async function findDatasetByTableName(
-  tableName: string,
-  authenticationHeader: AxiosHeaders,
-  throwOnError = false,
-): Promise<DatasetResult | undefined> {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await makeOpenOpsAnalyticsGet<{ result: any[] }>(
-      `dataset?q=(filters:!((col:table_name,opr:eq,value:'${tableName}')))`,
-      authenticationHeader,
-      !throwOnError,
-    );
-
-    if (response?.result?.length > 0) {
-      const dataset = response.result[0];
-      return {
-        id: dataset.id,
-        uuid: dataset.uuid,
-        ...dataset,
-      };
-    }
-    return undefined;
-  } catch (error) {
-    if (throwOnError) {
-      throw error;
-    }
-    return undefined;
-  }
-}
-
 function buildDatasetRequestBody(
   config: DatasetConfig,
 ): Record<string, unknown> {
@@ -83,10 +53,9 @@ export async function createDataset(
 ): Promise<DatasetResult> {
   const authenticationHeader = createAxiosHeadersForAnalytics(token);
 
-  const existingDataset = await findDatasetByTableName(
+  const existingDataset = await getDatasetWithTableName(
     config.tableName,
     authenticationHeader,
-    false,
   );
 
   if (existingDataset) {
@@ -122,4 +91,19 @@ export async function createDataset(
   };
 
   return result;
+}
+
+async function getDatasetWithTableName(
+  name: string,
+  authenticationHeader: AxiosHeaders,
+): Promise<DatasetResult | undefined> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response = await makeOpenOpsAnalyticsGet<{ result: any[] }>(
+    `dataset?q=(filters:!((col:table_name,opr:eq,value:'${name}')))`,
+    authenticationHeader,
+  );
+
+  return response && response?.result && response.result.length === 1
+    ? { id: response.result[0].id, ...response.result[0] }
+    : undefined;
 }
