@@ -60,20 +60,6 @@ export async function createDataset(
     authenticationHeader,
   );
 
-  if (existingDataset) {
-    if (config.recreateIfExists) {
-      logger.info(`Dataset ${config.tableName} exists, deleting to recreate`, {
-        datasetId: existingDataset.id,
-      });
-      await deleteDataset(token, existingDataset.id);
-    } else {
-      return existingDataset;
-    }
-  }
-  if (existingDataset && !config.recreateIfExists) {
-    return existingDataset;
-  }
-
   if (existingDataset && config.recreateIfExists) {
     logger.info('Dataset exists; deleting to recreate', {
       tableName: config.tableName,
