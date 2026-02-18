@@ -185,7 +185,7 @@ describe('createDataset', () => {
     expect(result).toEqual({ id: 4, uuid: 'new-uuid-789' });
     expect(deleteDatasetMock.deleteDataset).toHaveBeenCalledTimes(1);
     expect(deleteDatasetMock.deleteDataset).toHaveBeenCalledWith(
-      'some token',
+      'some header',
       3,
     );
     expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(

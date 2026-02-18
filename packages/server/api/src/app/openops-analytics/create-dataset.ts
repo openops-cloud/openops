@@ -60,15 +60,17 @@ export async function createDataset(
     authenticationHeader,
   );
 
+  if (existingDataset && !config.recreateIfExists) {
+    return existingDataset;
+  }
+
   if (existingDataset && config.recreateIfExists) {
     logger.info('Dataset exists; deleting to recreate', {
       tableName: config.tableName,
       datasetId: existingDataset.id,
     });
 
-    // Prefer using the same auth mechanism everywhere.
-    // If deleteDataset only accepts token, keep as-is.
-    await deleteDataset(token, existingDataset.id);
+    await deleteDataset(authenticationHeader, existingDataset.id);
   }
   const requestBody = buildDatasetRequestBody(config);
 
