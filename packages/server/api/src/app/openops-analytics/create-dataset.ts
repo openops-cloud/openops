@@ -35,7 +35,7 @@ async function findDatasetByTableName(
       !throwOnError,
     );
 
-    return response && response?.result && response.result.length > 0
+    return response?.result?.length > 0
       ? { id: response.result[0].id, uuid: response.result[0].uuid }
       : undefined;
   } catch (error) {
