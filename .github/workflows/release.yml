@@ -145,7 +145,7 @@ jobs:
         run: |
           gh workflow run release.yml -R openops-cloud/helm-chart \
             -f version=${VERSION} \
-            -f draft=${{ !inputs.github_release }}
+            -f draft=false
   trigger-deployment:
     name: Trigger a deployment
     needs: [get-version, create-release]
