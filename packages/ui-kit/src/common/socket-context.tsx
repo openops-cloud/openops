@@ -18,6 +18,8 @@ export const reconnectSocket = (): void => {
   if (socket.connected) {
     socket.disconnect();
     socket.connect();
+  } else {
+    socket.connect();
   }
 };
 
