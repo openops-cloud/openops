@@ -25,25 +25,27 @@ export type DatasetResult = {
 function buildDatasetRequestBody(
   config: DatasetConfig,
 ): Record<string, unknown> {
-  if ('sql' in config) {
-    if (!config.sql?.trim()) {
-      throw new Error(
-        'SQL query cannot be empty or whitespace when creating a virtual dataset',
-      );
-    }
+  const base = {
+    database: config.databaseId,
+    schema: config.schema,
+    table_name: config.tableName,
+  };
 
-    return {
-      database: config.databaseId,
-      schema: config.schema,
-      sql: config.sql,
-      table_name: config.tableName,
-    };
+  if (typeof config.sql !== 'string') {
+    return base;
+  }
+
+  const sql = config.sql.trim();
+
+  if (!sql) {
+    throw new Error(
+      'SQL query cannot be empty or whitespace when creating a virtual dataset',
+    );
   }
 
   return {
-    database: config.databaseId,
-    table_name: config.tableName,
-    schema: config.schema,
+    ...base,
+    sql,
   };
 }
 
@@ -68,7 +70,20 @@ export async function createDataset(
       return existingDataset;
     }
   }
+  if (existingDataset && !config.recreateIfExists) {
+    return existingDataset;
+  }
 
+  if (existingDataset && config.recreateIfExists) {
+    logger.info('Dataset exists; deleting to recreate', {
+      tableName: config.tableName,
+      datasetId: existing.id,
+    });
+
+    // Prefer using the same auth mechanism everywhere.
+    // If deleteDataset only accepts token, keep as-is.
+    await deleteDataset(token, existing.id);
+  }
   const requestBody = buildDatasetRequestBody(config);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,13 +99,11 @@ export async function createDataset(
     isVirtual: !!config.sql,
   });
 
-  const result: DatasetResult = {
+  return {
     id: response.id,
     uuid: response.uuid,
     ...response.result,
   };
-
-  return result;
 }
 
 async function getDatasetWithTableName(
