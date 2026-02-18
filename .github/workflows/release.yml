@@ -125,6 +125,27 @@ jobs:
           curl -fsS https://openops.sh/install | OPENOPS_VERSION=$VERSION sh
           \`\`\`
           EOF
+  trigger-helm-chart-release:
+    name: Trigger Helm chart release
+    needs: [get-version, create-release]
+    runs-on: ubuntu-latest
+    if: github.repository == 'openops-cloud/openops'
+    steps:
+      - name: Get GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v2.2.1
+        with:
+          app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
+      - name: Trigger Helm chart release
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+          VERSION: ${{ needs.get-version.outputs.version }}
+        run: |
+          gh workflow run release.yml -R openops-cloud/helm-chart \
+            -f version=${VERSION} \
+            -f draft=${{ !inputs.github_release }}
   trigger-deployment:
     name: Trigger a deployment
     needs: [get-version, create-release]
