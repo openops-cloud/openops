@@ -8,7 +8,7 @@ import {
 import { databaseConnection } from '../database-connection';
 import { applyToEachTablesDatabase } from './tables-database-iterator';
 
-const TIMESERIES_TABLE_SEED = 'TIMESERIESSEED';
+const TIMESERIES_TABLE_SEED = 'TIMESERIES_TABLE_SEEDED';
 
 const tableAlreadyCreated = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
