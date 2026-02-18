@@ -11,6 +11,8 @@ import { AiConfigEntity } from '../ai/config/ai-config.entity';
 import { McpConfigEntity } from '../ai/config/mcp-config.entity';
 import { AppConnectionEntity } from '../app-connection/app-connection.entity';
 import { AppEventRoutingEntity } from '../app-event-routing/app-event-routing.entity';
+import { BenchmarkFlowEntity } from '../benchmark/benchmark-flow.entity';
+import { BenchmarkEntity } from '../benchmark/benchmark.entity';
 import { BlockMetadataEntity } from '../blocks/block-metadata-entity';
 import { FileEntity } from '../file/file.entity';
 import { FlagEntity } from '../flags/flag.entity';
@@ -53,6 +55,8 @@ function getEntities(): EntitySchema<unknown>[] {
     WorkerMachineEntity,
     FlowTemplateEntity,
     UserSettingsEntity,
+    BenchmarkEntity,
+    BenchmarkFlowEntity,
     AiConfigEntity,
     McpConfigEntity,
     FlowStepTestOutputEntity,

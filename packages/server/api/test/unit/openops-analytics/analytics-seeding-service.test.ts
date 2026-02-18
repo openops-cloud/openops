@@ -39,7 +39,7 @@ jest.mock(
 );
 
 const getOrCreateDatasetMock = jest.fn();
-jest.mock('../../../src/app/openops-analytics/create-dataset', () => {
+jest.mock('../../../src/app/openops-analytics/get-or-create-dataset', () => {
   return {
     getOrCreateDataset: getOrCreateDatasetMock,
   };

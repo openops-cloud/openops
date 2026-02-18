@@ -21,7 +21,9 @@ const StepDragOverlay = ({ step, cursorPosition }: StepDragTemplateProps) => {
     const leftSidebarElement = document.getElementById(
       RESIZABLE_PANEL_IDS.LEFT_SIDEBAR,
     );
-    const aiChatElement = document.getElementById(RESIZABLE_PANEL_IDS.AI_CHAT);
+    const aiChatElement = document.getElementById(
+      RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR,
+    );
     const builderLeftSidebarElement = document.getElementById(
       RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
     );

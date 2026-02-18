@@ -1,6 +1,7 @@
 export * from './lib/ai/chat';
 export * from './lib/ai/config';
 export * from './lib/ai/providers';
+export * from './lib/ai/tools-constants';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
 export * from './lib/app-connection/connections-utils';
@@ -13,6 +14,7 @@ export * from './lib/authentication/dto/sign-up-request';
 export * from './lib/authentication/model/authentication-type';
 export * from './lib/authentication/model/principal';
 export * from './lib/authentication/model/principal-type';
+export * from './lib/benchmark';
 export * from './lib/blocks';
 export * from './lib/code/dto/code-request';
 export * from './lib/common';

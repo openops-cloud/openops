@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext, ToolResult } from '@openops/shared';
 import {
   AssistantModelMessage,
   LanguageModel,
@@ -14,7 +14,10 @@ import {
   sendAiChatAbortedEvent,
   sendAiChatFailureEvent,
 } from '../../telemetry/event-models';
-import { addUiToolResults } from '../mcp/tool-utils';
+import {
+  addMissingUiToolResults,
+  createToolResultsMap,
+} from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
@@ -41,6 +44,7 @@ type UserMessageParams = RequestContext &
     abortSignal: AbortSignal;
   } & {
     frontendTools: AssistantUITools;
+    frontendToolResults?: ToolResult[];
     additionalContext?: ChatFlowContext;
   };
 
@@ -57,6 +61,27 @@ type StreamCallSettings = RequestContext &
     abortSignal: AbortSignal;
   };
 
+type ToolErrorStreamPart = {
+  type: 'tool-error';
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+  error: unknown;
+};
+
+function isToolErrorPart(
+  message: TextStreamPart<ToolSet>,
+): message is ToolErrorStreamPart {
+  return message.type === 'tool-error';
+}
+
+type MessagePart = {
+  type: string;
+  toolCallId?: string;
+  output?: unknown;
+  isError?: boolean;
+};
+
 export async function handleUserMessage(
   params: UserMessageParams,
 ): Promise<void> {
@@ -71,18 +96,26 @@ export async function handleUserMessage(
     serverResponse,
     conversation: { chatContext, chatHistory },
     frontendTools,
+    frontendToolResults,
     additionalContext,
     abortSignal,
   } = params;
 
   const messageId = generateMessageId();
 
+  const toolResultsMap = createToolResultsMap(frontendToolResults);
+
+  const updatedChatHistory = addMissingUiToolResults(
+    chatHistory,
+    toolResultsMap,
+  );
+
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
     projectId,
     authToken,
     aiConfig,
-    messages: chatHistory,
+    messages: updatedChatHistory,
     chatContext,
     languageModel,
     frontendTools,
@@ -100,7 +133,7 @@ export async function handleUserMessage(
         userId,
         projectId,
         aiConfig,
-        chatHistory,
+        chatHistory: updatedChatHistory,
         systemPrompt,
         languageModel,
         serverResponse,
@@ -113,10 +146,15 @@ export async function handleUserMessage(
     serverResponse.write(finishStepPart);
     serverResponse.write(finishMessagePart);
 
-    await saveChatHistory(chatId, userId, projectId, [
-      ...chatHistory,
-      ...addUiToolResults(newMessages),
-    ]);
+    await saveChatHistory(
+      chatId,
+      userId,
+      projectId,
+      addMissingUiToolResults(
+        [...updatedChatHistory, ...newMessages],
+        toolResultsMap,
+      ),
+    );
   } finally {
     await closeMCPClients(mcpClients);
     serverResponse.write(doneMarker);
@@ -131,6 +169,7 @@ async function streamLLMResponse(
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
   const tokenUsageReporter = new TokenUsageReporter();
+  const errorToolCallIds = new Set<string>();
 
   try {
     const fullStream = getLLMAsyncStream({
@@ -169,13 +208,16 @@ async function streamLLMResponse(
         const partialMessages = steps.at(-1)?.response.messages ?? [];
         return saveChatHistory(params.chatId, params.userId, params.projectId, [
           ...params.chatHistory,
-          ...addUiToolResults(partialMessages),
+          ...markToolResultsWithErrors(partialMessages, errorToolCallIds),
         ]);
       },
       abortSignal: params.abortSignal,
     });
 
     for await (const message of fullStream) {
+      if (isToolErrorPart(message)) {
+        errorToolCallIds.add(message.toolCallId);
+      }
       sendMessageToStream(params.serverResponse, message);
     }
   } catch (error) {
@@ -183,7 +225,52 @@ async function streamLLMResponse(
     newMessages.push(errorMessage);
   }
 
-  return newMessages;
+  return markToolResultsWithErrors(newMessages, errorToolCallIds);
+}
+
+/**
+ * Marks tool-result parts with isError flag if their toolCallId is in the error set
+ * This ensures tool errors are properly persisted with error status
+ */
+function markToolResultsWithErrors(
+  messages: ModelMessage[],
+  errorToolCallIds: Set<string>,
+): ModelMessage[] {
+  if (errorToolCallIds.size === 0) {
+    return messages;
+  }
+
+  return messages.map((message) => {
+    if (!Array.isArray(message.content) || message.content.length === 0) {
+      return message;
+    }
+
+    const updatedContent = message.content.map((part) => {
+      if (shouldMarkPartAsError(part, errorToolCallIds)) {
+        return { ...part, isError: true };
+      }
+      return part;
+    });
+
+    return {
+      ...message,
+      content: updatedContent,
+    } as ModelMessage;
+  });
+}
+
+function shouldMarkPartAsError(
+  part: MessagePart,
+  errorToolCallIds: Set<string>,
+): boolean {
+  if (!part.toolCallId || !errorToolCallIds.has(part.toolCallId)) {
+    return false;
+  }
+
+  return (
+    part.type === 'tool-result' ||
+    (part.type === 'tool-call' && part.output != null)
+  );
 }
 
 function unrecoverableError(
@@ -314,9 +401,27 @@ function sendMessageToStream(
     case 'finish-step':
     case 'finish':
     case 'tool-input-end':
-    case 'tool-error':
     case 'error':
       return;
+    case 'tool-error':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: {
+            content: [
+              {
+                type: 'text',
+                text:
+                  (message as any).error?.message ||
+                  String((message as any).error),
+              },
+            ],
+            isError: true,
+          },
+        })}`,
+      );
+      break;
     default:
       responseStream.write(`data: ${JSON.stringify(message)}`);
       break;

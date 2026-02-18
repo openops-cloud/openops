@@ -11,6 +11,13 @@ const AiAssistantButton = ({ className }: { className?: string }) => {
   }));
 
   const onToggleAiChat = useCallback(() => {
+    const { isBenchmarkWizardOpen, setIsBenchmarkWizardOpen } =
+      useAppStore.getState();
+
+    if (isBenchmarkWizardOpen) {
+      setIsBenchmarkWizardOpen(false);
+    }
+
     setIsAiChatOpened(!isAiChatOpened);
   }, [isAiChatOpened, setIsAiChatOpened]);
 

@@ -10,6 +10,7 @@ describe('assertValidPassword', () => {
     'P@ssw0rd',
     '12345678',
     'password',
+    'Aa1!@#$%^&*()_+-=[]{};"\\\':|,.<>/?',
     'P@ssw0rd'.repeat(8),
   ])(
     'should not throw an error for a valid password',

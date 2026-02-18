@@ -22,10 +22,10 @@ import {
   LEFT_SIDEBAR_MIN_SIZE,
 } from '@/app/constants/sidebar';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
-import { AiChatResizablePanel } from '@/app/features/ai/assistant/ai-chat-resizable-panel';
 import { useAppStore } from '@/app/store/app-store';
 import { DashboardSideMenu } from '../side-menu/dashboard/dashboard-side-menu';
 import LeftSidebarResizablePanel from '../side-menu/left-sidebar';
+import { SecondaryLeftSidePanelContainer } from './secondary-left-side-panel-container';
 
 const MINIMIZED_NAVIGATION_ROUTES = [
   '/flows/',
@@ -89,7 +89,7 @@ export function GlobalLayout() {
     (size: number[]) => {
       setPanelsSize({
         [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
-        [RESIZABLE_PANEL_IDS.AI_CHAT]: size[1],
+        [RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR]: size[1],
       });
     },
     [setPanelsSize],
@@ -154,7 +154,7 @@ export function GlobalLayout() {
                 }}
               />
 
-              <AiChatResizablePanel onDragging={setIsDragging} />
+              <SecondaryLeftSidePanelContainer onDragging={setIsDragging} />
 
               <ResizablePanel
                 id={RESIZABLE_PANEL_IDS.MAIN}

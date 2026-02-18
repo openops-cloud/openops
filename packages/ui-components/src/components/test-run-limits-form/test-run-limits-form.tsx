@@ -1,4 +1,6 @@
+import { typeboxResolver } from '@hookform/resolvers/typebox';
 import { TestRunLimitSettings } from '@openops/shared';
+import { Type } from '@sinclair/typebox';
 import { t } from 'i18next';
 import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -96,6 +98,23 @@ type TestRunLimitsFormProps = {
   max?: number;
 };
 
+function createTestRunLimitsSchema(min: number, max: number) {
+  return Type.Object({
+    isEnabled: Type.Boolean(),
+    limits: Type.Array(
+      Type.Object({
+        blockName: Type.String(),
+        actionName: Type.String(),
+        isEnabled: Type.Boolean(),
+        limit: Type.Number({
+          minimum: min,
+          maximum: max,
+        }),
+      }),
+    ),
+  });
+}
+
 function TestRunLimitsForm({
   value,
   onSave,
@@ -105,13 +124,21 @@ function TestRunLimitsForm({
   min = 1,
   max = 99,
 }: TestRunLimitsFormProps) {
+  const schema = useMemo(() => createTestRunLimitsSchema(min, max), [min, max]);
+
   const form = useForm<TestRunLimitSettings>({
+    resolver: typeboxResolver(schema),
     defaultValues: {
       isEnabled: value?.isEnabled ?? false,
       limits: value?.limits ?? [],
     },
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    form.trigger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
 
   useEffect(() => {
     form.reset({
@@ -293,23 +320,35 @@ function TestRunLimitsForm({
                               <FormField
                                 control={form.control}
                                 name={`limits.${index}.limit` as const}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <NumericInput
-                                        min={min}
-                                        max={max}
-                                        value={field.value}
-                                        onChange={(number) => {
-                                          field.onChange(number ?? min);
-                                        }}
-                                        disabled={!isEnabled}
-                                        integerOnly={true}
-                                        className="h-8 w-[64px] outline-none"
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
+                                render={({ field }) => {
+                                  const isInvalid =
+                                    !!form.formState.errors.limits?.[index]
+                                      ?.limit;
+
+                                  return (
+                                    <FormItem>
+                                      <FormControl>
+                                        <NumericInput
+                                          value={field.value}
+                                          onChange={(number) => {
+                                            field.onChange(number ?? min);
+                                          }}
+                                          disabled={!isEnabled}
+                                          integerOnly={true}
+                                          min={min}
+                                          max={max}
+                                          className={cn(
+                                            'h-8 w-[64px] outline-none',
+                                            {
+                                              'border-red-500 focus-visible:ring-red-500':
+                                                isInvalid,
+                                            },
+                                          )}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             </div>
                           ))}
@@ -326,7 +365,7 @@ function TestRunLimitsForm({
             <Button
               size={'lg'}
               loading={!!isLoading}
-              disabled={!limits.length}
+              disabled={!limits.length || !form.formState.isValid}
               onClick={() => onSave(form.getValues())}
             >
               {t('Save')}

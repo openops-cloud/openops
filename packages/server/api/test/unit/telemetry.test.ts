@@ -133,6 +133,7 @@ describe('telemetry', () => {
         projectId: 'projectId',
         environmentId: 'undefined',
         __name__: `${event.name}_total`,
+        environment: 'environment-name',
         timestamp: '2023-11-25T12:00:00.000Z',
       },
       samples: [
@@ -179,15 +180,20 @@ describe('telemetry', () => {
       telemetry = getSUT();
 
       const fixedDate = new Date('2023-11-25T12:00:00Z');
-      jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
+      jest.useFakeTimers();
+      jest.setSystemTime(fixedDate);
 
-      telemetry.trackEvent(event);
-      await new Promise((r) => setTimeout(r, 500));
+      try {
+        telemetry.trackEvent(event);
+        await jest.runAllTimersAsync();
 
-      expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
-        expectedTimeseries,
-      );
-      jest.restoreAllMocks();
+        expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
+          expectedTimeseries,
+        );
+      } finally {
+        jest.useRealTimers();
+        jest.restoreAllMocks();
+      }
     });
   });
 
@@ -232,6 +238,10 @@ function setupSystemMock(
 
     if (key === 'VERSION') {
       return '0.0.1';
+    }
+
+    if (key === 'ENVIRONMENT_NAME') {
+      return 'environment-name';
     }
 
     return null;

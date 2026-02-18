@@ -13,12 +13,15 @@ import {
   DismissiblePanel,
   ExploreTemplates,
   ExploreTemplatesCarousel,
+  FinOpsBenchmarkBanner,
   FlowTemplateMetadataWithIntegrations,
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
+import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 
 type HomeOnboardingViewProps = {
   isHelpViewClosed: boolean;
@@ -56,6 +59,7 @@ const HomeOnboardingView = ({
   }));
 
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
+  const openBenchmarkWizard = useOpenBenchmarkWizard();
 
   useEffect(() => {
     setSelectedDomains([]);
@@ -89,8 +93,13 @@ const HomeOnboardingView = ({
     updateUserSettings({ [SETTINGS_KEYS.isHomeCloudConnectionClosed]: true });
   };
 
+  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+
   return (
     <div className="flex flex-col gap-6 flex-1">
+      {isFinOpsBenchmarkEnabled && (
+        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+      )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
@@ -112,7 +121,6 @@ const HomeOnboardingView = ({
           />
         </DismissiblePanel>
       )}
-
       {(isHelpViewClosed || cloudUser || isHomeCloudConnectionClosed) && (
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder

@@ -26,6 +26,7 @@ import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import removeMarkdown from 'markdown-to-text';
+import { extractUiToolResultsFromMessage } from '../mcp/tool-utils';
 import {
   createChatContext,
   deleteChatHistory,
@@ -44,7 +45,10 @@ import {
 import { routeChatRequest } from './chat-request-router';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { parseUserMessage } from './message-parser';
+import {
+  parseUserMessage,
+  UI_TOOL_RESULT_SUBMISSION_MESSAGE,
+} from './message-parser';
 import { createUserMessage } from './model-message-factory';
 import { getBlockSystemPrompt } from './prompts.service';
 
@@ -196,10 +200,17 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const chatId = request.body.chatId;
       const userId = request.principal.id;
 
+      const frontendToolResults = extractUiToolResultsFromMessage(
+        request.body.message,
+      );
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
-        return; // Error response already sent
+        return;
       }
+
+      const isToolResultOnly =
+        frontendToolResults.length > 0 &&
+        messageContent === UI_TOOL_RESULT_SUBMISSION_MESSAGE;
 
       updateActiveObservation({
         input: messageContent,
@@ -210,6 +221,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           app,
           request,
           newMessage: createUserMessage(messageContent),
+          isToolResultOnly,
+          frontendToolResults,
           reply,
         });
       });

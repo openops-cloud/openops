@@ -1,5 +1,10 @@
 import { logger } from '@openops/server-shared';
-import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
+import {
+  CODE_BLOCK_NAME,
+  NewMessageRequest,
+  Principal,
+  ToolResult,
+} from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { IncomingMessage, ServerResponse } from 'node:http';
@@ -16,6 +21,7 @@ export type ChatRequestContext = {
   request: {
     body: NewMessageRequest;
     principal: Principal;
+    cookies?: Record<string, string>;
     headers: {
       authorization?: string;
     };
@@ -24,12 +30,21 @@ export type ChatRequestContext = {
   reply: FastifyReply;
   app: FastifyInstance;
   newMessage: ModelMessage;
+  isToolResultOnly?: boolean;
+  frontendToolResults?: ToolResult[];
 };
 
 export async function routeChatRequest(
   params: ChatRequestContext,
 ): Promise<void> {
-  const { app, request, newMessage, reply: fastifyReply } = params;
+  const {
+    app,
+    request,
+    newMessage,
+    isToolResultOnly,
+    frontendToolResults,
+    reply: fastifyReply,
+  } = params;
   const serverResponse = fastifyReply.raw;
 
   const controller = new AbortController();
@@ -42,7 +57,10 @@ export async function routeChatRequest(
   const chatId = request.body.chatId;
   const userId = request.principal.id;
   const projectId = request.principal.projectId;
-  const authToken = request.headers.authorization?.replace('Bearer ', '') ?? '';
+  const authToken =
+    request.cookies?.token ??
+    request.headers.authorization?.replace('Bearer ', '') ??
+    '';
 
   const conversation = await getConversation(chatId, userId, projectId);
   const isCodeGenerationRequest =
@@ -74,7 +92,9 @@ export async function routeChatRequest(
     model: currentModel,
   };
 
-  conversation.chatHistory.push(newMessage);
+  if (!isToolResultOnly) {
+    conversation.chatHistory.push(newMessage);
+  }
 
   const generationRequestParams = {
     app,
@@ -89,6 +109,7 @@ export async function routeChatRequest(
     languageModel,
     additionalContext: request.body.additionalContext,
     frontendTools: request.body.tools || {},
+    frontendToolResults,
     abortSignal,
   };
 

@@ -1,4 +1,4 @@
-import { runCliCommand } from '@openops/common';
+import { runCliCommand, validateAzureCredentials } from '@openops/common';
 import { mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -42,6 +42,7 @@ export async function runCommand(
 }
 
 async function login(credentials: any, envVars: any) {
+  validateAzureCredentials(credentials);
   try {
     const loginCommand = `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`;
 

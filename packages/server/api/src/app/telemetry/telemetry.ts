@@ -24,6 +24,7 @@ const logzioMetricToken = system.get<string>(
 );
 
 const version = system.get<string>(SharedSystemProp.VERSION);
+const environmentName = system.get<string>(SharedSystemProp.ENVIRONMENT_NAME);
 
 export enum TelemetryMode {
   DISABLED = 'DISABLED',
@@ -118,6 +119,10 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
       __name__: `${event.name}_total`,
       environmentId: `${environmentId}`,
       timestamp: timestamp.toISOString(),
+      environment:
+        environmentName && environmentName !== 'local'
+          ? environmentName
+          : 'unknown',
     },
     samples: [
       {
@@ -142,8 +147,6 @@ async function sendToCollector(
   telemetryCollectorUrl: string,
   requestBody: Timeseries,
 ): Promise<void> {
-  requestBody.labels['environment'] = 'unknown';
-
   await axios.post(telemetryCollectorUrl, requestBody, {
     timeout: 10000,
   });

@@ -4,7 +4,7 @@ import {
   useWorkflowsOverview,
 } from '@/app/features/home/lib/home-hooks';
 import { HomeRunsTable } from '@/app/features/home/runs-table';
-import { OverviewCard } from '@openops/components/ui';
+import { FinOpsBenchmarkBanner, OverviewCard } from '@openops/components/ui';
 import { subDays } from 'date-fns';
 import { t } from 'i18next';
 import {
@@ -14,6 +14,8 @@ import {
   CircleCheckBig,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
+import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 
 type HomeOperationalViewProps = {
   onExploreTemplatesClick: () => void;
@@ -39,6 +41,9 @@ const HomeOperationalView = ({
   );
 
   const flowsExist = !!existingFlowsResponse?.data?.length;
+
+  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const openBenchmarkWizard = useOpenBenchmarkWizard();
 
   return (
     <>
@@ -87,6 +92,10 @@ const HomeOperationalView = ({
             }}
           />
         </div>
+      )}
+
+      {isFinOpsBenchmarkEnabled && (
+        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
       )}
 
       <HomeFlowsTable

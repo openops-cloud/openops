@@ -295,6 +295,12 @@ export const flagService = {
         created,
         updated,
       },
+      {
+        id: FlagId.FINOPS_BENCHMARK_ENABLED,
+        value: system.getBoolean(AppSystemProp.FINOPS_BENCHMARK_ENABLED),
+        created,
+        updated,
+      },
     );
 
     return flags;

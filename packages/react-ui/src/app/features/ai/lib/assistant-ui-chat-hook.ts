@@ -1,27 +1,21 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper, FlowVersion } from '@openops/shared';
+import { flowHelper, FlowVersion, UI_TOOL_PREFIX } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithToolCalls,
-  ToolSet,
-  UIMessage,
-} from 'ai';
+import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
 import { aiAssistantChatHistoryApi } from './ai-assistant-chat-history-api';
 import { aiSettingsHooks } from './ai-settings-hooks';
-import { buildQueryKey } from './chat-utils';
+import { buildQueryKey, hasCompletedUIToolCalls } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode, UseAssistantChatProps } from './types';
 
@@ -200,9 +194,7 @@ export const useAssistantChat = ({
     id: chatId ?? undefined,
     transport: new DefaultChatTransport({
       api: '/api/v1/ai/conversation',
-      headers: {
-        Authorization: `Bearer ${authenticationSession.getToken()}`,
-      },
+      credentials: 'include',
       prepareSendMessagesRequest: ({ messages, requestMetadata }) => ({
         body: {
           ...(requestMetadata as Record<string, unknown>),
@@ -263,7 +255,7 @@ export const useAssistantChat = ({
     // https://github.com/assistant-ui/assistant-ui/issues/2327
     // handle frontend tool calls manually until this is fixed
     onToolCall: async ({ toolCall }: { toolCall: any }) => {
-      if (toolCall.toolName?.startsWith('ui-')) {
+      if (toolCall.toolName?.startsWith(UI_TOOL_PREFIX)) {
         try {
           const tool =
             frontendTools[toolCall.toolName as keyof typeof frontendTools];
@@ -273,18 +265,26 @@ export const useAssistantChat = ({
               toolCall.input || toolCall.args,
               {} as any,
             );
-            chat.addToolResult({
+
+            chat.addToolOutput({
+              state: 'output-available',
               tool: toolCall.toolName,
               toolCallId: toolCall.toolCallId,
               output: result,
             });
           }
         } catch (error) {
+          chat.addToolOutput({
+            state: 'output-error',
+            tool: toolCall.toolName,
+            toolCallId: toolCall.toolCallId,
+            errorText: String(error),
+          });
           console.error('Error executing frontend tool:', error);
         }
       }
     },
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    sendAutomaticallyWhen: ({ messages }) => hasCompletedUIToolCalls(messages),
   });
 
   useEffect(() => {

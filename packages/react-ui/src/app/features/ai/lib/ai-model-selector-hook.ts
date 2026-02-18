@@ -53,7 +53,9 @@ export const useAiModelSelector = ({
 
   return {
     selectedModel,
-    availableModels: providerModels?.models ?? [],
+    selectedProvider: provider,
+    availableModels:
+      providerModels?.models.map((m) => ({ name: m, provider })) ?? [],
     isLoading: isLoadingProviderModels || isSaving,
     onModelSelected,
   };

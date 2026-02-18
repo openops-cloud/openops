@@ -1,4 +1,6 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { UI_TOOL_PREFIX } from '@openops/shared';
+import { UIMessage } from 'ai';
 import { ChatMode } from './types';
 
 export const buildQueryKey = (
@@ -25,3 +27,35 @@ export const buildQueryKey = (
 
   return baseKey;
 };
+
+export function hasCompletedUIToolCalls(messages: UIMessage[]): boolean {
+  const message = messages.at(-1);
+
+  if (!message || message.role !== 'assistant') {
+    return false;
+  }
+
+  const lastStepStartIndex = message.parts.reduce(
+    (lastIndex, part, index) =>
+      part.type === 'step-start' ? index : lastIndex,
+    -1,
+  );
+
+  const lastStepParts = message.parts.slice(lastStepStartIndex + 1);
+
+  const uiToolParts = lastStepParts.filter((part) => {
+    const isStaticUITool = part.type.startsWith(`tool-${UI_TOOL_PREFIX}`);
+    const isDynamicUITool =
+      part.type === 'dynamic-tool' &&
+      (part as { toolName?: string }).toolName?.startsWith(UI_TOOL_PREFIX);
+    return isStaticUITool || isDynamicUITool;
+  });
+
+  return (
+    uiToolParts.length > 0 &&
+    uiToolParts.every((part) => {
+      const state = (part as { state?: string }).state;
+      return state === 'output-available' || state === 'output-error';
+    })
+  );
+}
