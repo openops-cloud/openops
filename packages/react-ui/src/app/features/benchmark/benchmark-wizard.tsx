@@ -63,7 +63,7 @@ export const BenchmarkWizard = ({
     null,
   );
 
-  const { connectedProviders } = useProviderConnections();
+  const { connectedProviders, refetchConnections } = useProviderConnections();
 
   const connectingProviderConfig = getProviderByValue(connectingProvider);
 
@@ -75,7 +75,7 @@ export const BenchmarkWizard = ({
   };
 
   const handleConnectionSaved = async () => {
-    setConnectingProvider(null);
+    refetchConnections();
   };
 
   const handleConnectionDialogClose = () => {
