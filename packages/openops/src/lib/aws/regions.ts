@@ -43,14 +43,10 @@ export type RegionListItem = {
 };
 
 export function getRegionsList(): RegionListItem[] {
-  return Object.entries(staticRegions).map(([label, id]) => {
-    const part = label.includes(' ')
-      ? label.slice(label.indexOf(' ') + 1)
-      : label;
-    const displayName =
-      part.startsWith('(') && part.endsWith(')') ? part.slice(1, -1) : part;
-    return { id, displayName };
-  });
+  return Object.entries(staticRegions).map(([displayName, id]) => ({
+    id,
+    displayName,
+  }));
 }
 
 export function getRegionsDropdownState(): DropdownState<string> {
