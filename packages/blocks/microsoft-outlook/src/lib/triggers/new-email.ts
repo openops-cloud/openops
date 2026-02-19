@@ -7,6 +7,7 @@ import {
   TriggerStrategy,
   createTrigger,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { isEmpty, isString } from '@openops/shared';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
@@ -166,22 +167,26 @@ const polling: Polling<
 > = {
   strategy: DedupeStrategy.TIMEBASED,
   items: async ({ auth, lastFetchEpochMS, propsValue }) => {
-    const client = await createGraphClient(auth.access_token);
+    try {
+      const client = await createGraphClient(auth.access_token);
 
-    const messages = await fetchMessages(
-      client,
-      propsValue['mailBox'] as string,
-      lastFetchEpochMS,
-    );
+      const messages = await fetchMessages(
+        client,
+        propsValue['mailBox'] as string,
+        lastFetchEpochMS,
+      );
 
-    const filteredMessages = messages.filter((message) =>
-      applyClientSideFilters(message, propsValue),
-    );
-
-    return filteredMessages.map((message) => ({
-      epochMilliSeconds: dayjs(message.receivedDateTime).valueOf(),
-      data: message,
-    }));
+      const filteredMessages = messages.filter((message) =>
+        applyClientSideFilters(message, propsValue),
+      );
+      return filteredMessages.map((message) => ({
+        epochMilliSeconds: dayjs(message.receivedDateTime).valueOf(),
+        data: message,
+      }));
+    } catch (e) {
+      logger.error(e, 'THE NEW EMAIL ERROR');
+      throw e;
+    }
   },
 };
 
