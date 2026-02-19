@@ -8,7 +8,6 @@ import {
   WizardStep,
   WizardTitle,
 } from '@openops/components/ui';
-import { BenchmarkConfiguration } from '@openops/shared';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
 import { useState } from 'react';
@@ -21,9 +20,7 @@ import { InitialBenchmarkStep } from './initial-benchmark-step';
 import { useProviderConnections } from './use-provider-connections';
 
 interface BenchmarkWizardProps {
-  provider?: 'aws' | 'azure' | 'gcp';
   onClose: () => void;
-  onComplete?: (config: BenchmarkConfiguration) => void;
 }
 
 interface ProviderConnectionDialogProps {
@@ -51,14 +48,8 @@ const ProviderConnectionDialog = ({
   </DynamicFormValidationProvider>
 );
 
-export const BenchmarkWizard = ({
-  provider: initialProvider,
-  onClose,
-  onComplete: _onComplete,
-}: BenchmarkWizardProps) => {
-  const [selectedProvider, setSelectedProvider] = useState<string>(
-    initialProvider || '',
-  );
+export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
+  const [selectedProvider, setSelectedProvider] = useState<string>();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(
     null,
   );

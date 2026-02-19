@@ -11,7 +11,7 @@ import { t } from 'i18next';
 import { CLOUD_PROVIDERS, CloudProvider } from './cloud-providers';
 
 interface InitialBenchmarkStepProps {
-  selectedProvider: string;
+  selectedProvider?: string;
   onProviderChange: (provider: string) => void;
   onConnect?: (provider: string) => void;
   connectedProviders?: Record<string, boolean>;
