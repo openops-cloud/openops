@@ -4,9 +4,9 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import FormData from 'form-data';
-import fs from 'fs';
 import JSZip from 'jszip';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export function getDashboardFolderPath(providerKey: string): string {
   return path.join(
