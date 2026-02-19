@@ -7,6 +7,18 @@ jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
 }));
 
+const mockGetOneOrThrow = jest.fn();
+jest.mock(
+  '../../../../../src/app/app-connection/app-connection-service/app-connection-service',
+  () => ({
+    appConnectionService: {
+      getOneOrThrow: (
+        ...args: unknown[]
+      ): ReturnType<typeof mockGetOneOrThrow> => mockGetOneOrThrow(...args),
+    },
+  }),
+);
+
 describe('resolveOptions', () => {
   const projectId = 'project-123';
   const provider = 'aws';
@@ -35,14 +47,69 @@ describe('resolveOptions', () => {
     expect(result).toEqual(options);
   });
 
-  it('returns empty array for getConnectionAccounts', async () => {
+  it('throws when getConnectionAccounts is called without a selected connection', async () => {
+    await expect(
+      resolveOptions('getConnectionAccounts', {
+        projectId,
+        provider,
+      }),
+    ).rejects.toThrow('Connection must be selected to list accounts');
+    expect(mockGetOneOrThrow).not.toHaveBeenCalled();
+  });
+
+  it('returns accounts from connection roles for getConnectionAccounts', async () => {
+    mockGetOneOrThrow.mockResolvedValue({
+      value: {
+        type: 'CUSTOM_AUTH',
+        props: {
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ReadOnly',
+              accountName: 'Account One',
+            },
+            {
+              assumeRoleArn: 'arn:aws:iam::222222222222:role/ReadOnly',
+              accountName: 'Account Two',
+            },
+          ],
+        },
+      },
+    });
+
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
+      benchmarkConfiguration: {
+        connection: ['conn-123'],
+      },
     });
-    // Returns empty array until we implement the API (see getConnectionAccounts in aws-option-resolver).
+
+    expect(mockGetOneOrThrow).toHaveBeenCalledWith({
+      id: 'conn-123',
+      projectId,
+    });
+    expect(result).toEqual([
+      { id: '111111111111', displayName: 'Account One' },
+      { id: '222222222222', displayName: 'Account Two' },
+    ]);
+  });
+
+  it('returns empty array for getConnectionAccounts when connection has no roles', async () => {
+    mockGetOneOrThrow.mockResolvedValue({
+      value: { type: 'CUSTOM_AUTH', props: {} },
+    });
+
+    const result = await resolveOptions('getConnectionAccounts', {
+      projectId,
+      provider,
+      benchmarkConfiguration: { connection: ['conn-456'] },
+    });
+
+    expect(mockGetOneOrThrow).toHaveBeenCalledWith({
+      id: 'conn-456',
+      projectId,
+    });
     expect(result).toEqual([]);
-    expect(mockListConnections).not.toHaveBeenCalled();
   });
 
   it('throws with method name in message for unknown method', async () => {
