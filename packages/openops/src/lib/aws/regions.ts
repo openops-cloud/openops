@@ -52,9 +52,9 @@ export function getRegionsList(): RegionListItem[] {
 export function getRegionsDropdownState(): DropdownState<string> {
   return {
     disabled: false,
-    options: Object.entries(staticRegions).map(([label, value]) => ({
-      label,
-      value,
+    options: getRegionsList().map(({ id, displayName }) => ({
+      label: displayName,
+      value: id,
     })),
   } as DropdownState<string>;
 }
