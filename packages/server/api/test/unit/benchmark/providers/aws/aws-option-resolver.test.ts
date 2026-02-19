@@ -8,6 +8,7 @@ jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
 }));
 jest.mock('@openops/common', () => ({
+  ...jest.requireActual('@openops/common'),
   getRegionsList: (...args: unknown[]): ReturnType<typeof mockGetRegionsList> =>
     mockGetRegionsList(...args),
 }));
