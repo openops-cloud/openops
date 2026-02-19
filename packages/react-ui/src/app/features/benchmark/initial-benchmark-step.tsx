@@ -29,6 +29,7 @@ const ReadMoreLink = () => (
       );
     }}
     className="text-blue-600 hover:text-blue-700 bg-transparent border-none cursor-pointer p-0 font-inherit"
+    aria-label={t('Read more about benchmark documentation')}
   >
     {t('Read more here')} →
   </button>
@@ -58,7 +59,6 @@ const NotConnectedContent = ({ name, onConnect }: NotConnectedContentProps) => (
     <button
       type="button"
       onClick={(e) => {
-        // Prevent the parent SelectOption from being selected when clicking Connect
         e.preventDefault();
         e.stopPropagation();
         onConnect();
