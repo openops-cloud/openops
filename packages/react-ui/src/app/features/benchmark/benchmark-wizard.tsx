@@ -113,6 +113,7 @@ export const BenchmarkWizard = ({
         </WizardContent>
 
         <WizardFooter>
+          <div className="flex-1" />
           <WizardNext disabled={!isSelectedProviderConnected} />
         </WizardFooter>
       </Wizard>
