@@ -2,6 +2,7 @@ jest.useFakeTimers();
 
 import {
   getRegionsDropdownState,
+  getRegionsList,
   groupARNsByRegion,
   regionsStaticMultiSelectDropdown,
 } from '../src/lib/aws/regions';
@@ -95,6 +96,38 @@ describe('getRegionsDropdownState', () => {
       { label: 'me-central-1 (Middle East (UAE))', value: 'me-central-1' },
       { label: 'sa-east-1 (South America (São Paulo))', value: 'sa-east-1' },
     ]);
+  });
+});
+
+describe('getRegionsList', () => {
+  test('should return non-empty array of region items', () => {
+    const result = getRegionsList();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  test('should return items with id and displayName', () => {
+    const result = getRegionsList();
+    for (const item of result) {
+      expect(item).toHaveProperty('id');
+      expect(item).toHaveProperty('displayName');
+      expect(typeof item.id).toBe('string');
+      expect(typeof item.displayName).toBe('string');
+    }
+  });
+
+  test('should include known regions with correct display names', () => {
+    const result = getRegionsList();
+    const usEast1 = result.find((r) => r.id === 'us-east-1');
+    const euWest1 = result.find((r) => r.id === 'eu-west-1');
+    expect(usEast1).toEqual({
+      id: 'us-east-1',
+      displayName: 'us-east-1 (US East (N. Virginia))',
+    });
+    expect(euWest1).toEqual({
+      id: 'eu-west-1',
+      displayName: 'eu-west-1 (Europe (Ireland))',
+    });
   });
 });
 

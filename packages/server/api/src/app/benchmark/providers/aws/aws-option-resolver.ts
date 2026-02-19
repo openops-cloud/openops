@@ -1,4 +1,4 @@
-import { parseArn } from '@openops/common';
+import { getRegionsList, parseArn } from '@openops/common';
 import {
   BenchmarkWizardOption,
   CustomAuthConnectionValue,
@@ -21,6 +21,8 @@ export async function resolveOptions(
       return listConnections(context);
     case 'getConnectionAccounts':
       return getConnectionAccounts(context);
+    case 'getRegionsList':
+      return getRegionsList();
     default:
       throwValidationError(`Unknown AWS wizard option method: ${method}`);
   }
