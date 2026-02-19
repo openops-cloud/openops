@@ -1,0 +1,90 @@
+slice_name: Top opportunities to address
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 4__table
+  viz_type: table
+  slice_id: 3
+  query_mode: raw
+  groupby:
+    - Estimated savings USD per month
+    - Service
+    - Region
+    - Resource Id
+    - Opportunity details
+  temporal_columns_lookup:
+    Snoozed until: true
+    Creation time: true
+    Last modified time: true
+  all_columns:
+    - Estimated savings USD per month
+    - Service
+    - Region
+    - Resource Id
+    - Opportunity details
+    - Workflow
+  percent_metrics: []
+  adhoc_filters:
+    - expressionType: SIMPLE
+      subject: Snoozed until
+      operator: TEMPORAL_RANGE
+      comparator: No filter
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_7219f58sxtw_z9vj00lepno
+  order_by_cols:
+    - '["Estimated savings USD per month", false]'
+  row_limit: 1000
+  server_page_length: 10
+  order_desc: true
+  table_timestamp_format: smart_date
+  allow_render_html: true
+  column_config:
+    Estimated savings USD per month:
+      colorPositiveNegative: false
+      columnWidth: null
+      d3NumberFormat: $,.2f
+      horizontalAlign: right
+      showCellBars: false
+    Opportunity details:
+      horizontalAlign: left
+    Region:
+      columnWidth: 100
+      horizontalAlign: center
+    Resource Id:
+      columnWidth: 200
+      horizontalAlign: center
+    Service:
+      columnWidth: 150
+      horizontalAlign: center
+  show_cell_bars: false
+  color_pn: false
+  comparison_color_scheme: Green
+  conditional_formatting: []
+  comparison_type: values
+  extra_form_data: {}
+  dashboards:
+    - 2
+    - 1
+query_context:
+  '{"datasource":{"id":4,"type":"table"},"force":false,"queries":[{"filters":[{"col":"Snoozed
+  until","op":"TEMPORAL_RANGE","val":"No filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":["Estimated
+  savings USD per month","Service","Region","Resource Id","Opportunity details","Workflow"],"orderby":[["Estimated
+  savings USD per month",false]],"annotation_layers":[],"row_limit":1000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[],"time_offsets":[]}],"form_data":{"datasource":"4__table","viz_type":"table","slice_id":3,"query_mode":"raw","groupby":["Estimated
+  savings USD per month","Service","Region","Resource Id","Opportunity details"],"temporal_columns_lookup":{"Snoozed
+  until":true,"Creation time":true,"Last modified time":true},"all_columns":["Estimated
+  savings USD per month","Service","Region","Resource Id","Opportunity details","Workflow"],"percent_metrics":[],"adhoc_filters":[{"expressionType":"SIMPLE","subject":"Snoozed
+  until","operator":"TEMPORAL_RANGE","comparator":"No filter","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_7219f58sxtw_z9vj00lepno"}],"order_by_cols":["[\"Estimated
+  savings USD per month\", false]"],"row_limit":1000,"server_page_length":10,"order_desc":true,"table_timestamp_format":"smart_date","allow_render_html":true,"column_config":{"Estimated
+  savings USD per month":{"colorPositiveNegative":false,"columnWidth":null,"d3NumberFormat":"$,.2f","horizontalAlign":"right","showCellBars":false},"Opportunity
+  details":{"horizontalAlign":"left"},"Region":{"columnWidth":100,"horizontalAlign":"center"},"Resource
+  Id":{"columnWidth":200,"horizontalAlign":"center"},"Service":{"columnWidth":150,"horizontalAlign":"center"}},"show_cell_bars":false,"color_pn":false,"comparison_color_scheme":"Green","conditional_formatting":[],"comparison_type":"values","extra_form_data":{},"dashboards":[2,1],"force":false,"result_format":"json","result_type":"full","include_time":false},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 0825693c-efcc-4ce9-a88b-63eb24abc3e1
+version: 1.0.0
+dataset_uuid: e3dda124-e8ad-4c61-92d1-6cca71895ba0
