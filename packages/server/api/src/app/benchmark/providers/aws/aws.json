@@ -38,17 +38,94 @@
       "nextStep": "services"
     },
     {
-      "id": "services",
-      "title": "Which AWS services should we analyze?",
+      "id": "workflows",
+      "title": "Which AWS workflows should we run to analyze the data?",
       "selectionType": "multi-select",
       "optionsSource": {
         "type": "static",
         "values": [
-          { "id": "unattached-ebs", "displayName": "Unattached EBS Volumes" },
           {
-            "id": "asg-compute-optimizer",
-            "displayName": "ASG Compute Optimizer"
-          }
+            "id": "asg-compute-optimizer-recommendations",
+            "displayName": "ASG Compute Optimizer Recommendations"
+          },
+          {
+            "id": "dynamodb-over-provisioned-tables",
+            "displayName": "DynamoDB Over-Provisioned Tables"
+          },
+          {
+            "id": "ebs-compute-optimizer-recommendations",
+            "displayName": "EBS Compute Optimizer Recommendations"
+          },
+          {
+            "id": "ebs-generation-upgrade-gp2-to-gp3",
+            "displayName": "EBS Generation upgrade (gp2 to gp3)"
+          },
+          {
+            "id": "ec2-compute-optimizer-recommendations",
+            "displayName": "EC2 Compute Optimizer Recommendations"
+          },
+          {
+            "id": "ecs-compute-optimizer-recommendations",
+            "displayName": "ECS Compute Optimizer Recommendations"
+          },
+          {
+            "id": "idle-compute-optimizer-recommendations",
+            "displayName": "Idle Compute Optimizer Recommendations"
+          },
+          {
+            "id": "idle-elastic-load-balancer-elb",
+            "displayName": "Idle Elastic Load Balancer (ELB)"
+          },
+          { "id": "idle-rds-instances", "displayName": "Idle RDS instances" },
+          {
+            "id": "lambda-compute-optimizer-recommendations",
+            "displayName": "Lambda Compute Optimizer Recommendations"
+          },
+          {
+            "id": "lambda-runtime-optimization",
+            "displayName": "Lambda Runtime optimization"
+          },
+          {
+            "id": "license-compute-optimizer-recommendations",
+            "displayName": "License Compute Optimizer Recommendations"
+          },
+          {
+            "id": "migrate-ec2-instances-to-graviton",
+            "displayName": "Migrate EC2 instances to Graviton"
+          },
+          { "id": "network", "displayName": "Network" },
+          {
+            "id": "old-generation-ec2-instances",
+            "displayName": "Old generation EC2 instances"
+          },
+          {
+            "id": "orphaned-rds-snapshots",
+            "displayName": "Orphaned RDS Snapshots"
+          },
+          {
+            "id": "rds-extended-support-avoidance",
+            "displayName": "RDS Extended Support Avoidance"
+          },
+          {
+            "id": "rds-instance-compute-optimizer-recommendations",
+            "displayName": "RDS Instance Compute Optimizer Recommendations"
+          },
+          {
+            "id": "rds-storage-compute-optimizer-recommendations",
+            "displayName": "RDS Storage Compute Optimizer Recommendations"
+          },
+          { "id": "underutilized-ec2", "displayName": "Underutilized EC2" },
+          { "id": "underutilized-rds", "displayName": "Underutilized RDS" },
+          {
+            "id": "underutilized-vpc-interface-endpoints",
+            "displayName": "Underutilized VPC Interface Endpoints"
+          },
+          { "id": "unattached-ebs", "displayName": "Unattached EBS" },
+          {
+            "id": "unattached-elastic-ip-addresses",
+            "displayName": "Unattached Elastic IP Addresses"
+          },
+          { "id": "unused-nat-gateways", "displayName": "Unused NAT Gateways" }
         ]
       }
     }
