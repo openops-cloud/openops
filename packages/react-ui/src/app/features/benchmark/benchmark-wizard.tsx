@@ -21,7 +21,7 @@ import { InitialBenchmarkStep } from './initial-benchmark-step';
 import { useProviderConnections } from './use-provider-connections';
 
 interface BenchmarkWizardProps {
-  provider?: 'aws' | 'azure';
+  provider?: 'aws' | 'azure' | 'gcp';
   onClose: () => void;
   onComplete?: (config: BenchmarkConfiguration) => void;
 }
