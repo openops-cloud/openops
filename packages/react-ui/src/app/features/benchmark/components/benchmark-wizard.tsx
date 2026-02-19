@@ -15,9 +15,9 @@ import { useState } from 'react';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 
-import { CloudProvider, getProviderByValue } from './cloud-providers';
+import { CloudProvider, getProviderByValue } from '../cloud-providers';
+import { useProviderConnections } from '../use-provider-connections';
 import { InitialBenchmarkStep } from './initial-benchmark-step';
-import { useProviderConnections } from './use-provider-connections';
 
 interface BenchmarkWizardProps {
   onClose: () => void;

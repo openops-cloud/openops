@@ -8,7 +8,10 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 
-import { CLOUD_PROVIDERS, CloudProvider } from './cloud-providers';
+import { CLOUD_PROVIDERS, CloudProvider } from '../cloud-providers';
+import { ComingSoonLabel } from './coming-soon-label';
+import { NotConnectedContent } from './not-connected-content';
+import { ReadMoreLink } from './read-more-link';
 
 interface InitialBenchmarkStepProps {
   selectedProvider?: string;
@@ -16,59 +19,6 @@ interface InitialBenchmarkStepProps {
   onConnect?: (provider: string) => void;
   connectedProviders?: Record<string, boolean>;
 }
-
-const ReadMoreLink = () => (
-  <button
-    type="button"
-    onClick={() => {
-      // TODO: Link to documentation or info page
-      window.open(
-        'https://docs.openops.com/benchmark',
-        '_blank',
-        'noopener noreferrer',
-      );
-    }}
-    className="text-blue-600 hover:text-blue-700 bg-transparent border-none cursor-pointer p-0 font-inherit"
-    aria-label={t('Read more about benchmark documentation')}
-  >
-    {t('Read more here')} →
-  </button>
-);
-
-const ComingSoonLabel = () => (
-  <>
-    <div className="flex-1" />
-    <span className="text-xs text-gray-500">{t('COMING SOON')}</span>
-  </>
-);
-
-interface NotConnectedContentProps {
-  name: string;
-  onConnect: () => void;
-}
-
-const NotConnectedContent = ({ name, onConnect }: NotConnectedContentProps) => (
-  <>
-    <div className="flex items-center gap-2">
-      <span>{name}</span>
-      <span className="font-light hidden @[280px]:inline">
-        {t('(Not connected)')}
-      </span>
-    </div>
-    <div className="flex-1" />
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onConnect();
-      }}
-      className="text-primary-200 text-sm"
-    >
-      {t('Connect')}
-    </button>
-  </>
-);
 
 interface ProviderOptionContentProps {
   provider: CloudProvider;
