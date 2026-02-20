@@ -77,7 +77,20 @@ export async function importDashboardFromZip(
     datasetMapping,
   });
 
-  await makeOpenOpsAnalyticsPostFormData('dashboard/import/', token, formData);
+  try {
+    await makeOpenOpsAnalyticsPostFormData(
+      'dashboard/import/',
+      token,
+      formData,
+    );
+  } catch (error) {
+    logger.error('Failed to import benchmark dashboard from zip', {
+      databaseMapping,
+      datasetMapping,
+      error,
+    });
+    throw error;
+  }
 
   logger.info('Successfully imported dashboard');
 }
