@@ -3,7 +3,7 @@ import {
   makeOpenOpsAnalyticsGet,
   makeOpenOpsAnalyticsPost,
 } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
 
 type DatabaseConnection = { id: number; uuid: string };
@@ -47,6 +47,21 @@ export async function getOrCreatePostgresDatabaseConnection(
     },
   );
   return { id: databaseConnection.id, ...databaseConnection.result };
+}
+
+export async function getOrCreateOpenOpsTablesDatabaseConnection(
+  token: string,
+): Promise<{ id: number; uuid: string }> {
+  return getOrCreatePostgresDatabaseConnection(
+    token,
+    system.getOrThrow(AppSystemProp.OPENOPS_TABLES_DATABASE_NAME),
+    system.getOrThrow(AppSystemProp.POSTGRES_PASSWORD),
+    system.getOrThrow(AppSystemProp.POSTGRES_PORT),
+    system.getOrThrow(AppSystemProp.POSTGRES_USERNAME),
+    system.get(AppSystemProp.OPENOPS_TABLES_DB_HOST) ??
+      system.getOrThrow(AppSystemProp.POSTGRES_HOST),
+    'openops_tables_connection',
+  );
 }
 
 async function getDatabaseConnection(

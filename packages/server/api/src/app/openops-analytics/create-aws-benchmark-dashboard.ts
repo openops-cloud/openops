@@ -1,5 +1,5 @@
 import { authenticateOpenOpsAnalyticsAdmin } from '@openops/common';
-import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME as OPPORTUNITIES_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { TIMESERIES_TABLE_NAME } from '../openops-tables/template-tables/create-timeseries-table';
@@ -9,7 +9,7 @@ import {
   importDashboardFromZip,
   resolveTableIds,
 } from './benchmark-dashboard-helpers';
-import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
+import { getOrCreateOpenOpsTablesDatabaseConnection } from './create-database-connection';
 import { getDefaultProjectForOrganization } from './project-selector';
 import { createVirtualDataset } from './virtual-dataset';
 
@@ -76,15 +76,8 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
 
   const { access_token } = await authenticateOpenOpsAnalyticsAdmin();
 
-  const dbConnection = await getOrCreatePostgresDatabaseConnection(
+  const dbConnection = await getOrCreateOpenOpsTablesDatabaseConnection(
     access_token,
-    system.getOrThrow(AppSystemProp.OPENOPS_TABLES_DATABASE_NAME),
-    system.getOrThrow(AppSystemProp.POSTGRES_PASSWORD),
-    system.getOrThrow(AppSystemProp.POSTGRES_PORT),
-    system.getOrThrow(AppSystemProp.POSTGRES_USERNAME),
-    system.get(AppSystemProp.OPENOPS_TABLES_DB_HOST) ??
-      system.getOrThrow(AppSystemProp.POSTGRES_HOST),
-    'openops_tables_connection',
   );
 
   const organization = await organizationService.getOldestOrganization();
