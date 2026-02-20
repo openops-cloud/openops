@@ -88,7 +88,7 @@ export async function resolveTableIds(
     tablesDatabaseToken: { iv: string; data: string };
   },
   tableNames: string[],
-): Promise<Record<string, number> | null> {
+): Promise<Record<string, number>> {
   try {
     const entries = await Promise.all(
       tableNames.map(async (name) => {
@@ -102,6 +102,8 @@ export async function resolveTableIds(
     return Object.fromEntries(entries);
   } catch (error) {
     logger.error('Could not find required tables', { tableNames, error });
-    return null;
+    throw new Error(
+      'Could not resolve required table IDs for benchmark dashboard',
+    );
   }
 }
