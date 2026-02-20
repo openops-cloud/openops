@@ -4,7 +4,7 @@
     {
       "id": "connection",
       "title": "Choose the AWS connection you want to use",
-      "description": "**Choose the AWS connection you want to use**\n\nOpenOps can pull data from AWS using the connection you select here. We provide a CloudFormation stack that installs the required permissions for you.\n\nCloudFormation stack: [Create a read-only role](https://example.com/cloudformation-readonly)\n\nDocumentation: [How to set up AWS read-only permissions](https://example.com/docs/aws-readonly)",
+      "description": "OpenOps can pull data from AWS using the connection you select here. We provide a CloudFormation stack that installs the required permissions for you.\n\nCloudFormation stack: [Create a read-only role](https://example.com/cloudformation-readonly)\n\nDocumentation: [How to set up AWS read-only permissions](https://example.com/docs/aws-readonly)",
       "selectionType": "single",
       "optionsSource": { "type": "dynamic", "method": "listConnections" },
       "nextStep": "accounts"
