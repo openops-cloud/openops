@@ -35,30 +35,28 @@ export const MultiSelectBody = ({
         onValueChange={onValueChange}
         className="border-none shadow-none"
       >
-        <>
-          <div className="px-4 py-3 border-b border-border h-12 flex items-center">
-            <SelectAllCheckbox
-              id={`select-all-${stepResponse.currentStep}`}
-              selectedCount={value.length}
-              totalCount={stepResponse.options.length}
-              onSelectAllChange={handleSelectAll}
-            />
-          </div>
-          {stepResponse.options.map((option) => (
-            <SelectOption
-              key={option.id}
-              value={option.id}
-              icon={
-                <OptionIcon
-                  imageLogoUrl={option.imageLogoUrl}
-                  displayName={option.displayName}
-                />
-              }
-            >
-              {option.displayName}
-            </SelectOption>
-          ))}
-        </>
+        <div className="px-4 py-3 border-b border-border h-12 flex items-center">
+          <SelectAllCheckbox
+            id={`select-all-${stepResponse.currentStep}`}
+            selectedCount={value.length}
+            totalCount={stepResponse.options.length}
+            onSelectAllChange={handleSelectAll}
+          />
+        </div>
+        {stepResponse.options.map((option) => (
+          <SelectOption
+            key={option.id}
+            value={option.id}
+            icon={
+              <OptionIcon
+                imageLogoUrl={option.imageLogoUrl}
+                displayName={option.displayName}
+              />
+            }
+          >
+            {option.displayName}
+          </SelectOption>
+        ))}
       </SelectForm>
     </div>
   );
