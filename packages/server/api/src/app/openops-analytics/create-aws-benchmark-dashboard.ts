@@ -66,7 +66,7 @@ FULL OUTER JOIN ts
   return { opportunities, kpi };
 }
 
-const USERFRIENDLTABLE_SUFFIX = '_userfriendly';
+const USERFRIENDLYTABLE_SUFFIX = '_userfriendly';
 
 export async function createAwsBenchmarkDashboard(): Promise<void> {
   logger.info('Starting AWS Benchmark dashboard seeding');
@@ -96,8 +96,8 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
   ]);
   if (!tableIds) return;
 
-  const opportunitiesTableName = `${OPPORTUNITIES_TABLE_NAME}_${tableIds[OPPORTUNITIES_TABLE_NAME]}${USERFRIENDLTABLE_SUFFIX}`;
-  const timeseriesTableName = `${TIMESERIES_TABLE_NAME}_${tableIds[TIMESERIES_TABLE_NAME]}${USERFRIENDLTABLE_SUFFIX}`;
+  const opportunitiesTableName = `${OPPORTUNITIES_TABLE_NAME}_${tableIds[OPPORTUNITIES_TABLE_NAME]}${USERFRIENDLYTABLE_SUFFIX}`;
+  const timeseriesTableName = `${TIMESERIES_TABLE_NAME}_${tableIds[TIMESERIES_TABLE_NAME]}${USERFRIENDLYTABLE_SUFFIX}`;
 
   const datasets = await createAwsBenchmarkDatasets(
     access_token,
