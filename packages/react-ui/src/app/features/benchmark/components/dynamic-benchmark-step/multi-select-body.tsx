@@ -6,7 +6,6 @@ import {
   SelectOption,
 } from '@openops/components/ui';
 import { useCallback } from 'react';
-import { EmptyOptionsPlaceholder } from './empty-options-placeholder';
 import { DynamicBenchmarkStepProps } from './types';
 
 export const MultiSelectBody = ({
@@ -24,11 +23,9 @@ export const MultiSelectBody = ({
   );
 
   if (stepResponse.options.length === 0) {
-    return (
-      <div className="rounded-lg bg-background shadow-sm">
-        <EmptyOptionsPlaceholder />
-      </div>
-    );
+    //TODO: Remove this check once backend is fixed to not return multi-select steps with 0 options
+    console.warn('MultiSelectBody rendered with no options');
+    return null;
   }
 
   return (
