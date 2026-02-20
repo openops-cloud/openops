@@ -17,11 +17,12 @@ import {
   FlowTemplateMetadataWithIntegrations,
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
+import { BenchmarkProviders } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkStatus } from './useBenchmarkStatus';
 
 type HomeOnboardingViewProps = {
   isHelpViewClosed: boolean;
@@ -93,12 +94,17 @@ const HomeOnboardingView = ({
     updateUserSettings({ [SETTINGS_KEYS.isHomeCloudConnectionClosed]: true });
   };
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const { showBanner, hasRun } = useBenchmarkStatus(BenchmarkProviders.AWS);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
-      {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+      {showBanner && (
+        <FinOpsBenchmarkBanner
+          variation={hasRun ? 'report' : 'default'}
+          provider={BenchmarkProviders.AWS}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={hasRun ? () => navigate('/analytics') : undefined}
+        />
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}

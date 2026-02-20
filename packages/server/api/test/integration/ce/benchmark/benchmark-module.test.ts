@@ -9,8 +9,10 @@ jest.mock(
 import {
   ApplicationError,
   BenchmarkProviders,
+  type BenchmarkResponse,
   type BenchmarkWizardStepResponse,
   ErrorCode,
+  openOpsId,
   PrincipalType,
   Project,
 } from '@openops/shared';
@@ -95,6 +97,115 @@ describe('Benchmark wizard API', () => {
       headers: token ? { authorization: `Bearer ${token}` } : undefined,
       body,
     });
+
+  const getBenchmark = async ({
+    provider,
+    token,
+  }: {
+    provider: string;
+    token?: string;
+  }): Promise<LightMyRequestResponse | undefined> =>
+    app?.inject({
+      method: 'GET',
+      url: `/v1/benchmarks/${provider}`,
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    });
+
+  describe('GET /v1/benchmarks/:provider', () => {
+    beforeEach(() => {
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
+    });
+
+    it('returns 200 with id, provider and lastRunId when benchmark exists and has been run', async () => {
+      const { token, project } = await createAndInsertMocks();
+      const runId = openOpsId();
+      await databaseConnection().getRepository('benchmark').save({
+        id: openOpsId(),
+        projectId: project.id,
+        provider: BenchmarkProviders.AWS,
+        payload: {},
+        lastRunId: runId,
+        folderId: null,
+        connectionId: null,
+        deletedAt: null,
+      });
+
+      const response = await getBenchmark({
+        provider: BenchmarkProviders.AWS,
+        token,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const data = response?.json<BenchmarkResponse>();
+      expect(data?.provider).toBe(BenchmarkProviders.AWS);
+      expect(data?.lastRunId).toBe(runId);
+    });
+
+    it('returns 200 with lastRunId null when benchmark exists but has not been run', async () => {
+      const { token, project } = await createAndInsertMocks();
+      await databaseConnection().getRepository('benchmark').save({
+        id: openOpsId(),
+        projectId: project.id,
+        provider: BenchmarkProviders.AWS,
+        payload: {},
+        lastRunId: null,
+        folderId: null,
+        connectionId: null,
+        deletedAt: null,
+      });
+
+      const response = await getBenchmark({
+        provider: BenchmarkProviders.AWS,
+        token,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const data = response?.json<BenchmarkResponse>();
+      expect(data?.lastRunId).toBeNull();
+    });
+
+    it('returns 404 when no benchmark exists for the project', async () => {
+      const { token } = await createAndInsertMocks();
+
+      const response = await getBenchmark({
+        provider: BenchmarkProviders.AWS,
+        token,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('returns 400 when provider is not in BenchmarkProviders enum', async () => {
+      const { token } = await createAndInsertMocks();
+
+      const response = await getBenchmark({
+        provider: 'invalidprovider',
+        token,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'false';
+      const { token } = await createAndInsertMocks();
+
+      const response = await getBenchmark({
+        provider: BenchmarkProviders.AWS,
+        token,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+      const data = response?.json();
+      expect(data?.code).toBe('FEATURE_DISABLED');
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      const response = await getBenchmark({ provider: BenchmarkProviders.AWS });
+
+      expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+    });
+  });
 
   describe('POST /v1/benchmarks/:provider/wizard', () => {
     beforeEach(() => {

@@ -13,9 +13,10 @@ import {
   CalendarX2,
   CircleCheckBig,
 } from 'lucide-react';
+import { BenchmarkProviders } from '@openops/shared';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkStatus } from './useBenchmarkStatus';
 
 type HomeOperationalViewProps = {
   onExploreTemplatesClick: () => void;
@@ -42,7 +43,7 @@ const HomeOperationalView = ({
 
   const flowsExist = !!existingFlowsResponse?.data?.length;
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const { showBanner, hasRun } = useBenchmarkStatus(BenchmarkProviders.AWS);
   const openBenchmarkWizard = useOpenBenchmarkWizard();
 
   return (
@@ -94,8 +95,13 @@ const HomeOperationalView = ({
         </div>
       )}
 
-      {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+      {showBanner && (
+        <FinOpsBenchmarkBanner
+          variation={hasRun ? 'report' : 'default'}
+          provider={BenchmarkProviders.AWS}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={hasRun ? () => navigate('/analytics') : undefined}
+        />
       )}
 
       <HomeFlowsTable

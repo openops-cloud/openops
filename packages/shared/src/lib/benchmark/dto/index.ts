@@ -1,3 +1,4 @@
+export * from './benchmark-response';
 export * from './benchmark-status-response';
 export * from './create-benchmark-request';
 export * from './create-benchmark-response';

@@ -55,6 +55,9 @@ export const QueryKeys = {
   blocks: 'blocks',
   blocksMetadata: 'blocks-metadata',
 
+  // Benchmark
+  benchmarkStatus: 'benchmark-status',
+
   // Analytics
   analyticsEmbedId: 'analytics-embed-id',
 
