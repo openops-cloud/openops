@@ -96,11 +96,15 @@ describe('listConnections', () => {
   });
 
   it('calls appConnectionService.list with expected params', async () => {
-    mockList.mockResolvedValue({ data: [], next: null, previous: null });
+    mockList.mockResolvedValue({
+      data: [{ id: 'conn-1', name: 'Connection', authProviderKey: 'AWS' }],
+      next: null,
+      previous: null,
+    });
+    mockGetAuthProviderMetadata.mockResolvedValue(undefined);
 
     await listConnections({ projectId, provider });
 
-    expect(mockGetAuthProviderMetadata).not.toHaveBeenCalled();
     expect(mockList).toHaveBeenCalledTimes(1);
     expect(mockList).toHaveBeenCalledWith({
       projectId,
@@ -111,6 +115,25 @@ describe('listConnections', () => {
       name: undefined,
       connectionsIds: undefined,
     });
+  });
+
+  it('throws when no connections found for provider', async () => {
+    mockList.mockResolvedValue({ data: [], next: null, previous: null });
+
+    await expect(listConnections({ projectId, provider })).rejects.toThrow(
+      'No connections found for this provider',
+    );
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledWith({
+      projectId,
+      authProviders: [provider],
+      status: [AppConnectionStatus.ACTIVE],
+      limit: 100,
+      cursorRequest: null,
+      name: undefined,
+      connectionsIds: undefined,
+    });
+    expect(mockGetAuthProviderMetadata).not.toHaveBeenCalled();
   });
 
   it('throws when projectId is missing', async () => {

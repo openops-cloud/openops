@@ -29,6 +29,10 @@ export async function listConnections(
     connectionsIds: undefined,
   });
 
+  if (page.data.length === 0) {
+    throwValidationError('No connections found for this provider');
+  }
+
   const authProviderKey = page.data[0].authProviderKey;
   const providerLogoUrl = await getAuthProviderLogoUrl(
     authProviderKey,
