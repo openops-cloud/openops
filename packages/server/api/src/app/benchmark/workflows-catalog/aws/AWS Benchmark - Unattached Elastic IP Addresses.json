@@ -1,0 +1,541 @@
+{
+  "created": "1771567495699",
+  "updated": "1771567495699",
+  "name": "AWS Benchmark - Unattached Elastic IP Addresses",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - Unattached Elastic IP Addresses",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "llttXVzJXnkjAjcZQislf",
+        "name": "step_f",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "YMLkxklyLsj7rrrwsLugX",
+          "name": "step_26",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "wfName",
+              "store_scope": "RUN",
+              "defaultValue": "AWS Benchmark - Unattached Elastic IP Addresses"
+            },
+            "blockName": "@openops/block-store",
+            "blockType": "OFFICIAL",
+            "actionName": "get",
+            "inputUiInfo": {
+              "customizedInputs": {
+                "settings": {
+                  "input": {}
+                }
+              }
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.5.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "id": "VT0cBElTnCZ4fm2Wo0wet",
+            "name": "step_1",
+            "type": "LOOP_ON_ITEMS",
+            "valid": true,
+            "settings": {
+              "items": "{{step_f['accounts']}}",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              }
+            },
+            "nextAction": {
+              "id": "wYhOoAQSqg2UXkOuIblN4",
+              "name": "step_a",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "auth": null,
+                  "body": {
+                    "data": {
+                      "status": "ok"
+                    }
+                  },
+                  "status": 200,
+                  "headers": {},
+                  "body_type": "json"
+                },
+                "blockName": "@openops/block-http",
+                "blockType": "OFFICIAL",
+                "actionName": "return_response",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.5.1",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "displayName": "Return Response",
+              "stepIndex": 14
+            },
+            "displayName": "ACCOUNT",
+            "firstLoopAction": {
+              "id": "NDgm98QXqt7CREZzeGPMa",
+              "name": "step_32",
+              "type": "LOOP_ON_ITEMS",
+              "valid": true,
+              "settings": {
+                "items": "{{step_f['regions']}}",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                }
+              },
+              "displayName": "REGION",
+              "firstLoopAction": {
+                "id": "eZ6pFzNP3UgDkfZSM878e",
+                "name": "step_2",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "auth": "{{connections['AWS']}}",
+                    "dryRun": false,
+                    "account": {
+                      "accounts": "{{step_1['item']}}"
+                    },
+                    "commandToRun": "aws ec2 describe-addresses --region {{step_32['item']}} --query \"Addresses[?AssociationId==null]\""
+                  },
+                  "blockName": "@openops/block-aws",
+                  "blockType": "OFFICIAL",
+                  "actionName": "aws_cli",
+                  "inputUiInfo": {
+                    "customizedInputs": {
+                      "settings": {
+                        "input": {
+                          "auth": true,
+                          "account": {
+                            "accounts": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.0.3",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "LHAbqJkJRFWC7dgbsm72Z",
+                  "name": "step_d",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_2}}",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "displayName": "RESOURCE",
+                  "firstLoopAction": {
+                    "id": "3j132XCJpe98LLdcMlvMt",
+                    "name": "step_27",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "filters": {
+                          "filters": [
+                            {
+                              "value": {
+                                "value": "{{step_26}}"
+                              },
+                              "fieldName": "Workflow",
+                              "filterType": "Is equal"
+                            },
+                            {
+                              "value": {
+                                "value": "{{step_d['item']['PublicIp']}}"
+                              },
+                              "fieldName": "Resource Id",
+                              "filterType": "Is equal"
+                            }
+                          ]
+                        },
+                        "tableName": "Opportunities",
+                        "filterType": "AND"
+                      },
+                      "blockName": "@openops/block-openops-tables",
+                      "blockType": "OFFICIAL",
+                      "actionName": "get_records",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.0.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "okWpniHSkhqSVTTqr2F5c",
+                      "name": "step_28",
+                      "type": "BRANCH",
+                      "valid": true,
+                      "settings": {
+                        "conditions": [
+                          [
+                            {
+                              "operator": "NUMBER_IS_EQUAL_TO",
+                              "firstValue": "{{step_27['count']}}",
+                              "secondValue": "0",
+                              "caseSensitive": false
+                            }
+                          ]
+                        ],
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "nextAction": {
+                        "id": "ZcmkgRlYUFgIlt3qXsyZM",
+                        "name": "step_b",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "auth": "{{connections['AWS']}}",
+                            "service": {
+                              "ServiceCode": "AmazonVPC",
+                              "AttributeNames": [
+                                "termType",
+                                "servicecode",
+                                "location",
+                                "locationType",
+                                "group",
+                                "groupDescription",
+                                "usagetype",
+                                "operation",
+                                "regionCode",
+                                "servicename",
+                                "attachmentType",
+                                "productFamily",
+                                "endpointType",
+                                "vpnType",
+                                "transferType",
+                                "fromLocation",
+                                "fromLocationType",
+                                "toLocation",
+                                "toLocationType",
+                                "fromRegionCode",
+                                "toRegionCode",
+                                "trafficDirection"
+                              ]
+                            },
+                            "queryFilters": {
+                              "queryFilters": [
+                                {
+                                  "attributeName": "usagetype",
+                                  "attributeValue": "AFS1-PublicIPv4:IdleAddress"
+                                }
+                              ]
+                            }
+                          },
+                          "blockName": "@openops/block-aws",
+                          "blockType": "OFFICIAL",
+                          "actionName": "get_price",
+                          "inputUiInfo": {
+                            "customizedInputs": {
+                              "settings": {
+                                "input": {
+                                  "auth": true
+                                }
+                              }
+                            }
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.3",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "1af5AwXseUU5L4Mw0NOT0",
+                          "name": "step_c",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "first_number": "730",
+                              "second_number": "{{step_b[0]['pricePerUnit']['USD']}}"
+                            },
+                            "blockName": "@openops/block-math-helper",
+                            "blockType": "OFFICIAL",
+                            "actionName": "multiplication_math",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.8",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "c2oky5smLdmy9axV7fagM",
+                            "name": "step_e",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "tableName": "Opportunities",
+                                "rowPrimaryKey": {
+                                  "rowPrimaryKey": "{{step_27['items'][0]['ID']}}"
+                                },
+                                "fieldsProperties": {
+                                  "fieldsProperties": [
+                                    {
+                                      "fieldName": "Status",
+                                      "newFieldValue": {
+                                        "newFieldValue": "Created"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Estimated savings USD per month",
+                                      "newFieldValue": {
+                                        "newFieldValue": "{{step_c}}"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Workflow",
+                                      "newFieldValue": {
+                                        "newFieldValue": "{{step_26}}"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Account",
+                                      "newFieldValue": {
+                                        "newFieldValue": "{{step_1['item']}}"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Region",
+                                      "newFieldValue": {
+                                        "newFieldValue": "{{step_32['item']}}"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Service",
+                                      "newFieldValue": {
+                                        "newFieldValue": "AWS VPC"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Opportunity generator",
+                                      "newFieldValue": {
+                                        "newFieldValue": "OpenOps"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Opportunity Type",
+                                      "newFieldValue": {
+                                        "newFieldValue": "Workflow optimization"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Opportunity details",
+                                      "newFieldValue": {
+                                        "newFieldValue": "Unattached public IP address: {{step_d['item']['PublicIp']}}"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Complexity",
+                                      "newFieldValue": {
+                                        "newFieldValue": "S"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Risk",
+                                      "newFieldValue": {
+                                        "newFieldValue": "Low"
+                                      }
+                                    },
+                                    {
+                                      "fieldName": "Resource Id",
+                                      "newFieldValue": {
+                                        "newFieldValue": "{{step_d['item']['PublicIp']}}"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "roundToFieldPrecision": true
+                              },
+                              "blockName": "@openops/block-openops-tables",
+                              "blockType": "OFFICIAL",
+                              "pieceName": "@openops/piece-openops-tables",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "update_record",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.0.1",
+                              "pieceVersion": "0.0.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "displayName": "Create OpenOps opportunity",
+                            "stepIndex": 13
+                          },
+                          "displayName": "EIP Monthly Cost",
+                          "stepIndex": 12
+                        },
+                        "displayName": "Get EIP Price",
+                        "stepIndex": 11
+                      },
+                      "displayName": "Opportunity doesn't exist or snooze expired",
+                      "onFailureAction": {
+                        "id": "jfm1wnIuecN7fTPC86A16",
+                        "name": "step_30",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {},
+                          "blockName": "@openops/block-end-flow",
+                          "blockType": "OFFICIAL",
+                          "actionName": "end_workflow",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "displayName": "Skip recommendation",
+                        "stepIndex": 10
+                      },
+                      "stepIndex": 9
+                    },
+                    "displayName": "Get existing opportunity",
+                    "stepIndex": 8
+                  },
+                  "stepIndex": 7
+                },
+                "displayName": "Fetch unattached IPs",
+                "stepIndex": 6
+              },
+              "stepIndex": 5
+            },
+            "stepIndex": 4
+          },
+          "displayName": "This Workflow Name",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-store",
+    "@openops/block-aws",
+    "@openops/block-openops-tables",
+    "@openops/block-end-flow",
+    "@openops/block-math-helper",
+    "@openops/block-http"
+  ],
+  "categories": []
+}

@@ -1,0 +1,786 @@
+{
+  "created": "1771567469989",
+  "updated": "1771567469989",
+  "name": "AWS Benchmark - RDS Extended Support Avoidance",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - RDS Extended Support Avoidance",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "25VQEHl6n7G0aVB3XBBaz",
+        "name": "step_b",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "ZQGppQRnsLNR75vBPo2cI",
+          "name": "step_c",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "wfName",
+              "store_scope": "FLOW",
+              "defaultValue": "AWS Benchmark - RDS Extended Support Avoidance"
+            },
+            "blockName": "@openops/block-store",
+            "blockType": "OFFICIAL",
+            "actionName": "get",
+            "inputUiInfo": {
+              "customizedInputs": {
+                "settings": {
+                  "input": {}
+                }
+              }
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.5.1"
+          },
+          "nextAction": {
+            "id": "Ue5wQrp526nQ9fXqo4nZp",
+            "name": "step_18",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "first_number": "90",
+                "second_number": "0"
+              },
+              "blockName": "@openops/block-math-helper",
+              "blockType": "OFFICIAL",
+              "actionName": "addition_math",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.8",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "VT0cBElTnCZ4fm2Wo0wet",
+              "name": "step_1",
+              "type": "LOOP_ON_ITEMS",
+              "valid": true,
+              "settings": {
+                "items": "{{step_b['accounts']}}",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                }
+              },
+              "nextAction": {
+                "id": "0vByGLzKruu2uF7Wp8g8X",
+                "name": "step_a",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "auth": null,
+                    "body": {
+                      "data": {
+                        "status": "ok"
+                      }
+                    },
+                    "status": 200,
+                    "headers": {},
+                    "body_type": "json"
+                  },
+                  "blockName": "@openops/block-http",
+                  "blockType": "OFFICIAL",
+                  "actionName": "return_response",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.5.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Return Response",
+                "stepIndex": 20
+              },
+              "displayName": "ACCOUNT",
+              "firstLoopAction": {
+                "id": "NDgm98QXqt7CREZzeGPMa",
+                "name": "step_32",
+                "type": "LOOP_ON_ITEMS",
+                "valid": true,
+                "settings": {
+                  "items": "{{step_b['regions']}}",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  }
+                },
+                "displayName": "REGION",
+                "firstLoopAction": {
+                  "id": "eZ6pFzNP3UgDkfZSM878e",
+                  "name": "step_2",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['AWS']}}",
+                      "dryRun": false,
+                      "account": {
+                        "accounts": "{{step_1['item']}}"
+                      },
+                      "commandToRun": "aws rds describe-db-instances --region {{step_32['item']}} \\\n--filters Name=engine,Values=mysql,postgres,aurora-mysql,aurora-postgresql \\\n--query 'DBInstances[*].{Arn: DBInstanceArn, DBInstanceIdentifier: DBInstanceIdentifier, DBInstanceClass: DBInstanceClass, Engine: Engine, EngineVersion: EngineVersion, MultiAZ: MultiAZ, EngineLifecycleSupport: EngineLifecycleSupport}'"
+                    },
+                    "blockName": "@openops/block-aws",
+                    "blockType": "OFFICIAL",
+                    "actionName": "aws_cli",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {
+                            "auth": true,
+                            "account": {
+                              "accounts": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.3",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "zIrHTVjNnzvzRtEaa8Ugz",
+                    "name": "step_3",
+                    "type": "BRANCH",
+                    "valid": true,
+                    "settings": {
+                      "conditions": [
+                        [
+                          {
+                            "operator": "LIST_IS_NOT_EMPTY",
+                            "firstValue": "{{step_2}}"
+                          }
+                        ]
+                      ],
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "RDS exist",
+                    "onSuccessAction": {
+                      "id": "fok3yjDuaKdHhTUI0matg",
+                      "name": "step_10",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "auth": "{{connections['AWS']}}",
+                          "dryRun": false,
+                          "account": {
+                            "accounts": "{{step_1['item']}}"
+                          },
+                          "commandToRun": "aws rds describe-db-major-engine-versions \\\n--query \"DBMajorEngineVersions[?SupportedEngineLifecycles[?LifecycleSupportName=='open-source-rds-extended-support']].{Engine: Engine, MajorEngineVersion: MajorEngineVersion, ExtendedSupport: SupportedEngineLifecycles[?LifecycleSupportName=='open-source-rds-extended-support']}\""
+                        },
+                        "blockName": "@openops/block-aws",
+                        "blockType": "OFFICIAL",
+                        "actionName": "aws_cli",
+                        "inputUiInfo": {
+                          "customizedInputs": {
+                            "settings": {
+                              "input": {
+                                "auth": true,
+                                "account": {
+                                  "accounts": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.3",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "id": "jzvyABdnBd9FZTMLmjWki",
+                        "name": "step_11",
+                        "type": "CODE",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "LIST_OF_DATABASES": "{{step_2}}",
+                            "EXTENDED_SUPPORT_DATES": "{{step_10}}"
+                          },
+                          "sourceCode": {
+                            "code": "export const code = async (inputs) => {\n  const LIST_OF_DATABASES = inputs.LIST_OF_DATABASES;\n  const EXTENDED_SUPPORT_DATES = inputs.EXTENDED_SUPPORT_DATES;\n\n  const today = new Date();\n\n  const calculateDays = (startDate) => {\n    const start = new Date(startDate);\n    const diffInMs = today.getTime() - start.getTime();\n    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));\n    return diffInDays;\n  };\n\n  const calculateDaysUntil = (startDate) => {\n    const start = new Date(startDate);\n    const diffInMs = start.getTime() - today.getTime();\n    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));\n    return diffInDays;\n  };\n\n  const enrichDatabase = (db) => {\n    if (db.EngineLifecycleSupport === \"open-source-rds-extended-support-disabled\") {\n      return null; // Filter out databases with disabled extended support\n    }\n\n    const supportedEngines = [\"mysql\", \"postgres\", \"aurora-mysql\", \"aurora-postgresql\"];\n    if (!supportedEngines.includes(db.Engine)) {\n      return {\n        ...db,\n        InstanceClass: db.DBInstanceClass?.startsWith(\"db.\") ? db.DBInstanceClass.substring(3) : db.DBInstanceClass,\n        extendedSupportInfo: {\n          inExtendedSupport: false,\n          days: null,\n          message: \"Engine not supported for extended support\",\n          supportStartDate: null,\n        }\n      };\n    }\n\n    let majorVersion;\n    if (db.Engine === \"aurora-mysql\") {\n      const parts = db.EngineVersion.split('.');\n      majorVersion = parts.length >= 2 ? `${parts[0]}.${parts[1]}` : parts[0];\n    } else if (\n      db.Engine === \"aurora-postgresql\" ||\n      db.Engine === \"postgres\" ||\n      db.Engine === \"mysql\"\n    ) {\n      majorVersion = db.EngineVersion.split('.')[0];\n    } else {\n      majorVersion = db.EngineVersion.split('.')[0];\n    }\n\n    const supportDate = EXTENDED_SUPPORT_DATES.find(\n      (d) => d.Engine === db.Engine && d.MajorEngineVersion === majorVersion\n    )?.ExtendedSupport?.[0];\n\n    let extendedSupportInfo = {\n      inExtendedSupport: false,\n      days: null,\n      message: \"Not applicable for this engine version\",\n      supportStartDate: null,\n    };\n\n    if (supportDate) {\n      const startDate = new Date(supportDate.LifecycleSupportStartDate);\n\n      if (today >= startDate) {\n        extendedSupportInfo.inExtendedSupport = true;\n        extendedSupportInfo.days = calculateDays(supportDate.LifecycleSupportStartDate);\n        extendedSupportInfo.message = `Database in Extended Support for ${extendedSupportInfo.days} days`;\n        extendedSupportInfo.supportStartDate = startDate;\n      } else {\n        extendedSupportInfo.inExtendedSupport = false;\n        extendedSupportInfo.days = calculateDaysUntil(supportDate.LifecycleSupportStartDate);\n        extendedSupportInfo.message = `Databse will be in Extended Support in ${extendedSupportInfo.days} days`;\n        extendedSupportInfo.supportStartDate = startDate;\n      }\n    }\n\n    return {\n      ...db,\n      InstanceClass: db.DBInstanceClass?.startsWith(\"db.\") ? db.DBInstanceClass.substring(3) : db.DBInstanceClass,\n      extendedSupportInfo\n    };\n  };\n\n  const enrichedDatabases = LIST_OF_DATABASES.map(enrichDatabase).filter(db => db !== null);\n  const inExtendedSupport = enrichedDatabases.filter((db) => db.extendedSupportInfo.inExtendedSupport);\n  const notInExtendedSupport = enrichedDatabases.filter((db) => !db.extendedSupportInfo.inExtendedSupport);\n\n  return {\n    inExtendedSupport,\n    notInExtendedSupport,\n  };\n};\n",
+                            "packageJson": "{}"
+                          },
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "oeJZhM4InhNBk6xDp0zQ6",
+                          "name": "step_8",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['AWS']}}",
+                              "service": {
+                                "ServiceCode": "AmazonRDS",
+                                "AttributeNames": [
+                                  "termType",
+                                  "productFamily",
+                                  "servicecode",
+                                  "location",
+                                  "locationType",
+                                  "instanceType",
+                                  "currentGeneration",
+                                  "instanceFamily",
+                                  "vcpu",
+                                  "physicalProcessor",
+                                  "memory",
+                                  "storage",
+                                  "networkPerformance",
+                                  "processorArchitecture",
+                                  "engineCode",
+                                  "databaseEngine",
+                                  "databaseEdition",
+                                  "licenseModel",
+                                  "deploymentOption",
+                                  "usagetype",
+                                  "operation",
+                                  "instanceTypeFamily",
+                                  "normalizationSizeFactor",
+                                  "regionCode",
+                                  "servicename",
+                                  "LeaseContractLength",
+                                  "PurchaseOption",
+                                  "OfferingClass",
+                                  "clockSpeed",
+                                  "dedicatedEbsThroughput",
+                                  "enhancedNetworkingSupported",
+                                  "processorFeatures",
+                                  "deploymentModel",
+                                  "engineMediaType",
+                                  "group",
+                                  "groupDescription",
+                                  "storageMedia",
+                                  "volumeType",
+                                  "minVolumeSize",
+                                  "maxVolumeSize",
+                                  "volumeName",
+                                  "pricingUnit",
+                                  "limitlesspreview",
+                                  "engineMajorVersion",
+                                  "extendedSupportPricingYear",
+                                  "Restriction",
+                                  "acu"
+                                ]
+                              },
+                              "queryFilters": {
+                                "queryFilters": [
+                                  {
+                                    "attributeName": "regionCode",
+                                    "attributeValue": "{{step_32['item']}}",
+                                    "dynamicViewToggled": {
+                                      "attributeValue": true
+                                    }
+                                  },
+                                  {
+                                    "attributeName": "extendedSupportPricingYear",
+                                    "attributeValue": "Year 1, Year 2"
+                                  }
+                                ]
+                              }
+                            },
+                            "blockName": "@openops/block-aws",
+                            "blockType": "OFFICIAL",
+                            "actionName": "get_price",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "settings": {
+                                  "input": {
+                                    "auth": true
+                                  }
+                                }
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.3",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "sgNwSS7pgm0qbRvF1UVQU",
+                            "name": "step_9",
+                            "type": "CODE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "pricing": "{{step_8}}"
+                              },
+                              "sourceCode": {
+                                "code": "export const code = async ({ pricing }) => {\n  const engineMap = [\n    { match: (n, u) => u && u.includes('ASv2:AuroraPostgreSQL'), key: 'aurora-serverless', name: 'Aurora Serverless v2 with PostgreSQL' },\n    { match: (n) => n === 'Aurora PostgreSQL', key: 'aurora-postgresql', name: 'Aurora PostgreSQL' },\n    { match: (n) => n === 'PostgreSQL', key: 'postgres', name: 'PostgreSQL' },\n    { match: (n) => n === 'Aurora MySQL', key: 'aurora-mysql', name: 'Aurora MySQL' },\n    { match: (n) => n === 'MySQL', key: 'mysql', name: 'MySQL' }\n  ];\n\n  const summary = {};\n\n  pricing.forEach((item) => {\n    const { product, terms } = item;\n    const { attributes } = product;\n    const { databaseEngine, usagetype } = attributes;\n\n    const onDemandTerm = terms?.OnDemand;\n    if (!onDemandTerm) return;\n\n    const termKey = Object.keys(onDemandTerm)[0];\n    const priceDimensions = onDemandTerm[termKey]?.priceDimensions;\n    if (!priceDimensions) return;\n\n    const priceDimensionKey = Object.keys(priceDimensions)[0];\n    const pricePerUnitUSD = priceDimensions[priceDimensionKey]?.pricePerUnit?.USD;\n    const unit = priceDimensions[priceDimensionKey]?.unit;\n\n    if (pricePerUnitUSD === undefined) return;\n    const price = parseFloat(pricePerUnitUSD);\n\n    // Try to find a matching mapping\n    const mapping = engineMap.find(m => m.match(databaseEngine, usagetype));\n    const key = mapping\n      ? mapping.key\n      : (databaseEngine ? databaseEngine.replace(/\\s+/g, '-').toLowerCase() : 'unknown');\n    const name = mapping\n      ? mapping.name\n      : (databaseEngine || 'Unknown');\n\n    // Only keep the lowest price per engine/unit (should always be unique for each engine/unit)\n    if (!summary[key] || price < summary[key].price) {\n      summary[key] = { price, unit, name };\n    }\n  });\n\n  return summary;\n};\n",
+                                "packageJson": "{}"
+                              },
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "id": "BgQoe2itUGKEJqqYJWnpH",
+                              "name": "step_6",
+                              "type": "LOOP_ON_ITEMS",
+                              "valid": true,
+                              "settings": {
+                                "items": "{{step_11['inExtendedSupport']}}",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                }
+                              },
+                              "displayName": "DB in Support",
+                              "firstLoopAction": {
+                                "id": "Ku5rajUpsLInlr8N65IkT",
+                                "name": "step_14",
+                                "type": "BLOCK",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "filters": {
+                                      "filters": [
+                                        {
+                                          "value": {
+                                            "value": "{{step_6['item']['Arn']}}"
+                                          },
+                                          "fieldName": "Resource Id",
+                                          "filterType": "Is equal"
+                                        },
+                                        {
+                                          "value": {
+                                            "value": "RDS DB in Extended Support"
+                                          },
+                                          "fieldName": "Opportunity details",
+                                          "filterType": "Contains"
+                                        },
+                                        {
+                                          "value": {
+                                            "value": "{{step_c}}"
+                                          },
+                                          "fieldName": "Workflow",
+                                          "filterType": "Contains"
+                                        }
+                                      ]
+                                    },
+                                    "tableName": "Opportunities",
+                                    "filterType": "AND"
+                                  },
+                                  "blockName": "@openops/block-openops-tables",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "get_records",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.0.1",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "id": "njZui95DpVcxxzdXwIazZ",
+                                  "name": "step_15",
+                                  "type": "BRANCH",
+                                  "valid": true,
+                                  "settings": {
+                                    "conditions": [
+                                      [
+                                        {
+                                          "operator": "NUMBER_IS_GREATER_THAN",
+                                          "firstValue": "{{step_14['count']}}",
+                                          "secondValue": "0"
+                                        }
+                                      ]
+                                    ],
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    }
+                                  },
+                                  "displayName": "Opportunity exists",
+                                  "onFailureAction": {
+                                    "id": "Zv8fxp6MBvkf0BqMMi8fM",
+                                    "name": "step_5",
+                                    "type": "BLOCK",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "auth": "{{connections['AWS']}}",
+                                        "dryRun": false,
+                                        "account": {
+                                          "accounts": "{{step_1['item']}}"
+                                        },
+                                        "commandToRun": "aws ec2 describe-instance-types \\\n  --instance-types {{step_6['item']['InstanceClass']}} \\\n  --region {{step_32['item']}} \\\n  --query \"InstanceTypes[0].VCpuInfo.DefaultVCpus\""
+                                      },
+                                      "blockName": "@openops/block-aws",
+                                      "blockType": "OFFICIAL",
+                                      "actionName": "aws_cli",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {
+                                          "settings": {
+                                            "input": {
+                                              "auth": true,
+                                              "account": {
+                                                "accounts": true
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "blockVersion": "0.0.3",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "id": "PXv6AbLaQ9euG7FeVqlhl",
+                                      "name": "step_12",
+                                      "type": "CODE",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "vCPU": "{{step_5}}",
+                                          "engine": "{{step_6['item']['Engine']}}",
+                                          "multiAZ": "{{step_6['item']['MultiAZ']}}",
+                                          "pricing": "{{step_9}}"
+                                        },
+                                        "sourceCode": {
+                                          "code": "export const code = async ({pricing, engine, vCPU, multiAZ}) => {\n  const price = pricing[engine].price;\n  const cost = 730 * price * vCPU;\n  if(multiAZ) {\n    return 2 * cost;\n  }\n  return cost;\n};",
+                                          "packageJson": "{}"
+                                        },
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "3fQXN5HmLRatXag1Yp717",
+                                        "name": "step_13",
+                                        "type": "BLOCK",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "number": "{{step_12}}",
+                                            "numberOfDecimalPlaces": "2"
+                                          },
+                                          "blockName": "@openops/block-math-helper",
+                                          "blockType": "OFFICIAL",
+                                          "actionName": "truncate_math",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "blockVersion": "0.0.8",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "id": "eDaU9eBgQoepBxo1myF7N",
+                                          "name": "step_25",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "tableName": "Opportunities",
+                                              "rowPrimaryKey": {
+                                                "rowPrimaryKey": null
+                                              },
+                                              "fieldsProperties": {
+                                                "fieldsProperties": [
+                                                  {
+                                                    "fieldName": "Opportunity Type",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "Workflow optimization"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Account",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "{{step_1['item']}}"
+                                                    },
+                                                    "dynamicViewToggled": {
+                                                      "newFieldValue": true
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Status",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "Created"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Resource Id",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "{{step_6['item']['Arn']}}"
+                                                    },
+                                                    "dynamicViewToggled": {
+                                                      "newFieldValue": true
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Region",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "{{step_32['item']}}"
+                                                    },
+                                                    "dynamicViewToggled": {
+                                                      "newFieldValue": true
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Service",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "AWS RDS"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Opportunity details",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "RDS DB in Extended Support"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Complexity",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "M"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Risk",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "Medium"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Workflow",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "{{step_c}}"
+                                                    },
+                                                    "dynamicViewToggled": {
+                                                      "newFieldValue": true
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Opportunity generator",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "OpenOps"
+                                                    }
+                                                  },
+                                                  {
+                                                    "fieldName": "Estimated savings USD per month",
+                                                    "newFieldValue": {
+                                                      "newFieldValue": "{{step_13}}"
+                                                    },
+                                                    "dynamicViewToggled": {
+                                                      "newFieldValue": true
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              "roundToFieldPrecision": false
+                                            },
+                                            "blockName": "@openops/block-openops-tables",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "update_record",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {
+                                                "settings": {
+                                                  "input": {
+                                                    "fieldsProperties": {}
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "displayName": "Create OpenOps opportunity",
+                                          "stepIndex": 19
+                                        },
+                                        "displayName": "Monthly Cost",
+                                        "stepIndex": 18
+                                      },
+                                      "displayName": "Calculate Monthly Price",
+                                      "stepIndex": 17
+                                    },
+                                    "displayName": "Get vCPU count",
+                                    "stepIndex": 16
+                                  },
+                                  "stepIndex": 15
+                                },
+                                "displayName": "Get existing opportunity if exists",
+                                "stepIndex": 14
+                              },
+                              "stepIndex": 13
+                            },
+                            "displayName": "Parse pricing",
+                            "stepIndex": 12
+                          },
+                          "displayName": "Get Pricing",
+                          "stepIndex": 11
+                        },
+                        "displayName": "Find DBs in Extended Support",
+                        "stepIndex": 10
+                      },
+                      "displayName": "Get All Extended Support Dates",
+                      "stepIndex": 9
+                    },
+                    "stepIndex": 8
+                  },
+                  "displayName": "Fetch RDS databases",
+                  "stepIndex": 7
+                },
+                "stepIndex": 6
+              },
+              "stepIndex": 5
+            },
+            "displayName": "CONFIG: Days for upgrade planning",
+            "stepIndex": 4
+          },
+          "displayName": "This workflow name",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-store",
+    "@openops/block-math-helper",
+    "@openops/block-aws",
+    "@openops/block-openops-tables",
+    "@openops/block-http"
+  ],
+  "categories": []
+}

@@ -1,0 +1,535 @@
+{
+  "created": "1771567483869",
+  "updated": "1771567483869",
+  "name": "AWS Benchmark - Underutilized RDS",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - Underutilized RDS",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "iKHlbMy00FUZmwyQ12ViJ",
+        "name": "step_b",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "pjLipCuVOhGywwQTNQOKf",
+          "name": "step_c",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "wfName",
+              "store_scope": "FLOW",
+              "defaultValue": "AWS Benchmark - Underutilized RDS"
+            },
+            "blockName": "@openops/block-store",
+            "blockType": "OFFICIAL",
+            "actionName": "get",
+            "inputUiInfo": {
+              "customizedInputs": {
+                "settings": {
+                  "input": {}
+                }
+              }
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.5.1"
+          },
+          "nextAction": {
+            "id": "t4xG3BrVx9A2CbnbvI6RF",
+            "name": "step_3",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['AWS']}}",
+                "regions": "{{step_b['regions']}}",
+                "accounts": {
+                  "accounts": "{{step_b['accounts']}}"
+                }
+              },
+              "blockName": "@openops/block-aws-compute-optimizer",
+              "blockType": "OFFICIAL",
+              "actionName": "get_recommendations_summary",
+              "inputUiInfo": {
+                "customizedInputs": {
+                  "settings": {
+                    "input": {
+                      "auth": true,
+                      "regions": true,
+                      "accounts": {
+                        "accounts": true
+                      }
+                    }
+                  }
+                }
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "EjvylTwJiFEnt2D3evoYs",
+              "name": "step_4",
+              "type": "CODE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "inputs": "{{step_3}}"
+                },
+                "sourceCode": {
+                  "code": "export const code = async ({inputs}) => {\n  // Use reduce to aggregate the data. The accumulator will be an object\n  // where keys are a composite of accountId and region (e.g., \"123456789012:us-east-1\").\n  const summaryByAccountAndRegion = inputs.reduce((acc, item) => {\n    // We are only interested in recommendations for 'RdsDBInstance'.\n    if (item.recommendationResourceType === 'RdsDBInstance') {\n      // Find the summary entry for over-provisioned instances.\n      // We use toLowerCase() to handle potential variations in casing (e.g., 'Overprovisioned', 'overprovisioned').\n      const overprovisionedSummary = item.summaries.find(\n        summary => summary.name.toLowerCase() === 'overprovisioned'\n      );\n\n      // If an 'Overprovisioned' summary exists and its value is greater than 0,\n      // we add it to the total for that account and region combination.\n      if (overprovisionedSummary && overprovisionedSummary.value > 0) {\n        // Create a unique composite key from the account ID and region.\n        const compositeKey = `${item.accountId}:${item.region}`;\n        \n        // If the compositeKey is not yet in our accumulator, initialize it to 0.\n        // Then, add the value from the summary.\n        acc[compositeKey] = (acc[compositeKey] || 0) + overprovisionedSummary.value;\n      }\n    }\n    // Return the accumulator for the next iteration.\n    return acc;\n  }, {}); // Start with an empty object as the initial accumulator.\n\n  // Convert the aggregated object into the desired array format.\n  // Object.entries() creates an array of [key, value] pairs (e.g., ['123456789012:us-east-1', 5]).\n  // Then, map() transforms each pair into an object with 'account', 'region', and 'value' properties.\n  const result = Object.entries(summaryByAccountAndRegion).map(([compositeKey, count]) => {\n    // Split the composite key back into its original parts.\n    const [accountId, region] = compositeKey.split(':');\n    return {\n      account: accountId,\n      region: region,\n      value: count,\n    };\n  });\n\n  return result;\n};\n",
+                  "packageJson": "{}"
+                },
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "grzObpK7p68GCJaIaDBfb",
+                "name": "step_1",
+                "type": "LOOP_ON_ITEMS",
+                "valid": true,
+                "settings": {
+                  "items": "{{step_4}}",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  }
+                },
+                "nextAction": {
+                  "id": "hpGcNvXWZhoHw9MKS6GR0",
+                  "name": "step_a",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": null,
+                      "body": {
+                        "data": {
+                          "status": "ok"
+                        }
+                      },
+                      "status": 200,
+                      "headers": {},
+                      "body_type": "json"
+                    },
+                    "blockName": "@openops/block-http",
+                    "blockType": "OFFICIAL",
+                    "actionName": "return_response",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.5.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "displayName": "Return Response",
+                  "stepIndex": 13
+                },
+                "displayName": "ACCOUNT+REGION",
+                "firstLoopAction": {
+                  "id": "TJX66GWOQBNkJAxK911eP",
+                  "name": "step_6",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['AWS']}}",
+                      "dryRun": false,
+                      "account": {
+                        "accounts": "{{step_1['item']['account']}}"
+                      },
+                      "commandToRun": "aws compute-optimizer get-rds-database-recommendations \n--region {{step_1['item']['region']}} \n--query \"rdsDBRecommendations[?instanceFinding=='Overprovisioned']\"\n"
+                    },
+                    "blockName": "@openops/block-aws",
+                    "blockType": "OFFICIAL",
+                    "actionName": "aws_cli",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {
+                            "auth": true,
+                            "account": {
+                              "accounts": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.3",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "Ya5l2yHjuDYPlO1gjnnId",
+                    "name": "step_2",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_6}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "RECOMMENDATION",
+                    "firstLoopAction": {
+                      "id": "QtY9pCtimH3AxCRgMvpsU",
+                      "name": "step_20",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "filters": {
+                            "filters": [
+                              {
+                                "value": {
+                                  "value": "{{step_2['item']['resourceArn']}}",
+                                  "dynamicViewToggled": {
+                                    "value": true
+                                  }
+                                },
+                                "fieldName": "Resource Id",
+                                "filterType": "Is equal",
+                                "dynamicViewToggled": {
+                                  "value": true
+                                }
+                              },
+                              {
+                                "value": {
+                                  "value": "{{step_c}}",
+                                  "dynamicViewToggled": {
+                                    "value": true
+                                  }
+                                },
+                                "fieldName": "Workflow",
+                                "filterType": "Is equal",
+                                "dynamicViewToggled": {
+                                  "value": true
+                                }
+                              }
+                            ]
+                          },
+                          "tableName": "Opportunities",
+                          "filterType": "AND"
+                        },
+                        "blockName": "@openops/block-openops-tables",
+                        "blockType": "OFFICIAL",
+                        "actionName": "get_records",
+                        "inputUiInfo": {
+                          "customizedInputs": {
+                            "settings": {
+                              "input": {
+                                "filters": {}
+                              }
+                            }
+                          }
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "id": "eYPRs7SsgTLBFUqzkR8eI",
+                        "name": "step_21",
+                        "type": "BRANCH",
+                        "valid": true,
+                        "settings": {
+                          "conditions": [
+                            [
+                              {
+                                "operator": "NUMBER_IS_GREATER_THAN",
+                                "firstValue": "{{step_20['count']}}",
+                                "secondValue": "0",
+                                "caseSensitive": false
+                              }
+                            ]
+                          ],
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          }
+                        },
+                        "nextAction": {
+                          "id": "Am1I3397DgkiX1IDYZMhb",
+                          "name": "step_8",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "tableName": "Opportunities",
+                              "rowPrimaryKey": {
+                                "rowPrimaryKey": null
+                              },
+                              "fieldsProperties": {
+                                "fieldsProperties": [
+                                  {
+                                    "fieldName": "Status",
+                                    "newFieldValue": {
+                                      "newFieldValue": "Created"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Estimated savings USD per month",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_2['item']['instanceRecommendationOptions'][0]['savingsOpportunity']['estimatedMonthlySavings']['value']}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Workflow",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_c}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Resource Id",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_2['item']['resourceArn']}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Account",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_1['item']['account']}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Region",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_1['item']['region']}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Service",
+                                    "newFieldValue": {
+                                      "newFieldValue": "AWS RDS"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity generator",
+                                    "newFieldValue": {
+                                      "newFieldValue": "AWS Compute Optimizer"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity Type",
+                                    "newFieldValue": {
+                                      "newFieldValue": "Workflow optimization"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity details",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_2['item']}}"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": true
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Complexity",
+                                    "newFieldValue": {
+                                      "newFieldValue": "M"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Risk",
+                                    "newFieldValue": {
+                                      "newFieldValue": "Medium"
+                                    },
+                                    "dynamicViewToggled": {
+                                      "newFieldValue": false
+                                    }
+                                  }
+                                ]
+                              },
+                              "roundToFieldPrecision": true
+                            },
+                            "blockName": "@openops/block-openops-tables",
+                            "blockType": "OFFICIAL",
+                            "pieceName": "@openops/piece-openops-tables",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "update_record",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "settings": {
+                                  "input": {
+                                    "fieldsProperties": {}
+                                  }
+                                }
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.1",
+                            "pieceVersion": "~0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Create OpenOps opportunity",
+                          "stepIndex": 12
+                        },
+                        "displayName": "Opportunity exists?",
+                        "onSuccessAction": {
+                          "id": "DTJ5QPZ0SpVnuZUxBhhFM",
+                          "name": "step_22",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {},
+                            "blockName": "@openops/block-end-flow",
+                            "blockType": "OFFICIAL",
+                            "actionName": "end_workflow",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "Skip recommendation",
+                          "stepIndex": 11
+                        },
+                        "stepIndex": 10
+                      },
+                      "displayName": "Check if opportunity exists",
+                      "stepIndex": 9
+                    },
+                    "stepIndex": 8
+                  },
+                  "displayName": "Get recommendations",
+                  "stepIndex": 7
+                },
+                "stepIndex": 6
+              },
+              "displayName": "Find RDS Opportunity Accounts & Regions",
+              "stepIndex": 5
+            },
+            "displayName": "Get Recommendations Summary",
+            "stepIndex": 4
+          },
+          "displayName": "This workflow name",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-store",
+    "@openops/block-aws-compute-optimizer",
+    "@openops/block-aws",
+    "@openops/block-openops-tables",
+    "@openops/block-end-flow",
+    "@openops/block-http"
+  ],
+  "categories": []
+}
