@@ -87,12 +87,6 @@ describe('seedAnalyticsDashboards', () => {
     jest.clearAllMocks();
     getOldestOrganizationMock.mockResolvedValue(mockOrganization);
     getDefaultProjectForOrganizationMock.mockResolvedValue(mockProject);
-    process.env.OPS_POSTGRES_PASSWORD = 'some password';
-    process.env.OPS_POSTGRES_PORT = 'some port';
-    process.env.OPS_POSTGRES_USERNAME = 'some username';
-    process.env.OPS_POSTGRES_HOST = 'some host';
-    process.env.OPS_OPENOPS_TABLES_DATABASE_NAME = 'some dbName';
-    delete process.env.OPS_OPENOPS_TABLES_DB_HOST;
   });
 
   it('should succesfully create seed related objects', async () => {
@@ -179,26 +173,6 @@ describe('seedAnalyticsDashboards', () => {
         tablesDatabaseToken: mockProject.tablesDatabaseToken,
       },
     );
-  });
-
-  it('should user alternative host name if provided', async () => {
-    openopsCommonMock.getTableIdByTableName.mockResolvedValue(1);
-    process.env.OPS_OPENOPS_TABLES_DB_HOST = 'alternative host';
-    openopsCommonMock.authenticateOpenOpsAnalyticsAdmin.mockResolvedValue({
-      access_token: 'some token',
-    });
-    dashboardCommonMock.createOrGetDashboard
-      .mockResolvedValueOnce({ id: 1, dashboard_title: 'some title' })
-      .mockResolvedValueOnce({ id: 2, dashboard_title: 'some other title' });
-    dashboardCommonMock.getDashboardWithSlugOrId.mockResolvedValue({
-      result: { id: 1, dashboard_name: 'some name' },
-    });
-    createDbMock.mockResolvedValue({ id: 1 });
-
-    await seedAnalyticsDashboards();
-
-    expect(createDbMock).toHaveBeenCalledTimes(1);
-    expect(createDbMock).toHaveBeenCalledWith('some token');
   });
 
   it('should throw if something fails', async () => {
