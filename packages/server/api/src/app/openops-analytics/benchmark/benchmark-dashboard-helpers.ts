@@ -8,7 +8,7 @@ import JSZip from 'jszip';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export function getDashboardFolderPath(providerKey: string): string {
+function getDashboardFolderPath(providerKey: string): string {
   return path.join(
     process.cwd(),
     'packages',
@@ -16,7 +16,7 @@ export function getDashboardFolderPath(providerKey: string): string {
     'api',
     'src',
     'assets',
-    `${providerKey}-benchmark-dashboard`,
+    `${providerKey.toLowerCase()}-benchmark-dashboard`,
   );
 }
 
@@ -114,9 +114,10 @@ export async function resolveTableIds(
     );
     return Object.fromEntries(entries);
   } catch (error) {
-    logger.error('Could not find required tables', { tableNames, error });
-    throw new Error(
+    logger.error(
       'Could not resolve required table IDs for benchmark dashboard',
+      { tableNames, error },
     );
+    throw error;
   }
 }
