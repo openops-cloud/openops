@@ -1,0 +1,152 @@
+slice_name: By Account
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 4__table
+  viz_type: table
+  slice_id: 6
+  query_mode: aggregate
+  groupby:
+    - Account
+  temporal_columns_lookup:
+    Snoozed until: true
+    Creation time: true
+    Last modified time: true
+  metrics:
+    - aggregate: COUNT
+      column:
+        advanced_data_type: null
+        certification_details: null
+        certified_by: null
+        column_name: Resource Id
+        description: null
+        expression: null
+        filterable: true
+        groupby: true
+        id: 9
+        is_certified: false
+        is_dttm: false
+        python_date_format: null
+        type: TEXT
+        type_generic: 1
+        verbose_name: null
+        warning_markdown: null
+      datasourceWarning: false
+      expressionType: SIMPLE
+      hasCustomLabel: true
+      label: Opportunities
+      optionName: metric_upbxycs62f8_iv8c55qsu8
+      sqlExpression: null
+    - aggregate: SUM
+      column:
+        advanced_data_type: null
+        certification_details: null
+        certified_by: null
+        column_name: Estimated savings USD per month
+        description: null
+        expression: null
+        filterable: true
+        groupby: true
+        id: 10
+        is_certified: false
+        is_dttm: false
+        python_date_format: null
+        type: NUMERIC(52, 2)
+        type_generic: 0
+        verbose_name: null
+        warning_markdown: null
+      datasourceWarning: false
+      expressionType: SIMPLE
+      hasCustomLabel: true
+      label: Savings
+      optionName: metric_yn31eazkkq7_t03e9fakmqr
+      sqlExpression: null
+  all_columns: []
+  percent_metrics: []
+  adhoc_filters:
+    - clause: WHERE
+      comparator: No filter
+      datasourceWarning: false
+      expressionType: SIMPLE
+      filterOptionName: filter_shtjwp73xz_l1xeidimdkm
+      isExtra: false
+      isNew: false
+      operator: TEMPORAL_RANGE
+      sqlExpression: null
+      subject: Snoozed until
+  timeseries_limit_metric:
+    aggregate: SUM
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: Estimated savings USD per month
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 10
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: NUMERIC(52, 2)
+      type_generic: 0
+      verbose_name: null
+      warning_markdown: null
+    datasourceWarning: false
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    label: SUM(Estimated savings USD per month)
+    optionName: metric_x3rtagury6_pq0mdfhfuad
+    sqlExpression: null
+  order_by_cols: []
+  row_limit: 1000
+  order_desc: true
+  show_totals: true
+  table_timestamp_format: smart_date
+  allow_render_html: false
+  column_config:
+    Savings:
+      d3NumberFormat: $,.2f
+  show_cell_bars: false
+  color_pn: true
+  conditional_formatting: []
+  comparison_type: values
+  extra_form_data: {}
+  dashboards:
+    - 2
+    - 1
+query_context:
+  '{"datasource":{"id":4,"type":"table"},"force":false,"queries":[{"filters":[{"col":"Snoozed
+  until","op":"TEMPORAL_RANGE","val":"No filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":["Account"],"metrics":[{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Resource
+  Id","description":null,"expression":null,"filterable":true,"groupby":true,"id":9,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"TEXT","type_generic":1,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Opportunities","optionName":"metric_upbxycs62f8_iv8c55qsu8","sqlExpression":null},{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Savings","optionName":"metric_yn31eazkkq7_t03e9fakmqr","sqlExpression":null}],"orderby":[[{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_x3rtagury6_pq0mdfhfuad","sqlExpression":null},false]],"annotation_layers":[],"row_limit":1000,"series_limit":0,"series_limit_metric":{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_x3rtagury6_pq0mdfhfuad","sqlExpression":null},"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[],"time_offsets":[]},{"filters":[{"col":"Snoozed
+  until","op":"TEMPORAL_RANGE","val":"No filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":[{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Resource
+  Id","description":null,"expression":null,"filterable":true,"groupby":true,"id":9,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"TEXT","type_generic":1,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Opportunities","optionName":"metric_upbxycs62f8_iv8c55qsu8","sqlExpression":null},{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Savings","optionName":"metric_yn31eazkkq7_t03e9fakmqr","sqlExpression":null}],"annotation_layers":[],"row_limit":0,"row_offset":0,"series_limit":0,"series_limit_metric":{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_x3rtagury6_pq0mdfhfuad","sqlExpression":null},"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[],"time_offsets":[]}],"form_data":{"datasource":"4__table","viz_type":"table","slice_id":6,"query_mode":"aggregate","groupby":["Account"],"temporal_columns_lookup":{"Snoozed
+  until":true,"Creation time":true,"Last modified time":true},"metrics":[{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Resource
+  Id","description":null,"expression":null,"filterable":true,"groupby":true,"id":9,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"TEXT","type_generic":1,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Opportunities","optionName":"metric_upbxycs62f8_iv8c55qsu8","sqlExpression":null},{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":true,"label":"Savings","optionName":"metric_yn31eazkkq7_t03e9fakmqr","sqlExpression":null}],"all_columns":[],"percent_metrics":[],"adhoc_filters":[{"clause":"WHERE","comparator":"No
+  filter","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_shtjwp73xz_l1xeidimdkm","isExtra":false,"isNew":false,"operator":"TEMPORAL_RANGE","sqlExpression":null,"subject":"Snoozed
+  until"}],"timeseries_limit_metric":{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_x3rtagury6_pq0mdfhfuad","sqlExpression":null},"order_by_cols":[],"row_limit":1000,"order_desc":true,"show_totals":true,"table_timestamp_format":"smart_date","allow_render_html":false,"column_config":{"Savings":{"d3NumberFormat":"$,.2f"}},"show_cell_bars":false,"color_pn":true,"conditional_formatting":[],"comparison_type":"values","extra_form_data":{},"dashboards":[2,1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: e33c8ab9-0aee-4ea2-ae3d-b1be6f703b61
+version: 1.0.0
+dataset_uuid: e3dda124-e8ad-4c61-92d1-6cca71895ba0

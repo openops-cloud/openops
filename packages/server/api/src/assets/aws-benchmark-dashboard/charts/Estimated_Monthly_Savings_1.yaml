@@ -1,0 +1,73 @@
+slice_name: Estimated Monthly Savings
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 4__table
+  viz_type: big_number_total
+  slice_id: 1
+  metric:
+    aggregate: SUM
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: Estimated savings USD per month
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 10
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: NUMERIC(52, 2)
+      type_generic: 0
+      verbose_name: null
+      warning_markdown: null
+    datasourceWarning: false
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    label: SUM(Estimated savings USD per month)
+    optionName: metric_ys00phmxfb_k20b2ivbrn
+    sqlExpression: null
+  adhoc_filters:
+    - expressionType: SIMPLE
+      subject: Snoozed until
+      operator: TEMPORAL_RANGE
+      comparator: No filter
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_uq3g8df90ye_q8it0nekact
+  header_font_size: 0.5
+  subheader_font_size: 0.15
+  y_axis_format: $,.2f
+  time_format: smart_date
+  conditional_formatting:
+    - colorScheme: '#ACE1C4'
+      column: SUM(Estimated savings USD per month)
+      operator: '>'
+      targetValue: 0
+  extra_form_data: {}
+  dashboards:
+    - 2
+    - 1
+query_context:
+  '{"datasource":{"id":4,"type":"table"},"force":false,"queries":[{"filters":[{"col":"Snoozed
+  until","op":"TEMPORAL_RANGE","val":"No filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":[{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_ys00phmxfb_k20b2ivbrn","sqlExpression":null}],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"4__table","viz_type":"big_number_total","slice_id":1,"metric":{"aggregate":"SUM","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"Estimated
+  savings USD per month","description":null,"expression":null,"filterable":true,"groupby":true,"id":10,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"NUMERIC(52,
+  2)","type_generic":0,"verbose_name":null,"warning_markdown":null},"datasourceWarning":false,"expressionType":"SIMPLE","hasCustomLabel":false,"label":"SUM(Estimated
+  savings USD per month)","optionName":"metric_ys00phmxfb_k20b2ivbrn","sqlExpression":null},"adhoc_filters":[{"expressionType":"SIMPLE","subject":"Snoozed
+  until","operator":"TEMPORAL_RANGE","comparator":"No filter","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_uq3g8df90ye_q8it0nekact"}],"header_font_size":0.5,"subheader_font_size":0.15,"y_axis_format":"$,.2f","time_format":"smart_date","conditional_formatting":[{"colorScheme":"#ACE1C4","column":"SUM(Estimated
+  savings USD per month)","operator":">","targetValue":0}],"extra_form_data":{},"dashboards":[2,1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 6a9f0091-7fcb-4b63-ac39-6c1acbb0ae28
+version: 1.0.0
+dataset_uuid: e3dda124-e8ad-4c61-92d1-6cca71895ba0
