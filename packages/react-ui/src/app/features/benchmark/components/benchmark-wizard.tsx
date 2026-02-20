@@ -12,7 +12,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
@@ -78,13 +78,18 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
     refetchConnections();
   };
 
+  const handleCloseConnectionDialog = useCallback(
+    () => setConnectingProvider(null),
+    [],
+  );
+
   return (
     <div className="h-full w-full flex flex-col bg-greyBlue-100 dark:bg-background">
       {connectingProviderConfig && (
         <ProviderConnectionDialog
           providerConfig={connectingProviderConfig}
           onSaved={handleConnectionSaved}
-          onClose={() => setConnectingProvider(null)}
+          onClose={handleCloseConnectionDialog}
         />
       )}
       <Wizard

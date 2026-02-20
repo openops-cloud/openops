@@ -1,5 +1,4 @@
-import { SelectForm, SelectOption } from '@openops/components/ui';
-import { OptionIcon } from './option-icon';
+import { OptionIcon, SelectForm, SelectOption } from '@openops/components/ui';
 import { DynamicBenchmarkStepProps } from './types';
 
 export const SingleSelectBody = ({

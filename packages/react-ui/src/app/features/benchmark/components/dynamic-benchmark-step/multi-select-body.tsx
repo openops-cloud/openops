@@ -1,11 +1,12 @@
 import {
+  OptionIcon,
   SelectAllChangeAction,
   SelectAllCheckbox,
   SelectForm,
   SelectOption,
 } from '@openops/components/ui';
+import { useCallback } from 'react';
 import { EmptyOptionsPlaceholder } from './empty-options-placeholder';
-import { OptionIcon } from './option-icon';
 import { DynamicBenchmarkStepProps } from './types';
 
 export const MultiSelectBody = ({
@@ -13,6 +14,15 @@ export const MultiSelectBody = ({
   value,
   onValueChange,
 }: DynamicBenchmarkStepProps) => {
+  const handleSelectAll = useCallback(
+    (action: SelectAllChangeAction) => {
+      onValueChange(
+        action === 'selectAll' ? stepResponse.options.map((o) => o.id) : [],
+      );
+    },
+    [onValueChange, stepResponse.options],
+  );
+
   if (stepResponse.options.length === 0) {
     return (
       <div className="rounded-lg bg-background shadow-sm">
@@ -20,12 +30,6 @@ export const MultiSelectBody = ({
       </div>
     );
   }
-
-  const handleSelectAll = (action: SelectAllChangeAction) => {
-    onValueChange(
-      action === 'selectAll' ? stepResponse.options.map((o) => o.id) : [],
-    );
-  };
 
   return (
     <div className="rounded-lg bg-background shadow-sm">
