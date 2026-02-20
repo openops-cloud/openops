@@ -33,7 +33,7 @@ jest.mock(
   '../../../src/app/openops-analytics/create-database-connection',
   () => {
     return {
-      getOrCreatePostgresDatabaseConnection: createDbMock,
+      getOrCreateOpenOpsTablesDatabaseConnection: createDbMock,
     };
   },
 );
@@ -127,15 +127,7 @@ describe('seedAnalyticsDashboards', () => {
       'homepage',
     );
     expect(createDbMock).toHaveBeenCalledTimes(1);
-    expect(createDbMock).toHaveBeenCalledWith(
-      'some token',
-      'some dbName',
-      'some password',
-      'some port',
-      'some username',
-      'some host',
-      'openops_tables_connection',
-    );
+    expect(createDbMock).toHaveBeenCalledWith('some token');
     expect(getOrCreateDatasetMock).toHaveBeenCalledTimes(1);
     expect(getOrCreateDatasetMock).toHaveBeenCalledWith(
       'some token',
@@ -206,15 +198,7 @@ describe('seedAnalyticsDashboards', () => {
     await seedAnalyticsDashboards();
 
     expect(createDbMock).toHaveBeenCalledTimes(1);
-    expect(createDbMock).toHaveBeenCalledWith(
-      'some token',
-      'some dbName',
-      'some password',
-      'some port',
-      'some username',
-      'alternative host',
-      'openops_tables_connection',
-    );
+    expect(createDbMock).toHaveBeenCalledWith('some token');
   });
 
   it('should throw if something fails', async () => {
