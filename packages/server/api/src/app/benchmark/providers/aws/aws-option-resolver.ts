@@ -1,5 +1,7 @@
 import { getRegionsList, parseArn } from '@openops/common';
 import {
+  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
+  BenchmarkProviders,
   BenchmarkWizardOption,
   CustomAuthConnectionValue,
 } from '@openops/shared';
@@ -52,5 +54,6 @@ async function getConnectionAccounts(
   return roles.map((role) => ({
     id: parseArn(role.assumeRoleArn).accountId,
     displayName: role.accountName,
+    imageLogoUrl: BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[BenchmarkProviders.AWS],
   }));
 }

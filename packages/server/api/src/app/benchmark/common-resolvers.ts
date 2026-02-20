@@ -1,4 +1,9 @@
-import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
+import {
+  AppConnectionStatus,
+  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
+  BenchmarkProviders,
+  BenchmarkWizardOption,
+} from '@openops/shared';
 import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
 import { throwValidationError } from './errors';
 import type { WizardContext } from './provider-adapter';
@@ -23,6 +28,10 @@ export async function listConnections(
   return page.data.map((connection) => ({
     id: connection.id,
     displayName: connection.name,
+    imageLogoUrl:
+      BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[
+        context.provider as BenchmarkProviders
+      ],
     metadata: { authProviderKey: connection.authProviderKey },
   }));
 }

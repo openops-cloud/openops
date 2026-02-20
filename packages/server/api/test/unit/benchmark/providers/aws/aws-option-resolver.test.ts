@@ -1,3 +1,8 @@
+import {
+  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
+  BenchmarkProviders,
+} from '@openops/shared';
+
 import { resolveOptions } from '../../../../../src/app/benchmark/providers/aws/aws-option-resolver';
 
 const mockListConnections = jest.fn();
@@ -94,9 +99,10 @@ describe('resolveOptions', () => {
       id: 'conn-123',
       projectId,
     });
+    const awsIcon = BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[BenchmarkProviders.AWS];
     expect(result).toEqual([
-      { id: '111111111111', displayName: 'Account One' },
-      { id: '222222222222', displayName: 'Account Two' },
+      { id: '111111111111', displayName: 'Account One', imageLogoUrl: awsIcon },
+      { id: '222222222222', displayName: 'Account Two', imageLogoUrl: awsIcon },
     ]);
   });
 

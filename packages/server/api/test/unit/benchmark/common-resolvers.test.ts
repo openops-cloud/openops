@@ -1,4 +1,8 @@
-import { AppConnectionStatus } from '@openops/shared';
+import {
+  AppConnectionStatus,
+  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
+  BenchmarkProviders,
+} from '@openops/shared';
 import { listConnections } from '../../../src/app/benchmark/common-resolvers';
 
 const mockList = jest.fn();
@@ -41,15 +45,18 @@ describe('listConnections', () => {
 
     const result = await listConnections({ projectId, provider });
 
+    const awsIcon = BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[BenchmarkProviders.AWS];
     expect(result).toEqual([
       {
         id: 'conn-1',
         displayName: 'My AWS Connection',
+        imageLogoUrl: awsIcon,
         metadata: { authProviderKey: 'aws' },
       },
       {
         id: 'conn-2',
         displayName: 'Another Connection',
+        imageLogoUrl: awsIcon,
         metadata: { authProviderKey: 'aws' },
       },
     ]);
