@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAuthorization } from '@/app/common/components/authorization';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   BuilderStateContext,
   BuilderStore,
