@@ -1,11 +1,8 @@
-import {
-  AppConnectionStatus,
-  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
-  BenchmarkProviders,
-} from '@openops/shared';
+import { AppConnectionStatus } from '@openops/shared';
 import { listConnections } from '../../../src/app/benchmark/common-resolvers';
 
 const mockList = jest.fn();
+const mockGetAuthProviderMetadata = jest.fn();
 jest.mock(
   '../../../src/app/app-connection/app-connection-service/app-connection-service',
   () => ({
@@ -13,6 +10,15 @@ jest.mock(
       list: (...args: unknown[]): ReturnType<typeof mockList> =>
         mockList(...args),
     },
+  }),
+);
+jest.mock(
+  '../../../src/app/app-connection/connection-providers-resolver',
+  () => ({
+    getAuthProviderMetadata: (
+      ...args: unknown[]
+    ): ReturnType<typeof mockGetAuthProviderMetadata> =>
+      mockGetAuthProviderMetadata(...args),
   }),
 );
 
@@ -29,12 +35,12 @@ describe('listConnections', () => {
       {
         id: 'conn-1',
         name: 'My AWS Connection',
-        authProviderKey: 'aws',
+        authProviderKey: 'AWS',
       },
       {
         id: 'conn-2',
         name: 'Another Connection',
-        authProviderKey: 'aws',
+        authProviderKey: 'AWS',
       },
     ];
     mockList.mockResolvedValue({
@@ -42,22 +48,63 @@ describe('listConnections', () => {
       next: null,
       previous: null,
     });
+    const awsAuthLogo = '/blocks/aws.png';
+    mockGetAuthProviderMetadata
+      .mockResolvedValueOnce({
+        authProviderKey: 'AWS',
+        authProviderLogoUrl: awsAuthLogo,
+      })
+      .mockResolvedValueOnce({
+        authProviderKey: 'AWS',
+        authProviderLogoUrl: awsAuthLogo,
+      });
 
     const result = await listConnections({ projectId, provider });
 
-    const awsIcon = BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[BenchmarkProviders.AWS];
+    expect(mockGetAuthProviderMetadata).toHaveBeenCalledTimes(2);
+    expect(mockGetAuthProviderMetadata).toHaveBeenNthCalledWith(
+      1,
+      'AWS',
+      projectId,
+    );
+    expect(mockGetAuthProviderMetadata).toHaveBeenNthCalledWith(
+      2,
+      'AWS',
+      projectId,
+    );
     expect(result).toEqual([
       {
         id: 'conn-1',
         displayName: 'My AWS Connection',
-        imageLogoUrl: awsIcon,
-        metadata: { authProviderKey: 'aws' },
+        imageLogoUrl: awsAuthLogo,
+        metadata: { authProviderKey: 'AWS' },
       },
       {
         id: 'conn-2',
         displayName: 'Another Connection',
-        imageLogoUrl: awsIcon,
-        metadata: { authProviderKey: 'aws' },
+        imageLogoUrl: awsAuthLogo,
+        metadata: { authProviderKey: 'AWS' },
+      },
+    ]);
+  });
+
+  it('omits imageLogoUrl when auth metadata has no logo', async () => {
+    mockList.mockResolvedValue({
+      data: [
+        { id: 'conn-1', name: 'Connection', authProviderKey: 'SomeProvider' },
+      ],
+      next: null,
+      previous: null,
+    });
+    mockGetAuthProviderMetadata.mockResolvedValue(undefined);
+
+    const result = await listConnections({ projectId, provider });
+
+    expect(result).toEqual([
+      {
+        id: 'conn-1',
+        displayName: 'Connection',
+        metadata: { authProviderKey: 'SomeProvider' },
       },
     ]);
   });

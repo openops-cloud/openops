@@ -1,12 +1,16 @@
-import {
-  AppConnectionStatus,
-  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
-  BenchmarkProviders,
-  BenchmarkWizardOption,
-} from '@openops/shared';
+import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
 import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
+import { getAuthProviderMetadata } from '../app-connection/connection-providers-resolver';
 import { throwValidationError } from './errors';
 import type { WizardContext } from './provider-adapter';
+
+export async function getAuthProviderLogoUrl(
+  authProviderKey: string,
+  projectId: string,
+): Promise<string | undefined> {
+  const auth = await getAuthProviderMetadata(authProviderKey, projectId);
+  return auth?.authProviderLogoUrl;
+}
 
 export async function listConnections(
   context: WizardContext,
@@ -25,13 +29,19 @@ export async function listConnections(
     connectionsIds: undefined,
   });
 
-  return page.data.map((connection) => ({
-    id: connection.id,
-    displayName: connection.name,
-    imageLogoUrl:
-      BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[
-        context.provider as BenchmarkProviders
-      ],
-    metadata: { authProviderKey: connection.authProviderKey },
-  }));
+  const options = await Promise.all(
+    page.data.map(async (connection) => {
+      const imageLogoUrl = await getAuthProviderLogoUrl(
+        connection.authProviderKey,
+        context.projectId,
+      );
+      return {
+        id: connection.id,
+        displayName: connection.name,
+        ...(imageLogoUrl && { imageLogoUrl }),
+        metadata: { authProviderKey: connection.authProviderKey },
+      };
+    }),
+  );
+  return options;
 }

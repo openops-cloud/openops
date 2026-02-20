@@ -1,12 +1,14 @@
 import { getRegionsList, parseArn } from '@openops/common';
 import {
-  BENCHMARK_PROVIDER_IMAGE_LOGO_URLS,
-  BenchmarkProviders,
   BenchmarkWizardOption,
   CustomAuthConnectionValue,
+  REGION_IMAGE_LOGO_URL,
 } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
-import { listConnections } from '../../common-resolvers';
+import {
+  getAuthProviderLogoUrl,
+  listConnections,
+} from '../../common-resolvers';
 import { throwValidationError } from '../../errors';
 import type { WizardContext } from '../../provider-adapter';
 
@@ -24,7 +26,10 @@ export async function resolveOptions(
     case 'getConnectionAccounts':
       return getConnectionAccounts(context);
     case 'getRegionsList':
-      return getRegionsList();
+      return getRegionsList().map((region) => ({
+        ...region,
+        imageLogoUrl: REGION_IMAGE_LOGO_URL,
+      }));
     default:
       throwValidationError(`Unknown AWS wizard option method: ${method}`);
   }
@@ -51,9 +56,14 @@ async function getConnectionAccounts(
     return [];
   }
 
+  const imageLogoUrl = await getAuthProviderLogoUrl(
+    connection.authProviderKey,
+    context.projectId,
+  );
+
   return roles.map((role) => ({
     id: parseArn(role.assumeRoleArn).accountId,
     displayName: role.accountName,
-    imageLogoUrl: BENCHMARK_PROVIDER_IMAGE_LOGO_URLS[BenchmarkProviders.AWS],
+    ...(imageLogoUrl && { imageLogoUrl }),
   }));
 }
