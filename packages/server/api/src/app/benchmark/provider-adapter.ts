@@ -19,7 +19,12 @@ export type WizardStepOptionsSource =
 
 export type WizardStepConditional = {
   when: string;
-  skipToStep: string;
+  onSuccess?: {
+    optionsSource?: WizardStepOptionsSource;
+  };
+  onFailure?: {
+    skipToStep?: string;
+  };
 };
 
 export type WizardConfigStep = {
@@ -43,6 +48,7 @@ export type ProviderAdapter = {
     method: string,
     context: WizardContext,
   ): Promise<BenchmarkWizardOption[]>;
+  evaluateConditional(when: string, context: WizardContext): Promise<boolean>;
 };
 
 const providers = new Map<string, ProviderAdapter>();

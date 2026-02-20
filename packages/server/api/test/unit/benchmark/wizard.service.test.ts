@@ -4,6 +4,7 @@ import { resolveWizardNavigation } from '../../../src/app/benchmark/wizard.servi
 jest.mock('../../../src/app/benchmark/register-providers', () => ({}));
 
 const mockResolveOptions = jest.fn().mockResolvedValue([]);
+const mockEvaluateConditional = jest.fn().mockResolvedValue(true);
 
 const MOCK_WIZARD_CONFIG = {
   provider: 'test',
@@ -25,7 +26,7 @@ const MOCK_WIZARD_CONFIG = {
       },
       conditional: {
         when: 'step1.supportsMulti',
-        skipToStep: 'step3',
+        onFailure: { skipToStep: 'step3' },
       },
       nextStep: 'step3',
     },
@@ -54,6 +55,7 @@ const MOCK_WIZARD_CONFIG = {
 const mockProviderAdapter: ProviderAdapter = {
   config: MOCK_WIZARD_CONFIG,
   resolveOptions: mockResolveOptions,
+  evaluateConditional: mockEvaluateConditional,
 };
 
 const mockGetProvider = jest.fn((provider: string): ProviderAdapter => {
@@ -74,6 +76,7 @@ describe('resolveWizardNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockResolveOptions.mockResolvedValue([]);
+    mockEvaluateConditional.mockResolvedValue(true);
   });
 
   it('returns last_step with nextStep null when wizard complete', async () => {
