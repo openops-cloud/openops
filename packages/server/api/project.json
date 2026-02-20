@@ -20,7 +20,14 @@
         "outputPath": "dist/packages/server/api",
         "main": "packages/server/api/src/main.ts",
         "tsConfig": "packages/server/api/tsconfig.app.json",
-        "assets": ["packages/server/api/src/assets"],
+        "assets": [
+          "packages/server/api/src/assets",
+          {
+            "input": "packages/server/api/src/app/benchmark/workflows-catalog",
+            "output": "workflows-catalog",
+            "glob": "**/*"
+          }
+        ],
         "webpackConfig": "packages/server/api/webpack.config.js",
         "generatePackageJson": false,
         "babelUpwardRootMode": true,

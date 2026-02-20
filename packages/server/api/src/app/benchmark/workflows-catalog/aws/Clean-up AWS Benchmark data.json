@@ -1,0 +1,210 @@
+{
+  "created": "1771595759257",
+  "updated": "1771595759257",
+  "name": "Clean-up AWS Benchmark data",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "Clean-up AWS Benchmark data",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Every Month",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-schedule",
+        "blockVersion": "~0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "timezone": "UTC",
+          "hour_of_the_day": 1,
+          "day_of_the_month": 1
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "every_month"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "RPHRb3WqRbtqgngCrRBTU",
+        "name": "step_d",
+        "type": "BLOCK",
+        "valid": true,
+        "settings": {
+          "input": {
+            "filters": {
+              "filters": [
+                {
+                  "value": {
+                    "value": "AWS Benchmark"
+                  },
+                  "fieldName": "Workflow",
+                  "filterType": "Contains"
+                }
+              ]
+            },
+            "tableName": "Timeseries",
+            "filterType": "AND"
+          },
+          "blockName": "@openops/block-openops-tables",
+          "blockType": "OFFICIAL",
+          "actionName": "get_records",
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "packageType": "REGISTRY",
+          "blockVersion": "~0.0.1",
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "jMTYsBzcQIgJtd6617Pp0",
+          "name": "step_e",
+          "type": "LOOP_ON_ITEMS",
+          "valid": true,
+          "settings": {
+            "items": "{{step_d['items']}}",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            }
+          },
+          "nextAction": {
+            "id": "CIq91DE18SXAfBZE0BDcH",
+            "name": "step_a",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "filters": {
+                  "filters": [
+                    {
+                      "value": {
+                        "value": "AWS Benchmark"
+                      },
+                      "fieldName": "Workflow",
+                      "filterType": "Contains"
+                    }
+                  ]
+                },
+                "tableName": "Opportunities",
+                "filterType": "AND"
+              },
+              "blockName": "@openops/block-openops-tables",
+              "blockType": "OFFICIAL",
+              "actionName": "get_records",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "~0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "DQQFIGvJ0Bul0ImkYtloz",
+              "name": "step_b",
+              "type": "LOOP_ON_ITEMS",
+              "valid": true,
+              "settings": {
+                "items": "{{step_a['items']}}",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                }
+              },
+              "displayName": "Loop on Opportunities",
+              "firstLoopAction": {
+                "id": "UYI6CVO2zKmD8VRis1x7Z",
+                "name": "step_c",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "tableName": "Opportunities",
+                    "rowPrimaryKey": "{{step_b['item']['ID']}}"
+                  },
+                  "blockName": "@openops/block-openops-tables",
+                  "blockType": "OFFICIAL",
+                  "actionName": "delete_record",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "~0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Delete Record",
+                "stepIndex": 7
+              },
+              "stepIndex": 6
+            },
+            "displayName": "Get Opportunities",
+            "stepIndex": 5
+          },
+          "displayName": "Loop on Timeseries",
+          "firstLoopAction": {
+            "id": "3Ir4T3D7cDbUiUIP8HrAt",
+            "name": "step_f",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "tableName": "Timeseries",
+                "rowPrimaryKey": "{{step_e['item']['ID']}}"
+              },
+              "blockName": "@openops/block-openops-tables",
+              "blockType": "OFFICIAL",
+              "actionName": "delete_record",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "~0.0.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "displayName": "Delete Record",
+            "stepIndex": 4
+          },
+          "stepIndex": 3
+        },
+        "displayName": "Get Timeseries",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-schedule",
+    "@openops/block-openops-tables"
+  ],
+  "categories": []
+}

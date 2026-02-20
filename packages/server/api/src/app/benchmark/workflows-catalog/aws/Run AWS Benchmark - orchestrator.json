@@ -1,0 +1,347 @@
+{
+  "created": "1771600961090",
+  "updated": "1771600961090",
+  "name": "Run AWS Benchmark - orchestrator",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "Run AWS Benchmark - orchestrator",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "6CONYL2SRWTkjR6Ns178Q",
+        "name": "step_c",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "params": "{{trigger}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const params = inputs.params.body || {\n    workflows: [],\n    cleanupWorkflows: [],\n   \n      accounts: [],\n      regions: [],\n  \n  };\n\n  return params;\n};",
+            "packageJson": "{}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "21lf1rqbItzHYb7lSwT82",
+          "name": "step_e",
+          "type": "LOOP_ON_ITEMS",
+          "valid": true,
+          "settings": {
+            "items": "{{step_c['cleanupWorkflows']}}",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            }
+          },
+          "nextAction": {
+            "id": "rjxyvGxYw42djbJbtKX5K",
+            "name": "step_h",
+            "type": "LOOP_ON_ITEMS",
+            "valid": true,
+            "settings": {
+              "items": "{{step_c['workflows']}}",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              }
+            },
+            "nextAction": {
+              "id": "U1mgOfY0ZUmFG2ZDuylcD",
+              "name": "step_am",
+              "type": "CODE",
+              "valid": true,
+              "settings": {
+                "input": {},
+                "sourceCode": {
+                  "code": "import dayjs from 'dayjs';\n\nexport const code = async (inputs) => {\n  const now = dayjs();\n  const firstDay = now.subtract(6, 'month').startOf('month').format('YYYY-MM-DD');\n  const lastDay = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');\n\n  return {\n    firstDay,\n    lastDay,\n  };\n};",
+                  "packageJson": "{\n  \"dependencies\": {\n    \"dayjs\": \"^1.11.10\"\n  }\n}"
+                },
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "o4W8Jd7gCpYWBWUayaaJD",
+                "name": "step_ak",
+                "type": "LOOP_ON_ITEMS",
+                "valid": true,
+                "settings": {
+                  "items": "{{step_c}}",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  }
+                },
+                "displayName": "Loop on accounts",
+                "firstLoopAction": {
+                  "id": "0NkEyTR1kUIKdD8Al27P2",
+                  "name": "step_s",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['AWS-Production']}}",
+                      "dryRun": false,
+                      "account": {},
+                      "commandToRun": "aws ce get-cost-and-usage \\\n    --time-period Start={{step_am['firstDay']}},End={{step_am['lastDay']}} \\\n    --granularity MONTHLY \\\n    --metrics \"AmortizedCost\" \\\n    --filter '{\"Dimensions\":{\"Key\":\"RECORD_TYPE\",\"Values\":[\"Usage\"]}}' "
+                    },
+                    "blockName": "@openops/block-aws",
+                    "blockType": "OFFICIAL",
+                    "actionName": "aws_cli",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {
+                            "auth": false,
+                            "account": {
+                              "accounts": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.3",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "ClflsNTJG8CGapBkHeksZ",
+                    "name": "step_an",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_s['ResultsByTime']}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "Loop on Items",
+                    "firstLoopAction": {
+                      "id": "hmtz5uaGgOaqn8rDYnFZq",
+                      "name": "step_al",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "tableName": "Timeseries",
+                          "rowPrimaryKey": {
+                            "rowPrimaryKey": null
+                          },
+                          "fieldsProperties": {
+                            "fieldsProperties": [
+                              {
+                                "fieldName": "Workflow",
+                                "newFieldValue": {
+                                  "newFieldValue": "Run AWS Benchmark"
+                                }
+                              },
+                              {
+                                "fieldName": "Value",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_an['item']['Total']['AmortizedCost']['Amount']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Date",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_an['item']['TimePeriod']['Start']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Account",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_ak['item']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Type",
+                                "newFieldValue": {
+                                  "newFieldValue": "Monthly Amortized Cost"
+                                }
+                              }
+                            ]
+                          },
+                          "roundToFieldPrecision": true
+                        },
+                        "blockName": "@openops/block-openops-tables",
+                        "blockType": "OFFICIAL",
+                        "actionName": "update_record",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Save monthly cost into Timeseries",
+                      "stepIndex": 11
+                    },
+                    "stepIndex": 10
+                  },
+                  "displayName": "Retrieve last month bill",
+                  "stepIndex": 9
+                },
+                "stepIndex": 8
+              },
+              "displayName": "Get dates",
+              "stepIndex": 7
+            },
+            "displayName": "Loop on benchmark flows",
+            "firstLoopAction": {
+              "id": "m2tQyXsoO8lF1P9c8nHPD",
+              "name": "step_a",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "http://localhost:4200/api/v1/webhooks/{{step_h['item']}}/sync",
+                  "auth": null,
+                  "body": {
+                    "data": {
+                      "aws_regions_array": "{{step_c['regions']}}",
+                      "aws_accounts_array": "{{step_c['accounts']}}"
+                    }
+                  },
+                  "method": "POST",
+                  "headers": {},
+                  "timeout": null,
+                  "failsafe": false,
+                  "body_type": "json",
+                  "use_proxy": false,
+                  "queryParams": {},
+                  "proxy_settings": {}
+                },
+                "blockName": "@openops/block-http",
+                "blockType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.5.1",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": true
+                  }
+                }
+              },
+              "displayName": "Run sub-workflow",
+              "stepIndex": 6
+            },
+            "stepIndex": 5
+          },
+          "displayName": "Loop on cleanup flows",
+          "firstLoopAction": {
+            "id": "iqt1TIfwmLkQZArE887Nv",
+            "name": "step_b",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "http://localhost:4200/api/v1/webhooks/{{step_e['item']}}/sync",
+                "body": {
+                  "data": {
+                    "aws_regions_array": "{{step_c['regions']}}",
+                    "aws_accounts_array": "{{step_c['accounts']}}"
+                  }
+                },
+                "method": "POST",
+                "headers": {},
+                "timeout": null,
+                "failsafe": false,
+                "body_type": "json",
+                "use_proxy": false,
+                "queryParams": {},
+                "proxy_settings": {}
+              },
+              "blockName": "@openops/block-http",
+              "blockType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.5.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "displayName": "Run cleanup workflow",
+            "stepIndex": 4
+          },
+          "stepIndex": 3
+        },
+        "displayName": "Fetch webhook params",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-http",
+    "@openops/block-aws",
+    "@openops/block-openops-tables"
+  ],
+  "categories": []
+}
