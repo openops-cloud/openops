@@ -14,6 +14,15 @@ const SocketContext = React.createContext<typeof socket>(socket);
 
 export const useSocket = () => React.useContext(SocketContext);
 
+export const reconnectSocket = (): void => {
+  if (socket.connected) {
+    socket.disconnect();
+    socket.connect();
+  } else {
+    socket.connect();
+  }
+};
+
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffectOnce(() => {
     socket.on('connect_error', (err) => {

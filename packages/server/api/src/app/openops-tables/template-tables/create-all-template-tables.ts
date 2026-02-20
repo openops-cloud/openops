@@ -5,6 +5,7 @@ import { createAutoInstancesShutdownTable } from './create-auto-instances-shutdo
 import { createBaseTemplateTables } from './create-base-template-tables';
 import { createKnownCostTypesByApplicationTable } from './create-known-cost-types-by-application-table';
 import { createOpportunitiesTable } from './create-opportunities-table';
+import { createTimeseriesTable } from './create-timeseries-table';
 
 async function additionalTemplateTables(
   tablesContext: TablesServerContext,
@@ -13,6 +14,7 @@ async function additionalTemplateTables(
   await createAggregatedCostsTable(tablesContext);
   await createKnownCostTypesByApplicationTable(tablesContext);
   await createAutoInstancesShutdownTable(tablesContext);
+  await createTimeseriesTable(tablesContext);
   logger.info('[Seeding additional template tables] Done');
 }
 

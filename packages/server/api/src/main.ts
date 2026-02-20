@@ -17,6 +17,7 @@ import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/open
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-known-cost-types-by-application-seed';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
+import { seedTimeseriesTemplateTable } from './app/database/seeds/openops-timeseries-table-seed';
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
@@ -99,6 +100,7 @@ const main = async (): Promise<void> => {
     await seedFocusDataAggregationTemplateTable();
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
+    await seedTimeseriesTemplateTable();
 
     if (system.isAnalyticsEnabled()) {
       await analytics.seedAnalytics();
