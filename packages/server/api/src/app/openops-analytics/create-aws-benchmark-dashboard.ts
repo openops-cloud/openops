@@ -95,10 +95,9 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
     TIMESERIES_TABLE_NAME,
   ]);
   if (!tableIds) {
-    logger.error(
-      'Could not resolve required table IDs, aborting dashboard creation',
+    throw new Error(
+      'Could not resolve required table IDs for benchmark dashboard',
     );
-    return;
   }
   const opportunitiesTableName = `${OPPORTUNITIES_TABLE_NAME}_${tableIds[OPPORTUNITIES_TABLE_NAME]}${USERFRIENDLYTABLE_SUFFIX}`;
   const timeseriesTableName = `${TIMESERIES_TABLE_NAME}_${tableIds[TIMESERIES_TABLE_NAME]}${USERFRIENDLYTABLE_SUFFIX}`;
