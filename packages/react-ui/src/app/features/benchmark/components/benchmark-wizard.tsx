@@ -1,4 +1,5 @@
 import {
+  LoadingSpinner,
   StepCounter,
   Wizard,
   WizardClose,
@@ -10,6 +11,7 @@ import {
   WizardStep,
   WizardTitle,
 } from '@openops/components/ui';
+import { CreateBenchmarkResponse } from '@openops/shared';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
 import { useCallback, useState } from 'react';
@@ -25,6 +27,7 @@ import { InitialBenchmarkStep } from './initial-benchmark-step';
 
 interface BenchmarkWizardProps {
   onClose: () => void;
+  onBenchmarkCreated?: (result: CreateBenchmarkResponse) => void;
 }
 
 interface ProviderConnectionDialogProps {
@@ -52,7 +55,10 @@ const ProviderConnectionDialog = ({
   </DynamicFormValidationProvider>
 );
 
-export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
+export const BenchmarkWizard = ({
+  onClose,
+  onBenchmarkCreated,
+}: BenchmarkWizardProps) => {
   const [connectingProvider, setConnectingProvider] = useState<string | null>(
     null,
   );
@@ -66,11 +72,12 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
     currentStepResponse,
     currentSelections,
     setCurrentSelections,
+    isCreatingBenchmark,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,
     handlePrevious,
-  } = useBenchmarkWizardNavigation(connectedProviders);
+  } = useBenchmarkWizardNavigation(connectedProviders, onBenchmarkCreated);
 
   const connectingProviderConfig = getProviderByValue(connectingProvider);
 
@@ -103,23 +110,34 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
         </WizardHeader>
 
         <WizardContent className="max-h-[358px]">
-          <WizardStep value="initial" key="initial">
-            <InitialBenchmarkStep
-              selectedProvider={selectedProvider}
-              onProviderChange={setSelectedProvider}
-              onConnect={setConnectingProvider}
-              connectedProviders={connectedProviders}
-            />
-          </WizardStep>
-          <WizardStep value="provider-step" key="provider-step">
-            {currentStepResponse && (
-              <DynamicBenchmarkStep
-                stepResponse={currentStepResponse}
-                value={currentSelections}
-                onValueChange={setCurrentSelections}
-              />
-            )}
-          </WizardStep>
+          {isCreatingBenchmark ? (
+            <div className="flex flex-col items-center justify-center gap-4 h-full py-12">
+              <LoadingSpinner size={32} />
+              <p className="text-sm text-muted-foreground">
+                {t('Creating workflows for the Benchmark report')}
+              </p>
+            </div>
+          ) : (
+            <>
+              <WizardStep value="initial" key="initial">
+                <InitialBenchmarkStep
+                  selectedProvider={selectedProvider}
+                  onProviderChange={setSelectedProvider}
+                  onConnect={setConnectingProvider}
+                  connectedProviders={connectedProviders}
+                />
+              </WizardStep>
+              <WizardStep value="provider-step" key="provider-step">
+                {currentStepResponse && (
+                  <DynamicBenchmarkStep
+                    stepResponse={currentStepResponse}
+                    value={currentSelections}
+                    onValueChange={setCurrentSelections}
+                  />
+                )}
+              </WizardStep>
+            </>
+          )}
         </WizardContent>
 
         <WizardFooter>

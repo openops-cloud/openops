@@ -2,6 +2,7 @@ import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import {
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  CreateBenchmarkResponse,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -31,6 +32,7 @@ type UseBenchmarkWizardNavigationResult = {
   currentSelections: string[];
   setCurrentSelections: (selections: string[]) => void;
   isLoadingStep: boolean;
+  isCreatingBenchmark: boolean;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
@@ -39,6 +41,7 @@ type UseBenchmarkWizardNavigationResult = {
 
 export const useBenchmarkWizardNavigation = (
   connectedProviders: Record<string, boolean>,
+  onBenchmarkCreated?: (result: CreateBenchmarkResponse) => void,
 ): UseBenchmarkWizardNavigationResult => {
   const [selectedProvider, setSelectedProvider] = useState<string>();
   const [wizardPhase, setWizardPhase] = useState<WizardPhase>('initial');
@@ -56,6 +59,23 @@ export const useBenchmarkWizardNavigation = (
         provider: string;
         request: BenchmarkWizardRequest;
       }) => benchmarkApi.getWizardStep(provider, request),
+      onError: () => {
+        toast(INTERNAL_ERROR_TOAST);
+      },
+    });
+
+  const { mutateAsync: runCreateBenchmark, isPending: isCreatingBenchmark } =
+    useMutation({
+      mutationFn: ({
+        provider,
+        benchmarkConfiguration,
+      }: {
+        provider: string;
+        benchmarkConfiguration: Record<string, string[]>;
+      }) => benchmarkApi.createBenchmark(provider, benchmarkConfiguration),
+      onSuccess: (result) => {
+        onBenchmarkCreated?.(result);
+      },
       onError: () => {
         toast(INTERNAL_ERROR_TOAST);
       },
@@ -84,12 +104,21 @@ export const useBenchmarkWizardNavigation = (
       selections: currentSelections,
     };
     const newHistory = [...stepHistory, committed];
+    const benchmarkConfiguration = buildBenchmarkConfiguration(newHistory);
+
+    if (currentStepResponse.nextStep === null) {
+      await runCreateBenchmark({
+        provider: selectedProvider,
+        benchmarkConfiguration,
+      });
+      return;
+    }
 
     const nextStepResponse = await fetchWizardStep({
       provider: selectedProvider,
       request: {
         currentStep: currentStepResponse.currentStep,
-        benchmarkConfiguration: buildBenchmarkConfiguration(newHistory),
+        benchmarkConfiguration,
       },
     });
 
@@ -123,8 +152,9 @@ export const useBenchmarkWizardNavigation = (
 
   const isProviderStepNextDisabled = () =>
     (!hasEmptyOptions && currentSelections.length === 0) ||
-    !currentStepResponse?.nextStep ||
-    isLoadingStep;
+    !currentStepResponse ||
+    isLoadingStep ||
+    isCreatingBenchmark;
 
   const isNextDisabled =
     wizardPhase === 'initial'
@@ -139,6 +169,7 @@ export const useBenchmarkWizardNavigation = (
     currentSelections,
     setCurrentSelections,
     isLoadingStep,
+    isCreatingBenchmark,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,

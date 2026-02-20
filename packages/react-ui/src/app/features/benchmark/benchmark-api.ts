@@ -2,6 +2,8 @@ import {
   BenchmarkResponse,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  CreateBenchmarkRequest,
+  CreateBenchmarkResponse,
 } from '@openops/shared';
 
 import { api } from '@/app/lib/api';
@@ -18,4 +20,13 @@ const getWizardStep = (
     request,
   );
 
-export const benchmarkApi = { getBenchmark, getWizardStep };
+const createBenchmark = (
+  provider: string,
+  benchmarkConfiguration: Record<string, string[]>,
+): Promise<CreateBenchmarkResponse> =>
+  api.post<CreateBenchmarkResponse, CreateBenchmarkRequest>(
+    `/v1/benchmarks/${provider}`,
+    { benchmarkConfiguration },
+  );
+
+export const benchmarkApi = { getBenchmark, getWizardStep, createBenchmark };
