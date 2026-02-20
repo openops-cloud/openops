@@ -1,10 +1,12 @@
 import {
+  StepCounter,
   Wizard,
   WizardClose,
   WizardContent,
   WizardFooter,
   WizardHeader,
   WizardNext,
+  WizardPrevious,
   WizardStep,
   WizardTitle,
 } from '@openops/components/ui';
@@ -16,7 +18,9 @@ import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-fo
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 
 import { CloudProvider, getProviderByValue } from '../cloud-providers';
+import { useBenchmarkWizardNavigation } from '../use-benchmark-wizard-navigation';
 import { useProviderConnections } from '../use-provider-connections';
+import { DynamicBenchmarkStep } from './dynamic-benchmark-step/dynamic-benchmark-step';
 import { InitialBenchmarkStep } from './initial-benchmark-step';
 
 interface BenchmarkWizardProps {
@@ -49,28 +53,29 @@ const ProviderConnectionDialog = ({
 );
 
 export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
-  const [selectedProvider, setSelectedProvider] = useState<string>();
   const [connectingProvider, setConnectingProvider] = useState<string | null>(
     null,
   );
 
   const { connectedProviders, refetchConnections } = useProviderConnections();
 
+  const {
+    selectedProvider,
+    setSelectedProvider,
+    wizardPhase,
+    currentStepResponse,
+    currentSelections,
+    setCurrentSelections,
+    isNextDisabled,
+    handleNextFromInitial,
+    handleNextFromProviderStep,
+    handlePrevious,
+  } = useBenchmarkWizardNavigation(connectedProviders);
+
   const connectingProviderConfig = getProviderByValue(connectingProvider);
-
-  const isSelectedProviderConnected =
-    !!selectedProvider && connectedProviders[selectedProvider] === true;
-
-  const handleProviderConnect = (provider: string) => {
-    setConnectingProvider(provider);
-  };
 
   const handleConnectionSaved = async () => {
     refetchConnections();
-  };
-
-  const handleConnectionDialogClose = () => {
-    setConnectingProvider(null);
   };
 
   return (
@@ -79,12 +84,12 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
         <ProviderConnectionDialog
           providerConfig={connectingProviderConfig}
           onSaved={handleConnectionSaved}
-          onClose={handleConnectionDialogClose}
+          onClose={() => setConnectingProvider(null)}
         />
       )}
       <Wizard
         className="border-l-0 border-t-0"
-        value="initial"
+        value={wizardPhase}
         onValueChange={noop}
       >
         <WizardHeader className="min-h-[60px] bg-white border-gray-200">
@@ -97,15 +102,45 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
             <InitialBenchmarkStep
               selectedProvider={selectedProvider}
               onProviderChange={setSelectedProvider}
-              onConnect={handleProviderConnect}
+              onConnect={setConnectingProvider}
               connectedProviders={connectedProviders}
             />
+          </WizardStep>
+          <WizardStep value="provider-step" key="provider-step">
+            {currentStepResponse && (
+              <DynamicBenchmarkStep
+                stepResponse={currentStepResponse}
+                value={currentSelections}
+                onValueChange={setCurrentSelections}
+              />
+            )}
           </WizardStep>
         </WizardContent>
 
         <WizardFooter>
-          <div className="flex-1" />
-          <WizardNext disabled={!isSelectedProviderConnected} />
+          {wizardPhase === 'provider-step' ? (
+            <>
+              <WizardPrevious onPrevious={handlePrevious} />
+              {currentStepResponse && (
+                <StepCounter
+                  current={currentStepResponse.stepIndex}
+                  total={currentStepResponse.totalSteps}
+                />
+              )}
+              <WizardNext
+                onNext={handleNextFromProviderStep}
+                disabled={isNextDisabled}
+              />
+            </>
+          ) : (
+            <>
+              <div className="flex-1" />
+              <WizardNext
+                onNext={handleNextFromInitial}
+                disabled={isNextDisabled}
+              />
+            </>
+          )}
         </WizardFooter>
       </Wizard>
     </div>
