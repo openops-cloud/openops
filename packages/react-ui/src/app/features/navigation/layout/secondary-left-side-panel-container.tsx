@@ -9,7 +9,7 @@ import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 
-import { BenchmarkWizard } from '../../benchmark/benchmark-wizard';
+import { BenchmarkWizard } from '../../benchmark/components/benchmark-wizard';
 
 interface SidePanelContainerProps {
   onDragging: (isDragging: boolean) => void;

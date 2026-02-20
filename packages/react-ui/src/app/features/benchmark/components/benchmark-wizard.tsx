@@ -1,0 +1,113 @@
+import {
+  Wizard,
+  WizardClose,
+  WizardContent,
+  WizardFooter,
+  WizardHeader,
+  WizardNext,
+  WizardStep,
+  WizardTitle,
+} from '@openops/components/ui';
+import { t } from 'i18next';
+import { noop } from 'lodash-es';
+import { useState } from 'react';
+
+import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
+
+import { CloudProvider, getProviderByValue } from '../cloud-providers';
+import { useProviderConnections } from '../use-provider-connections';
+import { InitialBenchmarkStep } from './initial-benchmark-step';
+
+interface BenchmarkWizardProps {
+  onClose: () => void;
+}
+
+interface ProviderConnectionDialogProps {
+  providerConfig: CloudProvider;
+  onSaved: () => Promise<void>;
+  onClose: () => void;
+}
+
+const ProviderConnectionDialog = ({
+  providerConfig,
+  onSaved,
+  onClose,
+}: ProviderConnectionDialogProps) => (
+  <DynamicFormValidationProvider>
+    <CreateOrEditConnectionDialog
+      authProviderKey={providerConfig.authProviderKey}
+      connectionToEdit={null}
+      reconnect={false}
+      onConnectionSaved={onSaved}
+      open={true}
+      setOpen={(open) => {
+        if (!open) onClose();
+      }}
+    />
+  </DynamicFormValidationProvider>
+);
+
+export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
+  const [selectedProvider, setSelectedProvider] = useState<string>();
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(
+    null,
+  );
+
+  const { connectedProviders, refetchConnections } = useProviderConnections();
+
+  const connectingProviderConfig = getProviderByValue(connectingProvider);
+
+  const isSelectedProviderConnected =
+    !!selectedProvider && connectedProviders[selectedProvider] === true;
+
+  const handleProviderConnect = (provider: string) => {
+    setConnectingProvider(provider);
+  };
+
+  const handleConnectionSaved = async () => {
+    refetchConnections();
+  };
+
+  const handleConnectionDialogClose = () => {
+    setConnectingProvider(null);
+  };
+
+  return (
+    <div className="h-full w-full flex flex-col bg-greyBlue-100 dark:bg-background">
+      {connectingProviderConfig && (
+        <ProviderConnectionDialog
+          providerConfig={connectingProviderConfig}
+          onSaved={handleConnectionSaved}
+          onClose={handleConnectionDialogClose}
+        />
+      )}
+      <Wizard
+        className="border-l-0 border-t-0"
+        value="initial"
+        onValueChange={noop}
+      >
+        <WizardHeader className="min-h-[60px] bg-white border-gray-200">
+          <WizardTitle>{t('Run a Benchmark')}</WizardTitle>
+          <WizardClose onClose={onClose} />
+        </WizardHeader>
+
+        <WizardContent className="max-h-[358px]">
+          <WizardStep value="initial" key="initial">
+            <InitialBenchmarkStep
+              selectedProvider={selectedProvider}
+              onProviderChange={setSelectedProvider}
+              onConnect={handleProviderConnect}
+              connectedProviders={connectedProviders}
+            />
+          </WizardStep>
+        </WizardContent>
+
+        <WizardFooter>
+          <div className="flex-1" />
+          <WizardNext disabled={!isSelectedProviderConnected} />
+        </WizardFooter>
+      </Wizard>
+    </div>
+  );
+};
