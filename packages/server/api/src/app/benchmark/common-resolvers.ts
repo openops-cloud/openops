@@ -29,19 +29,16 @@ export async function listConnections(
     connectionsIds: undefined,
   });
 
-  const options = await Promise.all(
-    page.data.map(async (connection) => {
-      const imageLogoUrl = await getAuthProviderLogoUrl(
-        connection.authProviderKey,
-        context.projectId,
-      );
-      return {
-        id: connection.id,
-        displayName: connection.name,
-        ...(imageLogoUrl && { imageLogoUrl }),
-        metadata: { authProviderKey: connection.authProviderKey },
-      };
-    }),
+  const authProviderKey = page.data[0].authProviderKey;
+  const providerLogoUrl = await getAuthProviderLogoUrl(
+    authProviderKey,
+    context.projectId,
   );
-  return options;
+
+  return page.data.map((connection) => ({
+    id: connection.id,
+    displayName: connection.name,
+    ...(providerLogoUrl && { imageLogoUrl: providerLogoUrl }),
+    metadata: { authProviderKey: connection.authProviderKey },
+  }));
 }

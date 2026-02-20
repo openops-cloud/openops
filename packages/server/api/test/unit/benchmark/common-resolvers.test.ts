@@ -49,29 +49,15 @@ describe('listConnections', () => {
       previous: null,
     });
     const awsAuthLogo = '/blocks/aws.png';
-    mockGetAuthProviderMetadata
-      .mockResolvedValueOnce({
-        authProviderKey: 'AWS',
-        authProviderLogoUrl: awsAuthLogo,
-      })
-      .mockResolvedValueOnce({
-        authProviderKey: 'AWS',
-        authProviderLogoUrl: awsAuthLogo,
-      });
+    mockGetAuthProviderMetadata.mockResolvedValue({
+      authProviderKey: 'AWS',
+      authProviderLogoUrl: awsAuthLogo,
+    });
 
     const result = await listConnections({ projectId, provider });
 
-    expect(mockGetAuthProviderMetadata).toHaveBeenCalledTimes(2);
-    expect(mockGetAuthProviderMetadata).toHaveBeenNthCalledWith(
-      1,
-      'AWS',
-      projectId,
-    );
-    expect(mockGetAuthProviderMetadata).toHaveBeenNthCalledWith(
-      2,
-      'AWS',
-      projectId,
-    );
+    expect(mockGetAuthProviderMetadata).toHaveBeenCalledTimes(1);
+    expect(mockGetAuthProviderMetadata).toHaveBeenCalledWith('AWS', projectId);
     expect(result).toEqual([
       {
         id: 'conn-1',
@@ -114,6 +100,7 @@ describe('listConnections', () => {
 
     await listConnections({ projectId, provider });
 
+    expect(mockGetAuthProviderMetadata).not.toHaveBeenCalled();
     expect(mockList).toHaveBeenCalledTimes(1);
     expect(mockList).toHaveBeenCalledWith({
       projectId,
