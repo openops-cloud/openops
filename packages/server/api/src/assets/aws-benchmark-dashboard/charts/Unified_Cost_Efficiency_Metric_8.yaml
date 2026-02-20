@@ -1,0 +1,58 @@
+slice_name: Unified Cost Efficiency Metric
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 5__table
+  viz_type: big_number_total
+  slice_id: 8
+  metric:
+    aggregate: null
+    column: null
+    datasourceWarning: false
+    expressionType: SQL
+    hasCustomLabel: false
+    label: (1 - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))
+    optionName: metric_8n81cekkkvg_lszhg36gvtn
+    sqlExpression: (1 - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))
+  adhoc_filters:
+    - clause: WHERE
+      comparator: null
+      datasourceWarning: false
+      expressionType: SIMPLE
+      filterOptionName: filter_t0i5moi5eb_i5dy7umccqr
+      isExtra: false
+      isNew: false
+      operator: IS NOT NULL
+      operatorId: IS_NOT_NULL
+      sqlExpression: null
+      subject: Account
+  header_font_size: 0.5
+  subheader_font_size: 0.15
+  y_axis_format: .2%
+  currency_format:
+    symbolPosition: suffix
+  time_format: smart_date
+  force_timestamp_formatting: false
+  conditional_formatting:
+    - colorScheme: '#EFA1AA'
+      column: SUM(kpi/100)
+      operator: <
+      targetValue: 85
+  extra_form_data: {}
+  dashboards:
+    - 2
+    - 1
+query_context:
+  '{"datasource":{"id":5,"type":"table"},"force":false,"queries":[{"filters":[{"col":"Account","op":"IS
+  NOT NULL"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":[{"aggregate":null,"column":null,"datasourceWarning":false,"expressionType":"SQL","hasCustomLabel":false,"label":"(1
+  - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))","optionName":"metric_8n81cekkkvg_lszhg36gvtn","sqlExpression":"(1
+  - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))"}],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"5__table","viz_type":"big_number_total","slice_id":8,"metric":{"aggregate":null,"column":null,"datasourceWarning":false,"expressionType":"SQL","hasCustomLabel":false,"label":"(1
+  - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))","optionName":"metric_8n81cekkkvg_lszhg36gvtn","sqlExpression":"(1
+  - (SUM(savings) / NULLIF(SUM(monthly_cost), 0)))"},"adhoc_filters":[{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_t0i5moi5eb_i5dy7umccqr","isExtra":false,"isNew":false,"operator":"IS
+  NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"Account"}],"header_font_size":0.5,"subheader_font_size":0.15,"y_axis_format":".2%","currency_format":{"symbolPosition":"suffix"},"time_format":"smart_date","force_timestamp_formatting":false,"conditional_formatting":[{"colorScheme":"#EFA1AA","column":"SUM(kpi/100)","operator":"<","targetValue":85}],"extra_form_data":{},"dashboards":[2,1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 48cc43c9-0f6b-4158-9129-1adf8aece20b
+version: 1.0.0
+dataset_uuid: f5fbb976-0836-4cc5-8382-77d544626551

@@ -6,7 +6,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { organizationService } from '../organization/organization.service';
-import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
+import { getOrCreateOpenOpsTablesDatabaseConnection } from './create-database-connection';
 import { createOrGetDashboard } from './dashboard';
 import { getOrCreateDataset } from './get-or-create-dataset';
 import { createHomepageCharts } from './populate-homepage';
@@ -24,15 +24,8 @@ export async function seedAnalyticsDashboards(): Promise<void> {
 
   const { access_token } = await authenticateOpenOpsAnalyticsAdmin();
 
-  const dbConnection = await getOrCreatePostgresDatabaseConnection(
+  const dbConnection = await getOrCreateOpenOpsTablesDatabaseConnection(
     access_token,
-    system.getOrThrow(AppSystemProp.OPENOPS_TABLES_DATABASE_NAME),
-    system.getOrThrow(AppSystemProp.POSTGRES_PASSWORD),
-    system.getOrThrow(AppSystemProp.POSTGRES_PORT),
-    system.getOrThrow(AppSystemProp.POSTGRES_USERNAME),
-    system.get(AppSystemProp.OPENOPS_TABLES_DB_HOST) ??
-      system.getOrThrow(AppSystemProp.POSTGRES_HOST),
-    'openops_tables_connection',
   );
 
   const homepage = await createOrGetDashboard(
