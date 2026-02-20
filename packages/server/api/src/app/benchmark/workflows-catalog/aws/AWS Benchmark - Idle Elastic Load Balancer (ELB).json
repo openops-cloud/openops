@@ -1,0 +1,816 @@
+{
+  "created": "1771567491415",
+  "updated": "1771567491415",
+  "name": "AWS Benchmark - Idle Elastic Load Balancer (ELB)",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - Idle Elastic Load Balancer (ELB)",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "O73GLAY9cyFV6GNynw7Pi",
+        "name": "step_e",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "hjStRGd1G1hXmC5lQ2Ijk",
+          "name": "step_f",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "wfName",
+              "store_scope": "RUN",
+              "defaultValue": "AWS Benchmark - Idle Elastic Load Balancer (ELB)"
+            },
+            "blockName": "@openops/block-store",
+            "blockType": "OFFICIAL",
+            "actionName": "get",
+            "inputUiInfo": {
+              "customizedInputs": {
+                "settings": {
+                  "input": {}
+                }
+              }
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.5.1"
+          },
+          "nextAction": {
+            "id": "88uWDwuxbTUYrM6oTVNak",
+            "name": "step_i",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "first_number": "10",
+                "second_number": "1048576"
+              },
+              "blockName": "@openops/block-math-helper",
+              "blockType": "OFFICIAL",
+              "actionName": "multiplication_math",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.8",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "069lIhJs9dJYXWbV8riHu",
+              "name": "step_j",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "timeZone": "Europe/Warsaw",
+                  "timeFormat": "YYYY-MM-DDTHH:mm:ss"
+                },
+                "blockName": "@openops/block-date-helper",
+                "blockType": "OFFICIAL",
+                "actionName": "get_current_date",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "Mci9sFvArp5w1CiqXFWrK",
+                "name": "step_k",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "inputDate": "{{step_j}}",
+                    "expression": "-14 day",
+                    "outputFormat": "YYYY-MM-DDTHH:mm:ss",
+                    "inputDateFormat": "YYYY-MM-DDTHH:mm:ss"
+                  },
+                  "blockName": "@openops/block-date-helper",
+                  "blockType": "OFFICIAL",
+                  "actionName": "add_subtract_date",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.0.7",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "VT0cBElTnCZ4fm2Wo0wet",
+                  "name": "step_1",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_e['accounts']}}",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "nextAction": {
+                    "id": "wYhOoAQSqg2UXkOuIblN4",
+                    "name": "step_a",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": null,
+                        "body": {
+                          "data": {
+                            "status": "ok"
+                          }
+                        },
+                        "status": 200,
+                        "headers": {},
+                        "body_type": "json"
+                      },
+                      "blockName": "@openops/block-http",
+                      "blockType": "OFFICIAL",
+                      "actionName": "return_response",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Return Response",
+                    "stepIndex": 22
+                  },
+                  "displayName": "ACCOUNT",
+                  "firstLoopAction": {
+                    "id": "NDgm98QXqt7CREZzeGPMa",
+                    "name": "step_32",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_e['regions']}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "REGION",
+                    "firstLoopAction": {
+                      "id": "eZ6pFzNP3UgDkfZSM878e",
+                      "name": "step_2",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "auth": "{{connections['AWS']}}",
+                          "dryRun": false,
+                          "account": {
+                            "accounts": "{{step_1['item']}}"
+                          },
+                          "commandToRun": "aws elbv2 describe-load-balancers --region {{step_32['item']}}"
+                        },
+                        "blockName": "@openops/block-aws",
+                        "blockType": "OFFICIAL",
+                        "actionName": "aws_cli",
+                        "inputUiInfo": {
+                          "customizedInputs": {
+                            "settings": {
+                              "input": {
+                                "auth": true,
+                                "account": {
+                                  "accounts": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.3",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "id": "LHAbqJkJRFWC7dgbsm72Z",
+                        "name": "step_d",
+                        "type": "LOOP_ON_ITEMS",
+                        "valid": true,
+                        "settings": {
+                          "items": "{{step_2['LoadBalancers']}}",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          }
+                        },
+                        "displayName": "RESOURCE",
+                        "firstLoopAction": {
+                          "id": "oFH1XVrIV3iVfeVi2vHDi",
+                          "name": "step_g",
+                          "type": "CODE",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "arn": "{{step_d['item']['LoadBalancerArn']}}"
+                            },
+                            "sourceCode": {
+                              "code": "export const code = async ({ arn }) => {\n  return parseElbArn(arn);\n};\n\nconst parseElbArn = (arn) => {\n  if (typeof arn !== 'string') {\n    throw new Error('ARN must be a string');\n  }\n\n  const parts = arn.split(':');\n  if (parts.length < 6 || !parts[5]) {\n    throw new Error('Invalid ARN format');\n  }\n\n  const accountId = parts[4]; // <-- Extract account ID\n\n  const resource = parts[5];\n  const resourceParts = resource.split('/');\n\n  if (resourceParts.length < 2 || resourceParts[0] !== 'loadbalancer') {\n    throw new Error('ARN does not represent a Load Balancer');\n  }\n\n  const lbType = resourceParts[1]; // 'app', 'net', 'gateway', or 'classic'\n  let type;\n\n  if (lbType === 'app') {\n    type = 'Application';\n  } else if (lbType === 'net') {\n    type = 'Network';\n  } else if (lbType === 'gateway') {\n    type = 'Gateway';\n  } else if (lbType === 'classic') {\n    type = 'Classic';\n  } else {\n    throw new Error(`Unknown Load Balancer type: ${lbType}`);\n  }\n\n  const pricingParam = (type === 'Classic') ? 'AWSELB' : `Load Balancer-${type}`;\n  const namespace = (type === 'Classic') ? 'AWS/ELB' : `AWS/${type}ELB`;\n\n  const loadBalancerName = resourceParts.slice(1).join('/');\n\n  return {\n    accountId,\n    namespace,\n    loadBalancerName,\n    pricingParam,\n    type\n  };\n};\n",
+                              "packageJson": "{}"
+                            },
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "3j132XCJpe98LLdcMlvMt",
+                            "name": "step_27",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "filters": {
+                                  "filters": [
+                                    {
+                                      "value": {
+                                        "value": "{{step_f}}"
+                                      },
+                                      "fieldName": "Workflow",
+                                      "filterType": "Is equal",
+                                      "dynamicViewToggled": {
+                                        "value": true
+                                      }
+                                    },
+                                    {
+                                      "value": {
+                                        "value": "{{step_d['item']['LoadBalancerArn']}}"
+                                      },
+                                      "fieldName": "Resource Id",
+                                      "filterType": "Is equal",
+                                      "dynamicViewToggled": {
+                                        "value": true
+                                      }
+                                    }
+                                  ]
+                                },
+                                "tableName": "Opportunities",
+                                "filterType": "AND"
+                              },
+                              "blockName": "@openops/block-openops-tables",
+                              "blockType": "OFFICIAL",
+                              "actionName": "get_records",
+                              "inputUiInfo": {
+                                "customizedInputs": {
+                                  "settings": {
+                                    "input": {
+                                      "filters": {}
+                                    }
+                                  }
+                                }
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.0.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "id": "okWpniHSkhqSVTTqr2F5c",
+                              "name": "step_28",
+                              "type": "BRANCH",
+                              "valid": true,
+                              "settings": {
+                                "conditions": [
+                                  [
+                                    {
+                                      "operator": "NUMBER_IS_EQUAL_TO",
+                                      "firstValue": "{{step_27['count']}}",
+                                      "secondValue": "0",
+                                      "caseSensitive": false
+                                    }
+                                  ]
+                                ],
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                }
+                              },
+                              "nextAction": {
+                                "id": "Q1fUrCX1ub2KYIvUKaNaZ",
+                                "name": "step_h",
+                                "type": "BLOCK",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "auth": "{{connections['AWS']}}",
+                                    "dryRun": false,
+                                    "account": {
+                                      "accounts": "{{step_1['item']}}"
+                                    },
+                                    "commandToRun": "aws cloudwatch get-metric-statistics \\\n  --namespace {{step_g['namespace']}} \\\n  --metric-name ProcessedBytes \\\n  --dimensions Name=LoadBalancer,Value={{step_g['loadBalancerName']}} \\\n  --start-time {{step_k}} \\\n  --end-time {{step_j}} \\\n  --period 1209600 \\\n  --statistics Sum \\ \n  --region {{step_32['item']}}"
+                                  },
+                                  "blockName": "@openops/block-aws",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "aws_cli",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {
+                                      "settings": {
+                                        "input": {
+                                          "auth": true,
+                                          "account": {
+                                            "accounts": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.0.3",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "id": "tdiGwm8Z4trvBezgSWL0e",
+                                  "name": "step_l",
+                                  "type": "CODE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "bytes": "{{step_h['Datapoints'][0]['Sum']}}"
+                                    },
+                                    "sourceCode": {
+                                      "code": "export const code = async (inputs) => {\n  return bytesToHumanReadable(parseInt(inputs.bytes || 0));\n};\n\nconst bytesToHumanReadable = (bytes, decimals = 2) => {\n  // Validate that the input is a number.\n  if (typeof bytes !== 'number' || isNaN(bytes)) {\n    return 'Invalid input';\n  }\n\n  // Determine the sign for negative values.\n  const sign = bytes < 0 ? '-' : '';\n  bytes = Math.abs(bytes);\n\n  // Special case: 0 bytes.\n  if (bytes === 0) return '0 Bytes';\n\n  // Define the conversion factor and available size units.\n  const k = 1024;\n  const dm = decimals < 0 ? 0 : decimals;\n  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];\n\n  // Determine the appropriate unit.\n  const i = Math.floor(Math.log(bytes) / Math.log(k));\n\n  // Convert and format the number to the specified decimal places.\n  return sign + parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];\n};",
+                                      "packageJson": "{}"
+                                    },
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "QXwrSCo6dcCllQC0mw2P7",
+                                    "name": "step_b",
+                                    "type": "BRANCH",
+                                    "valid": true,
+                                    "settings": {
+                                      "conditions": [
+                                        [
+                                          {
+                                            "operator": "NUMBER_IS_LESS_THAN",
+                                            "firstValue": "{{step_h['Datapoints'][0]['Sum']}}",
+                                            "secondValue": "{{step_i}}"
+                                          }
+                                        ]
+                                      ],
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      }
+                                    },
+                                    "displayName": "If below bytes threshold",
+                                    "onSuccessAction": {
+                                      "id": "ovO3pT7Y4m6tqFttbMdgq",
+                                      "name": "step_c",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "auth": "{{connections['AWS']}}",
+                                          "service": {
+                                            "ServiceCode": "AWSELB",
+                                            "AttributeNames": [
+                                              "termType",
+                                              "productFamily",
+                                              "servicecode",
+                                              "location",
+                                              "locationType",
+                                              "group",
+                                              "groupDescription",
+                                              "usagetype",
+                                              "operation",
+                                              "regionCode",
+                                              "servicename"
+                                            ]
+                                          },
+                                          "queryFilters": {
+                                            "queryFilters": [
+                                              {
+                                                "attributeName": "regionCode",
+                                                "attributeValue": "{{step_32['item']}}",
+                                                "dynamicViewToggled": {
+                                                  "attributeValue": true
+                                                }
+                                              },
+                                              {
+                                                "attributeName": "productFamily",
+                                                "attributeValue": "{{step_g['pricingParam']}}",
+                                                "dynamicViewToggled": {
+                                                  "attributeValue": true
+                                                }
+                                              },
+                                              {
+                                                "attributeName": "groupDescription",
+                                                "attributeValue": "LoadBalancer hourly usage by {{step_g['type']}} Load Balancer",
+                                                "dynamicViewToggled": {
+                                                  "attributeValue": true
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "blockName": "@openops/block-aws",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "get_price",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {
+                                            "settings": {
+                                              "input": {
+                                                "auth": true
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.3",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "VUcZY5RcumgDPr4gTvONH",
+                                        "name": "step_m",
+                                        "type": "BLOCK",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "first_number": "730",
+                                            "second_number": "{{step_c[0]['pricePerUnit']['USD']}}"
+                                          },
+                                          "blockName": "@openops/block-math-helper",
+                                          "blockType": "OFFICIAL",
+                                          "actionName": "multiplication_math",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "blockVersion": "0.0.8",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "id": "ORoueuuL0Iqbta9Bh0DFT",
+                                          "name": "step_n",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "number": "{{step_m}}",
+                                              "numberOfDecimalPlaces": "2"
+                                            },
+                                            "blockName": "@openops/block-math-helper",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "truncate_math",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.8",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "HVCd1BBBU25uuUtBqN3wp",
+                                            "name": "step_p",
+                                            "type": "BLOCK",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "tableName": "Opportunities",
+                                                "rowPrimaryKey": {
+                                                  "rowPrimaryKey": null
+                                                },
+                                                "fieldsProperties": {
+                                                  "fieldsProperties": [
+                                                    {
+                                                      "fieldName": "Opportunity Type",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "Workflow optimization"
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Account",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "{{step_g['accountId']}}"
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Status",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "Created"
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Resource Id",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "{{step_d['item']['LoadBalancerArn']}}"
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Region",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "{{step_32['item']}}"
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Service",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "AWS ELB"
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Opportunity details",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "This resource is unused, it's total transfer over last 14 days was: {{step_l}}."
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Estimated savings USD per month",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "{{step_n}}"
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Complexity",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "L"
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Risk",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "High"
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Workflow",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "{{step_f}}"
+                                                      },
+                                                      "dynamicViewToggled": {
+                                                        "newFieldValue": true
+                                                      }
+                                                    },
+                                                    {
+                                                      "fieldName": "Opportunity generator",
+                                                      "newFieldValue": {
+                                                        "newFieldValue": "OpenOps"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                "roundToFieldPrecision": false
+                                              },
+                                              "blockName": "@openops/block-openops-tables",
+                                              "blockType": "OFFICIAL",
+                                              "actionName": "update_record",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {
+                                                  "settings": {
+                                                    "input": {
+                                                      "fieldsProperties": {}
+                                                    }
+                                                  }
+                                                }
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "blockVersion": "0.0.1",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "displayName": "Create OpenOps opportunity",
+                                            "stepIndex": 21
+                                          },
+                                          "displayName": "Monthly cost formatted",
+                                          "stepIndex": 20
+                                        },
+                                        "displayName": "Calculate Monthly Cost",
+                                        "stepIndex": 19
+                                      },
+                                      "displayName": "Get ELB Gateway Pricing",
+                                      "stepIndex": 18
+                                    },
+                                    "stepIndex": 17
+                                  },
+                                  "displayName": "Transfer as Human Readable",
+                                  "stepIndex": 16
+                                },
+                                "displayName": "Fetch ELB Metric",
+                                "stepIndex": 15
+                              },
+                              "displayName": "Opportunity doesn't exist or snooze expired",
+                              "onFailureAction": {
+                                "id": "jfm1wnIuecN7fTPC86A16",
+                                "name": "step_30",
+                                "type": "BLOCK",
+                                "valid": true,
+                                "settings": {
+                                  "input": {},
+                                  "blockName": "@openops/block-end-flow",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "end_workflow",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.0.1",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "displayName": "Skip recommendation",
+                                "stepIndex": 14
+                              },
+                              "stepIndex": 13
+                            },
+                            "displayName": "Get existing opportunity",
+                            "stepIndex": 12
+                          },
+                          "displayName": "Parse ELB ARN",
+                          "stepIndex": 11
+                        },
+                        "stepIndex": 10
+                      },
+                      "displayName": "Fetch ELBs",
+                      "stepIndex": 9
+                    },
+                    "stepIndex": 8
+                  },
+                  "stepIndex": 7
+                },
+                "displayName": "Get current date -14 days",
+                "stepIndex": 6
+              },
+              "displayName": "Get Current Date",
+              "stepIndex": 5
+            },
+            "displayName": "Set Bytes Threshold",
+            "stepIndex": 4
+          },
+          "displayName": "This workflow name",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-store",
+    "@openops/block-math-helper",
+    "@openops/block-date-helper",
+    "@openops/block-aws",
+    "@openops/block-openops-tables",
+    "@openops/block-end-flow",
+    "@openops/block-http"
+  ],
+  "categories": []
+}
