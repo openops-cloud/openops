@@ -53,7 +53,10 @@ SELECT
   COALESCE(opp.opp_account, ts.ts_account) AS "Account",
   COALESCE(opp.opp_sum, 0) AS savings,
   COALESCE(ts.ts_value, 0) AS monthly_cost,
-  (1 - (COALESCE(opp.opp_sum, 0) / NULLIF(COALESCE(ts.ts_value, 0), 0))) * 100.0 AS kpi
+  CASE
+    WHEN COALESCE(ts.ts_value, 0) = 0 THEN 100.0
+    ELSE (1 - (COALESCE(opp.opp_sum, 0) / COALESCE(ts.ts_value, 0))) * 100.0
+  END AS kpi
 FROM opp
 FULL OUTER JOIN ts
   ON opp.opp_account = ts.ts_account;
