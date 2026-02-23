@@ -28,7 +28,7 @@ export async function resolveOptions(
   }
 }
 
-async function getConnectionAccounts(
+export async function getConnectionAccounts(
   context: WizardContext,
 ): Promise<BenchmarkWizardOption[]> {
   const connectionId = context.benchmarkConfiguration?.connection?.[0];

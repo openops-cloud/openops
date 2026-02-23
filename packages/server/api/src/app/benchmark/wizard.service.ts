@@ -10,6 +10,7 @@ import {
   type StaticOptionValue,
   type WizardConfig,
   type WizardConfigStep,
+  type WizardContext,
 } from './provider-adapter';
 import './register-providers';
 
@@ -22,30 +23,54 @@ function getStepProgress(
   const stepIndex =
     stepsWithOptions.findIndex((s) => s.id === stepToReturn.id) + 1;
   return { totalSteps, stepIndex };
+  // This should be fixed to include the conditional steps as well
 }
 
-function resolveNextStepId(
+async function resolveNextStepId(
   step: WizardConfigStep,
   config: WizardConfig,
-): string | null {
-  const nextStepId = step.nextStep;
+  context: WizardContext,
+  providerAdapter: ProviderAdapter,
+): Promise<string | null> {
+  let nextStepId = step.nextStep;
   if (!nextStepId) {
     return null;
   }
-  const nextStepDef = config.steps.find((s) => s.id === nextStepId);
-  if (!nextStepDef) {
-    throwValidationError(`Next step not found: ${nextStepId}`);
+  const visitedSteps = new Set<string>();
+  while (nextStepId) {
+    if (visitedSteps.has(nextStepId)) {
+      throwValidationError(`Circular reference detected: ${nextStepId}`);
+    }
+    visitedSteps.add(nextStepId);
+    const nextStepDef = config.steps.find((s) => s.id === nextStepId);
+    if (!nextStepDef) {
+      throwValidationError(`Next step not found: ${nextStepId}`);
+    }
+    if (!nextStepDef.conditional) {
+      return nextStepId;
+    }
+    const conditionResult = await providerAdapter.evaluateCondition(
+      nextStepDef.conditional.when,
+      context,
+    );
+    if (conditionResult) {
+      return nextStepId;
+    }
+    const skipToStepId = nextStepDef.conditional.onFailure?.skipToStep;
+    if (!skipToStepId) {
+      return null;
+    }
+    nextStepId = skipToStepId;
   }
-  if (nextStepDef.conditional) {
-    // TODO: Implement conditional logic
-  }
-  return nextStepId;
+  return null;
 }
 
-function computeWizardStepResponse(
+async function computeWizardStepResponse(
   config: WizardConfig,
   currentStepId: string | undefined,
-): { stepToShow: WizardConfigStep; nextStep: string | null } {
+  context: WizardContext,
+  providerAdapter: ProviderAdapter,
+): Promise<{ stepToShow: WizardConfigStep; nextStep: string | null }> {
   const steps = config.steps;
   let stepToShow: WizardConfigStep;
 
@@ -55,7 +80,12 @@ function computeWizardStepResponse(
       throwValidationError(`Unknown step: ${currentStepId}`);
     }
     const currentStep = steps[currentStepIndex];
-    const nextStepId = resolveNextStepId(currentStep, config);
+    const nextStepId = await resolveNextStepId(
+      currentStep,
+      config,
+      context,
+      providerAdapter,
+    );
 
     if (nextStepId === null) {
       stepToShow = currentStep;
@@ -70,7 +100,12 @@ function computeWizardStepResponse(
     stepToShow = steps[0];
   }
 
-  const nextStep = resolveNextStepId(stepToShow, config);
+  const nextStep = await resolveNextStepId(
+    stepToShow,
+    config,
+    context,
+    providerAdapter,
+  );
   return { stepToShow, nextStep };
 }
 
@@ -90,7 +125,8 @@ async function resolveOptions(
   request: BenchmarkWizardRequest,
   projectId: string,
 ): Promise<BenchmarkWizardOption[]> {
-  const optionsSource = step.optionsSource;
+  const optionsSource =
+    step.conditional?.onSuccess?.optionsSource ?? step.optionsSource;
   if (!optionsSource) {
     return [];
   }
@@ -114,9 +150,17 @@ export async function resolveWizardNavigation(
   const providerAdapter = getProvider(normalizedProvider);
   const config = providerAdapter.config;
 
-  const { stepToShow, nextStep } = computeWizardStepResponse(
+  const context: WizardContext = {
+    benchmarkConfiguration: request.benchmarkConfiguration,
+    projectId,
+    provider: normalizedProvider,
+  };
+
+  const { stepToShow, nextStep } = await computeWizardStepResponse(
     config,
     request.currentStep,
+    context,
+    providerAdapter,
   );
 
   const options = await resolveOptions(
