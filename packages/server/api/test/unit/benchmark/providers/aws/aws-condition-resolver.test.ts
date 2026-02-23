@@ -1,4 +1,3 @@
-import { ApplicationError, ErrorCode } from '@openops/shared';
 import { evaluateCondition } from '../../../../../src/app/benchmark/providers/aws/aws-condition-resolver';
 
 const mockGetConnectionAccounts = jest.fn();
@@ -16,6 +15,11 @@ describe('evaluateCondition', () => {
   const projectId = 'project-123';
   const provider = 'aws';
   const defaultContext = { projectId, provider };
+  const contextWithConnection = {
+    projectId,
+    provider,
+    benchmarkConfiguration: { connection: ['conn-123'] },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,10 +33,12 @@ describe('evaluateCondition', () => {
 
     const result = await evaluateCondition(
       'hasMultipleAccounts',
-      defaultContext,
+      contextWithConnection,
     );
 
-    expect(mockGetConnectionAccounts).toHaveBeenCalledWith(defaultContext);
+    expect(mockGetConnectionAccounts).toHaveBeenCalledWith(
+      contextWithConnection,
+    );
     expect(result).toBe(true);
   });
 
@@ -43,7 +49,7 @@ describe('evaluateCondition', () => {
 
     const result = await evaluateCondition(
       'hasMultipleAccounts',
-      defaultContext,
+      contextWithConnection,
     );
 
     expect(result).toBe(false);
@@ -54,38 +60,20 @@ describe('evaluateCondition', () => {
 
     const result = await evaluateCondition(
       'hasMultipleAccounts',
-      defaultContext,
+      contextWithConnection,
     );
 
     expect(result).toBe(false);
   });
 
-  it('returns false for hasMultipleAccounts when getConnectionAccounts throws validation error', async () => {
-    mockGetConnectionAccounts.mockRejectedValue(
-      new ApplicationError(
-        {
-          code: ErrorCode.VALIDATION,
-          params: { message: 'Connection must be selected to list accounts' },
-        },
-        'Connection must be selected to list accounts',
-      ),
-    );
-
+  it('returns false for hasMultipleAccounts when no connection in context', async () => {
     const result = await evaluateCondition(
       'hasMultipleAccounts',
       defaultContext,
     );
 
     expect(result).toBe(false);
-  });
-
-  it('rethrows non-validation errors from getConnectionAccounts', async () => {
-    const networkError = new Error('Network failure');
-    mockGetConnectionAccounts.mockRejectedValue(networkError);
-
-    await expect(
-      evaluateCondition('hasMultipleAccounts', defaultContext),
-    ).rejects.toThrow('Network failure');
+    expect(mockGetConnectionAccounts).not.toHaveBeenCalled();
   });
 
   it('throws with condition name for unknown condition', async () => {
