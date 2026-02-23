@@ -23,7 +23,6 @@ import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
 import { jwtUtils } from './app/helper/jwt-utils';
 import { systemJobsSchedule } from './app/helper/system-jobs';
-import { createAwsBenchmarkDashboard } from './app/openops-analytics/benchmark/create-aws-benchmark-dashboard';
 import { registerTemplateTablesCreationJobHandler } from './app/openops-tables/template-tables/template-tables-job';
 import { setupServer } from './app/server';
 import { telemetry } from './app/telemetry/telemetry';
@@ -102,7 +101,6 @@ const main = async (): Promise<void> => {
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
     await seedTimeseriesTemplateTable();
-    await createAwsBenchmarkDashboard();
 
     if (system.isAnalyticsEnabled()) {
       await analytics.seedAnalytics();
