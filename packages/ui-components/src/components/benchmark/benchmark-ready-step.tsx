@@ -12,7 +12,6 @@ interface BenchmarkReadyStepProps {
   result: CreateBenchmarkResponse;
   runPhase: BenchmarkRunPhase;
   onViewRun: () => void;
-  onViewAnalytics: () => void;
   onResetRun: () => void;
 }
 
@@ -21,7 +20,6 @@ export const BenchmarkReadyStep = ({
   result,
   runPhase,
   onViewRun,
-  onViewAnalytics,
   onResetRun,
 }: BenchmarkReadyStepProps) => {
   const orchestrator = result.workflows.find((w) => w.isOrchestrator);
@@ -62,17 +60,17 @@ export const BenchmarkReadyStep = ({
 
       {runPhase === 'succeeded_with_failures' && (
         <BenchmarkAnalyticsPhase
+          provider={providerName}
           message={t(
             "You can review your Benchmark Report here (it's not final since there are some failed workflows)",
           )}
-          onViewAnalytics={onViewAnalytics}
         />
       )}
 
       {runPhase === 'succeeded' && (
         <BenchmarkAnalyticsPhase
+          provider={providerName}
           message={t('Your Benchmark Report is ready, you can review it here:')}
-          onViewAnalytics={onViewAnalytics}
         />
       )}
     </>

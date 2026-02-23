@@ -1,5 +1,5 @@
-import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { BenchmarkReadyStep } from '../../components/benchmark/benchmark-ready-step';
 
@@ -30,9 +30,13 @@ const mockResult = {
   benchmarkId: 'benchmark-123',
   folderId: 'folder-456',
   workflows: mockWorkflows,
+  webhookPayload: {
+    workflows: ['flow-001', 'flow-002', 'flow-003', 'flow-004'],
+    cleanupWorkflows: [],
+    accounts: ['123456789012'],
+    regions: ['us-east-1'],
+  },
 };
-
-// ─── BenchmarkReadyStep (full component) ─────────────────────────────────────
 
 const readyStepMeta = {
   title: 'Components/Benchmark/BenchmarkReadyStep',
@@ -41,9 +45,8 @@ const readyStepMeta = {
   args: {
     providerName: 'AWS',
     result: mockResult,
-    onViewRun: action('onViewRun'),
-    onViewAnalytics: action('onViewAnalytics'),
-    onResetRun: action('onResetRun'),
+    onViewRun: fn(),
+    onResetRun: fn(),
   },
   decorators: [ThemeAwareDecorator],
   parameters: { layout: 'centered' },
