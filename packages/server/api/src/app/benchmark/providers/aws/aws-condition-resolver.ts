@@ -10,7 +10,7 @@ export async function evaluateCondition(
     case 'hasMultipleAccounts':
       return hasMultipleAccounts(context);
     default:
-      throwValidationError(`Unknown AWS conditional method: ${condition}`);
+      throwValidationError(`Unknown AWS condition method: ${condition}`);
   }
 }
 
