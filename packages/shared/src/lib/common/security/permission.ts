@@ -24,4 +24,7 @@ export enum Permission {
 
   // Users
   WRITE_USER = 'user:write',
+
+  // Tables
+  WRITE_TABLE = 'table:write',
 }
