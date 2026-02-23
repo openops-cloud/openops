@@ -27,48 +27,44 @@ function getStepProgress(
   return { totalSteps, stepIndex };
 }
 
-async function resolveNextStepId(
+async function resolveNextStep(
   step: WizardConfigStep,
   config: WizardConfig,
   context: WizardContext,
   providerAdapter: ProviderAdapter,
-): Promise<string | null> {
-  let nextStepId = step.nextStep;
+): Promise<WizardConfigStep | null> {
+  const nextStepId = step.nextStep;
   if (!nextStepId) {
     return null;
   }
-  const visitedSteps = new Set<string>();
-  while (nextStepId) {
-    if (visitedSteps.has(nextStepId)) {
-      throwValidationError(`Circular reference detected: ${nextStepId}`);
-    }
-    visitedSteps.add(nextStepId);
-    const nextStepDef = config.steps.find((s) => s.id === nextStepId);
-    if (!nextStepDef) {
-      throwValidationError(`Next step not found: ${nextStepId}`);
-    }
-    if (!nextStepDef.conditional) {
-      return nextStepId;
-    }
-    const conditionResult = await providerAdapter.evaluateCondition(
-      nextStepDef.conditional.when,
-      context,
-    );
-    if (conditionResult) {
-      return nextStepId;
-    }
-    const skipToStepId = nextStepDef.conditional.onFailure?.skipToStep;
-    if (!skipToStepId) {
-      if (!nextStepDef.nextStep) {
-        return null;
-      }
+  const nextStepDef = config.steps.find((s) => s.id === nextStepId);
+  if (!nextStepDef) {
+    throwValidationError(`Next step not found: ${nextStepId}`);
+  }
+  if (!nextStepDef.conditional) {
+    return nextStepDef;
+  }
+  const conditionResult = await providerAdapter.evaluateCondition(
+    nextStepDef.conditional.when,
+    context,
+  );
+  if (conditionResult) {
+    return nextStepDef;
+  }
+  const skipToStepId = nextStepDef.conditional.onFailure?.skipToStep;
+  if (!skipToStepId) {
+    if (nextStepDef.nextStep) {
       throwValidationError(
         `Conditional step "${nextStepId}" must set onFailure.skipToStep when it is not the last step`,
       );
     }
-    nextStepId = skipToStepId;
+    return null;
   }
-  return null;
+  const skipToStepDef = config.steps.find((s) => s.id === skipToStepId);
+  if (!skipToStepDef) {
+    throwValidationError(`Next step not found: ${skipToStepId}`);
+  }
+  return skipToStepDef;
 }
 
 async function computeWizardStepResponse(
@@ -86,32 +82,18 @@ async function computeWizardStepResponse(
       throwValidationError(`Unknown step: ${currentStepId}`);
     }
     const currentStep = steps[currentStepIndex];
-    const nextStepId = await resolveNextStepId(
+    const nextStepDef = await resolveNextStep(
       currentStep,
       config,
       context,
       providerAdapter,
     );
-
-    if (nextStepId === null) {
-      stepToShow = currentStep;
-    } else {
-      const nextStepDef = steps.find((s) => s.id === nextStepId);
-      if (!nextStepDef) {
-        throwValidationError(`Next step not found: ${nextStepId}`);
-      }
-      stepToShow = nextStepDef;
-    }
+    stepToShow = nextStepDef ?? currentStep;
   } else {
     stepToShow = steps[0];
   }
 
-  const nextStep = await resolveNextStepId(
-    stepToShow,
-    config,
-    context,
-    providerAdapter,
-  );
+  const nextStep = stepToShow.nextStep ?? null;
   return { stepToShow, nextStep };
 }
 
