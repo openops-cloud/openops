@@ -1,5 +1,9 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import snowflake, { SnowflakeError, RowStatement, FileAndStageBindStatement } from 'snowflake-sdk';
+import snowflake, {
+  FileAndStageBindStatement,
+  RowStatement,
+  SnowflakeError,
+} from 'snowflake-sdk';
 import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
