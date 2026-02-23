@@ -1,5 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import snowflake, { SnowflakeError, Statement } from 'snowflake-sdk';
+import snowflake, { SnowflakeError, RowStatement, FileAndStageBindStatement } from 'snowflake-sdk';
 import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
@@ -72,7 +72,6 @@ export const runMultipleQueries = createAction({
       timeout: context.propsValue.timeout,
       username,
       password,
-      // @ts-expect-error ConnectionOptions interface definition in @types/snowflake-sdk is missing this property
       sfRetryMaxLoginRetries: maxLoginRetries,
       role,
       database,
@@ -128,7 +127,7 @@ export const runMultipleQueries = createAction({
                     binds: binds as snowflake.Binds,
                     complete: (
                       err: SnowflakeError | undefined,
-                      stmt: Statement,
+                      stmt: RowStatement | FileAndStageBindStatement,
                       rows: QueryResult,
                     ) => {
                       if (err) {
