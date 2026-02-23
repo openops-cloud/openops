@@ -15,12 +15,6 @@ export async function evaluateCondition(
 }
 
 async function hasMultipleAccounts(context: WizardContext): Promise<boolean> {
-  const connectionId = context.benchmarkConfiguration?.connection?.[0];
-
-  if (!connectionId) {
-    return false;
-  }
-
   const accounts = await getConnectionAccounts(context);
   return accounts.length > 1;
 }

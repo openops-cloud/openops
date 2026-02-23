@@ -14,7 +14,6 @@ jest.mock(
 describe('evaluateCondition', () => {
   const projectId = 'project-123';
   const provider = 'aws';
-  const defaultContext = { projectId, provider };
   const contextWithConnection = {
     projectId,
     provider,
@@ -25,7 +24,7 @@ describe('evaluateCondition', () => {
     jest.clearAllMocks();
   });
 
-  it('returns true for hasMultipleAccounts when connection has more than one account', async () => {
+  it('returns true when connection has more than one account', async () => {
     mockGetConnectionAccounts.mockResolvedValue([
       { id: '111111111111', displayName: 'Account One' },
       { id: '222222222222', displayName: 'Account Two' },
@@ -42,7 +41,7 @@ describe('evaluateCondition', () => {
     expect(result).toBe(true);
   });
 
-  it('returns false for hasMultipleAccounts when connection has one account', async () => {
+  it('returns false when connection has one account', async () => {
     mockGetConnectionAccounts.mockResolvedValue([
       { id: '111111111111', displayName: 'Only' },
     ]);
@@ -55,7 +54,7 @@ describe('evaluateCondition', () => {
     expect(result).toBe(false);
   });
 
-  it('returns false for hasMultipleAccounts when connection has zero accounts', async () => {
+  it('returns false when connection has zero accounts', async () => {
     mockGetConnectionAccounts.mockResolvedValue([]);
 
     const result = await evaluateCondition(
@@ -66,19 +65,9 @@ describe('evaluateCondition', () => {
     expect(result).toBe(false);
   });
 
-  it('returns false for hasMultipleAccounts when no connection in context', async () => {
-    const result = await evaluateCondition(
-      'hasMultipleAccounts',
-      defaultContext,
-    );
-
-    expect(result).toBe(false);
-    expect(mockGetConnectionAccounts).not.toHaveBeenCalled();
-  });
-
-  it('throws with condition name for unknown condition', async () => {
+  it('throws for unknown condition', async () => {
     await expect(
-      evaluateCondition('unknownCondition', defaultContext),
+      evaluateCondition('unknownCondition', contextWithConnection),
     ).rejects.toThrow('Unknown AWS condition method: unknownCondition');
     expect(mockGetConnectionAccounts).not.toHaveBeenCalled();
   });

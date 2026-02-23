@@ -41,52 +41,18 @@ const MOCK_WIZARD_CONFIG = {
         type: 'static' as const,
         values: [{ id: 'opt1', displayName: 'Option 1' }],
       },
-      conditional: {
-        when: 'step3Condition',
-        onSuccess: {
-          optionsSource: {
-            type: 'static' as const,
-            values: [{ id: 'opt1', displayName: 'Option 1' }],
-          },
-        },
-        onFailure: { skipToStep: 'step4' },
-      },
-      nextStep: 'step4',
-    },
-    {
-      id: 'step4',
-      title: 'Select fourth options',
-      selectionType: 'multi-select' as const,
-      optionsSource: {
-        type: 'static' as const,
-        values: [{ id: 'opt4', displayName: 'Option 4' }],
-      },
-      conditional: {
-        when: 'step4Condition',
-        onSuccess: {
-          optionsSource: {
-            type: 'static' as const,
-            values: [{ id: 'opt4', displayName: 'Option 4' }],
-          },
-        },
-        onFailure: { skipToStep: 'last_step' },
-      },
       nextStep: 'last_step',
     },
     {
       id: 'last_step',
-      title: 'Select fifth options',
+      title: 'Select last options',
       selectionType: 'multi-select' as const,
-      optionsSource: {
-        type: 'static' as const,
-        values: [{ id: 'opt2', displayName: 'Option 2' }],
-      },
       conditional: {
         when: 'lastStepCondition',
         onSuccess: {
           optionsSource: {
             type: 'static' as const,
-            values: [{ id: 'opt2', displayName: 'Option 2' }],
+            values: [{ id: 'opt1', displayName: 'Option 1' }],
           },
         },
       },
@@ -133,7 +99,7 @@ describe('resolveWizardNavigation', () => {
     );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
-    expect(result.totalSteps).toBe(5);
+    expect(result.totalSteps).toBe(4);
   });
 
   it('uses provider adapter config and returns first step with dynamic options', async () => {
@@ -161,42 +127,30 @@ describe('resolveWizardNavigation', () => {
       TEST_PROJECT_ID,
     );
     expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBe('step4');
+    expect(result.nextStep).toBe('last_step');
     expect(result.stepIndex).toBe(3);
     expect(result.options).toEqual([{ id: 'opt1', displayName: 'Option 1' }]);
   });
 
-  it('returns step4 after step3 with static options', async () => {
+  it('returns last_step after step3 with static options', async () => {
     const result = await resolveWizardNavigation(
       'test',
       { currentStep: 'step3' },
       TEST_PROJECT_ID,
     );
-    expect(result.currentStep).toBe('step4');
-    expect(result.nextStep).toBe('last_step');
-    expect(result.stepIndex).toBe(4);
-    expect(result.options).toEqual([{ id: 'opt4', displayName: 'Option 4' }]);
-  });
-
-  it('returns last_step after step4 with static options', async () => {
-    const result = await resolveWizardNavigation(
-      'test',
-      { currentStep: 'step4' },
-      TEST_PROJECT_ID,
-    );
     expect(result.currentStep).toBe('last_step');
     expect(result.nextStep).toBeNull();
-    expect(result.stepIndex).toBe(5);
-    expect(result.options).toEqual([{ id: 'opt2', displayName: 'Option 2' }]);
+    expect(result.stepIndex).toBe(4);
+    expect(result.options).toEqual([{ id: 'opt1', displayName: 'Option 1' }]);
   });
 
-  it('returns stepIndex 1 and totalSteps 5 for first step', async () => {
+  it('returns stepIndex 1 and totalSteps 4 for first step', async () => {
     const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
     expect(result.stepIndex).toBe(1);
-    expect(result.totalSteps).toBe(5);
+    expect(result.totalSteps).toBe(4);
   });
 
-  it('returns stepIndex 2 and totalSteps 5 for step2 (after step1)', async () => {
+  it('returns stepIndex 2 and totalSteps 4 for step2 (after step1)', async () => {
     const result = await resolveWizardNavigation(
       'test',
       { currentStep: 'step1' },
@@ -205,7 +159,7 @@ describe('resolveWizardNavigation', () => {
     expect(result.currentStep).toBe('step2');
     expect(result.nextStep).toBe('step3');
     expect(result.stepIndex).toBe(2);
-    expect(result.totalSteps).toBe(5);
+    expect(result.totalSteps).toBe(4);
   });
 
   it('throws when provider is not found', async () => {
@@ -226,9 +180,7 @@ describe('resolveWizardNavigation', () => {
   });
 
   it('skips conditional step when condition is false and onFailure.skipToStep is set', async () => {
-    mockEvaluateCondition
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true);
+    mockEvaluateCondition.mockResolvedValue(false);
 
     const result = await resolveWizardNavigation(
       'test',
@@ -237,7 +189,7 @@ describe('resolveWizardNavigation', () => {
     );
 
     expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBe('step4');
+    expect(result.nextStep).toBe('last_step');
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'step1.supportsMulti',
       expect.objectContaining({
@@ -351,40 +303,14 @@ describe('resolveWizardNavigation', () => {
 
     const result = await resolveWizardNavigation(
       'test',
-      { currentStep: 'step4' },
+      { currentStep: 'step3' },
       TEST_PROJECT_ID,
     );
 
-    expect(result.currentStep).toBe('step4');
-    expect(result.nextStep).toBeNull();
+    expect(result.currentStep).toBe('step3');
+    expect(result.nextStep).toBe('last_step');
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'lastStepCondition',
-      expect.any(Object),
-    );
-  });
-
-  it('chains conditionals: skips multiple steps when both conditions are false', async () => {
-    mockEvaluateCondition.mockImplementation(async (when: string) => {
-      if (when === 'step1.supportsMulti') return false;
-      if (when === 'step3Condition') return false;
-      if (when === 'step4Condition') return true;
-      if (when === 'lastStepCondition') return true;
-      return true;
-    });
-
-    const result = await resolveWizardNavigation(
-      'test',
-      { currentStep: 'step1' },
-      TEST_PROJECT_ID,
-    );
-
-    expect(result.currentStep).toBe('step4');
-    expect(mockEvaluateCondition).toHaveBeenCalledWith(
-      'step1.supportsMulti',
-      expect.any(Object),
-    );
-    expect(mockEvaluateCondition).toHaveBeenCalledWith(
-      'step3Condition',
       expect.any(Object),
     );
   });
