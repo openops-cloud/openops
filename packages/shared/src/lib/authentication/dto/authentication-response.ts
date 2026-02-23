@@ -1,7 +1,9 @@
 import { OpenOpsId } from '../../common/id-generator';
 import { OrganizationRole, User } from '../../user';
 
-export type AuthenticationResponseWithSensitiveData = User & {
+export type UserWithoutPassword = Omit<User, 'password'>;
+
+export type AuthenticationResponseWithSensitiveData = UserWithoutPassword & {
   token: string;
   projectId: string;
   projectRole: string;
