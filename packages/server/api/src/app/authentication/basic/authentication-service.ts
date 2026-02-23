@@ -1,5 +1,5 @@
 import { authenticateUserInOpenOpsTables } from '@openops/common';
-import { AuthenticationResponseWithSensitiveData } from '@openops/shared';
+import { InternalAuthenticationPayload } from '@openops/shared';
 import { userService } from '../../user/user-service';
 import { AuthenticationService } from '../authentication-service-factory';
 import { getProjectAndToken } from '../context/create-project-auth-context';
@@ -19,7 +19,7 @@ export const authenticationService: AuthenticationService = {
   async signUp(
     params: SignUpParams,
     tokenExpirationInSeconds?: number,
-  ): Promise<AuthenticationResponseWithSensitiveData> {
+  ): Promise<InternalAuthenticationPayload> {
     const { user, tablesRefreshToken } = await createUser(params);
 
     const updatedUser = await assignDefaultOrganization(user);
@@ -37,7 +37,7 @@ export const authenticationService: AuthenticationService = {
   async signIn(
     request: SignInParams,
     tokenExpirationInSeconds?: number,
-  ): Promise<AuthenticationResponseWithSensitiveData> {
+  ): Promise<InternalAuthenticationPayload> {
     const user = await userService.getByOrganizationAndEmail({
       organizationId: request.organizationId,
       email: request.email,

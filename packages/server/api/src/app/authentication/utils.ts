@@ -1,6 +1,6 @@
 import {
   ApplicationError,
-  AuthenticationResponseWithSensitiveData,
+  InternalAuthenticationPayload,
   ErrorCode,
   isNil,
   User,
@@ -55,7 +55,7 @@ export const assertPasswordMatches = async ({
 
 export function buildAuthResponse(
   projectContext: ProjectContext,
-): AuthenticationResponseWithSensitiveData {
+): InternalAuthenticationPayload {
   return {
     ...projectContext.user,
     token: projectContext.token,

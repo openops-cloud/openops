@@ -9,7 +9,7 @@ import {
   OpsEdition,
   PrincipalType,
   Provider,
-  sanitizeAuthResponse,
+  createAuthResponse,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
@@ -123,7 +123,7 @@ const signUpRoute = async (request: any, reply: any) => {
   });
 
   return setAuthCookies(reply, signUpResponse).send(
-    sanitizeAuthResponse(signUpResponse),
+    createAuthResponse(signUpResponse),
   );
 };
 
@@ -142,7 +142,7 @@ const signInRoute = async (request: any, reply: any) => {
   });
 
   return setAuthCookies(reply, signInResponse).send(
-    sanitizeAuthResponse(signInResponse),
+    createAuthResponse(signInResponse),
   );
 };
 

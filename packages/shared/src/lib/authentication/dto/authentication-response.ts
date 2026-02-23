@@ -1,7 +1,7 @@
 import { OpenOpsId } from '../../common/id-generator';
 import { OrganizationRole } from '../../user';
 
-export type AuthenticationResponseWithSensitiveData = {
+export type InternalAuthenticationPayload = {
   id: OpenOpsId;
   email: string;
   token: string;
@@ -22,8 +22,8 @@ export type AuthenticationResponse = {
   organizationRole: OrganizationRole;
 };
 
-export const sanitizeAuthResponse = (
-  authResponse: AuthenticationResponseWithSensitiveData,
+export const createAuthResponse = (
+  authResponse: InternalAuthenticationPayload,
 ): AuthenticationResponse => {
   return {
     id: authResponse.id,

@@ -1,4 +1,4 @@
-import { AuthenticationResponseWithSensitiveData } from '@openops/shared';
+import { InternalAuthenticationPayload } from '@openops/shared';
 import { authenticationService } from './basic/authentication-service';
 import { SignInParams, SignUpParams } from './types';
 
@@ -6,11 +6,11 @@ export type AuthenticationService = {
   signUp(
     params: SignUpParams,
     tokenExpirationInSeconds?: number,
-  ): Promise<AuthenticationResponseWithSensitiveData>;
+  ): Promise<InternalAuthenticationPayload>;
   signIn(
     request: SignInParams,
     tokenExpirationInSeconds?: number,
-  ): Promise<AuthenticationResponseWithSensitiveData>;
+  ): Promise<InternalAuthenticationPayload>;
 };
 
 export function getAuthenticationService(): AuthenticationService {
