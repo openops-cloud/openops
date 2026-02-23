@@ -300,7 +300,7 @@ function createEC2InstanceRecommendationsCommandForAssertion(
 ) {
   return expect.objectContaining({
     input: {
-      instanceArns: instanceArns, // or undefined if you expect it not set
+      instanceArns: instanceArns,
       filters: [{ name: 'Finding', values: [findingType] }],
     },
   });

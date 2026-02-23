@@ -302,7 +302,7 @@ function createEbsVolumeRecommendationsCommandForAssertion(
 ) {
   return expect.objectContaining({
     input: {
-      volumeArns: volumeArns, // or undefined if you expect it not set
+      volumeArns: volumeArns,
       filters: [{ name: 'Finding', values: [findingType] }],
     },
   });
