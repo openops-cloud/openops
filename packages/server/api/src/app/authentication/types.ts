@@ -1,7 +1,4 @@
-import {
-  Provider,
-  User,
-} from '@openops/shared';
+import { Provider, User } from '@openops/shared';
 
 export type SignUpParams = {
   email: string;
