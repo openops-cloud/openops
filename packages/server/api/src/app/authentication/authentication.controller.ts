@@ -9,6 +9,7 @@ import {
   OpsEdition,
   PrincipalType,
   Provider,
+  sanitizeAuthResponse,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
@@ -121,7 +122,9 @@ const signUpRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookies(reply, signUpResponse).send(signUpResponse);
+  return setAuthCookies(reply, signUpResponse).send(
+    sanitizeAuthResponse(signUpResponse),
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,7 +141,9 @@ const signInRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookies(reply, signInResponse).send(signInResponse);
+  return setAuthCookies(reply, signInResponse).send(
+    sanitizeAuthResponse(signInResponse),
+  );
 };
 
 const rateLimitOptions: RateLimitOptions = {
