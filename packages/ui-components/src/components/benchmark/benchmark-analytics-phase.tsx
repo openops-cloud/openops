@@ -12,6 +12,7 @@ export const BenchmarkAnalyticsPhase = ({
     <p className="text-sm dark:text-muted-foreground">{message}</p>
     <Link
       target="_blank"
+      rel="noopener noreferrer"
       className="text-sm text-primary-200"
       to={`/analytics?benchmark=${provider}`}
     >
