@@ -6,6 +6,7 @@ export * from './assistant-ui/history/assistant-ui-history-item';
 export * from './assistant-ui/step-settings-assistant-ui-chat-container';
 export * from './assistant-ui/thread';
 export * from './assistant-ui/thread-extra-context';
+export * from './benchmark/benchmark-analytics-phase';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';
