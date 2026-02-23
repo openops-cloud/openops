@@ -66,3 +66,10 @@ export type HandleSelectCallback = (
   block: StepMetadata | undefined,
   item: ItemListMetadata,
 ) => void;
+
+export type BenchmarkRunPhase =
+  | 'idle'
+  | 'running'
+  | 'failed'
+  | 'succeeded'
+  | 'succeeded_with_failures';
