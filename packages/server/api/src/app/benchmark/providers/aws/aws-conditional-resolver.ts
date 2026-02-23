@@ -3,14 +3,14 @@ import type { WizardContext } from '../../provider-adapter';
 import { getConnectionAccounts } from './aws-option-resolver';
 
 export async function evaluateCondition(
-  when: string,
+  condition: string,
   context: WizardContext,
 ): Promise<boolean> {
-  switch (when) {
+  switch (condition) {
     case 'hasMultipleAccounts':
       return hasMultipleAccounts(context);
     default:
-      throwValidationError(`Unknown AWS conditional method: ${when}`);
+      throwValidationError(`Unknown AWS conditional method: ${condition}`);
   }
 }
 
