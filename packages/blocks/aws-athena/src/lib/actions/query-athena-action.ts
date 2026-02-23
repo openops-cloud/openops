@@ -2,7 +2,8 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
   dryRunCheckBox,
-  getCredentialsFromAuth,
+  getAwsAccountsMultiSelectDropdown,
+  getCredentialsListFromAuth,
   listAthenaDatabases,
   runAndWaitForQueryResult,
 } from '@openops/common';
@@ -14,6 +15,7 @@ export const runAthenaQueryAction = createAction({
   displayName: 'Query Athena database',
   isWriteAction: false,
   props: {
+    accounts: getAwsAccountsMultiSelectDropdown().accounts,
     query: Property.LongText({
       displayName: 'Query',
       description: 'Query to run on the Athena database.',
@@ -23,9 +25,9 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-      refreshers: ['auth'],
+      refreshers: ['auth', 'accounts'],
       required: true,
-      options: async ({ auth }) => {
+      options: async ({ auth, accounts }) => {
         if (!auth) {
           return {
             disabled: true,
@@ -39,10 +41,14 @@ export const runAthenaQueryAction = createAction({
           secretAccessKey: string;
           defaultRegion: string;
         };
-        const credentials = await getCredentialsFromAuth(authProp);
+        const selectedAccounts = (accounts as any)?.['accounts'];
+        const credentialsList = await getCredentialsListFromAuth(
+          authProp,
+          selectedAccounts,
+        );
 
         const databases = await listAthenaDatabases(
-          credentials,
+          credentialsList[0],
           authProp.defaultRegion,
         );
 
@@ -91,10 +97,14 @@ export const runAthenaQueryAction = createAction({
     }
 
     try {
-      const credentials = await getCredentialsFromAuth(context.auth);
+      const selectedAccounts = context.propsValue.accounts?.['accounts'];
+      const credentialsList = await getCredentialsListFromAuth(
+        context.auth,
+        selectedAccounts,
+      );
 
       return await runAndWaitForQueryResult(
-        credentials,
+        credentialsList[0],
         context.auth.defaultRegion,
         query,
         database,
