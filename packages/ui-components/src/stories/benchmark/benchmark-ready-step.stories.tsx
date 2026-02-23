@@ -30,12 +30,6 @@ const mockResult = {
   benchmarkId: 'benchmark-123',
   folderId: 'folder-456',
   workflows: mockWorkflows,
-  webhookPayload: {
-    workflows: ['flow-001', 'flow-002', 'flow-003', 'flow-004'],
-    cleanupWorkflows: [],
-    accounts: ['123456789012'],
-    regions: ['us-east-1'],
-  },
 };
 
 const readyStepMeta = {

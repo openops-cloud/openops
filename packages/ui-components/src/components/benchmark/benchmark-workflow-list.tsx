@@ -3,8 +3,10 @@ import { t } from 'i18next';
 
 export const BenchmarkWorkflowList = ({
   workflows,
+  provider,
 }: {
   workflows: BenchmarkWorkflowBase[];
+  provider: string;
 }) => (
   <div>
     <p className="font-medium text-sm mb-2">{t('Available workflows:')}</p>
@@ -17,7 +19,8 @@ export const BenchmarkWorkflowList = ({
     </ul>
     <p className="text-xs text-muted-foreground mt-3 italic">
       {t(
-        '* Running the benchmark triggers AWS API calls, which may result in a small charge from AWS (typically not exceeding $0.03 per account).',
+        '* Running the benchmark triggers {provider} API calls, which may result in a small charge from {provider} (typically not exceeding $0.03 per account).',
+        { provider },
       )}
     </p>
   </div>
