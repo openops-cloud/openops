@@ -58,7 +58,6 @@ export const runQuery = createAction({
       timeout: context.propsValue.timeout,
       username,
       password,
-      // @ts-expect-error ConnectionOptions interface definition in @types/snowflake-sdk is missing this property
       sfRetryMaxLoginRetries: maxLoginRetries,
       role,
       database,

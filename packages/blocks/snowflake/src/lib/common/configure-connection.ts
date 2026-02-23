@@ -15,7 +15,6 @@ export function configureConnection(
     database: auth.database,
     warehouse: auth.warehouse,
     account: auth.account,
-    // @ts-expect-error ConnectionOptions interface definition in @types/snowflake-sdk is missing this property
     sfRetryMaxLoginRetries: auth.maxLoginRetries,
   });
 }
