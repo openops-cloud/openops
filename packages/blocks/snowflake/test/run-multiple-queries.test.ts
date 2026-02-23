@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import snowflakeSdk, { SnowflakeError, Statement } from 'snowflake-sdk';
+import {
+  FileAndStageBindStatement,
+  RowStatement,
+  SnowflakeError,
+  createConnection as snowCreateConnection,
+} from 'snowflake-sdk';
 import { runMultipleQueries } from '../src/lib/actions/run-multiple-queries';
 import {
   DEFAULT_APPLICATION_NAME,
@@ -92,11 +97,11 @@ describe('Snowflake: runMultipleQueries Action', () => {
         sqlText: string;
         complete: (
           err?: SnowflakeError | Error,
-          stmt?: Statement,
+          stmt?: RowStatement | FileAndStageBindStatement,
           rows?: unknown[],
         ) => void;
       }) => {
-        const mockStmt = {} as Statement;
+        const mockStmt = {} as RowStatement;
         let mockRows: unknown[] = [{ RESULT: `Success: ${sqlText}` }];
         if (
           sqlText === 'BEGIN' ||
@@ -133,7 +138,7 @@ describe('Snowflake: runMultipleQueries Action', () => {
       runMultipleQueries.run(context as RunMultipleQueriesContext),
     ).resolves.toEqual(expectedResults);
 
-    expect(snowflakeSdk.createConnection).toHaveBeenCalledWith(
+    expect(snowCreateConnection).toHaveBeenCalledWith(
       expect.objectContaining({
         username: 'testuser',
         application: DEFAULT_APPLICATION_NAME,
@@ -225,7 +230,7 @@ describe('Snowflake: runMultipleQueries Action', () => {
 
     await runMultipleQueries.run(context as RunMultipleQueriesContext);
 
-    expect(snowflakeSdk.createConnection).toHaveBeenCalledWith(
+    expect(snowCreateConnection).toHaveBeenCalledWith(
       expect.objectContaining({
         timeout: 5000,
         application: 'MyTestApp',
@@ -289,7 +294,7 @@ describe('Snowflake: runMultipleQueries Action', () => {
       runMultipleQueries.run(context as RunMultipleQueriesContext),
     ).rejects.toThrow(connectionError);
 
-    expect(snowflakeSdk.createConnection).toHaveBeenCalledTimes(1);
+    expect(snowCreateConnection).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockExecute).not.toHaveBeenCalled();
     expect(mockDestroy).not.toHaveBeenCalled();

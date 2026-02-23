@@ -300,18 +300,10 @@ function createEbsVolumeRecommendationsCommandForAssertion(
   findingType: EBSFinding,
   volumeArns?: string[],
 ) {
-  return {
-    deserialize: expect.anything(),
+  return expect.objectContaining({
     input: {
       volumeArns: volumeArns,
-      filters: [
-        {
-          name: 'Finding',
-          values: [findingType],
-        },
-      ],
+      filters: [{ name: 'Finding', values: [findingType] }],
     },
-    middlewareStack: expect.anything(),
-    serialize: expect.anything(),
-  };
+  });
 }
