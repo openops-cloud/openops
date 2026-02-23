@@ -298,18 +298,10 @@ function createEC2InstanceRecommendationsCommandForAssertion(
   findingType: Finding,
   instanceArns?: string[],
 ) {
-  return {
-    deserialize: expect.anything(),
+  return expect.objectContaining({
     input: {
-      instanceArns: instanceArns,
-      filters: [
-        {
-          name: 'Finding',
-          values: [findingType],
-        },
-      ],
+      instanceArns: instanceArns, // or undefined if you expect it not set
+      filters: [{ name: 'Finding', values: [findingType] }],
     },
-    middlewareStack: expect.anything(),
-    serialize: expect.anything(),
-  };
+  });
 }
