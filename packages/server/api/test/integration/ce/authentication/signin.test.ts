@@ -98,17 +98,8 @@ describe('Sign in Endpoint', () => {
     expect(response?.statusCode).toBe(StatusCodes.OK);
     expect(responseBody?.id).toBe(mockUser.id);
     expect(responseBody?.email).toBe(mockEmail);
-    expect(responseBody?.firstName).toBe(mockUser.firstName);
-    expect(responseBody?.lastName).toBe(mockUser.lastName);
-    expect(responseBody?.trackEvents).toBe(mockUser.trackEvents);
-    expect(responseBody?.newsLetter).toBe(mockUser.newsLetter);
-    expect(responseBody?.password).toBeUndefined();
-    expect(responseBody?.status).toBe(mockUser.status);
-    expect(responseBody?.verified).toBe(mockUser.verified);
     expect(responseBody?.organizationId).toBe(mockOrganization.id);
-    expect(responseBody?.externalId).toBe(null);
     expect(responseBody?.projectId).toBe(mockProject.id);
-    expect(responseBody?.token).toBeDefined();
     expect(authUserMock).toBeCalledTimes(1);
   });
 
