@@ -1,4 +1,3 @@
-import { Permission } from '../../common';
 import { OpenOpsId } from '../../common/id-generator';
 import { OrganizationRole, User } from '../../user';
 
