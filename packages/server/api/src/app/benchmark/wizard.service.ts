@@ -18,12 +18,13 @@ function getStepProgress(
   config: WizardConfig,
   stepToReturn: WizardConfigStep,
 ): { totalSteps: number; stepIndex: number } {
-  const stepsWithOptions = config.steps.filter((s) => s.optionsSource);
+  const stepsWithOptions = config.steps.filter(
+    (s) => s.optionsSource ?? s.conditional?.onSuccess?.optionsSource,
+  );
   const totalSteps = stepsWithOptions.length;
   const stepIndex =
     stepsWithOptions.findIndex((s) => s.id === stepToReturn.id) + 1;
   return { totalSteps, stepIndex };
-  // This should be fixed to include the conditional steps as well
 }
 
 async function resolveNextStepId(
@@ -58,7 +59,12 @@ async function resolveNextStepId(
     }
     const skipToStepId = nextStepDef.conditional.onFailure?.skipToStep;
     if (!skipToStepId) {
-      return null;
+      if (!nextStepDef.nextStep) {
+        return null;
+      }
+      throwValidationError(
+        `Conditional step "${nextStepId}" must set onFailure.skipToStep when it is not the last step`,
+      );
     }
     nextStepId = skipToStepId;
   }

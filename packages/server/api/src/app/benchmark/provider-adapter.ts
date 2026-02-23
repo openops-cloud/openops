@@ -19,11 +19,10 @@ export type WizardStepOptionsSource =
 
 export type WizardStepConditional = {
   when: string;
-  skipToStep: string;
   onSuccess: {
     optionsSource: WizardStepOptionsSource;
   };
-  onFailure: {
+  onFailure?: {
     skipToStep?: string;
   };
 };
