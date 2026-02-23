@@ -1,7 +1,7 @@
 import {
   ApplicationError,
-  InternalAuthenticationPayload,
   ErrorCode,
+  InternalAuthenticationPayload,
   isNil,
   User,
   UserStatus,

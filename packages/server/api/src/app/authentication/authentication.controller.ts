@@ -6,10 +6,10 @@ import {
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
+  createAuthResponse,
   OpsEdition,
   PrincipalType,
   Provider,
-  createAuthResponse,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
