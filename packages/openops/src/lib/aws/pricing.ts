@@ -10,7 +10,6 @@ import {
   Service,
 } from '@aws-sdk/client-pricing';
 import { cacheWrapper } from '@openops/server-shared';
-import { AutomaticJsonStringConversion as __AutomaticJsonStringConversion } from '@smithy/core/dist-types/submodules/serde/lazy-json';
 import { makeAwsRequest } from './aws-client-wrapper';
 import { getAwsClient } from './get-client';
 
