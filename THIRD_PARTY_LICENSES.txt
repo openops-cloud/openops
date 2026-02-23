@@ -21480,8 +21480,9 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - fast-xml-parser@4.4.1
- - fast-xml-parser@5.2.0
+ - fast-xml-parser@4.5.3
  - fast-xml-parser@5.2.5
+ - fast-xml-parser@5.3.7
 
 These packages each contain the following license:
 
@@ -24443,9 +24444,8 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - strnum@1.0.5
- - strnum@2.0.5
- - strnum@2.1.1
+ - strnum@1.1.2
+ - strnum@2.1.2
 
 These packages each contain the following license:
 
