@@ -2,7 +2,7 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
   dryRunCheckBox,
-  getAwsAccountsMultiSelectDropdown,
+  getAwsAccountsSingleSelectDropdown,
   getCredentialsListFromAuth,
   listAthenaDatabases,
   runAndWaitForQueryResult,
@@ -15,7 +15,7 @@ export const runAthenaQueryAction = createAction({
   displayName: 'Query Athena database',
   isWriteAction: false,
   props: {
-    accounts: getAwsAccountsMultiSelectDropdown().accounts,
+    accounts: getAwsAccountsSingleSelectDropdown().accounts,
     query: Property.LongText({
       displayName: 'Query',
       description: 'Query to run on the Athena database.',
