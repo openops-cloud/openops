@@ -6,6 +6,7 @@ import {
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
+  createAuthResponse,
   OpsEdition,
   PrincipalType,
   Provider,
@@ -121,7 +122,9 @@ const signUpRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookies(reply, signUpResponse).send(signUpResponse);
+  return setAuthCookies(reply, signUpResponse).send(
+    createAuthResponse(signUpResponse),
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,7 +141,9 @@ const signInRoute = async (request: any, reply: any) => {
     provider: Provider.EMAIL,
   });
 
-  return setAuthCookies(reply, signInResponse).send(signInResponse);
+  return setAuthCookies(reply, signInResponse).send(
+    createAuthResponse(signInResponse),
+  );
 };
 
 const rateLimitOptions: RateLimitOptions = {

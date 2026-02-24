@@ -13,10 +13,17 @@
       "id": "accounts",
       "title": "Which accounts should we include in the report?",
       "selectionType": "multi-select",
-      "optionsSource": { "type": "dynamic", "method": "getConnectionAccounts" },
       "conditional": {
-        "when": "connection.supportsMultiAccount",
-        "skipToStep": "regions"
+        "when": "hasMultipleAccounts",
+        "onSuccess": {
+          "optionsSource": {
+            "type": "dynamic",
+            "method": "getConnectionAccounts"
+          }
+        },
+        "onFailure": {
+          "skipToStep": "regions"
+        }
       },
       "nextStep": "regions"
     },
@@ -66,7 +73,10 @@
             "id": "AWS Benchmark - Idle Elastic Load Balancer (ELB)",
             "displayName": "Idle Elastic Load Balancer (ELB)"
           },
-          { "id": "AWS Benchmark - Idle RDS instances", "displayName": "Idle RDS instances" },
+          {
+            "id": "AWS Benchmark - Idle RDS instances",
+            "displayName": "Idle RDS instances"
+          },
           {
             "id": "AWS Benchmark - Lambda Compute Optimizer Recommendations",
             "displayName": "Lambda Compute Optimizer Recommendations"
@@ -99,18 +109,30 @@
             "id": "AWS Benchmark - RDS Storage Compute Optimizer Recommendations",
             "displayName": "RDS Storage Compute Optimizer Recommendations"
           },
-          { "id": "AWS Benchmark - Underutilized EC2", "displayName": "Underutilized EC2" },
-          { "id": "AWS Benchmark - Underutilized RDS", "displayName": "Underutilized RDS" },
+          {
+            "id": "AWS Benchmark - Underutilized EC2",
+            "displayName": "Underutilized EC2"
+          },
+          {
+            "id": "AWS Benchmark - Underutilized RDS",
+            "displayName": "Underutilized RDS"
+          },
           {
             "id": "AWS Benchmark - Underutilized VPC Interface Endpoints",
             "displayName": "Underutilized VPC Interface Endpoints"
           },
-          { "id": "AWS Benchmark - Unattached EBS", "displayName": "Unattached EBS" },
+          {
+            "id": "AWS Benchmark - Unattached EBS",
+            "displayName": "Unattached EBS"
+          },
           {
             "id": "AWS Benchmark - Unattached Elastic IP Addresses",
             "displayName": "Unattached Elastic IP Addresses"
           },
-          { "id": "AWS Benchmark - Unused NAT Gateways", "displayName": "Unused NAT Gateways" }
+          {
+            "id": "AWS Benchmark - Unused NAT Gateways",
+            "displayName": "Unused NAT Gateways"
+          }
         ]
       }
     }

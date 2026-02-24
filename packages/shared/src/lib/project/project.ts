@@ -1,7 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema, Nullable } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
-import { ProjectMemberRole } from './project-member';
 
 export const ListProjectRequestForUserQueryParams = Type.Object({
   cursor: Type.Optional(Type.String()),
@@ -18,13 +17,6 @@ export enum BlocksFilterType {
   NONE = 'NONE',
   ALLOWED = 'ALLOWED',
 }
-
-export const SwitchProjectResponse = Type.Object({
-  token: Type.String(),
-  projectRole: Type.Union([Type.Enum(ProjectMemberRole), Type.Null()]),
-});
-
-export type SwitchProjectResponse = Static<typeof SwitchProjectResponse>;
 
 export const Project = Type.Object({
   ...BaseModelSchema,
