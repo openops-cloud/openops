@@ -114,15 +114,11 @@ export const useBenchmarkWizardNavigation = (
   const isSelectedProviderConnected =
     !!selectedProvider && connectedProviders[selectedProvider] === true;
 
-  const hasEmptyOptions =
-    wizardPhase === 'provider-step' &&
-    currentStepResponse?.options.length === 0;
-
   const isInitialNextDisabled = () =>
     !isSelectedProviderConnected || isLoadingStep;
 
   const isProviderStepNextDisabled = () =>
-    (!hasEmptyOptions && currentSelections.length === 0) ||
+    currentSelections.length === 0 ||
     !currentStepResponse?.nextStep ||
     isLoadingStep;
 

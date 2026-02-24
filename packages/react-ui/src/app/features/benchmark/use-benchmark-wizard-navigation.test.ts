@@ -465,13 +465,12 @@ describe('useBenchmarkWizardNavigation', () => {
       expect(result.current.isNextDisabled).toBe(true);
     });
 
-    //TODO: Remove this check once backend is fixed to not return multi-select steps with 0 options
-    it('should be enabled when options array is empty (bypasses selection requirement)', async () => {
+    it('should be disabled when options array is empty )', async () => {
       const result = await setupAtProviderStep(
         buildStepResponse({ options: [], nextStep: 'next' }),
       );
 
-      expect(result.current.isNextDisabled).toBe(false);
+      expect(result.current.isNextDisabled).toBe(true);
     });
 
     it('should be disabled when loading even with valid selections', async () => {
