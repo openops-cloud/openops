@@ -4,6 +4,7 @@ import {
   dryRunCheckBox,
   getAwsAccountsSingleSelectDropdown,
   getCredentialsListFromAuth,
+  getRegionsDropdownState,
   listAthenaDatabases,
   runAndWaitForQueryResult,
 } from '@openops/common';
@@ -16,6 +17,13 @@ export const runAthenaQueryAction = createAction({
   isWriteAction: false,
   props: {
     accounts: getAwsAccountsSingleSelectDropdown().accounts,
+    region: Property.StaticDropdown({
+      displayName: 'Region',
+      description:
+        'AWS region to use. Defaults to the region from authentication.',
+      required: false,
+      options: getRegionsDropdownState(),
+    }),
     query: Property.LongText({
       displayName: 'Query',
       description: 'Query to run on the Athena database.',
@@ -25,9 +33,10 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-      refreshers: ['auth', 'accounts'],
+
+      refreshers: ['auth', 'accounts', 'region'],
       required: true,
-      options: async ({ auth, accounts }) => {
+      options: async ({ auth, accounts, region }) => {
         if (!auth) {
           return {
             disabled: true,
@@ -49,7 +58,7 @@ export const runAthenaQueryAction = createAction({
 
         const databases = await listAthenaDatabases(
           credentialsList[0],
-          authProp.defaultRegion,
+          (region as string | undefined) ?? authProp.defaultRegion,
         );
 
         return {
@@ -105,7 +114,7 @@ export const runAthenaQueryAction = createAction({
 
       return await runAndWaitForQueryResult(
         credentialsList[0],
-        context.auth.defaultRegion,
+        context.propsValue.region ?? context.auth.defaultRegion,
         query,
         database,
         context.propsValue.outputBucket,
