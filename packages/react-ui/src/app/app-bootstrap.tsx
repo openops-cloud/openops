@@ -25,9 +25,9 @@ export function AppBootstrap({ children }: Readonly<AppBootstrapProps>) {
       try {
         const flags = await flagsApi.getAll();
         queryClient.setQueryData<FlagsMap>([QueryKeys.flags], flags);
-        const isInitialize = await initializeInternal();
+        const isInitialized = await initializeInternal();
 
-        if (mounted && isInitialize) {
+        if (mounted && isInitialized) {
           setState({ status: 'ready' });
         }
       } catch (error) {
