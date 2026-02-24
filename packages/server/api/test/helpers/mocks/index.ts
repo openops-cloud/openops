@@ -14,8 +14,6 @@ import {
   FlowVersion,
   FlowVersionState,
   Folder,
-  InvitationStatus,
-  InvitationType,
   openOpsId,
   Organization,
   OrganizationRole,
@@ -26,7 +24,6 @@ import {
   Trigger,
   TriggerType,
   User,
-  UserInvitation,
   UserStatus,
 } from '@openops/shared';
 import bcrypt from 'bcrypt';
@@ -75,23 +72,6 @@ export const createMockTemplate = (
     created: template?.created ?? faker.date.recent().toISOString(),
     updated: template?.updated ?? faker.date.recent().toISOString(),
     categories: template?.categories ?? [],
-  };
-};
-
-export const createMockUserInvitation = (
-  userInvitation: Partial<UserInvitation>,
-): UserInvitation => {
-  return {
-    id: userInvitation.id ?? openOpsId(),
-    created: userInvitation.created ?? faker.date.recent().toISOString(),
-    updated: userInvitation.updated ?? faker.date.recent().toISOString(),
-    email: userInvitation.email ?? faker.internet.email(),
-    type: userInvitation.type ?? faker.helpers.enumValue(InvitationType),
-    organizationId: userInvitation.organizationId ?? openOpsId(),
-    projectId: userInvitation.projectId,
-    projectRole: userInvitation.projectRole,
-    organizationRole: userInvitation.organizationRole,
-    status: userInvitation.status ?? faker.helpers.enumValue(InvitationStatus),
   };
 };
 

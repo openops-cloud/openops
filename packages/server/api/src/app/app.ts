@@ -24,7 +24,6 @@ import {
   Folder,
   Project,
   spreadIfDefined,
-  UserInvitation,
 } from '@openops/shared';
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
 import chalk from 'chalk';
@@ -93,7 +92,6 @@ export const setupApp = async (
         schemas: {
           'flow-template': FlowImportTemplate,
           folder: Folder,
-          'user-invitation': UserInvitation,
           project: Project,
           flow: Flow,
           'flow-run': FlowRun,

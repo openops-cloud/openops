@@ -57,7 +57,6 @@ export type ApplicationErrorParams =
   | TriggerEnableErrorParams
   | TriggerFailedErrorParams
   | ValidationErrorParams
-  | InvitationOnlySignUpParams
   | UserIsInActiveErrorParams
   | DomainIsNotAllowedErrorParams
   | EmailAuthIsDisabledParams
