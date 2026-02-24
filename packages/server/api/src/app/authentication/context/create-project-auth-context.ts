@@ -49,8 +49,9 @@ export async function getProjectAndToken(
   return {
     user: updatedUser,
     token,
-    project,
     tablesRefreshToken,
+    projectId: project.id,
     projectRole: ProjectMemberRole.ADMIN,
+    tablesWorkspaceId: project.tablesWorkspaceId,
   };
 }
