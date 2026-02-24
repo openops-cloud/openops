@@ -465,7 +465,7 @@ describe('useBenchmarkWizardNavigation', () => {
       expect(result.current.isNextDisabled).toBe(true);
     });
 
-    it('should be disabled when options array is empty )', async () => {
+    it('should be disabled when options array is empty', async () => {
       const result = await setupAtProviderStep(
         buildStepResponse({ options: [], nextStep: 'next' }),
       );
