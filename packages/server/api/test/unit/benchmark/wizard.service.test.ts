@@ -47,14 +47,9 @@ const MOCK_WIZARD_CONFIG = {
       id: 'last_step',
       title: 'Select last options',
       selectionType: 'multi-select' as const,
-      conditional: {
-        when: 'lastStepCondition',
-        onSuccess: {
-          optionsSource: {
-            type: 'static' as const,
-            values: [{ id: 'opt1', displayName: 'Option 1' }],
-          },
-        },
+      optionsSource: {
+        type: 'static' as const,
+        values: [{ id: 'opt1', displayName: 'Option 1' }],
       },
     },
   ],
@@ -189,7 +184,7 @@ describe('resolveWizardNavigation', () => {
     );
 
     expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBeNull();
+    expect(result.nextStep).toBe('last_step');
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'step1.supportsMulti',
       expect.objectContaining({
@@ -296,22 +291,5 @@ describe('resolveWizardNavigation', () => {
     } finally {
       adapters.delete('misconfig');
     }
-  });
-
-  it('stays on current step when next step is terminal conditional and fails', async () => {
-    mockEvaluateCondition.mockResolvedValue(false);
-
-    const result = await resolveWizardNavigation(
-      'test',
-      { currentStep: 'step3' },
-      TEST_PROJECT_ID,
-    );
-
-    expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBeNull();
-    expect(mockEvaluateCondition).toHaveBeenCalledWith(
-      'lastStepCondition',
-      expect.any(Object),
-    );
   });
 });

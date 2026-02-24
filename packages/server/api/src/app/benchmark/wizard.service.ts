@@ -93,13 +93,7 @@ async function computeWizardStepResponse(
     stepToShow = steps[0];
   }
 
-  const resolvedNextStep = await resolveNextStep(
-    stepToShow,
-    config,
-    context,
-    providerAdapter,
-  );
-  const nextStep = resolvedNextStep?.id ?? null;
+  const nextStep = stepToShow.nextStep ?? null;
   return { stepToShow, nextStep };
 }
 
