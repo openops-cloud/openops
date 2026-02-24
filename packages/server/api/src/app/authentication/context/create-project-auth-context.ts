@@ -3,7 +3,6 @@ import {
   ErrorCode,
   isNil,
   PrincipalType,
-  ProjectMemberRole,
   User,
 } from '@openops/shared';
 import { organizationService } from '../../organization/organization.service';
@@ -49,8 +48,9 @@ export async function getProjectAndToken(
   return {
     user: updatedUser,
     token,
-    project,
     tablesRefreshToken,
-    projectRole: ProjectMemberRole.ADMIN,
+    projectId: project.id,
+    projectRole: 'ADMIN',
+    tablesWorkspaceId: project.tablesWorkspaceId,
   };
 }

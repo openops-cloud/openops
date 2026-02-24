@@ -3,14 +3,17 @@ import {
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
-import { AuthenticationResponse } from '@openops/shared';
 import { FastifyReply } from 'fastify';
 import { jwtDecode } from 'jwt-decode';
 import { getSubDomain } from '../../helper/sub-domain';
 
 export function setAuthCookies(
   reply: FastifyReply,
-  response: AuthenticationResponse,
+  response: {
+    tablesRefreshToken: string;
+    tablesWorkspaceId: number;
+    token: string;
+  },
   expiresAt?: number,
 ): FastifyReply {
   let cookieExpiryDate: Date;

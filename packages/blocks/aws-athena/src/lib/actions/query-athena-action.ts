@@ -33,6 +33,7 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
+
       refreshers: ['auth', 'accounts', 'region'],
       required: true,
       options: async ({ auth, accounts, region }) => {
