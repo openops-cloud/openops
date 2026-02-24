@@ -39,7 +39,7 @@ export async function getPrincipalFromWebsocket(
 
   const token = cookie.parse(rawCookies).token;
   if (!token) {
-    throw new Error('Missing token cookie');
+    throw new Error('Authentication cookie not provided.');
   }
 
   try {
