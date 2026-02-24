@@ -1,6 +1,6 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
-  getCredentialsFromAuth: jest.fn(),
+  getCredentialsListFromAuth: jest.fn(),
   runAndWaitForQueryResult: jest.fn(),
 };
 
@@ -12,9 +12,9 @@ describe('runAthenaQueryAction tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    openopsCommonMock.getCredentialsFromAuth.mockResolvedValue({
-      someCreds: 'some creds',
-    });
+    openopsCommonMock.getCredentialsListFromAuth.mockResolvedValue([
+      { someCreds: 'some creds' },
+    ]);
   });
 
   const auth = {
@@ -25,6 +25,9 @@ describe('runAthenaQueryAction tests', () => {
 
   test('should create action with correct properties', () => {
     expect(runAthenaQueryAction.props).toMatchObject({
+      accounts: {
+        type: 'DYNAMIC',
+      },
       query: {
         required: true,
         type: 'LONG_TEXT',
@@ -70,6 +73,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
+        accounts: { accounts: ['some-account-id'] },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -80,8 +84,13 @@ describe('runAthenaQueryAction tests', () => {
     const result = (await runAthenaQueryAction.run(context)) as any;
 
     expect(result).toEqual('mockResult');
-    expect(openopsCommonMock.getCredentialsFromAuth).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getCredentialsFromAuth).toHaveBeenCalledWith(auth);
+    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledWith(
+      auth,
+      ['some-account-id'],
+    );
   });
 
   test('should throw an error when runAndWaitForQueryResult throws error', async () => {
@@ -126,6 +135,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
+        accounts: { accounts: ['some-account-id'] },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -144,8 +154,13 @@ describe('runAthenaQueryAction tests', () => {
       'some database',
       'some outputBucket',
     );
-    expect(openopsCommonMock.getCredentialsFromAuth).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getCredentialsFromAuth).toHaveBeenCalledWith(auth);
+    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledWith(
+      auth,
+      ['some-account-id'],
+    );
   });
 
   test.each([
