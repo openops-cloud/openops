@@ -1,6 +1,5 @@
 import {
   OrganizationRole,
-  ProjectMemberRole,
   UserStatus,
 } from '@openops/shared';
 
@@ -65,7 +64,7 @@ const mockUser = {
   organizationId: 'bbbbbbbbbbbbbbbbbbbbb',
   token: '',
   projectId: 'ccccccccccccccccccccc',
-  projectRole: ProjectMemberRole.ADMIN,
+  projectRole: 'ADMIN',
   tablesRefreshToken: '',
 };
 

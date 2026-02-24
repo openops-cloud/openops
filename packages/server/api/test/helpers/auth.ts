@@ -3,7 +3,6 @@ import {
   openOpsId,
   Principal,
   PrincipalType,
-  ProjectMemberRole,
 } from '@openops/shared';
 import jwt, { Algorithm, JwtPayload, SignOptions } from 'jsonwebtoken';
 
