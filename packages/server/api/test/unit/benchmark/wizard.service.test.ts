@@ -189,7 +189,7 @@ describe('resolveWizardNavigation', () => {
     );
 
     expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBe('last_step');
+    expect(result.nextStep).toBeNull();
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'step1.supportsMulti',
       expect.objectContaining({
@@ -308,7 +308,7 @@ describe('resolveWizardNavigation', () => {
     );
 
     expect(result.currentStep).toBe('step3');
-    expect(result.nextStep).toBe('last_step');
+    expect(result.nextStep).toBeNull();
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'lastStepCondition',
       expect.any(Object),
