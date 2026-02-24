@@ -37,11 +37,13 @@ export async function getPrincipalFromWebsocket(
     throw new Error('Authentication cookie not provided.');
   }
 
+  const token = cookie.parse(rawCookies).token;
+  if (!token) {
+    throw new Error('Missing token cookie');
+  }
+
   try {
-    const parsedCookies = cookie.parse(rawCookies);
-    principal = await accessTokenManager.extractPrincipal(
-      parsedCookies['token'],
-    );
+    principal = await accessTokenManager.extractPrincipal(token);
   } catch (e) {
     logger.debug('Failed to extract principal from the socket.', {
       handshake: socket.handshake,
