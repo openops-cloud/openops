@@ -17431,7 +17431,7 @@ THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - bn.js@5.2.1
+ - bn.js@5.2.3
 
 This package contains the following license:
 
@@ -20276,6 +20276,7 @@ The following npm packages may be included in this product:
  - @frontegg/types@7.92.0
  - @hono/node-server@1.19.9
  - @linear/sdk@7.0.1
+ - @msgpackr-extract/msgpackr-extract-linux-x64@3.0.2
  - @nx/nx-linux-x64-gnu@19.8.8
  - @polka/url@1.0.0-next.25
  - @radix-ui/number@1.1.0
@@ -20458,6 +20459,8 @@ The following npm packages may be included in this product:
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1
+ - sass-embedded-linux-musl-x64@1.85.1
+ - sass-embedded-linux-x64@1.85.1
  - select@1.1.2
  - sirv@2.0.4
  - socks-proxy-agent@6.2.1
@@ -22196,11 +22199,13 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - @parcel/watcher-linux-x64-glibc@2.5.1
+ - @parcel/watcher-linux-x64-musl@2.5.1
  - @parcel/watcher@2.5.1
 
-This package contains the following license:
+These packages each contain the following license:
 
 MIT License
 
