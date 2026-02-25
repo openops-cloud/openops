@@ -56,7 +56,10 @@ export const useAnalyticsDashboard = () => {
 
   const handleDashboardChange = (dashboardId: string) => {
     setSelectedDashboardId(dashboardId);
-    setSearchParams({ dashboard: dashboardId });
+    setSearchParams((prev) => {
+      prev.set('dashboard', dashboardId);
+      return prev;
+    });
   };
 
   const registryDashboard = dashboardRegistry?.dashboards.find(
