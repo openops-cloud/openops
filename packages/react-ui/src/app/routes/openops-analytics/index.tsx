@@ -3,8 +3,10 @@ import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-s
 import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { FlagId } from '@openops/shared';
 
-import { AnalyticsDashboardSelector } from '@openops/components/ui';
-import { AnalyticsEmptyState } from './analytics-empty-state';
+import {
+  AnalyticsDashboardEmptyState,
+  AnalyticsDashboardSelector,
+} from '@openops/components/ui';
 import { AnaloyticsLoadingState } from './analytics-loading-state';
 import './openops-analytics.css';
 import { useAnalyticsDashboard } from './use-analytics-dashboard';
@@ -47,9 +49,8 @@ const OpenOpsAnalyticsPage = () => {
 
   if (!selectedDashboard) {
     return (
-      <AnalyticsEmptyState
+      <AnalyticsDashboardEmptyState
         dashboards={dashboards}
-        selectedDashboardId={selectedDashboardId ?? ''}
         onDashboardChange={handleDashboardChange}
       />
     );
