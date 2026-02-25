@@ -11,6 +11,21 @@ import {
   FlagId,
 } from '@openops/shared';
 
+function resolveSelectedDashboardId(
+  registry: AnalyticsDashboardRegistry,
+  urlDashboardId: string | null,
+): string | null {
+  const enabledDashboards = registry.dashboards.filter((d) => d.enabled);
+  const urlDashboard = enabledDashboards.find((d) => d.id === urlDashboardId);
+
+  if (urlDashboard) return urlDashboard.id;
+
+  const defaultOrFirst =
+    enabledDashboards.find((d) => d.id === registry.defaultDashboardId) ??
+    enabledDashboards[0];
+  return defaultOrFirst?.id ?? null;
+}
+
 export const useAnalyticsDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: dashboardRegistry } =
@@ -30,21 +45,14 @@ export const useAnalyticsDashboard = () => {
   );
 
   useEffect(() => {
-    if (!dashboardRegistry) {
-      return;
-    }
-
-    const urlDashboardId = searchParams.get('dashboard');
-    const validDashboard = dashboardRegistry.dashboards.find(
-      (d) => d.id === urlDashboardId && d.enabled,
+    if (!dashboardRegistry) return;
+    setSelectedDashboardId(
+      resolveSelectedDashboardId(
+        dashboardRegistry,
+        searchParams.get('dashboard'),
+      ),
     );
-
-    if (validDashboard) {
-      setSelectedDashboardId(validDashboard.id);
-    } else if (!selectedDashboardId) {
-      setSelectedDashboardId(dashboardRegistry.defaultDashboardId);
-    }
-  }, [dashboardRegistry, searchParams, selectedDashboardId]);
+  }, [dashboardRegistry, searchParams]);
 
   const handleDashboardChange = (dashboardId: string) => {
     setSelectedDashboardId(dashboardId);
@@ -52,7 +60,7 @@ export const useAnalyticsDashboard = () => {
   };
 
   const registryDashboard = dashboardRegistry?.dashboards.find(
-    (d) => d.id === selectedDashboardId,
+    (d) => d.id === selectedDashboardId && d.enabled,
   );
 
   const fallbackDashboard: AnalyticsDashboard | undefined =
