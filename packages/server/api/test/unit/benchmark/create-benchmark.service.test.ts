@@ -1,9 +1,4 @@
-import {
-  ApplicationError,
-  ContentType,
-  ErrorCode,
-  type FolderDto,
-} from '@openops/shared';
+import { ContentType, type FolderDto } from '@openops/shared';
 import {
   createBenchmark,
   ensureBenchmarkFolder,
@@ -34,13 +29,9 @@ describe('create-benchmark.service', () => {
   });
 
   it('throws validation error for unknown provider', () => {
-    try {
-      getBenchmarkFolderDisplayName('gcp');
-      throw new Error('Expected error not thrown');
-    } catch (error) {
-      const appError = error as ApplicationError;
-      expect(appError.error.code).toBe(ErrorCode.VALIDATION);
-    }
+    expect(() => getBenchmarkFolderDisplayName('gcp')).toThrow(
+      'Unknown provider: gcp',
+    );
   });
 
   it('returns existing folder when found by display name', async () => {
