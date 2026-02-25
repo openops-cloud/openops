@@ -1,4 +1,5 @@
 export * from './ai-chat-container';
+export * from './analytics-dashboard-selector/analytics-dashboard-selector';
 export * from './assistant-ui/assistant-top-bar';
 export * from './assistant-ui/assistant-ui-chat-container';
 export * from './assistant-ui/history/assistant-ui-history';
