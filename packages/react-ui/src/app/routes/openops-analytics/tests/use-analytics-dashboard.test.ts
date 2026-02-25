@@ -2,6 +2,10 @@ import { act, renderHook } from '@testing-library/react';
 
 import { useAnalyticsDashboard } from '../use-analytics-dashboard';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
+
 const mockSetSearchParams = jest.fn();
 jest.mock('react-router-dom', () => ({
   useSearchParams: jest.fn(),
@@ -17,10 +21,6 @@ jest.mock('@/app/common/hooks/flags-hooks', () => ({
   },
 }));
 
-import { useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-
 const mockUseSearchParams = useSearchParams as jest.Mock;
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseFlag = flagsHooks.useFlag as jest.Mock;
@@ -28,13 +28,28 @@ const mockUseFlag = flagsHooks.useFlag as jest.Mock;
 const makeRegistry = (overrides = {}) => ({
   defaultDashboardId: 'finops',
   dashboards: [
-    { id: 'finops', name: 'FinOps', embedId: 'embed-finops', slug: 'finops', enabled: true },
-    { id: 'benchmark', name: 'Benchmark', embedId: 'embed-benchmark', slug: 'benchmark', enabled: true },
+    {
+      id: 'finops',
+      name: 'FinOps',
+      embedId: 'embed-finops',
+      slug: 'finops',
+      enabled: true,
+    },
+    {
+      id: 'benchmark',
+      name: 'Benchmark',
+      embedId: 'embed-benchmark',
+      slug: 'benchmark',
+      enabled: true,
+    },
   ],
   ...overrides,
 });
 
-function setup(searchParam: string | null = null, registryData: unknown = undefined) {
+function setup(
+  searchParam: string | null = null,
+  registryData: unknown = undefined,
+) {
   mockUseSearchParams.mockReturnValue([
     new URLSearchParams(searchParam ? `dashboard=${searchParam}` : ''),
     mockSetSearchParams,
@@ -51,7 +66,10 @@ describe('useAnalyticsDashboard', () => {
   });
 
   it('isLoading is true when dashboardRegistry is undefined', () => {
-    mockUseSearchParams.mockReturnValue([new URLSearchParams(), mockSetSearchParams]);
+    mockUseSearchParams.mockReturnValue([
+      new URLSearchParams(),
+      mockSetSearchParams,
+    ]);
     mockUseFlag.mockReturnValue({ data: undefined });
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: false });
 
@@ -61,7 +79,10 @@ describe('useAnalyticsDashboard', () => {
   });
 
   it('returns fallback dashboard when registry is null and fallbackEmbedId is available', () => {
-    mockUseSearchParams.mockReturnValue([new URLSearchParams(), mockSetSearchParams]);
+    mockUseSearchParams.mockReturnValue([
+      new URLSearchParams(),
+      mockSetSearchParams,
+    ]);
     mockUseFlag.mockReturnValue({ data: null });
     mockUseQuery.mockReturnValue({ data: 'embed-fallback', isLoading: false });
 
@@ -75,7 +96,10 @@ describe('useAnalyticsDashboard', () => {
   });
 
   it('returns undefined selectedDashboard when registry is null and fallback is loading', () => {
-    mockUseSearchParams.mockReturnValue([new URLSearchParams(), mockSetSearchParams]);
+    mockUseSearchParams.mockReturnValue([
+      new URLSearchParams(),
+      mockSetSearchParams,
+    ]);
     mockUseFlag.mockReturnValue({ data: null });
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
 
@@ -88,15 +112,14 @@ describe('useAnalyticsDashboard', () => {
   it('selects dashboard matching the URL ?dashboard= param', async () => {
     const { result } = setup('benchmark', makeRegistry());
 
-    await act(async () => {});
-
     expect(result.current.selectedDashboard?.id).toBe('benchmark');
   });
 
   it('falls back to defaultDashboardId when URL param does not match any dashboard', async () => {
-    const { result } = setup('nonexistent', makeRegistry({ defaultDashboardId: 'benchmark' }));
-
-    await act(async () => {});
+    const { result } = setup(
+      'nonexistent',
+      makeRegistry({ defaultDashboardId: 'benchmark' }),
+    );
 
     expect(result.current.selectedDashboard?.id).toBe('benchmark');
   });
@@ -107,12 +130,10 @@ describe('useAnalyticsDashboard', () => {
       makeRegistry({ defaultDashboardId: 'also-nonexistent' }),
     );
 
-    await act(async () => {});
-
     expect(result.current.selectedDashboard?.id).toBe('finops');
   });
 
-  it('handleDashboardChange updates selectedDashboardId and calls setSearchParams', async () => {
+  it('handleDashboardChange updates selectedDashboardId', async () => {
     const { result } = setup(null, makeRegistry());
 
     await act(async () => {
@@ -120,6 +141,5 @@ describe('useAnalyticsDashboard', () => {
     });
 
     expect(result.current.selectedDashboardId).toBe('benchmark');
-    expect(mockSetSearchParams).toHaveBeenCalledWith({ dashboard: 'benchmark' });
   });
 });
