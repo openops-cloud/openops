@@ -6,8 +6,8 @@ import {
   WizardPrevious,
 } from '@openops/components/ui';
 import {
+  BenchmarkCreationResult,
   BenchmarkWizardStepResponse,
-  CreateBenchmarkResponse,
 } from '@openops/shared';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { WizardPhase } from '../use-benchmark-wizard-navigation';
 interface BenchmarkWizardFooterProps {
   wizardPhase: WizardPhase;
   currentStepResponse: BenchmarkWizardStepResponse | null;
-  createBenchmarkResult: CreateBenchmarkResponse | null;
+  benchmarkCreateResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
@@ -28,7 +28,7 @@ interface BenchmarkWizardFooterProps {
 export const BenchmarkWizardFooter = ({
   wizardPhase,
   currentStepResponse,
-  createBenchmarkResult,
+  benchmarkCreateResult,
   isNextDisabled,
   handleNextFromInitial,
   handleNextFromProviderStep,
@@ -48,7 +48,7 @@ export const BenchmarkWizardFooter = ({
           size="sm"
           onClick={() =>
             navigate(
-              `/flows?${FOLDER_ID_PARAM_NAME}=${createBenchmarkResult?.folderId}`,
+              `/flows?${FOLDER_ID_PARAM_NAME}=${benchmarkCreateResult?.folderId}`,
             )
           }
         >

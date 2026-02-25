@@ -18,7 +18,7 @@ export const BenchmarkWebhookPayload = Type.Object({
 
 export type BenchmarkWebhookPayload = Static<typeof BenchmarkWebhookPayload>;
 
-export const CreateBenchmarkResponse = Type.Object({
+export const BenchmarkCreationResult = Type.Object({
   benchmarkId: Type.String(),
   folderId: Type.String(),
   provider: Type.String(),
@@ -26,4 +26,4 @@ export const CreateBenchmarkResponse = Type.Object({
   webhookPayload: BenchmarkWebhookPayload,
 });
 
-export type CreateBenchmarkResponse = Static<typeof CreateBenchmarkResponse>;
+export type BenchmarkCreationResult = Static<typeof BenchmarkCreationResult>;

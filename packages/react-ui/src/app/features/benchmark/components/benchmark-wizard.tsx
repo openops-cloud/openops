@@ -9,7 +9,7 @@ import {
   WizardStep,
   WizardTitle,
 } from '@openops/components/ui';
-import { CreateBenchmarkResponse } from '@openops/shared';
+import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
 import { useCallback, useState } from 'react';
@@ -26,7 +26,7 @@ import { InitialBenchmarkStep } from './initial-benchmark-step';
 
 interface BenchmarkWizardProps {
   onClose: () => void;
-  onBenchmarkCreated?: (result: CreateBenchmarkResponse) => void;
+  onBenchmarkCreated?: (result: BenchmarkCreationResult) => void;
 }
 
 interface ProviderConnectionDialogProps {
@@ -72,7 +72,7 @@ export const BenchmarkWizard = ({
     currentSelections,
     setCurrentSelections,
     isCreatingBenchmark,
-    createBenchmarkResult,
+    benchmarkCreateResult,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,
@@ -135,10 +135,10 @@ export const BenchmarkWizard = ({
                 )}
               </WizardStep>
               <WizardStep value="benchmark-ready" key="benchmark-ready">
-                {createBenchmarkResult && (
+                {benchmarkCreateResult && (
                   <BenchmarkReadyStep
                     providerName={providerName}
-                    result={createBenchmarkResult}
+                    result={benchmarkCreateResult}
                     runPhase="idle"
                     onViewRun={noop}
                     onResetRun={noop}
@@ -153,7 +153,7 @@ export const BenchmarkWizard = ({
           <BenchmarkWizardFooter
             wizardPhase={wizardPhase}
             currentStepResponse={currentStepResponse}
-            createBenchmarkResult={createBenchmarkResult}
+            benchmarkCreateResult={benchmarkCreateResult}
             isNextDisabled={isNextDisabled}
             handleNextFromInitial={handleNextFromInitial}
             handleNextFromProviderStep={handleNextFromProviderStep}

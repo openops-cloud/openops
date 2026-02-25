@@ -525,7 +525,7 @@ describe('useBenchmarkWizardNavigation', () => {
         region: ['us-east-1'],
       });
       expect(result.current.wizardPhase).toBe('benchmark-ready');
-      expect(result.current.createBenchmarkResult).toEqual(benchmarkResult);
+      expect(result.current.benchmarkCreateResult).toEqual(benchmarkResult);
     });
 
     it('should call onBenchmarkCreated callback with the result', async () => {
@@ -576,7 +576,7 @@ describe('useBenchmarkWizardNavigation', () => {
   });
 
   describe('handleEditSetup', () => {
-    it('should return to provider-step phase and clear createBenchmarkResult', async () => {
+    it('should return to provider-step phase and clear benchmarkCreateResult', async () => {
       const lastStep = buildStepResponse({
         nextStep: null as unknown as string,
       });
@@ -609,7 +609,7 @@ describe('useBenchmarkWizardNavigation', () => {
       act(() => result.current.handleEditSetup());
 
       expect(result.current.wizardPhase).toBe('provider-step');
-      expect(result.current.createBenchmarkResult).toBeNull();
+      expect(result.current.benchmarkCreateResult).toBeNull();
       expect(result.current.currentStepResponse).toEqual(lastStep);
       expect(result.current.currentSelections).toEqual(['us-east-1']);
     });
