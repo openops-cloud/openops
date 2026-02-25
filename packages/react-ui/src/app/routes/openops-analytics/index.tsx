@@ -42,7 +42,7 @@ const OpenOpsAnalyticsPage = () => {
   }
 
   if (isLoading) {
-    <AnaloyticsLoadingState />;
+    return <AnaloyticsLoadingState />;
   }
 
   const dashboards = dashboardRegistry?.dashboards ?? [];
