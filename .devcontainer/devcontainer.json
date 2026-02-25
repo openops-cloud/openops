@@ -65,6 +65,6 @@
     },
     "remoteUser": "root",
     "postCreateCommand": "git pull origin $(git branch --show-current) && /bin/bash .devcontainer/setup.sh && npm ci",
-    "postStartCommand": "docker compose pull && /usr/lib/chromium/chromium --headless=new --no-sandbox --disable-dev-shm-usage --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 about:blank &",
+    "postStartCommand": "docker compose pull && nohup /usr/lib/chromium/chromium --headless=new --no-sandbox --disable-dev-shm-usage --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 about:blank >/tmp/chromium.log 2>&1 &",
     "postAttachCommand": "npm start"
 }
