@@ -1,4 +1,9 @@
-import { ContentType, type FolderDto } from '@openops/shared';
+import {
+  ApplicationError,
+  ContentType,
+  ErrorCode,
+  type FolderDto,
+} from '@openops/shared';
 import {
   createBenchmark,
   ensureBenchmarkFolder,
@@ -34,49 +39,6 @@ describe('create-benchmark.service', () => {
     );
   });
 
-  it('returns existing folder when found by display name', async () => {
-    const projectId = 'project-1';
-    const displayName = 'AWS Benchmark';
-    const existingFolder = {
-      id: 'folder-1',
-      projectId,
-      displayName,
-      contentType: ContentType.WORKFLOW,
-      created: '',
-      updated: '',
-    };
-    const folderDto: FolderDto = {
-      id: 'folder-1',
-      projectId,
-      displayName,
-      created: '',
-      updated: '',
-      numberOfFlows: 2,
-      contentType: ContentType.WORKFLOW,
-    };
-
-    flowFolderServiceMock.getOneByDisplayNameCaseInsensitive.mockResolvedValue(
-      existingFolder,
-    );
-    flowFolderServiceMock.getOneOrThrow.mockResolvedValue(folderDto);
-
-    const result = await ensureBenchmarkFolder(projectId, displayName);
-
-    expect(
-      flowFolderServiceMock.getOneByDisplayNameCaseInsensitive,
-    ).toHaveBeenCalledWith({
-      projectId,
-      displayName,
-      contentType: ContentType.WORKFLOW,
-    });
-    expect(flowFolderServiceMock.getOneOrThrow).toHaveBeenCalledWith({
-      projectId,
-      folderId: 'folder-1',
-    });
-    expect(flowFolderServiceMock.create).not.toHaveBeenCalled();
-    expect(result).toEqual(folderDto);
-  });
-
   it('creates folder when display name not found', async () => {
     const projectId = 'project-1';
     const displayName = 'AWS Benchmark';
@@ -106,6 +68,57 @@ describe('create-benchmark.service', () => {
       },
     });
     expect(result).toEqual(createdFolder);
+  });
+
+  it('returns existing folder when create throws FOLDER_ALREADY_EXISTS', async () => {
+    const projectId = 'project-1';
+    const displayName = 'AWS Benchmark';
+    const existingFolder = {
+      id: 'folder-1',
+      projectId,
+      displayName,
+      contentType: ContentType.WORKFLOW,
+      created: '',
+      updated: '',
+    };
+    const folderDto: FolderDto = {
+      id: 'folder-1',
+      projectId,
+      displayName,
+      created: '',
+      updated: '',
+      numberOfFlows: 2,
+      contentType: ContentType.WORKFLOW,
+    };
+
+    flowFolderServiceMock.getOneByDisplayNameCaseInsensitive
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(existingFolder);
+    flowFolderServiceMock.create.mockRejectedValue(
+      new ApplicationError({
+        code: ErrorCode.FOLDER_ALREADY_EXISTS,
+        params: { folderName: displayName },
+      }),
+    );
+    flowFolderServiceMock.getOneOrThrow.mockResolvedValue(folderDto);
+
+    const result = await ensureBenchmarkFolder(projectId, displayName);
+
+    expect(flowFolderServiceMock.create).toHaveBeenCalledWith({
+      projectId,
+      request: {
+        displayName,
+        contentType: ContentType.WORKFLOW,
+      },
+    });
+    expect(
+      flowFolderServiceMock.getOneByDisplayNameCaseInsensitive,
+    ).toHaveBeenCalledTimes(2);
+    expect(flowFolderServiceMock.getOneOrThrow).toHaveBeenCalledWith({
+      projectId,
+      folderId: 'folder-1',
+    });
+    expect(result).toEqual(folderDto);
   });
 
   it('creates a benchmark response after ensuring folder', async () => {
