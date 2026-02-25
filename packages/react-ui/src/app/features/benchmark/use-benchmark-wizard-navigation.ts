@@ -51,7 +51,7 @@ export const useBenchmarkWizardNavigation = (
     useState<BenchmarkWizardStepResponse | null>(null);
   const [currentSelections, setCurrentSelections] = useState<string[]>([]);
   const [stepHistory, setStepHistory] = useState<StepHistoryEntry[]>([]);
-  const [benchmarkCreateResult, setCreateBenchmarkResult] =
+  const [benchmarkCreateResult, setBenchmarkCreateResult] =
     useState<BenchmarkCreationResult | null>(null);
 
   const { mutateAsync: fetchWizardStep, isPending: isLoadingStep } =
@@ -78,7 +78,7 @@ export const useBenchmarkWizardNavigation = (
         benchmarkConfiguration: Record<string, string[]>;
       }) => benchmarkApi.createBenchmark(provider, benchmarkConfiguration),
       onSuccess: (result) => {
-        setCreateBenchmarkResult(result);
+        setBenchmarkCreateResult(result);
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
       },
@@ -140,7 +140,7 @@ export const useBenchmarkWizardNavigation = (
     setCurrentStepResponse(lastEntry.stepResponse);
     setCurrentSelections(lastEntry.selections);
     setWizardPhase('provider-step');
-    setCreateBenchmarkResult(null);
+    setBenchmarkCreateResult(null);
   };
 
   const handlePrevious = () => {
