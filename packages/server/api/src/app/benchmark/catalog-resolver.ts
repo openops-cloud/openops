@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  type CatalogManifest,
-  PROVIDER_CATALOG_MANIFESTS,
+  type LifecycleWorkflow,
+  PROVIDER_LIFECYCLE_WORKFLOWS,
 } from './catalog-manifests';
 import { throwValidationError } from './errors';
 
@@ -12,21 +12,21 @@ function getCatalogDir(provider: string): string {
   return path.join(__dirname, WORKFLOWS_CATALOG_DIR, provider.toLowerCase());
 }
 
-function getCatalogManifest(provider: string): CatalogManifest {
+function getLifecycleWorkflow(provider: string): LifecycleWorkflow {
   const normalized = provider.toLowerCase();
-  const manifest = PROVIDER_CATALOG_MANIFESTS[normalized];
-  if (!manifest) {
+  const lifecycleWorkflow = PROVIDER_LIFECYCLE_WORKFLOWS[normalized];
+  if (!lifecycleWorkflow) {
     throwValidationError(`Unsupported benchmark provider: ${provider}`);
   }
-  return manifest;
+  return lifecycleWorkflow;
 }
 
-export function getOrchestratorId(provider: string): string {
-  return getCatalogManifest(provider).orchestratorWorkflowId;
+function getOrchestratorId(provider: string): string {
+  return getLifecycleWorkflow(provider).orchestratorWorkflowId;
 }
 
-export function getCleanupWorkflowId(provider: string): string {
-  return getCatalogManifest(provider).cleanupWorkflowId;
+function getCleanupWorkflowId(provider: string): string {
+  return getLifecycleWorkflow(provider).cleanupWorkflowId;
 }
 
 export type ResolvedWorkflowPath = {
@@ -34,7 +34,7 @@ export type ResolvedWorkflowPath = {
   filePath: string;
 };
 
-export function resolveWorkflowPaths(
+function resolveWorkflowPaths(
   provider: string,
   workflowIds: string[],
 ): ResolvedWorkflowPath[] {
@@ -54,6 +54,10 @@ export function resolveWorkflowPathsForSeed(
   provider: string,
   subWorkflowIds: string[],
 ): ResolvedWorkflowPath[] {
+  if (subWorkflowIds.length === 0) {
+    getLifecycleWorkflow(provider);
+    return [];
+  }
   const orchestratorId = getOrchestratorId(provider);
   const cleanupId = getCleanupWorkflowId(provider);
   const allIds = [orchestratorId, cleanupId, ...subWorkflowIds];

@@ -1,8 +1,5 @@
 import fs from 'node:fs';
-import {
-  resolveWorkflowPaths,
-  resolveWorkflowPathsForSeed,
-} from '../../../src/app/benchmark/catalog-resolver';
+import { resolveWorkflowPathsForSeed } from '../../../src/app/benchmark/catalog-resolver';
 
 const ORCHESTRATOR_WORKFLOW_ID = 'Orchestrator Workflow';
 const CLEANUP_WORKFLOW_ID = 'Cleanup Workflow';
@@ -11,7 +8,7 @@ const SUB_WORKFLOW_ID = 'Sub Workflow A';
 const TEST_PROVIDER = 'provider_a';
 
 jest.mock('../../../src/app/benchmark/catalog-manifests', () => ({
-  PROVIDER_CATALOG_MANIFESTS: {
+  PROVIDER_LIFECYCLE_WORKFLOWS: {
     provider_a: {
       orchestratorWorkflowId: 'Orchestrator Workflow',
       cleanupWorkflowId: 'Cleanup Workflow',
@@ -46,17 +43,22 @@ describe('catalog-resolver', () => {
     );
   });
 
-  it('resolveWorkflowPaths throws when workflow file does not exist', () => {
-    existsSyncMock.mockReturnValue(false);
-
-    expect(() =>
-      resolveWorkflowPaths(TEST_PROVIDER, [SUB_WORKFLOW_ID]),
-    ).toThrow(`Workflow catalog file not found: ${SUB_WORKFLOW_ID}`);
+  it('resolveWorkflowPathsForSeed returns empty array when no sub-workflows', () => {
+    const result = resolveWorkflowPathsForSeed(TEST_PROVIDER, []);
+    expect(result).toEqual([]);
   });
 
-  it('resolveWorkflowPaths returns empty array for empty workflowIds', () => {
-    const result = resolveWorkflowPaths(TEST_PROVIDER, []);
-    expect(result).toEqual([]);
+  it('resolveWorkflowPathsForSeed throws when workflow file does not exist', () => {
+    setCatalogExists((filePath) => {
+      return (
+        filePath.endsWith(`${ORCHESTRATOR_WORKFLOW_ID}.json`) ||
+        filePath.endsWith(`${CLEANUP_WORKFLOW_ID}.json`)
+      );
+    });
+
+    expect(() =>
+      resolveWorkflowPathsForSeed(TEST_PROVIDER, [SUB_WORKFLOW_ID]),
+    ).toThrow(`Workflow catalog file not found: ${SUB_WORKFLOW_ID}`);
   });
 
   it('resolveWorkflowPathsForSeed returns orchestrator, cleanup, then sub-workflows when all exist', () => {
