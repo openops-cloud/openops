@@ -36,7 +36,7 @@ export const BenchmarkWizardFooter = ({
 }: BenchmarkWizardFooterProps) => {
   if (wizardPhase === 'benchmark-ready') {
     return (
-      <>
+      <div className="flex-1 flex gap-2 justify-end">
         <Button variant="outline" size="sm" onClick={handleEditSetup}>
           {t('Edit setup')}
         </Button>
@@ -48,7 +48,7 @@ export const BenchmarkWizardFooter = ({
         <Button size="sm" disabled>
           {t('Run now')}
         </Button>
-      </>
+      </div>
     );
   }
 
