@@ -610,6 +610,8 @@ describe('useBenchmarkWizardNavigation', () => {
 
       expect(result.current.wizardPhase).toBe('provider-step');
       expect(result.current.createBenchmarkResult).toBeNull();
+      expect(result.current.currentStepResponse).toEqual(lastStep);
+      expect(result.current.currentSelections).toEqual(['us-east-1']);
     });
   });
 });

@@ -113,6 +113,7 @@ export const useBenchmarkWizardNavigation = (
     const benchmarkConfiguration = buildBenchmarkConfiguration(newHistory);
 
     if (currentStepResponse.nextStep === null) {
+      setStepHistory(newHistory);
       await runCreateBenchmark({
         provider: selectedProvider,
         benchmarkConfiguration,
@@ -134,6 +135,10 @@ export const useBenchmarkWizardNavigation = (
   };
 
   const handleEditSetup = () => {
+    const lastEntry = stepHistory[stepHistory.length - 1];
+    setStepHistory(stepHistory.slice(0, -1));
+    setCurrentStepResponse(lastEntry.stepResponse);
+    setCurrentSelections(lastEntry.selections);
     setWizardPhase('provider-step');
     setCreateBenchmarkResult(null);
   };
