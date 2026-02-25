@@ -45,31 +45,44 @@ export const runAthenaQueryAction = createAction({
           };
         }
 
-        const authProp = auth as {
-          accessKeyId: string;
-          secretAccessKey: string;
-          defaultRegion: string;
-        };
-        const selectedAccounts = (accounts as any)?.['accounts'];
-        const credentialsList = await getCredentialsListFromAuth(
-          authProp,
-          selectedAccounts,
-        );
+        try {
+          const authProp = auth as {
+            accessKeyId: string;
+            secretAccessKey: string;
+            defaultRegion: string;
+          };
+          const selectedAccounts = (
+            accounts as unknown as {
+              accounts?: string[];
+            }
+          )?.accounts;
+          const credentialsList = await getCredentialsListFromAuth(
+            authProp,
+            selectedAccounts,
+          );
 
-        const databases = await listAthenaDatabases(
-          credentialsList[0],
-          (region as string | undefined) ?? authProp.defaultRegion,
-        );
+          const databases = await listAthenaDatabases(
+            credentialsList[0],
+            (region as string | undefined) ?? authProp.defaultRegion,
+          );
 
-        return {
-          disabled: false,
-          options: databases.map((database) => {
-            return {
-              label: database.Name as string,
-              value: database.Name as string,
-            };
-          }),
-        };
+          return {
+            disabled: false,
+            options: databases.map((database) => {
+              return {
+                label: database.Name as string,
+                value: database.Name as string,
+              };
+            }),
+          };
+        } catch (error) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'An error occurred while fetching databases',
+            error: String(error),
+          };
+        }
       },
     }),
     outputBucket: Property.LongText({
