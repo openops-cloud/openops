@@ -1,6 +1,5 @@
 import {
   Button,
-  FOLDER_ID_PARAM_NAME,
   StepCounter,
   WizardNext,
   WizardPrevious,
@@ -10,14 +9,14 @@ import {
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
 import { t } from 'i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { WizardPhase } from '../use-benchmark-wizard-navigation';
+import { ViewBenchmarkWorkflowsButton } from './view-benchmark-workflows-button';
 
 interface BenchmarkWizardFooterProps {
   wizardPhase: WizardPhase;
   currentStepResponse: BenchmarkWizardStepResponse | null;
-  benchmarkCreateResult: BenchmarkCreationResult | null;
+  benchmarkCreationResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
@@ -28,32 +27,24 @@ interface BenchmarkWizardFooterProps {
 export const BenchmarkWizardFooter = ({
   wizardPhase,
   currentStepResponse,
-  benchmarkCreateResult,
+  benchmarkCreationResult,
   isNextDisabled,
   handleNextFromInitial,
   handleNextFromProviderStep,
   handlePrevious,
   handleEditSetup,
 }: BenchmarkWizardFooterProps) => {
-  const navigate = useNavigate();
-
   if (wizardPhase === 'benchmark-ready') {
     return (
       <>
         <Button variant="outline" size="sm" onClick={handleEditSetup}>
           {t('Edit setup')}
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            navigate(
-              `/flows?${FOLDER_ID_PARAM_NAME}=${benchmarkCreateResult?.folderId}`,
-            )
-          }
-        >
-          {t('View Workflows')}
-        </Button>
+        {benchmarkCreationResult && (
+          <ViewBenchmarkWorkflowsButton
+            folderId={benchmarkCreationResult.folderId}
+          />
+        )}
         <Button size="sm" disabled>
           {t('Run now')}
         </Button>
