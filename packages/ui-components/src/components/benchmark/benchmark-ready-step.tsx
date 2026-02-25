@@ -1,5 +1,5 @@
 import { BenchmarkRunPhase } from '@/lib/types';
-import { CreateBenchmarkResponse } from '@openops/shared';
+import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 import { StepDescription } from '../../ui/wizard/wizard-step';
 import { BenchmarkAnalyticsPhase } from './benchmark-analytics-phase';
@@ -9,7 +9,7 @@ import { BenchmarkWorkflowList } from './benchmark-workflow-list';
 
 interface BenchmarkReadyStepProps {
   providerName: string;
-  result: CreateBenchmarkResponse;
+  result: BenchmarkCreationResult;
   runPhase: BenchmarkRunPhase;
   onViewRun: () => void;
   onResetRun: () => void;

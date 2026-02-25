@@ -1,8 +1,8 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import {
+  BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  CreateBenchmarkResponse,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -33,7 +33,7 @@ type UseBenchmarkWizardNavigationResult = {
   setCurrentSelections: (selections: string[]) => void;
   isLoadingStep: boolean;
   isCreatingBenchmark: boolean;
-  createBenchmarkResult: CreateBenchmarkResponse | null;
+  benchmarkCreateResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
@@ -43,7 +43,7 @@ type UseBenchmarkWizardNavigationResult = {
 
 export const useBenchmarkWizardNavigation = (
   connectedProviders: Record<string, boolean>,
-  onBenchmarkCreated?: (result: CreateBenchmarkResponse) => void,
+  onBenchmarkCreated?: (result: BenchmarkCreationResult) => void,
 ): UseBenchmarkWizardNavigationResult => {
   const [selectedProvider, setSelectedProvider] = useState<string>();
   const [wizardPhase, setWizardPhase] = useState<WizardPhase>('initial');
@@ -51,8 +51,8 @@ export const useBenchmarkWizardNavigation = (
     useState<BenchmarkWizardStepResponse | null>(null);
   const [currentSelections, setCurrentSelections] = useState<string[]>([]);
   const [stepHistory, setStepHistory] = useState<StepHistoryEntry[]>([]);
-  const [createBenchmarkResult, setCreateBenchmarkResult] =
-    useState<CreateBenchmarkResponse | null>(null);
+  const [benchmarkCreateResult, setCreateBenchmarkResult] =
+    useState<BenchmarkCreationResult | null>(null);
 
   const { mutateAsync: fetchWizardStep, isPending: isLoadingStep } =
     useMutation({
@@ -182,7 +182,7 @@ export const useBenchmarkWizardNavigation = (
     setCurrentSelections,
     isLoadingStep,
     isCreatingBenchmark,
-    createBenchmarkResult,
+    benchmarkCreateResult,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,

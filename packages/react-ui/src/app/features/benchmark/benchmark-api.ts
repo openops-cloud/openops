@@ -1,7 +1,7 @@
 import {
+  BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  CreateBenchmarkResponse,
 } from '@openops/shared';
 
 import { api } from '@/app/lib/api';
@@ -19,7 +19,7 @@ const getWizardStep = (
 const createBenchmark = (
   provider: string,
   _benchmarkConfiguration: Record<string, string[]>,
-): Promise<CreateBenchmarkResponse> =>
+): Promise<BenchmarkCreationResult> =>
   new Promise((resolve) =>
     setTimeout(
       () =>
