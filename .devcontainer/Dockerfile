@@ -9,7 +9,8 @@ RUN <<-```
       locales-all \
       libcap-dev \
       wget \
-      unzip
+      unzip \
+      chromium
     rm -rf /var/lib/apt/lists/*
 ```
 
