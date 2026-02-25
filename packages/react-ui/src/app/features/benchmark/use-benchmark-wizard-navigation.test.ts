@@ -13,6 +13,7 @@ jest.mock('@tanstack/react-query', () => ({
 jest.mock('./benchmark-api', () => ({
   benchmarkApi: {
     getWizardStep: jest.fn(),
+    createBenchmark: jest.fn(),
   },
 }));
 
@@ -23,6 +24,7 @@ jest.mock('@openops/components/ui', () => ({
 
 const mockUseMutation = useMutation as jest.Mock;
 const mockGetWizardStep = benchmarkApi.getWizardStep as jest.Mock;
+const mockCreateBenchmark = benchmarkApi.createBenchmark as jest.Mock;
 const mockToast = toast as jest.Mock;
 
 const buildStepResponse = (
@@ -47,10 +49,12 @@ const buildStepResponse = (
 });
 
 const setupMutationMock = (isPending = false) => {
-  mockUseMutation.mockImplementation(({ mutationFn, onError }) => ({
+  mockUseMutation.mockImplementation(({ mutationFn, onError, onSuccess }) => ({
     mutateAsync: async (args: unknown) => {
       try {
-        return await mutationFn(args);
+        const result = await mutationFn(args);
+        onSuccess?.(result);
+        return result;
       } catch (error) {
         onError(error);
         throw error;
@@ -455,14 +459,14 @@ describe('useBenchmarkWizardNavigation', () => {
       expect(result.current.isNextDisabled).toBe(false);
     });
 
-    it('should be disabled when nextStep is null even with selections', async () => {
+    it('should be enabled when nextStep is null and selections exist (last step triggers benchmark creation)', async () => {
       const result = await setupAtProviderStep(
         buildStepResponse({ nextStep: null as unknown as string }),
       );
 
       act(() => result.current.setCurrentSelections(['us-east-1']));
 
-      expect(result.current.isNextDisabled).toBe(true);
+      expect(result.current.isNextDisabled).toBe(false);
     });
 
     it('should be disabled when options array is empty', async () => {
@@ -482,6 +486,130 @@ describe('useBenchmarkWizardNavigation', () => {
       act(() => result.current.setCurrentSelections(['us-east-1']));
 
       expect(result.current.isNextDisabled).toBe(true);
+    });
+  });
+
+  describe('creating benchmark (last step)', () => {
+    const benchmarkResult = {
+      benchmarkId: 'bm-1',
+      folderId: 'folder-1',
+      provider: 'aws',
+      workflows: [],
+      webhookPayload: {
+        webhookBaseUrl: 'https://example.com',
+        workflows: [],
+        cleanupWorkflows: [],
+        accounts: [],
+        regions: [],
+      },
+    };
+
+    it('should call createBenchmark and transition to benchmark-ready when nextStep is null', async () => {
+      const lastStep = buildStepResponse({
+        nextStep: null as unknown as string,
+      });
+      mockGetWizardStep.mockResolvedValue(lastStep);
+      mockCreateBenchmark.mockResolvedValue(benchmarkResult);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => await result.current.handleNextFromProviderStep());
+
+      expect(mockCreateBenchmark).toHaveBeenCalledWith('aws', {
+        region: ['us-east-1'],
+      });
+      expect(result.current.wizardPhase).toBe('benchmark-ready');
+      expect(result.current.createBenchmarkResult).toEqual(benchmarkResult);
+    });
+
+    it('should call onBenchmarkCreated callback with the result', async () => {
+      const lastStep = buildStepResponse({
+        nextStep: null as unknown as string,
+      });
+      mockGetWizardStep.mockResolvedValue(lastStep);
+      mockCreateBenchmark.mockResolvedValue(benchmarkResult);
+      const onBenchmarkCreated = jest.fn();
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders, onBenchmarkCreated),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => await result.current.handleNextFromProviderStep());
+
+      expect(onBenchmarkCreated).toHaveBeenCalledWith(benchmarkResult);
+    });
+
+    it('should show error toast and stay in provider-step when createBenchmark fails', async () => {
+      const lastStep = buildStepResponse({
+        nextStep: null as unknown as string,
+      });
+      mockGetWizardStep.mockResolvedValue(lastStep);
+      mockCreateBenchmark.mockRejectedValue(new Error('Create failed'));
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => {
+        await result.current
+          .handleNextFromProviderStep()
+          .catch(() => undefined);
+      });
+
+      expect(mockToast).toHaveBeenCalledWith(INTERNAL_ERROR_TOAST);
+      expect(result.current.wizardPhase).toBe('provider-step');
+    });
+  });
+
+  describe('handleEditSetup', () => {
+    it('should return to provider-step phase and clear createBenchmarkResult', async () => {
+      const lastStep = buildStepResponse({
+        nextStep: null as unknown as string,
+      });
+      const benchmarkResult = {
+        benchmarkId: 'bm-1',
+        folderId: 'folder-1',
+        provider: 'aws',
+        workflows: [],
+        webhookPayload: {
+          webhookBaseUrl: 'https://example.com',
+          workflows: [],
+          cleanupWorkflows: [],
+          accounts: [],
+          regions: [],
+        },
+      };
+      mockGetWizardStep.mockResolvedValue(lastStep);
+      mockCreateBenchmark.mockResolvedValue(benchmarkResult);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => await result.current.handleNextFromProviderStep());
+      expect(result.current.wizardPhase).toBe('benchmark-ready');
+
+      act(() => result.current.handleEditSetup());
+
+      expect(result.current.wizardPhase).toBe('provider-step');
+      expect(result.current.createBenchmarkResult).toBeNull();
     });
   });
 });

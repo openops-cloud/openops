@@ -1,15 +1,15 @@
 import {
-  StepCounter,
+  BenchmarkCreatingPlaceholder,
+  BenchmarkReadyStep,
   Wizard,
   WizardClose,
   WizardContent,
   WizardFooter,
   WizardHeader,
-  WizardNext,
-  WizardPrevious,
   WizardStep,
   WizardTitle,
 } from '@openops/components/ui';
+import { CreateBenchmarkResponse } from '@openops/shared';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
 import { useCallback, useState } from 'react';
@@ -20,11 +20,13 @@ import { CreateOrEditConnectionDialog } from '@/app/features/connections/compone
 import { CloudProvider, getProviderByValue } from '../cloud-providers';
 import { useBenchmarkWizardNavigation } from '../use-benchmark-wizard-navigation';
 import { useProviderConnections } from '../use-provider-connections';
+import { BenchmarkWizardFooter } from './benchmark-wizard-footer';
 import { DynamicBenchmarkStep } from './dynamic-benchmark-step/dynamic-benchmark-step';
 import { InitialBenchmarkStep } from './initial-benchmark-step';
 
 interface BenchmarkWizardProps {
   onClose: () => void;
+  onBenchmarkCreated?: (result: CreateBenchmarkResponse) => void;
 }
 
 interface ProviderConnectionDialogProps {
@@ -52,7 +54,10 @@ const ProviderConnectionDialog = ({
   </DynamicFormValidationProvider>
 );
 
-export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
+export const BenchmarkWizard = ({
+  onClose,
+  onBenchmarkCreated,
+}: BenchmarkWizardProps) => {
   const [connectingProvider, setConnectingProvider] = useState<string | null>(
     null,
   );
@@ -66,13 +71,18 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
     currentStepResponse,
     currentSelections,
     setCurrentSelections,
+    isCreatingBenchmark,
+    createBenchmarkResult,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,
     handlePrevious,
-  } = useBenchmarkWizardNavigation(connectedProviders);
+    handleEditSetup,
+  } = useBenchmarkWizardNavigation(connectedProviders, onBenchmarkCreated);
 
   const connectingProviderConfig = getProviderByValue(connectingProvider);
+  const selectedProviderConfig = getProviderByValue(selectedProvider ?? null);
+  const providerName = selectedProviderConfig?.name ?? '';
 
   const handleConnectionSaved = async () => {
     refetchConnections();
@@ -103,49 +113,53 @@ export const BenchmarkWizard = ({ onClose }: BenchmarkWizardProps) => {
         </WizardHeader>
 
         <WizardContent className="max-h-[358px]">
-          <WizardStep value="initial" key="initial">
-            <InitialBenchmarkStep
-              selectedProvider={selectedProvider}
-              onProviderChange={setSelectedProvider}
-              onConnect={setConnectingProvider}
-              connectedProviders={connectedProviders}
-            />
-          </WizardStep>
-          <WizardStep value="provider-step" key="provider-step">
-            {currentStepResponse && (
-              <DynamicBenchmarkStep
-                stepResponse={currentStepResponse}
-                value={currentSelections}
-                onValueChange={setCurrentSelections}
-              />
-            )}
-          </WizardStep>
+          {isCreatingBenchmark ? (
+            <BenchmarkCreatingPlaceholder />
+          ) : (
+            <>
+              <WizardStep value="initial" key="initial">
+                <InitialBenchmarkStep
+                  selectedProvider={selectedProvider}
+                  onProviderChange={setSelectedProvider}
+                  onConnect={setConnectingProvider}
+                  connectedProviders={connectedProviders}
+                />
+              </WizardStep>
+              <WizardStep value="provider-step" key="provider-step">
+                {currentStepResponse && (
+                  <DynamicBenchmarkStep
+                    stepResponse={currentStepResponse}
+                    value={currentSelections}
+                    onValueChange={setCurrentSelections}
+                  />
+                )}
+              </WizardStep>
+              <WizardStep value="benchmark-ready" key="benchmark-ready">
+                {createBenchmarkResult && (
+                  <BenchmarkReadyStep
+                    providerName={providerName}
+                    result={createBenchmarkResult}
+                    runPhase="idle"
+                    onViewRun={noop}
+                    onResetRun={noop}
+                  />
+                )}
+              </WizardStep>
+            </>
+          )}
         </WizardContent>
 
         <WizardFooter>
-          {wizardPhase === 'provider-step' ? (
-            <>
-              <WizardPrevious onPrevious={handlePrevious} />
-              {currentStepResponse && (
-                <StepCounter
-                  current={currentStepResponse.stepIndex}
-                  total={currentStepResponse.totalSteps}
-                />
-              )}
-              <WizardNext
-                onNext={handleNextFromProviderStep}
-                disabled={isNextDisabled}
-              />
-            </>
-          ) : (
-            <>
-              <div className="flex-1" />
-              <WizardNext
-                onNext={handleNextFromInitial}
-                disabled={isNextDisabled}
-              />
-            </>
-          )}
+          <BenchmarkWizardFooter
+            wizardPhase={wizardPhase}
+            currentStepResponse={currentStepResponse}
+            createBenchmarkResult={createBenchmarkResult}
+            isNextDisabled={isNextDisabled}
+            handleNextFromInitial={handleNextFromInitial}
+            handleNextFromProviderStep={handleNextFromProviderStep}
+            handlePrevious={handlePrevious}
+            handleEditSetup={handleEditSetup}
+          />
         </WizardFooter>
       </Wizard>
     </div>
