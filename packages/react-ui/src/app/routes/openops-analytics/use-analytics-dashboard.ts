@@ -18,7 +18,7 @@ export const useAnalyticsDashboard = () => {
       FlagId.ANALYTICS_DASHBOARDS,
     );
 
-  const { data: fallbackEmbedId } = useQuery({
+  const { data: fallbackEmbedId, isLoading: isFallbackLoading } = useQuery({
     queryKey: ['analytics-fallback-embed-id'],
     queryFn: () => authenticationApi.fetchAnalyticsEmbedId(),
     enabled: !dashboardRegistry,
@@ -68,10 +68,15 @@ export const useAnalyticsDashboard = () => {
 
   const selectedDashboard = registryDashboard ?? fallbackDashboard;
 
+  const isLoading =
+    dashboardRegistry === undefined ||
+    (dashboardRegistry === null && isFallbackLoading);
+
   return {
     dashboardRegistry,
     selectedDashboardId,
     selectedDashboard,
+    isLoading,
     handleDashboardChange,
   };
 };

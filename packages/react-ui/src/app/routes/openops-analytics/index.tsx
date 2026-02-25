@@ -4,7 +4,8 @@ import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { FlagId } from '@openops/shared';
 
 import { AnalyticsDashboardSelector } from '@openops/components/ui';
-import { t } from 'i18next';
+import { AnalyticsEmptyState } from './analytics-empty-state';
+import { AnaloyticsLoadingState } from './analytics-loading-state';
 import './openops-analytics.css';
 import { useAnalyticsDashboard } from './use-analytics-dashboard';
 import { useEmbedDashboard } from './use-embed-dashboard';
@@ -21,6 +22,7 @@ const OpenOpsAnalyticsPage = () => {
     dashboardRegistry,
     selectedDashboardId,
     selectedDashboard,
+    isLoading,
     handleDashboardChange,
   } = useAnalyticsDashboard();
 
@@ -33,23 +35,30 @@ const OpenOpsAnalyticsPage = () => {
   });
 
   if (!analyticsPublicUrl) {
+    console.error('OpenOps Analytics URL is not defined');
     return null;
   }
 
+  if (isLoading) {
+    <AnaloyticsLoadingState />;
+  }
+
+  const dashboards = dashboardRegistry?.dashboards ?? [];
+
   if (!selectedDashboard) {
     return (
-      <div className="size-full flex items-center justify-center">
-        <span className="text-muted-foreground">
-          {t('Loading dashboards...')}
-        </span>
-      </div>
+      <AnalyticsEmptyState
+        dashboards={dashboards}
+        selectedDashboardId={selectedDashboardId ?? ''}
+        onDashboardChange={handleDashboardChange}
+      />
     );
   }
 
   return (
     <div className="size-full flex flex-col h-full">
       <AnalyticsDashboardSelector
-        dashboards={dashboardRegistry?.dashboards ?? []}
+        dashboards={dashboards}
         selectedDashboardId={selectedDashboardId ?? ''}
         onDashboardChange={handleDashboardChange}
       />
