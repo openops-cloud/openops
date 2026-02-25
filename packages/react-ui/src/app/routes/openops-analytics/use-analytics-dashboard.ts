@@ -22,6 +22,7 @@ export const useAnalyticsDashboard = () => {
     queryKey: ['analytics-fallback-embed-id'],
     queryFn: () => authenticationApi.fetchAnalyticsEmbedId(),
     enabled: !dashboardRegistry,
+    staleTime: Infinity,
   });
 
   const [selectedDashboardId, setSelectedDashboardId] = useState<string | null>(
