@@ -22,12 +22,6 @@ export const MultiSelectBody = ({
     [onValueChange, stepResponse.options],
   );
 
-  if (stepResponse.options.length === 0) {
-    //TODO: Remove this check once backend is fixed to not return multi-select steps with 0 options
-    console.warn('MultiSelectBody rendered with no options');
-    return null;
-  }
-
   return (
     <div className="rounded-lg bg-background shadow-sm">
       <SelectForm
