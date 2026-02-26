@@ -86,36 +86,22 @@ export const flowFolderService = {
         params: { folderName: request.displayName },
       });
     }
-
-    const folderId = openOpsId();
-    const parentFolder = await flowFolderService.getParentFolder(
-      projectId,
-      request.parentFolderId,
-    );
-
-    await folderRepo().upsert(
+    return createFolder(params);
+  },
+  async getOrCreate(params: UpsertParams): Promise<Folder> {
+    const { projectId, request } = params;
+    const requestContentType = request.contentType ?? ContentType.WORKFLOW;
+    const folderWithDisplayName = await this.getOneByDisplayNameCaseInsensitive(
       {
-        id: folderId,
         projectId,
-        parentFolder,
         displayName: request.displayName,
         contentType: requestContentType,
       },
-      ['projectId', 'contentType', 'displayName'],
     );
-
-    const folder = await folderRepo().findOneByOrFail({
-      projectId,
-      id: folderId,
-    });
-
-    return {
-      ...folder,
-      numberOfFlows: 0,
-      flows: undefined,
-      subfolders: undefined,
-      parentFolderId: request.parentFolderId,
-    };
+    if (!isNil(folderWithDisplayName)) {
+      return folderWithDisplayName;
+    }
+    return createFolder(params);
   },
   async getParentFolder(
     projectId: string,
@@ -224,6 +210,41 @@ export const flowFolderService = {
     };
   },
 };
+
+async function createFolder(params: UpsertParams): Promise<FolderDto> {
+  const { projectId, request } = params;
+  const requestContentType = request.contentType ?? ContentType.WORKFLOW;
+
+  const folderId = openOpsId();
+  const parentFolder = await flowFolderService.getParentFolder(
+    projectId,
+    request.parentFolderId,
+  );
+
+  await folderRepo().upsert(
+    {
+      id: folderId,
+      projectId,
+      parentFolder,
+      displayName: request.displayName,
+      contentType: requestContentType,
+    },
+    ['projectId', 'contentType', 'displayName'],
+  );
+
+  const folder = await folderRepo().findOneByOrFail({
+    projectId,
+    id: folderId,
+  });
+
+  return {
+    ...folder,
+    numberOfFlows: 0,
+    flows: undefined,
+    subfolders: undefined,
+    parentFolderId: request.parentFolderId,
+  };
+}
 
 type DeleteParams = {
   projectId: ProjectId;

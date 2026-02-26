@@ -7,6 +7,8 @@ export * from './assistant-ui/step-settings-assistant-ui-chat-container';
 export * from './assistant-ui/thread';
 export * from './assistant-ui/thread-extra-context';
 export * from './benchmark/benchmark-analytics-phase';
+export * from './benchmark/benchmark-creating-placeholder';
+export * from './benchmark/benchmark-ready-step';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';

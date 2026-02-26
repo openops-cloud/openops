@@ -1,9 +1,4 @@
-import {
-  OrganizationRole,
-  ProjectMemberRole,
-  UserStatus,
-} from '@openops/shared';
-
+import { OrganizationRole, UserStatus } from '@openops/shared';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent } from '@storybook/testing-library';
@@ -65,7 +60,7 @@ const mockUser = {
   organizationId: 'bbbbbbbbbbbbbbbbbbbbb',
   token: '',
   projectId: 'ccccccccccccccccccccc',
-  projectRole: ProjectMemberRole.ADMIN,
+  projectRole: 'ADMIN',
   tablesRefreshToken: '',
 };
 

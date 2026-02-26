@@ -1,5 +1,6 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import {
+  BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
@@ -8,7 +9,7 @@ import { useState } from 'react';
 
 import { benchmarkApi } from './benchmark-api';
 
-export type WizardPhase = 'initial' | 'provider-step';
+export type WizardPhase = 'initial' | 'provider-step' | 'benchmark-ready';
 
 type StepHistoryEntry = {
   stepResponse: BenchmarkWizardStepResponse;
@@ -31,14 +32,18 @@ type UseBenchmarkWizardNavigationResult = {
   currentSelections: string[];
   setCurrentSelections: (selections: string[]) => void;
   isLoadingStep: boolean;
+  isCreatingBenchmark: boolean;
+  benchmarkCreateResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
   handlePrevious: () => void;
+  handleEditSetup: () => void;
 };
 
 export const useBenchmarkWizardNavigation = (
   connectedProviders: Record<string, boolean>,
+  onBenchmarkCreated?: (result: BenchmarkCreationResult) => void,
 ): UseBenchmarkWizardNavigationResult => {
   const [selectedProvider, setSelectedProvider] = useState<string>();
   const [wizardPhase, setWizardPhase] = useState<WizardPhase>('initial');
@@ -46,6 +51,8 @@ export const useBenchmarkWizardNavigation = (
     useState<BenchmarkWizardStepResponse | null>(null);
   const [currentSelections, setCurrentSelections] = useState<string[]>([]);
   const [stepHistory, setStepHistory] = useState<StepHistoryEntry[]>([]);
+  const [benchmarkCreateResult, setBenchmarkCreateResult] =
+    useState<BenchmarkCreationResult | null>(null);
 
   const { mutateAsync: fetchWizardStep, isPending: isLoadingStep } =
     useMutation({
@@ -56,6 +63,25 @@ export const useBenchmarkWizardNavigation = (
         provider: string;
         request: BenchmarkWizardRequest;
       }) => benchmarkApi.getWizardStep(provider, request),
+      onError: () => {
+        toast(INTERNAL_ERROR_TOAST);
+      },
+    });
+
+  const { mutateAsync: runCreateBenchmark, isPending: isCreatingBenchmark } =
+    useMutation({
+      mutationFn: ({
+        provider,
+        benchmarkConfiguration,
+      }: {
+        provider: string;
+        benchmarkConfiguration: Record<string, string[]>;
+      }) => benchmarkApi.createBenchmark(provider, benchmarkConfiguration),
+      onSuccess: (result) => {
+        setBenchmarkCreateResult(result);
+        setWizardPhase('benchmark-ready');
+        onBenchmarkCreated?.(result);
+      },
       onError: () => {
         toast(INTERNAL_ERROR_TOAST);
       },
@@ -84,18 +110,37 @@ export const useBenchmarkWizardNavigation = (
       selections: currentSelections,
     };
     const newHistory = [...stepHistory, committed];
+    const benchmarkConfiguration = buildBenchmarkConfiguration(newHistory);
+
+    if (currentStepResponse.nextStep === null) {
+      setStepHistory(newHistory);
+      await runCreateBenchmark({
+        provider: selectedProvider,
+        benchmarkConfiguration,
+      });
+      return;
+    }
 
     const nextStepResponse = await fetchWizardStep({
       provider: selectedProvider,
       request: {
         currentStep: currentStepResponse.currentStep,
-        benchmarkConfiguration: buildBenchmarkConfiguration(newHistory),
+        benchmarkConfiguration,
       },
     });
 
     setStepHistory(newHistory);
     setCurrentStepResponse(nextStepResponse);
     setCurrentSelections([]);
+  };
+
+  const handleEditSetup = () => {
+    const lastEntry = stepHistory[stepHistory.length - 1];
+    setStepHistory(stepHistory.slice(0, -1));
+    setCurrentStepResponse(lastEntry.stepResponse);
+    setCurrentSelections(lastEntry.selections);
+    setWizardPhase('provider-step');
+    setBenchmarkCreateResult(null);
   };
 
   const handlePrevious = () => {
@@ -114,17 +159,14 @@ export const useBenchmarkWizardNavigation = (
   const isSelectedProviderConnected =
     !!selectedProvider && connectedProviders[selectedProvider] === true;
 
-  const hasEmptyOptions =
-    wizardPhase === 'provider-step' &&
-    currentStepResponse?.options.length === 0;
-
   const isInitialNextDisabled = () =>
     !isSelectedProviderConnected || isLoadingStep;
 
   const isProviderStepNextDisabled = () =>
-    (!hasEmptyOptions && currentSelections.length === 0) ||
-    !currentStepResponse?.nextStep ||
-    isLoadingStep;
+    currentSelections.length === 0 ||
+    currentStepResponse?.nextStep === undefined ||
+    isLoadingStep ||
+    isCreatingBenchmark;
 
   const isNextDisabled =
     wizardPhase === 'initial'
@@ -139,9 +181,12 @@ export const useBenchmarkWizardNavigation = (
     currentSelections,
     setCurrentSelections,
     isLoadingStep,
+    isCreatingBenchmark,
+    benchmarkCreateResult,
     isNextDisabled,
     handleNextFromInitial,
     handleNextFromProviderStep,
     handlePrevious,
+    handleEditSetup,
   };
 };
