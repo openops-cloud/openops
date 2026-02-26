@@ -1,9 +1,9 @@
-import { LoadingSpinner } from '@openops/components/ui';
+import { AnalyticsLoadingSpinner } from '@openops/components/ui';
 
 export const AnalyticsLoadingState = () => {
   return (
-    <div className="size-full flex flex-col items-center justify-center gap-3">
-      <LoadingSpinner size={50} className="stroke-blueAccent-500" />
+    <div className="size-full flex items-center justify-center">
+      <AnalyticsLoadingSpinner />
     </div>
   );
 };
