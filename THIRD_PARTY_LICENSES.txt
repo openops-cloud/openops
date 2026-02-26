@@ -8071,7 +8071,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor@7.57.4
+ - @microsoft/api-extractor@7.57.6
 
 This package contains the following license:
 
@@ -8104,7 +8104,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor-model@7.33.2
+ - @microsoft/api-extractor-model@7.33.4
 
 This package contains the following license:
 
@@ -8137,7 +8137,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/node-core-library@5.20.2
+ - @rushstack/node-core-library@5.20.3
 
 This package contains the following license:
 
@@ -8203,7 +8203,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/rig-package@0.7.1
+ - @rushstack/rig-package@0.7.2
 
 This package contains the following license:
 
@@ -8236,7 +8236,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/terminal@0.22.2
+ - @rushstack/terminal@0.22.3
 
 This package contains the following license:
 
@@ -8269,7 +8269,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/ts-command-line@5.3.2
+ - @rushstack/ts-command-line@5.3.3
 
 This package contains the following license:
 
@@ -19746,7 +19746,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @microsoft/tsdoc-config@0.18.0
+ - @microsoft/tsdoc-config@0.18.1
  - @microsoft/tsdoc@0.16.0
 
 These packages each contain the following license:
@@ -37783,13 +37783,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - ajv@8.12.0
- - ajv@8.13.0
  - ajv@8.18.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
