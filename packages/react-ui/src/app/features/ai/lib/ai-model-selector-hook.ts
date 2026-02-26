@@ -1,4 +1,5 @@
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
+import { isForbiddenMutationError } from '@/app/interceptors/interceptor-utils';
 import { toast } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -33,12 +34,14 @@ export const useAiModelSelector = ({
       setSelectedModel(data.model);
     },
     onError: (error: AxiosError) => {
-      toast({
-        title: t('Error'),
-        variant: 'destructive',
-        description: error.message,
-        duration: 3000,
-      });
+      if (!isForbiddenMutationError(error)) {
+        toast({
+          title: t('Error'),
+          variant: 'destructive',
+          description: error.message,
+          duration: 3000,
+        });
+      }
     },
   });
 

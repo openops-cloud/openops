@@ -14,9 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -42,6 +40,7 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { LeftSideBarType } from '@/app/features/builder/builder-types';
 import { FlowVersionStateDot } from '@/app/features/flows/components/flow-version-state-dot';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 
 type UseAsDraftOptionProps = {
@@ -144,8 +143,8 @@ const FlowVersionDetailsCard = React.memo(
         );
       },
       onError: (error) => {
-        toast(INTERNAL_ERROR_TOAST);
         console.error(error);
+        handleMutationError(error);
       },
     });
 
@@ -175,8 +174,8 @@ const FlowVersionDetailsCard = React.memo(
           );
         },
         onError: (error) => {
-          toast(INTERNAL_ERROR_TOAST);
           console.error(error);
+          handleMutationError(error);
         },
       });
 

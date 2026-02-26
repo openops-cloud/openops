@@ -1,9 +1,9 @@
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   toast,
   WarningWithIcon,
@@ -79,7 +79,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
       window.open(`/flows/${data.id}`, '_blank', `noopener noreferrer`);
       onDuplicate();
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   const { mutate: exportFlow, isPending: isExportPending } = useMutation({
@@ -91,7 +91,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
         duration: 3000,
       });
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   const refetchFolderTree = useRefetchFolderTree();

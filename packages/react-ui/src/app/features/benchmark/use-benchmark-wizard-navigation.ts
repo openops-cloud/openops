@@ -1,4 +1,4 @@
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   BenchmarkCreationResult,
   BenchmarkWizardRequest,
@@ -63,9 +63,7 @@ export const useBenchmarkWizardNavigation = (
         provider: string;
         request: BenchmarkWizardRequest;
       }) => benchmarkApi.getWizardStep(provider, request),
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
 
   const { mutateAsync: runCreateBenchmark, isPending: isCreatingBenchmark } =
@@ -82,9 +80,7 @@ export const useBenchmarkWizardNavigation = (
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
 
   const handleNextFromInitial = async () => {

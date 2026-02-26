@@ -7,7 +7,6 @@ import {
   CardListItem,
   CardListItemSkeleton,
   Input,
-  INTERNAL_ERROR_TOAST,
   ItemListMetadata,
   Popover,
   PopoverContent,
@@ -37,6 +36,7 @@ import {
 } from '@/app/features/builder/blocks-selector/block-tag-group';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useApplyOperationAndPushToHistory } from '@/app/features/builder/flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   Action,
   ActionType,
@@ -246,7 +246,7 @@ const BlockSelector = ({
     },
     onError: (e) => {
       console.error(e);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(e);
     },
   });
 
