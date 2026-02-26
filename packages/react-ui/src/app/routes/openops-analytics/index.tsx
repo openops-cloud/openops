@@ -7,7 +7,7 @@ import {
   AnalyticsDashboardEmptyState,
   AnalyticsDashboardSelector,
 } from '@openops/components/ui';
-import { AnaloyticsLoadingState } from './analytics-loading-state';
+import { AnalyticsLoadingState } from './analytics-loading-state';
 import './openops-analytics.css';
 import { useAnalyticsDashboard } from './use-analytics-dashboard';
 import { useEmbedDashboard } from './use-embed-dashboard';
@@ -42,7 +42,7 @@ const OpenOpsAnalyticsPage = () => {
   }
 
   if (isLoading) {
-    return <AnaloyticsLoadingState />;
+    return <AnalyticsLoadingState />;
   }
 
   const dashboards = dashboardRegistry?.dashboards ?? [];
