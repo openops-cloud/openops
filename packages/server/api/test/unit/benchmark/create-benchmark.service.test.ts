@@ -58,7 +58,7 @@ describe('create-benchmark.service', () => {
     expect(result).toEqual(folder);
   });
 
-  it('createBenchmark returns benchmarkId, folderId from folder, and empty workflows', async () => {
+  it('createBenchmark returns benchmark creation result', async () => {
     const projectId = 'project-1';
     const folder: Folder = {
       id: 'folder-2',
