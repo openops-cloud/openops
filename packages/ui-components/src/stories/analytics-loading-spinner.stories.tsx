@@ -12,6 +12,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    chromatic: { disable: true },
   },
 } satisfies Meta<typeof AnalyticsLoadingSpinner>;
 

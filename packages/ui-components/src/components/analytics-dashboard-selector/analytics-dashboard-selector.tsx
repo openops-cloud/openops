@@ -26,7 +26,7 @@ export const AnalyticsDashboardSelector = ({
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-background">
+    <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-background border-l-0 min-h-[60px]">
       <span className="text-sm text-muted-foreground">{t('Dashboard')}:</span>
       <Select value={selectedDashboardId} onValueChange={onDashboardChange}>
         <SelectTrigger className="w-[200px] h-8">
