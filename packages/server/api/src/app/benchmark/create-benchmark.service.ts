@@ -66,41 +66,38 @@ export async function deleteFlowsForExistingBenchmark(params: {
 }): Promise<void> {
   const { projectId, provider, folderId, userId } = params;
 
-  const existingBenchmark = await benchmarkRepo().findOne({
-    where: {
-      projectId,
-      provider,
-      folderId,
-      deletedAt: IsNull(),
-    },
-  });
+  const rows = await benchmarkFlowRepo()
+    .createQueryBuilder('bf')
+    .innerJoin('benchmark', 'b', 'b.id = bf.benchmarkId')
+    .select(['b.id AS benchmarkId', 'bf.flowId AS flowId'])
+    .where('b.projectId = :projectId', { projectId })
+    .andWhere('b.provider = :provider', { provider })
+    .andWhere('b.folderId = :folderId', { folderId })
+    .andWhere('b.deletedAt IS NULL')
+    .andWhere('bf.deletedAt IS NULL')
+    .getRawMany<{ benchmarkId: string; flowId: string }>();
 
-  if (!existingBenchmark) {
+  if (rows.length === 0) {
     return;
   }
 
-  const benchmarkFlowRows = await benchmarkFlowRepo().find({
-    where: {
-      benchmarkId: existingBenchmark.id,
-      deletedAt: IsNull(),
-    },
-  });
-
+  const benchmarkId = rows[0].benchmarkId;
+  const flowIds = rows.map((r) => r.flowId);
   const now = new Date().toISOString();
 
   await deleteFlowsByIds({
-    flowIds: benchmarkFlowRows.map((flowRow) => flowRow.flowId),
+    flowIds,
     projectId,
     userId,
   });
 
   await benchmarkFlowRepo().update(
-    { benchmarkId: existingBenchmark.id, deletedAt: IsNull() },
+    { benchmarkId, deletedAt: IsNull() },
     { deletedAt: now },
   );
 
   await benchmarkRepo().update(
-    { id: existingBenchmark.id, deletedAt: IsNull() },
+    { id: benchmarkId, deletedAt: IsNull() },
     { deletedAt: now },
   );
 }
