@@ -12,13 +12,6 @@ import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import { throwValidationError } from './errors';
 
-export type DeleteFlowsForExistingBenchmarkParams = {
-  projectId: string;
-  provider: string;
-  folderId: string;
-  userId: string;
-};
-
 function getBenchmarkFolderDisplayName(provider: string): string {
   const normalizedProvider = provider.toLowerCase();
   switch (normalizedProvider) {
@@ -42,9 +35,12 @@ async function ensureBenchmarkFolder(
   });
 }
 
-export async function deleteFlowsForExistingBenchmark(
-  params: DeleteFlowsForExistingBenchmarkParams,
-): Promise<void> {
+export async function deleteFlowsForExistingBenchmark(params: {
+  projectId: string;
+  provider: string;
+  folderId: string;
+  userId: string;
+}): Promise<void> {
   const { projectId, provider, folderId, userId } = params;
 
   const existingBenchmark = await benchmarkRepo().findOne({
@@ -91,13 +87,21 @@ export async function deleteFlowsForExistingBenchmark(
 export async function createBenchmark(params: {
   provider: string;
   projectId: string;
+  userId: string;
 }): Promise<BenchmarkCreationResult> {
-  const { provider, projectId } = params;
+  const { provider, projectId, userId } = params;
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
     getBenchmarkFolderDisplayName(provider),
   );
+
+  await deleteFlowsForExistingBenchmark({
+    projectId,
+    provider,
+    folderId: benchmarkFolder.id,
+    userId,
+  });
 
   return {
     benchmarkId: openOpsId(),

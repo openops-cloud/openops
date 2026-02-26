@@ -58,7 +58,11 @@ describe('create-benchmark.service', () => {
     };
     flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
 
-    await createBenchmark({ provider: 'aws', projectId });
+    await createBenchmark({
+      provider: 'aws',
+      projectId,
+      userId: 'user-1',
+    });
 
     expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
       projectId,
@@ -72,7 +76,11 @@ describe('create-benchmark.service', () => {
   it('createBenchmark throws for unknown provider', async () => {
     const projectId = 'project-1';
     await expect(
-      createBenchmark({ provider: 'gcp', projectId }),
+      createBenchmark({
+        provider: 'gcp',
+        projectId,
+        userId: 'user-1',
+      }),
     ).rejects.toThrow('Unknown provider: gcp');
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
   });
@@ -93,6 +101,7 @@ describe('create-benchmark.service', () => {
     const result = await createBenchmark({
       provider: 'aws',
       projectId,
+      userId: 'user-1',
     });
 
     expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
