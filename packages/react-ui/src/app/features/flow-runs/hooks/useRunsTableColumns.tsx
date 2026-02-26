@@ -1,5 +1,6 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   DataTableColumnHeader,
@@ -7,10 +8,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   RowDataWithActions,
   StatusIconWithText,
-  toast,
 } from '@openops/components/ui';
 import {
   FlagId,
@@ -56,7 +55,7 @@ export const useRunsTableColumns = ({
     },
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 
@@ -71,7 +70,7 @@ export const useRunsTableColumns = ({
     },
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 

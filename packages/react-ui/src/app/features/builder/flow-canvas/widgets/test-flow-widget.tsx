@@ -1,9 +1,7 @@
 import {
   Button,
   cn,
-  INTERNAL_ERROR_TOAST,
   isMacUserAgent,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -21,6 +19,7 @@ import {
   useExecuteRiskyFlowDialog,
 } from '@/app/features/flows/components/execute-risky-flow-dialog/execute-risky-flow-dialog';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { FlowRun, FlowVersion, isNil, TriggerType } from '@openops/shared';
 import { Settings } from 'lucide-react';
 import { stepTestOutputHooks } from '../../test-step/step-test-output-hooks';
@@ -57,7 +56,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
       ),
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 

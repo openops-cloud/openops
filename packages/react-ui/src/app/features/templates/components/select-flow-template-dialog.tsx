@@ -8,6 +8,7 @@ import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { usePrivateTemplates } from '@/app/features/templates/lib/private-templates-hook';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   cn,
@@ -15,9 +16,7 @@ import {
   DialogContent,
   DialogTitle,
   FlowTemplateMetadataWithIntegrations,
-  INTERNAL_ERROR_TOAST,
   TemplatesTabs,
-  toast,
 } from '@openops/components/ui';
 import { AppConnectionsWithSupportedBlocks } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
@@ -132,9 +131,7 @@ const SelectFlowTemplateDialog = ({
     onSuccess: (template) => {
       setSelectedTemplate(template);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const { mutate: useTemplate, isPending: isUseTemplatePending } = useMutation({
@@ -159,9 +156,7 @@ const SelectFlowTemplateDialog = ({
       updateHomePageOperationalViewFlag();
       navigate(`/flows/${flow.id}?${SEARCH_PARAMS.viewOnly}=false`);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { OPENOPS_ANALYTICS_FINOPS_SLUG } from '@openops/shared';
 import { AxiosHeaders } from 'axios';
 import {
   makeOpenOpsAnalyticsGet,
@@ -13,8 +14,6 @@ interface AnalyticsEmbedDetailsResponse {
     uuid: string;
   };
 }
-
-const OPENOPS_ANALYTICS_FINOPS_SLUG = 'finops';
 
 export async function fetchFinopsDashboardEmbedDetails(
   accessToken: string,
