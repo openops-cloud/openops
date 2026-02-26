@@ -1,9 +1,5 @@
 import { ContentType, type Folder } from '@openops/shared';
-import {
-  createBenchmark,
-  ensureBenchmarkFolder,
-  getBenchmarkFolderDisplayName,
-} from '../../../src/app/benchmark/create-benchmark.service';
+import { createBenchmark } from '../../../src/app/benchmark/create-benchmark.service';
 import { flowFolderService } from '../../../src/app/flows/folder/folder.service';
 
 jest.mock('../../../src/app/flows/folder/folder.service', () => ({
@@ -21,44 +17,38 @@ describe('create-benchmark.service', () => {
     jest.clearAllMocks();
   });
 
-  it('returns AWS Benchmark for aws provider (case-insensitive)', () => {
-    expect(getBenchmarkFolderDisplayName('aws')).toBe('AWS Benchmark');
-    expect(getBenchmarkFolderDisplayName('AWS')).toBe('AWS Benchmark');
-  });
-
-  it('throws validation error for unknown provider', () => {
-    expect(() => getBenchmarkFolderDisplayName('gcp')).toThrow(
-      'Unknown provider: gcp',
-    );
-  });
-
-  it('ensureBenchmarkFolder calls getOrCreate and returns the folder', async () => {
+  it('createBenchmark with provider aws calls getOrCreate with displayName AWS Benchmark', async () => {
     const projectId = 'project-1';
-    const displayName = 'AWS Benchmark';
     const folder: Folder = {
       id: 'folder-1',
       projectId,
-      displayName,
+      displayName: 'AWS Benchmark',
       created: '',
       updated: '',
       contentType: ContentType.WORKFLOW,
     };
-
     flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
 
-    const result = await ensureBenchmarkFolder(projectId, displayName);
+    await createBenchmark({ provider: 'aws', projectId });
 
     expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
       projectId,
       request: {
-        displayName,
+        displayName: 'AWS Benchmark',
         contentType: ContentType.WORKFLOW,
       },
     });
-    expect(result).toEqual(folder);
   });
 
-  it('createBenchmark returns benchmark creation result', async () => {
+  it('createBenchmark throws for unknown provider', async () => {
+    const projectId = 'project-1';
+    await expect(
+      createBenchmark({ provider: 'gcp', projectId }),
+    ).rejects.toThrow('Unknown provider: gcp');
+    expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
+  });
+
+  it('createBenchmark returns BenchmarkCreationResult', async () => {
     const projectId = 'project-1';
     const folder: Folder = {
       id: 'folder-2',
@@ -76,6 +66,13 @@ describe('create-benchmark.service', () => {
       projectId,
     });
 
+    expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
+      projectId,
+      request: {
+        displayName: 'AWS Benchmark',
+        contentType: ContentType.WORKFLOW,
+      },
+    });
     expect(result.folderId).toBe(folder.id);
     expect(result.workflows).toEqual([]);
     expect(result.benchmarkId).toBeDefined();

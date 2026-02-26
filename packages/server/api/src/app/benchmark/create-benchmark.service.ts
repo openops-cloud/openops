@@ -8,7 +8,7 @@ import {
 import { flowFolderService } from '../flows/folder/folder.service';
 import { throwValidationError } from './errors';
 
-export function getBenchmarkFolderDisplayName(provider: string): string {
+function getBenchmarkFolderDisplayName(provider: string): string {
   const normalizedProvider = provider.toLowerCase();
   switch (normalizedProvider) {
     case BenchmarkProviders.AWS:
@@ -18,7 +18,7 @@ export function getBenchmarkFolderDisplayName(provider: string): string {
   }
 }
 
-export async function ensureBenchmarkFolder(
+async function ensureBenchmarkFolder(
   projectId: string,
   displayName: string,
 ): Promise<Folder> {
