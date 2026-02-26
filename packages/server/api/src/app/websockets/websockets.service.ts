@@ -1,6 +1,6 @@
-import cookie from '@fastify/cookie';
 import { logger } from '@openops/server-shared';
 import { Principal, WebsocketServerEvent } from '@openops/shared';
+import { parse as parseCookie } from 'cookie';
 import { Socket } from 'socket.io';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
 
@@ -37,7 +37,7 @@ export async function getPrincipalFromWebsocket(
     throw new Error('Authentication cookie not provided.');
   }
 
-  const token = cookie.parse(rawCookies).token;
+  const token = parseCookie(rawCookies).token;
   if (!token) {
     throw new Error('Authentication cookie not provided.');
   }
