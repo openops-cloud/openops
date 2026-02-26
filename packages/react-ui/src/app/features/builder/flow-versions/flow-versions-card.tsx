@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
   INTERNAL_ERROR_TOAST,
   LoadingSpinner,
-  PermissionNeededTooltip,
   toast,
   Tooltip,
   TooltipContent,
@@ -62,18 +61,16 @@ const UseAsDraftDropdownMenuOption = ({
         disabled={!userHasPermissionToWriteFlow}
         className="w-full"
       >
-        <PermissionNeededTooltip hasPermission={userHasPermissionToWriteFlow}>
-          <DropdownMenuItem
-            className="w-full"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-            disabled={!userHasPermissionToWriteFlow}
-          >
-            <Pencil className="mr-2 h-4 w-4" />
-            <span>{t('Use as Draft')}</span>
-          </DropdownMenuItem>
-        </PermissionNeededTooltip>
+        <DropdownMenuItem
+          className="w-full"
+          onSelect={(e) => {
+            e.preventDefault();
+          }}
+          disabled={!userHasPermissionToWriteFlow}
+        >
+          <Pencil className="mr-2 h-4 w-4" />
+          <span>{t('Use as Draft')}</span>
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

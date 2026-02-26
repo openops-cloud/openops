@@ -28,6 +28,9 @@ describe('runAthenaQueryAction tests', () => {
       accounts: {
         type: 'DYNAMIC',
       },
+      region: {
+        type: 'STATIC_DROPDOWN',
+      },
       query: {
         required: true,
         type: 'LONG_TEXT',
@@ -136,6 +139,7 @@ describe('runAthenaQueryAction tests', () => {
       auth: auth,
       propsValue: {
         accounts: { accounts: ['some-account-id'] },
+        region: 'some region',
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -149,7 +153,7 @@ describe('runAthenaQueryAction tests', () => {
     expect(openopsCommonMock.runAndWaitForQueryResult).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.runAndWaitForQueryResult).toHaveBeenCalledWith(
       { someCreds: 'some creds' },
-      'some defaultRegion',
+      'some region',
       'some query LIMIT 10',
       'some database',
       'some outputBucket',

@@ -1,5 +1,5 @@
-import { Button } from '@/ui/button';
 import { t } from 'i18next';
+import { Button } from '../../ui/button';
 
 export const BenchmarkFailedPhase = ({
   onViewRun,

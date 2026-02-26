@@ -2,7 +2,7 @@ import { FileId } from '../file/file';
 import { FlowRunId } from '../flow-run/flow-run';
 import { FlowId } from '../flows/flow';
 import { FlowVersionId } from '../flows/flow-version';
-import { ProjectId, ProjectMemberRole } from '../project';
+import { ProjectId } from '../project';
 import { UserId } from '../user';
 import { OpenOpsId } from './id-generator';
 import { Permission } from './security';
@@ -118,7 +118,7 @@ export type PermissionDeniedErrorParams = BaseErrorParams<
   {
     userId: UserId;
     projectId: ProjectId;
-    role: ProjectMemberRole;
+    projectRole: string;
     permission: Permission | undefined;
   }
 >;
