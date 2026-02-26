@@ -89,7 +89,7 @@ export async function deleteFlowsForExistingBenchmark(params: {
   const now = new Date().toISOString();
 
   await deleteFlowsByIds({
-    flowIds: benchmarkFlowRows.map((bf) => bf.flowId),
+    flowIds: benchmarkFlowRows.map((flowRow) => flowRow.flowId),
     projectId,
     userId,
   });
