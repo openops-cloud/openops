@@ -65,7 +65,7 @@ describe('useAnalyticsDashboard', () => {
     jest.clearAllMocks();
   });
 
-  it('isLoading is true when dashboardRegistry is undefined', () => {
+  it('isLoading is false when dashboardRegistry is absent and fallback is not loading', () => {
     mockUseSearchParams.mockReturnValue([
       new URLSearchParams(),
       mockSetSearchParams,
@@ -75,15 +75,28 @@ describe('useAnalyticsDashboard', () => {
 
     const { result } = renderHook(() => useAnalyticsDashboard());
 
-    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(false);
   });
 
-  it('returns fallback dashboard when registry is null and fallbackEmbedId is available', () => {
+  it('isLoading is true when dashboardRegistry is absent and fallback is loading', () => {
     mockUseSearchParams.mockReturnValue([
       new URLSearchParams(),
       mockSetSearchParams,
     ]);
-    mockUseFlag.mockReturnValue({ data: null });
+    mockUseFlag.mockReturnValue({ data: undefined });
+    mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
+
+    const { result } = renderHook(() => useAnalyticsDashboard());
+
+    expect(result.current.isLoading).toBe(true);
+  });
+
+  it('returns fallback dashboard when dashboardRegistry is absent and fallbackEmbedId is available', () => {
+    mockUseSearchParams.mockReturnValue([
+      new URLSearchParams(),
+      mockSetSearchParams,
+    ]);
+    mockUseFlag.mockReturnValue({ data: undefined });
     mockUseQuery.mockReturnValue({ data: 'embed-fallback', isLoading: false });
 
     const { result } = renderHook(() => useAnalyticsDashboard());
@@ -95,12 +108,12 @@ describe('useAnalyticsDashboard', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('returns undefined selectedDashboard when registry is null and fallback is loading', () => {
+  it('returns undefined selectedDashboard when dashboardRegistry is absent and fallback is loading', () => {
     mockUseSearchParams.mockReturnValue([
       new URLSearchParams(),
       mockSetSearchParams,
     ]);
-    mockUseFlag.mockReturnValue({ data: null });
+    mockUseFlag.mockReturnValue({ data: undefined });
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
 
     const { result } = renderHook(() => useAnalyticsDashboard());

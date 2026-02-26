@@ -28,10 +28,10 @@ function resolveSelectedDashboardId(
 
 export const useAnalyticsDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: dashboardRegistry } =
-    flagsHooks.useFlag<AnalyticsDashboardRegistry | null>(
-      FlagId.ANALYTICS_DASHBOARDS,
-    );
+
+  const { data: dashboardRegistry } = flagsHooks.useFlag<
+    AnalyticsDashboardRegistry | undefined
+  >(FlagId.ANALYTICS_DASHBOARDS);
 
   const { data: fallbackEmbedId, isLoading: isFallbackLoading } = useQuery({
     queryKey: ['analytics-fallback-embed-id'],
@@ -79,9 +79,7 @@ export const useAnalyticsDashboard = () => {
 
   const selectedDashboard = registryDashboard ?? fallbackDashboard;
 
-  const isLoading =
-    dashboardRegistry === undefined ||
-    (dashboardRegistry === null && isFallbackLoading);
+  const isLoading = !dashboardRegistry && isFallbackLoading;
 
   return {
     dashboardRegistry,
