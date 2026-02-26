@@ -1,5 +1,6 @@
 /* export shadcn ui components */
 export * from './ui/alert';
+export * from './ui/analytics-loading-spinner';
 export * from './ui/autocomplete-input';
 export * from './ui/avatar';
 export * from './ui/avatar-letter';
@@ -45,7 +46,6 @@ export * from './ui/seperator';
 export * from './ui/shortcut';
 export * from './ui/skeleton';
 export * from './ui/sortable';
-export * from './ui/analytics-loading-spinner';
 export * from './ui/spinner';
 export * from './ui/status-icon-with-text';
 export * from './ui/step-counter';
