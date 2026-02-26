@@ -28,39 +28,60 @@ jest.mock('@openops/server-shared', () => {
   };
 });
 
-import { AnalyticsDashboard } from '@openops/shared';
-import { registerDashboard } from '../../../src/app/openops-analytics/analytics-dashboard-registry-service';
+const mockFetchFinopsDashboardEmbedDetails = jest.fn();
+jest.mock('@openops/common', () => ({
+  fetchFinopsDashboardEmbedDetails: mockFetchFinopsDashboardEmbedDetails,
+}));
 
-const mockEntry: AnalyticsDashboard = {
+import { AnalyticsDashboard } from '@openops/shared';
+import { upsertDashboard } from '../../../src/app/openops-analytics/analytics-dashboard-registry-service';
+
+const ACCESS_TOKEN = 'test-access-token';
+
+const mockFinopsEntry: AnalyticsDashboard = {
   id: 'finops',
-  name: 'FinOps Dashboard',
+  name: 'FinOps',
   slug: 'finops',
-  embedId: 'some-embed-uuid',
+  embedId: 'finops-embed-uuid',
   enabled: true,
 };
 
-describe('registerDashboard', () => {
+const mockEntry: AnalyticsDashboard = {
+  id: 'aws_benchmark',
+  name: 'AWS Benchmark',
+  slug: 'aws_benchmark',
+  embedId: 'benchmark-uuid',
+  enabled: true,
+};
+
+describe('upsertDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchFinopsDashboardEmbedDetails.mockResolvedValue({
+      result: { uuid: 'finops-embed-uuid' },
+    });
   });
 
-  it('creates a new registry with the entry as default when registry does not exist', async () => {
+  it('creates a new registry with finops as default and the entry when registry does not exist', async () => {
     mockFlagRepo.findOneBy.mockResolvedValue(null);
 
-    await registerDashboard(mockEntry);
+    await upsertDashboard(mockEntry, ACCESS_TOKEN);
 
+    expect(mockFetchFinopsDashboardEmbedDetails).toHaveBeenCalledWith(
+      ACCESS_TOKEN,
+    );
     expect(mockFlagRepo.save).toHaveBeenCalledTimes(1);
     expect(mockFlagRepo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         value: {
-          dashboards: [mockEntry],
-          defaultDashboardId: mockEntry.id,
+          dashboards: [mockFinopsEntry, mockEntry],
+          defaultDashboardId: 'finops',
         },
       }),
     );
   });
 
-  it('updates an existing dashboard entry in the registry', async () => {
+  it('updates an existing dashboard entry in the registry without fetching finops', async () => {
     const updatedEntry: AnalyticsDashboard = {
       ...mockEntry,
       embedId: 'new-uuid',
@@ -68,25 +89,26 @@ describe('registerDashboard', () => {
     mockFlagRepo.findOneBy.mockResolvedValue({
       id: 'analytics-dashboards',
       value: {
-        dashboards: [mockEntry],
-        defaultDashboardId: mockEntry.id,
+        dashboards: [mockFinopsEntry, mockEntry],
+        defaultDashboardId: 'finops',
       },
     });
 
-    await registerDashboard(updatedEntry);
+    await upsertDashboard(updatedEntry, ACCESS_TOKEN);
 
+    expect(mockFetchFinopsDashboardEmbedDetails).not.toHaveBeenCalled();
     expect(mockFlagRepo.save).toHaveBeenCalledTimes(1);
     expect(mockFlagRepo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         value: {
-          dashboards: [updatedEntry],
-          defaultDashboardId: mockEntry.id,
+          dashboards: [mockFinopsEntry, updatedEntry],
+          defaultDashboardId: 'finops',
         },
       }),
     );
   });
 
-  it('appends a new dashboard entry to an existing registry', async () => {
+  it('appends a new dashboard entry to an existing registry without fetching finops', async () => {
     const otherEntry: AnalyticsDashboard = {
       id: 'other',
       name: 'Other Dashboard',
@@ -97,19 +119,20 @@ describe('registerDashboard', () => {
     mockFlagRepo.findOneBy.mockResolvedValue({
       id: 'analytics-dashboards',
       value: {
-        dashboards: [mockEntry],
-        defaultDashboardId: mockEntry.id,
+        dashboards: [mockFinopsEntry, mockEntry],
+        defaultDashboardId: 'finops',
       },
     });
 
-    await registerDashboard(otherEntry);
+    await upsertDashboard(otherEntry, ACCESS_TOKEN);
 
+    expect(mockFetchFinopsDashboardEmbedDetails).not.toHaveBeenCalled();
     expect(mockFlagRepo.save).toHaveBeenCalledTimes(1);
     expect(mockFlagRepo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         value: {
-          dashboards: [mockEntry, otherEntry],
-          defaultDashboardId: mockEntry.id,
+          dashboards: [mockFinopsEntry, mockEntry, otherEntry],
+          defaultDashboardId: 'finops',
         },
       }),
     );

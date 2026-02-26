@@ -1,8 +1,10 @@
+import { fetchFinopsDashboardEmbedDetails } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   AnalyticsDashboard,
   AnalyticsDashboardRegistry,
   FlagId,
+  OPENOPS_ANALYTICS_FINOPS_SLUG,
 } from '@openops/shared';
 import { databaseConnection } from '../database/database-connection';
 import { FlagEntity } from '../flags/flag.entity';
@@ -22,15 +24,32 @@ async function getAnalyticsDashboardRegistry(): Promise<
   return flag?.value as AnalyticsDashboardRegistry | undefined;
 }
 
-export async function registerDashboard(
+async function buildFinopsDashboardRegistryEntry(
+  accessToken: string,
+): Promise<AnalyticsDashboard> {
+  const {
+    result: { uuid: embedId },
+  } = await fetchFinopsDashboardEmbedDetails(accessToken);
+  return {
+    id: OPENOPS_ANALYTICS_FINOPS_SLUG,
+    name: 'FinOps',
+    slug: OPENOPS_ANALYTICS_FINOPS_SLUG,
+    embedId,
+    enabled: true,
+  };
+}
+
+export async function upsertDashboard(
   entry: AnalyticsDashboard,
+  accessToken: string,
 ): Promise<void> {
   const registry = await getAnalyticsDashboardRegistry();
 
   if (!registry) {
+    const finopsEntry = await buildFinopsDashboardRegistryEntry(accessToken);
     await saveAnalyticsDashboardRegistry({
-      dashboards: [entry],
-      defaultDashboardId: entry.id,
+      dashboards: [finopsEntry, entry],
+      defaultDashboardId: OPENOPS_ANALYTICS_FINOPS_SLUG,
     });
 
     logger.info('Analytics dashboard registry created', {
