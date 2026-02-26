@@ -1,7 +1,9 @@
 import {
+  ApplicationError,
   BenchmarkCreationResult,
   BenchmarkProviders,
   ContentType,
+  ErrorCode,
   Folder,
   openOpsId,
 } from '@openops/shared';
@@ -11,6 +13,27 @@ import { flowFolderService } from '../flows/folder/folder.service';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import { throwValidationError } from './errors';
+
+async function deleteFlowsByIds(params: {
+  flowIds: string[];
+  projectId: string;
+  userId: string;
+}): Promise<void> {
+  const { flowIds, projectId, userId } = params;
+  for (const flowId of flowIds) {
+    try {
+      await flowService.delete({ id: flowId, projectId, userId });
+    } catch (err) {
+      if (
+        err instanceof ApplicationError &&
+        err.error?.code === ErrorCode.ENTITY_NOT_FOUND
+      ) {
+        continue;
+      }
+      throw err;
+    }
+  }
+}
 
 function getBenchmarkFolderDisplayName(provider: string): string {
   const normalizedProvider = provider.toLowerCase();
@@ -65,21 +88,19 @@ export async function deleteFlowsForExistingBenchmark(params: {
 
   const now = new Date().toISOString();
 
-  for (const bf of benchmarkFlowRows) {
-    await flowService.delete({
-      id: bf.flowId,
-      projectId,
-      userId,
-    });
-  }
+  await deleteFlowsByIds({
+    flowIds: benchmarkFlowRows.map((bf) => bf.flowId),
+    projectId,
+    userId,
+  });
 
   await benchmarkFlowRepo().update(
-    { benchmarkId: existingBenchmark.id },
+    { benchmarkId: existingBenchmark.id, deletedAt: IsNull() },
     { deletedAt: now },
   );
 
   await benchmarkRepo().update(
-    { id: existingBenchmark.id },
+    { id: existingBenchmark.id, deletedAt: IsNull() },
     { deletedAt: now },
   );
 }

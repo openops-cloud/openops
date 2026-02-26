@@ -44,6 +44,7 @@ const flowServiceMock = flowService as jest.Mocked<typeof flowService>;
 describe('create-benchmark.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockBenchmarkRepo.findOne.mockResolvedValue(null);
   });
 
   it('createBenchmark with provider aws calls getOrCreate with displayName AWS Benchmark', async () => {
@@ -170,11 +171,17 @@ describe('create-benchmark.service', () => {
     });
     expect(flowServiceMock.delete).not.toHaveBeenCalled();
     expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
-      { benchmarkId: benchmark.id },
+      expect.objectContaining({
+        benchmarkId: benchmark.id,
+        deletedAt: expect.anything(),
+      }),
       expect.objectContaining({ deletedAt: expect.any(String) }),
     );
     expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
-      { id: benchmark.id },
+      expect.objectContaining({
+        id: benchmark.id,
+        deletedAt: expect.anything(),
+      }),
       expect.objectContaining({ deletedAt: expect.any(String) }),
     );
   });
@@ -208,11 +215,17 @@ describe('create-benchmark.service', () => {
       userId: deleteFlowsParams.userId,
     });
     expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
-      { benchmarkId: benchmark.id },
+      expect.objectContaining({
+        benchmarkId: benchmark.id,
+        deletedAt: expect.anything(),
+      }),
       expect.objectContaining({ deletedAt: expect.any(String) }),
     );
     expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
-      { id: benchmark.id },
+      expect.objectContaining({
+        id: benchmark.id,
+        deletedAt: expect.anything(),
+      }),
       expect.objectContaining({ deletedAt: expect.any(String) }),
     );
   });
