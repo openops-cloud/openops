@@ -108,6 +108,38 @@ describe('upsertDashboard', () => {
     );
   });
 
+  it('updates only the matching dashboard and leaves other dashboards unchanged', async () => {
+    const otherDashboard: AnalyticsDashboard = {
+      id: 'other',
+      name: 'Other Dashboard',
+      slug: 'other',
+      embedId: 'other-uuid',
+      enabled: true,
+    };
+    const updatedEntry: AnalyticsDashboard = {
+      ...mockEntry,
+      embedId: 'new-uuid',
+    };
+    mockFlagRepo.findOneBy.mockResolvedValue({
+      id: 'analytics-dashboards',
+      value: {
+        dashboards: [mockEntry, otherDashboard],
+        defaultDashboardId: mockEntry.id,
+      },
+    });
+
+    await upsertDashboard(updatedEntry, ACCESS_TOKEN);
+
+    expect(mockFlagRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        value: {
+          dashboards: [updatedEntry, otherDashboard],
+          defaultDashboardId: mockEntry.id,
+        },
+      }),
+    );
+  });
+
   it('creates a registry with only one entry when the entry is the FinOps dashboard', async () => {
     mockFlagRepo.findOneBy.mockResolvedValue(null);
 
