@@ -79,5 +79,13 @@ describe('create-benchmark.service', () => {
     expect(result.folderId).toBe(folder.id);
     expect(result.workflows).toEqual([]);
     expect(result.benchmarkId).toBeDefined();
+    expect(result.provider).toBe('aws');
+    expect(result.webhookPayload).toEqual({
+      webhookBaseUrl: '',
+      workflows: [],
+      cleanupWorkflows: [],
+      accounts: [],
+      regions: [],
+    });
   });
 });

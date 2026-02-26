@@ -1,7 +1,7 @@
 import {
+  BenchmarkCreationResult,
   BenchmarkProviders,
   ContentType,
-  CreateBenchmarkResponse,
   Folder,
   openOpsId,
 } from '@openops/shared';
@@ -34,7 +34,7 @@ export async function ensureBenchmarkFolder(
 export async function createBenchmark(params: {
   provider: string;
   projectId: string;
-}): Promise<CreateBenchmarkResponse> {
+}): Promise<BenchmarkCreationResult> {
   const { provider, projectId } = params;
 
   const benchmarkFolder = await ensureBenchmarkFolder(
@@ -45,6 +45,14 @@ export async function createBenchmark(params: {
   return {
     benchmarkId: openOpsId(),
     folderId: benchmarkFolder.id,
+    provider,
     workflows: [],
+    webhookPayload: {
+      webhookBaseUrl: '',
+      workflows: [],
+      cleanupWorkflows: [],
+      accounts: [],
+      regions: [],
+    },
   };
 }
