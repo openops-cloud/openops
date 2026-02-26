@@ -1,10 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export enum AnalyticsDashboardId {
-  FINOPS = 'finops',
-  AWS_BENCHMARK = 'aws-benchmark',
-}
-
 export const AnalyticsDashboard = Type.Object({
   id: Type.String(),
   name: Type.String(),

@@ -6,9 +6,9 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import {
   AnalyticsDashboard,
-  AnalyticsDashboardId,
   AnalyticsDashboardRegistry,
   FlagId,
+  OPENOPS_ANALYTICS_FINOPS_SLUG,
 } from '@openops/shared';
 
 function resolveSelectedDashboardId(
@@ -69,10 +69,10 @@ export const useAnalyticsDashboard = () => {
   const fallbackDashboard: AnalyticsDashboard | undefined =
     !dashboardRegistry && fallbackEmbedId
       ? {
-          id: AnalyticsDashboardId.FINOPS,
+          id: OPENOPS_ANALYTICS_FINOPS_SLUG,
           name: 'FinOps',
           embedId: fallbackEmbedId,
-          slug: AnalyticsDashboardId.FINOPS,
+          slug: OPENOPS_ANALYTICS_FINOPS_SLUG,
           enabled: true,
         }
       : undefined;
