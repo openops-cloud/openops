@@ -5748,7 +5748,7 @@ The following npm packages may be included in this product:
  - @types/d3@7.4.3
  - @types/debug@4.1.12
  - @types/estree-jsx@1.0.5
- - @types/estree@1.0.6
+ - @types/estree@1.0.8
  - @types/geojson@7946.0.16
  - @types/hast@2.3.10
  - @types/hast@3.0.4
@@ -20276,6 +20276,7 @@ The following npm packages may be included in this product:
  - @frontegg/types@7.92.0
  - @hono/node-server@1.19.9
  - @linear/sdk@7.0.1
+ - @msgpackr-extract/msgpackr-extract-linux-x64@3.0.2
  - @nx/nx-linux-x64-gnu@19.8.8
  - @polka/url@1.0.0-next.25
  - @radix-ui/number@1.1.0
@@ -20362,8 +20363,8 @@ The following npm packages may be included in this product:
  - @radix-ui/react-use-size@1.1.0
  - @radix-ui/react-visually-hidden@1.1.0
  - @radix-ui/rect@1.1.0
- - @rollup/rollup-linux-x64-gnu@4.24.0
- - @rollup/rollup-linux-x64-musl@4.24.0
+ - @rollup/rollup-linux-x64-gnu@4.59.0
+ - @rollup/rollup-linux-x64-musl@4.59.0
  - @tiptap/extension-blockquote@2.6.6
  - @tiptap/extension-bold@2.6.6
  - @tiptap/extension-bubble-menu@2.6.6
@@ -20458,6 +20459,8 @@ The following npm packages may be included in this product:
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1
+ - sass-embedded-linux-musl-x64@1.85.1
+ - sass-embedded-linux-x64@1.85.1
  - select@1.1.2
  - sirv@2.0.4
  - socks-proxy-agent@6.2.1
@@ -22196,11 +22199,13 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - @parcel/watcher-linux-x64-glibc@2.5.1
+ - @parcel/watcher-linux-x64-musl@2.5.1
  - @parcel/watcher@2.5.1
 
-This package contains the following license:
+These packages each contain the following license:
 
 MIT License
 
