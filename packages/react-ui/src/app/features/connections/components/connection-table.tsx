@@ -13,7 +13,6 @@ import {
   INTERNAL_ERROR_TOAST,
   PageHeader,
   PaginationParams,
-  PermissionNeededTooltip,
   RowDataWithActions,
   StatusIconWithText,
   toast,
@@ -22,6 +21,7 @@ import {
   AppConnection,
   AppConnectionStatus,
   MinimalFlow,
+  Permission,
 } from '@openops/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
@@ -263,27 +263,25 @@ const fetchData = async (
 
 const ConnectionsHeader = () => {
   const { checkAccess } = useAuthorization();
-  const userHasPermissionToWriteAppConnection = checkAccess();
+  const userHasPermissionToWriteAppConnection = checkAccess(
+    Permission.WRITE_APP_CONNECTION,
+  );
 
   const { setRefresh } = useConnectionsContext();
 
   return (
     <PageHeader title={t('Connections')}>
       <div className="ml-auto mr-7">
-        <PermissionNeededTooltip
-          hasPermission={userHasPermissionToWriteAppConnection}
+        <NewConnectionTypeDialog
+          onConnectionCreated={() => setRefresh((prev) => !prev)}
         >
-          <NewConnectionTypeDialog
-            onConnectionCreated={() => setRefresh((prev) => !prev)}
+          <Button
+            variant="default"
+            disabled={!userHasPermissionToWriteAppConnection}
           >
-            <Button
-              variant="default"
-              disabled={!userHasPermissionToWriteAppConnection}
-            >
-              {t('New Connection')}
-            </Button>
-          </NewConnectionTypeDialog>
-        </PermissionNeededTooltip>
+            {t('New Connection')}
+          </Button>
+        </NewConnectionTypeDialog>
       </div>
     </PageHeader>
   );

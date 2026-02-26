@@ -1,5 +1,5 @@
-import { LoadingSpinner } from '@/ui/spinner';
 import { t } from 'i18next';
+import { LoadingSpinner } from '../../ui/spinner';
 
 export const BenchmarkRunningPhase = () => (
   <div className="flex items-center gap-3 py-4">

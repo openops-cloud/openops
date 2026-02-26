@@ -32,7 +32,6 @@ export * from './ui/image-with-fallback';
 export * from './ui/input';
 export * from './ui/label';
 export * from './ui/numeric-input';
-export * from './ui/permission-needed-tooltip';
 export * from './ui/popover';
 export * from './ui/progress';
 export * from './ui/radio-group';

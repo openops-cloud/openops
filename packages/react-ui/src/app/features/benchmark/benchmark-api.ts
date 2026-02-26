@@ -1,4 +1,5 @@
 import {
+  BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
@@ -14,4 +15,32 @@ const getWizardStep = (
     request,
   );
 
-export const benchmarkApi = { getWizardStep };
+// TODO: Remove mock and connect to real endpoint once backend is ready
+const createBenchmark = (
+  provider: string,
+  _benchmarkConfiguration: Record<string, string[]>,
+): Promise<BenchmarkCreationResult> =>
+  new Promise((resolve) =>
+    setTimeout(
+      () =>
+        resolve({
+          benchmarkId: 'mock-benchmark-id',
+          folderId: 'mock-folder-id',
+          provider,
+          workflows: [],
+          webhookPayload: {
+            webhookBaseUrl: '',
+            workflows: [],
+            cleanupWorkflows: [],
+            accounts: [],
+            regions: [],
+          },
+        }),
+      1000,
+    ),
+  );
+
+export const benchmarkApi = {
+  getWizardStep,
+  createBenchmark,
+};
