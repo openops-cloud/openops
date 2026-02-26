@@ -5,10 +5,17 @@ export const AnalyticsLoadingSpinner = () => {
     <svg
       className="w-12 h-12 animate-spin"
       viewBox="0 0 48 48"
-      role="status"
+      role="img"
       aria-label="Loading"
     >
-      <circle cx="24" cy="24" r="20" fill="none" className="stroke-gray-200" strokeWidth="5" />
+      <circle
+        cx="24"
+        cy="24"
+        r="20"
+        fill="none"
+        className="stroke-gray-200"
+        strokeWidth="5"
+      />
       <circle
         cx="24"
         cy="24"
