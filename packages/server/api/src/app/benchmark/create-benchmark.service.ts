@@ -1,10 +1,8 @@
 import {
-  ApplicationError,
   BenchmarkProviders,
   ContentType,
   CreateBenchmarkResponse,
-  ErrorCode,
-  FolderDto,
+  Folder,
   openOpsId,
 } from '@openops/shared';
 import { flowFolderService } from '../flows/folder/folder.service';
@@ -23,49 +21,14 @@ export function getBenchmarkFolderDisplayName(provider: string): string {
 export async function ensureBenchmarkFolder(
   projectId: string,
   displayName: string,
-): Promise<FolderDto> {
-  let existingFolder =
-    await flowFolderService.getOneByDisplayNameCaseInsensitive({
-      projectId,
+): Promise<Folder> {
+  return flowFolderService.getOrCreate({
+    projectId,
+    request: {
       displayName,
       contentType: ContentType.WORKFLOW,
-    });
-
-  if (existingFolder) {
-    return flowFolderService.getOneOrThrow({
-      projectId,
-      folderId: existingFolder.id,
-    });
-  }
-
-  try {
-    return await flowFolderService.create({
-      projectId,
-      request: {
-        displayName,
-        contentType: ContentType.WORKFLOW,
-      },
-    });
-  } catch (err) {
-    if (
-      err instanceof ApplicationError &&
-      err.error.code === ErrorCode.FOLDER_ALREADY_EXISTS
-    ) {
-      existingFolder =
-        await flowFolderService.getOneByDisplayNameCaseInsensitive({
-          projectId,
-          displayName,
-          contentType: ContentType.WORKFLOW,
-        });
-      if (existingFolder) {
-        return flowFolderService.getOneOrThrow({
-          projectId,
-          folderId: existingFolder.id,
-        });
-      }
-    }
-    throw err;
-  }
+    },
+  });
 }
 
 export async function createBenchmark(params: {
