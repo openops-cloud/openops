@@ -108,6 +108,22 @@ describe('upsertDashboard', () => {
     );
   });
 
+  it('creates a registry with only one entry when the entry is the FinOps dashboard', async () => {
+    mockFlagRepo.findOneBy.mockResolvedValue(null);
+
+    await upsertDashboard(mockFinopsEntry, ACCESS_TOKEN);
+
+    expect(mockFlagRepo.save).toHaveBeenCalledTimes(1);
+    expect(mockFlagRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        value: {
+          dashboards: [mockFinopsEntry],
+          defaultDashboardId: 'finops',
+        },
+      }),
+    );
+  });
+
   it('appends a new dashboard entry to an existing registry without fetching finops', async () => {
     const otherEntry: AnalyticsDashboard = {
       id: 'other',

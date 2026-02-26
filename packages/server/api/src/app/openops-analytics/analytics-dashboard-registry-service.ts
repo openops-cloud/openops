@@ -47,8 +47,12 @@ export async function upsertDashboard(
 
   if (!registry) {
     const finopsEntry = await buildFinopsDashboardRegistryEntry(accessToken);
+    const dashboards =
+      entry.id === OPENOPS_ANALYTICS_FINOPS_SLUG
+        ? [entry]
+        : [finopsEntry, entry];
     await saveAnalyticsDashboardRegistry({
-      dashboards: [finopsEntry, entry],
+      dashboards,
       defaultDashboardId: OPENOPS_ANALYTICS_FINOPS_SLUG,
     });
 
