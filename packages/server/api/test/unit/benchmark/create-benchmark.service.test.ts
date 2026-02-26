@@ -29,11 +29,11 @@ jest.mock('../../../src/app/flows/flow/flow.service', () => ({
 }));
 
 jest.mock('../../../src/app/benchmark/benchmark.repo', () => ({
-  benchmarkRepo: () => mockBenchmarkRepo,
+  benchmarkRepo: (): typeof mockBenchmarkRepo => mockBenchmarkRepo,
 }));
 
 jest.mock('../../../src/app/benchmark/benchmark-flow.repo', () => ({
-  benchmarkFlowRepo: () => mockBenchmarkFlowRepo,
+  benchmarkFlowRepo: (): typeof mockBenchmarkFlowRepo => mockBenchmarkFlowRepo,
 }));
 
 const flowFolderServiceMock = flowFolderService as jest.Mocked<
@@ -115,98 +115,96 @@ describe('create-benchmark.service', () => {
     });
   });
 
-  describe('deleteFlowsForExistingBenchmark', () => {
-    const params = {
-      projectId: 'project-1',
-      provider: 'aws',
-      folderId: 'folder-1',
-      userId: 'user-1',
+  const deleteFlowsParams = {
+    projectId: 'project-1',
+    provider: 'aws',
+    folderId: 'folder-1',
+    userId: 'user-1',
+  };
+
+  it('returns without calling delete or update when no existing benchmark', async () => {
+    mockBenchmarkRepo.findOne.mockResolvedValue(null);
+
+    await deleteFlowsForExistingBenchmark(deleteFlowsParams);
+
+    expect(mockBenchmarkRepo.findOne).toHaveBeenCalledWith({
+      where: {
+        projectId: deleteFlowsParams.projectId,
+        provider: deleteFlowsParams.provider,
+        folderId: deleteFlowsParams.folderId,
+        deletedAt: expect.anything(),
+      },
+    });
+    expect(mockBenchmarkFlowRepo.find).not.toHaveBeenCalled();
+    expect(flowServiceMock.delete).not.toHaveBeenCalled();
+    expect(mockBenchmarkFlowRepo.update).not.toHaveBeenCalled();
+    expect(mockBenchmarkRepo.update).not.toHaveBeenCalled();
+  });
+
+  it('soft-deletes benchmark and benchmark_flow when no flows', async () => {
+    const benchmark = {
+      id: 'bench-1',
+      projectId: deleteFlowsParams.projectId,
+      provider: deleteFlowsParams.provider,
+      folderId: deleteFlowsParams.folderId,
     };
+    mockBenchmarkRepo.findOne.mockResolvedValue(benchmark);
+    mockBenchmarkFlowRepo.find.mockResolvedValue([]);
 
-    it('returns without calling delete or update when no existing benchmark', async () => {
-      mockBenchmarkRepo.findOne.mockResolvedValue(null);
+    await deleteFlowsForExistingBenchmark(deleteFlowsParams);
 
-      await deleteFlowsForExistingBenchmark(params);
-
-      expect(mockBenchmarkRepo.findOne).toHaveBeenCalledWith({
-        where: {
-          projectId: params.projectId,
-          provider: params.provider,
-          folderId: params.folderId,
-          deletedAt: expect.anything(),
-        },
-      });
-      expect(mockBenchmarkFlowRepo.find).not.toHaveBeenCalled();
-      expect(flowServiceMock.delete).not.toHaveBeenCalled();
-      expect(mockBenchmarkFlowRepo.update).not.toHaveBeenCalled();
-      expect(mockBenchmarkRepo.update).not.toHaveBeenCalled();
+    expect(mockBenchmarkFlowRepo.find).toHaveBeenCalledWith({
+      where: {
+        benchmarkId: benchmark.id,
+        deletedAt: expect.anything(),
+      },
     });
+    expect(flowServiceMock.delete).not.toHaveBeenCalled();
+    expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
+      { benchmarkId: benchmark.id },
+      expect.objectContaining({ deletedAt: expect.any(String) }),
+    );
+    expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
+      { id: benchmark.id },
+      expect.objectContaining({ deletedAt: expect.any(String) }),
+    );
+  });
 
-    it('soft-deletes benchmark and benchmark_flow when no flows', async () => {
-      const benchmark = {
-        id: 'bench-1',
-        projectId: params.projectId,
-        provider: params.provider,
-        folderId: params.folderId,
-      };
-      mockBenchmarkRepo.findOne.mockResolvedValue(benchmark);
-      mockBenchmarkFlowRepo.find.mockResolvedValue([]);
+  it('deletes flows, soft-deletes benchmark_flow and benchmark when flows exist', async () => {
+    const benchmark = {
+      id: 'bench-1',
+      projectId: deleteFlowsParams.projectId,
+      provider: deleteFlowsParams.provider,
+      folderId: deleteFlowsParams.folderId,
+    };
+    const benchmarkFlowRows = [
+      { id: 'bf-1', benchmarkId: benchmark.id, flowId: 'flow-1' },
+      { id: 'bf-2', benchmarkId: benchmark.id, flowId: 'flow-2' },
+    ];
+    mockBenchmarkRepo.findOne.mockResolvedValue(benchmark);
+    mockBenchmarkFlowRepo.find.mockResolvedValue(benchmarkFlowRows);
+    flowServiceMock.delete.mockResolvedValue(undefined);
 
-      await deleteFlowsForExistingBenchmark(params);
+    await deleteFlowsForExistingBenchmark(deleteFlowsParams);
 
-      expect(mockBenchmarkFlowRepo.find).toHaveBeenCalledWith({
-        where: {
-          benchmarkId: benchmark.id,
-          deletedAt: expect.anything(),
-        },
-      });
-      expect(flowServiceMock.delete).not.toHaveBeenCalled();
-      expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
-        { benchmarkId: benchmark.id },
-        expect.objectContaining({ deletedAt: expect.any(String) }),
-      );
-      expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
-        { id: benchmark.id },
-        expect.objectContaining({ deletedAt: expect.any(String) }),
-      );
+    expect(flowServiceMock.delete).toHaveBeenCalledTimes(2);
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(1, {
+      id: 'flow-1',
+      projectId: deleteFlowsParams.projectId,
+      userId: deleteFlowsParams.userId,
     });
-
-    it('deletes flows, soft-deletes benchmark_flow and benchmark when flows exist', async () => {
-      const benchmark = {
-        id: 'bench-1',
-        projectId: params.projectId,
-        provider: params.provider,
-        folderId: params.folderId,
-      };
-      const benchmarkFlowRows = [
-        { id: 'bf-1', benchmarkId: benchmark.id, flowId: 'flow-1' },
-        { id: 'bf-2', benchmarkId: benchmark.id, flowId: 'flow-2' },
-      ];
-      mockBenchmarkRepo.findOne.mockResolvedValue(benchmark);
-      mockBenchmarkFlowRepo.find.mockResolvedValue(benchmarkFlowRows);
-      flowServiceMock.delete.mockResolvedValue(undefined);
-
-      await deleteFlowsForExistingBenchmark(params);
-
-      expect(flowServiceMock.delete).toHaveBeenCalledTimes(2);
-      expect(flowServiceMock.delete).toHaveBeenNthCalledWith(1, {
-        id: 'flow-1',
-        projectId: params.projectId,
-        userId: params.userId,
-      });
-      expect(flowServiceMock.delete).toHaveBeenNthCalledWith(2, {
-        id: 'flow-2',
-        projectId: params.projectId,
-        userId: params.userId,
-      });
-      expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
-        { benchmarkId: benchmark.id },
-        expect.objectContaining({ deletedAt: expect.any(String) }),
-      );
-      expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
-        { id: benchmark.id },
-        expect.objectContaining({ deletedAt: expect.any(String) }),
-      );
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(2, {
+      id: 'flow-2',
+      projectId: deleteFlowsParams.projectId,
+      userId: deleteFlowsParams.userId,
     });
+    expect(mockBenchmarkFlowRepo.update).toHaveBeenCalledWith(
+      { benchmarkId: benchmark.id },
+      expect.objectContaining({ deletedAt: expect.any(String) }),
+    );
+    expect(mockBenchmarkRepo.update).toHaveBeenCalledWith(
+      { id: benchmark.id },
+      expect.objectContaining({ deletedAt: expect.any(String) }),
+    );
   });
 });

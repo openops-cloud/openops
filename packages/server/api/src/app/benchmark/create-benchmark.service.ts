@@ -42,12 +42,6 @@ async function ensureBenchmarkFolder(
   });
 }
 
-/**
- * Finds the existing benchmark for project/provider/folder (if any), deletes
- * only those flows via flowService.delete, then soft-deletes the corresponding
- * benchmark_flow rows and the benchmark row. User-added, non-benchmark flows
- * in the folder are left untouched.
- */
 export async function deleteFlowsForExistingBenchmark(
   params: DeleteFlowsForExistingBenchmarkParams,
 ): Promise<void> {
