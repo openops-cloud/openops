@@ -1,8 +1,6 @@
 import {
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   Switch,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -30,6 +28,7 @@ import {
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { t } from 'i18next';
 import { getShortTriggerExplanation } from '../lib/flow-status-toggle-utils';
 
@@ -73,9 +72,7 @@ const FlowStatusToggle = ({
       setIsChecked(flow.status === FlowStatus.ENABLED);
       onFlowStatusChange?.(flow.status);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const { stepMetadata: triggerMetadata } = blocksHooks.useStepMetadata({

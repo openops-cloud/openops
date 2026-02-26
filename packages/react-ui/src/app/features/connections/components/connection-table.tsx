@@ -1,5 +1,6 @@
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   BlockIcon,
@@ -10,12 +11,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   PageHeader,
   PaginationParams,
   RowDataWithActions,
   StatusIconWithText,
-  toast,
 } from '@openops/components/ui';
 import {
   AppConnection,
@@ -84,7 +83,7 @@ const MenuConnectionColumn = ({
     onSuccess: (data) => {
       setLinkedFlows(data);
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   const [isEditConnectionDialog, setIsEditConnectionDialog] = useState(false);

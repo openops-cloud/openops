@@ -1,6 +1,7 @@
 import { useFlowVersionUndoRedo } from '@/app/features/builder/flow-version-undo-redo/hooks/flow-version-undo-redo';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import { toast } from '@openops/components/ui';
 import { FlowOperationType } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -33,9 +34,7 @@ const useLockAndPublish = () => {
         setFlow(flow);
         setVersion(flow.version);
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     },
   );
 
