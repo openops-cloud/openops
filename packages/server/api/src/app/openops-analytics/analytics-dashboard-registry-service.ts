@@ -14,10 +14,12 @@ async function saveAnalyticsDashboardRegistry(
   await flagRepo.save({ id: FlagId.ANALYTICS_DASHBOARDS, value: registry });
 }
 
-async function getAnalyticsDashboardRegistry(): Promise<AnalyticsDashboardRegistry | null> {
+async function getAnalyticsDashboardRegistry(): Promise<
+  AnalyticsDashboardRegistry | undefined
+> {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
   const flag = await flagRepo.findOneBy({ id: FlagId.ANALYTICS_DASHBOARDS });
-  return flag?.value as AnalyticsDashboardRegistry | null;
+  return flag?.value as AnalyticsDashboardRegistry | undefined;
 }
 
 export async function registerDashboard(
