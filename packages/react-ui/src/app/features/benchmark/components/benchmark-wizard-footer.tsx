@@ -6,10 +6,7 @@ import {
   WizardNext,
   WizardPrevious,
 } from '@openops/components/ui';
-import {
-  BenchmarkCreationResult,
-  BenchmarkWizardStepResponse,
-} from '@openops/shared';
+import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 
 import { WizardPhase } from '../use-benchmark-wizard-navigation';
@@ -17,7 +14,6 @@ import { ViewBenchmarkWorkflowsButton } from './view-benchmark-workflows-button'
 
 interface BenchmarkWizardFooterProps {
   wizardPhase: WizardPhase;
-  currentStepResponse: BenchmarkWizardStepResponse | null;
   benchmarkCreationResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
   handleNextFromInitial: () => Promise<void>;
@@ -28,7 +24,6 @@ interface BenchmarkWizardFooterProps {
 
 export const BenchmarkWizardFooter = ({
   wizardPhase,
-  currentStepResponse,
   benchmarkCreationResult,
   isNextDisabled,
   handleNextFromInitial,

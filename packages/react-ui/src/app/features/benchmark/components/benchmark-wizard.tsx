@@ -157,7 +157,6 @@ export const BenchmarkWizard = ({
         <WizardFooter>
           <BenchmarkWizardFooter
             wizardPhase={wizardPhase}
-            currentStepResponse={currentStepResponse}
             benchmarkCreationResult={benchmarkCreateResult}
             isNextDisabled={isNextDisabled}
             handleNextFromInitial={handleNextFromInitial}
