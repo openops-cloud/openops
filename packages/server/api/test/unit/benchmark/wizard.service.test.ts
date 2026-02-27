@@ -309,6 +309,40 @@ describe('resolveWizardNavigation', () => {
       const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
       expect(result.preselectedOptions).toBeUndefined();
     });
+
+    it('throws a validation error when selectAll is true but selectionType is single', async () => {
+      const invalidConfig = {
+        provider: 'selectall-single',
+        steps: [
+          {
+            id: 'step1',
+            title: 'Pick one',
+            selectionType: 'single' as const,
+            selectAll: true,
+            optionsSource: {
+              type: 'static' as const,
+              values: [{ id: 'opt1', displayName: 'Option 1' }],
+            },
+          },
+        ],
+      };
+
+      const invalidAdapter: ProviderAdapter = {
+        config: invalidConfig,
+        resolveOptions: mockResolveOptions,
+        evaluateCondition: mockEvaluateCondition,
+      };
+
+      adapters.set('selectall-single', invalidAdapter);
+
+      try {
+        await expect(
+          resolveWizardNavigation('selectall-single', {}, TEST_PROJECT_ID),
+        ).rejects.toThrow();
+      } finally {
+        adapters.delete('selectall-single');
+      }
+    });
   });
 
   it('throws when conditional step is not last step and onFailure.skipToStep is not set', async () => {
