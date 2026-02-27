@@ -1,9 +1,4 @@
-import {
-  Button,
-  StepCounter,
-  WizardNext,
-  WizardPrevious,
-} from '@openops/components/ui';
+import { Button, WizardNext, WizardPrevious } from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
   BenchmarkWizardStepResponse,
