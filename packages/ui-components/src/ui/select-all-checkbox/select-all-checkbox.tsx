@@ -13,7 +13,7 @@ const checkboxVariants = cva('flex items-center justify-center rounded-xs', {
     variant: {
       default: 'dark:data-[state=indeterminate]:!text-background',
       primary:
-        'data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200 data-[state=checked]:!text-white data-[state=indeterminate]:!text-white !border-input ',
+        'data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200 !border-input ',
     },
   },
   defaultVariants: {
