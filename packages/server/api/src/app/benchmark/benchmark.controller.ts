@@ -3,16 +3,13 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  BenchmarkCreationResult,
   BenchmarkProviders,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
-  CreateBenchmarkRequest,
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
-import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
@@ -36,25 +33,6 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
       return reply.status(StatusCodes.OK).send(step);
     },
   );
-
-  app.post(
-    '/:provider',
-    CreateBenchmarkRequestOptions,
-    async (request, reply) => {
-      await assertBenchmarkFeatureEnabled(
-        request.params.provider,
-        request.principal.projectId,
-      );
-
-      const result = await createBenchmark({
-        provider: request.params.provider,
-        projectId: request.principal.projectId,
-        userId: request.principal.id,
-        benchmarkConfiguration: request.body.benchmarkConfiguration,
-      });
-      return reply.status(StatusCodes.CREATED).send(result);
-    },
-  );
 };
 
 const WizardStepRequestOptions = {
@@ -71,24 +49,6 @@ const WizardStepRequestOptions = {
     body: BenchmarkWizardRequest,
     response: {
       [StatusCodes.OK]: BenchmarkWizardStepResponse,
-    },
-  },
-};
-
-const CreateBenchmarkRequestOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    tags: ['benchmarks'],
-    description:
-      'Create a benchmark: ensure folder, delete previous benchmark flows, seed workflows from catalog, and return result. For Postman/testing import/publish timing.',
-    params: Type.Object({
-      provider: Type.Enum(BenchmarkProviders),
-    }),
-    body: CreateBenchmarkRequest,
-    response: {
-      [StatusCodes.CREATED]: BenchmarkCreationResult,
     },
   },
 };
