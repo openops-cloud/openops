@@ -1,3 +1,5 @@
+import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   SETTINGS_KEYS,
   userSettingsHooks,
@@ -17,6 +19,7 @@ import {
   FlowTemplateMetadataWithIntegrations,
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +61,9 @@ const HomeOnboardingView = ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
 
+  const { checkAccess } = useAuthorization();
+  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
+
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
   const openBenchmarkWizard = useOpenBenchmarkWizard();
 
@@ -98,7 +104,9 @@ const HomeOnboardingView = ({
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        <PermissionGuard permission={Permission.WRITE_FLOW}>
+          <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        </PermissionGuard>
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}
@@ -125,9 +133,13 @@ const HomeOnboardingView = ({
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
-            onNewWorkflowClick={() => {
-              createFlow(undefined);
-            }}
+            onNewWorkflowClick={
+              hasWriteFlowPermission
+                ? () => {
+                    createFlow(undefined);
+                  }
+                : undefined
+            }
           />
         </div>
       )}

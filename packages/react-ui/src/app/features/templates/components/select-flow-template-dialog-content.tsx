@@ -1,3 +1,4 @@
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
@@ -16,8 +17,7 @@ import {
   TemplatesTabs,
   VerticalDivider,
 } from '@openops/components/ui';
-import { FlowTemplateDto } from '@openops/shared';
-import React from 'react';
+import { FlowTemplateDto, Permission } from '@openops/shared';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
@@ -99,6 +99,8 @@ const SelectFlowTemplateDialogContent = ({
   const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const { checkAccess } = useAuthorization();
+  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
   const isFullCatalog =
     !isTemplatePreselected &&
     (isConnectedToCloudTemplates || !useCloudTemplates);
@@ -166,7 +168,7 @@ const SelectFlowTemplateDialogContent = ({
             edgeTypes={edgeTypes}
             nodeTypes={nodeTypes}
             close={closeDetails}
-            useTemplate={useTemplate}
+            useTemplate={hasWriteFlowPermission ? useTemplate : undefined}
             expandPreview={expandPreview}
             ownerLogoUrl={ownerLogoUrl}
             theme={theme}

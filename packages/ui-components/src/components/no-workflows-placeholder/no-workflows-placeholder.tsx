@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import imageFile from '../../../static/images/no-workflows.svg';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
+import { PermissionNeededTooltip } from '../../ui/permission-needed-tooltip';
 
 type NoWorkflowsPlaceholderProps = {
   onExploreTemplatesClick: () => void;
-  onNewWorkflowClick: () => void;
+  onNewWorkflowClick?: () => void;
 };
 
 enum Sizes {
@@ -88,14 +89,23 @@ const NoWorkflowsPlaceholder = ({
           <LayoutPanelTop />
           {t('Explore templates')}
         </Button>
-        <Button
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={onNewWorkflowClick}
-        >
-          <Plus />
-          {t('New workflow')}
-        </Button>
+        {onNewWorkflowClick ? (
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={onNewWorkflowClick}
+          >
+            <Plus />
+            {t('New workflow')}
+          </Button>
+        ) : (
+          <PermissionNeededTooltip>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Plus />
+              {t('New workflow')}
+            </Button>
+          </PermissionNeededTooltip>
+        )}
       </div>
     </div>
   );
