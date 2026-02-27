@@ -149,6 +149,40 @@ describe('create-benchmark.service', () => {
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
   });
 
+  it('createBenchmark throws when connection is empty', async () => {
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId: 'project-1',
+        userId: 'user-1',
+        benchmarkConfiguration: {
+          ...defaultBenchmarkConfiguration,
+          connection: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'You must select at least one connection to create a benchmark',
+    );
+    expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
+  });
+
+  it('createBenchmark throws when workflows is empty', async () => {
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId: 'project-1',
+        userId: 'user-1',
+        benchmarkConfiguration: {
+          ...defaultBenchmarkConfiguration,
+          workflows: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'You must select at least one workflow to create a benchmark',
+    );
+    expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
+  });
+
   it('createBenchmark returns BenchmarkCreationResult with workflows from seed', async () => {
     const projectId = 'project-1';
     const folder: Folder = {

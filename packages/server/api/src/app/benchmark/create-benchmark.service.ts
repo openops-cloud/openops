@@ -23,6 +23,21 @@ import type { ResolvedWorkflowPath } from './catalog-resolver';
 import { resolveWorkflowPathsForSeed } from './catalog-resolver';
 import { throwValidationError } from './errors';
 
+function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
+  const connection = config.connection ?? [];
+  const workflows = config.workflows ?? [];
+  if (connection.length === 0) {
+    throwValidationError(
+      'You must select at least one connection to create a benchmark',
+    );
+  }
+  if (workflows.length === 0) {
+    throwValidationError(
+      'You must select at least one workflow to create a benchmark',
+    );
+  }
+}
+
 async function deleteFlowsByIds(params: {
   flowIds: string[];
   projectId: string;
@@ -123,14 +138,14 @@ export async function seedBenchmarkWorkflowsFromCatalog(params: {
     return [];
   }
 
-  const templates: WorkflowTemplate[] = [];
-  for (const { filePath } of paths) {
+  const parsedTemplates = paths.map(async ({ filePath }) => {
     const content = await fs.readFile(filePath, 'utf-8');
     const parsed = JSON.parse(content) as {
       template: WorkflowTemplate['template'];
     };
-    templates.push({ template: parsed.template });
-  }
+    return { template: parsed.template };
+  });
+  const templates = await Promise.all(parsedTemplates);
 
   const results = await bulkCreateAndPublishFlows(
     templates,
@@ -153,6 +168,8 @@ export async function createBenchmark(params: {
   benchmarkConfiguration: BenchmarkConfiguration;
 }): Promise<BenchmarkCreationResult> {
   const { provider, projectId, userId, benchmarkConfiguration } = params;
+
+  validateBenchmarkConfiguration(benchmarkConfiguration);
 
   const workflowIds = benchmarkConfiguration.workflows ?? [];
   const connectionId = benchmarkConfiguration.connection?.[0];
