@@ -60,11 +60,7 @@ export async function bulkCreateAndPublishFlows(
       .getRepository('flow')
       .insert(flowsWithVersions.map((b) => b.flow));
 
-    const versionsToInsert = flowsWithVersions.map((b) => ({
-      ...b.version,
-      created: dayjs().toISOString(),
-      updated: dayjs().toISOString(),
-    }));
+    const versionsToInsert = flowsWithVersions.map((b) => b.version);
     await trx.getRepository('flow_version').insert(versionsToInsert as never);
 
     await bulkUpdatePublishedVersionIds(trx, flowsWithVersions);
