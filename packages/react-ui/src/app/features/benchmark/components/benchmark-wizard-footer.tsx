@@ -1,4 +1,11 @@
-import { Button, WizardNext, WizardPrevious } from '@openops/components/ui';
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  WizardNext,
+  WizardPrevious,
+} from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
   BenchmarkWizardStepResponse,
@@ -62,7 +69,19 @@ export const BenchmarkWizardFooter = ({
   return (
     <>
       <div className="flex-1" />
-      <WizardNext onNext={handleNextFromInitial} disabled={isNextDisabled} />
+      <Tooltip>
+        <TooltipTrigger asChild className="disabled:pointer-events-auto">
+          <WizardNext
+            onNext={handleNextFromInitial}
+            disabled={isNextDisabled}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          {isNextDisabled
+            ? t('Need to connect to your account in order to proceed')
+            : null}
+        </TooltipContent>
+      </Tooltip>
     </>
   );
 };
