@@ -70,6 +70,7 @@ const InteractiveExample = () => {
     <div className="border border-border rounded-lg bg-background">
       <ListItem hasSeparator>
         <SelectAllCheckbox
+          variant="primary"
           id="select-all-interactive"
           selectedCount={selectedItems.length}
           totalCount={items.length}
