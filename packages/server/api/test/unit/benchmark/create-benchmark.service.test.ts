@@ -56,6 +56,17 @@ jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
     mockResolveWorkflowPathsForSeed(...args),
 }));
 
+const mockFetchConnectionsWithSupportedBlocks = jest.fn();
+jest.mock(
+  '../../../src/app/benchmark/connections-with-supported-blocks',
+  () => ({
+    fetchConnectionsWithSupportedBlocks: (
+      ...args: unknown[]
+    ): ReturnType<typeof mockFetchConnectionsWithSupportedBlocks> =>
+      mockFetchConnectionsWithSupportedBlocks(...args),
+  }),
+);
+
 jest.mock('../../../src/app/benchmark/benchmark-flow-bulk-create', () => ({
   bulkCreateAndPublishFlows: (
     ...args: unknown[]
@@ -80,8 +91,20 @@ const defaultBenchmarkConfiguration = {
   regions: [] as string[],
 };
 
+const createBenchmarkMockConnections = [
+  {
+    id: 'conn-1',
+    name: 'Test connection',
+    authProviderKey: 'aws',
+    supportedBlocks: [] as string[],
+  },
+];
+
 function setupCreateBenchmarkMocks(folder: Folder): void {
   flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
+  mockFetchConnectionsWithSupportedBlocks.mockResolvedValue(
+    createBenchmarkMockConnections,
+  );
   mockResolveWorkflowPathsForSeed.mockReturnValue([
     { id: 'orchestrator', filePath: '/catalog/orchestrator.json' },
     { id: 'cleanup', filePath: '/catalog/cleanup.json' },
@@ -231,7 +254,7 @@ describe('create-benchmark.service', () => {
     );
     expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
       expect.any(Array),
-      ['conn-1'],
+      createBenchmarkMockConnections,
       projectId,
       folder.id,
     );
@@ -302,6 +325,15 @@ describe('create-benchmark.service', () => {
     folderId: 'folder-1',
   };
 
+  const mockConnections = [
+    {
+      id: 'conn-1',
+      name: 'Test connection',
+      authProviderKey: 'aws',
+      supportedBlocks: [],
+    },
+  ];
+
   const setupSeedMocks = (): void => {
     mockReadFile.mockResolvedValue(
       JSON.stringify({
@@ -311,6 +343,7 @@ describe('create-benchmark.service', () => {
         },
       }),
     );
+    mockFetchConnectionsWithSupportedBlocks.mockResolvedValue(mockConnections);
     mockBulkCreateAndPublishFlows.mockResolvedValue([
       { id: 'f1', version: { id: 'v1', displayName: 'Orchestrator' } },
       { id: 'f2', version: { id: 'v2', displayName: 'Sub' } },
@@ -321,6 +354,10 @@ describe('create-benchmark.service', () => {
     setupSeedMocks();
     const result = await seedBenchmarkWorkflowsFromCatalog(seedParams);
 
+    expect(mockFetchConnectionsWithSupportedBlocks).toHaveBeenCalledWith(
+      seedParams.projectId,
+      [seedParams.connectionId],
+    );
     expect(mockReadFile).toHaveBeenCalledTimes(2);
     expect(mockReadFile).toHaveBeenNthCalledWith(1, '/path/orch.json', 'utf-8');
     expect(mockReadFile).toHaveBeenNthCalledWith(2, '/path/sub.json', 'utf-8');
@@ -328,7 +365,7 @@ describe('create-benchmark.service', () => {
       expect.arrayContaining([
         expect.objectContaining({ template: expect.any(Object) }),
       ]),
-      [seedParams.connectionId],
+      mockConnections,
       seedParams.projectId,
       seedParams.folderId,
     );
@@ -346,6 +383,7 @@ describe('create-benchmark.service', () => {
     });
 
     expect(result).toEqual([]);
+    expect(mockFetchConnectionsWithSupportedBlocks).not.toHaveBeenCalled();
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(mockBulkCreateAndPublishFlows).not.toHaveBeenCalled();
   });

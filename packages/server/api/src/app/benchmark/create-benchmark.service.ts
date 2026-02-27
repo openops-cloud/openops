@@ -21,6 +21,7 @@ import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import type { ResolvedWorkflowPath } from './catalog-resolver';
 import { resolveWorkflowPathsForSeed } from './catalog-resolver';
+import { fetchConnectionsWithSupportedBlocks } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
 
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
@@ -147,9 +148,12 @@ export async function seedBenchmarkWorkflowsFromCatalog(params: {
   });
   const templates = await Promise.all(parsedTemplates);
 
+  const connections = await fetchConnectionsWithSupportedBlocks(projectId, [
+    connectionId,
+  ]);
   const results = await bulkCreateAndPublishFlows(
     templates,
-    [connectionId],
+    connections,
     projectId,
     folderId,
   );

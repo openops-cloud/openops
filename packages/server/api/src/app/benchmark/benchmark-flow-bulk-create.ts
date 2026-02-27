@@ -7,10 +7,7 @@ import {
   flowHelper,
   openOpsId,
 } from '@openops/shared';
-import dayjs from 'dayjs';
 import { EntityManager } from 'typeorm';
-import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { getProviderMetadataForAllBlocks } from '../app-connection/connection-providers-resolver';
 import { flowRepo } from '../flows/flow/flow.repo';
 
 export type WorkflowTemplate = {
@@ -38,18 +35,13 @@ type FlowInsertRecord = {
 
 export async function bulkCreateAndPublishFlows(
   templates: WorkflowTemplate[],
-  connectionIds: string[],
+  connections: AppConnectionsWithSupportedBlocks[],
   projectId: string,
   folderId: string,
 ): Promise<BulkFlowResult[]> {
   if (templates.length === 0) {
     return [];
   }
-
-  const connections =
-    connectionIds.length > 0
-      ? await fetchConnections(projectId, connectionIds)
-      : [];
 
   const flowsWithVersions = templates.map((template) =>
     buildFlowAndVersion(template, projectId, folderId, connections),
@@ -70,31 +62,6 @@ export async function bulkCreateAndPublishFlows(
     id: b.flow.id,
     version: { id: b.version.id, displayName: b.version.displayName },
   }));
-}
-
-async function fetchConnections(
-  projectId: string,
-  connectionIds: string[],
-): Promise<AppConnectionsWithSupportedBlocks[]> {
-  const [connectionsList, providersMetadata] = await Promise.all([
-    appConnectionService.listActiveConnectionsByIds(projectId, connectionIds),
-    getProviderMetadataForAllBlocks(projectId),
-  ]);
-  if (!providersMetadata) {
-    throw new Error(`Provider metadata not found for projectId=${projectId}`);
-  }
-  return connectionsList.map((connection) => {
-    const providerMetadata = providersMetadata[connection.authProviderKey];
-    if (!providerMetadata) {
-      throw new Error(
-        `Missing provider metadata for authProviderKey=${connection.authProviderKey} projectId=${projectId}`,
-      );
-    }
-    return {
-      ...connection,
-      supportedBlocks: providerMetadata.supportedBlocks,
-    };
-  });
 }
 
 async function bulkUpdatePublishedVersionIds(
