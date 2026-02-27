@@ -399,7 +399,6 @@ const WizardExample = () => {
           ) : (
             <div className="w-[112px]" />
           )}
-          {/* <></> */}
           <WizardNext disabled={!isCurrentStepValid()} />
         </WizardFooter>
       </Wizard>
