@@ -173,13 +173,13 @@ export const Disabled: Story = {
   },
 };
 
-export const DefaultVariant: Story = {
+export const PrimaryVariant: Story = {
   args: {
-    id: 'select-all-default-variant',
+    id: 'select-all-primary-variant',
     className: backgroundClass,
     selectedCount: 3,
     totalCount: 5,
-    variant: 'default',
+    variant: 'primary',
     onSelectAllChange: () => {},
   },
 };

@@ -11,7 +11,8 @@ export type SelectAllChangeAction = 'selectAll' | 'clear';
 const checkboxVariants = cva('flex items-center justify-center rounded-xs', {
   variants: {
     variant: {
-      default: 'dark:data-[state=indeterminate]:!text-background',
+      default:
+        'dark:data-[state=indeterminate]:!text-background dark:data-[state=checked]:!text-background',
       primary:
         'data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200 !border-input ',
     },
