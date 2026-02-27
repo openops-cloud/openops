@@ -103,7 +103,7 @@ export const BenchmarkWizard = ({
         />
       )}
       <Wizard
-        className="border-l-0 border-t-0"
+        className="border-l-0 border-t-0 pb-9"
         value={wizardPhase}
         onValueChange={noop}
       >
@@ -112,7 +112,7 @@ export const BenchmarkWizard = ({
           <WizardClose onClose={onClose} />
         </WizardHeader>
 
-        <WizardContent className="max-h-[358px]">
+        <WizardContent className="flex flex-col overflow-hidden">
           {isCreatingBenchmark ? (
             <BenchmarkCreatingPlaceholder />
           ) : (
@@ -125,11 +125,16 @@ export const BenchmarkWizard = ({
                   connectedProviders={connectedProviders}
                 />
               </WizardStep>
-              <WizardStep value="provider-step" key="provider-step">
+              <WizardStep
+                value="provider-step"
+                key="provider-step"
+                className="flex flex-col flex-1 min-h-0"
+              >
                 {currentStepResponse && (
                   <DynamicBenchmarkStep
                     stepResponse={currentStepResponse}
                     value={currentSelections}
+                    stepbodyClassName="flex-1 min-h-0 overflow-y-auto"
                     onValueChange={setCurrentSelections}
                   />
                 )}
