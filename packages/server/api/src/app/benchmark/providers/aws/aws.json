@@ -38,6 +38,7 @@
       "id": "workflows",
       "title": "Which AWS workflows should we run to analyze the data?",
       "selectionType": "multi-select",
+      "selectAll": true,
       "optionsSource": {
         "type": "static",
         "values": [

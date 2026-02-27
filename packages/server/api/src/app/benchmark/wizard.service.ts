@@ -160,6 +160,11 @@ export async function resolveWizardNavigation(
 
   const { totalSteps, stepIndex } = getStepProgress(config, stepToShow);
 
+  const preselectedOptions =
+    stepToShow.selectAll && options.length > 0
+      ? options.map((o) => o.id)
+      : undefined;
+
   return {
     currentStep: stepToShow.id,
     title: stepToShow.title,
@@ -169,5 +174,6 @@ export async function resolveWizardNavigation(
     options,
     totalSteps,
     stepIndex,
+    preselectedOptions,
   };
 }

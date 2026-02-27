@@ -92,7 +92,7 @@ export const useBenchmarkWizardNavigation = (
       request: {},
     });
     setCurrentStepResponse(stepResponse);
-    setCurrentSelections([]);
+    setCurrentSelections(stepResponse.preselectedOptions ?? []);
     setStepHistory([]);
     setWizardPhase('provider-step');
   };
@@ -127,7 +127,7 @@ export const useBenchmarkWizardNavigation = (
 
     setStepHistory(newHistory);
     setCurrentStepResponse(nextStepResponse);
-    setCurrentSelections([]);
+    setCurrentSelections(nextStepResponse.preselectedOptions ?? []);
   };
 
   const handleEditSetup = () => {

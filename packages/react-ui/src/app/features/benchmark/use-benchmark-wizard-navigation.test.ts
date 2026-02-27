@@ -168,6 +168,47 @@ describe('useBenchmarkWizardNavigation', () => {
       expect(result.current.currentSelections).toEqual([]);
     });
 
+    it('should initialize selections from preselectedOptions when step has pre-selected options', async () => {
+      const stepResponse = buildStepResponse({
+        selectionType: 'multi-select',
+        preselectedOptions: ['us-east-1'],
+      });
+      mockGetWizardStep.mockResolvedValue(stepResponse);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => {
+        result.current.setSelectedProvider('aws');
+      });
+
+      await act(async () => {
+        await result.current.handleNextFromInitial();
+      });
+
+      expect(result.current.currentSelections).toEqual(['us-east-1']);
+    });
+
+    it('should initialize selections to empty array when step has no preselectedOptions', async () => {
+      const stepResponse = buildStepResponse({ preselectedOptions: undefined });
+      mockGetWizardStep.mockResolvedValue(stepResponse);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => {
+        result.current.setSelectedProvider('aws');
+      });
+
+      await act(async () => {
+        await result.current.handleNextFromInitial();
+      });
+
+      expect(result.current.currentSelections).toEqual([]);
+    });
+
     it('should reset selections and history when fetching first step', async () => {
       const firstStepResponse = buildStepResponse({ currentStep: 'region' });
       const secondStepResponse = buildStepResponse({
@@ -284,6 +325,37 @@ describe('useBenchmarkWizardNavigation', () => {
       });
       expect(result.current.currentStepResponse).toEqual(secondStep);
       expect(result.current.currentSelections).toEqual([]);
+    });
+
+    it('should initialize next step selections from preselectedOptions', async () => {
+      const firstStep = buildStepResponse({
+        currentStep: 'region',
+        nextStep: 'instance-type',
+      });
+      const secondStep = buildStepResponse({
+        currentStep: 'instance-type',
+        nextStep: 'confirm',
+        selectionType: 'multi-select',
+        preselectedOptions: ['t3.medium', 't3.large'],
+      });
+      mockGetWizardStep
+        .mockResolvedValueOnce(firstStep)
+        .mockResolvedValueOnce(secondStep);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => await result.current.handleNextFromProviderStep());
+
+      expect(result.current.currentSelections).toEqual([
+        't3.medium',
+        't3.large',
+      ]);
     });
 
     it('should accumulate history across multiple steps', async () => {

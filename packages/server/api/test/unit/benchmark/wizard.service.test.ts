@@ -233,6 +233,84 @@ describe('resolveWizardNavigation', () => {
     );
   });
 
+  describe('selectAll', () => {
+    it('returns preselectedOptions with all option ids when selectAll is true and options exist', async () => {
+      const selectAllConfig = {
+        provider: 'selectall',
+        steps: [
+          {
+            id: 'step1',
+            title: 'Pick all',
+            selectionType: 'multi-select' as const,
+            selectAll: true,
+            optionsSource: {
+              type: 'static' as const,
+              values: [
+                { id: 'opt1', displayName: 'Option 1' },
+                { id: 'opt2', displayName: 'Option 2' },
+              ],
+            },
+          },
+        ],
+      };
+      const selectAllAdapter: ProviderAdapter = {
+        config: selectAllConfig,
+        resolveOptions: mockResolveOptions,
+        evaluateCondition: mockEvaluateCondition,
+      };
+      adapters.set('selectall', selectAllAdapter);
+
+      try {
+        const result = await resolveWizardNavigation(
+          'selectall',
+          {},
+          TEST_PROJECT_ID,
+        );
+        expect(result.preselectedOptions).toEqual(['opt1', 'opt2']);
+      } finally {
+        adapters.delete('selectall');
+      }
+    });
+
+    it('returns preselectedOptions as undefined when selectAll is true but options are empty', async () => {
+      const selectAllEmptyConfig = {
+        provider: 'selectall-empty',
+        steps: [
+          {
+            id: 'step1',
+            title: 'Pick all',
+            selectionType: 'multi-select' as const,
+            selectAll: true,
+            optionsSource: { type: 'dynamic' as const, method: 'listOptions' },
+          },
+        ],
+      };
+      mockResolveOptions.mockResolvedValue([]);
+      const selectAllEmptyAdapter: ProviderAdapter = {
+        config: selectAllEmptyConfig,
+        resolveOptions: mockResolveOptions,
+        evaluateCondition: mockEvaluateCondition,
+      };
+      adapters.set('selectall-empty', selectAllEmptyAdapter);
+
+      try {
+        const result = await resolveWizardNavigation(
+          'selectall-empty',
+          {},
+          TEST_PROJECT_ID,
+        );
+        expect(result.preselectedOptions).toBeUndefined();
+      } finally {
+        adapters.delete('selectall-empty');
+      }
+    });
+
+    it('returns preselectedOptions as undefined when selectAll is not set', async () => {
+      const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
+      expect(result.preselectedOptions).toBeUndefined();
+    });
+  });
+
   it('throws when conditional step is not last step and onFailure.skipToStep is not set', async () => {
     mockEvaluateCondition.mockResolvedValue(false);
     const misconfigConfig = {
