@@ -160,6 +160,17 @@ export async function resolveWizardNavigation(
 
   const { totalSteps, stepIndex } = getStepProgress(config, stepToShow);
 
+  if (stepToShow.selectAll && stepToShow.selectionType !== 'multi-select') {
+    throwValidationError(
+      `Step "${stepToShow.id}" has selectAll: true but selectionType is not "multi-select".`,
+    );
+  }
+
+  const preselectedOptions =
+    stepToShow.selectAll && options.length > 0
+      ? options.map((o) => o.id)
+      : undefined;
+
   return {
     currentStep: stepToShow.id,
     title: stepToShow.title,
@@ -169,5 +180,6 @@ export async function resolveWizardNavigation(
     options,
     totalSteps,
     stepIndex,
+    preselectedOptions,
   };
 }

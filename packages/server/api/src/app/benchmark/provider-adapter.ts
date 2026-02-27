@@ -35,6 +35,7 @@ export type WizardConfigStep = {
   optionsSource?: WizardStepOptionsSource;
   nextStep?: string;
   conditional?: WizardStepConditional;
+  selectAll?: boolean;
 };
 
 export type WizardConfig = {
