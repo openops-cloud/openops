@@ -1,17 +1,26 @@
 import {
   ApplicationError,
-  BenchmarkCreationResult,
   BenchmarkProviders,
   ContentType,
   ErrorCode,
   Folder,
   openOpsId,
+  type BenchmarkConfiguration,
+  type BenchmarkCreationResult,
+  type BenchmarkWorkflowBase,
 } from '@openops/shared';
+import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import {
+  bulkCreateAndPublishFlows,
+  type WorkflowTemplate,
+} from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
+import type { ResolvedWorkflowPath } from './catalog-resolver';
+import { resolveWorkflowPathsForSeed } from './catalog-resolver';
 import { throwValidationError } from './errors';
 
 async function deleteFlowsByIds(params: {
@@ -102,12 +111,51 @@ export async function deleteFlowsForExistingBenchmark(params: {
   );
 }
 
+export async function seedBenchmarkWorkflowsFromCatalog(params: {
+  paths: ResolvedWorkflowPath[];
+  connectionId: string;
+  projectId: string;
+  folderId: string;
+}): Promise<BenchmarkWorkflowBase[]> {
+  const { paths, connectionId, projectId, folderId } = params;
+
+  if (paths.length === 0) {
+    return [];
+  }
+
+  const templates: WorkflowTemplate[] = [];
+  for (const { filePath } of paths) {
+    const content = await fs.readFile(filePath, 'utf-8');
+    const parsed = JSON.parse(content) as {
+      template: WorkflowTemplate['template'];
+    };
+    templates.push({ template: parsed.template });
+  }
+
+  const results = await bulkCreateAndPublishFlows(
+    templates,
+    [connectionId],
+    projectId,
+    folderId,
+  );
+
+  return results.map((r, index) => ({
+    flowId: r.id,
+    displayName: r.version.displayName,
+    isOrchestrator: index === 0,
+  }));
+}
+
 export async function createBenchmark(params: {
   provider: string;
   projectId: string;
   userId: string;
+  benchmarkConfiguration: BenchmarkConfiguration;
 }): Promise<BenchmarkCreationResult> {
-  const { provider, projectId, userId } = params;
+  const { provider, projectId, userId, benchmarkConfiguration } = params;
+
+  const workflowIds = benchmarkConfiguration.workflows ?? [];
+  const connectionId = benchmarkConfiguration.connection?.[0];
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
@@ -121,17 +169,25 @@ export async function createBenchmark(params: {
     userId,
   });
 
+  const paths = resolveWorkflowPathsForSeed(provider, workflowIds);
+  const workflows = await seedBenchmarkWorkflowsFromCatalog({
+    paths,
+    connectionId,
+    projectId,
+    folderId: benchmarkFolder.id,
+  });
+
   return {
     benchmarkId: openOpsId(),
     folderId: benchmarkFolder.id,
     provider,
-    workflows: [],
+    workflows,
     webhookPayload: {
       webhookBaseUrl: '',
       workflows: [],
       cleanupWorkflows: [],
-      accounts: [],
-      regions: [],
+      accounts: benchmarkConfiguration.accounts ?? [],
+      regions: benchmarkConfiguration.regions ?? [],
     },
   };
 }
