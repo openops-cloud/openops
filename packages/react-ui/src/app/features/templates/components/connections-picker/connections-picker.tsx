@@ -1,3 +1,4 @@
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
@@ -18,6 +19,7 @@ import {
   AppConnectionWithoutSensitiveData,
   flowHelper,
   isNil,
+  Permission,
   Trigger,
 } from '@openops/shared';
 import { t } from 'i18next';
@@ -281,17 +283,19 @@ const ConnectionsPicker = ({
               </div>
             )}
 
-            <Button
-              onClick={onUseTemplateClick}
-              loading={isLoading}
-              size="lg"
-              className={cn(
-                'ml-auto h-12 px-4 text-base font-medium',
-                buttonClassName,
-              )}
-            >
-              {buttonText ?? t('Create workflow')}
-            </Button>
+            <PermissionGuard permission={Permission.WRITE_FLOW}>
+              <Button
+                onClick={onUseTemplateClick}
+                loading={isLoading}
+                size="lg"
+                className={cn(
+                  'ml-auto h-12 px-4 text-base font-medium',
+                  buttonClassName,
+                )}
+              >
+                {buttonText ?? t('Create workflow')}
+              </Button>
+            </PermissionGuard>
           </DialogFooter>
         </>
       )}

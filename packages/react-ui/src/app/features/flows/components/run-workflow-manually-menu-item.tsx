@@ -1,13 +1,15 @@
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { RunWorkflowManuallyDialog } from '@/app/features/flows/components/run-workflow-manually-dialog';
 import { useRunWorkflowManually } from '@/app/features/flows/lib/run-workflow-manually-hook';
 import {
   DropdownMenuItem,
   LoadingSpinner,
+  PermissionNeededTooltip,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@openops/components/ui';
-import { FlowVersion } from '@openops/shared';
+import { FlowVersion, Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { CirclePlay } from 'lucide-react';
 import React from 'react';
@@ -56,8 +58,19 @@ const RunWorkflowManuallyMenuItem = ({
   flowVersion,
   isPublished,
 }: RunWorkflowManuallyMenuItemProps) => {
+  const { checkAccess } = useAuthorization();
+  const hasRunPermission = checkAccess(Permission.TEST_RUN_FLOW);
+
   const { isOpen, setIsOpen, canRun, isScheduled, run, isPending } =
     useRunWorkflowManually({ flowVersion, isPublished });
+
+  if (!hasRunPermission) {
+    return (
+      <PermissionNeededTooltip className="flex">
+        <MenuItemTrigger disabled={true} />
+      </PermissionNeededTooltip>
+    );
+  }
 
   if (!canRun) {
     return (
