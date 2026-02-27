@@ -134,7 +134,7 @@ export const BenchmarkWizard = ({
                   <DynamicBenchmarkStep
                     stepResponse={currentStepResponse}
                     value={currentSelections}
-                    stepbodyClassName="flex-1 min-h-0 overflow-y-auto"
+                    stepBodyClassName="flex-1 min-h-0 overflow-y-auto"
                     onValueChange={setCurrentSelections}
                   />
                 )}

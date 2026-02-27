@@ -11,7 +11,7 @@ import { DynamicBenchmarkStepProps } from './types';
 export const MultiSelectBody = ({
   stepResponse,
   value,
-  stepbodyClassName,
+  stepBodyClassName,
   onValueChange,
 }: DynamicBenchmarkStepProps) => {
   const handleSelectAll = useCallback(
@@ -39,7 +39,7 @@ export const MultiSelectBody = ({
             onSelectAllChange={handleSelectAll}
           />
         </div>
-        <div className={stepbodyClassName}>
+        <div className={stepBodyClassName}>
           {stepResponse.options.map((option) => (
             <SelectOption
               key={option.id}
