@@ -226,7 +226,7 @@ export const useRunsTableColumns = ({
                         }}
                       >
                         <PermissionGuard
-                          permission={Permission.TEST_STEP_FLOW}
+                          permission={Permission.TEST_RUN_FLOW}
                           tooltipClassName="flex"
                         >
                           <DropdownMenuItem
