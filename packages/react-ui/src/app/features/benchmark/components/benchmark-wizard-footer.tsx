@@ -56,12 +56,6 @@ export const BenchmarkWizardFooter = ({
     return (
       <>
         <WizardPrevious onPrevious={handlePrevious} />
-        {currentStepResponse && (
-          <StepCounter
-            current={currentStepResponse.stepIndex}
-            total={currentStepResponse.totalSteps}
-          />
-        )}
         <WizardNext
           onNext={handleNextFromProviderStep}
           disabled={isNextDisabled}
