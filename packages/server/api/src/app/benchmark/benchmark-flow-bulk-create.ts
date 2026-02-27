@@ -1,10 +1,8 @@
 import {
   AppConnectionsWithSupportedBlocks,
-  FlowOperationType,
   FlowStatus,
   FlowVersion,
   FlowVersionState,
-  TriggerType,
   TriggerWithOptionalId,
   flowHelper,
   openOpsId,
@@ -12,7 +10,7 @@ import {
 import dayjs from 'dayjs';
 import { EntityManager } from 'typeorm';
 import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { resolveProvidersForBlocks } from '../app-connection/connection-providers-resolver';
+import { getProviderMetadataForAllBlocks } from '../app-connection/connection-providers-resolver';
 import { flowRepo } from '../flows/flow/flow.repo';
 
 export type WorkflowTemplate = {
@@ -50,11 +48,7 @@ export async function bulkCreateAndPublishFlows(
 
   const connections =
     connectionIds.length > 0
-      ? await fetchConnections(
-          projectId,
-          templates[0].template.trigger,
-          connectionIds,
-        )
+      ? await fetchConnections(projectId, connectionIds)
       : [];
 
   const flowsWithVersions = templates.map((template) =>
@@ -84,55 +78,60 @@ export async function bulkCreateAndPublishFlows(
 
 async function fetchConnections(
   projectId: string,
-  triggerForBlockNames: TriggerWithOptionalId,
   connectionIds: string[],
 ): Promise<AppConnectionsWithSupportedBlocks[]> {
-  const connectionsList = await appConnectionService.listActiveConnectionsByIds(
-    projectId,
-    connectionIds,
-  );
-
-  const blockNames = flowHelper
-    .getAllSteps(triggerForBlockNames)
-    .map((s) => s.settings?.blockName)
-    .filter(Boolean) as string[];
-
-  const blockToProviderMap = await resolveProvidersForBlocks(
-    blockNames,
-    projectId,
-  );
-
-  return connectionsList.map((connection) => ({
-    ...connection,
-    supportedBlocks: blockToProviderMap[connection.authProviderKey],
-  }));
+  const [connectionsList, providersMetadata] = await Promise.all([
+    appConnectionService.listActiveConnectionsByIds(projectId, connectionIds),
+    getProviderMetadataForAllBlocks(projectId),
+  ]);
+  if (!providersMetadata) {
+    throw new Error(`Provider metadata not found for projectId=${projectId}`);
+  }
+  return connectionsList.map((connection) => {
+    const providerMetadata = providersMetadata[connection.authProviderKey];
+    if (!providerMetadata) {
+      throw new Error(
+        `Missing provider metadata for authProviderKey=${connection.authProviderKey} projectId=${projectId}`,
+      );
+    }
+    return {
+      ...connection,
+      supportedBlocks: providerMetadata.supportedBlocks,
+    };
+  });
 }
 
 async function bulkUpdatePublishedVersionIds(
   manager: EntityManager,
-  built: Array<{ flow: FlowInsertRecord; version: FlowVersion }>,
+  flowsToUpdate: Array<{ flow: FlowInsertRecord; version: FlowVersion }>,
 ): Promise<void> {
+  if (flowsToUpdate.length === 0) {
+    return;
+  }
+
   const params: string[] = [];
-
-  const caseParts = built.map((b) => {
-    params.push(b.flow.id, b.version.id);
-    const whenIdx = params.length - 1;
-    const thenIdx = params.length;
-    return `WHEN $${whenIdx} THEN $${thenIdx}`;
-  });
-
-  const whereInStart = params.length;
-  built.forEach((b) => params.push(b.flow.id));
+  const valuesSql = flowsToUpdate
+    .map(({ flow, version }) => {
+      const flowIdIndex = params.push(flow.id);
+      const versionIdIndex = params.push(version.id);
+      return `($${flowIdIndex}, $${versionIdIndex})`;
+    })
+    .join(', ');
 
   params.push(FlowStatus.ENABLED);
-  const statusIdx = params.length;
-
-  const whereIn = built.map((_, i) => `$${whereInStart + i + 1}`).join(', ');
+  const statusParam = params.length;
 
   await manager.query(
-    `UPDATE flow SET "publishedVersionId" = CASE id ${caseParts.join(
-      ' ',
-    )} END, status = $${statusIdx} WHERE id IN (${whereIn})`,
+    `
+    UPDATE flow f
+    SET
+      status = $${statusParam},
+      "publishedVersionId" = v.version_id
+    FROM (
+      VALUES ${valuesSql}
+    ) AS v(flow_id, version_id)
+    WHERE f.id = v.flow_id
+    `,
     params,
   );
 }
@@ -153,30 +152,14 @@ function buildFlowAndVersion(
     displayName,
     description: description ?? '',
     trigger: {
+      ...trigger,
       id: openOpsId(),
-      type: TriggerType.EMPTY,
-      name: 'trigger',
-      settings: {},
-      valid: false,
-      displayName: 'Select Trigger',
+      nextAction: null,
     },
     valid: false,
     state: FlowVersionState.DRAFT,
     testRunActionLimits: { isEnabled: true, limits: [] },
   } as unknown as FlowVersion;
-
-  version = flowHelper.apply(version, {
-    type: FlowOperationType.UPDATE_TRIGGER,
-    request: trigger,
-  });
-  version = flowHelper.apply(version, {
-    type: FlowOperationType.CHANGE_NAME,
-    request: { displayName },
-  });
-  version = flowHelper.apply(version, {
-    type: FlowOperationType.CHANGE_DESCRIPTION,
-    request: { description: description ?? '' },
-  });
 
   for (const op of flowHelper.getImportOperations(trigger, connections)) {
     version = flowHelper.apply(version, op);
