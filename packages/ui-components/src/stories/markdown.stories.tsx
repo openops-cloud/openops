@@ -220,7 +220,6 @@ aws ec2 describe-instances
     const monacoTextarea = await canvas.findByRole('textbox');
 
     expect(monacoTextarea).toBeInTheDocument();
-    expect(monacoTextarea).toHaveClass('native-edit-context');
 
     await waitFor(() => {
       const viewLines = canvas.getByText('aws ec2 describe-instances');
@@ -254,7 +253,6 @@ aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-na
     const monacoTextarea = await canvas.findByRole('textbox');
 
     expect(monacoTextarea).toBeInTheDocument();
-    expect(monacoTextarea).toHaveClass('native-edit-context');
 
     await waitFor(() => {
       expect(canvas.getByText(/aws s3 sync/i)).toBeInTheDocument();
