@@ -10,6 +10,7 @@ export const SingleSelectBody = ({
     type="single"
     value={value[0] ?? ''}
     onValueChange={(v) => onValueChange([v])}
+    className="max-h-full overflow-y-auto"
   >
     {stepResponse.options.map((option) => (
       <SelectOption
