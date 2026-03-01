@@ -6,9 +6,19 @@ jest.mock(
   () => wizardServiceMock,
 );
 
+const benchmarkStatusServiceMock = {
+  getBenchmarkStatus: jest.fn(),
+};
+jest.mock(
+  '../../../../src/app/benchmark/benchmark-status.service',
+  () => benchmarkStatusServiceMock,
+);
+
 import {
   ApplicationError,
   BenchmarkProviders,
+  BenchmarkStatus,
+  type BenchmarkStatusResponse,
   type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
@@ -35,11 +45,20 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
   totalSteps: 3,
 };
 
+const mockBenchmarkStatus: BenchmarkStatusResponse = {
+  benchmarkId: 'benchmark-001',
+  status: BenchmarkStatus.IDLE,
+  workflows: [],
+};
+
 const originalEnv = { ...process.env };
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
   wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
+  benchmarkStatusServiceMock.getBenchmarkStatus.mockResolvedValue(
+    mockBenchmarkStatus,
+  );
   process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
   await databaseConnection().initialize();
   app = await setupServer();
@@ -220,6 +239,97 @@ describe('Benchmark wizard API', () => {
 
       expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
       expect(wizardServiceMock.resolveWizardNavigation).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('Benchmark status API', () => {
+  const createAndInsertMocks = async (): Promise<{
+    token: string;
+    project: Project;
+  }> => {
+    const mockUser = createMockUser();
+    await databaseConnection().getRepository('user').save([mockUser]);
+
+    const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+    await databaseConnection()
+      .getRepository('organization')
+      .save(mockOrganization);
+
+    const mockProject = createMockProject({
+      ownerId: mockUser.id,
+      organizationId: mockOrganization.id,
+    });
+    await databaseConnection().getRepository('project').save([mockProject]);
+
+    const mockToken = await generateMockToken({
+      id: mockUser.id,
+      type: PrincipalType.USER,
+      projectId: mockProject.id,
+      organization: { id: mockOrganization.id },
+    });
+
+    return { token: mockToken, project: mockProject };
+  };
+
+  const getStatus = async ({
+    benchmarkId,
+    token,
+  }: {
+    benchmarkId: string;
+    token?: string;
+  }): Promise<LightMyRequestResponse | undefined> =>
+    app?.inject({
+      method: 'GET',
+      url: `/v1/benchmarks/${benchmarkId}/status`,
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    });
+
+  describe('GET /v1/benchmarks/:benchmarkId/status', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      benchmarkStatusServiceMock.getBenchmarkStatus.mockResolvedValue(
+        mockBenchmarkStatus,
+      );
+    });
+
+    it('calls getBenchmarkStatus with benchmarkId and projectId and returns status', async () => {
+      const { token, project } = await createAndInsertMocks();
+      const benchmarkId = 'benchmark-001';
+
+      const response = await getStatus({ benchmarkId, token });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(response?.json()).toEqual(mockBenchmarkStatus);
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).toHaveBeenCalledWith({
+        benchmarkId,
+        projectId: project.id,
+      });
+    });
+
+    it('returns 404 when getBenchmarkStatus throws ENTITY_NOT_FOUND', async () => {
+      benchmarkStatusServiceMock.getBenchmarkStatus.mockRejectedValue(
+        new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: { entityType: 'Benchmark', entityId: 'missing-id' },
+        }),
+      );
+      const { token } = await createAndInsertMocks();
+
+      const response = await getStatus({ benchmarkId: 'missing-id', token });
+
+      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      const response = await getStatus({ benchmarkId: 'benchmark-001' });
+
+      expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).not.toHaveBeenCalled();
     });
   });
 });
