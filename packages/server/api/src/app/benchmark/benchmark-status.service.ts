@@ -155,15 +155,20 @@ async function resolveStatusByBenchmarkId(
       ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
       : {};
 
-  return new Map(
-    benchmarkIds.map((id) => {
-      const orchestratorFlowId = orchestratorFlowIdByBenchmarkId.get(id);
-      const orchestratorRun = orchestratorFlowId
-        ? latestRunByFlowId[orchestratorFlowId]
-        : undefined;
-      return [id, resolveOrchestratorStatus(orchestratorRun)];
-    }),
-  );
+  const statusByBenchmarkId = new Map<string, BenchmarkStatus>();
+
+  for (const benchmarkId of benchmarkIds) {
+    const flowId = orchestratorFlowIdByBenchmarkId.get(benchmarkId);
+    const latestOrchestratorRun = flowId
+      ? latestRunByFlowId[flowId]
+      : undefined;
+    statusByBenchmarkId.set(
+      benchmarkId,
+      resolveOrchestratorStatus(latestOrchestratorRun),
+    );
+  }
+
+  return statusByBenchmarkId;
 }
 
 export async function listBenchmarks(params: {
