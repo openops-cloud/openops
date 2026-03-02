@@ -12,7 +12,10 @@ export enum BenchmarkStatus {
 export const BenchmarkWorkflowStatusItem = Type.Intersect([
   BenchmarkWorkflowBase,
   Type.Object({
-    runStatus: Type.Union([Type.Enum(FlowRunStatus), Type.Literal('IDLE')]),
+    runStatus: Type.Union([
+      Type.Enum(FlowRunStatus),
+      Type.Literal(BenchmarkStatus.IDLE),
+    ]),
     runId: Type.Optional(Type.String()),
   }),
 ]);
