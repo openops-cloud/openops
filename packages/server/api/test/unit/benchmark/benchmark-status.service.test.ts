@@ -43,8 +43,6 @@ jest.mock('../../../src/app/flows/flow-run/flow-run-service', () => ({
   flowRunRepo: (): typeof mockFlowRunRepo => mockFlowRunRepo,
 }));
 
-// --- test data helpers ---
-
 const BENCHMARK_ID = 'benchmark-001';
 const PROJECT_ID = 'project-001';
 
@@ -99,7 +97,6 @@ describe('getBenchmarkStatus', () => {
   it('returns IDLE status when orchestrator has no run', async () => {
     mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue(flowRows);
-    // mockGetRawManyRuns returns [] by default (beforeEach)
 
     const result = await getBenchmarkStatus({
       benchmarkId: BENCHMARK_ID,
@@ -223,7 +220,7 @@ describe('getBenchmarkStatus', () => {
         displayName: 'Orchestrator',
       },
     ]);
-    // distinctOn at DB level ensures only the latest run per flowId is returned.
+
     mockGetRawManyRuns.mockResolvedValue([
       {
         id: 'run-newer-id',
