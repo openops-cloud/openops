@@ -47,7 +47,7 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
 
 const mockBenchmarkStatus: BenchmarkStatusResponse = {
   benchmarkId: 'benchmark-001',
-  status: BenchmarkStatus.IDLE,
+  status: BenchmarkStatus.CREATED,
   workflows: [],
 };
 
