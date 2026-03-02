@@ -128,16 +128,6 @@ function mapLatestRuns(
   return result;
 }
 
-function findOrchestratorRun(
-  flowRows: FlowRow[],
-  latestRunByFlowId: Record<string, FlowRunSummary | undefined>,
-): FlowRunSummary | undefined {
-  const orchestratorRow = flowRows.find((r) => r.isOrchestrator);
-  return orchestratorRow
-    ? latestRunByFlowId[orchestratorRow.flowId]
-    : undefined;
-}
-
 function resolveOrchestratorStatus(
   run: FlowRunSummary | undefined,
 ): BenchmarkStatus {
@@ -151,25 +141,26 @@ async function resolveStatusByBenchmarkId(
   projectId: string,
 ): Promise<Map<string, BenchmarkStatus>> {
   const allFlowRows = await fetchFlowRowsByBenchmarkIds(benchmarkIds);
-  const orchestratorFlowIds = allFlowRows
-    .filter((r) => r.isOrchestrator)
-    .map((r) => r.flowId);
+
+  const orchestratorFlowIdByBenchmarkId = new Map<string, string>();
+  for (const row of allFlowRows) {
+    if (row.isOrchestrator) {
+      orchestratorFlowIdByBenchmarkId.set(row.benchmarkId, row.flowId);
+    }
+  }
+
+  const orchestratorFlowIds = [...orchestratorFlowIdByBenchmarkId.values()];
   const latestRunByFlowId =
     orchestratorFlowIds.length > 0
       ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
       : {};
 
-  const flowRowsByBenchmarkId = new Map<string, FlowRowWithBenchmarkId[]>();
-  for (const row of allFlowRows) {
-    const bucket = flowRowsByBenchmarkId.get(row.benchmarkId) ?? [];
-    bucket.push(row);
-    flowRowsByBenchmarkId.set(row.benchmarkId, bucket);
-  }
-
   return new Map(
     benchmarkIds.map((id) => {
-      const flowRows = flowRowsByBenchmarkId.get(id) ?? [];
-      const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
+      const orchestratorFlowId = orchestratorFlowIdByBenchmarkId.get(id);
+      const orchestratorRun = orchestratorFlowId
+        ? latestRunByFlowId[orchestratorFlowId]
+        : undefined;
       return [id, resolveOrchestratorStatus(orchestratorRun)];
     }),
   );
