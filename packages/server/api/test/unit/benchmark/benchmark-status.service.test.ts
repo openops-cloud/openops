@@ -254,20 +254,6 @@ describe('getBenchmarkStatus', () => {
     expect(result.workflows[0].displayName).toBe('');
   });
 
-  it('returns empty workflows array when no benchmark_flows exist', async () => {
-    mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
-    mockGetRawManyFlows.mockResolvedValue([]);
-
-    const result = await getBenchmarkStatus({
-      benchmarkId: BENCHMARK_ID,
-      projectId: PROJECT_ID,
-    });
-
-    expect(result.workflows).toEqual([]);
-    expect(result.benchmarkId).toBe(BENCHMARK_ID);
-    expect(mockFlowRunRepo.createQueryBuilder).not.toHaveBeenCalled();
-  });
-
   describe('mapFlowRunStatusToBenchmarkStatus (via overall status)', () => {
     const withOrchestratorRun = (status: FlowRunStatus) => {
       mockFindOneBenchmark.mockResolvedValue(baseBenchmark);

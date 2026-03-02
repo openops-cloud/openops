@@ -6,10 +6,8 @@ import {
   ErrorCode,
   FlowRunStatus,
 } from '@openops/shared';
-import { IsNull } from 'typeorm';
 import { flowRunRepo } from '../flows/flow-run/flow-run-service';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
-import { benchmarkRepo } from './benchmark.repo';
 
 type FlowRow = {
   flowId: string;
@@ -38,25 +36,6 @@ function mapFlowRunStatusToBenchmarkStatus(
       return BenchmarkStatus.FAILED;
     default:
       return BenchmarkStatus.SUCCEEDED;
-  }
-}
-
-async function fetchBenchmarkOrThrow(
-  benchmarkId: string,
-  projectId: string,
-): Promise<void> {
-  const benchmark = await benchmarkRepo().findOne({
-    where: { id: benchmarkId, projectId, deletedAt: IsNull() },
-  });
-
-  if (!benchmark) {
-    throw new ApplicationError({
-      code: ErrorCode.ENTITY_NOT_FOUND,
-      params: {
-        entityType: 'Benchmark',
-        entityId: benchmarkId,
-      },
-    });
   }
 }
 
@@ -146,14 +125,13 @@ export async function getBenchmarkStatus(params: {
   const flowRows = await fetchBenchmarkFlowRows(benchmarkId);
 
   if (flowRows.length === 0) {
-    await fetchBenchmarkOrThrow(benchmarkId, projectId);
-    return {
-      benchmarkId,
-      status: BenchmarkStatus.CREATED,
-      workflows: [],
-      lastRunId: undefined,
-      lastRunFinishedAt: undefined,
-    };
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        entityType: 'Benchmark',
+        entityId: benchmarkId,
+      },
+    });
   }
 
   const flowIds: string[] = [];
