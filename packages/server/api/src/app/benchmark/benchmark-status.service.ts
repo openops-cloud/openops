@@ -147,9 +147,7 @@ function pickFirstRunPerFlowId(
   for (const row of rows) {
     // Rows are ordered by id DESC, so the first occurrence per flowId is the
     // deterministic tiebreaker winner when two runs share the same MAX(created).
-    if (!result[row.flowId]) {
-      result[row.flowId] = { id: row.id, status: row.status };
-    }
+    result[row.flowId] ??= { id: row.id, status: row.status };
   }
   return result;
 }

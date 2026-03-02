@@ -54,6 +54,34 @@ const mockBenchmarkStatus: BenchmarkStatusResponse = {
 const originalEnv = { ...process.env };
 let app: FastifyInstance | null = null;
 
+const createAndInsertMocks = async (): Promise<{
+  token: string;
+  project: Project;
+}> => {
+  const mockUser = createMockUser();
+  await databaseConnection().getRepository('user').save([mockUser]);
+
+  const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+  await databaseConnection()
+    .getRepository('organization')
+    .save(mockOrganization);
+
+  const mockProject = createMockProject({
+    ownerId: mockUser.id,
+    organizationId: mockOrganization.id,
+  });
+  await databaseConnection().getRepository('project').save([mockProject]);
+
+  const mockToken = await generateMockToken({
+    id: mockUser.id,
+    type: PrincipalType.USER,
+    projectId: mockProject.id,
+    organization: { id: mockOrganization.id },
+  });
+
+  return { token: mockToken, project: mockProject };
+};
+
 beforeAll(async () => {
   wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
   benchmarkStatusServiceMock.getBenchmarkStatus.mockResolvedValue(
@@ -71,34 +99,6 @@ afterAll(async () => {
 });
 
 describe('Benchmark wizard API', () => {
-  const createAndInsertMocks = async (): Promise<{
-    token: string;
-    project: Project;
-  }> => {
-    const mockUser = createMockUser();
-    await databaseConnection().getRepository('user').save([mockUser]);
-
-    const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
-    await databaseConnection()
-      .getRepository('organization')
-      .save(mockOrganization);
-
-    const mockProject = createMockProject({
-      ownerId: mockUser.id,
-      organizationId: mockOrganization.id,
-    });
-    await databaseConnection().getRepository('project').save([mockProject]);
-
-    const mockToken = await generateMockToken({
-      id: mockUser.id,
-      type: PrincipalType.USER,
-      projectId: mockProject.id,
-      organization: { id: mockOrganization.id },
-    });
-
-    return { token: mockToken, project: mockProject };
-  };
-
   const postWizard = async ({
     provider,
     token,
@@ -244,34 +244,6 @@ describe('Benchmark wizard API', () => {
 });
 
 describe('Benchmark status API', () => {
-  const createAndInsertMocks = async (): Promise<{
-    token: string;
-    project: Project;
-  }> => {
-    const mockUser = createMockUser();
-    await databaseConnection().getRepository('user').save([mockUser]);
-
-    const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
-    await databaseConnection()
-      .getRepository('organization')
-      .save(mockOrganization);
-
-    const mockProject = createMockProject({
-      ownerId: mockUser.id,
-      organizationId: mockOrganization.id,
-    });
-    await databaseConnection().getRepository('project').save([mockProject]);
-
-    const mockToken = await generateMockToken({
-      id: mockUser.id,
-      type: PrincipalType.USER,
-      projectId: mockProject.id,
-      organization: { id: mockOrganization.id },
-    });
-
-    return { token: mockToken, project: mockProject };
-  };
-
   const getStatus = async ({
     benchmarkId,
     token,
