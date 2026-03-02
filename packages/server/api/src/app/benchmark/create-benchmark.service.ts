@@ -183,7 +183,7 @@ export async function createBenchmarkWorkflows(params: {
   }));
 }
 
-function buildBenchmarkPayload(params: {
+function buildPayloadForWebhook(params: {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
   webhookBaseUrl: string;
@@ -211,8 +211,8 @@ function buildBenchmarkPayload(params: {
 export async function insertBenchmarkRecords(params: {
   projectId: string;
   provider: string;
-  folderId: string;
-  connectionId: string;
+  folderId: string | null;
+  connectionId: string | null;
   payload: BenchmarkWebhookPayload;
   workflows: BenchmarkWorkflowBase[];
 }): Promise<BenchmarkRow> {
@@ -285,26 +285,35 @@ export async function createBenchmark(params: {
     folderId: benchmarkFolder.id,
   });
 
-  const payload = buildBenchmarkPayload({
+  const payload = buildPayloadForWebhook({
     benchmarkConfiguration,
     workflows,
     webhookBaseUrl,
   });
 
-  const benchmark = await insertBenchmarkRecords({
-    projectId,
-    provider,
-    folderId: benchmarkFolder.id,
-    connectionId,
-    payload,
-    workflows,
-  });
+  try {
+    const benchmark = await insertBenchmarkRecords({
+      projectId,
+      provider,
+      folderId: benchmarkFolder.id,
+      connectionId,
+      payload,
+      workflows,
+    });
 
-  return {
-    benchmarkId: benchmark.id,
-    folderId: benchmarkFolder.id,
-    provider,
-    workflows,
-    webhookPayload: payload,
-  };
+    return {
+      benchmarkId: benchmark.id,
+      folderId: benchmarkFolder.id,
+      provider,
+      workflows,
+      webhookPayload: payload,
+    };
+  } catch (err) {
+    await deleteFlowsByIds({
+      flowIds: workflows.map((w) => w.flowId),
+      projectId,
+      userId,
+    });
+    throw err;
+  }
 }

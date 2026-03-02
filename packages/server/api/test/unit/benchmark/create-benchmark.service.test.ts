@@ -10,7 +10,6 @@ import { flowFolderService } from '../../../src/app/flows/folder/folder.service'
 
 const mockBenchmarkRepoSave = jest.fn();
 const mockBenchmarkRepo = {
-  findOne: jest.fn(),
   update: jest.fn(),
   save: mockBenchmarkRepoSave,
 };
@@ -18,7 +17,6 @@ const mockBenchmarkRepo = {
 const mockGetRawMany = jest.fn();
 const mockBenchmarkFlowRepoSave = jest.fn();
 const mockBenchmarkFlowRepo = {
-  find: jest.fn(),
   update: jest.fn(),
   save: mockBenchmarkFlowRepoSave,
   createQueryBuilder: jest.fn().mockImplementation(() => ({
@@ -265,6 +263,47 @@ describe('create-benchmark.service', () => {
       projectId,
       folder.id,
     );
+  });
+
+  it('createBenchmark deletes newly created flows and rethrows when insertBenchmarkRecords fails', async () => {
+    const projectId = 'project-1';
+    const userId = 'user-1';
+    const folder: Folder = {
+      id: 'folder-2',
+      projectId,
+      displayName: 'AWS Benchmark',
+      created: '',
+      updated: '',
+      contentType: ContentType.WORKFLOW,
+    };
+    setupCreateBenchmarkMocks(folder);
+    mockBenchmarkRepoSave.mockRejectedValue(new Error('DB error'));
+
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId,
+        userId,
+        benchmarkConfiguration: defaultBenchmarkConfiguration,
+      }),
+    ).rejects.toThrow('DB error');
+
+    expect(flowServiceMock.delete).toHaveBeenCalledTimes(3);
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(1, {
+      id: 'flow-1',
+      projectId,
+      userId,
+    });
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(2, {
+      id: 'flow-2',
+      projectId,
+      userId,
+    });
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(3, {
+      id: 'flow-3',
+      projectId,
+      userId,
+    });
   });
 
   const deleteFlowsParams = {
