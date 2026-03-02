@@ -1,4 +1,9 @@
-import { BenchmarkStatus, ErrorCode, FlowRunStatus } from '@openops/shared';
+import {
+  BenchmarkProviders,
+  BenchmarkStatus,
+  ErrorCode,
+  FlowRunStatus,
+} from '@openops/shared';
 import {
   getBenchmarkStatus,
   listBenchmarks,
@@ -360,6 +365,7 @@ describe('listBenchmarks', () => {
     mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
     mockGetRawManyFlows.mockResolvedValue([
       {
+        benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
         displayName: 'Orchestrator',
@@ -380,6 +386,7 @@ describe('listBenchmarks', () => {
     mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
     mockGetRawManyFlows.mockResolvedValue([
       {
+        benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
         displayName: 'Orchestrator',
@@ -398,6 +405,7 @@ describe('listBenchmarks', () => {
     mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
     mockGetRawManyFlows.mockResolvedValue([
       {
+        benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
         displayName: 'Orchestrator',
@@ -416,6 +424,7 @@ describe('listBenchmarks', () => {
     mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
     mockGetRawManyFlows.mockResolvedValue([
       {
+        benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
         displayName: 'Orchestrator',
@@ -433,11 +442,14 @@ describe('listBenchmarks', () => {
   it('passes provider to find when provider filter is supplied', async () => {
     mockFindBenchmarks.mockResolvedValue([]);
 
-    await listBenchmarks({ projectId: PROJECT_ID, provider: 'aws' });
+    await listBenchmarks({
+      projectId: PROJECT_ID,
+      provider: BenchmarkProviders.AWS,
+    });
 
     expect(mockFindBenchmarks).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ provider: 'aws' }),
+        where: expect.objectContaining({ provider: BenchmarkProviders.AWS }),
       }),
     );
   });
