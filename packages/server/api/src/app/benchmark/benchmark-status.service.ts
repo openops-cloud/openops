@@ -1,19 +1,25 @@
 import {
   ApplicationError,
+  BenchmarkListItem,
+  BenchmarkProviders,
   BenchmarkStatus,
   BenchmarkStatusResponse,
   BenchmarkWorkflowStatusItem,
   ErrorCode,
   FlowRunStatus,
 } from '@openops/shared';
+import { IsNull } from 'typeorm';
 import { flowRunRepo } from '../flows/flow-run/flow-run-service';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
+import { benchmarkRepo } from './benchmark.repo';
 
 type FlowRow = {
   flowId: string;
   isOrchestrator: boolean;
   displayName: string | null;
 };
+
+type FlowRowWithBenchmarkId = FlowRow & { benchmarkId: string };
 
 type FlowRunSummary = {
   id: string;
@@ -39,19 +45,25 @@ function mapFlowRunStatusToBenchmarkStatus(
   }
 }
 
-async function fetchBenchmarkFlowRows(benchmarkId: string): Promise<FlowRow[]> {
+async function fetchFlowRowsByBenchmarkIds(
+  benchmarkIds: string[],
+): Promise<FlowRowWithBenchmarkId[]> {
+  if (benchmarkIds.length === 0) {
+    return [];
+  }
   return benchmarkFlowRepo()
     .createQueryBuilder('bf')
     .leftJoin('flow', 'f', 'f.id = bf.flowId')
     .leftJoin('flow_version', 'fv', 'fv.id = f.publishedVersionId')
     .select([
+      'bf.benchmarkId AS "benchmarkId"',
       'bf.flowId AS "flowId"',
       'bf.isOrchestrator AS "isOrchestrator"',
       'fv.displayName AS "displayName"',
     ])
-    .where('bf.benchmarkId = :benchmarkId', { benchmarkId })
+    .where('bf.benchmarkId IN (:...benchmarkIds)', { benchmarkIds })
     .andWhere('bf.deletedAt IS NULL')
-    .getRawMany<FlowRow>();
+    .getRawMany<FlowRowWithBenchmarkId>();
 }
 
 function buildWorkflowStatusItems(
@@ -116,13 +128,86 @@ function mapLatestRuns(
   return result;
 }
 
+function resolveOrchestratorStatus(
+  run: FlowRunSummary | undefined,
+): BenchmarkStatus {
+  return run
+    ? mapFlowRunStatusToBenchmarkStatus(run.status)
+    : BenchmarkStatus.CREATED;
+}
+
+async function resolveStatusByBenchmarkId(
+  benchmarkIds: string[],
+  projectId: string,
+): Promise<Map<string, BenchmarkStatus>> {
+  const allFlowRows = await fetchFlowRowsByBenchmarkIds(benchmarkIds);
+
+  const orchestratorFlowIdByBenchmarkId = new Map<string, string>();
+  for (const row of allFlowRows) {
+    if (row.isOrchestrator) {
+      orchestratorFlowIdByBenchmarkId.set(row.benchmarkId, row.flowId);
+    }
+  }
+
+  const orchestratorFlowIds = [...orchestratorFlowIdByBenchmarkId.values()];
+  const latestRunByFlowId =
+    orchestratorFlowIds.length > 0
+      ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
+      : {};
+
+  const statusByBenchmarkId = new Map<string, BenchmarkStatus>();
+
+  for (const benchmarkId of benchmarkIds) {
+    const flowId = orchestratorFlowIdByBenchmarkId.get(benchmarkId);
+    const latestOrchestratorRun = flowId
+      ? latestRunByFlowId[flowId]
+      : undefined;
+    statusByBenchmarkId.set(
+      benchmarkId,
+      resolveOrchestratorStatus(latestOrchestratorRun),
+    );
+  }
+
+  return statusByBenchmarkId;
+}
+
+export async function listBenchmarks(params: {
+  projectId: string;
+  provider?: BenchmarkProviders;
+}): Promise<BenchmarkListItem[]> {
+  const { projectId, provider } = params;
+
+  const rows = await benchmarkRepo().find({
+    where: {
+      projectId,
+      deletedAt: IsNull(),
+      ...(provider ? { provider } : {}),
+    },
+  });
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const statusByBenchmarkId = await resolveStatusByBenchmarkId(
+    rows.map((r) => r.id),
+    projectId,
+  );
+
+  return rows.map((row) => ({
+    benchmarkId: row.id,
+    provider: row.provider,
+    status: statusByBenchmarkId.get(row.id) ?? BenchmarkStatus.CREATED,
+  }));
+}
+
 export async function getBenchmarkStatus(params: {
   benchmarkId: string;
   projectId: string;
 }): Promise<BenchmarkStatusResponse> {
   const { benchmarkId, projectId } = params;
 
-  const flowRows = await fetchBenchmarkFlowRows(benchmarkId);
+  const flowRows = await fetchFlowRowsByBenchmarkIds([benchmarkId]);
 
   if (flowRows.length === 0) {
     throw new ApplicationError({
@@ -149,15 +234,11 @@ export async function getBenchmarkStatus(params: {
     ? latestRunByFlowId[orchestratorFlowId]
     : undefined;
 
-  const status = orchestratorRun
-    ? mapFlowRunStatusToBenchmarkStatus(orchestratorRun.status)
-    : BenchmarkStatus.CREATED;
-
   const workflows = buildWorkflowStatusItems(flowRows, latestRunByFlowId);
 
   return {
     benchmarkId,
-    status,
+    status: resolveOrchestratorStatus(orchestratorRun),
     workflows,
     lastRunId: orchestratorRun?.id,
     lastRunFinishedAt: orchestratorRun?.finishTime,

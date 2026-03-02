@@ -1,9 +1,19 @@
-import { BenchmarkStatus, ErrorCode, FlowRunStatus } from '@openops/shared';
-import { getBenchmarkStatus } from '../../../src/app/benchmark/benchmark-status.service';
+import {
+  BenchmarkProviders,
+  BenchmarkStatus,
+  ErrorCode,
+  FlowRunStatus,
+} from '@openops/shared';
+import {
+  getBenchmarkStatus,
+  listBenchmarks,
+} from '../../../src/app/benchmark/benchmark-status.service';
 
 const mockFindOneBenchmark = jest.fn();
+const mockFindBenchmarks = jest.fn();
 const mockBenchmarkRepo = {
   findOne: mockFindOneBenchmark,
+  find: mockFindBenchmarks,
 };
 
 const mockGetRawManyFlows = jest.fn();
@@ -49,6 +59,7 @@ const PROJECT_ID = 'project-001';
 const baseBenchmark = {
   id: BENCHMARK_ID,
   projectId: PROJECT_ID,
+  provider: 'aws',
   deletedAt: null,
 };
 
@@ -302,5 +313,168 @@ describe('getBenchmarkStatus', () => {
       const result = await withOrchestratorRun(FlowRunStatus.STOPPED);
       expect(result.status).toBe(BenchmarkStatus.SUCCEEDED);
     });
+  });
+});
+
+describe('listBenchmarks', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBenchmarkFlowRepo.createQueryBuilder.mockReturnValue({
+      leftJoin: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawMany: mockGetRawManyFlows,
+    });
+    mockFlowRunRepo.createQueryBuilder.mockReturnValue({
+      distinctOn: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      addOrderBy: jest.fn().mockReturnThis(),
+      getRawMany: mockGetRawManyRuns,
+    });
+    mockGetRawManyRuns.mockResolvedValue([]);
+  });
+
+  it('returns empty array when no benchmarks exist', async () => {
+    mockFindBenchmarks.mockResolvedValue([]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result).toEqual([]);
+    expect(mockBenchmarkFlowRepo.createQueryBuilder).not.toHaveBeenCalled();
+  });
+
+  it('returns CREATED status when benchmark has no runs', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      benchmarkId: BENCHMARK_ID,
+      provider: 'aws',
+      status: BenchmarkStatus.CREATED,
+    });
+  });
+
+  it('returns RUNNING status when orchestrator run is RUNNING', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+    ]);
+    mockGetRawManyRuns.mockResolvedValue([
+      { id: 'run-001', flowId: 'flow-orch', status: FlowRunStatus.RUNNING },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result[0].status).toBe(BenchmarkStatus.RUNNING);
+  });
+
+  it('returns SUCCEEDED status when orchestrator run is SUCCEEDED', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+    ]);
+    mockGetRawManyRuns.mockResolvedValue([
+      { id: 'run-002', flowId: 'flow-orch', status: FlowRunStatus.SUCCEEDED },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result[0].status).toBe(BenchmarkStatus.SUCCEEDED);
+  });
+
+  it('returns FAILED status when orchestrator run is FAILED', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+    ]);
+    mockGetRawManyRuns.mockResolvedValue([
+      { id: 'run-003', flowId: 'flow-orch', status: FlowRunStatus.FAILED },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result[0].status).toBe(BenchmarkStatus.FAILED);
+  });
+
+  it('passes provider to find when provider filter is supplied', async () => {
+    mockFindBenchmarks.mockResolvedValue([]);
+
+    await listBenchmarks({
+      projectId: PROJECT_ID,
+      provider: BenchmarkProviders.AWS,
+    });
+
+    expect(mockFindBenchmarks).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ provider: BenchmarkProviders.AWS }),
+      }),
+    );
+  });
+
+  it('omits provider from find when no provider filter is supplied', async () => {
+    mockFindBenchmarks.mockResolvedValue([]);
+
+    await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(mockFindBenchmarks).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.not.objectContaining({ provider: expect.anything() }),
+      }),
+    );
+  });
+
+  it('derives status from orchestrator run when sub-workflow rows are also present', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-sub1',
+        isOrchestrator: false,
+        displayName: 'Sub 1',
+      },
+    ]);
+    mockGetRawManyRuns.mockResolvedValue([
+      { id: 'run-001', flowId: 'flow-orch', status: FlowRunStatus.SUCCEEDED },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result[0].status).toBe(BenchmarkStatus.SUCCEEDED);
   });
 });
