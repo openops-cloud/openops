@@ -1,9 +1,8 @@
 import { Static, Type } from '@sinclair/typebox';
-import { FlowRunStatus } from '../../flow-run/execution/flow-execution';
 import { BenchmarkWorkflowBase } from './create-benchmark-response';
 
 export enum BenchmarkStatus {
-  IDLE = 'IDLE',
+  CREATED = 'CREATED',
   RUNNING = 'RUNNING',
   SUCCEEDED = 'SUCCEEDED',
   FAILED = 'FAILED',
@@ -12,10 +11,7 @@ export enum BenchmarkStatus {
 export const BenchmarkWorkflowStatusItem = Type.Intersect([
   BenchmarkWorkflowBase,
   Type.Object({
-    runStatus: Type.Union([
-      Type.Enum(FlowRunStatus),
-      Type.Literal(BenchmarkStatus.IDLE),
-    ]),
+    runStatus: Type.Enum(BenchmarkStatus),
     runId: Type.Optional(Type.String()),
   }),
 ]);

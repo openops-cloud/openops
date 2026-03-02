@@ -19,11 +19,14 @@ const mockBenchmarkFlowRepo = {
 
 const mockGetRawManyRuns = jest.fn();
 const mockFlowRunRepo = {
-  findOneBy: jest.fn(),
   createQueryBuilder: jest.fn().mockReturnValue({
-    innerJoin: jest.fn().mockReturnThis(),
+    distinctOn: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
     addSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    addOrderBy: jest.fn().mockReturnThis(),
     getRawMany: mockGetRawManyRuns,
   }),
 };
@@ -48,7 +51,6 @@ const PROJECT_ID = 'project-001';
 const baseBenchmark = {
   id: BENCHMARK_ID,
   projectId: PROJECT_ID,
-  lastRunId: null,
   deletedAt: null,
 };
 
@@ -69,10 +71,13 @@ describe('getBenchmarkStatus', () => {
     });
     mockFlowRunRepo.createQueryBuilder.mockReturnValue({
       innerJoin: jest.fn().mockReturnThis(),
+      distinctOn: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
+      addOrderBy: jest.fn().mockReturnThis(),
       getRawMany: mockGetRawManyRuns,
     });
     mockGetRawManyRuns.mockResolvedValue([]);
@@ -91,34 +96,32 @@ describe('getBenchmarkStatus', () => {
     });
   });
 
-  it('returns IDLE status when benchmark has no lastRunId', async () => {
-    mockFindOneBenchmark.mockResolvedValue({
-      ...baseBenchmark,
-      lastRunId: null,
-    });
+  it('returns IDLE status when orchestrator has no run', async () => {
+    mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue(flowRows);
+    // mockGetRawManyRuns returns [] by default (beforeEach)
 
     const result = await getBenchmarkStatus({
       benchmarkId: BENCHMARK_ID,
       projectId: PROJECT_ID,
     });
 
-    expect(result.status).toBe(BenchmarkStatus.IDLE);
+    expect(result.status).toBe(BenchmarkStatus.CREATED);
     expect(result.lastRunId).toBeUndefined();
     expect(result.lastRunFinishedAt).toBeUndefined();
   });
 
   it('returns RUNNING status when orchestrator run is RUNNING', async () => {
-    mockFindOneBenchmark.mockResolvedValue({
-      ...baseBenchmark,
-      lastRunId: 'run-001',
-    });
+    mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue(flowRows);
-    mockFlowRunRepo.findOneBy.mockResolvedValue({
-      id: 'run-001',
-      status: FlowRunStatus.RUNNING,
-      finishTime: undefined,
-    });
+    mockGetRawManyRuns.mockResolvedValue([
+      {
+        id: 'run-001',
+        flowId: 'flow-orch',
+        status: FlowRunStatus.RUNNING,
+        finishTime: undefined,
+      },
+    ]);
 
     const result = await getBenchmarkStatus({
       benchmarkId: BENCHMARK_ID,
@@ -131,16 +134,16 @@ describe('getBenchmarkStatus', () => {
   });
 
   it('returns SUCCEEDED status when orchestrator run is SUCCEEDED', async () => {
-    mockFindOneBenchmark.mockResolvedValue({
-      ...baseBenchmark,
-      lastRunId: 'run-002',
-    });
+    mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue(flowRows);
-    mockFlowRunRepo.findOneBy.mockResolvedValue({
-      id: 'run-002',
-      status: FlowRunStatus.SUCCEEDED,
-      finishTime: '2024-01-01T12:00:00.000Z',
-    });
+    mockGetRawManyRuns.mockResolvedValue([
+      {
+        id: 'run-002',
+        flowId: 'flow-orch',
+        status: FlowRunStatus.SUCCEEDED,
+        finishTime: '2024-01-01T12:00:00.000Z',
+      },
+    ]);
 
     const result = await getBenchmarkStatus({
       benchmarkId: BENCHMARK_ID,
@@ -153,16 +156,16 @@ describe('getBenchmarkStatus', () => {
   });
 
   it('returns FAILED status when orchestrator run is FAILED', async () => {
-    mockFindOneBenchmark.mockResolvedValue({
-      ...baseBenchmark,
-      lastRunId: 'run-003',
-    });
+    mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue(flowRows);
-    mockFlowRunRepo.findOneBy.mockResolvedValue({
-      id: 'run-003',
-      status: FlowRunStatus.FAILED,
-      finishTime: '2024-01-02T08:00:00.000Z',
-    });
+    mockGetRawManyRuns.mockResolvedValue([
+      {
+        id: 'run-003',
+        flowId: 'flow-orch',
+        status: FlowRunStatus.FAILED,
+        finishTime: '2024-01-02T08:00:00.000Z',
+      },
+    ]);
 
     const result = await getBenchmarkStatus({
       benchmarkId: BENCHMARK_ID,
@@ -170,22 +173,6 @@ describe('getBenchmarkStatus', () => {
     });
 
     expect(result.status).toBe(BenchmarkStatus.FAILED);
-  });
-
-  it('returns IDLE overall status when lastRunId references a missing run', async () => {
-    mockFindOneBenchmark.mockResolvedValue({
-      ...baseBenchmark,
-      lastRunId: 'run-gone',
-    });
-    mockGetRawManyFlows.mockResolvedValue([]);
-    mockFlowRunRepo.findOneBy.mockResolvedValue(null);
-
-    const result = await getBenchmarkStatus({
-      benchmarkId: BENCHMARK_ID,
-      projectId: PROJECT_ID,
-    });
-
-    expect(result.status).toBe(BenchmarkStatus.IDLE);
   });
 
   it('sets runStatus to IDLE for workflows with no run found', async () => {
@@ -200,7 +187,7 @@ describe('getBenchmarkStatus', () => {
 
     expect(result.workflows).toHaveLength(2);
     result.workflows.forEach((wf) => {
-      expect(wf.runStatus).toBe('IDLE');
+      expect(wf.runStatus).toBe(BenchmarkStatus.CREATED);
       expect(wf.runId).toBeUndefined();
     });
   });
@@ -222,12 +209,12 @@ describe('getBenchmarkStatus', () => {
     const subWf = result.workflows.find((w) => !w.isOrchestrator);
 
     expect(orchestratorWf?.runId).toBe('fr-orch');
-    expect(orchestratorWf?.runStatus).toBe(FlowRunStatus.SUCCEEDED);
+    expect(orchestratorWf?.runStatus).toBe(BenchmarkStatus.SUCCEEDED);
     expect(subWf?.runId).toBe('fr-sub1');
-    expect(subWf?.runStatus).toBe(FlowRunStatus.RUNNING);
+    expect(subWf?.runStatus).toBe(BenchmarkStatus.RUNNING);
   });
 
-  it('keeps only the first row per flowId when two runs share the same created timestamp (id DESC tiebreaker)', async () => {
+  it('uses the single run returned by distinctOn per flowId', async () => {
     mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue([
       {
@@ -236,15 +223,13 @@ describe('getBenchmarkStatus', () => {
         displayName: 'Orchestrator',
       },
     ]);
-    // Simulate two rows for the same flowId already ordered by id DESC by the query.
-    // Only the first (larger id) should be kept.
+    // distinctOn at DB level ensures only the latest run per flowId is returned.
     mockGetRawManyRuns.mockResolvedValue([
       {
         id: 'run-newer-id',
         flowId: 'flow-orch',
         status: FlowRunStatus.SUCCEEDED,
       },
-      { id: 'run-older-id', flowId: 'flow-orch', status: FlowRunStatus.FAILED },
     ]);
 
     const result = await getBenchmarkStatus({
@@ -254,7 +239,7 @@ describe('getBenchmarkStatus', () => {
 
     expect(result.workflows).toHaveLength(1);
     expect(result.workflows[0].runId).toBe('run-newer-id');
-    expect(result.workflows[0].runStatus).toBe(FlowRunStatus.SUCCEEDED);
+    expect(result.workflows[0].runStatus).toBe(BenchmarkStatus.SUCCEEDED);
   });
 
   it('maps displayName from publishedVersion (falling back to empty string when null)', async () => {
@@ -286,17 +271,18 @@ describe('getBenchmarkStatus', () => {
   });
 
   describe('mapFlowRunStatusToBenchmarkStatus (via overall status)', () => {
-    const withLastRun = (status: FlowRunStatus) => {
-      mockFindOneBenchmark.mockResolvedValue({
-        ...baseBenchmark,
-        lastRunId: 'run-x',
-      });
-      mockGetRawManyFlows.mockResolvedValue([]);
-      mockFlowRunRepo.findOneBy.mockResolvedValue({
-        id: 'run-x',
-        status,
-        finishTime: undefined,
-      });
+    const withOrchestratorRun = (status: FlowRunStatus) => {
+      mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
+      mockGetRawManyFlows.mockResolvedValue([
+        {
+          flowId: 'flow-orch',
+          isOrchestrator: true,
+          displayName: 'Orchestrator',
+        },
+      ]);
+      mockGetRawManyRuns.mockResolvedValue([
+        { id: 'run-x', flowId: 'flow-orch', status, finishTime: undefined },
+      ]);
       return getBenchmarkStatus({
         benchmarkId: BENCHMARK_ID,
         projectId: PROJECT_ID,
@@ -304,32 +290,32 @@ describe('getBenchmarkStatus', () => {
     };
 
     it('maps PAUSED → RUNNING', async () => {
-      const result = await withLastRun(FlowRunStatus.PAUSED);
+      const result = await withOrchestratorRun(FlowRunStatus.PAUSED);
       expect(result.status).toBe(BenchmarkStatus.RUNNING);
     });
 
     it('maps SCHEDULED → RUNNING', async () => {
-      const result = await withLastRun(FlowRunStatus.SCHEDULED);
+      const result = await withOrchestratorRun(FlowRunStatus.SCHEDULED);
       expect(result.status).toBe(BenchmarkStatus.RUNNING);
     });
 
     it('maps TIMEOUT → FAILED', async () => {
-      const result = await withLastRun(FlowRunStatus.TIMEOUT);
+      const result = await withOrchestratorRun(FlowRunStatus.TIMEOUT);
       expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps INTERNAL_ERROR → FAILED', async () => {
-      const result = await withLastRun(FlowRunStatus.INTERNAL_ERROR);
+      const result = await withOrchestratorRun(FlowRunStatus.INTERNAL_ERROR);
       expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps IGNORED → FAILED', async () => {
-      const result = await withLastRun(FlowRunStatus.IGNORED);
+      const result = await withOrchestratorRun(FlowRunStatus.IGNORED);
       expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps STOPPED → SUCCEEDED', async () => {
-      const result = await withLastRun(FlowRunStatus.STOPPED);
+      const result = await withOrchestratorRun(FlowRunStatus.STOPPED);
       expect(result.status).toBe(BenchmarkStatus.SUCCEEDED);
     });
   });

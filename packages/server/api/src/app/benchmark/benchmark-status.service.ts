@@ -9,13 +9,18 @@ import {
 import { IsNull } from 'typeorm';
 import { flowRunRepo } from '../flows/flow-run/flow-run-service';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
-import { BenchmarkSchema } from './benchmark.entity';
 import { benchmarkRepo } from './benchmark.repo';
 
 type FlowRow = {
   flowId: string;
   isOrchestrator: boolean;
   displayName: string | null;
+};
+
+type FlowRunSummary = {
+  id: string;
+  status: FlowRunStatus;
+  finishTime?: string;
 };
 
 function mapFlowRunStatusToBenchmarkStatus(
@@ -32,7 +37,6 @@ function mapFlowRunStatusToBenchmarkStatus(
     case FlowRunStatus.IGNORED:
       return BenchmarkStatus.FAILED;
     default:
-      // SUCCEEDED, STOPPED
       return BenchmarkStatus.SUCCEEDED;
   }
 }
@@ -40,7 +44,7 @@ function mapFlowRunStatusToBenchmarkStatus(
 async function fetchBenchmarkOrThrow(
   benchmarkId: string,
   projectId: string,
-): Promise<BenchmarkSchema> {
+): Promise<void> {
   const benchmark = await benchmarkRepo().findOne({
     where: { id: benchmarkId, projectId, deletedAt: IsNull() },
   });
@@ -54,8 +58,6 @@ async function fetchBenchmarkOrThrow(
       },
     });
   }
-
-  return benchmark;
 }
 
 async function fetchBenchmarkFlowRows(benchmarkId: string): Promise<FlowRow[]> {
@@ -73,32 +75,9 @@ async function fetchBenchmarkFlowRows(benchmarkId: string): Promise<FlowRow[]> {
     .getRawMany<FlowRow>();
 }
 
-async function resolveOverallStatus(
-  lastRunId: string | null | undefined,
-  projectId: string,
-): Promise<{ status: BenchmarkStatus; lastRunFinishedAt?: string }> {
-  if (!lastRunId) {
-    return { status: BenchmarkStatus.IDLE };
-  }
-
-  const orchestratorRun = await flowRunRepo().findOneBy({
-    id: lastRunId,
-    projectId,
-  });
-  return {
-    status: orchestratorRun
-      ? mapFlowRunStatusToBenchmarkStatus(orchestratorRun.status)
-      : BenchmarkStatus.IDLE,
-    lastRunFinishedAt: orchestratorRun?.finishTime,
-  };
-}
-
 function buildWorkflowStatusItems(
   flowRows: FlowRow[],
-  latestRunByFlowId: Record<
-    string,
-    { id: string; status: FlowRunStatus } | undefined
-  >,
+  latestRunByFlowId: Record<string, FlowRunSummary | undefined>,
 ): BenchmarkWorkflowStatusItem[] {
   return flowRows.map((row) => {
     const latestRun = latestRunByFlowId[row.flowId];
@@ -106,7 +85,9 @@ function buildWorkflowStatusItems(
       flowId: row.flowId,
       displayName: row.displayName ?? '',
       isOrchestrator: row.isOrchestrator,
-      runStatus: latestRun?.status ?? BenchmarkStatus.IDLE,
+      runStatus: latestRun
+        ? mapFlowRunStatusToBenchmarkStatus(latestRun.status)
+        : BenchmarkStatus.CREATED,
       runId: latestRun?.id,
     };
   });
@@ -115,46 +96,33 @@ function buildWorkflowStatusItems(
 async function getLatestRunByFlowId(
   flowIds: string[],
   projectId: string,
-): Promise<Record<string, { id: string; status: FlowRunStatus } | undefined>> {
+): Promise<Record<string, FlowRunSummary | undefined>> {
   if (flowIds.length === 0) {
     return {};
   }
 
   const rows = await flowRunRepo()
     .createQueryBuilder('fr')
-    .innerJoin(
-      (subQuery) =>
-        subQuery
-          .select('fr2.flowId', 'flowId')
-          .addSelect('MAX(fr2.created)', 'maxCreated')
-          .from('flow_run', 'fr2')
-          .where('fr2.flowId IN (:...flowIds)', { flowIds })
-          .andWhere('fr2.projectId = :projectId', { projectId })
-          .groupBy('fr2.flowId'),
-      'latest',
-      'fr."flowId" = latest."flowId" AND fr.created = latest."maxCreated"',
-    )
-    .select('fr.id', 'id')
-    .addSelect('fr.flowId', 'flowId')
+    .distinctOn(['fr.flowId'])
+    .select('fr.flowId', 'flowId')
+    .addSelect('fr.id', 'id')
     .addSelect('fr.status', 'status')
-    .where('fr."projectId" = :projectId', { projectId })
-    .orderBy('fr.id', 'DESC')
-    .getRawMany<{ id: string; flowId: string; status: FlowRunStatus }>();
+    .addSelect('fr.finishTime', 'finishTime')
+    .where('fr.projectId = :projectId', { projectId })
+    .andWhere('fr.flowId IN (:...flowIds)', { flowIds })
+    .orderBy('fr.flowId', 'ASC')
+    .addOrderBy('fr.created', 'DESC')
+    .addOrderBy('fr.id', 'DESC')
+    .getRawMany<{
+      id: string;
+      flowId: string;
+      status: FlowRunStatus;
+      finishTime?: string;
+    }>();
 
-  return pickFirstRunPerFlowId(rows);
-}
-
-function pickFirstRunPerFlowId(
-  rows: { id: string; flowId: string; status: FlowRunStatus }[],
-): Record<string, { id: string; status: FlowRunStatus } | undefined> {
-  const result: Record<
-    string,
-    { id: string; status: FlowRunStatus } | undefined
-  > = {};
-  for (const row of rows) {
-    // Rows are ordered by id DESC, so the first occurrence per flowId is the
-    // deterministic tiebreaker winner when two runs share the same MAX(created).
-    result[row.flowId] ??= { id: row.id, status: row.status };
+  const result: Record<string, FlowRunSummary | undefined> = {};
+  for (const r of rows) {
+    result[r.flowId] = { id: r.id, status: r.status, finishTime: r.finishTime };
   }
   return result;
 }
@@ -165,20 +133,27 @@ export async function getBenchmarkStatus(params: {
 }): Promise<BenchmarkStatusResponse> {
   const { benchmarkId, projectId } = params;
 
-  const benchmark = await fetchBenchmarkOrThrow(benchmarkId, projectId);
-  const [flowRows, { status, lastRunFinishedAt }] = await Promise.all([
-    fetchBenchmarkFlowRows(benchmarkId),
-    resolveOverallStatus(benchmark.lastRunId, projectId),
-  ]);
+  await fetchBenchmarkOrThrow(benchmarkId, projectId);
+  const flowRows = await fetchBenchmarkFlowRows(benchmarkId);
   const flowIds = flowRows.map((r) => r.flowId);
   const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
+
+  const orchestratorRow = flowRows.find((r) => r.isOrchestrator);
+  const orchestratorRun = orchestratorRow
+    ? latestRunByFlowId[orchestratorRow.flowId]
+    : undefined;
+
+  const status = orchestratorRun
+    ? mapFlowRunStatusToBenchmarkStatus(orchestratorRun.status)
+    : BenchmarkStatus.CREATED;
+
   const workflows = buildWorkflowStatusItems(flowRows, latestRunByFlowId);
 
   return {
     benchmarkId,
     status,
     workflows,
-    lastRunId: benchmark.lastRunId ?? undefined,
-    lastRunFinishedAt,
+    lastRunId: orchestratorRun?.id,
+    lastRunFinishedAt: orchestratorRun?.finishTime,
   };
 }
