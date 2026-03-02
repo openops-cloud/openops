@@ -114,6 +114,7 @@ function buildWorkflowStatusItems(
 
 async function getLatestRunByFlowId(
   flowIds: string[],
+  projectId: string,
 ): Promise<Record<string, { id: string; status: FlowRunStatus } | undefined>> {
   if (flowIds.length === 0) {
     return {};
@@ -128,6 +129,7 @@ async function getLatestRunByFlowId(
           .addSelect('MAX(fr2.created)', 'maxCreated')
           .from('flow_run', 'fr2')
           .where('fr2.flowId IN (:...flowIds)', { flowIds })
+          .andWhere('fr2.projectId = :projectId', { projectId })
           .groupBy('fr2.flowId'),
       'latest',
       'fr."flowId" = latest."flowId" AND fr.created = latest."maxCreated"',
@@ -135,6 +137,7 @@ async function getLatestRunByFlowId(
     .select('fr.id', 'id')
     .addSelect('fr.flowId', 'flowId')
     .addSelect('fr.status', 'status')
+    .where('fr."projectId" = :projectId', { projectId })
     .orderBy('fr.id', 'DESC')
     .getRawMany<{ id: string; flowId: string; status: FlowRunStatus }>();
 
@@ -168,7 +171,7 @@ export async function getBenchmarkStatus(params: {
     resolveOverallStatus(benchmark.lastRunId, projectId),
   ]);
   const flowIds = flowRows.map((r) => r.flowId);
-  const latestRunByFlowId = await getLatestRunByFlowId(flowIds);
+  const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
   const workflows = buildWorkflowStatusItems(flowRows, latestRunByFlowId);
 
   return {
