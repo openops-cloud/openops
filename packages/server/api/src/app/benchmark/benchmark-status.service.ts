@@ -75,12 +75,16 @@ async function fetchBenchmarkFlowRows(benchmarkId: string): Promise<FlowRow[]> {
 
 async function resolveOverallStatus(
   lastRunId: string | null | undefined,
+  projectId: string,
 ): Promise<{ status: BenchmarkStatus; lastRunFinishedAt?: string }> {
   if (!lastRunId) {
     return { status: BenchmarkStatus.IDLE };
   }
 
-  const orchestratorRun = await flowRunRepo().findOneBy({ id: lastRunId });
+  const orchestratorRun = await flowRunRepo().findOneBy({
+    id: lastRunId,
+    projectId,
+  });
   return {
     status: orchestratorRun
       ? mapFlowRunStatusToBenchmarkStatus(orchestratorRun.status)
@@ -161,7 +165,7 @@ export async function getBenchmarkStatus(params: {
   const benchmark = await fetchBenchmarkOrThrow(benchmarkId, projectId);
   const [flowRows, { status, lastRunFinishedAt }] = await Promise.all([
     fetchBenchmarkFlowRows(benchmarkId),
-    resolveOverallStatus(benchmark.lastRunId),
+    resolveOverallStatus(benchmark.lastRunId, projectId),
   ]);
   const flowIds = flowRows.map((r) => r.flowId);
   const latestRunByFlowId = await getLatestRunByFlowId(flowIds);
