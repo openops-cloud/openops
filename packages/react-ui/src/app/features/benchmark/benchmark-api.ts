@@ -33,7 +33,7 @@ const createBenchmark = (
           workflows: [],
           webhookPayload: {
             webhookBaseUrl: '',
-            workflows: ['Run AWS Benchmark'],
+            workflows: [],
             cleanupWorkflows: [],
             accounts: [],
             regions: [],

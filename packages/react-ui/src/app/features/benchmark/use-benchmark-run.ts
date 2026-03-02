@@ -24,7 +24,6 @@ function mapStatusToRunPhase(
 ): BenchmarkRunPhase | null {
   switch (data.status) {
     case BenchmarkStatus.CREATED:
-      // Workflow run not registered yet — keep current state, continue polling
       return null;
     case BenchmarkStatus.RUNNING:
       return 'running';

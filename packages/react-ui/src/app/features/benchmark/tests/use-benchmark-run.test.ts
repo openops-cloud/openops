@@ -324,7 +324,6 @@ describe('useBenchmarkRun', () => {
         await result.current.handleRunBenchmark();
       });
 
-      // CREATED status should not override the 'running' phase set by onSuccess
       expect(result.current.runPhase).toBe('running');
     });
 
