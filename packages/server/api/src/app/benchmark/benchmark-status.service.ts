@@ -159,9 +159,16 @@ async function resolveStatusByBenchmarkId(
       ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
       : {};
 
+  const flowRowsByBenchmarkId = new Map<string, FlowRowWithBenchmarkId[]>();
+  for (const row of allFlowRows) {
+    const bucket = flowRowsByBenchmarkId.get(row.benchmarkId) ?? [];
+    bucket.push(row);
+    flowRowsByBenchmarkId.set(row.benchmarkId, bucket);
+  }
+
   return new Map(
     benchmarkIds.map((id) => {
-      const flowRows = allFlowRows.filter((r) => r.benchmarkId === id);
+      const flowRows = flowRowsByBenchmarkId.get(id) ?? [];
       const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
       return [id, resolveOrchestratorStatus(orchestratorRun)];
     }),
