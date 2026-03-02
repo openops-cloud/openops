@@ -146,6 +146,28 @@ function resolveOrchestratorStatus(
     : BenchmarkStatus.CREATED;
 }
 
+async function resolveStatusByBenchmarkId(
+  benchmarkIds: string[],
+  projectId: string,
+): Promise<Map<string, BenchmarkStatus>> {
+  const allFlowRows = await fetchFlowRowsByBenchmarkIds(benchmarkIds);
+  const orchestratorFlowIds = allFlowRows
+    .filter((r) => r.isOrchestrator)
+    .map((r) => r.flowId);
+  const latestRunByFlowId =
+    orchestratorFlowIds.length > 0
+      ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
+      : {};
+
+  return new Map(
+    benchmarkIds.map((id) => {
+      const flowRows = allFlowRows.filter((r) => r.benchmarkId === id);
+      const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
+      return [id, resolveOrchestratorStatus(orchestratorRun)];
+    }),
+  );
+}
+
 export async function listBenchmarks(params: {
   projectId: string;
   provider?: BenchmarkProviders;
@@ -164,31 +186,16 @@ export async function listBenchmarks(params: {
     return [];
   }
 
-  const allFlowRows = await fetchFlowRowsByBenchmarkIds(rows.map((r) => r.id));
-  const orchestratorFlowIds = allFlowRows
-    .filter((r) => r.isOrchestrator)
-    .map((r) => r.flowId);
-  const latestRunByFlowId = await getLatestRunByFlowId(
-    orchestratorFlowIds,
+  const statusByBenchmarkId = await resolveStatusByBenchmarkId(
+    rows.map((r) => r.id),
     projectId,
   );
 
-  const flowRowsByBenchmarkId = new Map<string, FlowRowWithBenchmarkId[]>();
-  for (const fr of allFlowRows) {
-    const bucket = flowRowsByBenchmarkId.get(fr.benchmarkId) ?? [];
-    bucket.push(fr);
-    flowRowsByBenchmarkId.set(fr.benchmarkId, bucket);
-  }
-
-  return rows.map((row) => {
-    const flowRows = flowRowsByBenchmarkId.get(row.id) ?? [];
-    const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
-    return {
-      benchmarkId: row.id,
-      provider: row.provider,
-      status: resolveOrchestratorStatus(orchestratorRun),
-    };
-  });
+  return rows.map((row) => ({
+    benchmarkId: row.id,
+    provider: row.provider,
+    status: statusByBenchmarkId.get(row.id) ?? BenchmarkStatus.CREATED,
+  }));
 }
 
 export async function getBenchmarkStatus(params: {
