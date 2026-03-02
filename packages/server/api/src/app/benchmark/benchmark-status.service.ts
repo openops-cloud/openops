@@ -1,5 +1,6 @@
 import {
   ApplicationError,
+  BenchmarkListItem,
   BenchmarkStatus,
   BenchmarkStatusResponse,
   BenchmarkWorkflowStatusItem,
@@ -141,6 +142,51 @@ function mapLatestRuns(
   return result;
 }
 
+function findOrchestratorRun(
+  flowRows: FlowRow[],
+  latestRunByFlowId: Record<string, FlowRunSummary | undefined>,
+): FlowRunSummary | undefined {
+  const orchestratorRow = flowRows.find((r) => r.isOrchestrator);
+  return orchestratorRow
+    ? latestRunByFlowId[orchestratorRow.flowId]
+    : undefined;
+}
+
+function resolveOrchestratorStatus(
+  flowRows: FlowRow[],
+  latestRunByFlowId: Record<string, FlowRunSummary | undefined>,
+): BenchmarkStatus {
+  const run = findOrchestratorRun(flowRows, latestRunByFlowId);
+  return run
+    ? mapFlowRunStatusToBenchmarkStatus(run.status)
+    : BenchmarkStatus.CREATED;
+}
+
+export async function listBenchmarks(params: {
+  projectId: string;
+  provider?: string;
+}): Promise<BenchmarkListItem[]> {
+  const { projectId, provider } = params;
+
+  const rows = await benchmarkRepo().find({
+    where: {
+      projectId,
+      deletedAt: IsNull(),
+      ...(provider ? { provider } : {}),
+    },
+  });
+
+  return Promise.all(
+    rows.map(async (row) => {
+      const flowRows = await fetchBenchmarkFlowRows(row.id);
+      const flowIds = flowRows.map((r) => r.flowId);
+      const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
+      const status = resolveOrchestratorStatus(flowRows, latestRunByFlowId);
+      return { benchmarkId: row.id, provider: row.provider, status };
+    }),
+  );
+}
+
 export async function getBenchmarkStatus(params: {
   benchmarkId: string;
   projectId: string;
@@ -152,14 +198,8 @@ export async function getBenchmarkStatus(params: {
   const flowIds = flowRows.map((r) => r.flowId);
   const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
 
-  const orchestratorRow = flowRows.find((r) => r.isOrchestrator);
-  const orchestratorRun = orchestratorRow
-    ? latestRunByFlowId[orchestratorRow.flowId]
-    : undefined;
-
-  const status = orchestratorRun
-    ? mapFlowRunStatusToBenchmarkStatus(orchestratorRun.status)
-    : BenchmarkStatus.CREATED;
+  const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
+  const status = resolveOrchestratorStatus(flowRows, latestRunByFlowId);
 
   const workflows = buildWorkflowStatusItems(flowRows, latestRunByFlowId);
 

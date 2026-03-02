@@ -7,11 +7,12 @@ import {
   BenchmarkStatusResponse,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  ListBenchmarksResponse,
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
-import { getBenchmarkStatus } from './benchmark-status.service';
+import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
@@ -36,6 +37,15 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
+  app.get('/', ListBenchmarksRequestOptions, async (request, reply) => {
+    await assertBenchmarkFeatureEnabled(request.principal.projectId);
+    const items = await listBenchmarks({
+      projectId: request.principal.projectId,
+      provider: request.query.provider,
+    });
+    return reply.status(StatusCodes.OK).send(items);
+  });
+
   app.get(
     '/:benchmarkId/status',
     BenchmarkStatusRequestOptions,
@@ -48,6 +58,23 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
       return reply.status(StatusCodes.OK).send(status);
     },
   );
+};
+
+const ListBenchmarksRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['benchmarks'],
+    description:
+      'Returns the list of benchmarks for the project, optionally filtered by provider.',
+    querystring: Type.Object({
+      provider: Type.Optional(Type.Enum(BenchmarkProviders)),
+    }),
+    response: {
+      [StatusCodes.OK]: ListBenchmarksResponse,
+    },
+  },
 };
 
 const WizardStepRequestOptions = {
