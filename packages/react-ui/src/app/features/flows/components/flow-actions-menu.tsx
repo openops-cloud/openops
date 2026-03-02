@@ -192,16 +192,21 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
             </PermissionGuard>
           </ImportFlowDialog>
         )}
-        <DropdownMenuItem onClick={() => exportFlow()}>
-          <div className="flex cursor-pointer  flex-row gap-2 items-center">
-            {isExportPending ? (
-              <LoadingSpinner />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            <span>{isExportPending ? t('Exporting') : t('Export')}</span>
-          </div>
-        </DropdownMenuItem>
+        <PermissionGuard
+          permission={Permission.READ_FLOW}
+          tooltipClassName="flex"
+        >
+          <DropdownMenuItem onClick={() => exportFlow()}>
+            <div className="flex cursor-pointer  flex-row gap-2 items-center">
+              {isExportPending ? (
+                <LoadingSpinner />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span>{isExportPending ? t('Exporting') : t('Export')}</span>
+            </div>
+          </DropdownMenuItem>
+        </PermissionGuard>
         {!readonly && (
           <ConfirmationDeleteDialog
             title={
