@@ -70,6 +70,7 @@ const InteractiveExample = () => {
     <div className="border border-border rounded-lg bg-background">
       <ListItem hasSeparator>
         <SelectAllCheckbox
+          variant="primary"
           id="select-all-interactive"
           selectedCount={selectedItems.length}
           totalCount={items.length}
@@ -172,13 +173,13 @@ export const Disabled: Story = {
   },
 };
 
-export const DefaultVariant: Story = {
+export const PrimaryVariant: Story = {
   args: {
-    id: 'select-all-default-variant',
+    id: 'select-all-primary-variant',
     className: backgroundClass,
     selectedCount: 3,
     totalCount: 5,
-    variant: 'default',
+    variant: 'primary',
     onSelectAllChange: () => {},
   },
 };

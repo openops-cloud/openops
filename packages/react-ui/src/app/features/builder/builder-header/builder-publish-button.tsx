@@ -7,12 +7,13 @@ import {
   TooltipTrigger,
   TooltipWrapper,
 } from '@openops/components/ui';
-import { FlowVersionState } from '@openops/shared';
+import { FlowVersionState, Permission } from '@openops/shared';
 import { t } from 'i18next';
 import React from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { LeftSideBarType } from '../builder-types';
 
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   useBuilderStateContext,
@@ -122,33 +123,38 @@ const BuilderPublishButton = React.memo(() => {
       )}
       {readonly && (
         <TooltipWrapper tooltipText={t('Switch to edit mode')}>
-          <Button
-            size={'lg'}
-            variant={'default'}
-            loading={isSwitchingToDraftPending || isSaving}
-            onClick={() => {
-              if (location.pathname.includes('/runs')) {
-                navigate(
-                  `/flows/${flow.id}?folderId=${flow.folderId ?? ''}&${
-                    SEARCH_PARAMS.viewOnly
-                  }=false`,
-                );
-              } else {
-                switchToDraft();
-                setLeftSidebar(LeftSideBarType.NONE);
-                setSearchParams(
-                  (params) => {
-                    params.set(SEARCH_PARAMS.viewOnly, 'false');
-                    return params;
-                  },
-                  { replace: true },
-                );
-              }
-            }}
-            className="h-[42px] rounded-lg font-bold shadow-editor text-sm"
+          <PermissionGuard
+            permission={Permission.WRITE_FLOW}
+            tooltipLocation="left"
           >
-            {t('Edit')}
-          </Button>
+            <Button
+              size={'lg'}
+              variant={'default'}
+              loading={isSwitchingToDraftPending || isSaving}
+              onClick={() => {
+                if (location.pathname.includes('/runs')) {
+                  navigate(
+                    `/flows/${flow.id}?folderId=${flow.folderId ?? ''}&${
+                      SEARCH_PARAMS.viewOnly
+                    }=false`,
+                  );
+                } else {
+                  switchToDraft();
+                  setLeftSidebar(LeftSideBarType.NONE);
+                  setSearchParams(
+                    (params) => {
+                      params.set(SEARCH_PARAMS.viewOnly, 'false');
+                      return params;
+                    },
+                    { replace: true },
+                  );
+                }
+              }}
+              className="h-[42px] rounded-lg font-bold shadow-editor text-sm"
+            >
+              {t('Edit')}
+            </Button>
+          </PermissionGuard>
         </TooltipWrapper>
       )}
     </div>
