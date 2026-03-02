@@ -120,7 +120,21 @@ async function getLatestRunByFlowId(
       finishTime?: string;
     }>();
 
-  const result: Record<string, FlowRunSummary | undefined> = {};
+  return mapLatestRuns(flowIds, rows);
+}
+
+function mapLatestRuns(
+  flowIds: string[],
+  rows: {
+    flowId: string;
+    id: string;
+    status: FlowRunStatus;
+    finishTime?: string;
+  }[],
+): Record<string, FlowRunSummary | undefined> {
+  const result: Record<string, FlowRunSummary | undefined> = Object.fromEntries(
+    flowIds.map((fid) => [fid, undefined]),
+  );
   for (const r of rows) {
     result[r.flowId] = { id: r.id, status: r.status, finishTime: r.finishTime };
   }
