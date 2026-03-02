@@ -209,11 +209,20 @@ export async function getBenchmarkStatus(params: {
     });
   }
 
-  const flowIds = flowRows.map((r) => r.flowId);
+  const flowIds: string[] = [];
+  let orchestratorFlowId: string | undefined;
+
+  for (const r of flowRows) {
+    flowIds.push(r.flowId);
+    if (r.isOrchestrator) orchestratorFlowId = r.flowId;
+  }
+
   const latestRunByFlowId =
     flowIds.length > 0 ? await getLatestRunByFlowId(flowIds, projectId) : {};
 
-  const orchestratorRun = findOrchestratorRun(flowRows, latestRunByFlowId);
+  const orchestratorRun = orchestratorFlowId
+    ? latestRunByFlowId[orchestratorFlowId]
+    : undefined;
 
   const workflows = buildWorkflowStatusItems(flowRows, latestRunByFlowId);
 
