@@ -33,6 +33,8 @@ export const MultiSelectBody = ({
       >
         <div className="px-4 py-3 border-b border-border h-12 flex items-center">
           <SelectAllCheckbox
+            variant="primary"
+            labelClassName="font-normal"
             id={`select-all-${stepResponse.currentStep}`}
             selectedCount={value.length}
             totalCount={stepResponse.options.length}
