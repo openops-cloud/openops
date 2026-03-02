@@ -30,6 +30,7 @@ import { throwValidationError } from './errors';
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
   const connection = config.connection ?? [];
   const workflows = config.workflows ?? [];
+  const regions = config.regions ?? [];
   if (connection.length === 0) {
     throwValidationError(
       'You must select at least one connection to create a benchmark',
@@ -38,6 +39,11 @@ function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
   if (workflows.length === 0) {
     throwValidationError(
       'You must select at least one workflow to create a benchmark',
+    );
+  }
+  if (regions.length === 0) {
+    throwValidationError(
+      'You must select at least one region to create a benchmark',
     );
   }
 }
@@ -204,7 +210,7 @@ function buildPayloadForWebhook(params: {
     workflows: subWorkflowFlowIds,
     cleanupWorkflows: cleanupFlowIds,
     accounts: benchmarkConfiguration.accounts ?? [],
-    regions: benchmarkConfiguration.regions ?? [],
+    regions: benchmarkConfiguration.regions,
   };
 }
 

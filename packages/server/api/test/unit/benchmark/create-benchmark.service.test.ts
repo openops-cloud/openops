@@ -105,7 +105,7 @@ const defaultBenchmarkConfiguration = {
   connection: ['conn-1'],
   workflows: ['AWS Benchmark - Unattached EBS'],
   accounts: [] as string[],
-  regions: [] as string[],
+  regions: ['us-east-1'] as string[],
 };
 
 const createBenchmarkMockConnections = [
@@ -207,6 +207,23 @@ describe('create-benchmark.service', () => {
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
   });
 
+  it('createBenchmark throws when regions is empty', async () => {
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId: 'project-1',
+        userId: 'user-1',
+        benchmarkConfiguration: {
+          ...defaultBenchmarkConfiguration,
+          regions: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'You must select at least one region to create a benchmark',
+    );
+    expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
+  });
+
   it('createBenchmark returns BenchmarkCreationResult with workflows from seed', async () => {
     const projectId = 'project-1';
     const folder: Folder = {
@@ -247,7 +264,7 @@ describe('create-benchmark.service', () => {
       workflows: ['flow-3'],
       cleanupWorkflows: ['flow-2'],
       accounts: [],
-      regions: [],
+      regions: ['us-east-1'],
     });
     expect(mockGetWebhookPrefix).toHaveBeenCalled();
     expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
