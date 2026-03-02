@@ -1,3 +1,4 @@
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { HomeFlowsTable } from '@/app/features/home/flows-table';
 import {
   useDashboardData,
@@ -5,6 +6,7 @@ import {
 } from '@/app/features/home/lib/home-hooks';
 import { HomeRunsTable } from '@/app/features/home/runs-table';
 import { FinOpsBenchmarkBanner, OverviewCard } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { subDays } from 'date-fns';
 import { t } from 'i18next';
 import {
@@ -95,7 +97,9 @@ const HomeOperationalView = ({
       )}
 
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        <PermissionGuard permission={Permission.WRITE_FLOW}>
+          <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        </PermissionGuard>
       )}
 
       <HomeFlowsTable
