@@ -16,6 +16,8 @@ interface BenchmarkWizardFooterProps {
   wizardPhase: WizardPhase;
   benchmarkCreationResult: BenchmarkCreationResult | null;
   isNextDisabled: boolean;
+  isRunning: boolean;
+  onRunNow: () => Promise<void>;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
   handlePrevious: () => void;
@@ -26,23 +28,39 @@ export const BenchmarkWizardFooter = ({
   wizardPhase,
   benchmarkCreationResult,
   isNextDisabled,
+  isRunning,
+  onRunNow,
   handleNextFromInitial,
   handleNextFromProviderStep,
   handlePrevious,
   handleEditSetup,
 }: BenchmarkWizardFooterProps) => {
   if (wizardPhase === 'benchmark-ready') {
+    const hasOrchestrator = benchmarkCreationResult?.workflows.some(
+      (w) => w.isOrchestrator,
+    );
+
     return (
       <div className="flex-1 flex gap-2 justify-end">
-        <Button variant="outline" size="sm" onClick={handleEditSetup}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isRunning}
+          onClick={handleEditSetup}
+        >
           {t('Edit setup')}
         </Button>
         {benchmarkCreationResult && (
           <ViewBenchmarkWorkflowsButton
             folderId={benchmarkCreationResult.folderId}
+            disabled={isRunning}
           />
         )}
-        <Button size="sm" disabled>
+        <Button
+          size="sm"
+          disabled={!hasOrchestrator || isRunning}
+          onClick={onRunNow}
+        >
           {t('Run now')}
         </Button>
       </div>
