@@ -149,6 +149,17 @@ export async function getBenchmarkStatus(params: {
 
   await fetchBenchmarkOrThrow(benchmarkId, projectId);
   const flowRows = await fetchBenchmarkFlowRows(benchmarkId);
+
+  if (flowRows.length === 0) {
+    return {
+      benchmarkId,
+      status: BenchmarkStatus.CREATED,
+      workflows: [],
+      lastRunId: undefined,
+      lastRunFinishedAt: undefined,
+    };
+  }
+
   const flowIds = flowRows.map((r) => r.flowId);
   const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
 
