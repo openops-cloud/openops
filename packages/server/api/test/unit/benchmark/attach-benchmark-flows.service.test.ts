@@ -1,6 +1,6 @@
 import {
   attachFlowsToBenchmark,
-  type AttachFlowsToBenchmarkParams,
+  type AttachFlowsToBenchmarkRequest,
 } from '../../../src/app/benchmark/attach-benchmark-flows.service';
 
 const mockBenchmarkRepoSave = jest.fn();
@@ -45,7 +45,7 @@ describe('create-benchmark-flows.service', () => {
     mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   });
 
-  const attachFlowsToBenchmarkParams: AttachFlowsToBenchmarkParams = {
+  const attachFlowsToBenchmarkRequest: AttachFlowsToBenchmarkRequest = {
     projectId: 'project-1',
     provider: 'aws',
     folderId: 'folder-1',
@@ -81,7 +81,7 @@ describe('create-benchmark-flows.service', () => {
     );
     mockBenchmarkFlowRepoSave.mockResolvedValue(undefined);
 
-    const result = await attachFlowsToBenchmark(attachFlowsToBenchmarkParams);
+    const result = await attachFlowsToBenchmark(attachFlowsToBenchmarkRequest);
 
     expect(mockGetWebhookPrefix).toHaveBeenCalled();
     expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
@@ -90,16 +90,16 @@ describe('create-benchmark-flows.service', () => {
       unknown
     >;
     expect(savedBenchmarkArg.projectId).toBe(
-      attachFlowsToBenchmarkParams.projectId,
+      attachFlowsToBenchmarkRequest.projectId,
     );
     expect(savedBenchmarkArg.provider).toBe(
-      attachFlowsToBenchmarkParams.provider,
+      attachFlowsToBenchmarkRequest.provider,
     );
     expect(savedBenchmarkArg.folderId).toBe(
-      attachFlowsToBenchmarkParams.folderId,
+      attachFlowsToBenchmarkRequest.folderId,
     );
     expect(savedBenchmarkArg.connectionId).toBe(
-      attachFlowsToBenchmarkParams.connectionId,
+      attachFlowsToBenchmarkRequest.connectionId,
     );
     expect(savedBenchmarkArg.payload).toEqual(
       expect.objectContaining({
@@ -139,7 +139,7 @@ describe('create-benchmark-flows.service', () => {
   it('attachFlowsToBenchmark throws when workflows has fewer than 3 items', async () => {
     await expect(
       attachFlowsToBenchmark({
-        ...attachFlowsToBenchmarkParams,
+        ...attachFlowsToBenchmarkRequest,
         workflows: [
           {
             flowId: 'f1',
