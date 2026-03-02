@@ -97,10 +97,6 @@ async function getLatestRunByFlowId(
   flowIds: string[],
   projectId: string,
 ): Promise<Record<string, FlowRunSummary | undefined>> {
-  if (flowIds.length === 0) {
-    return {};
-  }
-
   const rows = await flowRunRepo()
     .createQueryBuilder('fr')
     .distinctOn(['fr.flowId'])
@@ -147,10 +143,10 @@ export async function getBenchmarkStatus(params: {
 }): Promise<BenchmarkStatusResponse> {
   const { benchmarkId, projectId } = params;
 
-  await fetchBenchmarkOrThrow(benchmarkId, projectId);
   const flowRows = await fetchBenchmarkFlowRows(benchmarkId);
 
   if (flowRows.length === 0) {
+    await fetchBenchmarkOrThrow(benchmarkId, projectId);
     return {
       benchmarkId,
       status: BenchmarkStatus.CREATED,
@@ -160,12 +156,19 @@ export async function getBenchmarkStatus(params: {
     };
   }
 
-  const flowIds = flowRows.map((r) => r.flowId);
-  const latestRunByFlowId = await getLatestRunByFlowId(flowIds, projectId);
+  const flowIds: string[] = [];
+  let orchestratorFlowId: string | undefined;
 
-  const orchestratorRow = flowRows.find((r) => r.isOrchestrator);
-  const orchestratorRun = orchestratorRow
-    ? latestRunByFlowId[orchestratorRow.flowId]
+  for (const r of flowRows) {
+    flowIds.push(r.flowId);
+    if (r.isOrchestrator) orchestratorFlowId = r.flowId;
+  }
+
+  const latestRunByFlowId =
+    flowIds.length > 0 ? await getLatestRunByFlowId(flowIds, projectId) : {};
+
+  const orchestratorRun = orchestratorFlowId
+    ? latestRunByFlowId[orchestratorFlowId]
     : undefined;
 
   const status = orchestratorRun

@@ -83,6 +83,7 @@ describe('getBenchmarkStatus', () => {
 
   it('throws ENTITY_NOT_FOUND when benchmark does not exist', async () => {
     mockFindOneBenchmark.mockResolvedValue(null);
+    mockGetRawManyFlows.mockResolvedValue([]);
 
     await expect(
       getBenchmarkStatus({ benchmarkId: BENCHMARK_ID, projectId: PROJECT_ID }),
