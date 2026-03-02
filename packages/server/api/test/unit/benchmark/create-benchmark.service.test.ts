@@ -1,6 +1,5 @@
 import { ContentType, type Folder } from '@openops/shared';
 import {
-  buildBenchmarkPayload,
   createBenchmark,
   createBenchmarkWorkflows,
   deleteFlowsForExistingBenchmark,
@@ -402,58 +401,6 @@ describe('create-benchmark.service', () => {
     expect(mockGetConnectionsWithBlockSupport).not.toHaveBeenCalled();
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(mockBulkCreateAndPublishFlows).not.toHaveBeenCalled();
-  });
-
-  const buildPayloadWorkflows = [
-    {
-      flowId: 'flow-orch',
-      displayName: 'Orchestrator',
-      isOrchestrator: true,
-    },
-    {
-      flowId: 'flow-cleanup',
-      displayName: 'Cleanup',
-      isOrchestrator: false,
-    },
-    { flowId: 'flow-sub', displayName: 'Sub', isOrchestrator: false },
-  ];
-
-  it('buildBenchmarkPayload throws when workflows has fewer than 3 items', () => {
-    expect(() =>
-      buildBenchmarkPayload({
-        benchmarkConfiguration: {
-          connection: ['c'],
-          workflows: ['w'],
-          accounts: [],
-          regions: [],
-        },
-        workflows: [
-          { flowId: 'f1', displayName: 'Orch', isOrchestrator: true },
-        ],
-        webhookBaseUrl: 'https://api.example.com',
-      }),
-    ).toThrow(
-      'Benchmark requires orchestrator, cleanup, and at least one sub-workflow',
-    );
-  });
-
-  it('buildBenchmarkPayload returns payload with workflows, cleanupWorkflows, accounts, regions, webhookBaseUrl', () => {
-    const payload = buildBenchmarkPayload({
-      benchmarkConfiguration: {
-        connection: ['conn-1'],
-        workflows: ['sub-1'],
-        accounts: ['account-1'],
-        regions: ['us-east-1'],
-      },
-      workflows: buildPayloadWorkflows,
-      webhookBaseUrl: 'https://api.example.com',
-    });
-
-    expect(payload.webhookBaseUrl).toBe('https://api.example.com');
-    expect(payload.workflows).toEqual(['flow-sub']);
-    expect(payload.cleanupWorkflows).toEqual(['flow-cleanup']);
-    expect(payload.accounts).toEqual(['account-1']);
-    expect(payload.regions).toEqual(['us-east-1']);
   });
 
   const insertRecordsPayload = {

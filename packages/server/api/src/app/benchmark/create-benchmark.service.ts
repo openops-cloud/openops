@@ -183,7 +183,7 @@ export async function createBenchmarkWorkflows(params: {
   }));
 }
 
-export function buildBenchmarkPayload(params: {
+function buildBenchmarkPayload(params: {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
   webhookBaseUrl: string;
