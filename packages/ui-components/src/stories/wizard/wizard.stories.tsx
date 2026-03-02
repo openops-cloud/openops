@@ -8,7 +8,6 @@ import {
   SelectForm,
   SelectOption,
   StepBody,
-  StepCounter,
   StepDescription,
   StepTitle,
   Wizard,
@@ -400,7 +399,6 @@ const WizardExample = () => {
           ) : (
             <div className="w-[112px]" />
           )}
-          <StepCounter current={steps.indexOf(currentStep) + 1} total={5} />
           <WizardNext disabled={!isCurrentStepValid()} />
         </WizardFooter>
       </Wizard>
