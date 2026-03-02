@@ -295,6 +295,20 @@ describe('Benchmark status API', () => {
       expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
     });
 
+    it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'false';
+      const { token } = await createAndInsertMocks();
+
+      const response = await getStatus({ benchmarkId: 'benchmark-001', token });
+
+      expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+      const data = response?.json();
+      expect(data?.code).toBe('FEATURE_DISABLED');
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).not.toHaveBeenCalled();
+    });
+
     it('returns 401 when not authenticated', async () => {
       const response = await getStatus({ benchmarkId: 'benchmark-001' });
 

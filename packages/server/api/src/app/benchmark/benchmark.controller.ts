@@ -20,8 +20,8 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     WizardStepRequestOptions,
     async (request, reply) => {
       await assertBenchmarkFeatureEnabled(
-        request.params.provider,
         request.principal.projectId,
+        request.params.provider,
       );
 
       const step = await resolveWizardNavigation(
@@ -40,6 +40,7 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:benchmarkId/status',
     BenchmarkStatusRequestOptions,
     async (request, reply) => {
+      await assertBenchmarkFeatureEnabled(request.principal.projectId);
       const status = await getBenchmarkStatus({
         benchmarkId: request.params.benchmarkId,
         projectId: request.principal.projectId,
