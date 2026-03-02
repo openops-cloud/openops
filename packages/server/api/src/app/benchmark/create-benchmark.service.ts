@@ -1,18 +1,42 @@
 import {
   ApplicationError,
-  BenchmarkCreationResult,
   BenchmarkProviders,
   ContentType,
   ErrorCode,
   Folder,
   openOpsId,
+  type BenchmarkConfiguration,
+  type BenchmarkCreationResult,
+  type BenchmarkWorkflowBase,
 } from '@openops/shared';
+import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import {
+  bulkCreateAndPublishFlows,
+  type WorkflowTemplate,
+} from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
+import { resolveWorkflowPathsForSeed } from './catalog-resolver';
+import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
+
+function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
+  const connection = config.connection ?? [];
+  const workflows = config.workflows ?? [];
+  if (connection.length === 0) {
+    throwValidationError(
+      'You must select at least one connection to create a benchmark',
+    );
+  }
+  if (workflows.length === 0) {
+    throwValidationError(
+      'You must select at least one workflow to create a benchmark',
+    );
+  }
+}
 
 async function deleteFlowsByIds(params: {
   flowIds: string[];
@@ -102,12 +126,71 @@ export async function deleteFlowsForExistingBenchmark(params: {
   );
 }
 
+async function loadWorkflowTemplates(
+  provider: string,
+  workflowIds: string[],
+): Promise<WorkflowTemplate[]> {
+  const paths = resolveWorkflowPathsForSeed(provider, workflowIds);
+
+  if (paths.length === 0) {
+    return [];
+  }
+
+  const parsedTemplates = paths.map(async ({ filePath }) => {
+    const content = await fs.readFile(filePath, 'utf-8');
+    const parsed = JSON.parse(content) as {
+      template: WorkflowTemplate['template'];
+    };
+    return { template: parsed.template };
+  });
+
+  return Promise.all(parsedTemplates);
+}
+
+export async function createBenchmarkWorkflows(params: {
+  provider: string;
+  workflowIds: string[];
+  connectionId: string;
+  projectId: string;
+  folderId: string;
+}): Promise<BenchmarkWorkflowBase[]> {
+  const { provider, workflowIds, connectionId, projectId, folderId } = params;
+
+  if (workflowIds.length === 0) {
+    return [];
+  }
+
+  const templates = await loadWorkflowTemplates(provider, workflowIds);
+
+  const connections = await getConnectionsWithBlockSupport(projectId, [
+    connectionId,
+  ]);
+  const results = await bulkCreateAndPublishFlows(
+    templates,
+    connections,
+    projectId,
+    folderId,
+  );
+
+  return results.map((r, index) => ({
+    flowId: r.id,
+    displayName: r.version.displayName,
+    isOrchestrator: index === 0,
+  }));
+}
+
 export async function createBenchmark(params: {
   provider: string;
   projectId: string;
   userId: string;
+  benchmarkConfiguration: BenchmarkConfiguration;
 }): Promise<BenchmarkCreationResult> {
-  const { provider, projectId, userId } = params;
+  const { provider, projectId, userId, benchmarkConfiguration } = params;
+
+  validateBenchmarkConfiguration(benchmarkConfiguration);
+
+  const workflowIds = benchmarkConfiguration.workflows ?? [];
+  const connectionId = benchmarkConfiguration.connection?.[0];
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
@@ -121,17 +204,25 @@ export async function createBenchmark(params: {
     userId,
   });
 
+  const workflows = await createBenchmarkWorkflows({
+    provider,
+    workflowIds,
+    connectionId,
+    projectId,
+    folderId: benchmarkFolder.id,
+  });
+
   return {
     benchmarkId: openOpsId(),
     folderId: benchmarkFolder.id,
     provider,
-    workflows: [],
+    workflows,
     webhookPayload: {
       webhookBaseUrl: '',
       workflows: [],
       cleanupWorkflows: [],
-      accounts: [],
-      regions: [],
+      accounts: benchmarkConfiguration.accounts ?? [],
+      regions: benchmarkConfiguration.regions ?? [],
     },
   };
 }
