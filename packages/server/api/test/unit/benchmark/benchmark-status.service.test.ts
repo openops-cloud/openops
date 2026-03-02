@@ -452,4 +452,29 @@ describe('listBenchmarks', () => {
       }),
     );
   });
+
+  it('derives status from orchestrator run when sub-workflow rows are also present', async () => {
+    mockFindBenchmarks.mockResolvedValue([baseBenchmark]);
+    mockGetRawManyFlows.mockResolvedValue([
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-orch',
+        isOrchestrator: true,
+        displayName: 'Orchestrator',
+      },
+      {
+        benchmarkId: BENCHMARK_ID,
+        flowId: 'flow-sub1',
+        isOrchestrator: false,
+        displayName: 'Sub 1',
+      },
+    ]);
+    mockGetRawManyRuns.mockResolvedValue([
+      { id: 'run-001', flowId: 'flow-orch', status: FlowRunStatus.SUCCEEDED },
+    ]);
+
+    const result = await listBenchmarks({ projectId: PROJECT_ID });
+
+    expect(result[0].status).toBe(BenchmarkStatus.SUCCEEDED);
+  });
 });
