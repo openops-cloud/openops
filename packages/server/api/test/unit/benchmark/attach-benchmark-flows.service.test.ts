@@ -1,7 +1,7 @@
 import {
-  createBenchmarkFlows,
-  type CreateBenchmarkFlowsParams,
-} from '../../../src/app/benchmark/create-benchmark-flows.service';
+  attachFlowsToBenchmark,
+  type AttachFlowsToBenchmarkParams,
+} from '../../../src/app/benchmark/attach-benchmark-flows.service';
 
 const mockBenchmarkRepoSave = jest.fn();
 const mockBenchmarkRepo = {
@@ -45,7 +45,7 @@ describe('create-benchmark-flows.service', () => {
     mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   });
 
-  const createBenchmarkFlowsParams: CreateBenchmarkFlowsParams = {
+  const attachFlowsToBenchmarkParams: AttachFlowsToBenchmarkParams = {
     projectId: 'project-1',
     provider: 'aws',
     folderId: 'folder-1',
@@ -58,7 +58,7 @@ describe('create-benchmark-flows.service', () => {
     },
     workflows: [
       {
-        flowId: 'flow-orch',
+        flowId: 'flow-orchestrator',
         displayName: 'Orchestrator',
         isOrchestrator: true,
       },
@@ -71,7 +71,7 @@ describe('create-benchmark-flows.service', () => {
     ],
   };
 
-  it('createBenchmarkFlows builds payload, saves benchmark and benchmark_flow rows, returns benchmark and payload', async () => {
+  it('attachFlowsToBenchmark builds payload, saves benchmark and benchmark_flow rows, returns benchmark and payload', async () => {
     mockBenchmarkRepoSave.mockImplementation((row: Record<string, unknown>) =>
       Promise.resolve({
         ...row,
@@ -81,7 +81,7 @@ describe('create-benchmark-flows.service', () => {
     );
     mockBenchmarkFlowRepoSave.mockResolvedValue(undefined);
 
-    const result = await createBenchmarkFlows(createBenchmarkFlowsParams);
+    const result = await attachFlowsToBenchmark(attachFlowsToBenchmarkParams);
 
     expect(mockGetWebhookPrefix).toHaveBeenCalled();
     expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
@@ -90,16 +90,16 @@ describe('create-benchmark-flows.service', () => {
       unknown
     >;
     expect(savedBenchmarkArg.projectId).toBe(
-      createBenchmarkFlowsParams.projectId,
+      attachFlowsToBenchmarkParams.projectId,
     );
     expect(savedBenchmarkArg.provider).toBe(
-      createBenchmarkFlowsParams.provider,
+      attachFlowsToBenchmarkParams.provider,
     );
     expect(savedBenchmarkArg.folderId).toBe(
-      createBenchmarkFlowsParams.folderId,
+      attachFlowsToBenchmarkParams.folderId,
     );
     expect(savedBenchmarkArg.connectionId).toBe(
-      createBenchmarkFlowsParams.connectionId,
+      attachFlowsToBenchmarkParams.connectionId,
     );
     expect(savedBenchmarkArg.payload).toEqual(
       expect.objectContaining({
@@ -117,7 +117,7 @@ describe('create-benchmark-flows.service', () => {
       Record<string, unknown>
     >;
     expect(savedFlowRows).toHaveLength(3);
-    expect(savedFlowRows[0].flowId).toBe('flow-orch');
+    expect(savedFlowRows[0].flowId).toBe('flow-orchestrator');
     expect(savedFlowRows[0].isOrchestrator).toBe(true);
     expect(savedFlowRows[1].flowId).toBe('flow-cleanup');
     expect(savedFlowRows[1].isOrchestrator).toBe(false);
@@ -136,14 +136,14 @@ describe('create-benchmark-flows.service', () => {
     expect(result.payload.regions).toEqual(['us-east-1']);
   });
 
-  it('createBenchmarkFlows throws when workflows has fewer than 3 items', async () => {
+  it('attachFlowsToBenchmark throws when workflows has fewer than 3 items', async () => {
     await expect(
-      createBenchmarkFlows({
-        ...createBenchmarkFlowsParams,
+      attachFlowsToBenchmark({
+        ...attachFlowsToBenchmarkParams,
         workflows: [
           {
             flowId: 'f1',
-            displayName: 'Orch',
+            displayName: 'Orchestrator',
             isOrchestrator: true,
           },
         ],

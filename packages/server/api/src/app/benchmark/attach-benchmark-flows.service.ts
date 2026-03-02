@@ -11,7 +11,7 @@ import type { BenchmarkRow } from './benchmark.entity';
 import { benchmarkRepo } from './benchmark.repo';
 import { throwValidationError } from './errors';
 
-export type CreateBenchmarkFlowsParams = {
+export type AttachFlowsToBenchmarkParams = {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
   projectId: string;
@@ -20,7 +20,7 @@ export type CreateBenchmarkFlowsParams = {
   connectionId: string | null;
 };
 
-export type CreateBenchmarkFlowsResult = {
+export type AttachFlowsToBenchmarkResult = {
   benchmark: BenchmarkRow;
   payload: BenchmarkWebhookPayload;
 };
@@ -91,9 +91,9 @@ async function insertBenchmarkRecords(params: {
   });
 }
 
-export async function createBenchmarkFlows(
-  params: CreateBenchmarkFlowsParams,
-): Promise<CreateBenchmarkFlowsResult> {
+export async function attachFlowsToBenchmark(
+  params: AttachFlowsToBenchmarkParams,
+): Promise<AttachFlowsToBenchmarkResult> {
   const {
     benchmarkConfiguration,
     workflows,

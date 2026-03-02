@@ -12,6 +12,7 @@ import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
 import {
   bulkCreateAndPublishFlows,
   type WorkflowTemplate,
@@ -20,7 +21,6 @@ import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import { resolveWorkflowPathsForSeed } from './catalog-resolver';
 import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
-import { createBenchmarkFlows } from './create-benchmark-flows.service';
 import { throwValidationError } from './errors';
 
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
@@ -219,7 +219,7 @@ export async function createBenchmark(params: {
   });
 
   try {
-    const { benchmark, payload } = await createBenchmarkFlows({
+    const { benchmark, payload } = await attachFlowsToBenchmark({
       benchmarkConfiguration,
       workflows,
       projectId,
