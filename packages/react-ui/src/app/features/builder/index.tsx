@@ -110,9 +110,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { checkAccess } = useAuthorization();
-  const hasFlowReadPermission = useMemo(() => {
-    return checkAccess(Permission.READ_FLOW);
-  }, [checkAccess]);
+  const hasFlowReadPermission = checkAccess(Permission.READ_FLOW);
 
   const [
     selectedStep,
