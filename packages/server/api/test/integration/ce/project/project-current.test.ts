@@ -46,7 +46,7 @@ describe('Project Current API', () => {
       id: mockUser.id,
       type: PrincipalType.USER,
       projectId: mockProject.id,
-      organization: { id: mockOrganization.id },
+      organization: { id: mockOrganization.id, role: 'MEMBER' },
     });
 
     return {
