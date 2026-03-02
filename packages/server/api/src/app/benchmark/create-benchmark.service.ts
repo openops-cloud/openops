@@ -19,9 +19,8 @@ import {
 } from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
-import type { ResolvedWorkflowPath } from './catalog-resolver';
 import { resolveWorkflowPathsForSeed } from './catalog-resolver';
-import { fetchConnectionsWithSupportedBlocks } from './connections-with-supported-blocks';
+import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
 
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
@@ -127,13 +126,11 @@ export async function deleteFlowsForExistingBenchmark(params: {
   );
 }
 
-export async function seedBenchmarkWorkflowsFromCatalog(params: {
-  paths: ResolvedWorkflowPath[];
-  connectionId: string;
-  projectId: string;
-  folderId: string;
-}): Promise<BenchmarkWorkflowBase[]> {
-  const { paths, connectionId, projectId, folderId } = params;
+async function loadWorkflowTemplates(
+  provider: string,
+  workflowIds: string[],
+): Promise<WorkflowTemplate[]> {
+  const paths = resolveWorkflowPathsForSeed(provider, workflowIds);
 
   if (paths.length === 0) {
     return [];
@@ -146,9 +143,26 @@ export async function seedBenchmarkWorkflowsFromCatalog(params: {
     };
     return { template: parsed.template };
   });
-  const templates = await Promise.all(parsedTemplates);
 
-  const connections = await fetchConnectionsWithSupportedBlocks(projectId, [
+  return Promise.all(parsedTemplates);
+}
+
+export async function createBenchmarkWorkflows(params: {
+  provider: string;
+  workflowIds: string[];
+  connectionId: string;
+  projectId: string;
+  folderId: string;
+}): Promise<BenchmarkWorkflowBase[]> {
+  const { provider, workflowIds, connectionId, projectId, folderId } = params;
+
+  if (workflowIds.length === 0) {
+    return [];
+  }
+
+  const templates = await loadWorkflowTemplates(provider, workflowIds);
+
+  const connections = await getConnectionsWithBlockSupport(projectId, [
     connectionId,
   ]);
   const results = await bulkCreateAndPublishFlows(
@@ -190,9 +204,9 @@ export async function createBenchmark(params: {
     userId,
   });
 
-  const paths = resolveWorkflowPathsForSeed(provider, workflowIds);
-  const workflows = await seedBenchmarkWorkflowsFromCatalog({
-    paths,
+  const workflows = await createBenchmarkWorkflows({
+    provider,
+    workflowIds,
     connectionId,
     projectId,
     folderId: benchmarkFolder.id,

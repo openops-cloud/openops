@@ -1,8 +1,8 @@
 import { ContentType, type Folder } from '@openops/shared';
 import {
   createBenchmark,
+  createBenchmarkWorkflows,
   deleteFlowsForExistingBenchmark,
-  seedBenchmarkWorkflowsFromCatalog,
 } from '../../../src/app/benchmark/create-benchmark.service';
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowFolderService } from '../../../src/app/flows/folder/folder.service';
@@ -56,14 +56,14 @@ jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
     mockResolveWorkflowPathsForSeed(...args),
 }));
 
-const mockFetchConnectionsWithSupportedBlocks = jest.fn();
+const mockGetConnectionsWithBlockSupport = jest.fn();
 jest.mock(
   '../../../src/app/benchmark/connections-with-supported-blocks',
   () => ({
-    fetchConnectionsWithSupportedBlocks: (
+    getConnectionsWithBlockSupport: (
       ...args: unknown[]
-    ): ReturnType<typeof mockFetchConnectionsWithSupportedBlocks> =>
-      mockFetchConnectionsWithSupportedBlocks(...args),
+    ): ReturnType<typeof mockGetConnectionsWithBlockSupport> =>
+      mockGetConnectionsWithBlockSupport(...args),
   }),
 );
 
@@ -102,7 +102,7 @@ const createBenchmarkMockConnections = [
 
 function setupCreateBenchmarkMocks(folder: Folder): void {
   flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
-  mockFetchConnectionsWithSupportedBlocks.mockResolvedValue(
+  mockGetConnectionsWithBlockSupport.mockResolvedValue(
     createBenchmarkMockConnections,
   );
   mockResolveWorkflowPathsForSeed.mockReturnValue([
@@ -315,11 +315,13 @@ describe('create-benchmark.service', () => {
     );
   });
 
+  const workflowPaths = [
+    { id: 'orch', filePath: '/path/orch.json' },
+    { id: 'sub', filePath: '/path/sub.json' },
+  ];
   const seedParams = {
-    paths: [
-      { id: 'orch', filePath: '/path/orch.json' },
-      { id: 'sub', filePath: '/path/sub.json' },
-    ],
+    provider: 'aws',
+    workflowIds: ['orch', 'sub'],
     connectionId: 'conn-1',
     projectId: 'project-1',
     folderId: 'folder-1',
@@ -335,6 +337,7 @@ describe('create-benchmark.service', () => {
   ];
 
   const setupSeedMocks = (): void => {
+    mockResolveWorkflowPathsForSeed.mockReturnValue(workflowPaths);
     mockReadFile.mockResolvedValue(
       JSON.stringify({
         template: {
@@ -343,7 +346,7 @@ describe('create-benchmark.service', () => {
         },
       }),
     );
-    mockFetchConnectionsWithSupportedBlocks.mockResolvedValue(mockConnections);
+    mockGetConnectionsWithBlockSupport.mockResolvedValue(mockConnections);
     mockBulkCreateAndPublishFlows.mockResolvedValue([
       { id: 'f1', version: { id: 'v1', displayName: 'Orchestrator' } },
       { id: 'f2', version: { id: 'v2', displayName: 'Sub' } },
@@ -352,9 +355,13 @@ describe('create-benchmark.service', () => {
 
   it('reads paths, calls bulkCreateAndPublishFlows, returns BenchmarkWorkflowBase[]', async () => {
     setupSeedMocks();
-    const result = await seedBenchmarkWorkflowsFromCatalog(seedParams);
+    const result = await createBenchmarkWorkflows(seedParams);
 
-    expect(mockFetchConnectionsWithSupportedBlocks).toHaveBeenCalledWith(
+    expect(mockResolveWorkflowPathsForSeed).toHaveBeenCalledWith(
+      seedParams.provider,
+      seedParams.workflowIds,
+    );
+    expect(mockGetConnectionsWithBlockSupport).toHaveBeenCalledWith(
       seedParams.projectId,
       [seedParams.connectionId],
     );
@@ -375,15 +382,16 @@ describe('create-benchmark.service', () => {
     ]);
   });
 
-  it('returns empty array when paths is empty', async () => {
+  it('returns empty array when workflowIds is empty', async () => {
     setupSeedMocks();
-    const result = await seedBenchmarkWorkflowsFromCatalog({
+    mockResolveWorkflowPathsForSeed.mockReturnValue([]);
+    const result = await createBenchmarkWorkflows({
       ...seedParams,
-      paths: [],
+      workflowIds: [],
     });
 
     expect(result).toEqual([]);
-    expect(mockFetchConnectionsWithSupportedBlocks).not.toHaveBeenCalled();
+    expect(mockGetConnectionsWithBlockSupport).not.toHaveBeenCalled();
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(mockBulkCreateAndPublishFlows).not.toHaveBeenCalled();
   });
