@@ -274,8 +274,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
   );
 };
 
-const getViewOrEditLabel = (canWriteFlow: boolean): string => {
-  return canWriteFlow ? t('Edit') : t('View');
-};
+const getViewOrEditLabel = (canWriteFlow: boolean): string =>
+  canWriteFlow ? t('Edit') : t('View');
 
 export { FlowActionMenu };
