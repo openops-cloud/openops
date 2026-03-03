@@ -19,6 +19,7 @@ import { createAwsBenchmarkDatasets } from './create-aws-benchmark-datasets';
 
 const USER_FRIENDLY_TABLE_SUFFIX = '_userfriendly';
 const AWS_BENCHMARK_DASHBOARD_SLUG = 'aws_benchmark';
+const AWS_BENCHMARK_DASHBOARD_DISPLAY_NAME = 'AWS Benchmark';
 
 export async function createAwsBenchmarkDashboard(): Promise<void> {
   logger.info('Starting AWS Benchmark dashboard seeding');
@@ -70,7 +71,7 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
   await upsertDashboard(
     {
       id: AWS_BENCHMARK_DASHBOARD_SLUG,
-      name: 'AWS Benchmark',
+      name: AWS_BENCHMARK_DASHBOARD_DISPLAY_NAME,
       slug: AWS_BENCHMARK_DASHBOARD_SLUG,
       embedId: embedResponse.result.uuid,
       enabled: true,
