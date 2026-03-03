@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { BenchmarkProvider, BenchmarkStatus } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { benchmarkApi } from '../../benchmark/benchmark-api';
@@ -13,7 +14,7 @@ export const useBenchmarkBannerState = (): BenchmarkBannerState => {
   const isEnabled = useShowBenchmarkBanner();
 
   const { data: benchmarks } = useQuery({
-    queryKey: ['benchmarks'],
+    queryKey: [QueryKeys.benchmarks],
     queryFn: () => benchmarkApi.listBenchmarks(),
     enabled: isEnabled,
   });

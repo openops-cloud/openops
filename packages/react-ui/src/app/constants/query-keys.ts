@@ -67,4 +67,7 @@ export const QueryKeys = {
   oauthApps: 'oauth-apps',
   platformMetadata: 'platform-metadata',
   latestRelease: 'latest-release',
+
+  // Benchmarks
+  benchmarks: 'benchmarks',
 };
