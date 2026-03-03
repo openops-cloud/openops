@@ -13,7 +13,7 @@ export const securityHandlerChain = async (
   request: FastifyRequest,
 ): Promise<void> => {
   await executeAuthnHandlers(request);
-  await getAuthorizationHandler().execute(request);
+  await getAuthorizationHandler().validate(request);
 };
 
 /**
