@@ -11,10 +11,8 @@ export const BenchmarkAnalyticsPhase = ({
   <div className="flex flex-col gap-3 py-2">
     <p className="text-sm dark:text-muted-foreground">{message}</p>
     <Link
-      target="_blank"
-      rel="noopener noreferrer"
       className="text-sm text-primary-200"
-      to={`/analytics?benchmark=${provider}`}
+      to={`/analytics?dashboard=${provider.toLowerCase()}_benchmark`}
     >
       {t('Analytics \u2192')}
     </Link>
