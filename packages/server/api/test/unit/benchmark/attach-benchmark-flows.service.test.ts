@@ -1,3 +1,4 @@
+import { BenchmarkProviders } from '@openops/shared';
 import {
   attachFlowsToBenchmark,
   type AttachFlowsToBenchmarkRequest,
@@ -47,7 +48,7 @@ describe('create-benchmark-flows.service', () => {
 
   const attachFlowsToBenchmarkRequest: AttachFlowsToBenchmarkRequest = {
     projectId: 'project-1',
-    provider: 'aws',
+    provider: BenchmarkProviders.AWS,
     folderId: 'folder-1',
     connectionId: 'conn-1',
     benchmarkConfiguration: {
