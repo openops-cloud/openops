@@ -112,6 +112,11 @@ export const BenchmarkWizard = ({
     }
   };
 
+  const handleEditSetupAndResetRun = () => {
+    handleResetRun();
+    handleEditSetup();
+  };
+
   return (
     <div className="h-full w-full flex flex-col bg-greyBlue-100 dark:bg-background">
       {connectingProviderConfig && (
@@ -165,8 +170,6 @@ export const BenchmarkWizard = ({
                     result={benchmarkCreateResult}
                     runPhase={runPhase}
                     runningProgress={runningProgress ?? undefined}
-                    onViewRun={handleViewRun}
-                    onResetRun={handleResetRun}
                   />
                 )}
               </WizardStep>
@@ -177,14 +180,17 @@ export const BenchmarkWizard = ({
         <WizardFooter>
           <BenchmarkWizardFooter
             wizardPhase={wizardPhase}
+            runPhase={runPhase}
             benchmarkCreationResult={benchmarkCreateResult}
             isNextDisabled={isNextDisabled}
             isRunning={runPhase === 'running' || isRunPending}
             handleNextFromInitial={handleNextFromInitial}
             handleNextFromProviderStep={handleNextFromProviderStep}
             handlePrevious={handlePrevious}
-            handleEditSetup={handleEditSetup}
+            handleEditSetup={handleEditSetupAndResetRun}
             onRunNow={handleRunBenchmark}
+            onViewRun={handleViewRun}
+            onResetRun={handleResetRun}
           />
         </WizardFooter>
       </Wizard>
