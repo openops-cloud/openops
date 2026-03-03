@@ -1,6 +1,6 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import { BenchmarkWizardStepResponse } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 
 import { benchmarkApi } from './benchmark-api';
@@ -8,6 +8,7 @@ import { useBenchmarkWizardNavigation } from './use-benchmark-wizard-navigation'
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
+  useQueryClient: jest.fn(),
 }));
 
 jest.mock('./benchmark-api', () => ({
@@ -23,6 +24,7 @@ jest.mock('@openops/components/ui', () => ({
 }));
 
 const mockUseMutation = useMutation as jest.Mock;
+const mockUseQueryClient = useQueryClient as jest.Mock;
 const mockGetWizardStep = benchmarkApi.getWizardStep as jest.Mock;
 const mockCreateBenchmark = benchmarkApi.createBenchmark as jest.Mock;
 const mockToast = toast as jest.Mock;
@@ -70,6 +72,9 @@ describe('useBenchmarkWizardNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMutationMock();
+    mockUseQueryClient.mockReturnValue({
+      invalidateQueries: jest.fn(),
+    });
   });
 
   describe('initial state', () => {
