@@ -2,7 +2,7 @@ import {
   AuthorizationScope,
   Permission,
   PrincipalType,
-  PublicRoute,
+  PublicRoutePolicy,
   RouteAccessType,
 } from '@openops/shared';
 import { ProjectIdLocation, ProjectIdSource } from './project-id-source';
@@ -24,11 +24,15 @@ export function getOrganizationScopedRoutePolicy(
   };
 }
 
-export function getProjectScopedRoutePolicy(
-  allowedPrincipals: readonly PrincipalType[],
-  permission?: Permission,
-  projectIdSource: ProjectIdSource = defaultProjectIdSource,
-): AuthenticatedRoutePolicy {
+export function getProjectScopedRoutePolicy({
+  projectIdSource = defaultProjectIdSource,
+  allowedPrincipals,
+  permission,
+}: {
+  allowedPrincipals: readonly PrincipalType[];
+  projectIdSource?: ProjectIdSource;
+  permission?: Permission;
+}): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
     authorization: {
@@ -40,7 +44,7 @@ export function getProjectScopedRoutePolicy(
   };
 }
 
-export function getPublicRoutePolicy(): PublicRoute {
+export function getPublicRoutePolicy(): PublicRoutePolicy {
   return {
     routeAccessType: RouteAccessType.PUBLIC,
   };

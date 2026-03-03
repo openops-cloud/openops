@@ -2,7 +2,7 @@ import {
   AuthorizationScope,
   Permission,
   PrincipalType,
-  PublicRoute,
+  PublicRoutePolicy,
   RouteAccessType,
 } from '@openops/shared';
 import { ProjectIdSource } from './project-id-source';
@@ -29,4 +29,4 @@ type ProjectAuthorizationPolicy = {
   permission?: Permission;
 };
 
-export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoute;
+export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoutePolicy;

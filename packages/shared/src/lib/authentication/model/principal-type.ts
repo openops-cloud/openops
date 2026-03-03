@@ -24,6 +24,6 @@ export enum RouteAccessType {
   PUBLIC = 'PUBLIC',
 }
 
-export type PublicRoute = {
+export type PublicRoutePolicy = {
   routeAccessType: RouteAccessType.PUBLIC;
 };
