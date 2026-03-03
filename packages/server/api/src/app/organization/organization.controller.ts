@@ -4,7 +4,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   assertEqual,
-  EndpointScope,
   OpenOpsId,
   Organization,
   PrincipalType,
@@ -54,7 +53,6 @@ const UpdateOrganizationRequest = {
 const GetOrganizationRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    scope: EndpointScope.ORGANIZATION,
   },
   schema: {
     tags: ['organizations'],

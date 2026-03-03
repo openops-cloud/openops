@@ -3,7 +3,6 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  EndpointScope,
   flowHelper,
   groupStepOutputsById,
   PrincipalType,
@@ -59,7 +58,6 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
 const ExecuteVariableRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    scope: EndpointScope.ORGANIZATION,
   },
   schema: {
     description:
