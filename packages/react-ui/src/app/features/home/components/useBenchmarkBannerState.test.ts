@@ -46,7 +46,7 @@ describe('useBenchmarkBannerState', () => {
 
     expect(result.current.isEnabled).toBe(false);
     expect(result.current.variation).toBe('default');
-    expect(result.current.provider).toBe('aws');
+    expect(result.current.provider).toBe(undefined);
   });
 
   it('does not call listBenchmarks when flag is disabled', () => {
@@ -62,6 +62,15 @@ describe('useBenchmarkBannerState', () => {
     expect(mockListBenchmarks).not.toHaveBeenCalled();
   });
 
+  it('calls listBenchmarks when flag is enabled', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue(true);
+    setupQueryMock([]);
+
+    renderHook(() => useBenchmarkBannerState());
+
+    expect(mockListBenchmarks).toHaveBeenCalledTimes(1);
+  });
+
   it('returns default variation when flag is enabled but no benchmarks exist', () => {
     mockUseShowBenchmarkBanner.mockReturnValue(true);
     setupQueryMock([]);
@@ -70,7 +79,7 @@ describe('useBenchmarkBannerState', () => {
 
     expect(result.current.isEnabled).toBe(true);
     expect(result.current.variation).toBe('default');
-    expect(result.current.provider).toBe('aws');
+    expect(result.current.provider).toBe(undefined);
   });
 
   it('returns default variation when flag is enabled but benchmark is RUNNING', () => {
@@ -137,14 +146,5 @@ describe('useBenchmarkBannerState', () => {
 
     expect(result.current.variation).toBe('report');
     expect(result.current.provider).toBe('azure');
-  });
-
-  it('calls listBenchmarks when flag is enabled', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
-    setupQueryMock([]);
-
-    renderHook(() => useBenchmarkBannerState());
-
-    expect(mockListBenchmarks).toHaveBeenCalledTimes(1);
   });
 });

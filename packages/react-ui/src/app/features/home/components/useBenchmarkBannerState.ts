@@ -6,7 +6,7 @@ import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 type BenchmarkBannerState = {
   isEnabled: boolean;
   variation: 'default' | 'report';
-  provider: BenchmarkProvider;
+  provider?: BenchmarkProvider;
 };
 
 export const useBenchmarkBannerState = (): BenchmarkBannerState => {
@@ -25,6 +25,6 @@ export const useBenchmarkBannerState = (): BenchmarkBannerState => {
   return {
     isEnabled,
     variation: succeededBenchmark ? 'report' : 'default',
-    provider: (succeededBenchmark?.provider ?? 'aws') as BenchmarkProvider,
+    provider: succeededBenchmark?.provider,
   };
 };
