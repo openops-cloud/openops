@@ -28,6 +28,7 @@ import React, { useState } from 'react';
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
 import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { RunWorkflowManuallyMenuItem } from '@/app/features/flows/components/run-workflow-manually-menu-item';
@@ -64,6 +65,8 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const { checkAccess } = useAuthorization();
+  const canWriteFlow = checkAccess(Permission.WRITE_FLOW);
 
   const { mutate: duplicateFlow, isPending: isDuplicatePending } = useMutation({
     mutationFn: async () => {
@@ -113,7 +116,13 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {!insideBuilder && <EditFlowMenuItem flow={flow} baseRoute="/flows" />}
+        {!insideBuilder && (
+          <EditFlowMenuItem
+            flow={flow}
+            baseRoute="/flows"
+            text={getViewOrEditLabel(canWriteFlow)}
+          />
+        )}
 
         {!readonly && (
           <RenameFlowDialog
@@ -264,5 +273,8 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
     </DropdownMenu>
   );
 };
+
+const getViewOrEditLabel = (canWriteFlow: boolean): string =>
+  canWriteFlow ? t('Edit') : t('View');
 
 export { FlowActionMenu };
