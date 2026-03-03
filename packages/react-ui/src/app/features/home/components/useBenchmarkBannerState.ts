@@ -1,5 +1,5 @@
 import { QueryKeys } from '@/app/constants/query-keys';
-import { BenchmarkProvider, BenchmarkStatus } from '@openops/shared';
+import { BenchmarkProviders, BenchmarkStatus } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { benchmarkApi } from '../../benchmark/benchmark-api';
 import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
@@ -7,7 +7,7 @@ import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 type BenchmarkBannerState = {
   isEnabled: boolean;
   variation: 'default' | 'report';
-  provider?: BenchmarkProvider;
+  provider?: BenchmarkProviders;
 };
 
 export const useBenchmarkBannerState = (): BenchmarkBannerState => {
