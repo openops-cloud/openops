@@ -1,9 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import {
-  Permission,
-  Principal,
-  PrincipalType,
-} from '@openops/shared';
+import { Permission, Principal, PrincipalType } from '@openops/shared';
 import fastify from 'fastify';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
