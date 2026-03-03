@@ -29,15 +29,21 @@ jest.mock('../../../src/app/core/db/transaction', () => ({
     operation({}),
 }));
 
-jest.mock('@openops/server-shared', () => ({
-  networkUtls: { getInternalApiUrl: () => 'http://localhost:3000/' },
+const mockGetWebhookPrefix = jest.fn();
+jest.mock('server-worker', () => ({
+  webhookUtils: {
+    getWebhookPrefix: (
+      ...args: unknown[]
+    ): ReturnType<typeof mockGetWebhookPrefix> => mockGetWebhookPrefix(...args),
+  },
 }));
 
-const defaultWebhookBaseUrl = 'http://localhost:3000/v1/webhooks';
+const defaultWebhookBaseUrl = 'https://api.example.com/v1/webhooks';
 
 describe('create-benchmark-flows.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   });
 
   const attachFlowsToBenchmarkRequest: AttachFlowsToBenchmarkRequest = {
@@ -78,6 +84,7 @@ describe('create-benchmark-flows.service', () => {
 
     const result = await attachFlowsToBenchmark(attachFlowsToBenchmarkRequest);
 
+    expect(mockGetWebhookPrefix).toHaveBeenCalled();
     expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
     const savedBenchmarkArg = mockBenchmarkRepoSave.mock.calls[0][0] as Record<
       string,

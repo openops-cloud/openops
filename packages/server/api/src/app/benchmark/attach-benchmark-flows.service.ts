@@ -1,4 +1,3 @@
-import { networkUtls } from '@openops/server-shared';
 import {
   BenchmarkProviders,
   openOpsId,
@@ -6,6 +5,7 @@ import {
   type BenchmarkWebhookPayload,
   type BenchmarkWorkflowBase,
 } from '@openops/shared';
+import { webhookUtils } from 'server-worker';
 import { transaction } from '../core/db/transaction';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import type { BenchmarkRow } from './benchmark.entity';
@@ -26,10 +26,10 @@ export type AttachFlowsToBenchmarkResponse = {
   payload: BenchmarkWebhookPayload;
 };
 
-function buildPayloadForWebhook(params: {
+async function buildPayloadForWebhook(params: {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
-}): BenchmarkWebhookPayload {
+}): Promise<BenchmarkWebhookPayload> {
   const { benchmarkConfiguration, workflows } = params;
 
   if (workflows.length < 3) {
@@ -38,7 +38,7 @@ function buildPayloadForWebhook(params: {
     );
   }
 
-  const webhookBaseUrl = `${networkUtls.getInternalApiUrl()}v1/webhooks`;
+  const webhookBaseUrl = await webhookUtils.getWebhookPrefix();
   const subWorkflowFlowIds = workflows.slice(2).map((w) => w.flowId);
   const cleanupFlowIds = [workflows[1].flowId];
 
@@ -104,7 +104,7 @@ export async function attachFlowsToBenchmark(
     connectionId,
   } = params;
 
-  const payload = buildPayloadForWebhook({
+  const payload = await buildPayloadForWebhook({
     benchmarkConfiguration,
     workflows,
   });
