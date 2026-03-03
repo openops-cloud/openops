@@ -7,15 +7,17 @@ import {
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowFolderService } from '../../../src/app/flows/folder/folder.service';
 
+const mockBenchmarkRepoSave = jest.fn();
 const mockBenchmarkRepo = {
-  findOne: jest.fn(),
   update: jest.fn(),
+  save: mockBenchmarkRepoSave,
 };
 
 const mockGetRawMany = jest.fn();
+const mockBenchmarkFlowRepoSave = jest.fn();
 const mockBenchmarkFlowRepo = {
-  find: jest.fn(),
   update: jest.fn(),
+  save: mockBenchmarkFlowRepoSave,
   createQueryBuilder: jest.fn().mockImplementation(() => ({
     innerJoin: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
@@ -49,6 +51,11 @@ jest.mock('../../../src/app/benchmark/benchmark-flow.repo', () => ({
   benchmarkFlowRepo: (): typeof mockBenchmarkFlowRepo => mockBenchmarkFlowRepo,
 }));
 
+jest.mock('../../../src/app/core/db/transaction', () => ({
+  transaction: async <T>(operation: (em: unknown) => Promise<T>): Promise<T> =>
+    operation({}),
+}));
+
 jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
   resolveWorkflowPathsForSeed: (
     ...args: unknown[]
@@ -66,6 +73,15 @@ jest.mock(
       mockGetConnectionsWithBlockSupport(...args),
   }),
 );
+
+const mockGetWebhookPrefix = jest.fn();
+jest.mock('server-worker', () => ({
+  webhookUtils: {
+    getWebhookPrefix: (
+      ...args: unknown[]
+    ): ReturnType<typeof mockGetWebhookPrefix> => mockGetWebhookPrefix(...args),
+  },
+}));
 
 jest.mock('../../../src/app/benchmark/benchmark-flow-bulk-create', () => ({
   bulkCreateAndPublishFlows: (
@@ -88,7 +104,7 @@ const defaultBenchmarkConfiguration = {
   connection: ['conn-1'],
   workflows: ['AWS Benchmark - Unattached EBS'],
   accounts: [] as string[],
-  regions: [] as string[],
+  regions: ['us-east-1'] as string[],
 };
 
 const createBenchmarkMockConnections = [
@@ -100,8 +116,11 @@ const createBenchmarkMockConnections = [
   },
 ];
 
+const defaultWebhookBaseUrl = 'https://api.example.com/v1/webhooks';
+
 function setupCreateBenchmarkMocks(folder: Folder): void {
   flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
+  mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   mockGetConnectionsWithBlockSupport.mockResolvedValue(
     createBenchmarkMockConnections,
   );
@@ -123,40 +142,21 @@ function setupCreateBenchmarkMocks(folder: Folder): void {
     { id: 'flow-2', version: { id: 'v2', displayName: 'Cleanup' } },
     { id: 'flow-3', version: { id: 'v3', displayName: 'Sub' } },
   ]);
+  mockBenchmarkRepoSave.mockImplementation((row: Record<string, unknown>) =>
+    Promise.resolve({
+      ...row,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
+    }),
+  );
+  mockBenchmarkFlowRepoSave.mockResolvedValue(undefined);
 }
 
 describe('create-benchmark.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetRawMany.mockResolvedValue([]);
-  });
-
-  it('createBenchmark with provider aws calls getOrCreate with displayName AWS Benchmark', async () => {
-    const projectId = 'project-1';
-    const folder: Folder = {
-      id: 'folder-1',
-      projectId,
-      displayName: 'AWS Benchmark',
-      created: '',
-      updated: '',
-      contentType: ContentType.WORKFLOW,
-    };
-    setupCreateBenchmarkMocks(folder);
-
-    await createBenchmark({
-      provider: 'aws',
-      projectId,
-      userId: 'user-1',
-      benchmarkConfiguration: defaultBenchmarkConfiguration,
-    });
-
-    expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
-      projectId,
-      request: {
-        displayName: 'AWS Benchmark',
-        contentType: ContentType.WORKFLOW,
-      },
-    });
+    mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   });
 
   it('createBenchmark throws for unknown provider', async () => {
@@ -206,6 +206,23 @@ describe('create-benchmark.service', () => {
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
   });
 
+  it('createBenchmark throws when regions is empty', async () => {
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId: 'project-1',
+        userId: 'user-1',
+        benchmarkConfiguration: {
+          ...defaultBenchmarkConfiguration,
+          regions: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'You must select at least one region to create a benchmark',
+    );
+    expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
+  });
+
   it('createBenchmark returns BenchmarkCreationResult with workflows from seed', async () => {
     const projectId = 'project-1';
     const folder: Folder = {
@@ -239,14 +256,18 @@ describe('create-benchmark.service', () => {
       { flowId: 'flow-3', displayName: 'Sub', isOrchestrator: false },
     ]);
     expect(result.benchmarkId).toBeDefined();
+    expect(result.benchmarkId).toHaveLength(21);
     expect(result.provider).toBe('aws');
     expect(result.webhookPayload).toEqual({
-      webhookBaseUrl: '',
-      workflows: [],
-      cleanupWorkflows: [],
+      webhookBaseUrl: defaultWebhookBaseUrl,
+      workflows: ['flow-3'],
+      cleanupWorkflows: ['flow-2'],
       accounts: [],
-      regions: [],
+      regions: ['us-east-1'],
     });
+    expect(mockGetWebhookPrefix).toHaveBeenCalled();
+    expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
+    expect(mockBenchmarkFlowRepoSave).toHaveBeenCalledTimes(1);
     expect(mockBenchmarkFlowRepo.createQueryBuilder).toHaveBeenCalledWith('bf');
     expect(mockResolveWorkflowPathsForSeed).toHaveBeenCalledWith(
       'aws',
@@ -258,6 +279,47 @@ describe('create-benchmark.service', () => {
       projectId,
       folder.id,
     );
+  });
+
+  it('createBenchmark deletes newly created flows and rethrows when attachFlowsToBenchmark fails', async () => {
+    const projectId = 'project-1';
+    const userId = 'user-1';
+    const folder: Folder = {
+      id: 'folder-2',
+      projectId,
+      displayName: 'AWS Benchmark',
+      created: '',
+      updated: '',
+      contentType: ContentType.WORKFLOW,
+    };
+    setupCreateBenchmarkMocks(folder);
+    mockBenchmarkRepoSave.mockRejectedValue(new Error('DB error'));
+
+    await expect(
+      createBenchmark({
+        provider: 'aws',
+        projectId,
+        userId,
+        benchmarkConfiguration: defaultBenchmarkConfiguration,
+      }),
+    ).rejects.toThrow('DB error');
+
+    expect(flowServiceMock.delete).toHaveBeenCalledTimes(3);
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(1, {
+      id: 'flow-1',
+      projectId,
+      userId,
+    });
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(2, {
+      id: 'flow-2',
+      projectId,
+      userId,
+    });
+    expect(flowServiceMock.delete).toHaveBeenNthCalledWith(3, {
+      id: 'flow-3',
+      projectId,
+      userId,
+    });
   });
 
   const deleteFlowsParams = {

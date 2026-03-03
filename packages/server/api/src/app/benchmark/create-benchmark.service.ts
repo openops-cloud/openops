@@ -4,7 +4,6 @@ import {
   ContentType,
   ErrorCode,
   Folder,
-  openOpsId,
   type BenchmarkConfiguration,
   type BenchmarkCreationResult,
   type BenchmarkWorkflowBase,
@@ -13,6 +12,7 @@ import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
 import {
   bulkCreateAndPublishFlows,
   type WorkflowTemplate,
@@ -26,6 +26,7 @@ import { throwValidationError } from './errors';
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
   const connection = config.connection ?? [];
   const workflows = config.workflows ?? [];
+  const regions = config.regions ?? [];
   if (connection.length === 0) {
     throwValidationError(
       'You must select at least one connection to create a benchmark',
@@ -34,6 +35,11 @@ function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
   if (workflows.length === 0) {
     throwValidationError(
       'You must select at least one workflow to create a benchmark',
+    );
+  }
+  if (regions.length === 0) {
+    throwValidationError(
+      'You must select at least one region to create a benchmark',
     );
   }
 }
@@ -93,7 +99,7 @@ export async function deleteFlowsForExistingBenchmark(params: {
   const rows = await benchmarkFlowRepo()
     .createQueryBuilder('bf')
     .innerJoin('benchmark', 'b', 'b.id = bf.benchmarkId')
-    .select(['b.id AS benchmarkId', 'bf.flowId AS flowId'])
+    .select(['b.id AS "benchmarkId"', 'bf.flowId AS "flowId"'])
     .where('b.projectId = :projectId', { projectId })
     .andWhere('b.provider = :provider', { provider })
     .andWhere('b.folderId = :folderId', { folderId })
@@ -190,7 +196,7 @@ export async function createBenchmark(params: {
   validateBenchmarkConfiguration(benchmarkConfiguration);
 
   const workflowIds = benchmarkConfiguration.workflows ?? [];
-  const connectionId = benchmarkConfiguration.connection?.[0];
+  const connectionId = benchmarkConfiguration.connection[0];
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
@@ -212,17 +218,29 @@ export async function createBenchmark(params: {
     folderId: benchmarkFolder.id,
   });
 
-  return {
-    benchmarkId: openOpsId(),
-    folderId: benchmarkFolder.id,
-    provider,
-    workflows,
-    webhookPayload: {
-      webhookBaseUrl: '',
-      workflows: [],
-      cleanupWorkflows: [],
-      accounts: benchmarkConfiguration.accounts ?? [],
-      regions: benchmarkConfiguration.regions ?? [],
-    },
-  };
+  try {
+    const { benchmark, payload } = await attachFlowsToBenchmark({
+      benchmarkConfiguration,
+      workflows,
+      projectId,
+      provider,
+      folderId: benchmarkFolder.id,
+      connectionId,
+    });
+
+    return {
+      benchmarkId: benchmark.id,
+      folderId: benchmarkFolder.id,
+      provider,
+      workflows,
+      webhookPayload: payload,
+    };
+  } catch (err) {
+    await deleteFlowsByIds({
+      flowIds: workflows.map((w) => w.flowId),
+      projectId,
+      userId,
+    });
+    throw err;
+  }
 }
