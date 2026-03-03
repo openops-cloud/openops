@@ -1,23 +1,19 @@
 import { ProjectIdLocation, ProjectIdSource } from './project-id-source';
 
+const DEFAULT_KEY = 'projectId';
+
 function createProjectIdSource(
   location: ProjectIdLocation,
-  key = 'projectId',
+  key: string = DEFAULT_KEY,
 ): ProjectIdSource {
-  return {
-    location,
-    key,
-  };
+  return { location, key };
 }
 
-export function projectIdFromQuery(key?: string): ProjectIdSource {
-  return createProjectIdSource(ProjectIdLocation.QUERY, key);
+function projectIdFrom(location: ProjectIdLocation) {
+  return (key?: string): ProjectIdSource =>
+    createProjectIdSource(location, key);
 }
 
-export function projectIdFromParams(key?: string): ProjectIdSource {
-  return createProjectIdSource(ProjectIdLocation.PARAMS, key);
-}
-
-export function projectIdFromBody(key?: string): ProjectIdSource {
-  return createProjectIdSource(ProjectIdLocation.BODY, key);
-}
+export const projectIdFromParams = projectIdFrom(ProjectIdLocation.PARAMS);
+export const projectIdFromQuery = projectIdFrom(ProjectIdLocation.QUERY);
+export const projectIdFromBody = projectIdFrom(ProjectIdLocation.BODY);
