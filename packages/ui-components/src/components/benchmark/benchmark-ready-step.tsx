@@ -46,12 +46,10 @@ export const BenchmarkReadyStep = ({
         )}
       </StepDescription>
 
-      {runPhase === 'idle' && (
-        <BenchmarkWorkflowList
-          workflows={displayedWorkflows}
-          provider={providerName}
-        />
-      )}
+      <BenchmarkWorkflowList
+        workflows={displayedWorkflows}
+        provider={providerName}
+      />
 
       {runPhase === 'running' && (
         <BenchmarkRunningPhase progress={runningProgress} />
