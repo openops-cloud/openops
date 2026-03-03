@@ -44,8 +44,6 @@ export function getProjectScopedRoutePolicy({
   };
 }
 
-export function getPublicRoutePolicy(): PublicRoutePolicy {
-  return {
-    routeAccessType: RouteAccessType.PUBLIC,
-  };
-}
+export const PUBLIC_ROUTE_POLICY: Readonly<PublicRoutePolicy> = Object.freeze({
+  routeAccessType: RouteAccessType.PUBLIC,
+});
