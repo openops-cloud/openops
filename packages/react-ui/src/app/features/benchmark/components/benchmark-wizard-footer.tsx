@@ -66,6 +66,13 @@ export const BenchmarkWizardFooter = ({
       );
     }
 
+    const isReportAvailable =
+      runPhase === 'succeeded' || runPhase === 'succeeded_with_failures';
+
+    if (isReportAvailable) {
+      return null;
+    }
+
     const hasOrchestrator = benchmarkCreationResult?.workflows.some(
       (w) => w.isOrchestrator,
     );
