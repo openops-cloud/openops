@@ -3,7 +3,6 @@ import {
   createBenchmark,
   createBenchmarkWorkflows,
   deleteFlowsForExistingBenchmark,
-  insertBenchmarkRecords,
 } from '../../../src/app/benchmark/create-benchmark.service';
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowFolderService } from '../../../src/app/flows/folder/folder.service';
@@ -457,80 +456,5 @@ describe('create-benchmark.service', () => {
     expect(mockGetConnectionsWithBlockSupport).not.toHaveBeenCalled();
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(mockBulkCreateAndPublishFlows).not.toHaveBeenCalled();
-  });
-
-  const insertRecordsPayload = {
-    webhookBaseUrl: 'https://api.example.com',
-    workflows: ['flow-sub'],
-    cleanupWorkflows: ['flow-cleanup'],
-    accounts: ['account-1'],
-    regions: ['us-east-1'],
-  };
-
-  const insertRecordsParams = {
-    projectId: 'project-1',
-    provider: 'aws',
-    folderId: 'folder-1',
-    connectionId: 'conn-1',
-    payload: insertRecordsPayload,
-    workflows: [
-      {
-        flowId: 'flow-orch',
-        displayName: 'Orchestrator',
-        isOrchestrator: true,
-      },
-      {
-        flowId: 'flow-cleanup',
-        displayName: 'Cleanup',
-        isOrchestrator: false,
-      },
-      { flowId: 'flow-sub', displayName: 'Sub', isOrchestrator: false },
-    ],
-  };
-
-  it('insertBenchmarkRecords saves one benchmark row with given payload and N benchmark_flow rows', async () => {
-    mockBenchmarkRepoSave.mockImplementation((row: Record<string, unknown>) =>
-      Promise.resolve({
-        ...row,
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
-      }),
-    );
-    mockBenchmarkFlowRepoSave.mockResolvedValue(undefined);
-
-    const result = await insertBenchmarkRecords(insertRecordsParams);
-
-    expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
-    const savedBenchmarkArg = mockBenchmarkRepoSave.mock.calls[0][0] as Record<
-      string,
-      unknown
-    >;
-    expect(savedBenchmarkArg.projectId).toBe(insertRecordsParams.projectId);
-    expect(savedBenchmarkArg.provider).toBe(insertRecordsParams.provider);
-    expect(savedBenchmarkArg.folderId).toBe(insertRecordsParams.folderId);
-    expect(savedBenchmarkArg.connectionId).toBe(
-      insertRecordsParams.connectionId,
-    );
-    expect(savedBenchmarkArg.payload).toEqual(insertRecordsPayload);
-    expect(savedBenchmarkArg.deletedAt).toBeNull();
-    expect(savedBenchmarkArg.lastRunId).toBeNull();
-
-    expect(mockBenchmarkFlowRepoSave).toHaveBeenCalledTimes(1);
-    const savedFlowRows = mockBenchmarkFlowRepoSave.mock.calls[0][0] as Array<
-      Record<string, unknown>
-    >;
-    expect(savedFlowRows).toHaveLength(3);
-    expect(savedFlowRows[0].flowId).toBe('flow-orch');
-    expect(savedFlowRows[0].isOrchestrator).toBe(true);
-    expect(savedFlowRows[1].flowId).toBe('flow-cleanup');
-    expect(savedFlowRows[1].isOrchestrator).toBe(false);
-    expect(savedFlowRows[2].flowId).toBe('flow-sub');
-    expect(savedFlowRows[2].isOrchestrator).toBe(false);
-    savedFlowRows.forEach((row) => {
-      expect(row.benchmarkId).toBe(result.id);
-      expect(row.deletedAt).toBeNull();
-    });
-
-    expect(result.id).toBeDefined();
   });
 });

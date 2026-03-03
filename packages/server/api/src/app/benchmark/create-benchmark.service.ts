@@ -4,15 +4,12 @@ import {
   ContentType,
   ErrorCode,
   Folder,
-  openOpsId,
   type BenchmarkConfiguration,
   type BenchmarkCreationResult,
-  type BenchmarkWebhookPayload,
   type BenchmarkWorkflowBase,
 } from '@openops/shared';
 import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
-import { transaction } from '../core/db/transaction';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
 import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
@@ -21,7 +18,6 @@ import {
   type WorkflowTemplate,
 } from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
-import type { BenchmarkRow } from './benchmark.entity';
 import { benchmarkRepo } from './benchmark.repo';
 import { resolveWorkflowPathsForSeed } from './catalog-resolver';
 import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
@@ -187,72 +183,6 @@ export async function createBenchmarkWorkflows(params: {
     displayName: r.version.displayName,
     isOrchestrator: index === 0,
   }));
-}
-
-function _buildPayloadForWebhook(params: {
-  benchmarkConfiguration: BenchmarkConfiguration;
-  workflows: BenchmarkWorkflowBase[];
-  webhookBaseUrl: string;
-}): BenchmarkWebhookPayload {
-  const { benchmarkConfiguration, workflows, webhookBaseUrl } = params;
-
-  if (workflows.length < 3) {
-    throwValidationError(
-      'Benchmark requires orchestrator, cleanup, and at least one sub-workflow',
-    );
-  }
-
-  const subWorkflowFlowIds = workflows.slice(2).map((w) => w.flowId);
-  const cleanupFlowIds = [workflows[1].flowId];
-
-  return {
-    webhookBaseUrl,
-    workflows: subWorkflowFlowIds,
-    cleanupWorkflows: cleanupFlowIds,
-    accounts: benchmarkConfiguration.accounts ?? [],
-    regions: benchmarkConfiguration.regions,
-  };
-}
-
-export async function insertBenchmarkRecords(params: {
-  projectId: string;
-  provider: string;
-  folderId: string | null;
-  connectionId: string | null;
-  payload: BenchmarkWebhookPayload;
-  workflows: BenchmarkWorkflowBase[];
-}): Promise<BenchmarkRow> {
-  const { projectId, provider, folderId, connectionId, payload, workflows } =
-    params;
-
-  return transaction(async (entityManager) => {
-    const benchmarkId = openOpsId();
-    const benchmarkRow = {
-      id: benchmarkId,
-      projectId,
-      provider,
-      folderId,
-      connectionId,
-      payload,
-      deletedAt: null as string | null,
-    };
-
-    const savedBenchmark = await benchmarkRepo(entityManager).save(
-      benchmarkRow,
-    );
-
-    const benchmarkFlowRows = workflows.map((w) => ({
-      id: openOpsId(),
-      benchmarkId: savedBenchmark.id,
-      flowId: w.flowId,
-      isOrchestrator: w.isOrchestrator,
-      deletedAt: null as string | null,
-    }));
-
-    await benchmarkFlowRepo(entityManager).save(benchmarkFlowRows);
-
-    return savedBenchmark;
-  });
 }
 
 export async function createBenchmark(params: {
