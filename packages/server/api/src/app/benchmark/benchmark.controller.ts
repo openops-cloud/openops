@@ -126,7 +126,7 @@ const CreateBenchmarkRequestOptions = {
   schema: {
     tags: ['benchmarks'],
     description:
-      'Creates a new benchmark for a given provider and returns the result.',
+      'Creates a new benchmark for the given provider from the request configuration and returns the created benchmark (benchmarkId, folderId, workflows, webhookPayload).',
     params: Type.Object({
       provider: Type.Enum(BenchmarkProviders),
     }),

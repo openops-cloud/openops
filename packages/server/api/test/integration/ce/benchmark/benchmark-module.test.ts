@@ -375,6 +375,40 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
     expect(createBenchmarkServiceMock.createBenchmark).not.toHaveBeenCalled();
   });
+
+  it('returns 409 with VALIDATION when service rejects with validation error', async () => {
+    createBenchmarkServiceMock.createBenchmark.mockRejectedValueOnce(
+      new ApplicationError(
+        {
+          code: ErrorCode.VALIDATION,
+          params: {
+            message:
+              'You must select at least one workflow to create a benchmark',
+          },
+        },
+        'You must select at least one workflow to create a benchmark',
+      ),
+    );
+    const { token } = await createAndInsertMocks();
+
+    const response = await postCreate({
+      provider: BenchmarkProviders.AWS,
+      token,
+      body: {
+        benchmarkConfiguration: {
+          connection: ['conn-1'],
+          workflows: [],
+          regions: ['us-east-1'],
+        },
+      },
+    });
+
+    expect(response?.statusCode).toBe(StatusCodes.CONFLICT);
+    const data = response?.json();
+    expect(data?.code).toBe('VALIDATION');
+    expect(data?.params).toBeDefined();
+    expect(createBenchmarkServiceMock.createBenchmark).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('Benchmark status API', () => {
