@@ -6,6 +6,7 @@ import {
 } from '../../../src/app/benchmark/create-benchmark.service';
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowFolderService } from '../../../src/app/flows/folder/folder.service';
+import * as benchmarkDashboardService from '../../../src/app/openops-analytics/benchmark/benchmark-dashboard-service';
 
 const mockBenchmarkRepoSave = jest.fn();
 const mockBenchmarkRepo = {
@@ -94,6 +95,13 @@ jest.mock('node:fs/promises', () => ({
   readFile: (...args: unknown[]): ReturnType<typeof mockReadFile> =>
     mockReadFile(...args),
 }));
+
+jest.mock(
+  '../../../src/app/openops-analytics/benchmark/benchmark-dashboard-service',
+  () => ({
+    createBenchmarkDashboard: jest.fn().mockResolvedValue(undefined),
+  }),
+);
 
 const flowFolderServiceMock = flowFolderService as jest.Mocked<
   typeof flowFolderService
@@ -279,6 +287,12 @@ describe('create-benchmark.service', () => {
       projectId,
       folder.id,
     );
+    expect(
+      benchmarkDashboardService.createBenchmarkDashboard,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      benchmarkDashboardService.createBenchmarkDashboard,
+    ).toHaveBeenCalledWith('aws');
   });
 
   it('createBenchmark deletes newly created flows and rethrows when attachFlowsToBenchmark fails', async () => {
@@ -320,6 +334,9 @@ describe('create-benchmark.service', () => {
       projectId,
       userId,
     });
+    expect(
+      benchmarkDashboardService.createBenchmarkDashboard,
+    ).not.toHaveBeenCalled();
   });
 
   const deleteFlowsParams = {

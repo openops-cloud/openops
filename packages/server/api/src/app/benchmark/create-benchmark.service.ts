@@ -219,6 +219,7 @@ export async function createBenchmark(params: {
     folderId: benchmarkFolder.id,
   });
 
+  let result: BenchmarkCreationResult;
   try {
     const { benchmark, payload } = await attachFlowsToBenchmark({
       benchmarkConfiguration,
@@ -229,9 +230,7 @@ export async function createBenchmark(params: {
       connectionId,
     });
 
-    await createBenchmarkDashboard(provider);
-
-    return {
+    result = {
       benchmarkId: benchmark.id,
       folderId: benchmarkFolder.id,
       provider,
@@ -246,4 +245,7 @@ export async function createBenchmark(params: {
     });
     throw err;
   }
+
+  await createBenchmarkDashboard(provider);
+  return result;
 }
