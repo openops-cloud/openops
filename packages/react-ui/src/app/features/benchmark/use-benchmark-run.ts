@@ -1,5 +1,5 @@
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
-import { BenchmarkRunPhase } from '@openops/components/ui';
+import type { BenchmarkRunPhase } from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
   BenchmarkStatus,

@@ -108,7 +108,7 @@ export const BenchmarkWizard = ({
 
   const handleViewRun = () => {
     if (lastRunId) {
-      navigate(`runs/${lastRunId}`);
+      navigate(`/runs/${lastRunId}`);
     }
   };
 
