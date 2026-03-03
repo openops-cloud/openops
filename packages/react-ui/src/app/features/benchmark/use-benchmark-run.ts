@@ -7,12 +7,13 @@ import {
   BenchmarkWebhookPayload,
 } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { benchmarkApi } from './benchmark-api';
 
 export type UseBenchmarkRunResult = {
   runPhase: BenchmarkRunPhase;
+  runningProgress: { completed: number; total: number } | null;
   isRunPending: boolean;
   handleRunBenchmark: () => Promise<void>;
   handleResetRun: () => void;
@@ -101,8 +102,30 @@ export const useBenchmarkRun = (
     setLastRunId(undefined);
   };
 
+  const runningProgress = useMemo(() => {
+    if (runPhase !== 'running' || !statusData) {
+      return null;
+    }
+    let completed = 0;
+    let total = 0;
+    for (const w of statusData.workflows) {
+      if (w.isOrchestrator) {
+        continue;
+      }
+      total++;
+      if (
+        w.runStatus === BenchmarkStatus.SUCCEEDED ||
+        w.runStatus === BenchmarkStatus.FAILED
+      ) {
+        completed++;
+      }
+    }
+    return { completed, total };
+  }, [runPhase, statusData]);
+
   return {
     runPhase,
+    runningProgress,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,

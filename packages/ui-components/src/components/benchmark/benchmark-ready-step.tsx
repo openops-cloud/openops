@@ -11,6 +11,7 @@ interface BenchmarkReadyStepProps {
   providerName: string;
   result: BenchmarkCreationResult;
   runPhase: BenchmarkRunPhase;
+  runningProgress?: { completed: number; total: number };
   onViewRun: () => void;
   onResetRun: () => void;
 }
@@ -19,6 +20,7 @@ export const BenchmarkReadyStep = ({
   providerName,
   result,
   runPhase,
+  runningProgress,
   onViewRun,
   onResetRun,
 }: BenchmarkReadyStepProps) => {
@@ -55,7 +57,9 @@ export const BenchmarkReadyStep = ({
         />
       )}
 
-      {runPhase === 'running' && <BenchmarkRunningPhase />}
+      {runPhase === 'running' && (
+        <BenchmarkRunningPhase progress={runningProgress} />
+      )}
 
       {runPhase === 'failed' && (
         <BenchmarkFailedPhase onViewRun={onViewRun} onResetRun={onResetRun} />

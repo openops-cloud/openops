@@ -86,6 +86,7 @@ export const BenchmarkWizard = ({
 
   const {
     runPhase,
+    runningProgress,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,
@@ -163,6 +164,7 @@ export const BenchmarkWizard = ({
                     providerName={providerName}
                     result={benchmarkCreateResult}
                     runPhase={runPhase}
+                    runningProgress={runningProgress ?? undefined}
                     onViewRun={handleViewRun}
                     onResetRun={handleResetRun}
                   />

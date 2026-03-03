@@ -57,6 +57,9 @@ type ReadyStepStory = StoryObj<typeof readyStepMeta>;
 
 export const Idle: ReadyStepStory = { args: { runPhase: 'idle' } };
 export const Running: ReadyStepStory = { args: { runPhase: 'running' } };
+export const RunningWithProgress: ReadyStepStory = {
+  args: { runPhase: 'running', runningProgress: { completed: 2, total: 5 } },
+};
 export const Failed: ReadyStepStory = { args: { runPhase: 'failed' } };
 export const SucceededWithFailures: ReadyStepStory = {
   args: { runPhase: 'succeeded_with_failures' },

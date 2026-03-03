@@ -376,4 +376,202 @@ describe('useBenchmarkRun', () => {
       expect(result.current.lastRunId).toBeUndefined();
     });
   });
+
+  describe('runningProgress', () => {
+    it('should be null in initial idle state', () => {
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      expect(result.current.runningProgress).toBeNull();
+    });
+
+    it('should be null when running but no status data yet', async () => {
+      mockRunBenchmark.mockResolvedValue(undefined);
+      setupQueryMock(undefined);
+
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      await act(async () => {
+        await result.current.handleRunBenchmark();
+      });
+
+      expect(result.current.runPhase).toBe('running');
+      expect(result.current.runningProgress).toBeNull();
+    });
+
+    it('should return 0/n when all sub-workflows are still running', async () => {
+      mockRunBenchmark.mockResolvedValue(undefined);
+      setupQueryMock(
+        buildStatusResponse({
+          workflows: [
+            {
+              flowId: 'orch-flow-1',
+              displayName: 'Orchestrator',
+              isOrchestrator: true,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-1',
+            },
+            {
+              flowId: 'sub-flow-1',
+              displayName: 'Sub 1',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-2',
+            },
+            {
+              flowId: 'sub-flow-2',
+              displayName: 'Sub 2',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-3',
+            },
+          ],
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      await act(async () => {
+        await result.current.handleRunBenchmark();
+      });
+
+      expect(result.current.runningProgress).toEqual({
+        completed: 0,
+        total: 2,
+      });
+    });
+
+    it('should count SUCCEEDED and FAILED sub-workflows as completed', async () => {
+      mockRunBenchmark.mockResolvedValue(undefined);
+      setupQueryMock(
+        buildStatusResponse({
+          workflows: [
+            {
+              flowId: 'orch-flow-1',
+              displayName: 'Orchestrator',
+              isOrchestrator: true,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-1',
+            },
+            {
+              flowId: 'sub-flow-1',
+              displayName: 'Sub 1',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.SUCCEEDED,
+              runId: 'run-2',
+            },
+            {
+              flowId: 'sub-flow-2',
+              displayName: 'Sub 2',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.FAILED,
+              runId: 'run-3',
+            },
+            {
+              flowId: 'sub-flow-3',
+              displayName: 'Sub 3',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-4',
+            },
+          ],
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      await act(async () => {
+        await result.current.handleRunBenchmark();
+      });
+
+      expect(result.current.runningProgress).toEqual({
+        completed: 2,
+        total: 3,
+      });
+    });
+
+    it('should exclude orchestrator from total and completed counts', async () => {
+      mockRunBenchmark.mockResolvedValue(undefined);
+      setupQueryMock(
+        buildStatusResponse({
+          workflows: [
+            {
+              flowId: 'orch-flow-1',
+              displayName: 'Orchestrator',
+              isOrchestrator: true,
+              runStatus: BenchmarkStatus.SUCCEEDED,
+              runId: 'run-1',
+            },
+            {
+              flowId: 'sub-flow-1',
+              displayName: 'Sub 1',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-2',
+            },
+          ],
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      await act(async () => {
+        await result.current.handleRunBenchmark();
+      });
+
+      expect(result.current.runningProgress).toEqual({
+        completed: 0,
+        total: 1,
+      });
+    });
+
+    it('should return null after handleResetRun', async () => {
+      mockRunBenchmark.mockResolvedValue(undefined);
+      setupQueryMock(
+        buildStatusResponse({
+          workflows: [
+            {
+              flowId: 'orch-flow-1',
+              displayName: 'Orchestrator',
+              isOrchestrator: true,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-1',
+            },
+            {
+              flowId: 'sub-flow-1',
+              displayName: 'Sub 1',
+              isOrchestrator: false,
+              runStatus: BenchmarkStatus.RUNNING,
+              runId: 'run-2',
+            },
+          ],
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      await act(async () => {
+        await result.current.handleRunBenchmark();
+      });
+
+      expect(result.current.runningProgress).not.toBeNull();
+
+      act(() => {
+        result.current.handleResetRun();
+      });
+
+      expect(result.current.runningProgress).toBeNull();
+    });
+  });
 });
