@@ -3,16 +3,19 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  BenchmarkCreationResult,
   BenchmarkProviders,
   BenchmarkStatusResponse,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  CreateBenchmarkRequest,
   ListBenchmarksResponse,
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
+import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
@@ -37,6 +40,24 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
+  app.post(
+    '/:provider',
+    CreateBenchmarkRequestOptions,
+    async (request, reply) => {
+      await assertBenchmarkFeatureEnabled(
+        request.principal.projectId,
+        request.params.provider,
+      );
+
+      const result = await createBenchmark({
+        provider: request.params.provider,
+        projectId: request.principal.projectId,
+        userId: request.principal.id,
+        benchmarkConfiguration: request.body.benchmarkConfiguration,
+      });
+      return reply.status(StatusCodes.CREATED).send(result);
+    },
+  );
   app.get('/', ListBenchmarksRequestOptions, async (request, reply) => {
     await assertBenchmarkFeatureEnabled(
       request.principal.projectId,
@@ -94,6 +115,24 @@ const WizardStepRequestOptions = {
     body: BenchmarkWizardRequest,
     response: {
       [StatusCodes.OK]: BenchmarkWizardStepResponse,
+    },
+  },
+};
+
+const CreateBenchmarkRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['benchmarks'],
+    description:
+      'Creates a new benchmark for the given provider from the request configuration and returns the created benchmark (benchmarkId, folderId, workflows, webhookPayload).',
+    params: Type.Object({
+      provider: Type.Enum(BenchmarkProviders),
+    }),
+    body: CreateBenchmarkRequest,
+    response: {
+      [StatusCodes.CREATED]: BenchmarkCreationResult,
     },
   },
 };

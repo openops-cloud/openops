@@ -4,9 +4,10 @@ import {
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { benchmarkApi } from './benchmark-api';
 
 export type WizardPhase = 'initial' | 'provider-step' | 'benchmark-ready';
@@ -66,6 +67,8 @@ export const useBenchmarkWizardNavigation = (
       onError: handleMutationError,
     });
 
+  const queryClient = useQueryClient();
+
   const { mutateAsync: runCreateBenchmark, isPending: isCreatingBenchmark } =
     useMutation({
       mutationFn: ({
@@ -79,6 +82,9 @@ export const useBenchmarkWizardNavigation = (
         setBenchmarkCreateResult(result);
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
+        queryClient.invalidateQueries({
+          queryKey: [QueryKeys.foldersFlows],
+        });
       },
       onError: handleMutationError,
     });
