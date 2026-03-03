@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
-  EndpointScope,
   Permission,
   Principal,
   PrincipalType,
@@ -23,7 +22,6 @@ declare module 'fastify' {
     allowedPrincipals?: PrincipalType[];
     rawBody?: boolean;
     skipAuth?: boolean;
-    scope?: EndpointScope;
     permission?: Permission;
   }
 }
