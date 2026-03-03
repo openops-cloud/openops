@@ -1,4 +1,5 @@
 import {
+  BenchmarkRunPhase,
   Button,
   Tooltip,
   TooltipContent,
@@ -9,7 +10,6 @@ import {
 import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 
-import { BenchmarkRunPhase } from '@openops/components/ui';
 import { WizardPhase } from '../use-benchmark-wizard-navigation';
 import { ViewBenchmarkWorkflowsButton } from './view-benchmark-workflows-button';
 
