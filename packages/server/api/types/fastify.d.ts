@@ -17,7 +17,6 @@ declare module 'fastify' {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export interface FastifyContextConfig {
     rawBody?: boolean;
-
     security?: RouteSecurityPolicy; // TODO change to mandatory
 
     // TODO: Prepare deprecation of the following properties

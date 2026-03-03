@@ -17,7 +17,6 @@ export const SERVICE_KEY_SECURITY_OPENAPI = {
 export enum AuthorizationScope {
   ORGANIZATION = 'ORGANIZATION',
   PROJECT = 'PROJECT',
-  // NONE = 'NONE',
 }
 
 export enum RouteAccessType {
