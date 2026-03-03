@@ -1,5 +1,9 @@
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
-import type { BenchmarkRunPhase } from '@openops/components/ui';
+import {
+  BenchmarkRunPhase,
+  INTERNAL_ERROR_TOAST,
+  toast,
+} from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
   BenchmarkStatus,
@@ -44,15 +48,29 @@ export const useBenchmarkRun = (
 ): UseBenchmarkRunResult => {
   const [runPhase, setRunPhase] = useState<BenchmarkRunPhase>('idle');
   const [lastRunId, setLastRunId] = useState<string | undefined>();
+  const [runCount, setRunCount] = useState(0);
 
   const benchmarkId = benchmarkCreateResult?.benchmarkId ?? null;
 
-  const { data: statusData } = useQuery({
-    queryKey: ['benchmark-status', benchmarkId],
+  const {
+    data: statusData,
+    error: pollError,
+    isError: isPollError,
+  } = useQuery({
+    queryKey: ['benchmark-status', benchmarkId, runCount],
     queryFn: () => benchmarkApi.getBenchmarkStatus(benchmarkId!),
     enabled: runPhase === 'running' && !!benchmarkId,
     refetchInterval: 5000,
+    retry: 2,
   });
+
+  useEffect(() => {
+    if (isPollError && pollError) {
+      console.error('[benchmark] Status polling failed:', pollError);
+      toast(INTERNAL_ERROR_TOAST);
+      setRunPhase('failed');
+    }
+  }, [isPollError, pollError]);
 
   useEffect(() => {
     if (!statusData) {
@@ -76,6 +94,8 @@ export const useBenchmarkRun = (
       webhookPayload: BenchmarkWebhookPayload;
     }) => benchmarkApi.runBenchmark(orchestratorFlowId, webhookPayload),
     onSuccess: () => {
+      setLastRunId(undefined);
+      setRunCount((c) => c + 1);
       setRunPhase('running');
     },
     onError: handleMutationError,

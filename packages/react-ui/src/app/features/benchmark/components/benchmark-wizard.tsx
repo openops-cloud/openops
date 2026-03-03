@@ -190,7 +190,7 @@ export const BenchmarkWizard = ({
             handleEditSetup={handleEditSetupAndResetRun}
             onRunNow={handleRunBenchmark}
             onViewRun={handleViewRun}
-            onResetRun={handleResetRun}
+            onRunAgain={handleRunBenchmark}
           />
         </WizardFooter>
       </Wizard>

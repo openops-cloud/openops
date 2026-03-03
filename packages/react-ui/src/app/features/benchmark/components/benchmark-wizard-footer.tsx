@@ -23,7 +23,7 @@ interface BenchmarkWizardFooterProps {
   isRunning: boolean;
   onRunNow: () => Promise<void>;
   onViewRun: () => void;
-  onResetRun: () => void;
+  onRunAgain: () => Promise<void>;
   handleNextFromInitial: () => Promise<void>;
   handleNextFromProviderStep: () => Promise<void>;
   handlePrevious: () => void;
@@ -38,7 +38,7 @@ export const BenchmarkWizardFooter = ({
   isRunning,
   onRunNow,
   onViewRun,
-  onResetRun,
+  onRunAgain,
   handleNextFromInitial,
   handleNextFromProviderStep,
   handlePrevious,
@@ -51,7 +51,15 @@ export const BenchmarkWizardFooter = ({
           <Button variant="outline" size="sm" onClick={onViewRun}>
             {t('View run')}
           </Button>
-          <Button size="sm" onClick={onResetRun}>
+          <Button
+            size="sm"
+            onClick={() => {
+              onRunAgain().catch((e) => {
+                console.error(e);
+                toast(INTERNAL_ERROR_TOAST);
+              });
+            }}
+          >
             {t('Run again')}
           </Button>
         </div>
