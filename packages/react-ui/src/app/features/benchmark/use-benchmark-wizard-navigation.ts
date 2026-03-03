@@ -83,7 +83,7 @@ export const useBenchmarkWizardNavigation = (
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
         queryClient.invalidateQueries({
-          queryKey: [QueryKeys.foldersFlows, QueryKeys.flows],
+          queryKey: [QueryKeys.foldersFlows],
         });
       },
       onError: handleMutationError,
