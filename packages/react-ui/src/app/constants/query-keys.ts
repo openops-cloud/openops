@@ -70,4 +70,5 @@ export const QueryKeys = {
 
   // Benchmarks
   benchmarkStatus: 'benchmark-status',
+  benchmarks: 'benchmarks',
 };

@@ -13,8 +13,3 @@ export const ALL_PRINCIPAL_TYPES = Object.values(PrincipalType).filter(
 export const SERVICE_KEY_SECURITY_OPENAPI = {
   apiKey: [],
 };
-
-export enum EndpointScope {
-  ORGANIZATION = 'ORGANIZATION',
-  PROJECT = 'PROJECT',
-}

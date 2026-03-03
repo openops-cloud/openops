@@ -1,10 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import {
-  EndpointScope,
-  Permission,
-  Principal,
-  PrincipalType,
-} from '@openops/shared';
+import { Permission, Principal, PrincipalType } from '@openops/shared';
 import fastify from 'fastify';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
@@ -23,7 +18,6 @@ declare module 'fastify' {
     allowedPrincipals?: PrincipalType[];
     rawBody?: boolean;
     skipAuth?: boolean;
-    scope?: EndpointScope;
     permission?: Permission;
   }
 }

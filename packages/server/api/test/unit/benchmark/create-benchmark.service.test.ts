@@ -1,4 +1,4 @@
-import { ContentType, type Folder } from '@openops/shared';
+import { BenchmarkProviders, ContentType, type Folder } from '@openops/shared';
 import {
   createBenchmark,
   createBenchmarkWorkflows,
@@ -163,7 +163,7 @@ describe('create-benchmark.service', () => {
     const projectId = 'project-1';
     await expect(
       createBenchmark({
-        provider: 'gcp',
+        provider: 'gcp' as BenchmarkProviders,
         projectId,
         userId: 'user-1',
         benchmarkConfiguration: defaultBenchmarkConfiguration,
@@ -175,7 +175,7 @@ describe('create-benchmark.service', () => {
   it('createBenchmark throws when connection is empty', async () => {
     await expect(
       createBenchmark({
-        provider: 'aws',
+        provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
         benchmarkConfiguration: {
@@ -192,7 +192,7 @@ describe('create-benchmark.service', () => {
   it('createBenchmark throws when workflows is empty', async () => {
     await expect(
       createBenchmark({
-        provider: 'aws',
+        provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
         benchmarkConfiguration: {
@@ -209,7 +209,7 @@ describe('create-benchmark.service', () => {
   it('createBenchmark throws when regions is empty', async () => {
     await expect(
       createBenchmark({
-        provider: 'aws',
+        provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
         benchmarkConfiguration: {
@@ -236,7 +236,7 @@ describe('create-benchmark.service', () => {
     setupCreateBenchmarkMocks(folder);
 
     const result = await createBenchmark({
-      provider: 'aws',
+      provider: BenchmarkProviders.AWS,
       projectId,
       userId: 'user-1',
       benchmarkConfiguration: defaultBenchmarkConfiguration,
@@ -257,7 +257,7 @@ describe('create-benchmark.service', () => {
     ]);
     expect(result.benchmarkId).toBeDefined();
     expect(result.benchmarkId).toHaveLength(21);
-    expect(result.provider).toBe('aws');
+    expect(result.provider).toBe(BenchmarkProviders.AWS);
     expect(result.webhookPayload).toEqual({
       webhookBaseUrl: defaultWebhookBaseUrl,
       workflows: ['flow-3'],
@@ -297,7 +297,7 @@ describe('create-benchmark.service', () => {
 
     await expect(
       createBenchmark({
-        provider: 'aws',
+        provider: BenchmarkProviders.AWS,
         projectId,
         userId,
         benchmarkConfiguration: defaultBenchmarkConfiguration,
@@ -324,7 +324,7 @@ describe('create-benchmark.service', () => {
 
   const deleteFlowsParams = {
     projectId: 'project-1',
-    provider: 'aws',
+    provider: BenchmarkProviders.AWS,
     folderId: 'folder-1',
     userId: 'user-1',
   };
@@ -382,7 +382,7 @@ describe('create-benchmark.service', () => {
     { id: 'sub', filePath: '/path/sub.json' },
   ];
   const seedParams = {
-    provider: 'aws',
+    provider: BenchmarkProviders.AWS,
     workflowIds: ['orch', 'sub'],
     connectionId: 'conn-1',
     projectId: 'project-1',
