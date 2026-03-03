@@ -16,13 +16,13 @@ export type AuthenticatedRoutePolicy = {
   authorization: AuthorizationPolicy;
 };
 
-type OrganizationAuthorizationPolicy = {
+export type OrganizationAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.ORGANIZATION;
   allowedPrincipals: readonly PrincipalType[];
   permission?: Permission;
 };
 
-type ProjectAuthorizationPolicy = {
+export type ProjectAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.PROJECT;
   allowedPrincipals: readonly PrincipalType[];
   projectIdSource: ProjectIdSource;
