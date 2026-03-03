@@ -49,7 +49,6 @@ export * from './ui/skeleton';
 export * from './ui/sortable';
 export * from './ui/spinner';
 export * from './ui/status-icon-with-text';
-export * from './ui/step-counter';
 export * from './ui/switch';
 export * from './ui/table';
 export * from './ui/tabs';

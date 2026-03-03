@@ -282,7 +282,7 @@ describe('create-benchmark.service', () => {
     );
   });
 
-  it('createBenchmark deletes newly created flows and rethrows when insertBenchmarkRecords fails', async () => {
+  it('createBenchmark deletes newly created flows and rethrows when attachFlowsToBenchmark fails', async () => {
     const projectId = 'project-1';
     const userId = 'user-1';
     const folder: Folder = {

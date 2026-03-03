@@ -11,11 +11,11 @@ import {
   type BenchmarkWorkflowBase,
 } from '@openops/shared';
 import fs from 'node:fs/promises';
-import { webhookUtils } from 'server-worker';
 import { IsNull } from 'typeorm';
 import { transaction } from '../core/db/transaction';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
 import {
   bulkCreateAndPublishFlows,
   type WorkflowTemplate,
@@ -189,7 +189,7 @@ export async function createBenchmarkWorkflows(params: {
   }));
 }
 
-function buildPayloadForWebhook(params: {
+function _buildPayloadForWebhook(params: {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
   webhookBaseUrl: string;
@@ -235,7 +235,6 @@ export async function insertBenchmarkRecords(params: {
       connectionId,
       payload,
       deletedAt: null as string | null,
-      lastRunId: null as string | null,
     };
 
     const savedBenchmark = await benchmarkRepo(entityManager).save(
@@ -266,8 +265,6 @@ export async function createBenchmark(params: {
 
   validateBenchmarkConfiguration(benchmarkConfiguration);
 
-  const webhookBaseUrl = await webhookUtils.getWebhookPrefix();
-
   const workflowIds = benchmarkConfiguration.workflows ?? [];
   const connectionId = benchmarkConfiguration.connection[0];
 
@@ -291,20 +288,14 @@ export async function createBenchmark(params: {
     folderId: benchmarkFolder.id,
   });
 
-  const payload = buildPayloadForWebhook({
-    benchmarkConfiguration,
-    workflows,
-    webhookBaseUrl,
-  });
-
   try {
-    const benchmark = await insertBenchmarkRecords({
+    const { benchmark, payload } = await attachFlowsToBenchmark({
+      benchmarkConfiguration,
+      workflows,
       projectId,
       provider,
       folderId: benchmarkFolder.id,
       connectionId,
-      payload,
-      workflows,
     });
 
     return {

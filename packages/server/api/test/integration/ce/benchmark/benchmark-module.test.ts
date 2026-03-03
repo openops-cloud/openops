@@ -14,9 +14,21 @@ jest.mock(
   () => createBenchmarkServiceMock,
 );
 
+const benchmarkStatusServiceMock = {
+  getBenchmarkStatus: jest.fn(),
+  listBenchmarks: jest.fn(),
+};
+jest.mock(
+  '../../../../src/app/benchmark/benchmark-status.service',
+  () => benchmarkStatusServiceMock,
+);
+
 import {
   ApplicationError,
+  BenchmarkListItem,
   BenchmarkProviders,
+  BenchmarkStatus,
+  type BenchmarkStatusResponse,
   type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
@@ -43,21 +55,14 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
   totalSteps: 3,
 };
 
+const mockBenchmarkStatus: BenchmarkStatusResponse = {
+  benchmarkId: 'benchmark-001',
+  status: BenchmarkStatus.CREATED,
+  workflows: [],
+};
+
 const originalEnv = { ...process.env };
 let app: FastifyInstance | null = null;
-
-beforeAll(async () => {
-  wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
-  process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
-  await databaseConnection().initialize();
-  app = await setupServer();
-});
-
-afterAll(async () => {
-  await databaseConnection().destroy();
-  await app?.close();
-  process.env = originalEnv;
-});
 
 const createAndInsertMocks = async (): Promise<{
   token: string;
@@ -86,6 +91,22 @@ const createAndInsertMocks = async (): Promise<{
 
   return { token: mockToken, project: mockProject };
 };
+
+beforeAll(async () => {
+  wizardServiceMock.resolveWizardNavigation.mockResolvedValue(mockWizardStep);
+  benchmarkStatusServiceMock.getBenchmarkStatus.mockResolvedValue(
+    mockBenchmarkStatus,
+  );
+  process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
+  await databaseConnection().initialize();
+  app = await setupServer();
+});
+
+afterAll(async () => {
+  await databaseConnection().destroy();
+  await app?.close();
+  process.env = originalEnv;
+});
 
 describe('Benchmark wizard API', () => {
   const postWizard = async ({
@@ -353,5 +374,173 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
 
     expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
     expect(createBenchmarkServiceMock.createBenchmark).not.toHaveBeenCalled();
+  });
+});
+
+describe('Benchmark status API', () => {
+  const getStatus = async ({
+    benchmarkId,
+    token,
+  }: {
+    benchmarkId: string;
+    token?: string;
+  }): Promise<LightMyRequestResponse | undefined> =>
+    app?.inject({
+      method: 'GET',
+      url: `/v1/benchmarks/${benchmarkId}/status`,
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    });
+
+  describe('GET /v1/benchmarks/:benchmarkId/status', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      benchmarkStatusServiceMock.getBenchmarkStatus.mockResolvedValue(
+        mockBenchmarkStatus,
+      );
+    });
+
+    it('calls getBenchmarkStatus with benchmarkId and projectId and returns status', async () => {
+      const { token, project } = await createAndInsertMocks();
+      const benchmarkId = 'benchmark-001';
+
+      const response = await getStatus({ benchmarkId, token });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(response?.json()).toEqual(mockBenchmarkStatus);
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).toHaveBeenCalledWith({
+        benchmarkId,
+        projectId: project.id,
+      });
+    });
+
+    it('returns 404 when getBenchmarkStatus throws ENTITY_NOT_FOUND', async () => {
+      benchmarkStatusServiceMock.getBenchmarkStatus.mockRejectedValue(
+        new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: { entityType: 'Benchmark', entityId: 'missing-id' },
+        }),
+      );
+      const { token } = await createAndInsertMocks();
+
+      const response = await getStatus({ benchmarkId: 'missing-id', token });
+
+      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'false';
+      const { token } = await createAndInsertMocks();
+
+      const response = await getStatus({ benchmarkId: 'benchmark-001', token });
+
+      expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+      const data = response?.json();
+      expect(data?.code).toBe('FEATURE_DISABLED');
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      const response = await getStatus({ benchmarkId: 'benchmark-001' });
+
+      expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+      expect(
+        benchmarkStatusServiceMock.getBenchmarkStatus,
+      ).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('List benchmarks API', () => {
+  const getBenchmarkList = async ({
+    token,
+    provider,
+  }: {
+    token?: string;
+    provider?: string;
+  }): Promise<LightMyRequestResponse | undefined> =>
+    app?.inject({
+      method: 'GET',
+      url: '/v1/benchmarks',
+      query: provider ? { provider } : {},
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    });
+
+  const mockListItem: BenchmarkListItem = {
+    benchmarkId: 'benchmark-001',
+    provider: BenchmarkProviders.AWS,
+    status: BenchmarkStatus.CREATED,
+  };
+
+  describe('GET /v1/benchmarks', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      benchmarkStatusServiceMock.listBenchmarks.mockResolvedValue([
+        mockListItem,
+      ]);
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
+    });
+
+    it('calls listBenchmarks with projectId and returns results', async () => {
+      const { token, project } = await createAndInsertMocks();
+
+      const response = await getBenchmarkList({ token });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(response?.json()).toEqual([mockListItem]);
+      expect(benchmarkStatusServiceMock.listBenchmarks).toHaveBeenCalledWith({
+        projectId: project.id,
+        provider: undefined,
+      });
+    });
+
+    it('passes provider filter to listBenchmarks', async () => {
+      const { token, project } = await createAndInsertMocks();
+
+      const response = await getBenchmarkList({
+        token,
+        provider: BenchmarkProviders.AWS,
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(benchmarkStatusServiceMock.listBenchmarks).toHaveBeenCalledWith({
+        projectId: project.id,
+        provider: BenchmarkProviders.AWS,
+      });
+    });
+
+    it('returns 400 when provider is not a valid BenchmarkProviders value', async () => {
+      const { token } = await createAndInsertMocks();
+
+      const response = await getBenchmarkList({
+        token,
+        provider: 'invalidprovider',
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(benchmarkStatusServiceMock.listBenchmarks).not.toHaveBeenCalled();
+    });
+
+    it('returns 402 when FINOPS_BENCHMARK_ENABLED flag is disabled', async () => {
+      process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'false';
+      const { token } = await createAndInsertMocks();
+
+      const response = await getBenchmarkList({ token });
+
+      expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+      const data = response?.json();
+      expect(data?.code).toBe('FEATURE_DISABLED');
+      expect(benchmarkStatusServiceMock.listBenchmarks).not.toHaveBeenCalled();
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      const response = await getBenchmarkList({});
+
+      expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+      expect(benchmarkStatusServiceMock.listBenchmarks).not.toHaveBeenCalled();
+    });
   });
 });
