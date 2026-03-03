@@ -6,7 +6,7 @@ export enum ProjectIdLocation {
 }
 
 type BaseProjectIdSource = {
-  key?: string; // defaults to 'projectId'
+  key?: string;
 };
 
 export type ParamsProjectIdSource = BaseProjectIdSource & {
