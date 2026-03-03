@@ -14,14 +14,12 @@ const defaultProjectIdSource: ProjectIdSource = {
 
 export function getOrganizationScopedRoutePolicy(
   allowedPrincipals: readonly PrincipalType[],
-  // projectIdSource: ProjectIdSource = defaultProjectIdSource,
 ): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
     authorization: {
       authorizationScope: AuthorizationScope.ORGANIZATION,
       allowedPrincipals,
-      // projectIdSource,
     },
   };
 }
