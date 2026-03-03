@@ -7,6 +7,7 @@ import { assertNotNullOrUndefined } from '@openops/shared';
 import { SEED_OPENOPS_TABLE_NAME as OPPORTUNITIES_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
 import { TIMESERIES_TABLE_NAME } from '../../openops-tables/template-tables/create-timeseries-table';
 import { organizationService } from '../../organization/organization.service';
+import { upsertDashboard } from '../analytics-dashboard-registry-service';
 import { getOrCreateOpenOpsTablesDatabaseConnection } from '../create-database-connection';
 import { getDefaultProjectForOrganization } from '../project-selector';
 import {
@@ -61,7 +62,21 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
     },
   );
 
-  await enableDashboardEmbedding(access_token, AWS_BENCHMARK_DASHBOARD_SLUG);
+  const embedResponse = await enableDashboardEmbedding(
+    access_token,
+    AWS_BENCHMARK_DASHBOARD_SLUG,
+  );
+
+  await upsertDashboard(
+    {
+      id: AWS_BENCHMARK_DASHBOARD_SLUG,
+      name: 'AWS Benchmark',
+      slug: AWS_BENCHMARK_DASHBOARD_SLUG,
+      embedId: embedResponse.result.uuid,
+      enabled: true,
+    },
+    access_token,
+  );
 
   logger.info('AWS Benchmark dashboard seeding completed successfully');
 }
