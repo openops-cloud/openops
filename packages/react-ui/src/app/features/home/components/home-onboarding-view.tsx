@@ -24,7 +24,7 @@ import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
 type HomeOnboardingViewProps = {
   isHelpViewClosed: boolean;
@@ -99,13 +99,24 @@ const HomeOnboardingView = ({
     updateUserSettings({ [SETTINGS_KEYS.isHomeCloudConnectionClosed]: true });
   };
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const {
+    isEnabled: isFinOpsBenchmarkEnabled,
+    variation: benchmarkVariation,
+    provider: benchmarkProvider,
+  } = useBenchmarkBannerState();
+  const onViewBenchmarkReportClick = () =>
+    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
         <PermissionGuard permission={Permission.WRITE_FLOW}>
-          <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+          <FinOpsBenchmarkBanner
+            variation={benchmarkVariation}
+            provider={benchmarkProvider}
+            onActionClick={openBenchmarkWizard}
+            onViewReportClick={onViewBenchmarkReportClick}
+          />
         </PermissionGuard>
       )}
       <ExploreTemplatesCarousel

@@ -1,4 +1,5 @@
 import {
+  BenchmarkProviders,
   openOpsId,
   type BenchmarkConfiguration,
   type BenchmarkWebhookPayload,
@@ -15,7 +16,7 @@ export type AttachFlowsToBenchmarkRequest = {
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
   projectId: string;
-  provider: string;
+  provider: BenchmarkProviders;
   folderId: string | null;
   connectionId: string | null;
 };
@@ -52,7 +53,7 @@ async function buildPayloadForWebhook(params: {
 
 async function insertBenchmarkRecords(params: {
   projectId: string;
-  provider: string;
+  provider: BenchmarkProviders;
   folderId: string | null;
   connectionId: string | null;
   payload: BenchmarkWebhookPayload;

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
 type HomeOperationalViewProps = {
   onExploreTemplatesClick: () => void;
@@ -44,8 +44,14 @@ const HomeOperationalView = ({
 
   const flowsExist = !!existingFlowsResponse?.data?.length;
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const {
+    isEnabled: isFinOpsBenchmarkEnabled,
+    variation: benchmarkVariation,
+    provider: benchmarkProvider,
+  } = useBenchmarkBannerState();
   const openBenchmarkWizard = useOpenBenchmarkWizard();
+  const onViewBenchmarkReportClick = () =>
+    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
 
   return (
     <>
@@ -98,7 +104,12 @@ const HomeOperationalView = ({
 
       {isFinOpsBenchmarkEnabled && (
         <PermissionGuard permission={Permission.WRITE_FLOW}>
-          <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+          <FinOpsBenchmarkBanner
+            variation={benchmarkVariation}
+            provider={benchmarkProvider}
+            onActionClick={openBenchmarkWizard}
+            onViewReportClick={onViewBenchmarkReportClick}
+          />
         </PermissionGuard>
       )}
 

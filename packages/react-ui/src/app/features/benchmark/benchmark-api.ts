@@ -2,6 +2,7 @@ import {
   BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  ListBenchmarksResponse,
 } from '@openops/shared';
 
 import { api } from '@/app/lib/api';
@@ -24,7 +25,14 @@ const createBenchmark = (
     { benchmarkConfiguration: Record<string, string[]> }
   >(`/v1/benchmarks/${provider}`, { benchmarkConfiguration });
 
+const listBenchmarks = (provider?: string): Promise<ListBenchmarksResponse> =>
+  api.get<ListBenchmarksResponse>(
+    '/v1/benchmarks',
+    provider ? { provider } : undefined,
+  );
+
 export const benchmarkApi = {
   getWizardStep,
   createBenchmark,
+  listBenchmarks,
 };
