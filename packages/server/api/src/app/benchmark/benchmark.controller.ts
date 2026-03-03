@@ -45,8 +45,8 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     CreateBenchmarkRequestOptions,
     async (request, reply) => {
       await assertBenchmarkFeatureEnabled(
-        request.params.provider,
         request.principal.projectId,
+        request.params.provider,
       );
 
       const result = await createBenchmark({
