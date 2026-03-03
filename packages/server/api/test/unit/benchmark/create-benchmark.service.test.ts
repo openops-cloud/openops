@@ -74,13 +74,8 @@ jest.mock(
   }),
 );
 
-const mockGetWebhookPrefix = jest.fn();
-jest.mock('server-worker', () => ({
-  webhookUtils: {
-    getWebhookPrefix: (
-      ...args: unknown[]
-    ): ReturnType<typeof mockGetWebhookPrefix> => mockGetWebhookPrefix(...args),
-  },
+jest.mock('@openops/server-shared', () => ({
+  networkUtls: { getInternalApiUrl: () => 'http://localhost:3000/' },
 }));
 
 jest.mock('../../../src/app/benchmark/benchmark-flow-bulk-create', () => ({
@@ -116,11 +111,10 @@ const createBenchmarkMockConnections = [
   },
 ];
 
-const defaultWebhookBaseUrl = 'https://api.example.com/v1/webhooks';
+const defaultWebhookBaseUrl = 'http://localhost:3000/v1/webhooks';
 
 function setupCreateBenchmarkMocks(folder: Folder): void {
   flowFolderServiceMock.getOrCreate.mockResolvedValue(folder);
-  mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   mockGetConnectionsWithBlockSupport.mockResolvedValue(
     createBenchmarkMockConnections,
   );
@@ -156,7 +150,6 @@ describe('create-benchmark.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetRawMany.mockResolvedValue([]);
-    mockGetWebhookPrefix.mockResolvedValue(defaultWebhookBaseUrl);
   });
 
   it('createBenchmark throws for unknown provider', async () => {
@@ -265,7 +258,6 @@ describe('create-benchmark.service', () => {
       accounts: [],
       regions: ['us-east-1'],
     });
-    expect(mockGetWebhookPrefix).toHaveBeenCalled();
     expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
     expect(mockBenchmarkFlowRepoSave).toHaveBeenCalledTimes(1);
     expect(mockBenchmarkFlowRepo.createQueryBuilder).toHaveBeenCalledWith('bf');
