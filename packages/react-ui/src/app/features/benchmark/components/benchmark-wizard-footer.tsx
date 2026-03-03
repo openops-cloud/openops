@@ -1,11 +1,13 @@
 import {
   BenchmarkRunPhase,
   Button,
+  INTERNAL_ERROR_TOAST,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   WizardNext,
   WizardPrevious,
+  toast,
 } from '@openops/components/ui';
 import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
@@ -79,7 +81,12 @@ export const BenchmarkWizardFooter = ({
         <Button
           size="sm"
           disabled={!hasOrchestrator || isRunning}
-          onClick={onRunNow}
+          onClick={() => {
+            onRunNow().catch((e) => {
+              console.error(e);
+              toast(INTERNAL_ERROR_TOAST);
+            });
+          }}
         >
           {t('Run now')}
         </Button>
