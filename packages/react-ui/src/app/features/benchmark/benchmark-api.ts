@@ -36,7 +36,9 @@ const runBenchmark = (
 const getBenchmarkStatus = (
   benchmarkId: string,
 ): Promise<BenchmarkStatusResponse> =>
-  api.get<BenchmarkStatusResponse>(`/v1/benchmarks/${benchmarkId}/status`);
+  api.get<BenchmarkStatusResponse>(
+    `/v1/benchmarks/${benchmarkId}/status?${Date.now()}`,
+  );
 
 const listBenchmarks = (provider?: string): Promise<ListBenchmarksResponse> =>
   api.get<ListBenchmarksResponse>(
