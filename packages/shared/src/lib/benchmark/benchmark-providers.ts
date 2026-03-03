@@ -2,4 +2,5 @@ export enum BenchmarkProviders {
   AWS = 'aws',
 }
 
-export type BenchmarkProvider = `${BenchmarkProviders}`;
+export type BenchmarkProvider =
+  (typeof BenchmarkProviders)[keyof typeof BenchmarkProviders];
