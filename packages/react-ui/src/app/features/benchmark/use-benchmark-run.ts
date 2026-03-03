@@ -103,12 +103,14 @@ export const useBenchmarkRun = (
 
   const handleRunBenchmark = async () => {
     if (!benchmarkCreateResult) {
+      console.warn('Cannot run benchmark: no creation result available');
       return;
     }
     const orchestratorFlow = benchmarkCreateResult.workflows.find(
       (w) => w.isOrchestrator,
     );
     if (!orchestratorFlow) {
+      console.warn('Cannot run benchmark: no orchestrator workflow found');
       return;
     }
     await triggerRun({
