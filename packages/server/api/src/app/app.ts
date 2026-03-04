@@ -230,11 +230,6 @@ export const setupApp = async (
 
   app.get(
     '/redirect',
-    {
-      config: {
-        security: PUBLIC_ROUTE_POLICY,
-      },
-    },
     async (
       request: FastifyRequest<{ Querystring: { code: string } }>,
       reply,
