@@ -9,7 +9,7 @@ import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 
-import { BenchmarkWizard } from '../../benchmark/benchmark-wizard';
+import { BenchmarkWizard } from '../../benchmark/components/benchmark-wizard';
 
 interface SidePanelContainerProps {
   onDragging: (isDragging: boolean) => void;
@@ -23,11 +23,13 @@ const SecondaryLeftSidePanelContainer = ({
     setIsBenchmarkWizardOpen,
     isAiChatOpened,
     setIsAiChatOpened,
+    setIsSidebarMinimized,
   } = useAppStore((s) => ({
     isBenchmarkWizardOpen: s.isBenchmarkWizardOpen,
     setIsBenchmarkWizardOpen: s.setIsBenchmarkWizardOpen,
     isAiChatOpened: s.isAiChatOpened,
     setIsAiChatOpened: s.setIsAiChatOpened,
+    setIsSidebarMinimized: s.setIsSidebarMinimized,
   }));
 
   const { hasActiveAiSettings, isLoading } =
@@ -51,6 +53,12 @@ const SecondaryLeftSidePanelContainer = ({
     if (!shouldShowPanelContent) return 0;
     return getPanelSize(RESIZABLE_PANEL_IDS.SECONDARY_LEFT_SIDEBAR) ?? 20;
   }, [getPanelSize, shouldShowPanelContent]);
+
+  useEffect(() => {
+    if (isBenchmarkWizardOpen) {
+      setIsSidebarMinimized(true);
+    }
+  }, [isBenchmarkWizardOpen, setIsSidebarMinimized]);
 
   useEffect(() => {
     if (!resizablePanelRef.current) {

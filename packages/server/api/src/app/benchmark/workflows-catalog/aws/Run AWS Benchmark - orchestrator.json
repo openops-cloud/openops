@@ -1,0 +1,453 @@
+{
+  "created": "1772610946554",
+  "updated": "1772610946554",
+  "name": "Run AWS Benchmark - orchestrator",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "Run AWS Benchmark - orchestrator",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "G4pI8DoSPKKkAFFPifmsO",
+        "name": "step_b",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "params": "{{trigger}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const params = inputs.params.body?.data || {\n    webhookBaseUrl: 'http://localhost:4200/api/v1/webhooks',\n    workflows: [],\n    cleanupWorkflows: [],\n    accounts: [],\n    regions: [],\n  };\n\n  return params;\n};",
+            "packageJson": "{}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "N9D9NTgxgGDLXdmILm7pS",
+          "name": "step_c",
+          "type": "LOOP_ON_ITEMS",
+          "valid": true,
+          "settings": {
+            "items": "{{step_b['cleanupWorkflows']}}",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            }
+          },
+          "nextAction": {
+            "id": "rjxyvGxYw42djbJbtKX5K",
+            "name": "step_h",
+            "type": "LOOP_ON_ITEMS",
+            "valid": true,
+            "settings": {
+              "items": "{{step_b['workflows']}}",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              }
+            },
+            "nextAction": {
+              "id": "U1mgOfY0ZUmFG2ZDuylcD",
+              "name": "step_am",
+              "type": "CODE",
+              "valid": true,
+              "settings": {
+                "input": {},
+                "sourceCode": {
+                  "code": "import dayjs from 'dayjs';\n\nexport const code = async (inputs) => {\n  const now = dayjs();\n  const firstDay = now.subtract(6, 'month').startOf('month').format('YYYY-MM-DD');\n  const lastDay = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');\n\n  return {\n    firstDay,\n    lastDay,\n  };\n};",
+                  "packageJson": "{\n  \"dependencies\": {\n    \"dayjs\": \"^1.11.10\"\n  }\n}"
+                },
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "o4W8Jd7gCpYWBWUayaaJD",
+                "name": "step_ak",
+                "type": "LOOP_ON_ITEMS",
+                "valid": true,
+                "settings": {
+                  "items": "{{step_b['accounts']}}",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  }
+                },
+                "nextAction": {
+                  "id": "WtiVYVjYhQlmS4DphuTlF",
+                  "name": "step_d",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "filters": {
+                        "filters": [
+                          {
+                            "value": {
+                              "value": "AWS Benchmark - "
+                            },
+                            "fieldName": "Workflow",
+                            "filterType": "Contains"
+                          }
+                        ]
+                      },
+                      "tableName": "Opportunities",
+                      "filterType": "AND"
+                    },
+                    "blockName": "@openops/block-openops-tables",
+                    "blockType": "OFFICIAL",
+                    "actionName": "get_records",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "rKm3dn5X2XoBlSthwIbpu",
+                    "name": "step_e",
+                    "type": "CODE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "opportunities": "{{step_d['items']}}"
+                      },
+                      "sourceCode": {
+                        "code": "// @ts-nocheck\n// ── Workflow-to-Category Mapping ──────────────────────────────────────────────\n\nconst WORKFLOW_CATEGORIES = {\n  // idle: resource is unused, recommend termination/deletion\n  'AWS Benchmark - Idle RDS instances': 'idle',\n  'AWS Benchmark - Underutilized EC2': 'idle',\n  'AWS Benchmark - Underutilized RDS': 'idle',\n  'AWS Benchmark - Idle Elastic Load Balancer (ELB)': 'idle',\n  'AWS Benchmark - Unused NAT Gateways': 'idle',\n  'AWS Benchmark - Underutilized VPC Interface Endpoints': 'idle',\n  'AWS Benchmark - Unattached Elastic IP Addresses': 'idle',\n  'AWS Benchmark - Unattached EBS': 'idle',\n  'AWS Benchmark - Idle Compute Optimizer Recommendations': 'idle',\n\n  // rightsizing: resource is over-provisioned, recommend downsizing\n  'AWS Benchmark - EC2 Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - RDS Instance Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - RDS Storage Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - EBS Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - ECS Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - Lambda Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - ASG Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - License Compute Optimizer Recommendations': 'rightsizing',\n  'AWS Benchmark - DynamoDB Over-Provisioned Tables': 'rightsizing',\n\n  // migration: resource should be migrated/upgraded\n  'AWS Benchmark - Migrate EC2 instances to Graviton': 'migration',\n  'AWS Benchmark - EBS Generation upgrade (gp2 to gp3)': 'migration',\n  'AWS Benchmark - RDS Extended Support Avoidance': 'migration',\n\n  // cleanup: orphaned resources\n  'AWS Benchmark - Orphaned RDS Snapshots': 'cleanup',\n};\n\n// ── Default Config ───────────────────────────────────────────────────────────\n\nconst DEFAULT_CONFIG = {\n  // 'higher_savings' | 'prefer_compute_optimizer' | 'prefer_openops'\n  winnerStrategy: 'higher_savings',\n\n  // When savings are equal and strategy is 'higher_savings', prefer this source\n  tieBreaker: 'compute_optimizer', // 'compute_optimizer' | 'openops'\n\n  // If true, idle recommendations supersede all other categories for the same resource\n  idleTrumpsAll: true,\n\n  // Enable debug mode — adds explanation for each decision\n  debug: false,\n\n  // Override the workflow-to-category mapping (null = use defaults)\n  workflowCategories: null,\n};\n\n// ── Helpers ──────────────────────────────────────────────────────────────────\n\nconst parseSavings = (opportunity) =>\n  parseFloat(opportunity['Estimated savings USD per month']) || 0;\n\nconst isComputeOptimizer = (workflow) =>\n  workflow.includes('Compute Optimizer');\n\nconst getCategory = (workflow, config) => {\n  const categories = config.workflowCategories || WORKFLOW_CATEGORIES;\n  return categories[workflow] || 'unknown';\n};\n\nconst briefOpp = (opp) => ({\n  id: opp.id,\n  workflow: opp['Workflow'],\n  savings: parseSavings(opp),\n});\n\n// ── Winner Selection ─────────────────────────────────────────────────────────\n\nconst selectWinner = (opportunities, config) => {\n  if (opportunities.length === 1) {\n    return { winners: [opportunities[0]], losers: [], reason: 'Only one opportunity in category' };\n  }\n\n  const strategy = config.winnerStrategy || 'higher_savings';\n\n  let sorted;\n\n  if (strategy === 'prefer_compute_optimizer') {\n    sorted = [...opportunities].sort((a, b) => {\n      const aCO = isComputeOptimizer(a['Workflow']) ? 1 : 0;\n      const bCO = isComputeOptimizer(b['Workflow']) ? 1 : 0;\n      if (bCO !== aCO) return bCO - aCO;\n      return parseSavings(b) - parseSavings(a);\n    });\n  } else if (strategy === 'prefer_openops') {\n    sorted = [...opportunities].sort((a, b) => {\n      const aOO = isComputeOptimizer(a['Workflow']) ? 0 : 1;\n      const bOO = isComputeOptimizer(b['Workflow']) ? 0 : 1;\n      if (bOO !== aOO) return bOO - aOO;\n      return parseSavings(b) - parseSavings(a);\n    });\n  } else {\n    // higher_savings (default)\n    sorted = [...opportunities].sort((a, b) => {\n      const diff = parseSavings(b) - parseSavings(a);\n      if (diff !== 0) return diff;\n      // tie-break\n      const preferCO = (config.tieBreaker || 'compute_optimizer') === 'compute_optimizer';\n      const aCO = isComputeOptimizer(a['Workflow']) ? 1 : 0;\n      const bCO = isComputeOptimizer(b['Workflow']) ? 1 : 0;\n      return preferCO ? bCO - aCO : aCO - bCO;\n    });\n  }\n\n  const winner = sorted[0];\n  const losers = sorted.slice(1);\n\n  const reason = buildWinnerReason(strategy, winner, losers, config);\n\n  return { winners: [winner], losers, reason };\n};\n\nconst buildWinnerReason = (strategy, winner, losers, config) => {\n  const wSavings = parseSavings(winner);\n  const lDescriptions = losers\n    .map((l) => `$${parseSavings(l).toFixed(2)} (${l['Workflow']})`)\n    .join(', ');\n\n  if (strategy === 'prefer_compute_optimizer') {\n    return `Strategy: prefer Compute Optimizer. Winner: ${winner['Workflow']} ($${wSavings.toFixed(2)}) over ${lDescriptions}`;\n  }\n  if (strategy === 'prefer_openops') {\n    return `Strategy: prefer OpenOps. Winner: ${winner['Workflow']} ($${wSavings.toFixed(2)}) over ${lDescriptions}`;\n  }\n\n  const allSame = losers.every((l) => parseSavings(l) === wSavings);\n  if (allSame) {\n    const tieLabel =\n      (config.tieBreaker || 'compute_optimizer') === 'compute_optimizer'\n        ? 'Compute Optimizer'\n        : 'OpenOps';\n    return `Equal savings ($${wSavings.toFixed(2)}). Tie-break: prefer ${tieLabel}. Winner: ${winner['Workflow']} over ${lDescriptions}`;\n  }\n\n  return `Higher savings: $${wSavings.toFixed(2)} (${winner['Workflow']}) over ${lDescriptions}`;\n};\n\n// ── Core Deduplication ───────────────────────────────────────────────────────\n\nconst deDuplicate = (opportunities, config) => {\n  const toKeep = [];\n  const toRemove = [];\n  const debugLog = [];\n\n  // 0. Remove opportunities with 0 USD savings\n  const nonZeroOpportunities = [];\n  for (const opp of opportunities) {\n    if (parseSavings(opp) === 0) {\n      toRemove.push(opp);\n      if (config.debug) {\n        debugLog.push({\n          resourceId: opp['Resource Id'],\n          action: 'zero_savings_removed',\n          kept: [],\n          removed: [briefOpp(opp)],\n          reason: 'Opportunity has $0 estimated savings — removed',\n        });\n      }\n    } else {\n      nonZeroOpportunities.push(opp);\n    }\n  }\n\n  // 1. Group by Resource Id\n  const groups = new Map();\n  for (const opp of nonZeroOpportunities) {\n    const resourceId = opp['Resource Id'];\n    if (!groups.has(resourceId)) {\n      groups.set(resourceId, []);\n    }\n    groups.get(resourceId).push(opp);\n  }\n\n  // 2. Process each resource group\n  for (const [resourceId, opps] of groups) {\n    if (opps.length === 1) {\n      toKeep.push(opps[0]);\n      if (config.debug) {\n        debugLog.push({\n          resourceId,\n          action: 'unique_resource',\n          kept: [briefOpp(opps[0])],\n          removed: [],\n          reason: 'Only opportunity for this resource — auto-kept',\n        });\n      }\n      continue;\n    }\n\n    // 3. Sub-group by category\n    const categoryGroups = new Map();\n    for (const opp of opps) {\n      const category = getCategory(opp['Workflow'], config);\n      if (!categoryGroups.has(category)) {\n        categoryGroups.set(category, []);\n      }\n      categoryGroups.get(category).push(opp);\n    }\n\n    // 4. Select winner within each category\n    const categoryWinners = new Map(); // category -> winners[]\n    for (const [category, categoryOpps] of categoryGroups) {\n      const { winners, losers, reason } = selectWinner(categoryOpps, config);\n      categoryWinners.set(category, winners);\n      toRemove.push(...losers);\n\n      if (config.debug && losers.length > 0) {\n        debugLog.push({\n          resourceId,\n          action: 'selected_winner',\n          category,\n          kept: winners.map(briefOpp),\n          removed: losers.map(briefOpp),\n          reason,\n        });\n      }\n    }\n\n    // 5. Apply cross-category rules: idle trumps all other categories\n    if (config.idleTrumpsAll && categoryWinners.has('idle')) {\n      for (const [cat, winners] of categoryWinners) {\n        if (cat === 'idle') continue;\n        toRemove.push(...winners);\n        categoryWinners.delete(cat);\n\n        if (config.debug) {\n          debugLog.push({\n            resourceId,\n            action: 'idle_trumps_all',\n            kept: categoryWinners.get('idle').map(briefOpp),\n            removed: winners.map(briefOpp),\n            reason: `Idle recommendation supersedes ${cat} — resource should be terminated/deleted, not optimized`,\n          });\n        }\n      }\n    }\n\n    // 6. Collect all surviving winners\n    for (const winners of categoryWinners.values()) {\n      toKeep.push(...winners);\n    }\n  }\n\n  const result = {\n    toKeep,\n    toRemove,\n    toKeepCount: toKeep.length,\n    toRemoveCount: toRemove.length,\n  };\n  if (config.debug) {\n    result.debugLog = debugLog;\n  }\n  return result;\n};\n\n// ── Entry Point ──────────────────────────────────────────────────────────────\n\nexport const code = async ({ opportunities }) => {\n  const config = { ...DEFAULT_CONFIG };\n  return deDuplicate(opportunities, config);\n};\n\n// ── Named Exports for Testing ────────────────────────────────────────────────\n\nexport {\n  deDuplicate,\n  selectWinner,\n  getCategory,\n  isComputeOptimizer,\n  parseSavings,\n  WORKFLOW_CATEGORIES,\n  DEFAULT_CONFIG,\n};\n\n",
+                        "packageJson": "{}"
+                      },
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "ZRkZiigGOnj1ECRds2mM4",
+                      "name": "step_f",
+                      "type": "LOOP_ON_ITEMS",
+                      "valid": true,
+                      "settings": {
+                        "items": "{{step_e['toRemove']}}",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "displayName": "Remove duplicated opportunities",
+                      "firstLoopAction": {
+                        "id": "J9p2rIxqM27h8PMWmNQsB",
+                        "name": "step_g",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "tableName": "Opportunities",
+                            "rowPrimaryKey": "{{step_f['item']['ID']}}"
+                          },
+                          "blockName": "@openops/block-openops-tables",
+                          "blockType": "OFFICIAL",
+                          "actionName": "delete_record",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "displayName": "Delete Record",
+                        "stepIndex": 15
+                      },
+                      "stepIndex": 14
+                    },
+                    "displayName": "DeDuplicator",
+                    "stepIndex": 13
+                  },
+                  "displayName": "Get Records",
+                  "stepIndex": 12
+                },
+                "displayName": "Loop on accounts",
+                "firstLoopAction": {
+                  "id": "0NkEyTR1kUIKdD8Al27P2",
+                  "name": "step_s",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['AWS']}}",
+                      "dryRun": false,
+                      "account": {},
+                      "commandToRun": "aws ce get-cost-and-usage \\\n    --time-period Start={{step_am['firstDay']}},End={{step_am['lastDay']}} \\\n    --granularity MONTHLY \\\n    --metrics \"AmortizedCost\" \\\n    --filter '{\"Dimensions\":{\"Key\":\"RECORD_TYPE\",\"Values\":[\"Usage\"]}}' "
+                    },
+                    "blockName": "@openops/block-aws",
+                    "blockType": "OFFICIAL",
+                    "actionName": "aws_cli",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {
+                            "auth": false,
+                            "account": {
+                              "accounts": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.3",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "ClflsNTJG8CGapBkHeksZ",
+                    "name": "step_an",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_s['ResultsByTime']}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "Loop on Items",
+                    "firstLoopAction": {
+                      "id": "hmtz5uaGgOaqn8rDYnFZq",
+                      "name": "step_al",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "tableName": "Timeseries",
+                          "rowPrimaryKey": {},
+                          "fieldsProperties": {
+                            "fieldsProperties": [
+                              {
+                                "fieldName": "Workflow",
+                                "newFieldValue": {
+                                  "newFieldValue": "Run AWS Benchmark"
+                                }
+                              },
+                              {
+                                "fieldName": "Value",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_an['item']['Total']['AmortizedCost']['Amount']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Date",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_an['item']['TimePeriod']['Start']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Account",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_ak['item']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Type",
+                                "newFieldValue": {
+                                  "newFieldValue": "Monthly Amortized Cost"
+                                }
+                              }
+                            ]
+                          },
+                          "roundToFieldPrecision": true
+                        },
+                        "blockName": "@openops/block-openops-tables",
+                        "blockType": "OFFICIAL",
+                        "actionName": "update_record",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Save monthly cost into Timeseries",
+                      "stepIndex": 11
+                    },
+                    "stepIndex": 10
+                  },
+                  "displayName": "Retrieve last month bill",
+                  "stepIndex": 9
+                },
+                "stepIndex": 8
+              },
+              "displayName": "Get dates",
+              "stepIndex": 7
+            },
+            "displayName": "Loop on benchmark flows",
+            "firstLoopAction": {
+              "id": "m2tQyXsoO8lF1P9c8nHPD",
+              "name": "step_a",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "url": "{{step_b['webhookBaseUrl']}}/{{step_h['item']}}/sync",
+                  "auth": null,
+                  "body": {
+                    "data": {
+                      "aws_regions_array": "{{step_b['regions']}}",
+                      "aws_accounts_array": "{{step_b['accounts']}}"
+                    }
+                  },
+                  "method": "POST",
+                  "headers": {},
+                  "timeout": null,
+                  "failsafe": false,
+                  "body_type": "json",
+                  "use_proxy": false,
+                  "queryParams": {},
+                  "proxy_settings": {}
+                },
+                "blockName": "@openops/block-http",
+                "blockType": "OFFICIAL",
+                "actionName": "send_request",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.5.1",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": true
+                  }
+                }
+              },
+              "displayName": "Run sub-workflow",
+              "stepIndex": 6
+            },
+            "stepIndex": 5
+          },
+          "displayName": "Loop on cleanup flows",
+          "firstLoopAction": {
+            "id": "vC5So8eaRE7u6gDpTKAOj",
+            "name": "step_i",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "{{step_b['webhookBaseUrl']}}/{{step_c['item']}}/sync",
+                "body": {},
+                "method": "GET",
+                "headers": {},
+                "timeout": null,
+                "failsafe": false,
+                "body_type": "none",
+                "use_proxy": false,
+                "queryParams": {},
+                "proxy_settings": {}
+              },
+              "blockName": "@openops/block-http",
+              "blockType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.5.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "displayName": "Run cleanup workflow",
+            "stepIndex": 4
+          },
+          "stepIndex": 3
+        },
+        "displayName": "Fetch webhook params",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-http",
+    "@openops/block-aws",
+    "@openops/block-openops-tables"
+  ],
+  "categories": []
+}

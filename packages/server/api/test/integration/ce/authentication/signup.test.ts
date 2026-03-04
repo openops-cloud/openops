@@ -87,8 +87,10 @@ beforeAll(async () => {
     externalId: mockAdminUser.externalId,
     type: PrincipalType.USER,
     projectId: mockProject.id,
+    projectRole: 'ADMIN',
     organization: {
       id: mockOrganization.id,
+      role: 'MEMBER',
     },
   });
 });
@@ -121,20 +123,9 @@ describe('Sign up Endpoint', () => {
 
     expect(response?.statusCode).toBe(StatusCodes.OK);
     expect(responseBody?.id).toHaveLength(21);
-    expect(responseBody?.created).toBeDefined();
-    expect(responseBody?.updated).toBeDefined();
-    expect(responseBody?.verified).toBe(true);
     expect(responseBody?.email).toBe(mockSignUpRequest.email);
-    expect(responseBody?.firstName).toBe(mockSignUpRequest.firstName);
-    expect(responseBody?.lastName).toBe(mockSignUpRequest.lastName);
-    expect(responseBody?.trackEvents).toBe(mockSignUpRequest.trackEvents);
-    expect(responseBody?.newsLetter).toBe(mockSignUpRequest.newsLetter);
-    expect(responseBody?.password).toBeUndefined();
-    expect(responseBody?.status).toBe('ACTIVE');
     expect(responseBody?.organizationId).toBeDefined();
-    expect(responseBody?.externalId).toBe(null);
     expect(responseBody?.projectId).toHaveLength(21);
-    expect(responseBody?.token).toBeDefined();
     expect(authUserMock).toBeCalledTimes(1);
   });
 

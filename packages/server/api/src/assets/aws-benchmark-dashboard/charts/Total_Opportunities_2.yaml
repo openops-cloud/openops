@@ -1,0 +1,38 @@
+slice_name: Total Opportunities
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 4__table
+  viz_type: big_number_total
+  slice_id: 2
+  metric: count
+  adhoc_filters:
+    - expressionType: SIMPLE
+      subject: Snoozed until
+      operator: TEMPORAL_RANGE
+      comparator: No filter
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_lz36u8hmdgq_9ga1m5gnizb
+  header_font_size: 0.5
+  subheader_font_size: 0.15
+  y_axis_format: SMART_NUMBER
+  time_format: smart_date
+  conditional_formatting: []
+  extra_form_data: {}
+  dashboards:
+    - 2
+    - 1
+query_context:
+  '{"datasource":{"id":4,"type":"table"},"force":false,"queries":[{"filters":[{"col":"Snoozed
+  until","op":"TEMPORAL_RANGE","val":"No filter"}],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":["count"],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"4__table","viz_type":"big_number_total","slice_id":2,"metric":"count","adhoc_filters":[{"expressionType":"SIMPLE","subject":"Snoozed
+  until","operator":"TEMPORAL_RANGE","comparator":"No filter","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_lz36u8hmdgq_9ga1m5gnizb"}],"header_font_size":0.5,"subheader_font_size":0.15,"y_axis_format":"SMART_NUMBER","time_format":"smart_date","conditional_formatting":[],"extra_form_data":{},"dashboards":[2,1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 1f2e7352-4935-40cf-ba60-b83549e1c116
+version: 1.0.0
+dataset_uuid: e3dda124-e8ad-4c61-92d1-6cca71895ba0

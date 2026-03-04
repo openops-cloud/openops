@@ -1,18 +1,13 @@
 import {
   ApplicationError,
-  AuthenticationResponse,
   ErrorCode,
+  InternalAuthenticationPayload,
   isNil,
   User,
   UserStatus,
 } from '@openops/shared';
 import { passwordHasher } from './basic/password-hasher';
 import { AssertPasswordsMatchParams, ProjectContext } from './types';
-
-const removePasswordPropFromUser = (user: User): Omit<User, 'password'> => {
-  const { password: _, ...filteredUser } = user;
-  return filteredUser;
-};
 
 export const assertUserIsAllowedToSignIn: (
   user: User | null,
@@ -60,15 +55,13 @@ export const assertPasswordMatches = async ({
 
 export function buildAuthResponse(
   projectContext: ProjectContext,
-): AuthenticationResponse {
-  const userWithoutPassword = removePasswordPropFromUser(projectContext.user);
-
+): InternalAuthenticationPayload {
   return {
-    ...userWithoutPassword,
+    ...projectContext.user,
     token: projectContext.token,
-    projectId: projectContext.project.id,
+    projectId: projectContext.projectId,
     projectRole: projectContext.projectRole,
     tablesRefreshToken: projectContext.tablesRefreshToken,
-    tablesWorkspaceId: projectContext.project.tablesWorkspaceId,
+    tablesWorkspaceId: projectContext.tablesWorkspaceId,
   };
 }

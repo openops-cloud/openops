@@ -1,0 +1,89 @@
+table_name: AWS_Benchmark_KPI_efficiency
+main_dttm_col: null
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+catalog: tables
+schema: public
+sql:
+  "WITH opp AS (\n  SELECT\n    \"Account\" AS opp_account,\n    COALESCE(SUM(\"\
+  Estimated savings USD per month\"), 0) AS opp_sum\n  FROM public.\"Opportunities_5_userfriendly\"\
+  \n  WHERE \"Workflow\" LIKE 'AWS Benchmark%'\n  GROUP BY \"Account\"\n),\nts AS\
+  \ (\n  SELECT\n    \"Account\" AS ts_account,\n    COALESCE(SUM(\"Value\"), 0) AS\
+  \ ts_value\n  FROM public.\"Timeseries_14_userfriendly\"\n  WHERE \"Workflow\" =\
+  \ 'Run AWS Benchmark'\n    AND \"Date\" = (date_trunc('month', current_date) - interval\
+  \ '1 month')::date\n  GROUP BY \"Account\"\n)\nSELECT\n  COALESCE(opp.opp_account,\
+  \ ts.ts_account) AS \"Account\",\n  COALESCE(opp.opp_sum, 0) AS savings,\n  COALESCE(ts.ts_value,\
+  \ 0) AS monthly_cost,\n  (1 - (COALESCE(opp.opp_sum, 0) / NULLIF(COALESCE(ts.ts_value,\
+  \ 0), 0))) * 100.0 AS kpi\nFROM opp\nFULL OUTER JOIN ts\n  ON opp.opp_account =\
+  \ ts.ts_account;"
+params: null
+template_params: null
+filter_select_enabled: true
+fetch_values_predicate: null
+extra: null
+normalize_columns: false
+always_filter_main_dttm: false
+uuid: f5fbb976-0836-4cc5-8382-77d544626551
+metrics:
+  - metric_name: count
+    verbose_name: COUNT(*)
+    metric_type: count
+    expression: COUNT(*)
+    description: null
+    d3format: null
+    currency: null
+    extra: null
+    warning_text: null
+columns:
+  - column_name: monthly_cost
+    verbose_name: null
+    is_dttm: false
+    is_active: true
+    type: DECIMAL
+    advanced_data_type: null
+    groupby: true
+    filterable: true
+    expression: null
+    description: null
+    python_date_format: null
+    extra: null
+  - column_name: savings
+    verbose_name: null
+    is_dttm: false
+    is_active: true
+    type: DECIMAL
+    advanced_data_type: null
+    groupby: true
+    filterable: true
+    expression: null
+    description: null
+    python_date_format: null
+    extra: null
+  - column_name: kpi
+    verbose_name: null
+    is_dttm: false
+    is_active: true
+    type: DECIMAL
+    advanced_data_type: null
+    groupby: true
+    filterable: true
+    expression: null
+    description: null
+    python_date_format: null
+    extra: null
+  - column_name: Account
+    verbose_name: null
+    is_dttm: false
+    is_active: true
+    type: STRING
+    advanced_data_type: null
+    groupby: true
+    filterable: true
+    expression: null
+    description: null
+    python_date_format: null
+    extra: null
+version: 1.0.0
+database_uuid: a584ee83-4fb9-4bcd-8ac1-70ec37e0acd9

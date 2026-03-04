@@ -1,22 +1,16 @@
-import { t } from 'i18next';
 import React from 'react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
+type PermissionNeededTooltipProps = {
+  children: React.ReactNode;
+  message?: string;
+  className?: string;
+  tooltipPlacement?: 'bottom' | 'left';
+};
 
-export const PermissionNeededTooltip = React.forwardRef<
-  HTMLButtonElement,
-  { children: React.ReactNode; hasPermission: boolean }
->(({ children, hasPermission }, ref) => {
-  return (
-    <Tooltip delayDuration={100}>
-      <TooltipTrigger ref={ref} asChild disabled={!hasPermission}>
-        <div>{children}</div>
-      </TooltipTrigger>
-      {!hasPermission && (
-        <TooltipContent side="bottom">{t('Permission needed')}</TooltipContent>
-      )}
-    </Tooltip>
-  );
-});
+export const PermissionNeededTooltip = ({
+  children,
+}: PermissionNeededTooltipProps) => {
+  return children;
+};
 
-PermissionNeededTooltip.displayName = 'PermissionNeededWrapper';
+PermissionNeededTooltip.displayName = 'PermissionNeededTooltip';

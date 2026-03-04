@@ -21,6 +21,7 @@ import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { ImportFlowDialogContent } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog-content';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 
 const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -53,9 +54,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
       updateHomePageOperationalViewFlag();
       navigate(`/flows/${flow.id}?${SEARCH_PARAMS.viewOnly}=true`);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const handleFileParsing = async (file: File | null) => {

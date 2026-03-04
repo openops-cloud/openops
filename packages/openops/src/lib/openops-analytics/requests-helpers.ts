@@ -1,5 +1,6 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import axios, { AxiosHeaders, Method } from 'axios';
+import FormData from 'form-data';
 
 export function createAxiosHeadersForAnalytics(token: string): AxiosHeaders {
   return new AxiosHeaders({
@@ -46,6 +47,25 @@ export async function makeOpenOpsAnalyticsDelete<T>(
     'DELETE',
     route,
     undefined,
+    headers,
+    allowErrors,
+  );
+}
+
+export async function makeOpenOpsAnalyticsPostFormData<T>(
+  route: string,
+  token: string,
+  formData: FormData,
+  allowErrors?: boolean,
+): Promise<T> {
+  const headers = new AxiosHeaders({
+    ...formData.getHeaders(),
+    Authorization: `Bearer ${token}`,
+  });
+  return makeOpenOpsAnalyticsV1ApiRequest<T>(
+    'POST',
+    route,
+    formData,
     headers,
     allowErrors,
   );

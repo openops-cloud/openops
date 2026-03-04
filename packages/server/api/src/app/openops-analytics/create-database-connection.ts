@@ -3,8 +3,10 @@ import {
   makeOpenOpsAnalyticsGet,
   makeOpenOpsAnalyticsPost,
 } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
+
+type DatabaseConnection = { id: number; uuid: string };
 
 export async function getOrCreatePostgresDatabaseConnection(
   token: string,
@@ -14,7 +16,7 @@ export async function getOrCreatePostgresDatabaseConnection(
   dbUserName: string,
   host: string,
   connectionName: string,
-): Promise<{ id: number }> {
+): Promise<DatabaseConnection> {
   const authenticationHeader = createAxiosHeadersForAnalytics(token);
 
   const existingConnection = await getDatabaseConnection(
@@ -47,10 +49,25 @@ export async function getOrCreatePostgresDatabaseConnection(
   return { id: databaseConnection.id, ...databaseConnection.result };
 }
 
+export async function getOrCreateOpenOpsTablesDatabaseConnection(
+  token: string,
+): Promise<{ id: number; uuid: string }> {
+  return getOrCreatePostgresDatabaseConnection(
+    token,
+    system.getOrThrow(AppSystemProp.OPENOPS_TABLES_DATABASE_NAME),
+    system.getOrThrow(AppSystemProp.POSTGRES_PASSWORD),
+    system.getOrThrow(AppSystemProp.POSTGRES_PORT),
+    system.getOrThrow(AppSystemProp.POSTGRES_USERNAME),
+    system.get(AppSystemProp.OPENOPS_TABLES_DB_HOST) ??
+      system.getOrThrow(AppSystemProp.POSTGRES_HOST),
+    'openops_tables_connection',
+  );
+}
+
 async function getDatabaseConnection(
   name: string,
   authenticationHeader: AxiosHeaders,
-): Promise<{ id: number } | undefined> {
+): Promise<DatabaseConnection | undefined> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response = await makeOpenOpsAnalyticsGet<{ result: any[] }>(
     `database?q=(filters:!((col:database_name,opr:eq,value:'${name}')))`,
@@ -58,6 +75,10 @@ async function getDatabaseConnection(
   );
 
   return response && response?.result && response.result.length === 1
-    ? { id: response.result[0].id, ...response.result[0] }
+    ? {
+        id: response.result[0].id,
+        uuid: response.result[0].uuid,
+        ...response.result[0],
+      }
     : undefined;
 }

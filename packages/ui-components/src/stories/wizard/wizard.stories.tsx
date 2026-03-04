@@ -8,7 +8,6 @@ import {
   SelectForm,
   SelectOption,
   StepBody,
-  StepCounter,
   StepDescription,
   StepTitle,
   Wizard,
@@ -277,6 +276,8 @@ const WizardExample = () => {
                   <>
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
+                        variant="primary"
+                        labelClassName="font-normal"
                         id="select-all-accounts"
                         selectedCount={selectedAccounts.length}
                         totalCount={ACCOUNTS.length}
@@ -322,6 +323,8 @@ const WizardExample = () => {
                   <>
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
+                        variant="primary"
+                        labelClassName="font-normal"
                         id="select-all-regions"
                         selectedCount={selectedRegions.length}
                         totalCount={REGIONS.length}
@@ -365,6 +368,8 @@ const WizardExample = () => {
                   <>
                     <div className="px-4 py-3 border-b border-border h-12 flex items-center">
                       <SelectAllCheckbox
+                        variant="primary"
+                        labelClassName="font-normal"
                         id="select-all-services"
                         selectedCount={selectedServices.length}
                         totalCount={SERVICES.length}
@@ -400,7 +405,6 @@ const WizardExample = () => {
           ) : (
             <div className="w-[112px]" />
           )}
-          <StepCounter current={steps.indexOf(currentStep) + 1} total={5} />
           <WizardNext disabled={!isCurrentStepValid()} />
         </WizardFooter>
       </Wizard>

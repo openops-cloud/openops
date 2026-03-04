@@ -12,7 +12,60 @@ const openopsCommonMock = {
 };
 jest.mock('@openops/common', () => openopsCommonMock);
 
-import { getOrCreatePostgresDatabaseConnection } from '../../../src/app/openops-analytics/create-database-connection';
+import {
+  getOrCreateOpenOpsTablesDatabaseConnection,
+  getOrCreatePostgresDatabaseConnection,
+} from '../../../src/app/openops-analytics/create-database-connection';
+
+describe('getOrCreateOpenOpsTablesDatabaseConnection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    openopsCommonMock.makeOpenOpsAnalyticsGet.mockResolvedValue({ result: [] });
+    openopsCommonMock.createAxiosHeadersForAnalytics.mockReturnValue(
+      'some header',
+    );
+    openopsCommonMock.makeOpenOpsAnalyticsPost.mockResolvedValue({
+      id: 1,
+      result: { uuid: 'some-uuid' },
+    });
+    process.env.OPS_OPENOPS_TABLES_DATABASE_NAME = 'some dbName';
+    process.env.OPS_POSTGRES_PASSWORD = 'some password';
+    process.env.OPS_POSTGRES_PORT = 'some port';
+    process.env.OPS_POSTGRES_USERNAME = 'some username';
+    process.env.OPS_POSTGRES_HOST = 'some host';
+    delete process.env.OPS_OPENOPS_TABLES_DB_HOST;
+  });
+
+  it('should use POSTGRES_HOST when OPENOPS_TABLES_DB_HOST is not set', async () => {
+    await getOrCreateOpenOpsTablesDatabaseConnection('some token');
+
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(
+      'database',
+      expect.objectContaining({
+        sqlalchemy_uri:
+          'postgresql://some username:some password@some host:some port/some dbName',
+        database_name: 'openops_tables_connection',
+      }),
+      'some header',
+    );
+  });
+
+  it('should use OPENOPS_TABLES_DB_HOST when provided', async () => {
+    process.env.OPS_OPENOPS_TABLES_DB_HOST = 'alternative host';
+
+    await getOrCreateOpenOpsTablesDatabaseConnection('some token');
+
+    expect(openopsCommonMock.makeOpenOpsAnalyticsPost).toHaveBeenCalledWith(
+      'database',
+      expect.objectContaining({
+        sqlalchemy_uri:
+          'postgresql://some username:some password@alternative host:some port/some dbName',
+        database_name: 'openops_tables_connection',
+      }),
+      'some header',
+    );
+  });
+});
 
 describe('createPostgresSqlDatabaseConnectionIfDoesntExist', () => {
   beforeEach(() => {

@@ -1,0 +1,870 @@
+{
+  "created": "1771567450403",
+  "updated": "1771567450403",
+  "name": "AWS Benchmark - Idle RDS instances",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - Idle RDS instances",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "c4iDLm2ZSZPcFihZmZCnY",
+        "name": "step_c",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "tPR9ryw3eCPfumImwjOWV",
+          "name": "step_d",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "key": "wfName",
+              "store_scope": "RUN",
+              "defaultValue": "AWS Benchmark - Idle RDS instances"
+            },
+            "blockName": "@openops/block-store",
+            "blockType": "OFFICIAL",
+            "actionName": "get",
+            "inputUiInfo": {
+              "customizedInputs": {
+                "settings": {
+                  "input": {}
+                }
+              }
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.5.1",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "id": "JVD6NOY8pyC7jc3tkSDnZ",
+            "name": "step_1",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['AWS']}}",
+                "tags": [],
+                "accounts": {
+                  "accounts": "{{step_c['accounts']}}"
+                },
+                "condition": "AND",
+                "domainIds": [],
+                "clusterIds": [],
+                "filterByARNs": false,
+                "filterProperty": {
+                  "regions": "{{step_c['regions']}}"
+                }
+              },
+              "blockName": "@openops/block-aws",
+              "blockType": "OFFICIAL",
+              "actionName": "rds_describe_instances",
+              "inputUiInfo": {
+                "customizedInputs": {
+                  "settings": {
+                    "input": {
+                      "auth": true,
+                      "accounts": {
+                        "accounts": true
+                      },
+                      "filterProperty": {
+                        "regions": true
+                      }
+                    }
+                  }
+                }
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.3",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "MgxsOlgtxF7TJAYx5jJez",
+              "name": "step_3",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "timeZone": "UTC",
+                  "timeFormat": "YYYY-MM-DD"
+                },
+                "blockName": "@openops/block-date-helper",
+                "blockType": "OFFICIAL",
+                "pieceName": "@openops/piece-date-helper",
+                "pieceType": "OFFICIAL",
+                "actionName": "get_current_date",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.0.7",
+                "pieceVersion": "~0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "2LhJRe5ygse2mOU3Uhz5r",
+                "name": "step_5",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "inputDate": "{{step_3}}",
+                    "expression": "-14 day",
+                    "outputFormat": "YYYY-MM-DD",
+                    "inputDateFormat": "YYYY-MM-DD"
+                  },
+                  "blockName": "@openops/block-date-helper",
+                  "blockType": "OFFICIAL",
+                  "pieceName": "@openops/piece-date-helper",
+                  "pieceType": "OFFICIAL",
+                  "actionName": "add_subtract_date",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.0.7",
+                  "pieceVersion": "~0.0.7",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "ILsXc81HgdGn80mVevxtZ",
+                  "name": "step_2",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_1}}",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "nextAction": {
+                    "id": "FX0fUt0HpbG8I2aweER04",
+                    "name": "step_a",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": null,
+                        "body": {
+                          "data": {
+                            "status": "ok"
+                          }
+                        },
+                        "status": 200,
+                        "headers": {},
+                        "body_type": "json"
+                      },
+                      "blockName": "@openops/block-http",
+                      "blockType": "OFFICIAL",
+                      "actionName": "return_response",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Return Response",
+                    "stepIndex": 20
+                  },
+                  "displayName": "DATABASE",
+                  "firstLoopAction": {
+                    "id": "mLItfxNI1KrNi2exTDPML",
+                    "name": "step_19",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "filters": {
+                          "filters": [
+                            {
+                              "value": {
+                                "value": "{{step_d}}"
+                              },
+                              "fieldName": "Workflow",
+                              "filterType": "Is equal"
+                            },
+                            {
+                              "value": {
+                                "value": "{{step_2['item']['DBInstanceArn']}}"
+                              },
+                              "fieldName": "Resource Id",
+                              "filterType": "Is equal"
+                            }
+                          ]
+                        },
+                        "tableName": "Opportunities",
+                        "filterType": "AND"
+                      },
+                      "blockName": "@openops/block-openops-tables",
+                      "blockType": "OFFICIAL",
+                      "actionName": "get_records",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.0.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "m3Z6wJzTFQqldIRL6hEb0",
+                      "name": "step_22",
+                      "type": "BRANCH",
+                      "valid": true,
+                      "settings": {
+                        "conditions": [
+                          [
+                            {
+                              "operator": "NUMBER_IS_EQUAL_TO",
+                              "firstValue": "{{step_19['count']}}",
+                              "secondValue": "0",
+                              "caseSensitive": false
+                            }
+                          ],
+                          [
+                            {
+                              "operator": "TEXT_EXACTLY_MATCHES",
+                              "firstValue": "{{step_19['items'][0]['Status']['value']}}",
+                              "secondValue": "Snoozed",
+                              "caseSensitive": false
+                            },
+                            {
+                              "operator": "DATE_IS_BEFORE",
+                              "firstValue": "{{step_19['items'][0]['Snoozed until']}}",
+                              "secondValue": "{{step_3}}",
+                              "caseSensitive": false
+                            }
+                          ]
+                        ],
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "nextAction": {
+                        "id": "b6mQQhCCqxstOQ2YTBE6a",
+                        "name": "step_20",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "arn": "{{step_2['item']['DBInstanceArn']}}",
+                            "auth": "{{connections['AWS']}}"
+                          },
+                          "blockName": "@openops/block-aws",
+                          "blockType": "OFFICIAL",
+                          "actionName": "parse_arn",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.3",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "VBEPlkPDs7c1rkbwDipwg",
+                          "name": "step_10",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['AWS']}}",
+                              "dryRun": false,
+                              "account": {
+                                "accounts": "{{step_20['accountId']}}"
+                              },
+                              "commandToRun": "aws cloudwatch get-metric-statistics --namespace AWS/RDS --metric-name DatabaseConnections --dimensions Name=DBInstanceIdentifier,Value={{step_2['item']['DBInstanceIdentifier']}} --statistics Maximum --period 86400 --start-time {{step_5}}T00:00:00Z --end-time {{step_3}}T00:00:00Z --region {{step_2['item']['region']}}"
+                            },
+                            "blockName": "@openops/block-aws",
+                            "blockType": "OFFICIAL",
+                            "pieceName": "@openops/piece-aws",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "aws_cli",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "settings": {
+                                  "input": {
+                                    "auth": true,
+                                    "account": {
+                                      "accounts": true
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.3",
+                            "pieceVersion": "~0.0.3",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "mpCWgPDXjG5zsgQhHtbol",
+                            "name": "step_24",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "keyName": "Maximum",
+                                "listItems": "{{step_10['Datapoints']}}"
+                              },
+                              "blockName": "@openops/block-list-operations",
+                              "blockType": "OFFICIAL",
+                              "pieceName": "@openops/piece-list-operations",
+                              "pieceType": "OFFICIAL",
+                              "actionName": "extract_from_list_action",
+                              "inputUiInfo": {
+                                "customizedInputs": {
+                                  "settings": {
+                                    "input": {
+                                      "listItems": true
+                                    }
+                                  }
+                                }
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.0.1",
+                              "pieceVersion": "~0.0.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "id": "jcoaxl3uluRVbdUstOX9L",
+                              "name": "step_21",
+                              "type": "BLOCK",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "numbers": "{{step_24}}"
+                                },
+                                "blockName": "@openops/block-math-helper",
+                                "blockType": "OFFICIAL",
+                                "pieceName": "@openops/piece-math-helper",
+                                "pieceType": "OFFICIAL",
+                                "actionName": "max",
+                                "inputUiInfo": {
+                                  "customizedInputs": {
+                                    "settings": {
+                                      "input": {
+                                        "numbers": true
+                                      }
+                                    }
+                                  }
+                                },
+                                "packageType": "REGISTRY",
+                                "blockVersion": "0.0.8",
+                                "pieceVersion": "~0.0.8",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "id": "XgDPyvKLY3Jj9IyGCjGuq",
+                                "name": "step_7",
+                                "type": "BRANCH",
+                                "valid": true,
+                                "settings": {
+                                  "conditions": [
+                                    [
+                                      {
+                                        "operator": "NUMBER_IS_LESS_THAN",
+                                        "firstValue": "{{step_21}}",
+                                        "secondValue": "1"
+                                      }
+                                    ]
+                                  ],
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  }
+                                },
+                                "displayName": "If no connections",
+                                "onSuccessAction": {
+                                  "id": "VB7VRXjxADMEBjfJSzTOz",
+                                  "name": "step_18",
+                                  "type": "CODE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "rdsDatabase": "{{step_2['item']}}"
+                                    },
+                                    "sourceCode": {
+                                      "code": "export const code = async (inputs) => {\n  const rdsDatabase = (typeof inputs.rdsDatabase === 'string'\n    ? JSON.parse(inputs.rdsDatabase)\n    : inputs.rdsDatabase) as any;\n\n  const deploymentOption = rdsDatabase.MultiAZ ? 'Multi-AZ' : 'Single-AZ';\n\n  const engine = (rdsDatabase.Engine || '').toLowerCase();\n  let databaseEngine = 'Unknown';\n\n  const isOnOutpost = rdsDatabase.DBSubnetGroup?.Subnets?.some(\n    (subnet: any) => subnet.SubnetOutpost && Object.keys(subnet.SubnetOutpost).length > 0\n  ) ?? false;\n\n  if (engine.startsWith('aurora-postgresql')) {\n    databaseEngine = 'Aurora PostgreSQL';\n  } else if (engine.startsWith('aurora-mysql') || engine.startsWith('aurora')) {\n    databaseEngine = 'Aurora MySQL';\n  } else if (engine.includes('db2')) {\n    databaseEngine = 'Db2';\n  } else if (engine.startsWith('mariadb')) {\n    databaseEngine = 'MariaDB';\n  } else if (engine.startsWith('mysql')) {\n    databaseEngine = isOnOutpost ? 'MySQL (on-premise for Outpost)' : 'MySQL';\n  } else if (engine.startsWith('postgres')) {\n    databaseEngine = 'PostgreSQL';\n  } else if (engine.startsWith('sqlserver')) {\n    databaseEngine = isOnOutpost ? 'SQL Server (on-premise for Outpost)' : 'SQL Server';\n  } else if (engine) {\n    databaseEngine = engine.charAt(0).toUpperCase() + engine.slice(1);\n  }\n\n  return {\n    deploymentOption,\n    databaseEngine,\n  };\n};",
+                                      "packageJson": "{}"
+                                    },
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "61Y6YpCQm1h35zy1nhDuL",
+                                    "name": "step_b",
+                                    "type": "BLOCK",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "auth": "{{connections['AWS']}}",
+                                        "service": {
+                                          "ServiceCode": "AmazonRDS",
+                                          "AttributeNames": [
+                                            "termType",
+                                            "productFamily",
+                                            "servicecode",
+                                            "location",
+                                            "locationType",
+                                            "engineCode",
+                                            "databaseEngine",
+                                            "databaseEdition",
+                                            "deploymentOption",
+                                            "group",
+                                            "groupDescription",
+                                            "usagetype",
+                                            "operation",
+                                            "regionCode",
+                                            "servicename",
+                                            "storageMedia",
+                                            "volumeType",
+                                            "minVolumeSize",
+                                            "maxVolumeSize",
+                                            "instanceType",
+                                            "currentGeneration",
+                                            "instanceFamily",
+                                            "vcpu",
+                                            "physicalProcessor",
+                                            "memory",
+                                            "storage",
+                                            "networkPerformance",
+                                            "processorArchitecture",
+                                            "licenseModel",
+                                            "instanceTypeFamily",
+                                            "normalizationSizeFactor",
+                                            "LeaseContractLength",
+                                            "PurchaseOption",
+                                            "OfferingClass",
+                                            "clockSpeed",
+                                            "dedicatedEbsThroughput",
+                                            "processorFeatures",
+                                            "deploymentModel",
+                                            "engineMediaType",
+                                            "enhancedNetworkingSupported",
+                                            "volumeName",
+                                            "engineMajorVersion",
+                                            "extendedSupportPricingYear",
+                                            "Restriction",
+                                            "limitlesspreview",
+                                            "acu"
+                                          ]
+                                        },
+                                        "queryFilters": {
+                                          "queryFilters": [
+                                            {
+                                              "attributeName": "regionCode",
+                                              "attributeValue": "{{step_20['region']}}",
+                                              "dynamicViewToggled": {
+                                                "attributeValue": true
+                                              }
+                                            },
+                                            {
+                                              "attributeName": "instanceType",
+                                              "attributeValue": "{{step_2['item']['DBInstanceClass']}}",
+                                              "dynamicViewToggled": {
+                                                "attributeValue": true
+                                              }
+                                            },
+                                            {
+                                              "attributeName": "deploymentOption",
+                                              "attributeValue": "{{step_18['deploymentOption']}}",
+                                              "dynamicViewToggled": {
+                                                "attributeValue": true
+                                              }
+                                            },
+                                            {
+                                              "attributeName": "termType",
+                                              "attributeValue": "OnDemand",
+                                              "dynamicViewToggled": {
+                                                "attributeValue": false
+                                              }
+                                            },
+                                            {
+                                              "attributeName": "databaseEngine",
+                                              "attributeValue": "{{step_18['databaseEngine']}}",
+                                              "dynamicViewToggled": {
+                                                "attributeValue": true
+                                              }
+                                            },
+                                            {
+                                              "attributeName": "productFamily",
+                                              "attributeValue": "Database Instance"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "blockName": "@openops/block-aws",
+                                      "blockType": "OFFICIAL",
+                                      "pieceName": "@openops/piece-aws",
+                                      "pieceType": "OFFICIAL",
+                                      "actionName": "get_price",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {
+                                          "attributeValue__queryFilters__2": true,
+                                          "attributeValue__queryFilters__51683sqr": true,
+                                          "attributeValue__queryFilters__30d70fsqr": true,
+                                          "attributeValue__queryFilters__5e94fasqr": true
+                                        }
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "blockVersion": "0.0.3",
+                                      "pieceVersion": "0.0.3",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "id": "W6zjlHCYMJtSy1l6weLNS",
+                                      "name": "step_17",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "first_number": "{{step_b[0]['pricePerUnit']['USD']}}",
+                                          "second_number": "730"
+                                        },
+                                        "blockName": "@openops/block-math-helper",
+                                        "blockType": "OFFICIAL",
+                                        "pieceName": "@openops/piece-math-helper",
+                                        "pieceType": "OFFICIAL",
+                                        "actionName": "multiplication_math",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.8",
+                                        "pieceVersion": "0.0.8",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "GkAmGU3uzTwOAO2C3a16p",
+                                        "name": "step_8",
+                                        "type": "BLOCK",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "tableName": "Opportunities",
+                                            "rowPrimaryKey": {
+                                              "rowPrimaryKey": null
+                                            },
+                                            "fieldsProperties": {
+                                              "fieldsProperties": [
+                                                {
+                                                  "fieldName": "Status",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Created"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Workflow",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_d}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Resource Id",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_2['item']['DBInstanceArn']}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Account",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_20['accountId']}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Region",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_20['region']}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Service",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "AWS RDS"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity generator",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "OpenOps"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity Type",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Workflow optimization"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity details",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "RDS database is idle (no connections)."
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Complexity",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "M"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Risk",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Medium"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Estimated savings USD per month",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_17}}"
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            "roundToFieldPrecision": true
+                                          },
+                                          "blockName": "@openops/block-openops-tables",
+                                          "blockType": "OFFICIAL",
+                                          "actionName": "update_record",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "blockVersion": "0.0.1",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "displayName": "Create opportunity",
+                                        "stepIndex": 19
+                                      },
+                                      "displayName": "Get Total cost",
+                                      "stepIndex": 18
+                                    },
+                                    "displayName": "Get unit cost",
+                                    "stepIndex": 17
+                                  },
+                                  "displayName": "Prepare inputs for Cost query",
+                                  "stepIndex": 16
+                                },
+                                "stepIndex": 15
+                              },
+                              "displayName": "Maximum db connections",
+                              "stepIndex": 14
+                            },
+                            "displayName": "Extract From List",
+                            "stepIndex": 13
+                          },
+                          "displayName": "Get #database connections",
+                          "stepIndex": 12
+                        },
+                        "displayName": "Parse ARN",
+                        "stepIndex": 11
+                      },
+                      "displayName": "Opportunity doesn't exist or snooze expired",
+                      "onFailureAction": {
+                        "id": "yEK0t8CFLTkSMBcHVaaLa",
+                        "name": "step_23",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {},
+                          "blockName": "@openops/block-end-flow",
+                          "blockType": "OFFICIAL",
+                          "actionName": "end_workflow",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "displayName": "Skip recommendation",
+                        "stepIndex": 10
+                      },
+                      "stepIndex": 9
+                    },
+                    "displayName": "Get existing opportunity",
+                    "stepIndex": 8
+                  },
+                  "stepIndex": 7
+                },
+                "displayName": "Get current date -14D",
+                "stepIndex": 6
+              },
+              "displayName": "Get Current Date",
+              "stepIndex": 5
+            },
+            "displayName": "RDS Get Instances",
+            "stepIndex": 4
+          },
+          "displayName": "This Workflow Name",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-store",
+    "@openops/block-aws",
+    "@openops/block-date-helper",
+    "@openops/block-openops-tables",
+    "@openops/block-end-flow",
+    "@openops/block-list-operations",
+    "@openops/block-math-helper",
+    "@openops/block-http"
+  ],
+  "categories": []
+}

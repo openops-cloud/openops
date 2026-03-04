@@ -1,0 +1,15 @@
+database_name: openops_tables_connection
+sqlalchemy_uri: sqlite:///:memory
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: true
+allow_cvas: true
+allow_dml: true
+allow_file_upload: false
+extra:
+  metadata_params: {}
+  engine_params: {}
+  schemas_allowed_for_csv_upload: []
+uuid: a584ee83-4fb9-4bcd-8ac1-70ec37e0acd9
+version: 1.0.0

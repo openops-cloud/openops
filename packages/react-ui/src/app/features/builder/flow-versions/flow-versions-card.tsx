@@ -14,10 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
-  PermissionNeededTooltip,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -43,6 +40,7 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { LeftSideBarType } from '@/app/features/builder/builder-types';
 import { FlowVersionStateDot } from '@/app/features/flows/components/flow-version-state-dot';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 
 type UseAsDraftOptionProps = {
@@ -62,18 +60,16 @@ const UseAsDraftDropdownMenuOption = ({
         disabled={!userHasPermissionToWriteFlow}
         className="w-full"
       >
-        <PermissionNeededTooltip hasPermission={userHasPermissionToWriteFlow}>
-          <DropdownMenuItem
-            className="w-full"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-            disabled={!userHasPermissionToWriteFlow}
-          >
-            <Pencil className="mr-2 h-4 w-4" />
-            <span>{t('Use as Draft')}</span>
-          </DropdownMenuItem>
-        </PermissionNeededTooltip>
+        <DropdownMenuItem
+          className="w-full"
+          onSelect={(e) => {
+            e.preventDefault();
+          }}
+          disabled={!userHasPermissionToWriteFlow}
+        >
+          <Pencil className="mr-2 h-4 w-4" />
+          <span>{t('Use as Draft')}</span>
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -147,8 +143,8 @@ const FlowVersionDetailsCard = React.memo(
         );
       },
       onError: (error) => {
-        toast(INTERNAL_ERROR_TOAST);
         console.error(error);
+        handleMutationError(error);
       },
     });
 
@@ -178,8 +174,8 @@ const FlowVersionDetailsCard = React.memo(
           );
         },
         onError: (error) => {
-          toast(INTERNAL_ERROR_TOAST);
           console.error(error);
+          handleMutationError(error);
         },
       });
 

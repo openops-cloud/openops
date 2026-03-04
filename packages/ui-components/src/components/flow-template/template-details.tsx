@@ -7,11 +7,13 @@ import { ArrowLeft, ExpandIcon, PencilLine } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
+import { PermissionNeededTooltip } from '../../ui/permission-needed-tooltip';
 import { ScrollArea } from '../../ui/scroll-area';
 
 import { OverflowTooltip } from '../overflow-tooltip';
 import { FlowTemplateMetadataWithIntegrations } from './types';
 
+import { Theme } from '../../lib/theme';
 import { DialogDescription } from '../../ui/dialog';
 import { LoadingSpinner } from '../../ui/spinner';
 import { BlockIconList } from '../block-icon';
@@ -21,7 +23,7 @@ import { TemplateCanvas } from './template-canvas';
 type TemplateDetailsProps = {
   templateMetadata: FlowTemplateMetadataWithIntegrations;
   close?: () => void;
-  useTemplate: () => void;
+  useTemplate?: () => void;
   expandPreview: () => void;
   edgeTypes: EdgeTypes;
   nodeTypes: NodeTypes;
@@ -79,13 +81,22 @@ export const TemplateDetails = ({
           className="flex-1 text-[32px] font-bold text-primary-300 dark:text-primary"
           text={templateMetadata.name}
         ></OverflowTooltip>
-        <Button
-          className="flex gap-2 items-center justify-end ml-auto"
-          onClick={useTemplate}
-        >
-          <PencilLine />
-          {t('Use template')}
-        </Button>
+        {useTemplate ? (
+          <Button
+            className="flex gap-2 items-center justify-end ml-auto"
+            onClick={useTemplate}
+          >
+            <PencilLine />
+            {t('Use template')}
+          </Button>
+        ) : (
+          <PermissionNeededTooltip>
+            <Button className="flex gap-2 items-center justify-end ml-auto">
+              <PencilLine />
+              {t('Use template')}
+            </Button>
+          </PermissionNeededTooltip>
+        )}
       </div>
       <ScrollArea
         className="h-full"

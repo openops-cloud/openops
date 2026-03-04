@@ -1,14 +1,19 @@
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   toast,
   WarningWithIcon,
 } from '@openops/components/ui';
-import { Flow, FlowOperationType, FlowVersion } from '@openops/shared';
+import {
+  Flow,
+  FlowOperationType,
+  FlowVersion,
+  Permission,
+} from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import {
@@ -22,6 +27,8 @@ import {
 import React, { useState } from 'react';
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
+import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { RunWorkflowManuallyMenuItem } from '@/app/features/flows/components/run-workflow-manually-menu-item';
@@ -58,6 +65,8 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const { checkAccess } = useAuthorization();
+  const canWriteFlow = checkAccess(Permission.WRITE_FLOW);
 
   const { mutate: duplicateFlow, isPending: isDuplicatePending } = useMutation({
     mutationFn: async () => {
@@ -79,7 +88,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
       window.open(`/flows/${data.id}`, '_blank', `noopener noreferrer`);
       onDuplicate();
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   const { mutate: exportFlow, isPending: isExportPending } = useMutation({
@@ -91,7 +100,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
         duration: 3000,
       });
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   const refetchFolderTree = useRefetchFolderTree();
@@ -107,7 +116,13 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {!insideBuilder && <EditFlowMenuItem flow={flow} baseRoute="/flows" />}
+        {!insideBuilder && (
+          <EditFlowMenuItem
+            flow={flow}
+            baseRoute="/flows"
+            text={getViewOrEditLabel(canWriteFlow)}
+          />
+        )}
 
         {!readonly && (
           <RenameFlowDialog
@@ -118,12 +133,17 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
             }}
             currentName={flowVersion.displayName}
           >
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <div className="flex cursor-pointer flex-row gap-2 items-center">
-                <TextCursorInput className="h-4 w-4" />
-                <span>{t('Rename')}</span>
-              </div>
-            </DropdownMenuItem>
+            <PermissionGuard
+              permission={Permission.WRITE_FLOW}
+              tooltipClassName="flex"
+            >
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <div className="flex cursor-pointer flex-row gap-2 items-center">
+                  <TextCursorInput className="h-4 w-4" />
+                  <span>{t('Rename')}</span>
+                </div>
+              </DropdownMenuItem>
+            </PermissionGuard>
           </RenameFlowDialog>
         )}
 
@@ -135,47 +155,67 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
             setIsOpen(false);
           }}
         >
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <div className="flex cursor-pointer  flex-row gap-2 items-center">
-              <CornerUpLeft className="h-4 w-4" />
-              <span>{t('Move To')}</span>
-            </div>
-          </DropdownMenuItem>
+          <PermissionGuard
+            permission={Permission.WRITE_FLOW}
+            tooltipClassName="flex"
+          >
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <div className="flex cursor-pointer  flex-row gap-2 items-center">
+                <CornerUpLeft className="h-4 w-4" />
+                <span>{t('Move To')}</span>
+              </div>
+            </DropdownMenuItem>
+          </PermissionGuard>
         </MoveFlowDialog>
 
-        <DropdownMenuItem onClick={() => duplicateFlow()}>
-          <div className="flex cursor-pointer  flex-row gap-2 items-center">
-            {isDuplicatePending ? (
-              <LoadingSpinner />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-            <span>
-              {isDuplicatePending ? t('Duplicating') : t('Duplicate')}
-            </span>
-          </div>
-        </DropdownMenuItem>
+        <PermissionGuard
+          permission={Permission.WRITE_FLOW}
+          tooltipClassName="flex"
+        >
+          <DropdownMenuItem onClick={() => duplicateFlow()}>
+            <div className="flex cursor-pointer  flex-row gap-2 items-center">
+              {isDuplicatePending ? (
+                <LoadingSpinner />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              <span>
+                {isDuplicatePending ? t('Duplicating') : t('Duplicate')}
+              </span>
+            </div>
+          </DropdownMenuItem>
+        </PermissionGuard>
 
         {!readonly && (
           <ImportFlowDialog>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <div className="flex cursor-pointer flex-row gap-2 items-center">
-                <Import className="w-4 h-4" />
-                {t('Import')}
-              </div>
-            </DropdownMenuItem>
+            <PermissionGuard
+              permission={Permission.WRITE_FLOW}
+              tooltipClassName="flex"
+            >
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <div className="flex cursor-pointer flex-row gap-2 items-center">
+                  <Import className="w-4 h-4" />
+                  {t('Import')}
+                </div>
+              </DropdownMenuItem>
+            </PermissionGuard>
           </ImportFlowDialog>
         )}
-        <DropdownMenuItem onClick={() => exportFlow()}>
-          <div className="flex cursor-pointer  flex-row gap-2 items-center">
-            {isExportPending ? (
-              <LoadingSpinner />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            <span>{isExportPending ? t('Exporting') : t('Export')}</span>
-          </div>
-        </DropdownMenuItem>
+        <PermissionGuard
+          permission={Permission.READ_FLOW}
+          tooltipClassName="flex"
+        >
+          <DropdownMenuItem onClick={() => exportFlow()}>
+            <div className="flex cursor-pointer  flex-row gap-2 items-center">
+              {isExportPending ? (
+                <LoadingSpinner />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span>{isExportPending ? t('Exporting') : t('Export')}</span>
+            </div>
+          </DropdownMenuItem>
+        </PermissionGuard>
         {!readonly && (
           <ConfirmationDeleteDialog
             title={
@@ -209,12 +249,17 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
               />
             }
           >
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <div className="flex cursor-pointer  flex-row gap-2 items-center">
-                <Trash2 className="h-4 w-4 text-destructive" />
-                <span className="text-destructive">{t('Delete')}</span>
-              </div>
-            </DropdownMenuItem>
+            <PermissionGuard
+              permission={Permission.DELETE_FLOW}
+              tooltipClassName="flex"
+            >
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <div className="flex cursor-pointer  flex-row gap-2 items-center">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                  <span className="text-destructive">{t('Delete')}</span>
+                </div>
+              </DropdownMenuItem>
+            </PermissionGuard>
           </ConfirmationDeleteDialog>
         )}
 
@@ -228,5 +273,8 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
     </DropdownMenu>
   );
 };
+
+const getViewOrEditLabel = (canWriteFlow: boolean): string =>
+  canWriteFlow ? t('Edit') : t('View');
 
 export { FlowActionMenu };

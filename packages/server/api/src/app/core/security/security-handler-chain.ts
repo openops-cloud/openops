@@ -2,24 +2,18 @@ import { Principal } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { AccessTokenAuthnHandler } from './authn/access-token-authn-handler';
 import { AnonymousAuthnHandler } from './authn/anonymous-authn-handler';
-import { PrincipalTypeAuthzHandler } from './authz/principal-type-authz-handler';
-import { ProjectAuthzHandler } from './authz/project-authz-handler';
+import { getAuthorizationHandler } from './authz/authorization-handler-factory';
 
 const AUTHN_HANDLERS = [
   new AccessTokenAuthnHandler(),
   new AnonymousAuthnHandler(),
 ];
 
-const AUTHZ_HANDLERS = [
-  new PrincipalTypeAuthzHandler(),
-  new ProjectAuthzHandler(),
-];
-
 export const securityHandlerChain = async (
   request: FastifyRequest,
 ): Promise<void> => {
   await executeAuthnHandlers(request);
-  await executeAuthzHandlers(request);
+  await getAuthorizationHandler().validate(request);
 };
 
 /**
@@ -33,12 +27,6 @@ const executeAuthnHandlers = async (request: FastifyRequest): Promise<void> => {
     if (principalPopulated) {
       return;
     }
-  }
-};
-
-const executeAuthzHandlers = async (request: FastifyRequest): Promise<void> => {
-  for (const handler of AUTHZ_HANDLERS) {
-    await handler.handle(request);
   }
 };
 

@@ -3,7 +3,6 @@ import {
   ErrorCode,
   isNil,
   PrincipalType,
-  ProjectMemberRole,
   User,
 } from '@openops/shared';
 import { organizationService } from '../../organization/organization.service';
@@ -33,14 +32,17 @@ export async function getProjectAndToken(
     project.organizationId,
   );
 
+  const projectRole = 'ADMIN';
   const token = await accessTokenManager.generateToken(
     {
       id: user.id,
       externalId: user.externalId,
       type: PrincipalType.USER,
       projectId: project.id,
+      projectRole,
       organization: {
         id: organization.id,
+        role: user.organizationRole,
       },
     },
     expiresInSeconds,
@@ -49,8 +51,9 @@ export async function getProjectAndToken(
   return {
     user: updatedUser,
     token,
-    project,
     tablesRefreshToken,
-    projectRole: ProjectMemberRole.ADMIN,
+    projectId: project.id,
+    projectRole,
+    tablesWorkspaceId: project.tablesWorkspaceId,
   };
 }

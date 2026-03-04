@@ -2,6 +2,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { BenchmarkWorkflowBase } from './create-benchmark-response';
 
 export enum BenchmarkStatus {
+  CREATED = 'CREATED',
   RUNNING = 'RUNNING',
   SUCCEEDED = 'SUCCEEDED',
   FAILED = 'FAILED',
@@ -10,7 +11,7 @@ export enum BenchmarkStatus {
 export const BenchmarkWorkflowStatusItem = Type.Intersect([
   BenchmarkWorkflowBase,
   Type.Object({
-    runStatus: Type.String(),
+    runStatus: Type.Enum(BenchmarkStatus),
     runId: Type.Optional(Type.String()),
   }),
 ]);
@@ -23,6 +24,8 @@ export const BenchmarkStatusResponse = Type.Object({
   benchmarkId: Type.String(),
   status: Type.Enum(BenchmarkStatus),
   workflows: Type.Array(BenchmarkWorkflowStatusItem),
+  lastRunId: Type.Optional(Type.String()),
+  lastRunFinishedAt: Type.Optional(Type.String()),
 });
 
 export type BenchmarkStatusResponse = Static<typeof BenchmarkStatusResponse>;

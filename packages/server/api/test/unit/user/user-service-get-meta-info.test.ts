@@ -22,8 +22,10 @@ describe('userService.getMetaInfo', () => {
     id: 'user-id-1',
     type: PrincipalType.USER,
     projectId: 'project-id-123',
+    projectRole: 'ADMIN',
     organization: {
       id: 'org-id-1',
+      role: 'MEMBER',
     },
   };
 

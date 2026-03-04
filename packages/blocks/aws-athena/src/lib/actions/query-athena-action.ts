@@ -2,7 +2,9 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
   dryRunCheckBox,
-  getCredentialsFromAuth,
+  getAwsAccountsSingleSelectDropdown,
+  getCredentialsListFromAuth,
+  getRegionsDropdownState,
   listAthenaDatabases,
   runAndWaitForQueryResult,
 } from '@openops/common';
@@ -14,6 +16,14 @@ export const runAthenaQueryAction = createAction({
   displayName: 'Query Athena database',
   isWriteAction: false,
   props: {
+    accounts: getAwsAccountsSingleSelectDropdown().accounts,
+    region: Property.StaticDropdown({
+      displayName: 'Region',
+      description:
+        'AWS region to use. Defaults to the region from authentication.',
+      required: false,
+      options: getRegionsDropdownState(),
+    }),
     query: Property.LongText({
       displayName: 'Query',
       description: 'Query to run on the Athena database.',
@@ -23,9 +33,10 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-      refreshers: ['auth'],
+
+      refreshers: ['auth', 'accounts', 'region'],
       required: true,
-      options: async ({ auth }) => {
+      options: async ({ auth, accounts, region }) => {
         if (!auth) {
           return {
             disabled: true,
@@ -34,27 +45,44 @@ export const runAthenaQueryAction = createAction({
           };
         }
 
-        const authProp = auth as {
-          accessKeyId: string;
-          secretAccessKey: string;
-          defaultRegion: string;
-        };
-        const credentials = await getCredentialsFromAuth(authProp);
+        try {
+          const authProp = auth as {
+            accessKeyId: string;
+            secretAccessKey: string;
+            defaultRegion: string;
+          };
+          const selectedAccounts = (
+            accounts as unknown as {
+              accounts?: string[];
+            }
+          )?.accounts;
+          const credentialsList = await getCredentialsListFromAuth(
+            authProp,
+            selectedAccounts,
+          );
 
-        const databases = await listAthenaDatabases(
-          credentials,
-          authProp.defaultRegion,
-        );
+          const databases = await listAthenaDatabases(
+            credentialsList[0],
+            (region as string | undefined) ?? authProp.defaultRegion,
+          );
 
-        return {
-          disabled: false,
-          options: databases.map((database) => {
-            return {
-              label: database.Name as string,
-              value: database.Name as string,
-            };
-          }),
-        };
+          return {
+            disabled: false,
+            options: databases.map((database) => {
+              return {
+                label: database.Name as string,
+                value: database.Name as string,
+              };
+            }),
+          };
+        } catch (error) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'An error occurred while fetching databases',
+            error: String(error),
+          };
+        }
       },
     }),
     outputBucket: Property.LongText({
@@ -91,11 +119,15 @@ export const runAthenaQueryAction = createAction({
     }
 
     try {
-      const credentials = await getCredentialsFromAuth(context.auth);
+      const selectedAccounts = context.propsValue.accounts?.['accounts'];
+      const credentialsList = await getCredentialsListFromAuth(
+        context.auth,
+        selectedAccounts,
+      );
 
       return await runAndWaitForQueryResult(
-        credentials,
-        context.auth.defaultRegion,
+        credentialsList[0],
+        context.propsValue.region ?? context.auth.defaultRegion,
         query,
         database,
         context.propsValue.outputBucket,

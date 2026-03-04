@@ -2,8 +2,8 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { throwFeatureDisabledError } from './errors';
 
 export async function assertBenchmarkFeatureEnabled(
-  provider: string,
   projectId: string,
+  provider?: string,
 ): Promise<void> {
   if (system.getBoolean(AppSystemProp.FINOPS_BENCHMARK_ENABLED) !== true) {
     logger.info(

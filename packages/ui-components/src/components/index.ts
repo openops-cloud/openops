@@ -1,4 +1,6 @@
 export * from './ai-chat-container';
+export * from './analytics-dashboard-selector/analytics-dashboard-empty-state';
+export * from './analytics-dashboard-selector/analytics-dashboard-selector';
 export * from './assistant-ui/assistant-top-bar';
 export * from './assistant-ui/assistant-ui-chat-container';
 export * from './assistant-ui/history/assistant-ui-history';
@@ -6,6 +8,9 @@ export * from './assistant-ui/history/assistant-ui-history-item';
 export * from './assistant-ui/step-settings-assistant-ui-chat-container';
 export * from './assistant-ui/thread';
 export * from './assistant-ui/thread-extra-context';
+export * from './benchmark/benchmark-analytics-phase';
+export * from './benchmark/benchmark-creating-placeholder';
+export * from './benchmark/benchmark-ready-step';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';

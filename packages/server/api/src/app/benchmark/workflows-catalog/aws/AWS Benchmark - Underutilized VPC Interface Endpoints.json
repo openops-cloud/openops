@@ -1,0 +1,1006 @@
+{
+  "created": "1771567500301",
+  "updated": "1771567500301",
+  "name": "AWS Benchmark - Underutilized VPC Interface Endpoints",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - Underutilized VPC Interface Endpoints",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "VLDvWfics5PrrUv67kScA",
+        "name": "step_u",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "UZgxK9hDoksEWbBbozyW8",
+          "name": "step_l",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "first_number": "10000000",
+              "second_number": "0"
+            },
+            "blockName": "@openops/block-math-helper",
+            "blockType": "OFFICIAL",
+            "actionName": "addition_math",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.0.8",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "id": "069lIhJs9dJYXWbV8riHu",
+            "name": "step_j",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "timeZone": "Europe/Warsaw",
+                "timeFormat": "YYYY-MM-DDTHH:mm:ss"
+              },
+              "blockName": "@openops/block-date-helper",
+              "blockType": "OFFICIAL",
+              "actionName": "get_current_date",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.7",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "Mci9sFvArp5w1CiqXFWrK",
+              "name": "step_k",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "inputDate": "{{step_j}}",
+                  "expression": "-14 day",
+                  "outputFormat": "YYYY-MM-DDTHH:mm:ss",
+                  "inputDateFormat": "YYYY-MM-DDTHH:mm:ss"
+                },
+                "blockName": "@openops/block-date-helper",
+                "blockType": "OFFICIAL",
+                "actionName": "add_subtract_date",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "YMLkxklyLsj7rrrwsLugX",
+                "name": "step_26",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "key": "wfName",
+                    "store_scope": "RUN",
+                    "defaultValue": "AWS Benchmark - Underutilized VPC Interface Endpoints"
+                  },
+                  "blockName": "@openops/block-store",
+                  "blockType": "OFFICIAL",
+                  "actionName": "get",
+                  "inputUiInfo": {
+                    "customizedInputs": {
+                      "settings": {
+                        "input": {}
+                      }
+                    }
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.5.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "VT0cBElTnCZ4fm2Wo0wet",
+                  "name": "step_1",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_u['accounts']}}",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "nextAction": {
+                    "id": "wYhOoAQSqg2UXkOuIblN4",
+                    "name": "step_a",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": null,
+                        "body": {
+                          "data": {
+                            "status": "ok"
+                          }
+                        },
+                        "status": 200,
+                        "headers": {},
+                        "body_type": "json"
+                      },
+                      "blockName": "@openops/block-http",
+                      "blockType": "OFFICIAL",
+                      "actionName": "return_response",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Return Response",
+                    "stepIndex": 29
+                  },
+                  "displayName": "ACCOUNT",
+                  "firstLoopAction": {
+                    "id": "NDgm98QXqt7CREZzeGPMa",
+                    "name": "step_32",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_u['regions']}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "displayName": "REGION",
+                    "firstLoopAction": {
+                      "id": "eZ6pFzNP3UgDkfZSM878e",
+                      "name": "step_2",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "auth": "{{connections['AWS']}}",
+                          "dryRun": false,
+                          "account": {
+                            "accounts": "{{step_1['item']}}"
+                          },
+                          "commandToRun": "aws ec2 describe-vpc-endpoints --filters Name=vpc-endpoint-type,Values=Interface \\\n--region {{step_32['item']}} \\\n--query 'VpcEndpoints[*].{ID:VpcEndpointId,Service:ServiceName,VPC:VpcId}'"
+                        },
+                        "blockName": "@openops/block-aws",
+                        "blockType": "OFFICIAL",
+                        "actionName": "aws_cli",
+                        "inputUiInfo": {
+                          "customizedInputs": {
+                            "settings": {
+                              "input": {
+                                "auth": true,
+                                "account": {
+                                  "accounts": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.3",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "id": "byEkxY1eUTwIHdaPXnriV",
+                        "name": "step_g",
+                        "type": "BRANCH",
+                        "valid": true,
+                        "settings": {
+                          "conditions": [
+                            [
+                              {
+                                "operator": "LIST_IS_NOT_EMPTY",
+                                "firstValue": "{{step_2}}"
+                              }
+                            ]
+                          ],
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          }
+                        },
+                        "nextAction": {
+                          "id": "ArtUdDS8lUGkFYveBLk5m",
+                          "name": "step_n",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['AWS']}}",
+                              "service": {
+                                "ServiceCode": "AmazonVPC",
+                                "AttributeNames": [
+                                  "termType",
+                                  "servicecode",
+                                  "location",
+                                  "locationType",
+                                  "group",
+                                  "groupDescription",
+                                  "usagetype",
+                                  "operation",
+                                  "regionCode",
+                                  "servicename",
+                                  "attachmentType",
+                                  "productFamily",
+                                  "endpointType",
+                                  "vpnType",
+                                  "transferType",
+                                  "fromLocation",
+                                  "fromLocationType",
+                                  "toLocation",
+                                  "toLocationType",
+                                  "fromRegionCode",
+                                  "toRegionCode",
+                                  "trafficDirection"
+                                ]
+                              },
+                              "queryFilters": {
+                                "queryFilters": [
+                                  {
+                                    "attributeName": "regionCode",
+                                    "attributeValue": "{{step_32['item']}}",
+                                    "dynamicViewToggled": {
+                                      "attributeValue": true
+                                    }
+                                  },
+                                  {
+                                    "attributeName": "operation",
+                                    "attributeValue": "VpcEndpoint"
+                                  },
+                                  {
+                                    "attributeName": "group",
+                                    "attributeValue": "VPCE:VpcEndpoint"
+                                  }
+                                ]
+                              }
+                            },
+                            "blockName": "@openops/block-aws",
+                            "blockType": "OFFICIAL",
+                            "actionName": "get_price",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "settings": {
+                                  "input": {
+                                    "auth": true
+                                  }
+                                }
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.3",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "LPAl3MmsSiDOX1qnxMcCv",
+                            "name": "step_o",
+                            "type": "CODE",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "inputs": "{{step_n}}"
+                              },
+                              "sourceCode": {
+                                "code": "export const code = async ({inputs}) => {\n  return getHourlyPricingObject(inputs);\n};\n\nconst getHourlyPricingObject = data => {\n  let endpoint, glbEndpoint;\n\n  for (const item of data || []) {\n    const onDemand = item?.terms?.OnDemand;\n    if (!onDemand) continue;\n\n    for (const termKey in onDemand) {\n      const term = onDemand[termKey];\n      const priceDimensions = term && term.priceDimensions;\n      if (!priceDimensions) continue;\n\n      for (const dimKey in priceDimensions) {\n        const dim = priceDimensions[dimKey];\n        if (!dim || dim.unit !== \"Hrs\") continue;\n\n        const pricePerUnitUSD = dim.pricePerUnit?.USD ? Number(dim.pricePerUnit.USD) : undefined;\n        const monthlyCost = pricePerUnitUSD !== undefined\n          ? Math.round(pricePerUnitUSD * 730 * 100) / 100\n          : undefined;\n\n        const entry = {\n          sku: term.sku,\n          description: dim.description,\n          pricePerUnitUSD,\n          monthlyCost,\n          region: item.product?.attributes?.regionCode,\n          endpointType: item.product?.attributes?.endpointType,\n          usageType: item.product?.attributes?.usagetype,\n          productFamily: item.product?.productFamily,\n        };\n\n        if (entry.endpointType === \"PrivateLink\") endpoint = entry;\n        else if (entry.endpointType === \"Gateway Load Balancer Endpoint\") glbEndpoint = entry;\n      }\n    }\n  }\n\n  return { endpoint, glbEndpoint };\n};\n",
+                                "packageJson": "{}"
+                              },
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "id": "r5SAWaCL494QUWMenup6h",
+                              "name": "step_p",
+                              "type": "BLOCK",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "number": "{{step_o['endpoint']['monthlyCost']}}",
+                                  "numberOfDecimalPlaces": "2"
+                                },
+                                "blockName": "@openops/block-math-helper",
+                                "blockType": "OFFICIAL",
+                                "actionName": "truncate_math",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "blockVersion": "0.0.8",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "id": "LHAbqJkJRFWC7dgbsm72Z",
+                                "name": "step_d",
+                                "type": "LOOP_ON_ITEMS",
+                                "valid": true,
+                                "settings": {
+                                  "items": "{{step_2}}",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  }
+                                },
+                                "displayName": "RESOURCE",
+                                "firstLoopAction": {
+                                  "id": "3j132XCJpe98LLdcMlvMt",
+                                  "name": "step_27",
+                                  "type": "BLOCK",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "filters": {
+                                        "filters": [
+                                          {
+                                            "value": {
+                                              "value": "{{step_26}}"
+                                            },
+                                            "fieldName": "Workflow",
+                                            "filterType": "Is equal"
+                                          },
+                                          {
+                                            "value": {
+                                              "value": "{{step_d['item']['ID']}}"
+                                            },
+                                            "fieldName": "Resource Id",
+                                            "filterType": "Is equal"
+                                          }
+                                        ]
+                                      },
+                                      "tableName": "Opportunities",
+                                      "filterType": "AND"
+                                    },
+                                    "blockName": "@openops/block-openops-tables",
+                                    "blockType": "OFFICIAL",
+                                    "actionName": "get_records",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "blockVersion": "0.0.1",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "okWpniHSkhqSVTTqr2F5c",
+                                    "name": "step_28",
+                                    "type": "BRANCH",
+                                    "valid": true,
+                                    "settings": {
+                                      "conditions": [
+                                        [
+                                          {
+                                            "operator": "NUMBER_IS_EQUAL_TO",
+                                            "firstValue": "{{step_27['count']}}",
+                                            "secondValue": "0",
+                                            "caseSensitive": false
+                                          }
+                                        ]
+                                      ],
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      }
+                                    },
+                                    "nextAction": {
+                                      "id": "Q1fUrCX1ub2KYIvUKaNaZ",
+                                      "name": "step_h",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "auth": "{{connections['AWS']}}",
+                                          "dryRun": false,
+                                          "account": {
+                                            "accounts": "{{step_1['item']}}"
+                                          },
+                                          "commandToRun": "aws cloudwatch get-metric-statistics \\\n  --namespace \"AWS/PrivateLinkEndpoints\" \\\n  --metric-name \"NewConnections\" \\\n  --dimensions \\\n     Name=\"VPC Id\",Value=\"{{step_d['item']['VPC']}}\" \\\n     Name=\"VPC Endpoint Id\",Value=\"{{step_d['item']['ID']}}\" \\\n     Name=\"Endpoint Type\",Value=\"Interface\" \\\n     Name=\"Service Name\",Value=\"{{step_d['item']['Service']}}\" \\\n  --period 1209600 --statistics Average Maximum Sum \\\n  --start-time \"{{step_k}}\" \\\n  --end-time \"{{step_j}}\" \\\n  --region {{step_32['item']}}"
+                                        },
+                                        "blockName": "@openops/block-aws",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "aws_cli",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {
+                                            "settings": {
+                                              "input": {
+                                                "auth": true,
+                                                "account": {
+                                                  "accounts": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.3",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "QXwrSCo6dcCllQC0mw2P7",
+                                        "name": "step_b",
+                                        "type": "BRANCH",
+                                        "valid": true,
+                                        "settings": {
+                                          "conditions": [
+                                            [
+                                              {
+                                                "operator": "LIST_IS_NOT_EMPTY",
+                                                "firstValue": "{{step_h['Datapoints']}}",
+                                                "secondValue": "5000"
+                                              }
+                                            ]
+                                          ],
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "id": "b4wQPkB3sJWSX8hKr7WPf",
+                                          "name": "step_f",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "auth": "{{connections['AWS']}}",
+                                              "dryRun": false,
+                                              "account": {
+                                                "accounts": "{{step_1['item']}}"
+                                              },
+                                              "commandToRun": "aws cloudwatch get-metric-statistics \\\n  --namespace \"AWS/PrivateLinkEndpoints\" \\\n  --metric-name \"BytesProcessed\" \\\n  --dimensions \\\n     Name=\"VPC Id\",Value=\"{{step_d['item']['VPC']}}\" \\\n     Name=\"VPC Endpoint Id\",Value=\"{{step_d['item']['ID']}}\" \\\n     Name=\"Endpoint Type\",Value=\"Interface\" \\\n     Name=\"Service Name\",Value=\"{{step_d['item']['Service']}}\" \\\n  --period 1209600 --statistics Sum \\\n  --start-time \"{{step_k}}\" \\\n  --end-time \"{{step_j}}\" \\\n  --region {{step_32['item']}}"
+                                            },
+                                            "blockName": "@openops/block-aws",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "aws_cli",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {
+                                                "settings": {
+                                                  "input": {
+                                                    "auth": true,
+                                                    "account": {
+                                                      "accounts": true
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.3",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "nvCNTCPqo9hLWi5CSGDOu",
+                                            "name": "step_m",
+                                            "type": "CODE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "bytes": "{{step_f['Datapoints'][0]['Sum']}}"
+                                              },
+                                              "sourceCode": {
+                                                "code": "export const code = async (inputs) => {\n  return bytesToHumanReadable(parseInt(inputs.bytes || 0));\n};\n\nconst bytesToHumanReadable = (bytes, decimals = 2) => {\n  // Validate that the input is a number.\n  if (typeof bytes !== 'number' || isNaN(bytes)) {\n    return 'Invalid input';\n  }\n\n  // Determine the sign for negative values.\n  const sign = bytes < 0 ? '-' : '';\n  bytes = Math.abs(bytes);\n\n  // Special case: 0 bytes.\n  if (bytes === 0) return '0 Bytes';\n\n  // Define the conversion factor and available size units.\n  const k = 1024;\n  const dm = decimals < 0 ? 0 : decimals;\n  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];\n\n  // Determine the appropriate unit.\n  const i = Math.floor(Math.log(bytes) / Math.log(k));\n\n  // Convert and format the number to the specified decimal places.\n  return sign + parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];\n};",
+                                                "packageJson": "{}"
+                                              },
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "id": "dKywzyzdvTplEBKTcV2FN",
+                                              "name": "step_q",
+                                              "type": "BRANCH",
+                                              "valid": true,
+                                              "settings": {
+                                                "conditions": [
+                                                  [
+                                                    {
+                                                      "operator": "LIST_IS_EMPTY",
+                                                      "firstValue": "{{step_f['Datapoints']}}"
+                                                    }
+                                                  ],
+                                                  [
+                                                    {
+                                                      "operator": "NUMBER_IS_LESS_THAN",
+                                                      "firstValue": "{{step_f['Datapoints'][0]['Sum']}}",
+                                                      "secondValue": " {{step_l}}"
+                                                    }
+                                                  ]
+                                                ],
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                }
+                                              },
+                                              "displayName": "Endpoint underutilized",
+                                              "onSuccessAction": {
+                                                "id": "PXhT0PpRmvRL4zpKXGAH4",
+                                                "name": "step_r",
+                                                "type": "BLOCK",
+                                                "valid": true,
+                                                "settings": {
+                                                  "input": {
+                                                    "key": "connectionsAverage-{{step_d['index']}}",
+                                                    "store_scope": "RUN",
+                                                    "defaultValue": "0"
+                                                  },
+                                                  "blockName": "@openops/block-store",
+                                                  "blockType": "OFFICIAL",
+                                                  "actionName": "get",
+                                                  "inputUiInfo": {
+                                                    "customizedInputs": {}
+                                                  },
+                                                  "packageType": "REGISTRY",
+                                                  "blockVersion": "0.5.1",
+                                                  "errorHandlingOptions": {
+                                                    "retryOnFailure": {
+                                                      "value": false
+                                                    },
+                                                    "continueOnFailure": {
+                                                      "value": false
+                                                    }
+                                                  }
+                                                },
+                                                "nextAction": {
+                                                  "id": "ttRr1RqWt5Sb44cK4VXf4",
+                                                  "name": "step_s",
+                                                  "type": "BLOCK",
+                                                  "valid": true,
+                                                  "settings": {
+                                                    "input": {
+                                                      "key": "connectionsSum-{{step_d['index']}}",
+                                                      "store_scope": "RUN",
+                                                      "defaultValue": "0"
+                                                    },
+                                                    "blockName": "@openops/block-store",
+                                                    "blockType": "OFFICIAL",
+                                                    "actionName": "get",
+                                                    "inputUiInfo": {
+                                                      "customizedInputs": {}
+                                                    },
+                                                    "packageType": "REGISTRY",
+                                                    "blockVersion": "0.5.1",
+                                                    "errorHandlingOptions": {
+                                                      "retryOnFailure": {
+                                                        "value": false
+                                                      },
+                                                      "continueOnFailure": {
+                                                        "value": false
+                                                      }
+                                                    }
+                                                  },
+                                                  "nextAction": {
+                                                    "id": "ip4duc2eYq1z4489D5ulh",
+                                                    "name": "step_t",
+                                                    "type": "BLOCK",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "tableName": "Opportunities",
+                                                        "rowPrimaryKey": {
+                                                          "rowPrimaryKey": null
+                                                        },
+                                                        "fieldsProperties": {
+                                                          "fieldsProperties": [
+                                                            {
+                                                              "fieldName": "Opportunity Type",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "Workflow optimization"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Account",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "{{step_1['item']}}"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Status",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "Created"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Resource Id",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "{{step_d['item']['ID']}}"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Region",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "{{step_32['item']}}"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Service",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "AWS VPC"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Opportunity details",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "VPC Endpoint is underutilized. it's total transfer over last 14 days was: {{step_m}}."
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Complexity",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "XS"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Risk",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "Low"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Workflow",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "{{step_26}}"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Opportunity generator",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "OpenOps"
+                                                              }
+                                                            },
+                                                            {
+                                                              "fieldName": "Estimated savings USD per month",
+                                                              "newFieldValue": {
+                                                                "newFieldValue": "{{step_p}}"
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "roundToFieldPrecision": false
+                                                      },
+                                                      "blockName": "@openops/block-openops-tables",
+                                                      "blockType": "OFFICIAL",
+                                                      "actionName": "update_record",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {}
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "blockVersion": "0.0.1",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "displayName": "Create OpenOps opportunity",
+                                                    "stepIndex": 28
+                                                  },
+                                                  "displayName": "Get connectionsSum",
+                                                  "stepIndex": 27
+                                                },
+                                                "displayName": "Get connectionsAverage",
+                                                "stepIndex": 26
+                                              },
+                                              "stepIndex": 25
+                                            },
+                                            "displayName": "Transfer as Human Readable",
+                                            "stepIndex": 24
+                                          },
+                                          "displayName": "Get BytesProcessed",
+                                          "stepIndex": 23
+                                        },
+                                        "displayName": "NewConnections Datapoints exist",
+                                        "onSuccessAction": {
+                                          "id": "r1pNmJSANDGcx5EOrWQ5H",
+                                          "name": "step_c",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "key": "connectionsAverage-{{step_d['index']}}",
+                                              "value": "{{step_h['Datapoints'][0]['Average']}}",
+                                              "store_scope": "RUN"
+                                            },
+                                            "blockName": "@openops/block-store",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "put",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.5.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "I2H96noVQaD6Vu0DKw6jx",
+                                            "name": "step_e",
+                                            "type": "BLOCK",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "key": "connectionsSum-{{step_d['index']}}",
+                                                "value": "{{step_h['Datapoints'][0]['Sum']}}",
+                                                "store_scope": "RUN"
+                                              },
+                                              "blockName": "@openops/block-store",
+                                              "blockType": "OFFICIAL",
+                                              "actionName": "put",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "blockVersion": "0.5.1",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "displayName": "Set connectionsSum",
+                                            "stepIndex": 22
+                                          },
+                                          "displayName": "Set connectionsAverage",
+                                          "stepIndex": 21
+                                        },
+                                        "stepIndex": 20
+                                      },
+                                      "displayName": "Get NewConnections Count",
+                                      "stepIndex": 19
+                                    },
+                                    "displayName": "Opportunity doesn't exist or snooze expired",
+                                    "onFailureAction": {
+                                      "id": "jfm1wnIuecN7fTPC86A16",
+                                      "name": "step_30",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {},
+                                        "blockName": "@openops/block-end-flow",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "end_workflow",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {}
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.1",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "displayName": "Skip recommendation",
+                                      "stepIndex": 18
+                                    },
+                                    "stepIndex": 17
+                                  },
+                                  "displayName": "Get existing opportunity",
+                                  "stepIndex": 16
+                                },
+                                "stepIndex": 15
+                              },
+                              "displayName": "Monthly cost formatted",
+                              "stepIndex": 14
+                            },
+                            "displayName": "Calculate monthly price",
+                            "stepIndex": 13
+                          },
+                          "displayName": "Get Price from Price Catalog",
+                          "stepIndex": 12
+                        },
+                        "displayName": "VPCs Endpoints exist",
+                        "onFailureAction": {
+                          "id": "jwD5S86AQ0pPS42JveWUs",
+                          "name": "step_i",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {},
+                            "blockName": "@openops/block-end-flow",
+                            "blockType": "OFFICIAL",
+                            "actionName": "end_workflow",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "displayName": "End Workflow",
+                          "stepIndex": 11
+                        },
+                        "stepIndex": 10
+                      },
+                      "displayName": "Fetch VPC Interface Endpoints",
+                      "stepIndex": 9
+                    },
+                    "stepIndex": 8
+                  },
+                  "stepIndex": 7
+                },
+                "displayName": "This Workflow Name",
+                "stepIndex": 6
+              },
+              "displayName": "Get current date -14 days",
+              "stepIndex": 5
+            },
+            "displayName": "Get Current Date",
+            "stepIndex": 4
+          },
+          "displayName": "CONFIG: Bytes threshold: 10MB",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-math-helper",
+    "@openops/block-date-helper",
+    "@openops/block-store",
+    "@openops/block-aws",
+    "@openops/block-end-flow",
+    "@openops/block-openops-tables",
+    "@openops/block-http"
+  ],
+  "categories": []
+}

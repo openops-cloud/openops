@@ -1,0 +1,1337 @@
+{
+  "created": "1771567608581",
+  "updated": "1771567608581",
+  "name": "AWS Benchmark - DynamoDB Over-Provisioned Tables",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "AWS Benchmark - DynamoDB Over-Provisioned Tables",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "6Kw7KtE9bJFlq4RrPJm7d",
+        "name": "step_g",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "regions_array": "{{trigger['body']['aws_regions_array']}}",
+            "accounts_array": "{{trigger['body']['aws_accounts_array']}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const regions = (typeof inputs.regions_array === 'string' \n    ? JSON.parse(inputs.regions_array) \n    : inputs.regions_array) as any[];\n\n  const accounts = (typeof inputs.accounts_array === 'string' \n    ? JSON.parse(inputs.accounts_array) \n    : inputs.accounts_array) as any[];\n\n  return { regions, accounts };\n};",
+            "packageJson": "{\n  \"dependencies\": {}\n}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "uzkPNGyhE0r3JSl4NfVRQ",
+          "name": "step_i",
+          "type": "BLOCK",
+          "valid": true,
+          "settings": {
+            "input": {
+              "first_number": "5",
+              "second_number": "0"
+            },
+            "blockName": "@openops/block-math-helper",
+            "blockType": "OFFICIAL",
+            "actionName": "addition_math",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            },
+            "packageType": "REGISTRY",
+            "blockVersion": "0.0.8",
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "id": "YSQDJcD0hmBAu8HqeHCbx",
+            "name": "step_l",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "first_number": "0.8",
+                "second_number": "1"
+              },
+              "blockName": "@openops/block-math-helper",
+              "blockType": "OFFICIAL",
+              "actionName": "multiplication_math",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.0.8",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "069lIhJs9dJYXWbV8riHu",
+              "name": "step_j",
+              "type": "BLOCK",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "timeZone": "Europe/Warsaw",
+                  "timeFormat": "YYYY-MM-DDTHH:mm:ss"
+                },
+                "blockName": "@openops/block-date-helper",
+                "blockType": "OFFICIAL",
+                "actionName": "get_current_date",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                },
+                "packageType": "REGISTRY",
+                "blockVersion": "0.0.7",
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "id": "Mci9sFvArp5w1CiqXFWrK",
+                "name": "step_k",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "inputDate": "{{step_j}}",
+                    "expression": "-14 day",
+                    "outputFormat": "YYYY-MM-DDTHH:mm:ss",
+                    "inputDateFormat": "YYYY-MM-DDTHH:mm:ss"
+                  },
+                  "blockName": "@openops/block-date-helper",
+                  "blockType": "OFFICIAL",
+                  "actionName": "add_subtract_date",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.0.7",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "YMLkxklyLsj7rrrwsLugX",
+                  "name": "step_26",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "key": "wfName",
+                      "store_scope": "RUN",
+                      "defaultValue": "AWS Benchmark - DynamoDB Over-Provisioned Tables"
+                    },
+                    "blockName": "@openops/block-store",
+                    "blockType": "OFFICIAL",
+                    "actionName": "get",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {}
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.5.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "VT0cBElTnCZ4fm2Wo0wet",
+                    "name": "step_1",
+                    "type": "LOOP_ON_ITEMS",
+                    "valid": true,
+                    "settings": {
+                      "items": "{{step_g['accounts']}}",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      }
+                    },
+                    "nextAction": {
+                      "id": "wYhOoAQSqg2UXkOuIblN4",
+                      "name": "step_a",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "auth": null,
+                          "body": {
+                            "data": {
+                              "status": "ok"
+                            }
+                          },
+                          "status": 200,
+                          "headers": {},
+                          "body_type": "json"
+                        },
+                        "blockName": "@openops/block-http",
+                        "blockType": "OFFICIAL",
+                        "actionName": "return_response",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.5.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Return Response",
+                      "stepIndex": 39
+                    },
+                    "displayName": "ACCOUNT",
+                    "firstLoopAction": {
+                      "id": "NDgm98QXqt7CREZzeGPMa",
+                      "name": "step_32",
+                      "type": "LOOP_ON_ITEMS",
+                      "valid": true,
+                      "settings": {
+                        "items": "{{step_g['regions']}}",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "displayName": "REGION",
+                      "firstLoopAction": {
+                        "id": "eZ6pFzNP3UgDkfZSM878e",
+                        "name": "step_2",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "auth": "{{connections['AWS']}}",
+                            "dryRun": false,
+                            "account": {
+                              "accounts": "{{step_1['item']}}"
+                            },
+                            "commandToRun": "aws dynamodb list-tables --region {{step_32['item']}}"
+                          },
+                          "blockName": "@openops/block-aws",
+                          "blockType": "OFFICIAL",
+                          "actionName": "aws_cli",
+                          "inputUiInfo": {
+                            "customizedInputs": {
+                              "settings": {
+                                "input": {
+                                  "auth": true,
+                                  "account": {
+                                    "accounts": true
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.3",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "FGF8LVems3cITWCu8fNWQ",
+                          "name": "step_b",
+                          "type": "BRANCH",
+                          "valid": true,
+                          "settings": {
+                            "conditions": [
+                              [
+                                {
+                                  "operator": "LIST_IS_NOT_EMPTY",
+                                  "firstValue": "{{step_2['TableNames']}}"
+                                }
+                              ]
+                            ],
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            }
+                          },
+                          "nextAction": {
+                            "id": "cPjNKyMjqAhznAVlFCNox",
+                            "name": "step_e",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "auth": "{{connections['AWS']}}",
+                                "service": {
+                                  "ServiceCode": "AmazonDynamoDB",
+                                  "AttributeNames": [
+                                    "termType",
+                                    "productFamily",
+                                    "servicecode",
+                                    "location",
+                                    "locationType",
+                                    "volumeType",
+                                    "usagetype",
+                                    "regionCode",
+                                    "servicename",
+                                    "group",
+                                    "groupDescription",
+                                    "operation",
+                                    "LeaseContractLength",
+                                    "PurchaseOption",
+                                    "OfferingClass"
+                                  ]
+                                },
+                                "queryFilters": {
+                                  "queryFilters": [
+                                    {
+                                      "attributeName": "regionCode",
+                                      "attributeValue": "{{step_32['item']}}",
+                                      "dynamicViewToggled": {
+                                        "attributeValue": true
+                                      }
+                                    },
+                                    {
+                                      "attributeName": "groupDescription",
+                                      "attributeValue": "DynamoDB Provisioned Write Units"
+                                    },
+                                    {
+                                      "attributeName": "termType",
+                                      "attributeValue": "OnDemand"
+                                    }
+                                  ]
+                                }
+                              },
+                              "blockName": "@openops/block-aws",
+                              "blockType": "OFFICIAL",
+                              "actionName": "get_price",
+                              "inputUiInfo": {
+                                "customizedInputs": {
+                                  "settings": {
+                                    "input": {
+                                      "auth": true
+                                    }
+                                  }
+                                }
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.0.3",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "nextAction": {
+                              "id": "jPgsyTpM0aDjLIHWidjvf",
+                              "name": "step_f",
+                              "type": "CODE",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "input": "{{step_e[0]['terms']['OnDemand']}}"
+                                },
+                                "sourceCode": {
+                                  "code": "export const code = async ({input}) => {\n  return getPricePerUnitForInfRange(input) * 730;\n};\n\nconst getPricePerUnitForInfRange = (data) => {\n  for (const termKey in data) {\n    const priceDimensions = data[termKey].priceDimensions;\n    for (const dimensionKey in priceDimensions) {\n      const dimension = priceDimensions[dimensionKey];\n      if (dimension.endRange === 'Inf') {\n        return dimension.pricePerUnit.USD;\n      }\n    }\n  }\n  return 0; // Return 0 if no matching dimension found\n};",
+                                  "packageJson": "{}"
+                                },
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "nextAction": {
+                                "id": "N6ZfYRzOB5H8Pn6v8lM59",
+                                "name": "step_h",
+                                "type": "BLOCK",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "auth": "{{connections['AWS']}}",
+                                    "service": {
+                                      "ServiceCode": "AmazonDynamoDB",
+                                      "AttributeNames": [
+                                        "termType",
+                                        "productFamily",
+                                        "servicecode",
+                                        "location",
+                                        "locationType",
+                                        "volumeType",
+                                        "usagetype",
+                                        "regionCode",
+                                        "servicename",
+                                        "group",
+                                        "groupDescription",
+                                        "operation",
+                                        "LeaseContractLength",
+                                        "PurchaseOption",
+                                        "OfferingClass"
+                                      ]
+                                    },
+                                    "queryFilters": {
+                                      "queryFilters": [
+                                        {
+                                          "attributeName": "regionCode",
+                                          "attributeValue": "{{step_32['item']}}",
+                                          "dynamicViewToggled": {
+                                            "attributeValue": true
+                                          }
+                                        },
+                                        {
+                                          "attributeName": "groupDescription",
+                                          "attributeValue": "DynamoDB Provisioned Read Units"
+                                        },
+                                        {
+                                          "attributeName": "termType",
+                                          "attributeValue": "OnDemand"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "blockName": "@openops/block-aws",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "get_price",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {
+                                      "settings": {
+                                        "input": {
+                                          "auth": true
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.0.3",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "id": "TXECe9e6OIqWQd866djef",
+                                  "name": "step_m",
+                                  "type": "CODE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "input": "{{step_h[0]['terms']['OnDemand']}}"
+                                    },
+                                    "sourceCode": {
+                                      "code": "export const code = async ({input}) => {\n  return getPricePerUnitForInfRange(input) * 730;\n};\n\nconst getPricePerUnitForInfRange = (data) => {\n  for (const termKey in data) {\n    const priceDimensions = data[termKey].priceDimensions;\n    for (const dimensionKey in priceDimensions) {\n      const dimension = priceDimensions[dimensionKey];\n      if (dimension.endRange === 'Inf') {\n        return dimension.pricePerUnit.USD;\n      }\n    }\n  }\n  return 0; // Return 0 if no matching dimension found\n};",
+                                      "packageJson": "{}"
+                                    },
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "LHAbqJkJRFWC7dgbsm72Z",
+                                    "name": "step_d",
+                                    "type": "LOOP_ON_ITEMS",
+                                    "valid": true,
+                                    "settings": {
+                                      "items": "{{step_2['TableNames']}}",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      }
+                                    },
+                                    "displayName": "RESOURCE",
+                                    "firstLoopAction": {
+                                      "id": "8n3t4ehZoN94A0xXS48bN",
+                                      "name": "step_n",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "auth": "{{connections['AWS']}}",
+                                          "dryRun": false,
+                                          "account": {
+                                            "accounts": "{{step_1['item']}}"
+                                          },
+                                          "commandToRun": "aws dynamodb describe-table --table-name {{step_d['item']}} --region {{step_32['item']}}"
+                                        },
+                                        "blockName": "@openops/block-aws",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "aws_cli",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {
+                                            "settings": {
+                                              "input": {
+                                                "auth": true,
+                                                "account": {
+                                                  "accounts": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.3",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "6g2t3YZKBJ6X6aN3PelDN",
+                                        "name": "step_o",
+                                        "type": "BLOCK",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "arn": "{{step_n['Table']['TableArn']}}"
+                                          },
+                                          "blockName": "@openops/block-aws",
+                                          "blockType": "OFFICIAL",
+                                          "actionName": "parse_arn",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "blockVersion": "0.0.3",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "id": "3j132XCJpe98LLdcMlvMt",
+                                          "name": "step_27",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "filters": {
+                                                "filters": [
+                                                  {
+                                                    "value": {
+                                                      "value": "{{step_26}}"
+                                                    },
+                                                    "fieldName": "Workflow",
+                                                    "filterType": "Is equal"
+                                                  },
+                                                  {
+                                                    "value": {
+                                                      "value": "{{step_n['Table']['TableArn']}}"
+                                                    },
+                                                    "fieldName": "Resource Id",
+                                                    "filterType": "Is equal"
+                                                  }
+                                                ]
+                                              },
+                                              "tableName": "Opportunities",
+                                              "filterType": "AND"
+                                            },
+                                            "blockName": "@openops/block-openops-tables",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "get_records",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "okWpniHSkhqSVTTqr2F5c",
+                                            "name": "step_28",
+                                            "type": "BRANCH",
+                                            "valid": true,
+                                            "settings": {
+                                              "conditions": [
+                                                [
+                                                  {
+                                                    "operator": "NUMBER_IS_EQUAL_TO",
+                                                    "firstValue": "{{step_27['count']}}",
+                                                    "secondValue": "0",
+                                                    "caseSensitive": false
+                                                  }
+                                                ]
+                                              ],
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "id": "jrpQJqR6ZlbNKN8ONBgiJ",
+                                              "name": "step_p",
+                                              "type": "BRANCH",
+                                              "valid": true,
+                                              "settings": {
+                                                "conditions": [
+                                                  [
+                                                    {
+                                                      "operator": "EXISTS",
+                                                      "firstValue": "{{step_n['Table']['ProvisionedThroughput']}}"
+                                                    }
+                                                  ]
+                                                ],
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                }
+                                              },
+                                              "displayName": "Provisioned Throughput mode",
+                                              "onSuccessAction": {
+                                                "id": "6yZrkM48tXd7Sq9STpiUd",
+                                                "name": "step_q",
+                                                "type": "BLOCK",
+                                                "valid": true,
+                                                "settings": {
+                                                  "input": {
+                                                    "auth": "{{connections['AWS']}}",
+                                                    "dryRun": false,
+                                                    "account": {
+                                                      "accounts": "{{step_1['item']}}"
+                                                    },
+                                                    "commandToRun": "aws cloudwatch get-metric-statistics \\\n  --namespace AWS/DynamoDB \\\n  --metric-name ConsumedReadCapacityUnits \\\n  --dimensions Name=TableName,Value={{step_n['Table']['TableName']}} \\\n  --start-time {{step_k}} \\\n  --end-time {{step_j}} \\\n  --period 86400 \\\n  --statistics Maximum \\ \n  --region {{step_32['item']}}\n"
+                                                  },
+                                                  "blockName": "@openops/block-aws",
+                                                  "blockType": "OFFICIAL",
+                                                  "actionName": "aws_cli",
+                                                  "inputUiInfo": {
+                                                    "customizedInputs": {
+                                                      "settings": {
+                                                        "input": {
+                                                          "auth": true,
+                                                          "account": {
+                                                            "accounts": true
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  "packageType": "REGISTRY",
+                                                  "blockVersion": "0.0.3",
+                                                  "errorHandlingOptions": {
+                                                    "retryOnFailure": {
+                                                      "value": false
+                                                    },
+                                                    "continueOnFailure": {
+                                                      "value": false
+                                                    }
+                                                  }
+                                                },
+                                                "nextAction": {
+                                                  "id": "2hrwe9Pz8hTIhulo5LihW",
+                                                  "name": "step_r",
+                                                  "type": "CODE",
+                                                  "valid": true,
+                                                  "settings": {
+                                                    "input": {
+                                                      "data": "{{step_q}}"
+                                                    },
+                                                    "sourceCode": {
+                                                      "code": "export const code = async ({data}) => {\n  const dps = data.Datapoints.map(dp => dp.Maximum);\n  const median = med(dps);\n  return median;\n}\n\n\nconst med = arr => {\n  const sorted = [...arr].sort((a, b) => a - b);\n  const mid = Math.floor(sorted.length / 2);\n  return sorted.length % 2\n    ? sorted[mid]\n    : (sorted[mid - 1] + sorted[mid]) / 2;\n};\n",
+                                                      "packageJson": "{}"
+                                                    },
+                                                    "inputUiInfo": {
+                                                      "customizedInputs": {}
+                                                    },
+                                                    "errorHandlingOptions": {
+                                                      "retryOnFailure": {
+                                                        "value": false
+                                                      },
+                                                      "continueOnFailure": {
+                                                        "value": false
+                                                      }
+                                                    }
+                                                  },
+                                                  "nextAction": {
+                                                    "id": "QMZZ2Sp7UHh5gIW4fxWhH",
+                                                    "name": "step_s",
+                                                    "type": "BLOCK",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "auth": "{{connections['AWS']}}",
+                                                        "dryRun": false,
+                                                        "account": {
+                                                          "accounts": "{{step_1['item']}}"
+                                                        },
+                                                        "commandToRun": "aws cloudwatch get-metric-statistics \\\n  --namespace AWS/DynamoDB \\\n  --metric-name ConsumedWriteCapacityUnits \\\n  --dimensions Name=TableName,Value={{step_n['Table']['TableName']}} \\\n  --start-time {{step_k}} \\\n  --end-time {{step_j}} \\\n  --period 86400 \\\n  --statistics Maximum \\ \n  --region {{step_32['item']}}\n"
+                                                      },
+                                                      "blockName": "@openops/block-aws",
+                                                      "blockType": "OFFICIAL",
+                                                      "actionName": "aws_cli",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {
+                                                          "settings": {
+                                                            "input": {
+                                                              "auth": true,
+                                                              "account": {
+                                                                "accounts": true
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "blockVersion": "0.0.3",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "nextAction": {
+                                                      "id": "ZIcUcUrWA3gNuwis0zhdS",
+                                                      "name": "step_t",
+                                                      "type": "CODE",
+                                                      "valid": true,
+                                                      "settings": {
+                                                        "input": {
+                                                          "data": "{{step_s}}"
+                                                        },
+                                                        "sourceCode": {
+                                                          "code": "export const code = async ({data}) => {\n  const dps = data.Datapoints.map(dp => dp.Maximum);\n  const median = med(dps);\n  return median;\n}\n\n\nconst med = arr => {\n  const sorted = [...arr].sort((a, b) => a - b);\n  const mid = Math.floor(sorted.length / 2);\n  return sorted.length % 2\n    ? sorted[mid]\n    : (sorted[mid - 1] + sorted[mid]) / 2;\n};\n",
+                                                          "packageJson": "{}"
+                                                        },
+                                                        "inputUiInfo": {
+                                                          "customizedInputs": {}
+                                                        },
+                                                        "errorHandlingOptions": {
+                                                          "retryOnFailure": {
+                                                            "value": false
+                                                          },
+                                                          "continueOnFailure": {
+                                                            "value": false
+                                                          }
+                                                        }
+                                                      },
+                                                      "nextAction": {
+                                                        "id": "mLl7eJ3IdwVHczcBSeCft",
+                                                        "name": "step_u",
+                                                        "type": "BLOCK",
+                                                        "valid": true,
+                                                        "settings": {
+                                                          "input": {
+                                                            "first_number": "{{step_n['Table']['ProvisionedThroughput']['ReadCapacityUnits']}}",
+                                                            "second_number": "{{step_l}}"
+                                                          },
+                                                          "blockName": "@openops/block-math-helper",
+                                                          "blockType": "OFFICIAL",
+                                                          "actionName": "multiplication_math",
+                                                          "inputUiInfo": {
+                                                            "customizedInputs": {}
+                                                          },
+                                                          "packageType": "REGISTRY",
+                                                          "blockVersion": "0.0.8",
+                                                          "errorHandlingOptions": {
+                                                            "retryOnFailure": {
+                                                              "value": false
+                                                            },
+                                                            "continueOnFailure": {
+                                                              "value": false
+                                                            }
+                                                          }
+                                                        },
+                                                        "nextAction": {
+                                                          "id": "4qlJC87PFcfezGsuKusei",
+                                                          "name": "step_v",
+                                                          "type": "BLOCK",
+                                                          "valid": true,
+                                                          "settings": {
+                                                            "input": {
+                                                              "first_number": "{{step_n['Table']['ProvisionedThroughput']['WriteCapacityUnits']}}",
+                                                              "second_number": "{{step_l}}"
+                                                            },
+                                                            "blockName": "@openops/block-math-helper",
+                                                            "blockType": "OFFICIAL",
+                                                            "actionName": "multiplication_math",
+                                                            "inputUiInfo": {
+                                                              "customizedInputs": {}
+                                                            },
+                                                            "packageType": "REGISTRY",
+                                                            "blockVersion": "0.0.8",
+                                                            "errorHandlingOptions": {
+                                                              "retryOnFailure": {
+                                                                "value": false
+                                                              },
+                                                              "continueOnFailure": {
+                                                                "value": false
+                                                              }
+                                                            }
+                                                          },
+                                                          "nextAction": {
+                                                            "id": "ISfaa1ACqd43G7YoGYBA4",
+                                                            "name": "step_w",
+                                                            "type": "BRANCH",
+                                                            "valid": true,
+                                                            "settings": {
+                                                              "conditions": [
+                                                                [
+                                                                  {
+                                                                    "operator": "NUMBER_IS_LESS_THAN",
+                                                                    "firstValue": "{{step_r}}",
+                                                                    "secondValue": "{{step_u}}"
+                                                                  },
+                                                                  {
+                                                                    "operator": "NUMBER_IS_LESS_THAN",
+                                                                    "firstValue": "{{step_t}}",
+                                                                    "secondValue": "{{step_v}}"
+                                                                  }
+                                                                ]
+                                                              ],
+                                                              "inputUiInfo": {
+                                                                "customizedInputs": {}
+                                                              }
+                                                            },
+                                                            "displayName": "Table over-provisioned",
+                                                            "onSuccessAction": {
+                                                              "id": "u2JP8j31vhLm6moCOZ7Fs",
+                                                              "name": "step_x",
+                                                              "type": "BLOCK",
+                                                              "valid": true,
+                                                              "settings": {
+                                                                "input": {
+                                                                  "first_number": "{{step_n['Table']['ProvisionedThroughput']['WriteCapacityUnits']}}",
+                                                                  "second_number": "{{step_f}}"
+                                                                },
+                                                                "blockName": "@openops/block-math-helper",
+                                                                "blockType": "OFFICIAL",
+                                                                "actionName": "multiplication_math",
+                                                                "inputUiInfo": {
+                                                                  "customizedInputs": {}
+                                                                },
+                                                                "packageType": "REGISTRY",
+                                                                "blockVersion": "0.0.8",
+                                                                "errorHandlingOptions": {
+                                                                  "retryOnFailure": {
+                                                                    "value": false
+                                                                  },
+                                                                  "continueOnFailure": {
+                                                                    "value": false
+                                                                  }
+                                                                }
+                                                              },
+                                                              "nextAction": {
+                                                                "id": "jlf9gj1mnNt1Tygxbk9ov",
+                                                                "name": "step_y",
+                                                                "type": "BLOCK",
+                                                                "valid": true,
+                                                                "settings": {
+                                                                  "input": {
+                                                                    "number": "{{step_x}}",
+                                                                    "numberOfDecimalPlaces": "2"
+                                                                  },
+                                                                  "blockName": "@openops/block-math-helper",
+                                                                  "blockType": "OFFICIAL",
+                                                                  "actionName": "truncate_math",
+                                                                  "inputUiInfo": {
+                                                                    "customizedInputs": {}
+                                                                  },
+                                                                  "packageType": "REGISTRY",
+                                                                  "blockVersion": "0.0.8",
+                                                                  "errorHandlingOptions": {
+                                                                    "retryOnFailure": {
+                                                                      "value": false
+                                                                    },
+                                                                    "continueOnFailure": {
+                                                                      "value": false
+                                                                    }
+                                                                  }
+                                                                },
+                                                                "nextAction": {
+                                                                  "id": "HGOo94Kdtf6HFAearXZwa",
+                                                                  "name": "step_z",
+                                                                  "type": "BLOCK",
+                                                                  "valid": true,
+                                                                  "settings": {
+                                                                    "input": {
+                                                                      "first_number": "{{step_n['Table']['ProvisionedThroughput']['ReadCapacityUnits']}}",
+                                                                      "second_number": "{{step_m}}"
+                                                                    },
+                                                                    "blockName": "@openops/block-math-helper",
+                                                                    "blockType": "OFFICIAL",
+                                                                    "actionName": "multiplication_math",
+                                                                    "inputUiInfo": {
+                                                                      "customizedInputs": {}
+                                                                    },
+                                                                    "packageType": "REGISTRY",
+                                                                    "blockVersion": "0.0.8",
+                                                                    "errorHandlingOptions": {
+                                                                      "retryOnFailure": {
+                                                                        "value": false
+                                                                      },
+                                                                      "continueOnFailure": {
+                                                                        "value": false
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                  "nextAction": {
+                                                                    "id": "9EqnBt3MiOfQuS22YiGUv",
+                                                                    "name": "step_aa",
+                                                                    "type": "BLOCK",
+                                                                    "valid": true,
+                                                                    "settings": {
+                                                                      "input": {
+                                                                        "number": "{{step_z}}",
+                                                                        "numberOfDecimalPlaces": "2"
+                                                                      },
+                                                                      "blockName": "@openops/block-math-helper",
+                                                                      "blockType": "OFFICIAL",
+                                                                      "actionName": "truncate_math",
+                                                                      "inputUiInfo": {
+                                                                        "customizedInputs": {}
+                                                                      },
+                                                                      "packageType": "REGISTRY",
+                                                                      "blockVersion": "0.0.8",
+                                                                      "errorHandlingOptions": {
+                                                                        "retryOnFailure": {
+                                                                          "value": false
+                                                                        },
+                                                                        "continueOnFailure": {
+                                                                          "value": false
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    "nextAction": {
+                                                                      "id": "nysFfUhUynLeW2g8xMubf",
+                                                                      "name": "step_ab",
+                                                                      "type": "BLOCK",
+                                                                      "valid": true,
+                                                                      "settings": {
+                                                                        "input": {
+                                                                          "first_number": "{{step_x}}",
+                                                                          "second_number": "{{step_z}}"
+                                                                        },
+                                                                        "blockName": "@openops/block-math-helper",
+                                                                        "blockType": "OFFICIAL",
+                                                                        "actionName": "addition_math",
+                                                                        "inputUiInfo": {
+                                                                          "customizedInputs": {}
+                                                                        },
+                                                                        "packageType": "REGISTRY",
+                                                                        "blockVersion": "0.0.8",
+                                                                        "errorHandlingOptions": {
+                                                                          "retryOnFailure": {
+                                                                            "value": false
+                                                                          },
+                                                                          "continueOnFailure": {
+                                                                            "value": false
+                                                                          }
+                                                                        }
+                                                                      },
+                                                                      "nextAction": {
+                                                                        "id": "i47s59rFxJXBKwP7q2im7",
+                                                                        "name": "step_ac",
+                                                                        "type": "BRANCH",
+                                                                        "valid": true,
+                                                                        "settings": {
+                                                                          "conditions": [
+                                                                            [
+                                                                              {
+                                                                                "operator": "NUMBER_IS_GREATER_THAN",
+                                                                                "firstValue": "{{step_ab}}",
+                                                                                "secondValue": "{{step_i}}"
+                                                                              }
+                                                                            ]
+                                                                          ],
+                                                                          "inputUiInfo": {
+                                                                            "customizedInputs": {}
+                                                                          }
+                                                                        },
+                                                                        "displayName": "Potential savings > threshold",
+                                                                        "onSuccessAction": {
+                                                                          "id": "Al0HWzJF5l2WgxTYHc8HP",
+                                                                          "name": "step_ad",
+                                                                          "type": "BLOCK",
+                                                                          "valid": true,
+                                                                          "settings": {
+                                                                            "input": {
+                                                                              "number": "{{step_ab}}",
+                                                                              "numberOfDecimalPlaces": "2"
+                                                                            },
+                                                                            "blockName": "@openops/block-math-helper",
+                                                                            "blockType": "OFFICIAL",
+                                                                            "actionName": "truncate_math",
+                                                                            "inputUiInfo": {
+                                                                              "customizedInputs": {}
+                                                                            },
+                                                                            "packageType": "REGISTRY",
+                                                                            "blockVersion": "0.0.8",
+                                                                            "errorHandlingOptions": {
+                                                                              "retryOnFailure": {
+                                                                                "value": false
+                                                                              },
+                                                                              "continueOnFailure": {
+                                                                                "value": false
+                                                                              }
+                                                                            }
+                                                                          },
+                                                                          "nextAction": {
+                                                                            "id": "fAWInh17pwPiZNbOx5LtX",
+                                                                            "name": "step_af",
+                                                                            "type": "BLOCK",
+                                                                            "valid": true,
+                                                                            "settings": {
+                                                                              "input": {
+                                                                                "tableName": "Opportunities",
+                                                                                "rowPrimaryKey": {
+                                                                                  "rowPrimaryKey": null
+                                                                                },
+                                                                                "fieldsProperties": {
+                                                                                  "fieldsProperties": [
+                                                                                    {
+                                                                                      "fieldName": "Opportunity Type",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "Workflow optimization"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Account",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "{{step_1['item']}}"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Status",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "Created"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Resource Id",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "{{step_n['Table']['TableArn']}}"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Region",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "{{step_32['item']}}"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Service",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "AWS DynamoDB"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Opportunity details",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "Table over-provisioned. Switch to on-demand mode."
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Estimated savings USD per month",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "{{step_ad}}"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Complexity",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "XS"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Risk",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "Low"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Workflow",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "{{step_26}}"
+                                                                                      }
+                                                                                    },
+                                                                                    {
+                                                                                      "fieldName": "Opportunity generator",
+                                                                                      "newFieldValue": {
+                                                                                        "newFieldValue": "OpenOps"
+                                                                                      }
+                                                                                    }
+                                                                                  ]
+                                                                                },
+                                                                                "roundToFieldPrecision": false
+                                                                              },
+                                                                              "blockName": "@openops/block-openops-tables",
+                                                                              "blockType": "OFFICIAL",
+                                                                              "actionName": "update_record",
+                                                                              "inputUiInfo": {
+                                                                                "customizedInputs": {}
+                                                                              },
+                                                                              "packageType": "REGISTRY",
+                                                                              "blockVersion": "0.0.1",
+                                                                              "errorHandlingOptions": {
+                                                                                "retryOnFailure": {
+                                                                                  "value": false
+                                                                                },
+                                                                                "continueOnFailure": {
+                                                                                  "value": false
+                                                                                }
+                                                                              }
+                                                                            },
+                                                                            "displayName": "Create OpenOps opportunity",
+                                                                            "stepIndex": 38
+                                                                          },
+                                                                          "displayName": "Table Monthly cost formatted",
+                                                                          "stepIndex": 37
+                                                                        },
+                                                                        "stepIndex": 36
+                                                                      },
+                                                                      "displayName": "Total Monthly Table CU cost",
+                                                                      "stepIndex": 35
+                                                                    },
+                                                                    "displayName": "RCU Monthly cost formatted",
+                                                                    "stepIndex": 34
+                                                                  },
+                                                                  "displayName": "Calculate RCU Monthly",
+                                                                  "stepIndex": 33
+                                                                },
+                                                                "displayName": "WCU Monthly cost formatted",
+                                                                "stepIndex": 32
+                                                              },
+                                                              "displayName": "Calculate WCU Monthly",
+                                                              "stepIndex": 31
+                                                            },
+                                                            "stepIndex": 30
+                                                          },
+                                                          "displayName": "Provisioned WCU multiplied by factor",
+                                                          "stepIndex": 29
+                                                        },
+                                                        "displayName": "Provisioned RCU multiplied by factor",
+                                                        "stepIndex": 28
+                                                      },
+                                                      "displayName": "WCU Median",
+                                                      "stepIndex": 27
+                                                    },
+                                                    "displayName": "Fetch WCU Metrics",
+                                                    "stepIndex": 26
+                                                  },
+                                                  "displayName": "RCU Median",
+                                                  "stepIndex": 25
+                                                },
+                                                "displayName": "Fetch RCU Metrics",
+                                                "stepIndex": 24
+                                              },
+                                              "stepIndex": 23
+                                            },
+                                            "displayName": "Opportunity doesn't exist or snooze expired",
+                                            "onFailureAction": {
+                                              "id": "jfm1wnIuecN7fTPC86A16",
+                                              "name": "step_30",
+                                              "type": "BLOCK",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {},
+                                                "blockName": "@openops/block-end-flow",
+                                                "blockType": "OFFICIAL",
+                                                "actionName": "end_workflow",
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                },
+                                                "packageType": "REGISTRY",
+                                                "blockVersion": "0.0.1",
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "displayName": "Skip recommendation",
+                                              "stepIndex": 22
+                                            },
+                                            "stepIndex": 21
+                                          },
+                                          "displayName": "Get existing opportunity",
+                                          "stepIndex": 20
+                                        },
+                                        "displayName": "Parse ARN",
+                                        "stepIndex": 19
+                                      },
+                                      "displayName": "Fetch Table information",
+                                      "stepIndex": 18
+                                    },
+                                    "stepIndex": 17
+                                  },
+                                  "displayName": "Extract RCU Pricing per month",
+                                  "stepIndex": 16
+                                },
+                                "displayName": "Get RCU Pricing data",
+                                "stepIndex": 15
+                              },
+                              "displayName": "Extract WCU Pricing per month",
+                              "stepIndex": 14
+                            },
+                            "displayName": "Get WCU Pricing data",
+                            "stepIndex": 13
+                          },
+                          "displayName": "DynamoDB tables exists",
+                          "onFailureAction": {
+                            "id": "8oknpQjCX8QGQhlPAcjwu",
+                            "name": "step_c",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {},
+                              "blockName": "@openops/block-end-flow",
+                              "blockType": "OFFICIAL",
+                              "actionName": "end_workflow",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.0.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "displayName": "Skip region",
+                            "stepIndex": 12
+                          },
+                          "stepIndex": 11
+                        },
+                        "displayName": "Fetch DynamoDB tables",
+                        "stepIndex": 10
+                      },
+                      "stepIndex": 9
+                    },
+                    "stepIndex": 8
+                  },
+                  "displayName": "This Workflow Name",
+                  "stepIndex": 7
+                },
+                "displayName": "Get current date -14 days",
+                "stepIndex": 6
+              },
+              "displayName": "Get Current Date",
+              "stepIndex": 5
+            },
+            "displayName": "Level factor",
+            "stepIndex": 4
+          },
+          "displayName": "Cost Saving Threshold",
+          "stepIndex": 3
+        },
+        "displayName": "Format regions and accounts",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-math-helper",
+    "@openops/block-date-helper",
+    "@openops/block-store",
+    "@openops/block-aws",
+    "@openops/block-end-flow",
+    "@openops/block-openops-tables",
+    "@openops/block-http"
+  ],
+  "categories": []
+}

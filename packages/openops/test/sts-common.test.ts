@@ -35,7 +35,6 @@ const ACCESS_KEY_ID = 'random accessKeyId';
 const SECRET_ACCESS_KEY = 'random secretAccessKey';
 const DEFAULT_REGION = 'random defaultRegion';
 
-import { EndpointScope } from '@openops/shared';
 import { assumeRole, getAccountId } from '../src/lib/aws/sts-common';
 
 describe('assumeRole tests', () => {
