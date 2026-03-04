@@ -98,13 +98,8 @@
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "AWS Benchmark - Migrate EC2 instances to Graviton",
-            "displayName": "Migrate EC2 instances to Graviton",
-            "imageLogoUrl": "/blocks/workflow.svg"
-          },
-          {
-            "id": "AWS Benchmark - Old generation EC2 instances",
-            "displayName": "Old generation EC2 instances",
+            "id": "AWS Benchmark - Migrate Linux EC2 instances to Graviton",
+            "displayName": "Migrate Linux EC2 instances to Graviton",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
