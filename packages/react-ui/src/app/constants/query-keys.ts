@@ -69,5 +69,6 @@ export const QueryKeys = {
   latestRelease: 'latest-release',
 
   // Benchmarks
+  benchmarkStatus: 'benchmark-status',
   benchmarks: 'benchmarks',
 };

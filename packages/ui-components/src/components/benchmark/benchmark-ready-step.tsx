@@ -11,16 +11,14 @@ interface BenchmarkReadyStepProps {
   providerName: string;
   result: BenchmarkCreationResult;
   runPhase: BenchmarkRunPhase;
-  onViewRun: () => void;
-  onResetRun: () => void;
+  runningProgress?: { completed: number; total: number };
 }
 
 export const BenchmarkReadyStep = ({
   providerName,
   result,
   runPhase,
-  onViewRun,
-  onResetRun,
+  runningProgress,
 }: BenchmarkReadyStepProps) => {
   const orchestrator = result.workflows.find((w) => w.isOrchestrator);
   const subWorkflows = result.workflows.filter((w) => !w.isOrchestrator);
@@ -48,18 +46,16 @@ export const BenchmarkReadyStep = ({
         )}
       </StepDescription>
 
-      {runPhase === 'idle' && (
-        <BenchmarkWorkflowList
-          workflows={displayedWorkflows}
-          provider={providerName}
-        />
+      <BenchmarkWorkflowList
+        workflows={displayedWorkflows}
+        provider={providerName}
+      />
+
+      {runPhase === 'running' && (
+        <BenchmarkRunningPhase progress={runningProgress} />
       )}
 
-      {runPhase === 'running' && <BenchmarkRunningPhase />}
-
-      {runPhase === 'failed' && (
-        <BenchmarkFailedPhase onViewRun={onViewRun} onResetRun={onResetRun} />
-      )}
+      {runPhase === 'failed' && <BenchmarkFailedPhase />}
 
       {runPhase === 'succeeded_with_failures' && (
         <BenchmarkAnalyticsPhase
