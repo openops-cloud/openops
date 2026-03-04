@@ -14,7 +14,16 @@ export const SERVICE_KEY_SECURITY_OPENAPI = {
   apiKey: [],
 };
 
-export enum EndpointScope {
+export enum AuthorizationScope {
   ORGANIZATION = 'ORGANIZATION',
   PROJECT = 'PROJECT',
 }
+
+export enum RouteAccessType {
+  AUTHENTICATED = 'AUTHENTICATED',
+  PUBLIC = 'PUBLIC',
+}
+
+export type PublicRoutePolicy = {
+  routeAccessType: RouteAccessType.PUBLIC;
+};

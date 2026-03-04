@@ -187,7 +187,7 @@ export async function createBenchmarkWorkflows(params: {
 }
 
 export async function createBenchmark(params: {
-  provider: string;
+  provider: BenchmarkProviders;
   projectId: string;
   userId: string;
   benchmarkConfiguration: BenchmarkConfiguration;
