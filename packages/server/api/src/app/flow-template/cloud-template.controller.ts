@@ -3,7 +3,11 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { ALL_PRINCIPAL_TYPES, OpenOpsId } from '@openops/shared';
+import {
+  ALL_PRINCIPAL_TYPES,
+  OpenOpsId,
+  PUBLIC_ROUTE_POLICY,
+} from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { JwtPayload } from 'jsonwebtoken';
 import {
@@ -40,6 +44,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
       schema: {
         tags: ['flow-templates'],
@@ -81,6 +86,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
       schema: {
         tags: ['flow-templates'],

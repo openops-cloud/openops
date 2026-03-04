@@ -18,6 +18,7 @@ import {
   Permission,
   PrincipalType,
   ProgressUpdateType,
+  PUBLIC_ROUTE_POLICY,
   RetryFlowRequestBody,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
@@ -178,6 +179,7 @@ const ResumeFlowRunRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     description:

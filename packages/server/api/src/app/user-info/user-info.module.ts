@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { ALL_PRINCIPAL_TYPES } from '@openops/shared';
+import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
@@ -34,6 +34,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
     },
     async (request, reply) => {
