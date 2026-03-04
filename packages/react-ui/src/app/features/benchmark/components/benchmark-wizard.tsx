@@ -13,11 +13,13 @@ import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 import { noop } from 'lodash-es';
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 
 import { CloudProvider, getProviderByValue } from '../cloud-providers';
+import { useBenchmarkRun } from '../use-benchmark-run';
 import { useBenchmarkWizardNavigation } from '../use-benchmark-wizard-navigation';
 import { useProviderConnections } from '../use-provider-connections';
 import { BenchmarkWizardFooter } from './benchmark-wizard-footer';
@@ -80,6 +82,17 @@ export const BenchmarkWizard = ({
     handleEditSetup,
   } = useBenchmarkWizardNavigation(connectedProviders, onBenchmarkCreated);
 
+  const navigate = useNavigate();
+
+  const {
+    runPhase,
+    runningProgress,
+    isRunPending,
+    handleRunBenchmark,
+    handleResetRun,
+    lastRunId,
+  } = useBenchmarkRun(benchmarkCreateResult);
+
   const connectingProviderConfig = getProviderByValue(connectingProvider);
   const selectedProviderConfig = getProviderByValue(selectedProvider ?? null);
   const providerName = selectedProviderConfig?.name ?? '';
@@ -92,6 +105,17 @@ export const BenchmarkWizard = ({
     () => setConnectingProvider(null),
     [],
   );
+
+  const handleViewRun = () => {
+    if (lastRunId) {
+      navigate(`/runs/${lastRunId}`);
+    }
+  };
+
+  const handleEditSetupAndResetRun = () => {
+    handleResetRun();
+    handleEditSetup();
+  };
 
   return (
     <div className="h-full w-full flex flex-col bg-greyBlue-100 dark:bg-background">
@@ -144,9 +168,8 @@ export const BenchmarkWizard = ({
                   <BenchmarkReadyStep
                     providerName={providerName}
                     result={benchmarkCreateResult}
-                    runPhase="idle"
-                    onViewRun={noop}
-                    onResetRun={noop}
+                    runPhase={runPhase}
+                    runningProgress={runningProgress ?? undefined}
                   />
                 )}
               </WizardStep>
@@ -157,12 +180,17 @@ export const BenchmarkWizard = ({
         <WizardFooter>
           <BenchmarkWizardFooter
             wizardPhase={wizardPhase}
+            runPhase={runPhase}
             benchmarkCreationResult={benchmarkCreateResult}
             isNextDisabled={isNextDisabled}
+            isRunning={runPhase === 'running' || isRunPending}
             handleNextFromInitial={handleNextFromInitial}
             handleNextFromProviderStep={handleNextFromProviderStep}
             handlePrevious={handlePrevious}
-            handleEditSetup={handleEditSetup}
+            handleEditSetup={handleEditSetupAndResetRun}
+            onRunNow={handleRunBenchmark}
+            onViewRun={handleViewRun}
+            onRunAgain={handleRunBenchmark}
           />
         </WizardFooter>
       </Wizard>
