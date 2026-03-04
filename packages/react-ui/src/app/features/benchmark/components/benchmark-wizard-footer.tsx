@@ -78,10 +78,11 @@ export const BenchmarkWizardFooter = ({
     );
 
     return (
-      <div className="flex-1 flex gap-2 justify-end">
+      <div className="@container flex-1 flex flex-wrap gap-2 justify-end">
         <Button
           variant="outline"
           size="sm"
+          className="flex-1 min-w-0 @xs:flex-none"
           disabled={isRunning}
           onClick={handleEditSetup}
         >
@@ -90,12 +91,14 @@ export const BenchmarkWizardFooter = ({
         {benchmarkCreationResult && (
           <ViewBenchmarkWorkflowsButton
             folderId={benchmarkCreationResult.folderId}
+            className="flex-1 min-w-0 @xs:flex-none"
             disabled={isRunning}
           />
         )}
         <Button
           size="sm"
           disabled={!hasOrchestrator || isRunning}
+          className="w-full @xs:w-auto"
           onClick={() => {
             onRunNow().catch((e) => {
               console.error(e);

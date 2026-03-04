@@ -12,6 +12,7 @@ import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
+import { createBenchmarkDashboard } from '../openops-analytics/benchmark/benchmark-dashboard-service';
 import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
 import {
   bulkCreateAndPublishFlows,
@@ -218,6 +219,7 @@ export async function createBenchmark(params: {
     folderId: benchmarkFolder.id,
   });
 
+  let result: BenchmarkCreationResult;
   try {
     const { benchmark, payload } = await attachFlowsToBenchmark({
       benchmarkConfiguration,
@@ -228,7 +230,7 @@ export async function createBenchmark(params: {
       connectionId,
     });
 
-    return {
+    result = {
       benchmarkId: benchmark.id,
       folderId: benchmarkFolder.id,
       provider,
@@ -243,4 +245,7 @@ export async function createBenchmark(params: {
     });
     throw err;
   }
+
+  await createBenchmarkDashboard(provider);
+  return result;
 }

@@ -1,12 +1,12 @@
 {
-  "created": "1771567454850",
-  "updated": "1771567454850",
-  "name": "AWS Benchmark - Migrate EC2 instances to Graviton",
+  "created": "1772547770997",
+  "updated": "1772547770997",
+  "name": "AWS Benchmark - Migrate Linux EC2 instances to Graviton",
   "tags": [],
   "services": [],
   "domains": [],
   "template": {
-    "displayName": "AWS Benchmark - Migrate EC2 instances to Graviton",
+    "displayName": "AWS Benchmark - Migrate Linux EC2 instances to Graviton",
     "trigger": {
       "name": "trigger",
       "valid": true,
@@ -14,7 +14,7 @@
       "type": "TRIGGER",
       "settings": {
         "blockName": "@openops/block-webhook",
-        "blockVersion": "~0.1.5",
+        "blockVersion": "0.1.5",
         "blockType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
@@ -76,7 +76,7 @@
               }
             },
             "packageType": "REGISTRY",
-            "blockVersion": "~0.5.1",
+            "blockVersion": "0.5.1",
             "errorHandlingOptions": {
               "retryOnFailure": {
                 "value": false
@@ -121,7 +121,7 @@
                   "customizedInputs": {}
                 },
                 "packageType": "REGISTRY",
-                "blockVersion": "~0.5.1",
+                "blockVersion": "0.5.1",
                 "errorHandlingOptions": {
                   "retryOnFailure": {
                     "value": false
@@ -132,7 +132,7 @@
                 }
               },
               "displayName": "Return Response",
-              "stepIndex": 19
+              "stepIndex": 20
             },
             "displayName": "ACCOUNT",
             "firstLoopAction": {
@@ -159,7 +159,7 @@
                     "account": {
                       "accounts": "{{step_1['item']}}"
                     },
-                    "commandToRun": "aws ec2 describe-instances --region {{step_32['item']}} --filters \"Name=instance-state-name,Values=running\" --query 'Reservations[*].Instances[*].{ InstanceId: InstanceId, InstanceType: InstanceType, Architecture: Architecture,  AvailabilityZone: Placement.AvailabilityZone, Tags: Tags, AccountID: NetworkInterfaces[0].OwnerId }'"
+                    "commandToRun": "aws ec2 describe-instances --region {{step_32['item']}} --filters \"Name=instance-state-name,Values=running\" \"Name=platform-details,Values='Linux/UNIX'\" --query 'Reservations[*].Instances[*].{InstanceId: InstanceId, InstanceType: InstanceType, Architecture: Architecture, AvailabilityZone: Placement.AvailabilityZone, OperatingSystem: PlatformDetails, Tags: Tags, AccountID: NetworkInterfaces[0].OwnerId}'"
                   },
                   "blockName": "@openops/block-aws",
                   "blockType": "OFFICIAL",
@@ -177,7 +177,7 @@
                     }
                   },
                   "packageType": "REGISTRY",
-                  "blockVersion": "~0.0.3",
+                  "blockVersion": "0.0.3",
                   "errorHandlingOptions": {
                     "retryOnFailure": {
                       "value": false
@@ -234,7 +234,7 @@
                         "customizedInputs": {}
                       },
                       "packageType": "REGISTRY",
-                      "blockVersion": "~0.0.1",
+                      "blockVersion": "0.0.1",
                       "errorHandlingOptions": {
                         "retryOnFailure": {
                           "value": false
@@ -457,7 +457,7 @@
                                 }
                               },
                               "packageType": "REGISTRY",
-                              "blockVersion": "~0.0.3",
+                              "blockVersion": "0.0.3",
                               "errorHandlingOptions": {
                                 "retryOnFailure": {
                                   "value": false
@@ -608,7 +608,7 @@
                                   "customizedInputs": {}
                                 },
                                 "packageType": "REGISTRY",
-                                "blockVersion": "~0.0.3",
+                                "blockVersion": "0.0.3",
                                 "errorHandlingOptions": {
                                   "retryOnFailure": {
                                     "value": false
@@ -635,7 +635,7 @@
                                     "customizedInputs": {}
                                   },
                                   "packageType": "REGISTRY",
-                                  "blockVersion": "~0.0.8",
+                                  "blockVersion": "0.0.8",
                                   "errorHandlingOptions": {
                                     "retryOnFailure": {
                                       "value": false
@@ -662,7 +662,7 @@
                                       "customizedInputs": {}
                                     },
                                     "packageType": "REGISTRY",
-                                    "blockVersion": "~0.0.8",
+                                    "blockVersion": "0.0.8",
                                     "errorHandlingOptions": {
                                       "retryOnFailure": {
                                         "value": false
@@ -689,7 +689,7 @@
                                         "customizedInputs": {}
                                       },
                                       "packageType": "REGISTRY",
-                                      "blockVersion": "~0.0.8",
+                                      "blockVersion": "0.0.8",
                                       "errorHandlingOptions": {
                                         "retryOnFailure": {
                                           "value": false
@@ -700,110 +700,23 @@
                                       }
                                     },
                                     "nextAction": {
-                                      "id": "DLPvDfv3sMs8qDtIpXYgc",
-                                      "name": "step_n",
-                                      "type": "BLOCK",
+                                      "id": "3viTs3gYm8F78QmnrycEG",
+                                      "name": "step_e",
+                                      "type": "CODE",
                                       "valid": true,
                                       "settings": {
                                         "input": {
-                                          "tableName": "Opportunities",
-                                          "rowPrimaryKey": {
-                                            "rowPrimaryKey": null
-                                          },
-                                          "fieldsProperties": {
-                                            "fieldsProperties": [
-                                              {
-                                                "fieldName": "Estimated savings USD per month",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "{{step_l}}"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Opportunity Type",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "Workflow optimization"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Resource Id",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "{{step_d['item']['InstanceId']}}"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Service",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "AWS EC2"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Region",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "{{step_32['item']}}"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Complexity",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "M"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Risk",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "Medium"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Account",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "{{step_1['item']}}"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Opportunity generator",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "OpenOps"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Status",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "Created"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Workflow",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "{{step_26}}"
-                                                }
-                                              },
-                                              {
-                                                "fieldName": "Opportunity details",
-                                                "newFieldValue": {
-                                                  "newFieldValue": "OpenOps detected the following EC2 instance could be converted to Graviton."
-                                                }
-                                              }
-                                            ]
-                                          },
-                                          "roundToFieldPrecision": false
+                                          "region": "{{step_32['item']}}",
+                                          "account": "{{step_1['item']}}",
+                                          "instanceId": "{{step_d['item']['InstanceId']}}"
                                         },
-                                        "blockName": "@openops/block-openops-tables",
-                                        "blockType": "OFFICIAL",
-                                        "actionName": "update_record",
+                                        "sourceCode": {
+                                          "code": "export const code = async ({region, account, instanceId}) => {\n  return `arn:aws:ec2:${region}:${account}:instance/${instanceId}`\n};\n",
+                                          "packageJson": "{}"
+                                        },
                                         "inputUiInfo": {
-                                          "customizedInputs": {
-                                            "settings": {
-                                              "input": {
-                                                "rowPrimaryKey": {
-                                                  "rowPrimaryKey": true
-                                                }
-                                              }
-                                            }
-                                          }
+                                          "customizedInputs": {}
                                         },
-                                        "packageType": "REGISTRY",
-                                        "blockVersion": "~0.0.1",
                                         "errorHandlingOptions": {
                                           "retryOnFailure": {
                                             "value": false
@@ -813,7 +726,124 @@
                                           }
                                         }
                                       },
-                                      "displayName": "Create OpenOps opportunity",
+                                      "nextAction": {
+                                        "id": "DLPvDfv3sMs8qDtIpXYgc",
+                                        "name": "step_n",
+                                        "type": "BLOCK",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "tableName": "Opportunities",
+                                            "rowPrimaryKey": {
+                                              "rowPrimaryKey": null
+                                            },
+                                            "fieldsProperties": {
+                                              "fieldsProperties": [
+                                                {
+                                                  "fieldName": "Estimated savings USD per month",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_l}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity Type",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Workflow optimization"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Resource Id",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_e}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Service",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "AWS EC2"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Region",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_32['item']}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Complexity",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "M"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Risk",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Medium"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Account",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_1['item']}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity generator",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "OpenOps"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Status",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "Created"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Workflow",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "{{step_26}}"
+                                                  }
+                                                },
+                                                {
+                                                  "fieldName": "Opportunity details",
+                                                  "newFieldValue": {
+                                                    "newFieldValue": "OpenOps detected the following EC2 instance could be converted to Graviton."
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            "roundToFieldPrecision": false
+                                          },
+                                          "blockName": "@openops/block-openops-tables",
+                                          "blockType": "OFFICIAL",
+                                          "actionName": "update_record",
+                                          "inputUiInfo": {
+                                            "customizedInputs": {
+                                              "settings": {
+                                                "input": {
+                                                  "rowPrimaryKey": {
+                                                    "rowPrimaryKey": true
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "packageType": "REGISTRY",
+                                          "blockVersion": "0.0.1",
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "displayName": "Create OpenOps opportunity",
+                                        "stepIndex": 19
+                                      },
+                                      "displayName": "Build ARN",
                                       "stepIndex": 18
                                     },
                                     "displayName": "Truncate",
@@ -851,7 +881,7 @@
                             "customizedInputs": {}
                           },
                           "packageType": "REGISTRY",
-                          "blockVersion": "~0.0.1",
+                          "blockVersion": "0.0.1",
                           "errorHandlingOptions": {
                             "retryOnFailure": {
                               "value": false

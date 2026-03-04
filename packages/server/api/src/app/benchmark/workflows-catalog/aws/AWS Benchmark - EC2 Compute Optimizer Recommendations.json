@@ -1,6 +1,6 @@
 {
-  "created": "1771567407491",
-  "updated": "1771567407491",
+  "created": "1772547740622",
+  "updated": "1772547740622",
   "name": "AWS Benchmark - EC2 Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -363,7 +363,7 @@
                                   {
                                     "fieldName": "Opportunity details",
                                     "newFieldValue": {
-                                      "newFieldValue": "Compute Optimizer EC2 recommendation details:  {{step_d['item']}} "
+                                      "newFieldValue": "Compute Optimizer recommends rightsizing. "
                                     }
                                   }
                                 ]
