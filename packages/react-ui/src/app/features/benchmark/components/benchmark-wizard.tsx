@@ -163,7 +163,11 @@ export const BenchmarkWizard = ({
                   />
                 )}
               </WizardStep>
-              <WizardStep value="benchmark-ready" key="benchmark-ready">
+              <WizardStep
+                value="benchmark-ready"
+                key="benchmark-ready"
+                className="flex flex-col flex-1 min-h-0"
+              >
                 {benchmarkCreateResult && (
                   <BenchmarkReadyStep
                     providerName={providerName}

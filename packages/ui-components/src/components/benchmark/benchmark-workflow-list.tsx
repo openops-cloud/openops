@@ -8,16 +8,16 @@ export const BenchmarkWorkflowList = ({
   workflows: BenchmarkWorkflowBase[];
   provider: string;
 }) => (
-  <div>
+  <div className="flex flex-col flex-1 min-h-0">
     <p className="font-medium text-sm mb-2">{t('Available workflows:')}</p>
-    <ul className="list-disc pl-5 space-y-1 overflow-y-auto max-h-[120px]">
+    <ul className="list-disc pl-5 space-y-1 overflow-y-auto min-h-0">
       {workflows.map((workflow) => (
         <li key={workflow.flowId} className="text-sm">
           {workflow.displayName}
         </li>
       ))}
     </ul>
-    <p className="text-xs text-muted-foreground mt-3 italic">
+    <p className="text-xs text-muted-foreground mt-3 italic shrink-0">
       {t(
         '* Running the benchmark triggers {provider} API calls, which may result in a small charge from {provider} (typically not exceeding $0.03 per account).',
         { provider },
