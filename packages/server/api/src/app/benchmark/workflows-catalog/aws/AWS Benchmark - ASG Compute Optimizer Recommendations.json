@@ -1,6 +1,6 @@
 {
-  "created": "1771567397718",
-  "updated": "1771567397718",
+  "created": "1772547722558",
+  "updated": "1772547722558",
   "name": "AWS Benchmark - ASG Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -347,7 +347,7 @@
                                   {
                                     "fieldName": "Service",
                                     "newFieldValue": {
-                                      "newFieldValue": "AWS Auto Scaling Group"
+                                      "newFieldValue": "AWS ASG"
                                     }
                                   },
                                   {
@@ -365,7 +365,7 @@
                                   {
                                     "fieldName": "Opportunity details",
                                     "newFieldValue": {
-                                      "newFieldValue": "Compute Optimizer auto scaling group recommendation details:   {{step_d['item']}} "
+                                      "newFieldValue": "Compute Optimizer detected that this Auto Scaling Group can be optimized. "
                                     }
                                   }
                                 ]

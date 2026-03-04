@@ -1,6 +1,6 @@
 {
-  "created": "1771567479000",
-  "updated": "1771567479000",
+  "created": "1772547803133",
+  "updated": "1772547803133",
   "name": "AWS Benchmark - Underutilized EC2",
   "tags": [],
   "services": [],
@@ -428,7 +428,7 @@
                                 {
                                   "fieldName": "Opportunity details",
                                   "newFieldValue": {
-                                    "newFieldValue": "{{step_2['item']}}  "
+                                    "newFieldValue": "Replace current {{step_2['item']['recommendation']['options'][0]['details']['currentInstanceType']}} with {{step_2['item']['recommendation']['options'][0]['details']['suggestedInstanceType']}} instance type."
                                   },
                                   "dynamicViewToggled": {
                                     "newFieldValue": true
