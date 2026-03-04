@@ -21,14 +21,8 @@ describe('createBenchmarkDashboard', () => {
     createAwsBenchmarkDashboardMock.mockResolvedValue(undefined);
   });
 
-  it('calls provider creator when provider is supported aws', async () => {
+  it('calls provider creator when provider is supported (aws)', async () => {
     await createBenchmarkDashboard(BenchmarkProviders.AWS);
-
-    expect(createAwsBenchmarkDashboardMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('normalizes provider to lowercase and calls creator', async () => {
-    await createBenchmarkDashboard('AWS');
 
     expect(createAwsBenchmarkDashboardMock).toHaveBeenCalledTimes(1);
   });

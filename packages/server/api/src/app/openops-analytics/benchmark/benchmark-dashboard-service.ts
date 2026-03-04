@@ -5,9 +5,7 @@ import { createAwsBenchmarkDashboard } from './create-aws-benchmark-dashboard';
 export async function createBenchmarkDashboard(
   provider: string,
 ): Promise<void> {
-  const normalizedProvider = provider.toLowerCase();
-
-  switch (normalizedProvider) {
+  switch (provider) {
     case BenchmarkProviders.AWS:
       await createAwsBenchmarkDashboard();
       break;
