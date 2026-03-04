@@ -360,8 +360,8 @@
                   "auth": null,
                   "body": {
                     "data": {
-                      "aws_regions_array": "{{step_c['regions']}}",
-                      "aws_accounts_array": "{{step_c['accounts']}}"
+                      "aws_regions_array": "{{step_b['regions']}}",
+                      "aws_accounts_array": "{{step_b['accounts']}}"
                     }
                   },
                   "method": "POST",
