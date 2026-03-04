@@ -33,16 +33,22 @@ export const BenchmarkWizardFooter = ({
 }: BenchmarkWizardFooterProps) => {
   if (wizardPhase === 'benchmark-ready') {
     return (
-      <div className="flex-1 flex gap-2 justify-end">
-        <Button variant="outline" size="sm" onClick={handleEditSetup}>
+      <div className="@container flex-1 flex flex-wrap gap-2 justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 min-w-0 @xs:flex-none"
+          onClick={handleEditSetup}
+        >
           {t('Edit setup')}
         </Button>
         {benchmarkCreationResult && (
           <ViewBenchmarkWorkflowsButton
             folderId={benchmarkCreationResult.folderId}
+            className="flex-1 min-w-0 @xs:flex-none"
           />
         )}
-        <Button size="sm" disabled>
+        <Button size="sm" disabled className="w-full @xs:w-auto">
           {t('Run now')}
         </Button>
       </div>
