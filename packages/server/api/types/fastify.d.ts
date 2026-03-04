@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Permission, Principal, PrincipalType } from '@openops/shared';
 import fastify from 'fastify';
+import { RouteSecurityPolicy } from '../src/app/core/security/route-policies/route-security-policy';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 declare module 'fastify' {
@@ -15,9 +16,12 @@ declare module 'fastify' {
   }
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   export interface FastifyContextConfig {
-    allowedPrincipals?: PrincipalType[];
     rawBody?: boolean;
-    skipAuth?: boolean;
+    security?: RouteSecurityPolicy; // TODO change to mandatory
+
+    // TODO: Prepare deprecation of the following properties
+    allowedPrincipals?: PrincipalType[];
     permission?: Permission;
+    skipAuth?: boolean;
   }
 }

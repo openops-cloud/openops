@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 export const ViewBenchmarkWorkflowsButton = ({
   folderId,
   className,
+  disabled,
 }: {
-  folderId: string;
   className?: string;
+  folderId: string;
+  disabled?: boolean;
 }) => {
   const navigate = useNavigate();
   return (
@@ -15,6 +17,7 @@ export const ViewBenchmarkWorkflowsButton = ({
       variant="outline"
       size="sm"
       className={className}
+      disabled={disabled}
       onClick={() => navigate(`/flows?${FOLDER_ID_PARAM_NAME}=${folderId}`)}
     >
       {t('View Workflows')}
