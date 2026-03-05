@@ -38,10 +38,9 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
-      logger.error('THE RESULT IS:', JSON.stringify(result));
       logger.error(
         {
-          result,
+          result: JSON.stringify(result),
           blockName,
           blockVersion,
           flowId: flowVersion.flowId,
