@@ -27,6 +27,9 @@ export const useMenuLinks = () => {
         label: t('Overview'),
         icon: Home,
       },
+    ];
+
+    links.push(
       {
         to: '/flows',
         label: t('Workflows'),
@@ -56,7 +59,7 @@ export const useMenuLinks = () => {
             },
           ]
         : []),
-    ];
+    );
 
     return links;
   }, [hasAnalyticsAccess]);
