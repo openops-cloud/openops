@@ -9,7 +9,7 @@ services:
       NGINX_WEBHOOK_SYNC_TIMEOUT: '${OPS_FLOW_TIMEOUT_SECONDS:-600}s'
     volumes:
       - ./${OPS_NGINX_CONFIG_FILE:-nginx.gateway.conf}:/etc/nginx/conf.d/default.conf
-      - ./nginx.gateway.routing.template:/etc/nginx/templates/routing.template
+      - ./nginx.gateway.routing.template:/etc/nginx/templates/gateway.routing.template
       - ./tls:/etc/nginx/tls
     depends_on:
       openops-tables:
