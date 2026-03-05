@@ -7,19 +7,19 @@ import {
 
 import { QueryKeys } from '@/app/constants/query-keys';
 import { projectApi } from '@/app/lib/project-api';
-import { Project } from '@openops/shared';
+import { Project, ProjectWithoutSensitiveData } from '@openops/shared';
 
 export const projectHooks = {
   prefetchProject: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    usePrefetchQuery<Project, Error>({
+    usePrefetchQuery<ProjectWithoutSensitiveData, Error>({
       queryKey: [QueryKeys.currentProject],
       queryFn: projectApi.current,
       staleTime: Infinity,
     });
   },
   useCurrentProject: () => {
-    const query = useSuspenseQuery<Project, Error>({
+    const query = useSuspenseQuery<ProjectWithoutSensitiveData, Error>({
       queryKey: [QueryKeys.currentProject],
       queryFn: projectApi.current,
       staleTime: Infinity,

@@ -1,5 +1,7 @@
 import { useHasAnalyticsAccess } from '@/app/common/hooks/analytics-hooks';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { MenuLink, RunsIcon } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import {
   Home,
@@ -19,6 +21,7 @@ import { useMemo } from 'react';
  */
 export const useMenuLinks = () => {
   const { hasAnalyticsAccess } = useHasAnalyticsAccess();
+  const { checkAccess } = useAuthorization();
 
   const menuLinks: MenuLink[] = useMemo(() => {
     const links: MenuLink[] = [
@@ -34,16 +37,19 @@ export const useMenuLinks = () => {
         to: '/flows',
         label: t('Workflows'),
         icon: Workflow,
+        locked: !checkAccess(Permission.READ_FLOW),
       },
       {
         to: '/runs',
         label: t('Runs'),
         icon: RunsIcon,
+        locked: !checkAccess(Permission.READ_RUN),
       },
       {
         to: '/connections',
         label: t('Connections'),
         icon: Share2,
+        locked: !checkAccess(Permission.READ_APP_CONNECTION),
       },
       {
         to: '/tables',
@@ -62,7 +68,7 @@ export const useMenuLinks = () => {
     );
 
     return links;
-  }, [hasAnalyticsAccess]);
+  }, [hasAnalyticsAccess, checkAccess]);
 
   return menuLinks;
 };
