@@ -34,8 +34,11 @@ export const Project = Type.Object({
 
 export type Project = Static<typeof Project>;
 
-export const ProjectWithoutSensitiveData = Type.Omit(Project, [
-  'tablesDatabaseToken',
+export const ProjectWithoutSensitiveData = Type.Composite([
+  Type.Omit(Project, ['tablesDatabaseToken']),
+  Type.Object({
+    ownerEmail: Type.Optional(Type.String()),
+  }),
 ]);
 
 export type ProjectWithoutSensitiveData = Static<

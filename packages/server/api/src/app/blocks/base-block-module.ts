@@ -21,6 +21,7 @@ import {
   ListVersionsResponse,
   OpsEdition,
   PrincipalType,
+  PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
@@ -183,6 +184,7 @@ const ListBlocksRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'List Blocks',
@@ -196,6 +198,7 @@ const GetBlockParamsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'Get Block Details',
@@ -210,6 +213,7 @@ const GetBlockParamsWithScopeRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'Get Scoped Block',
@@ -224,6 +228,7 @@ const ListCategoriesRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'List Block Categories',
@@ -259,6 +264,7 @@ const ListVersionsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     description:

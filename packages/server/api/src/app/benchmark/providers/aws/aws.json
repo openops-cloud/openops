@@ -14,7 +14,7 @@
       "title": "Which accounts should we include in the report?",
       "selectionType": "multi-select",
       "conditional": {
-        "when": "hasMultipleAccounts",
+        "when": "hasAnyAccounts",
         "onSuccess": {
           "optionsSource": {
             "type": "dynamic",

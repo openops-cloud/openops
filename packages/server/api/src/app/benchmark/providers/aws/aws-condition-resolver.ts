@@ -7,14 +7,14 @@ export async function evaluateCondition(
   context: WizardContext,
 ): Promise<boolean> {
   switch (condition) {
-    case 'hasMultipleAccounts':
-      return hasMultipleAccounts(context);
+    case 'hasAnyAccounts':
+      return hasAnyAccounts(context);
     default:
       throwValidationError(`Unknown AWS condition method: ${condition}`);
   }
 }
 
-async function hasMultipleAccounts(context: WizardContext): Promise<boolean> {
+async function hasAnyAccounts(context: WizardContext): Promise<boolean> {
   const accounts = await getConnectionAccounts(context);
-  return accounts.length > 1;
+  return accounts.length >= 1;
 }
