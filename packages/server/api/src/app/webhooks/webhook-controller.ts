@@ -1,5 +1,9 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { ALL_PRINCIPAL_TYPES, WebhookUrlParams } from '@openops/shared';
+import {
+  ALL_PRINCIPAL_TYPES,
+  PUBLIC_ROUTE_POLICY,
+  WebhookUrlParams,
+} from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { handleWebhook, handleWebhookSimulation } from './webhook-handler';
 
@@ -66,6 +70,7 @@ const WEBHOOK_PARAMS = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     params: WebhookUrlParams,

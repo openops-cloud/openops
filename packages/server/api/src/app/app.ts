@@ -23,6 +23,7 @@ import {
   FlowRun,
   Folder,
   Project,
+  PUBLIC_ROUTE_POLICY,
   spreadIfDefined,
 } from '@openops/shared';
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
@@ -113,7 +114,9 @@ export const setupApp = async (
   const openapiRoutePrefix = '/v1/openapi';
   app.addHook('onRoute', (route) => {
     if (route.url.startsWith(openapiRoutePrefix)) {
-      route.config = { ...(route.config ?? {}), skipAuth: true };
+      route.config ??= {};
+      route.config.skipAuth = true;
+      route.config.security = PUBLIC_ROUTE_POLICY;
     }
   });
 

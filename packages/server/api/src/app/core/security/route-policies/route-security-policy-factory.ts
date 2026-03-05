@@ -2,7 +2,6 @@ import {
   AuthorizationScope,
   Permission,
   PrincipalType,
-  PublicRoutePolicy,
   RouteAccessType,
 } from '@openops/shared';
 import { ProjectIdLocation, ProjectIdSource } from './project-id-source';
@@ -43,7 +42,3 @@ export function getProjectScopedRoutePolicy({
     },
   };
 }
-
-export const PUBLIC_ROUTE_POLICY: Readonly<PublicRoutePolicy> = Object.freeze({
-  routeAccessType: RouteAccessType.PUBLIC,
-});

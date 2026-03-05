@@ -4,7 +4,7 @@ import {
   FastifyPluginCallbackTypebox,
 } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
-import { PrincipalType } from '@openops/shared';
+import { PrincipalType, PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import axios from 'axios';
 import { FastifyReply, FastifyRequest } from 'fastify';
@@ -37,6 +37,7 @@ const slackInteractionController: FastifyPluginCallbackTypebox = (
       config: {
         allowedPrincipals: [PrincipalType.UNKNOWN],
         skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
         rawBody: true,
       },
       schema: { body: CreateSlackInteractionRequest },

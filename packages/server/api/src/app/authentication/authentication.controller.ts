@@ -10,6 +10,7 @@ import {
   OpsEdition,
   PrincipalType,
   Provider,
+  PUBLIC_ROUTE_POLICY,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
@@ -56,6 +57,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       config: {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
         skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
     },
     async (request, reply) => {
@@ -170,6 +172,7 @@ const SignInRequestOptions = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
     skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
     rateLimit: rateLimitOptions,
   },
   schema: {
