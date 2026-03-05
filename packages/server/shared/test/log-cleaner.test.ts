@@ -329,7 +329,7 @@ describe('log-cleaner', () => {
         config: {
           method: 'POST',
           url: 'https://api.example.com/oauth/v2',
-          data: 'grant_type=client_credentials&client_secret=Nde8Q~em33mYurQU_vyuDWHQVHlJNrfkUugX.aX~',
+          data: 'grant_type=client_credentials&client_secret=test_secret',
         },
         code: 'ERR_BAD_REQUEST',
       });
