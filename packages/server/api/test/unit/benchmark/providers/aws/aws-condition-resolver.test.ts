@@ -31,7 +31,7 @@ describe('evaluateCondition', () => {
     ]);
 
     const result = await evaluateCondition(
-      'hasMultipleAccounts',
+      'hasAnyAccounts',
       contextWithConnection,
     );
 
@@ -41,24 +41,24 @@ describe('evaluateCondition', () => {
     expect(result).toBe(true);
   });
 
-  it('returns false when connection has one account', async () => {
+  it('returns true when connection has exactly one account', async () => {
     mockGetConnectionAccounts.mockResolvedValue([
       { id: '111111111111', displayName: 'Only' },
     ]);
 
     const result = await evaluateCondition(
-      'hasMultipleAccounts',
+      'hasAnyAccounts',
       contextWithConnection,
     );
 
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it('returns false when connection has zero accounts', async () => {
     mockGetConnectionAccounts.mockResolvedValue([]);
 
     const result = await evaluateCondition(
-      'hasMultipleAccounts',
+      'hasAnyAccounts',
       contextWithConnection,
     );
 
