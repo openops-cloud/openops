@@ -232,7 +232,9 @@
                     "input": {
                       "auth": "{{connections['AWS']}}",
                       "dryRun": false,
-                      "account": {},
+                      "account": {
+                        "accounts": "{{step_b['accounts']}}"
+                      },
                       "commandToRun": "aws ce get-cost-and-usage \\\n    --time-period Start={{step_am['firstDay']}},End={{step_am['lastDay']}} \\\n    --granularity MONTHLY \\\n    --metrics \"AmortizedCost\" \\\n    --filter '{\"Dimensions\":{\"Key\":\"RECORD_TYPE\",\"Values\":[\"Usage\"]}}' "
                     },
                     "blockName": "@openops/block-aws",
