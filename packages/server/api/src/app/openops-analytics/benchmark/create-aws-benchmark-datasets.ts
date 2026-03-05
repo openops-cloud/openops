@@ -55,5 +55,16 @@ export async function createAwsBenchmarkDatasets(
     recreateIfExists: true,
   });
 
-  return { opportunities, kpi };
+  const timeseries = await createVirtualDataset(token, {
+    tableName: 'AWS_Benchmark_Timeseries',
+    sql: `
+        SELECT *
+        FROM public."${timeseriesTableName}"
+    `,
+    databaseId,
+    schema: 'public',
+    recreateIfExists: true,
+  });
+
+  return { opportunities, kpi, timeseries };
 }
