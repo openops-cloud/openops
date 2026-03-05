@@ -26,6 +26,7 @@ import {
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
 import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   flowsHooks,
   FlowsSearchState,
@@ -278,6 +279,8 @@ const FolderTreeWrapper = ({
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const updateSearchParams = useUpdateSearchParams();
+  const { checkAccess } = useAuthorization();
+  const canWriteFlow = checkAccess(Permission.WRITE_FLOW);
 
   const expandSubfolder = (folderItem?: FolderItem) => {
     if (
@@ -320,7 +323,7 @@ const FolderTreeWrapper = ({
           <FileAddons
             item={item}
             isSelected={item.id === flowId}
-            readonly={false}
+            readonly={!canWriteFlow}
             onViewClick={(item) => {
               navigate(getFlowLink(item.id, true));
             }}
