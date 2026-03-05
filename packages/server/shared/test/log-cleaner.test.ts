@@ -341,9 +341,7 @@ describe('log-cleaner', () => {
       const result = cleanLogEvent(logEvent);
 
       expect(result.event.errorContext).toContain('client_secret=[REDACTED]');
-      expect(result.event.errorContext).not.toContain(
-        'Nde8Q~em33mYurQU_vyuDWHQVHlJNrfkUugX.aX~',
-      );
+      expect(result.event.errorContext).not.toContain('test_secret');
       expect(result.event.errorContext).toContain(
         'grant_type=client_credentials',
       );
