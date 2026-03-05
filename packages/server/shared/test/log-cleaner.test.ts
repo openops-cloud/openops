@@ -191,6 +191,7 @@ describe('log-cleaner', () => {
     });
 
     it('should redact password field', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
       const logEvent = {
         event: {
           email: 'user@example.com',
@@ -285,6 +286,99 @@ describe('log-cleaner', () => {
 
       expect(result.event.usage).toContain('[REDACTED]');
       expect(result.event.usage).not.toContain('1234');
+    });
+
+    it('should redact URL-encoded sensitive data in strings', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          data: 'client_id=12345&client_secret=supersecret&grant_type=client_credentials',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.data).toContain('client_secret=[REDACTED]');
+      expect(result.event.data).not.toContain('supersecret');
+      expect(result.event.data).toContain('client_id=12345');
+      expect(result.event.data).toContain('grant_type=client_credentials');
+    });
+
+    it('should redact multiple URL-encoded sensitive fields', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          body: 'username=john&password=pass123&api_token=xyz789&remember=true',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.body).toContain('password=[REDACTED]');
+      expect(result.event.body).toContain('api_token=[REDACTED]');
+      expect(result.event.body).not.toContain('pass123');
+      expect(result.event.body).not.toContain('xyz789');
+      expect(result.event.body).toContain('username=john');
+      expect(result.event.body).toContain('remember=true');
+    });
+
+    it('should redact URL-encoded sensitive data in error context', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const error = new Error('Request failed');
+      Object.assign(error, {
+        config: {
+          method: 'POST',
+          url: 'https://api.example.com/oauth/v2',
+          data: 'grant_type=client_credentials&client_secret=Nde8Q~em33mYurQU_vyuDWHQVHlJNrfkUugX.aX~',
+        },
+        code: 'ERR_BAD_REQUEST',
+      });
+
+      const logEvent = {
+        event: error,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.errorContext).toContain('client_secret=[REDACTED]');
+      expect(result.event.errorContext).not.toContain(
+        'Nde8Q~em33mYurQU_vyuDWHQVHlJNrfkUugX.aX~',
+      );
+      expect(result.event.errorContext).toContain(
+        'grant_type=client_credentials',
+      );
+    });
+
+    it('should redact both JSON and URL-encoded sensitive data', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          body: 'Combined: query=test&api_token=url456&email=user@example.com',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.body).toContain('api_token=[REDACTED]');
+      expect(result.event.body).not.toContain('url456');
+      expect(result.event.body).toContain('query=test');
+      expect(result.event.body).toContain('email=user@example.com');
+    });
+
+    it('should handle URL-encoded data with special characters', () => {
+      process.env['OPS_LOG_REDACTION'] = 'true';
+      const logEvent = {
+        event: {
+          data: 'user=admin&password=p%40ss%21word&action=login',
+        },
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.data).toContain('password=[REDACTED]');
+      expect(result.event.data).not.toContain('p%40ss%21word');
+      expect(result.event.data).toContain('user=admin');
+      expect(result.event.data).toContain('action=login');
     });
   });
 
