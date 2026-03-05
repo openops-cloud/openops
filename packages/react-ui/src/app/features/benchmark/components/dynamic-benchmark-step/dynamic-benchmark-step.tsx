@@ -25,7 +25,7 @@ export const DynamicBenchmarkStep = ({
         <StepDescription>
           <Markdown
             theme={theme}
-            containerClassName="border-none p-0"
+            containerClassName="border-none p-0 bg-transparent"
             markdown={stepResponse.description}
           />
         </StepDescription>
