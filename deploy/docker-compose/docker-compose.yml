@@ -5,9 +5,15 @@ services:
     ports:
       - '80:80'
       - '443:443'
+    environment:
+      NGINX_WEBHOOK_SYNC_TIMEOUT: "${OPS_FLOW_TIMEOUT_SECONDS:-600}s"
+    command:
+      - /bin/sh
+      - -c
+      - "envsubst '$$NGINX_WEBHOOK_SYNC_TIMEOUT' < /etc/nginx/includes/routing.conf.tmpl > /etc/nginx/includes/routing.conf && nginx -g 'daemon off;'"
     volumes:
       - ./${OPS_NGINX_CONFIG_FILE:-nginx.gateway.conf}:/etc/nginx/conf.d/default.conf
-      - ./nginx.gateway.routing.conf:/etc/nginx/includes/routing.conf
+      - ./nginx.gateway.routing.conf:/etc/nginx/includes/routing.conf.tmpl
       - ./tls:/etc/nginx/tls
     depends_on:
       openops-tables:
