@@ -6,6 +6,7 @@ import { system } from '@openops/server-shared';
 import {
   OpsEdition,
   PrincipalType,
+  WORKER_ROUTE_POLICY,
   WorkerMachineHealthcheckRequest,
   WorkerMachineType,
   WorkerPrincipal,
@@ -69,6 +70,7 @@ const GenerateWorkerTokenParams = {
 const HeartbeatParams = {
   config: {
     allowedPrincipals: [PrincipalType.WORKER],
+    security: WORKER_ROUTE_POLICY,
   },
   schema: {
     description:

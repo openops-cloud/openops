@@ -52,3 +52,13 @@ export const ENGINE_ROUTE_POLICY: Readonly<UnscopedRoutePolicy> = Object.freeze(
     } as UnscopedAuthorizationPolicy,
   },
 );
+
+export const WORKER_ROUTE_POLICY: Readonly<UnscopedRoutePolicy> = Object.freeze(
+  {
+    routeAccessType: RouteAccessType.AUTHENTICATED,
+    authorization: {
+      authorizationScope: AuthorizationScope.UNSCOPED,
+      allowedPrincipals: [PrincipalType.WORKER],
+    } as UnscopedAuthorizationPolicy,
+  },
+);
