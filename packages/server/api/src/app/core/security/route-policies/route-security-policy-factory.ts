@@ -7,16 +7,12 @@ import {
 import { PropertyLocation, PropertySource } from './property-source';
 import { AuthenticatedRoutePolicy } from './route-security-policy';
 
-const defaultProjectIdSource: PropertySource = {
-  location: PropertyLocation.TOKEN,
-};
-
-const defaultOrganizationIdSource: PropertySource = {
+const defaultSource: PropertySource = {
   location: PropertyLocation.TOKEN,
 };
 
 export function getOrganizationScopedRoutePolicy({
-  organizationIdSource = defaultOrganizationIdSource,
+  organizationIdSource = defaultSource,
   allowedPrincipals,
   permission,
 }: {
@@ -36,7 +32,7 @@ export function getOrganizationScopedRoutePolicy({
 }
 
 export function getProjectScopedRoutePolicy({
-  projectIdSource = defaultProjectIdSource,
+  projectIdSource = defaultSource,
   allowedPrincipals,
   permission,
 }: {
