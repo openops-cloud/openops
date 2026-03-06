@@ -14,10 +14,6 @@ function createPropertySource(
   defaultKey: string,
   key?: string,
 ): PropertySource {
-  if (location === PropertyLocation.TOKEN) {
-    return { location };
-  }
-
   return {
     location,
     key: key ?? defaultKey,
