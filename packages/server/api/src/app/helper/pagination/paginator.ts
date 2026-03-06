@@ -31,8 +31,16 @@ export type PagingResult<Entity> = {
   cursor: CursorResult;
 };
 
+type CursorContext = {
+  primaryColumnName: string;
+  primaryParamName: string;
+  tieBreakerColumnName: string | null;
+  tieBreakerParamName: string | null;
+};
+
 const PAGINATION_KEY = 'created';
 const CUSTOM_PAGINATION_KEY = 'custom_pagination';
+const CUSTOM_PAGINATION_TIE_BREAKER_KEY = 'custom_pagination_tie_breaker';
 const DEFAULT_TIMESTAMP_TYPE = 'timestamp with time zone';
 
 export default class Paginator<Entity extends ObjectLiteral> {
@@ -56,6 +64,12 @@ export default class Paginator<Entity extends ObjectLiteral> {
 
   private paginationColumnType: string | null = null;
 
+  private paginationTieBreakerColumnPath: string | null = null;
+
+  private paginationTieBreakerColumnName: string | null = null;
+
+  private paginationTieBreakerColumnType: string | null = null;
+
   public constructor(private readonly entity: EntitySchema) {}
 
   public setPaginationColumn(
@@ -70,6 +84,16 @@ export default class Paginator<Entity extends ObjectLiteral> {
 
   public setAlias(alias: string): void {
     this.alias = alias;
+  }
+
+  public setPaginationTieBreakerColumn(
+    columnPath: string,
+    columnName: string,
+    columnType = 'string',
+  ): void {
+    this.paginationTieBreakerColumnPath = columnPath;
+    this.paginationTieBreakerColumnName = columnName;
+    this.paginationTieBreakerColumnType = columnType;
   }
 
   public setAfterCursor(cursor: string): void {
@@ -146,10 +170,10 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const cursors: CursorParam = {};
     const clonedBuilder = new SelectQueryBuilder<Entity>(builder);
 
-    if (this.hasAfterCursor()) {
-      Object.assign(cursors, this.decode(this.afterCursor!));
-    } else if (this.hasBeforeCursor()) {
-      Object.assign(cursors, this.decode(this.beforeCursor!));
+    if (this.afterCursor !== null) {
+      Object.assign(cursors, this.decode(this.afterCursor));
+    } else if (this.beforeCursor !== null) {
+      Object.assign(cursors, this.decode(this.beforeCursor));
     }
 
     if (Object.keys(cursors).length > 0) {
@@ -169,30 +193,28 @@ export default class Paginator<Entity extends ObjectLiteral> {
     where: WhereExpressionBuilder,
     cursors: CursorParam,
   ): void {
-    const dbType = system.get(AppSystemProp.DB_TYPE);
+    const dbType = this.getSupportedDbType();
     const operator = this.getOperator();
-    let queryString: string;
+    const context = this.resolveCursorContext(cursors);
 
-    const isCustomColumn =
-      this.paginationColumnName && cursors[CUSTOM_PAGINATION_KEY];
-    const columnName = isCustomColumn
-      ? this.paginationColumnName
-      : `${this.alias}.${PAGINATION_KEY}`;
-    const paramName = isCustomColumn ? CUSTOM_PAGINATION_KEY : PAGINATION_KEY;
-
-    if (dbType === DatabaseType.SQLITE3) {
-      queryString = `${columnName} ${operator} :${paramName}`;
-    } else if (dbType === DatabaseType.POSTGRES) {
-      if (this.hasBeforeCursor() && !this.hasAfterCursor()) {
-        queryString = `${columnName} ${operator} (:${paramName}::timestamp + INTERVAL '1 millisecond')`;
-      } else {
-        queryString = `${columnName} ${operator} :${paramName}::timestamp`;
-      }
-    } else {
-      throw new Error('Unsupported database type');
+    if (context.tieBreakerColumnName && context.tieBreakerParamName) {
+      this.applyCompositeCursorFilter(
+        where,
+        cursors,
+        dbType,
+        operator,
+        context,
+      );
+      return;
     }
 
-    where.orWhere(queryString, cursors);
+    this.applySingleColumnCursorFilter(
+      where,
+      cursors,
+      dbType,
+      operator,
+      context,
+    );
   }
 
   private getOperator(): string {
@@ -222,6 +244,10 @@ export default class Paginator<Entity extends ObjectLiteral> {
       orderByCondition[`${this.alias}.${PAGINATION_KEY}`] = order;
     }
 
+    if (this.paginationTieBreakerColumnName) {
+      orderByCondition[this.paginationTieBreakerColumnName] = order;
+    }
+
     return orderByCondition;
   }
 
@@ -247,7 +273,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     }
 
     const value = getValueByPath(entity, this.paginationColumnPath);
-    if (!value) {
+    if (value === null || value === undefined) {
       throw new Error(
         `Pagination column not found at path: ${this.paginationColumnPath}`,
       );
@@ -257,9 +283,31 @@ export default class Paginator<Entity extends ObjectLiteral> {
       this.paginationColumnType || DEFAULT_TIMESTAMP_TYPE,
       value,
     );
-    const payload = `${CUSTOM_PAGINATION_KEY}:${encodedValue}`;
+    const payload = [`${CUSTOM_PAGINATION_KEY}:${encodedValue}`];
 
-    return btoa(payload);
+    if (
+      this.paginationTieBreakerColumnPath &&
+      this.paginationTieBreakerColumnName
+    ) {
+      const tieBreakerValue = getValueByPath(
+        entity,
+        this.paginationTieBreakerColumnPath,
+      );
+      if (tieBreakerValue === null || tieBreakerValue === undefined) {
+        throw new Error(
+          `Pagination tie breaker column not found at path: ${this.paginationTieBreakerColumnPath}`,
+        );
+      }
+      const encodedTieBreakerValue = encodeByType(
+        this.paginationTieBreakerColumnType || 'string',
+        tieBreakerValue,
+      );
+      payload.push(
+        `${CUSTOM_PAGINATION_TIE_BREAKER_KEY}:${encodedTieBreakerValue}`,
+      );
+    }
+
+    return btoa(payload.join(','));
   }
 
   private decode(cursor: string): CursorParam {
@@ -279,6 +327,9 @@ export default class Paginator<Entity extends ObjectLiteral> {
     if (key === CUSTOM_PAGINATION_KEY) {
       return this.paginationColumnType || DEFAULT_TIMESTAMP_TYPE;
     }
+    if (key === CUSTOM_PAGINATION_TIE_BREAKER_KEY) {
+      return this.paginationTieBreakerColumnType || 'string';
+    }
 
     const col = this.entity.options.columns[key];
     if (col === undefined) {
@@ -289,6 +340,162 @@ export default class Paginator<Entity extends ObjectLiteral> {
 
   private flipOrder(order: Order): Order {
     return order === Order.ASC ? Order.DESC : Order.ASC;
+  }
+
+  private buildComparisonClause({
+    dbType,
+    columnName,
+    paramName,
+    operator,
+  }: {
+    dbType: DatabaseType;
+    columnName: string;
+    paramName: string;
+    operator: string;
+  }): string {
+    if (dbType === DatabaseType.SQLITE3) {
+      return `${columnName} ${operator} :${paramName}`;
+    }
+
+    if (dbType === DatabaseType.POSTGRES) {
+      const type = this.getEntityPropertyType(paramName);
+      if (this.isTimestampType(type)) {
+        if (operator === '<') {
+          return `${columnName} < :${paramName}::timestamptz`;
+        }
+        if (operator === '>') {
+          return `${columnName} >= (:${paramName}::timestamptz + INTERVAL '1 millisecond')`;
+        }
+        if (operator === '=') {
+          return `(${columnName} >= :${paramName}::timestamptz AND ${columnName} < (:${paramName}::timestamptz + INTERVAL '1 millisecond'))`;
+        }
+        return `${columnName} ${operator} :${paramName}::timestamptz`;
+      }
+      return `${columnName} ${operator} :${paramName}`;
+    }
+
+    throw new Error('Unsupported database type');
+  }
+
+  private isTimestampType(type: string): boolean {
+    return (
+      type === 'timestamp with time zone' ||
+      type === 'datetime' ||
+      type === 'date'
+    );
+  }
+
+  private getSupportedDbType(): DatabaseType {
+    const dbType = system.get(AppSystemProp.DB_TYPE);
+    if (dbType === DatabaseType.SQLITE3 || dbType === DatabaseType.POSTGRES) {
+      return dbType;
+    }
+    throw new Error('Unsupported database type');
+  }
+
+  private resolveCursorContext(cursors: CursorParam): CursorContext {
+    const customPaginationColumnName = this.paginationColumnName;
+    const hasCustomPaginationCursor =
+      customPaginationColumnName !== null &&
+      cursors[CUSTOM_PAGINATION_KEY] !== undefined;
+
+    const primaryColumnName =
+      hasCustomPaginationCursor && customPaginationColumnName
+        ? customPaginationColumnName
+        : `${this.alias}.${PAGINATION_KEY}`;
+    const primaryParamName = hasCustomPaginationCursor
+      ? CUSTOM_PAGINATION_KEY
+      : PAGINATION_KEY;
+
+    const hasCustomTieBreakerCursor =
+      this.paginationTieBreakerColumnName !== null &&
+      cursors[CUSTOM_PAGINATION_TIE_BREAKER_KEY] !== undefined;
+
+    if (hasCustomPaginationCursor && hasCustomTieBreakerCursor) {
+      return {
+        primaryColumnName,
+        primaryParamName,
+        tieBreakerColumnName: this.paginationTieBreakerColumnName,
+        tieBreakerParamName: CUSTOM_PAGINATION_TIE_BREAKER_KEY,
+      };
+    }
+
+    return {
+      primaryColumnName,
+      primaryParamName,
+      tieBreakerColumnName: null,
+      tieBreakerParamName: null,
+    };
+  }
+
+  private applySingleColumnCursorFilter(
+    where: WhereExpressionBuilder,
+    cursors: CursorParam,
+    dbType: DatabaseType,
+    operator: string,
+    context: CursorContext,
+  ): void {
+    where.orWhere(
+      this.buildComparisonClause({
+        dbType,
+        columnName: context.primaryColumnName,
+        paramName: context.primaryParamName,
+        operator,
+      }),
+      cursors,
+    );
+  }
+
+  private applyCompositeCursorFilter(
+    where: WhereExpressionBuilder,
+    cursors: CursorParam,
+    dbType: DatabaseType,
+    operator: string,
+    context: CursorContext,
+  ): void {
+    const {
+      primaryColumnName,
+      primaryParamName,
+      tieBreakerColumnName,
+      tieBreakerParamName,
+    } = context;
+    if (!tieBreakerColumnName || !tieBreakerParamName) {
+      throw new Error('Pagination tie breaker context is not configured');
+    }
+
+    where.orWhere(
+      this.buildComparisonClause({
+        dbType,
+        columnName: primaryColumnName,
+        paramName: primaryParamName,
+        operator,
+      }),
+      cursors,
+    );
+
+    // Lexicographic cursor compare: primary equals, then compare tie-breaker.
+    where.orWhere(
+      new Brackets((nestedWhere) => {
+        nestedWhere.where(
+          this.buildComparisonClause({
+            dbType,
+            columnName: primaryColumnName,
+            paramName: primaryParamName,
+            operator: '=',
+          }),
+          cursors,
+        );
+        nestedWhere.andWhere(
+          this.buildComparisonClause({
+            dbType,
+            columnName: tieBreakerColumnName,
+            paramName: tieBreakerParamName,
+            operator,
+          }),
+          cursors,
+        );
+      }),
+    );
   }
 
   private toPagingResult<Entity>(entities: Entity[]): PagingResult<Entity> {
