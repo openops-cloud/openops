@@ -4,6 +4,7 @@ import {
   PrincipalType,
   PublicRoutePolicy,
   RouteAccessType,
+  UnscopedAuthorizationPolicy,
 } from '@openops/shared';
 import { PropertySource } from './property-source';
 
@@ -29,11 +30,6 @@ export type ProjectAuthorizationPolicy = {
   allowedPrincipals: readonly PrincipalType[];
   projectIdSource: PropertySource;
   permission?: Permission;
-};
-
-export type UnscopedAuthorizationPolicy = {
-  authorizationScope: AuthorizationScope.UNSCOPED;
-  allowedPrincipals: readonly PrincipalType[];
 };
 
 export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoutePolicy;
