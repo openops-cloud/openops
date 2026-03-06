@@ -58,7 +58,7 @@ params:
       \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
       \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
     colorScheme: '#ACE1C4'
-    operator: "\u2265"
+    operator: ">="
     targetValue: 0.9
   extra_form_data: {}
   dashboards:

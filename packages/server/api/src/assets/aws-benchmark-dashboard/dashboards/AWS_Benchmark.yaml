@@ -202,7 +202,7 @@ position:
     children: []
     id: MARKDOWN-HKNnJ2lH0FIKW4k4DebL7
     meta:
-      code: 'Please select any of Service, Region or Account number to filter the dashboard. '
+      code: 'Please select any of Service, Region or Account number to filter the dashboard.'
       height: 9
       width: 12
     parents:

@@ -35,38 +35,38 @@ params:
     optionName: metric_ai92fvuxgst_41x1k3d4hi
     sqlExpression: null
   adhoc_filters:
-  - expressionType: SIMPLE
-    subject: Date
-    operator: TEMPORAL_RANGE
-    comparator: No filter
-    clause: WHERE
-    sqlExpression: null
-    isExtra: false
-    isNew: false
-    datasourceWarning: false
-    filterOptionName: filter_kgxrqyltse8_see42fyeyem
-  - expressionType: SIMPLE
-    subject: Workflow
-    operator: ==
-    operatorId: EQUALS
-    comparator: Run AWS Benchmark
-    clause: WHERE
-    sqlExpression: null
-    isExtra: false
-    isNew: false
-    datasourceWarning: false
-    filterOptionName: filter_zw9kds5hofg_otsdjf1tmx
-  - expressionType: SIMPLE
-    subject: Account
-    operator: IS NOT NULL
-    operatorId: IS_NOT_NULL
-    comparator: null
-    clause: WHERE
-    sqlExpression: null
-    isExtra: false
-    isNew: false
-    datasourceWarning: false
-    filterOptionName: filter_nk59etbjcxn_dg63tye4u4w
+    - expressionType: SIMPLE
+      subject: Date
+      operator: TEMPORAL_RANGE
+      comparator: No filter
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_kgxrqyltse8_see42fyeyem
+    - expressionType: SIMPLE
+      subject: Workflow
+      operator: ==
+      operatorId: EQUALS
+      comparator: Run AWS Benchmark
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_zw9kds5hofg_otsdjf1tmx
+    - expressionType: SIMPLE
+      subject: Account
+      operator: IS NOT NULL
+      operatorId: IS_NOT_NULL
+      comparator: null
+      clause: WHERE
+      sqlExpression: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_nk59etbjcxn_dg63tye4u4w
   show_timestamp: true
   show_trend_line: true
   start_y_axis_at_zero: true
@@ -82,7 +82,7 @@ params:
   rolling_type: None
   extra_form_data: {}
   dashboards:
-  - 1
+    - 1
 cache_timeout: null
 uuid: 2005ee5c-dfb1-43f8-899d-9a2a66315f81
 version: 1.0.0
