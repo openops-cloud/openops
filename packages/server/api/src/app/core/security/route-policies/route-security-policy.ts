@@ -32,4 +32,9 @@ export type ProjectAuthorizationPolicy = {
   permission?: Permission;
 };
 
+export type UnscopedAuthorizationPolicy = {
+  authorizationScope: AuthorizationScope.UNSCOPED;
+  allowedPrincipals: readonly PrincipalType[];
+};
+
 export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoutePolicy;
