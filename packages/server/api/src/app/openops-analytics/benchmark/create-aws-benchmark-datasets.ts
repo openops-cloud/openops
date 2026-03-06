@@ -60,6 +60,7 @@ export async function createAwsBenchmarkDatasets(
     sql: `
         SELECT *
         FROM public."${timeseriesTableName}"
+        WHERE "Workflow" = 'Run AWS Benchmark' AND "Account" IS NOT NULL
     `,
     databaseId,
     schema: 'public',
