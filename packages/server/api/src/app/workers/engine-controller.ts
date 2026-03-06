@@ -14,6 +14,7 @@ import {
 import {
   ApplicationError,
   assertNotNullOrUndefined,
+  ENGINE_ROUTE_POLICY,
   EngineHttpResponse,
   EnginePrincipal,
   ErrorCode,
@@ -55,6 +56,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     {
       config: {
         allowedPrincipals: [PrincipalType.ENGINE],
+        security: ENGINE_ROUTE_POLICY,
       },
       schema: {
         description:
@@ -76,6 +78,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     {
       config: {
         allowedPrincipals: [PrincipalType.ENGINE],
+        security: ENGINE_ROUTE_POLICY,
       },
       schema: {
         description:
@@ -397,6 +400,7 @@ async function trackExecution(
 const GetFileRequestParams = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     params: Type.Object({
@@ -408,6 +412,7 @@ const GetFileRequestParams = {
 const UpdateStepProgress = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     body: UpdateRunProgressRequest,
@@ -417,6 +422,7 @@ const UpdateStepProgress = {
 const SendWebhookResponse = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     description:
@@ -428,6 +434,7 @@ const SendWebhookResponse = {
 const UpdateFailureCount = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     description:
@@ -439,6 +446,7 @@ const UpdateFailureCount = {
 const GetLockedVersionRequest = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     description:
@@ -453,6 +461,7 @@ const GetLockedVersionRequest = {
 const RemoveFlowRequest = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
   schema: {
     description:
