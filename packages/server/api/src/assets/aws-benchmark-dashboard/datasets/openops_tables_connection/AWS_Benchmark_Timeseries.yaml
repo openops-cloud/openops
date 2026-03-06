@@ -16,57 +16,57 @@ normalize_columns: false
 always_filter_main_dttm: false
 uuid: 0147f58c-faa2-4589-867a-047e25e8e9b4
 metrics:
-  - metric_name: count
-    verbose_name: COUNT(*)
-    metric_type: count
-    expression: COUNT(*)
-    description: null
-    d3format: null
-    currency: null
-    extra:
-      warning_markdown: ''
-    warning_text: null
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  currency: null
+  extra:
+    warning_markdown: ''
+  warning_text: null
 columns:
-  - column_name: Value
-    verbose_name: null
-    is_dttm: false
-    is_active: true
-    type: NUMERIC(52, 2)
-    advanced_data_type: null
-    groupby: true
-    filterable: true
-    expression: null
-    description: null
-    python_date_format: null
-    extra:
-      warning_markdown: null
-  - column_name: Date
-    verbose_name: null
-    is_dttm: true
-    is_active: true
-    type: DATE
-    advanced_data_type: null
-    groupby: true
-    filterable: true
-    expression: null
-    description: null
-    python_date_format: null
-    extra:
-      warning_markdown: null
-  - column_name: ID
-    verbose_name: null
-    is_dttm: false
-    is_active: true
-    type: UUID
-    advanced_data_type: null
-    groupby: true
-    filterable: true
-    expression: null
-    description: null
-    python_date_format: null
-    extra:
-      warning_markdown: null
-  - column_name: Description
+- column_name: Value
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: NUMERIC(52, 2)
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra:
+    warning_markdown: null
+- column_name: Date
+  verbose_name: null
+  is_dttm: true
+  is_active: true
+  type: DATE
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra:
+    warning_markdown: null
+- column_name: ID
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: UUID
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra:
+    warning_markdown: null
+- column_name: Description
   verbose_name: null
   is_dttm: false
   is_active: true
