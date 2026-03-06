@@ -4,21 +4,33 @@ import {
   PrincipalType,
   RouteAccessType,
 } from '@openops/shared';
-import { ProjectIdLocation, ProjectIdSource } from './project-id-source';
+import { PropertyLocation, PropertySource } from './property-source';
 import { AuthenticatedRoutePolicy } from './route-security-policy';
 
-const defaultProjectIdSource: ProjectIdSource = {
-  location: ProjectIdLocation.TOKEN,
+const defaultProjectIdSource: PropertySource = {
+  location: PropertyLocation.TOKEN,
 };
 
-export function getOrganizationScopedRoutePolicy(
-  allowedPrincipals: readonly PrincipalType[],
-): AuthenticatedRoutePolicy {
+const defaultOrganizationIdSource: PropertySource = {
+  location: PropertyLocation.TOKEN,
+};
+
+export function getOrganizationScopedRoutePolicy({
+  organizationIdSource = defaultOrganizationIdSource,
+  allowedPrincipals,
+  permission,
+}: {
+  allowedPrincipals: readonly PrincipalType[];
+  organizationIdSource?: PropertySource;
+  permission?: Permission;
+}): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
     authorization: {
       authorizationScope: AuthorizationScope.ORGANIZATION,
+      organizationIdSource,
       allowedPrincipals,
+      permission,
     },
   };
 }
@@ -29,7 +41,7 @@ export function getProjectScopedRoutePolicy({
   permission,
 }: {
   allowedPrincipals: readonly PrincipalType[];
-  projectIdSource?: ProjectIdSource;
+  projectIdSource?: PropertySource;
   permission?: Permission;
 }): AuthenticatedRoutePolicy {
   return {
@@ -39,6 +51,18 @@ export function getProjectScopedRoutePolicy({
       allowedPrincipals,
       projectIdSource,
       permission,
+    },
+  };
+}
+
+export function getUnscopedRoutePolicy(
+  allowedPrincipals: PrincipalType[],
+): AuthenticatedRoutePolicy {
+  return {
+    routeAccessType: RouteAccessType.AUTHENTICATED,
+    authorization: {
+      authorizationScope: AuthorizationScope.UNSCOPED,
+      allowedPrincipals,
     },
   };
 }
