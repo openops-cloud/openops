@@ -17,8 +17,8 @@ type CustomPaginationColumnOptions = {
 // Secondary custom pagination is only valid when primary custom pagination is configured.
 type CustomPaginationColumns =
   | {
-      customPaginationColumn?: undefined;
-      customPaginationSecondaryColumn?: undefined;
+      customPaginationColumn?: never;
+      customPaginationSecondaryColumn?: never;
     }
   | {
       customPaginationColumn: CustomPaginationColumnOptions;
