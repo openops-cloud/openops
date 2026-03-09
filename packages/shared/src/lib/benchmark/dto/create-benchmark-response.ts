@@ -4,6 +4,7 @@ export const BenchmarkWorkflowBase = Type.Object({
   flowId: Type.String(),
   displayName: Type.String(),
   isOrchestrator: Type.Boolean(),
+  isCleanup: Type.Boolean(),
 });
 
 export type BenchmarkWorkflowBase = Static<typeof BenchmarkWorkflowBase>;

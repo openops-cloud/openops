@@ -14,6 +14,7 @@ export type BenchmarkFlowRow = {
   benchmarkId: string;
   flowId: string;
   isOrchestrator: boolean;
+  isCleanup: boolean;
   deletedAt: string | null;
 };
 
@@ -35,6 +36,11 @@ export const BenchmarkFlowEntity = new EntitySchema<BenchmarkFlowSchema>({
       nullable: false,
     },
     isOrchestrator: {
+      type: Boolean,
+      nullable: false,
+      default: false,
+    },
+    isCleanup: {
       type: Boolean,
       nullable: false,
       default: false,
