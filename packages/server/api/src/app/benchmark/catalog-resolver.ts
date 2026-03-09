@@ -60,11 +60,13 @@ export function resolveWorkflowPathsForSeed(
   provider: string,
   subWorkflowIds: string[],
 ): CategorizedWorkflowPaths {
+  const orchestratorId = getOrchestratorId(provider);
+  const cleanupId = getCleanupWorkflowId(provider);
+
   if (subWorkflowIds.length === 0) {
     throwValidationError('At least one sub-workflow is required');
   }
-  const orchestratorId = getOrchestratorId(provider);
-  const cleanupId = getCleanupWorkflowId(provider);
+
   const allIds = [orchestratorId, cleanupId, ...subWorkflowIds];
   const paths = resolveWorkflowPaths(provider, allIds);
 
