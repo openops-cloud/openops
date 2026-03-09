@@ -311,6 +311,11 @@ describe('Paginator Integration Tests', () => {
   });
 
   describe('Composite Pagination with Secondary Column', () => {
+    const buildProjectQuery = () =>
+      dataSource
+        .createQueryBuilder(TestFlowRunEntity, 'fr')
+        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+
     test('should paginate same-updated rows without skipping (limit 10, >20 rows)', async () => {
       const sharedCreated = '2025-01-01 08:51:00.123';
       const totalRows = 25;
@@ -330,11 +335,6 @@ describe('Paginator Integration Tests', () => {
           .execute();
       }
 
-      const baseQuery = () =>
-        dataSource
-          .createQueryBuilder(TestFlowRunEntity, 'fr')
-          .where('fr.projectId = :projectId', { projectId: 'proj1' });
-
       const expectedSortedIds = rows
         .map((row) => row.id)
         .sort((a, b) => b.localeCompare(a));
@@ -345,7 +345,7 @@ describe('Paginator Integration Tests', () => {
       page1Paginator.setLimit(10);
       page1Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
       page1Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
-      const page1 = await page1Paginator.paginate(baseQuery());
+      const page1 = await page1Paginator.paginate(buildProjectQuery());
 
       const page2Paginator = new Paginator(TestFlowRunEntity);
       page2Paginator.setAlias('fr');
@@ -354,7 +354,7 @@ describe('Paginator Integration Tests', () => {
       page2Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
       page2Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
       page2Paginator.setAfterCursor(page1.cursor.afterCursor!);
-      const page2 = await page2Paginator.paginate(baseQuery());
+      const page2 = await page2Paginator.paginate(buildProjectQuery());
 
       const combinedIds = [...page1.data, ...page2.data].map((row) => row.id);
 
@@ -381,18 +381,13 @@ describe('Paginator Integration Tests', () => {
           .execute();
       }
 
-      const baseQuery = () =>
-        dataSource
-          .createQueryBuilder(TestFlowRunEntity, 'fr')
-          .where('fr.projectId = :projectId', { projectId: 'proj1' });
-
       const page1Paginator = new Paginator(TestFlowRunEntity);
       page1Paginator.setAlias('fr');
       page1Paginator.setOrder(Order.DESC);
       page1Paginator.setLimit(10);
       page1Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
       page1Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
-      const page1 = await page1Paginator.paginate(baseQuery());
+      const page1 = await page1Paginator.paginate(buildProjectQuery());
 
       const page2Paginator = new Paginator(TestFlowRunEntity);
       page2Paginator.setAlias('fr');
@@ -401,11 +396,11 @@ describe('Paginator Integration Tests', () => {
       page2Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
       page2Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
       page2Paginator.setAfterCursor(page1.cursor.afterCursor!);
-      const page2 = await page2Paginator.paginate(baseQuery());
+      const page2 = await page2Paginator.paginate(buildProjectQuery());
 
       const page1Ids = page1.data.map((row) => row.id);
-      const page2Ids = page2.data.map((row) => row.id);
-      const duplicateIds = page1Ids.filter((id) => page2Ids.includes(id));
+      const page2Ids = new Set(page2.data.map((row) => row.id));
+      const duplicateIds = page1Ids.filter((id) => page2Ids.has(id));
 
       expect(page1.data).toHaveLength(10);
       expect(page2.data).toHaveLength(5);
