@@ -133,7 +133,10 @@ function setupCreateBenchmarkMocks(folder: Folder): void {
     createBenchmarkMockConnections,
   );
   mockResolveWorkflowPathsForSeed.mockReturnValue({
-    orchestrator: { id: 'orchestrator', filePath: '/catalog/orchestrator.json' },
+    orchestrator: {
+      id: 'orchestrator',
+      filePath: '/catalog/orchestrator.json',
+    },
     cleanup: { id: 'cleanup', filePath: '/catalog/cleanup.json' },
     subWorkflows: [{ id: 'sub', filePath: '/catalog/sub.json' }],
   });
@@ -169,6 +172,7 @@ describe('create-benchmark.service', () => {
 
   it('createBenchmark throws for unknown provider', async () => {
     const projectId = 'project-1';
+
     await expect(
       createBenchmark({
         provider: 'gcp' as BenchmarkProviders,
@@ -463,7 +467,11 @@ describe('create-benchmark.service', () => {
     );
     expect(mockReadFile).toHaveBeenCalledTimes(3);
     expect(mockReadFile).toHaveBeenNthCalledWith(1, '/path/orch.json', 'utf-8');
-    expect(mockReadFile).toHaveBeenNthCalledWith(2, '/path/cleanup.json', 'utf-8');
+    expect(mockReadFile).toHaveBeenNthCalledWith(
+      2,
+      '/path/cleanup.json',
+      'utf-8',
+    );
     expect(mockReadFile).toHaveBeenNthCalledWith(3, '/path/sub.json', 'utf-8');
     expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
       expect.arrayContaining([
