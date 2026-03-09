@@ -244,7 +244,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
       orderByCondition[`${this.alias}.${PAGINATION_KEY}`] = order;
     }
 
-    if (this.paginationSecondaryColumnName) {
+    if (this.paginationColumnName && this.paginationSecondaryColumnName) {
       orderByCondition[this.paginationSecondaryColumnName] = order;
     }
 

@@ -8,21 +8,28 @@ export type PagingQuery = {
   order?: Order | 'ASC' | 'DESC';
 };
 
+type CustomPaginationColumnOptions = {
+  columnPath: string;
+  columnName: string;
+  columnType?: string;
+};
+
+// Secondary custom pagination is only valid when primary custom pagination is configured.
+type CustomPaginationColumns =
+  | {
+      customPaginationColumn?: undefined;
+      customPaginationSecondaryColumn?: undefined;
+    }
+  | {
+      customPaginationColumn: CustomPaginationColumnOptions;
+      customPaginationSecondaryColumn?: CustomPaginationColumnOptions;
+    };
+
 export type PaginationOptions<Entity> = {
   entity: EntitySchema<Entity>;
   alias?: string;
   query?: PagingQuery;
-  customPaginationColumn?: {
-    columnPath: string;
-    columnName: string;
-    columnType?: string;
-  };
-  customPaginationSecondaryColumn?: {
-    columnPath: string;
-    columnName: string;
-    columnType?: string;
-  };
-};
+} & CustomPaginationColumns;
 
 export function buildPaginator<Entity extends ObjectLiteral>(
   options: PaginationOptions<Entity>,
@@ -36,6 +43,15 @@ export function buildPaginator<Entity extends ObjectLiteral>(
   const paginator = new Paginator<Entity>(entity);
 
   paginator.setAlias(alias);
+
+  if (
+    options.customPaginationSecondaryColumn &&
+    !options.customPaginationColumn
+  ) {
+    throw new Error(
+      'customPaginationSecondaryColumn requires customPaginationColumn',
+    );
+  }
 
   if (options.customPaginationColumn) {
     paginator.setPaginationColumn(
