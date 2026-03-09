@@ -170,10 +170,10 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const cursors: CursorParam = {};
     const clonedBuilder = new SelectQueryBuilder<Entity>(builder);
 
-    if (this.afterCursor !== null) {
-      Object.assign(cursors, this.decode(this.afterCursor));
-    } else if (this.beforeCursor !== null) {
-      Object.assign(cursors, this.decode(this.beforeCursor));
+    if (this.hasAfterCursor()) {
+      Object.assign(cursors, this.decode(this.afterCursor!));
+    } else if (this.hasBeforeCursor()) {
+      Object.assign(cursors, this.decode(this.beforeCursor!));
     }
 
     if (Object.keys(cursors).length > 0) {
@@ -273,7 +273,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     }
 
     const value = getValueByPath(entity, this.paginationColumnPath);
-    if (value === null || value === undefined) {
+    if (!value) {
       throw new Error(
         `Pagination column not found at path: ${this.paginationColumnPath}`,
       );
