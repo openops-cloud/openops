@@ -1,9 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import {
-  AppSystemProp,
-  logger,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import {
   allowAllOriginsHookHandler,
