@@ -310,6 +310,109 @@ describe('Paginator Integration Tests', () => {
     });
   });
 
+  describe('Composite Pagination with Secondary Column', () => {
+    test('should paginate same-updated rows without skipping (limit 10, >20 rows)', async () => {
+      const sharedCreated = '2025-01-01 08:51:00.123';
+      const totalRows = 25;
+      const rows = Array.from({ length: totalRows }, (_, index) => ({
+        id: `run-${String(index + 1).padStart(3, '0')}`,
+        created: sharedCreated,
+        projectId: 'proj1',
+        status: 'SUCCEEDED',
+      }));
+
+      for (const row of rows) {
+        await dataSource
+          .createQueryBuilder()
+          .insert()
+          .into('test_flow_runs')
+          .values(row)
+          .execute();
+      }
+
+      const baseQuery = () =>
+        dataSource
+          .createQueryBuilder(TestFlowRunEntity, 'fr')
+          .where('fr.projectId = :projectId', { projectId: 'proj1' });
+
+      const expectedSortedIds = rows
+        .map((row) => row.id)
+        .sort((a, b) => b.localeCompare(a));
+
+      const page1Paginator = new Paginator(TestFlowRunEntity);
+      page1Paginator.setAlias('fr');
+      page1Paginator.setOrder(Order.DESC);
+      page1Paginator.setLimit(10);
+      page1Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
+      page1Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
+      const page1 = await page1Paginator.paginate(baseQuery());
+
+      const page2Paginator = new Paginator(TestFlowRunEntity);
+      page2Paginator.setAlias('fr');
+      page2Paginator.setOrder(Order.DESC);
+      page2Paginator.setLimit(10);
+      page2Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
+      page2Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
+      page2Paginator.setAfterCursor(page1.cursor.afterCursor!);
+      const page2 = await page2Paginator.paginate(baseQuery());
+
+      const combinedIds = [...page1.data, ...page2.data].map((row) => row.id);
+
+      expect(page1.data).toHaveLength(10);
+      expect(page2.data).toHaveLength(10);
+      expect(combinedIds).toEqual(expectedSortedIds.slice(0, 20));
+    });
+
+    test('should not duplicate rows across consecutive pages', async () => {
+      const sharedCreated = '2025-01-01 08:51:00.456';
+      const rows = Array.from({ length: 15 }, (_, index) => ({
+        id: `row-${String(index + 1).padStart(3, '0')}`,
+        created: sharedCreated,
+        projectId: 'proj1',
+        status: 'RUNNING',
+      }));
+
+      for (const row of rows) {
+        await dataSource
+          .createQueryBuilder()
+          .insert()
+          .into('test_flow_runs')
+          .values(row)
+          .execute();
+      }
+
+      const baseQuery = () =>
+        dataSource
+          .createQueryBuilder(TestFlowRunEntity, 'fr')
+          .where('fr.projectId = :projectId', { projectId: 'proj1' });
+
+      const page1Paginator = new Paginator(TestFlowRunEntity);
+      page1Paginator.setAlias('fr');
+      page1Paginator.setOrder(Order.DESC);
+      page1Paginator.setLimit(10);
+      page1Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
+      page1Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
+      const page1 = await page1Paginator.paginate(baseQuery());
+
+      const page2Paginator = new Paginator(TestFlowRunEntity);
+      page2Paginator.setAlias('fr');
+      page2Paginator.setOrder(Order.DESC);
+      page2Paginator.setLimit(10);
+      page2Paginator.setPaginationColumn('created', 'fr.created', 'datetime');
+      page2Paginator.setPaginationSecondaryColumn('id', 'fr.id', 'string');
+      page2Paginator.setAfterCursor(page1.cursor.afterCursor!);
+      const page2 = await page2Paginator.paginate(baseQuery());
+
+      const page1Ids = page1.data.map((row) => row.id);
+      const page2Ids = page2.data.map((row) => row.id);
+      const duplicateIds = page1Ids.filter((id) => page2Ids.includes(id));
+
+      expect(page1.data).toHaveLength(10);
+      expect(page2.data).toHaveLength(5);
+      expect(duplicateIds).toHaveLength(0);
+    });
+  });
+
   describe('Edge Cases', () => {
     describe('refetch when backward result is shorter than limit', () => {
       test.each([3, 4])(
