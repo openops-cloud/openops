@@ -9,7 +9,7 @@ export class AddIsCleanupToBenchmarkFlow1773046640936
 
     await queryRunner.query(`
       ALTER TABLE "benchmark_flow"
-      ADD COLUMN "isCleanup" boolean NOT NULL DEFAULT false;
+      ADD COLUMN IF NOT EXISTS "isCleanup" boolean NOT NULL DEFAULT false;
     `);
 
     logger.info('AddIsCleanupToBenchmarkFlow1773046640936: completed');
