@@ -102,6 +102,10 @@ const FOUR_RUNS_TEST_DATA = [
 
 describe('Paginator Integration Tests', () => {
   let dataSource: DataSource;
+  const buildFlowRunsQuery = (projectId = 'proj1') =>
+    dataSource
+      .createQueryBuilder(TestFlowRunEntity, 'fr')
+      .where('fr.projectId = :projectId', { projectId });
 
   beforeAll(async () => {
     dataSource = new DataSource({
@@ -174,9 +178,7 @@ describe('Paginator Integration Tests', () => {
       paginator.setOrder(Order.DESC);
       paginator.setLimit(2);
 
-      const query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      const query = buildFlowRunsQuery();
 
       const result = await paginator.paginate(query);
 
@@ -229,9 +231,7 @@ describe('Paginator Integration Tests', () => {
       paginator.setOrder(Order.DESC);
       paginator.setLimit(2);
 
-      let query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      let query = buildFlowRunsQuery();
 
       const firstPage = await paginator.paginate(query);
 
@@ -241,9 +241,7 @@ describe('Paginator Integration Tests', () => {
       paginator2.setLimit(2);
       paginator2.setAfterCursor(firstPage.cursor.afterCursor!);
 
-      query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      query = buildFlowRunsQuery();
 
       const secondPage = await paginator2.paginate(query);
 
@@ -253,9 +251,7 @@ describe('Paginator Integration Tests', () => {
       paginator3.setLimit(2);
       paginator3.setBeforeCursor(secondPage.cursor.beforeCursor!);
 
-      query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      query = buildFlowRunsQuery();
 
       const backwardPage = await paginator3.paginate(query);
 
@@ -298,9 +294,7 @@ describe('Paginator Integration Tests', () => {
 
       paginator.setPaginationColumn('created', 'fr.created', 'datetime');
 
-      const query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      const query = buildFlowRunsQuery();
 
       const result = await paginator.paginate(query);
 
@@ -311,10 +305,7 @@ describe('Paginator Integration Tests', () => {
   });
 
   describe('Composite Pagination with Secondary Column', () => {
-    const buildProjectQuery = () =>
-      dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+    const buildProjectQuery = () => buildFlowRunsQuery();
 
     test('should paginate same-updated rows without skipping (limit 10, >20 rows)', async () => {
       const sharedCreated = '2025-01-01 08:51:00.123';
@@ -424,10 +415,7 @@ describe('Paginator Integration Tests', () => {
               .execute();
           }
 
-          const queryBase = () =>
-            dataSource
-              .createQueryBuilder(TestFlowRunEntity, 'fr')
-              .where('fr.projectId = :projectId', { projectId: 'proj1' });
+          const queryBase = () => buildFlowRunsQuery();
 
           const paginator1 = new Paginator(TestFlowRunEntity);
           paginator1.setAlias('fr');
@@ -474,10 +462,7 @@ describe('Paginator Integration Tests', () => {
               .execute();
           }
 
-          const queryBase = () =>
-            dataSource
-              .createQueryBuilder(TestFlowRunEntity, 'fr')
-              .where('fr.projectId = :projectId', { projectId: 'proj1' });
+          const queryBase = () => buildFlowRunsQuery();
 
           const paginator1 = new Paginator(TestFlowRunEntity);
           paginator1.setAlias('fr');
@@ -513,9 +498,7 @@ describe('Paginator Integration Tests', () => {
       paginator.setAlias('fr');
       paginator.setLimit(10);
 
-      const query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'nonexistent' });
+      const query = buildFlowRunsQuery('nonexistent');
 
       const result = await paginator.paginate(query);
 
@@ -541,9 +524,7 @@ describe('Paginator Integration Tests', () => {
       paginator.setAlias('fr');
       paginator.setLimit(10);
 
-      const query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      const query = buildFlowRunsQuery();
 
       const result = await paginator.paginate(query);
 
@@ -589,9 +570,7 @@ describe('Paginator Integration Tests', () => {
       paginator.setOrder(Order.DESC);
       paginator.setLimit(3);
 
-      const query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      const query = buildFlowRunsQuery();
 
       const result = await paginator.paginate(query);
 
@@ -644,9 +623,7 @@ describe('Paginator Integration Tests', () => {
       paginator1.setOrder(Order.DESC);
       paginator1.setLimit(2);
 
-      let query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      let query = buildFlowRunsQuery();
 
       const page1 = await paginator1.paginate(query);
 
@@ -656,9 +633,7 @@ describe('Paginator Integration Tests', () => {
       paginator2.setLimit(2);
       paginator2.setAfterCursor(page1.cursor.afterCursor!);
 
-      query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      query = buildFlowRunsQuery();
 
       const page2 = await paginator2.paginate(query);
 
@@ -668,9 +643,7 @@ describe('Paginator Integration Tests', () => {
       paginator3.setLimit(2);
       paginator3.setBeforeCursor(page2.cursor.beforeCursor!);
 
-      query = dataSource
-        .createQueryBuilder(TestFlowRunEntity, 'fr')
-        .where('fr.projectId = :projectId', { projectId: 'proj1' });
+      query = buildFlowRunsQuery();
 
       const backPage = await paginator3.paginate(query);
 
