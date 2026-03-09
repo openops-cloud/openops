@@ -2,6 +2,7 @@ import { OrganizationRole, Principal } from '@openops/shared';
 
 export type ProjectPermissions = {
   analytics: boolean;
+  benchmark: boolean;
 };
 
 export type ProjectPermissionsService = {
@@ -18,6 +19,7 @@ export const projectPermissionsService: ProjectPermissionsService = {
   ): ProjectPermissions {
     return {
       analytics: true,
+      benchmark: true,
     };
   },
 };
