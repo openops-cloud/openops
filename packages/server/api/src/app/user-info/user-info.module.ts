@@ -1,6 +1,12 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { AppSystemProp, logger, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  logger,
+  system,
+} from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
+import { FastifyRequest } from 'fastify';
+import { JwtPayload } from 'jsonwebtoken';
 import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
@@ -24,6 +30,11 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
     return;
   }
 
+  const oldPublicKey = system.get(AppSystemProp.OLD_FRONTEGG_PUBLIC_KEY);
+  const publicKeys = [publicKey, oldPublicKey].filter((key): key is string =>
+    Boolean(key),
+  );
+
   // user-info is available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
   registerOptionsEndpoint(app);
@@ -38,7 +49,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
       },
     },
     async (request, reply) => {
-      const user = getVerifiedUser(request, publicKey);
+      const user = verifyUserWithPublicKeys(request, publicKeys);
 
       if (!user) {
         return reply.status(401).send();
@@ -48,3 +59,18 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 };
+
+function verifyUserWithPublicKeys(
+  request: FastifyRequest,
+  keysToCheck: string[],
+): string | JwtPayload | undefined {
+  for (const key of keysToCheck) {
+    const user = getVerifiedUser(request, key);
+
+    if (user) {
+      return user;
+    }
+  }
+
+  return undefined;
+}

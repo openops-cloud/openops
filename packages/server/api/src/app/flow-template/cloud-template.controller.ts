@@ -32,7 +32,11 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     return;
   }
 
-  const publicKeys = [publicKey];
+  const oldPublicKey = system.get(AppSystemProp.OLD_FRONTEGG_PUBLIC_KEY);
+   const publicKeys = [publicKey, oldPublicKey].filter(
+    (key): key is string => Boolean(key),
+  );
+  
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
 
