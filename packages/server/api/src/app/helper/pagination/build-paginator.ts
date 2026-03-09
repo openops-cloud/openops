@@ -17,7 +17,7 @@ export type PaginationOptions<Entity> = {
     columnName: string;
     columnType?: string;
   };
-  customPaginationTieBreakerColumn?: {
+  customPaginationSecondaryColumn?: {
     columnPath: string;
     columnName: string;
     columnType?: string;
@@ -45,11 +45,11 @@ export function buildPaginator<Entity extends ObjectLiteral>(
     );
   }
 
-  if (options.customPaginationTieBreakerColumn) {
-    paginator.setPaginationTieBreakerColumn(
-      options.customPaginationTieBreakerColumn.columnPath,
-      options.customPaginationTieBreakerColumn.columnName,
-      options.customPaginationTieBreakerColumn.columnType,
+  if (options.customPaginationSecondaryColumn) {
+    paginator.setPaginationSecondaryColumn(
+      options.customPaginationSecondaryColumn.columnPath,
+      options.customPaginationSecondaryColumn.columnName,
+      options.customPaginationSecondaryColumn.columnType,
     );
   }
 

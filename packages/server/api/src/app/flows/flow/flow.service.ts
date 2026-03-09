@@ -145,7 +145,7 @@ export const flowService = {
         columnName: 'fv.updated',
         columnType: 'timestamp with time zone',
       },
-      customPaginationTieBreakerColumn: {
+      customPaginationSecondaryColumn: {
         columnPath: 'id',
         columnName: 'flow.id',
         columnType: 'string',

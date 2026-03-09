@@ -34,13 +34,13 @@ export type PagingResult<Entity> = {
 type CursorContext = {
   primaryColumnName: string;
   primaryParamName: string;
-  tieBreakerColumnName: string | null;
-  tieBreakerParamName: string | null;
+  secondaryColumnName: string | null;
+  secondaryParamName: string | null;
 };
 
 const PAGINATION_KEY = 'created';
 const CUSTOM_PAGINATION_KEY = 'custom_pagination';
-const CUSTOM_PAGINATION_TIE_BREAKER_KEY = 'custom_pagination_tie_breaker';
+const CUSTOM_PAGINATION_SECONDARY_KEY = 'custom_pagination_tie_breaker';
 const DEFAULT_TIMESTAMP_TYPE = 'timestamp with time zone';
 
 export default class Paginator<Entity extends ObjectLiteral> {
@@ -64,11 +64,11 @@ export default class Paginator<Entity extends ObjectLiteral> {
 
   private paginationColumnType: string | null = null;
 
-  private paginationTieBreakerColumnPath: string | null = null;
+  private paginationSecondaryColumnPath: string | null = null;
 
-  private paginationTieBreakerColumnName: string | null = null;
+  private paginationSecondaryColumnName: string | null = null;
 
-  private paginationTieBreakerColumnType: string | null = null;
+  private paginationSecondaryColumnType: string | null = null;
 
   public constructor(private readonly entity: EntitySchema) {}
 
@@ -86,14 +86,14 @@ export default class Paginator<Entity extends ObjectLiteral> {
     this.alias = alias;
   }
 
-  public setPaginationTieBreakerColumn(
+  public setPaginationSecondaryColumn(
     columnPath: string,
     columnName: string,
     columnType = 'string',
   ): void {
-    this.paginationTieBreakerColumnPath = columnPath;
-    this.paginationTieBreakerColumnName = columnName;
-    this.paginationTieBreakerColumnType = columnType;
+    this.paginationSecondaryColumnPath = columnPath;
+    this.paginationSecondaryColumnName = columnName;
+    this.paginationSecondaryColumnType = columnType;
   }
 
   public setAfterCursor(cursor: string): void {
@@ -197,7 +197,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const operator = this.getOperator();
     const context = this.resolveCursorContext(cursors);
 
-    if (context.tieBreakerColumnName && context.tieBreakerParamName) {
+    if (context.secondaryColumnName && context.secondaryParamName) {
       this.applyCompositeCursorFilter(
         where,
         cursors,
@@ -244,8 +244,8 @@ export default class Paginator<Entity extends ObjectLiteral> {
       orderByCondition[`${this.alias}.${PAGINATION_KEY}`] = order;
     }
 
-    if (this.paginationTieBreakerColumnName) {
-      orderByCondition[this.paginationTieBreakerColumnName] = order;
+    if (this.paginationSecondaryColumnName) {
+      orderByCondition[this.paginationSecondaryColumnName] = order;
     }
 
     return orderByCondition;
@@ -286,24 +286,24 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const payload = [`${CUSTOM_PAGINATION_KEY}:${encodedValue}`];
 
     if (
-      this.paginationTieBreakerColumnPath &&
-      this.paginationTieBreakerColumnName
+      this.paginationSecondaryColumnPath &&
+      this.paginationSecondaryColumnName
     ) {
-      const tieBreakerValue = getValueByPath(
+      const secondaryValue = getValueByPath(
         entity,
-        this.paginationTieBreakerColumnPath,
+        this.paginationSecondaryColumnPath,
       );
-      if (tieBreakerValue === null || tieBreakerValue === undefined) {
+      if (secondaryValue === null || secondaryValue === undefined) {
         throw new Error(
-          `Pagination tie breaker column not found at path: ${this.paginationTieBreakerColumnPath}`,
+          `Pagination secondary column not found at path: ${this.paginationSecondaryColumnPath}`,
         );
       }
-      const encodedTieBreakerValue = encodeByType(
-        this.paginationTieBreakerColumnType || 'string',
-        tieBreakerValue,
+      const encodedSecondaryValue = encodeByType(
+        this.paginationSecondaryColumnType || 'string',
+        secondaryValue,
       );
       payload.push(
-        `${CUSTOM_PAGINATION_TIE_BREAKER_KEY}:${encodedTieBreakerValue}`,
+        `${CUSTOM_PAGINATION_SECONDARY_KEY}:${encodedSecondaryValue}`,
       );
     }
 
@@ -327,8 +327,8 @@ export default class Paginator<Entity extends ObjectLiteral> {
     if (key === CUSTOM_PAGINATION_KEY) {
       return this.paginationColumnType || DEFAULT_TIMESTAMP_TYPE;
     }
-    if (key === CUSTOM_PAGINATION_TIE_BREAKER_KEY) {
-      return this.paginationTieBreakerColumnType || 'string';
+    if (key === CUSTOM_PAGINATION_SECONDARY_KEY) {
+      return this.paginationSecondaryColumnType || 'string';
     }
 
     const col = this.entity.options.columns[key];
@@ -407,24 +407,24 @@ export default class Paginator<Entity extends ObjectLiteral> {
       ? CUSTOM_PAGINATION_KEY
       : PAGINATION_KEY;
 
-    const hasCustomTieBreakerCursor =
-      this.paginationTieBreakerColumnName !== null &&
-      cursors[CUSTOM_PAGINATION_TIE_BREAKER_KEY] !== undefined;
+    const hasCustomSecondaryCursor =
+      this.paginationSecondaryColumnName !== null &&
+      cursors[CUSTOM_PAGINATION_SECONDARY_KEY] !== undefined;
 
-    if (hasCustomPaginationCursor && hasCustomTieBreakerCursor) {
+    if (hasCustomPaginationCursor && hasCustomSecondaryCursor) {
       return {
         primaryColumnName,
         primaryParamName,
-        tieBreakerColumnName: this.paginationTieBreakerColumnName,
-        tieBreakerParamName: CUSTOM_PAGINATION_TIE_BREAKER_KEY,
+        secondaryColumnName: this.paginationSecondaryColumnName,
+        secondaryParamName: CUSTOM_PAGINATION_SECONDARY_KEY,
       };
     }
 
     return {
       primaryColumnName,
       primaryParamName,
-      tieBreakerColumnName: null,
-      tieBreakerParamName: null,
+      secondaryColumnName: null,
+      secondaryParamName: null,
     };
   }
 
@@ -456,11 +456,11 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const {
       primaryColumnName,
       primaryParamName,
-      tieBreakerColumnName,
-      tieBreakerParamName,
+      secondaryColumnName,
+      secondaryParamName,
     } = context;
-    if (!tieBreakerColumnName || !tieBreakerParamName) {
-      throw new Error('Pagination tie breaker context is not configured');
+    if (!secondaryColumnName || !secondaryParamName) {
+      throw new Error('Pagination secondary context is not configured');
     }
 
     where.orWhere(
@@ -473,7 +473,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
       cursors,
     );
 
-    // Lexicographic cursor compare: primary equals, then compare tie-breaker.
+    // Lexicographic cursor compare: primary equals, then compare secondary key.
     where.orWhere(
       new Brackets((nestedWhere) => {
         nestedWhere.where(
@@ -488,8 +488,8 @@ export default class Paginator<Entity extends ObjectLiteral> {
         nestedWhere.andWhere(
           this.buildComparisonClause({
             dbType,
-            columnName: tieBreakerColumnName,
-            paramName: tieBreakerParamName,
+            columnName: secondaryColumnName,
+            paramName: secondaryParamName,
             operator,
           }),
           cursors,
