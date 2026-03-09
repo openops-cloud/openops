@@ -27,4 +27,7 @@ export enum Permission {
 
   // Tables
   WRITE_TABLE = 'table:write',
+
+  // Analytics
+  WRITE_ANALYTICS = 'analytics:write',
 }
