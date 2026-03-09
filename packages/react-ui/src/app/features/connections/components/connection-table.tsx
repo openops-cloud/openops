@@ -1,17 +1,15 @@
-import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   BlockIcon,
-  Button,
   DataTable,
   DataTableColumnHeader,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  PageHeader,
   PaginationParams,
   RowDataWithActions,
   StatusIconWithText,
@@ -35,7 +33,6 @@ import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import { useConnectionsContext } from './connections-context';
 import { DeleteConnectionDialog } from './delete-connection-dialog';
 import { EditConnectionDialog } from './edit-connection-dialog';
-import { NewConnectionTypeDialog } from './new-connection-type-dialog';
 
 type BlockIconWithBlockNameProps = {
   authProviderKey: string;
@@ -107,38 +104,48 @@ const MenuConnectionColumn = ({
           <EllipsisVertical className="h-10 w-10" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[155px]">
-          <DropdownMenuItem
-            key="edit"
-            onSelect={(e) => {
-              e.preventDefault();
-              setIsEditConnectionDialog(true);
-            }}
+          <PermissionGuard
+            permission={Permission.WRITE_APP_CONNECTION}
+            tooltipClassName="flex"
           >
-            <span className="text-black text-sm font-medium cursor-pointer w-full">
-              {t('Edit')}
-            </span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            key="delete"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <DeleteConnectionDialog
-              connectionName={row.name}
-              mutationFn={deleteConnectionMutation}
-              isPending={isPending}
-              linkedFlows={linkedFlows}
+            <DropdownMenuItem
+              key="edit"
+              onSelect={(e) => {
+                e.preventDefault();
+                setIsEditConnectionDialog(true);
+              }}
             >
-              <button
-                onClick={() => mutate({ connectionName: row.name })}
-                className="text-black text-sm font-medium bg-transparent border-none p-0 m-0 cursor-pointer appearance-none w-full text-left"
-                type="button"
+              <span className="text-black text-sm font-medium cursor-pointer w-full">
+                {t('Edit')}
+              </span>
+            </DropdownMenuItem>
+          </PermissionGuard>
+          <PermissionGuard
+            permission={Permission.DELETE_APP_CONNECTION}
+            tooltipClassName="flex"
+          >
+            <DropdownMenuItem
+              key="delete"
+              onSelect={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <DeleteConnectionDialog
+                connectionName={row.name}
+                mutationFn={deleteConnectionMutation}
+                isPending={isPending}
+                linkedFlows={linkedFlows}
               >
-                {t('Delete')}
-              </button>
-            </DeleteConnectionDialog>
-          </DropdownMenuItem>
+                <button
+                  onClick={() => mutate({ connectionName: row.name })}
+                  className="text-black text-sm font-medium bg-transparent border-none p-0 m-0 cursor-pointer appearance-none w-full text-left"
+                  type="button"
+                >
+                  {t('Delete')}
+                </button>
+              </DeleteConnectionDialog>
+            </DropdownMenuItem>
+          </PermissionGuard>
         </DropdownMenuContent>
       </DropdownMenu>
       {isEditConnectionDialog && (
@@ -260,32 +267,6 @@ const fetchData = async (
   });
 };
 
-const ConnectionsHeader = () => {
-  const { checkAccess } = useAuthorization();
-  const userHasPermissionToWriteAppConnection = checkAccess(
-    Permission.WRITE_APP_CONNECTION,
-  );
-
-  const { setRefresh } = useConnectionsContext();
-
-  return (
-    <PageHeader title={t('Connections')}>
-      <div className="ml-auto mr-7">
-        <NewConnectionTypeDialog
-          onConnectionCreated={() => setRefresh((prev) => !prev)}
-        >
-          <Button
-            variant="default"
-            disabled={!userHasPermissionToWriteAppConnection}
-          >
-            {t('New Connection')}
-          </Button>
-        </NewConnectionTypeDialog>
-      </div>
-    </PageHeader>
-  );
-};
-
 function AppConnectionsTable() {
   const { refresh, setRefresh } = useConnectionsContext();
 
@@ -303,4 +284,4 @@ function AppConnectionsTable() {
   );
 }
 
-export { AppConnectionsTable, ConnectionsHeader };
+export { AppConnectionsTable };
