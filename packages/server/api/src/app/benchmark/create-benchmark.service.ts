@@ -1,12 +1,12 @@
 import {
   ApplicationError,
+  type BenchmarkConfiguration,
+  type BenchmarkCreationResult,
   BenchmarkProviders,
+  type BenchmarkWorkflowBase,
   ContentType,
   ErrorCode,
   Folder,
-  type BenchmarkConfiguration,
-  type BenchmarkCreationResult,
-  type BenchmarkWorkflowBase,
 } from '@openops/shared';
 import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
@@ -21,8 +21,8 @@ import {
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import {
-  resolveWorkflowPathsForSeed,
   type CategorizedWorkflowPaths,
+  resolveWorkflowPathsForSeed,
 } from './catalog-resolver';
 import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
@@ -242,32 +242,26 @@ export async function createBenchmarkWorkflows(params: {
     folderId,
   );
 
-  const workflows: BenchmarkWorkflowBase[] = [];
-
-  workflows.push({
-    flowId: results.orchestrator.id,
-    displayName: results.orchestrator.displayName,
-    isOrchestrator: true,
-    isCleanup: false,
-  });
-
-  workflows.push({
-    flowId: results.cleanup.id,
-    displayName: results.cleanup.displayName,
-    isOrchestrator: false,
-    isCleanup: true,
-  });
-
-  workflows.push(
+  return [
+    {
+      flowId: results.orchestrator.id,
+      displayName: results.orchestrator.displayName,
+      isOrchestrator: true,
+      isCleanup: false,
+    },
+    {
+      flowId: results.cleanup.id,
+      displayName: results.cleanup.displayName,
+      isOrchestrator: false,
+      isCleanup: true,
+    },
     ...results.subWorkflows.map((sw) => ({
       flowId: sw.id,
       displayName: sw.displayName,
       isOrchestrator: false,
       isCleanup: false,
     })),
-  );
-
-  return workflows;
+  ];
 }
 
 export async function createBenchmark(params: {
