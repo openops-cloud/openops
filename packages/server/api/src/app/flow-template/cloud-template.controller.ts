@@ -8,13 +8,11 @@ import {
   OpenOpsId,
   PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
-import { FastifyRequest } from 'fastify';
-import { JwtPayload } from 'jsonwebtoken';
 import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
 } from '../helper/allow-all-origins-hook-handler';
-import { getVerifiedUser } from '../user-info/cloud-auth';
+import { verifyUserWithPublicKeys } from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
 
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
@@ -36,7 +34,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
    const publicKeys = [publicKey, oldPublicKey].filter(
     (key): key is string => Boolean(key),
   );
-  
+
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
 
@@ -116,18 +114,3 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     },
   );
 };
-
-function verifyUserWithPublicKeys(
-  request: FastifyRequest,
-  keysToCheck: string[],
-): string | JwtPayload | undefined {
-  for (const key of keysToCheck) {
-    const user = getVerifiedUser(request, key);
-
-    if (user) {
-      return user;
-    }
-  }
-
-  return undefined;
-}

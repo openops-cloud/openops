@@ -19,7 +19,7 @@ const getCloudToken = (request: FastifyRequest): string | undefined => {
   return headerToken;
 };
 
-export function getVerifiedUser(
+function getVerifiedUser(
   request: FastifyRequest,
   publicKey: string,
 ): string | JwtPayload | undefined {
@@ -33,4 +33,19 @@ export function getVerifiedUser(
   } catch {
     return undefined;
   }
+}
+
+export function verifyUserWithPublicKeys(
+  request: FastifyRequest,
+  keysToCheck: string[],
+): string | JwtPayload | undefined {
+  for (const key of keysToCheck) {
+    const user = getVerifiedUser(request, key);
+
+    if (user) {
+      return user;
+    }
+  }
+
+  return undefined;
 }

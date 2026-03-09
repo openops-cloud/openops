@@ -5,13 +5,11 @@ import {
   system,
 } from '@openops/server-shared';
 import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
-import { FastifyRequest } from 'fastify';
-import { JwtPayload } from 'jsonwebtoken';
 import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
 } from '../helper/allow-all-origins-hook-handler';
-import { getVerifiedUser } from './cloud-auth';
+import { verifyUserWithPublicKeys } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(userInfoController, { prefix: '/v1/user-info' });
@@ -59,18 +57,3 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 };
-
-function verifyUserWithPublicKeys(
-  request: FastifyRequest,
-  keysToCheck: string[],
-): string | JwtPayload | undefined {
-  for (const key of keysToCheck) {
-    const user = getVerifiedUser(request, key);
-
-    if (user) {
-      return user;
-    }
-  }
-
-  return undefined;
-}
