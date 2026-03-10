@@ -223,7 +223,7 @@ const StopFlowRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
-      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_RUN_FLOW,
     }),
   },
