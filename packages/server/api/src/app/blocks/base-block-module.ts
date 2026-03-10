@@ -20,11 +20,13 @@ import {
   ListVersionRequestQuery,
   ListVersionsResponse,
   OpsEdition,
+  Permission,
   PrincipalType,
   PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { flagService } from '../flags/flag.service';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
@@ -241,6 +243,10 @@ const ListCategoriesRequest = {
 const OptionsBlockRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'Execute Block Properties',
@@ -251,6 +257,11 @@ const OptionsBlockRequest = {
 };
 
 const DeleteBlockRequest = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     description:
       'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',

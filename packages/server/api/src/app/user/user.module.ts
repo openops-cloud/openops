@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { PrincipalType, UpdateTrackingRequestBody } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
+import { getUnscopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { userService } from './user-service';
 
 export const userModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -8,10 +9,11 @@ export const userModule: FastifyPluginAsyncTypebox = async (app) => {
 };
 
 const usersController: FastifyPluginAsyncTypebox = async (app) => {
-  app.get('/me', async (request: FastifyRequest) => {
+  app.get('/me', MeRequestOptions, async (request: FastifyRequest) => {
     const user = await userService.getMetaInfo({
       principal: request.principal,
     });
+
     return user;
   });
 
@@ -41,9 +43,17 @@ const usersController: FastifyPluginAsyncTypebox = async (app) => {
   );
 };
 
+const MeRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    security: getUnscopedRoutePolicy([PrincipalType.USER]),
+  },
+};
+
 const UpdateTrackingRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {
     body: UpdateTrackingRequestBody,

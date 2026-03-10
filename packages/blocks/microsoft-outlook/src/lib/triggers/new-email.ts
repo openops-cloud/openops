@@ -10,6 +10,7 @@ import {
 import { isEmpty, isString } from '@openops/shared';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
+import { microsoftGraphRetry } from '../common/graph-retry';
 import { mailFolderIdDropdown } from '../common/props';
 
 function normalizeString(value: string): string {
@@ -146,7 +147,7 @@ async function fetchMessages(
     );
   }
 
-  let response: PageCollection = await req.get();
+  let response: PageCollection = await microsoftGraphRetry(() => req.get());
   do {
     messages.push(...(response.value as Message[]));
 
@@ -154,7 +155,9 @@ async function fetchMessages(
       break;
     }
 
-    response = await client.api(response['@odata.nextLink']).get();
+    response = await microsoftGraphRetry(() =>
+      client.api(response['@odata.nextLink'] as string).get(),
+    );
   } while (response.value.length > 0);
 
   return messages;

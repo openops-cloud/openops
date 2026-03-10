@@ -15,6 +15,7 @@ import {
   UpdateFlowVersionRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
@@ -25,6 +26,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
   fastify.post(
     '/:flowVersionId/trigger',
     {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+          permission: Permission.WRITE_FLOW,
+        }),
+      },
       schema: {
         description:
           'Updates the trigger configuration for a specific flow version',
@@ -243,7 +250,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 const GetLatestVersionsByConnectionRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'List Flows By Connection',

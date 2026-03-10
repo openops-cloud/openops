@@ -1,6 +1,4 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Type } from '@sinclair/typebox';
-
 import {
   getAiProvider,
   getAvailableProvidersWithModels,
@@ -10,6 +8,8 @@ import {
   GetProvidersResponse,
   PrincipalType,
 } from '@openops/shared';
+import { Type } from '@sinclair/typebox';
+import { getUnscopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 
 export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {
   app.get(
@@ -37,6 +37,7 @@ export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {
 const ListAiProvidersRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {
     tags: ['ai-providers'],
@@ -48,6 +49,7 @@ const ListAiProvidersRequest = {
 const GetAiProviderRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {
     tags: ['ai-providers'],
