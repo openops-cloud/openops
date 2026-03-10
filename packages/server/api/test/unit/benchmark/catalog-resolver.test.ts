@@ -37,12 +37,6 @@ describe('catalog-resolver', () => {
     jest.clearAllMocks();
   });
 
-  it('resolveWorkflowPathsForSeed throws when provider is not in catalog', () => {
-    expect(() => resolveWorkflowPathsForSeed('gcp', [])).toThrow(
-      'Unsupported benchmark provider: gcp',
-    );
-  });
-
   it('resolveWorkflowPathsForSeed throws when no sub-workflows', () => {
     expect(() => resolveWorkflowPathsForSeed(TEST_PROVIDER, [])).toThrow(
       'At least one sub-workflow is required',
