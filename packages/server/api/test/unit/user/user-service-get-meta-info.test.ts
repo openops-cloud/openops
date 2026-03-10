@@ -47,6 +47,7 @@ describe('userService.getMetaInfo', () => {
     findOneByMock.mockResolvedValue(mockUser);
     getProjectPermissionsMock.mockResolvedValue({
       analytics: false,
+      benchmark: true,
     });
 
     const result = await userService.getMetaInfo({
@@ -64,6 +65,7 @@ describe('userService.getMetaInfo', () => {
       projectId: 'project-id-123',
       projectPermissions: {
         analytics: false,
+        benchmark: true,
       },
     });
   });
@@ -88,6 +90,7 @@ describe('userService.getMetaInfo', () => {
     findOneByMock.mockResolvedValue(mockUser);
     getProjectPermissionsMock.mockResolvedValue({
       analytics: true,
+      benchmark: false,
     });
 
     const result = await userService.getMetaInfo({
