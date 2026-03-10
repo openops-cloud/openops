@@ -1,8 +1,6 @@
-import {
-  benchmarkFeatureGuard,
-  BenchmarkFeatureGuard,
-} from './benchmark-feature-guard';
+import { preHandlerAsyncHookHandler } from 'fastify';
+import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 
-export const getBenchmarkFeatureGuard = (): BenchmarkFeatureGuard => {
-  return benchmarkFeatureGuard;
+export const getBenchmarkFeatureGuard = (): preHandlerAsyncHookHandler => {
+  return assertBenchmarkFeatureEnabled;
 };

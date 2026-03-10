@@ -19,16 +19,12 @@ import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
+  app.addHook('preHandler', getBenchmarkFeatureGuard());
+
   app.post(
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
-        request.principal.projectId,
-        request.principal.organization.id,
-        request.params.provider,
-      );
-
       const step = await resolveWizardNavigation(
         request.params.provider,
         {
@@ -45,12 +41,6 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider',
     CreateBenchmarkRequestOptions,
     async (request, reply) => {
-      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
-        request.principal.projectId,
-        request.principal.organization.id,
-        request.params.provider,
-      );
-
       const result = await createBenchmark({
         provider: request.params.provider,
         projectId: request.principal.projectId,
@@ -61,11 +51,6 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
   app.get('/', ListBenchmarksRequestOptions, async (request, reply) => {
-    await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
-      request.principal.projectId,
-      request.principal.organization.id,
-      request.query.provider,
-    );
     const items = await listBenchmarks({
       projectId: request.principal.projectId,
       provider: request.query.provider,
@@ -77,10 +62,6 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:benchmarkId/status',
     BenchmarkStatusRequestOptions,
     async (request, reply) => {
-      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
-        request.principal.projectId,
-        request.principal.organization.id,
-      );
       const status = await getBenchmarkStatus({
         benchmarkId: request.params.benchmarkId,
         projectId: request.principal.projectId,
