@@ -2,7 +2,8 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { PrincipalType } from '@openops/shared';
+import { Permission, PrincipalType } from '@openops/shared';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { webhookSimulationService } from './webhook-simulation-service';
 
 export const webhookSimulationController: FastifyPluginCallbackTypebox = (
@@ -46,6 +47,10 @@ export const webhookSimulationController: FastifyPluginCallbackTypebox = (
 const CreateWebhookSimulationRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_STEP_FLOW,
+    }),
   },
   schema: {
     body: Type.Object({
@@ -59,6 +64,10 @@ const CreateWebhookSimulationRequest = {
 const GetWebhookSimulationRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_STEP_FLOW,
+    }),
   },
   schema: {
     querystring: Type.Object({

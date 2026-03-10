@@ -25,6 +25,7 @@ import {
   WebsocketClientEvent,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { flowRunRepo, flowRunService } from './flow-run-service';
 
 const DEFAULT_PAGING_LIMIT = 10;
@@ -142,6 +143,10 @@ const FlowRunFilteredWithNoSteps = Type.Omit(FlowRun, [
 const ListRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_RUN,
+    }),
   },
   schema: {
     operationId: 'List Flow Runs',
@@ -159,6 +164,10 @@ const ListRequest = {
 const GetRequest = {
   config: {
     allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_RUN,
+    }),
   },
   schema: {
     operationId: 'Get Flow Run Details',
@@ -194,7 +203,10 @@ const ResumeFlowRunRequest = {
 const RetryFlowRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.RETRY_RUN,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.RETRY_RUN,
+    }),
   },
   schema: {
     operationId: 'Retry Flow Run',
@@ -210,6 +222,10 @@ const RetryFlowRequest = {
 const StopFlowRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.TEST_RUN_FLOW,
+    }),
   },
   schema: {
     operationId: 'Stop Flow Run',
