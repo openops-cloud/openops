@@ -13,6 +13,17 @@ export async function withGraphRetry<T>(
   options: RetryOptions,
 ): Promise<T> {
   const { maxRetries, initialDelayMs, shouldRetry, onRetry } = options;
+
+  if (maxRetries < 1) {
+    throw new Error(`maxRetries must be at least 1, but got ${maxRetries}`);
+  }
+
+  if (initialDelayMs < 0) {
+    throw new Error(
+      `initialDelayMs must be non-negative, but got ${initialDelayMs}`,
+    );
+  }
+
   let lastError: unknown;
 
   for (let i = 0; i < maxRetries; i++) {

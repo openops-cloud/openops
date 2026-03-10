@@ -33,7 +33,7 @@ describe('withGraphRetry', () => {
     expect(result).toBe('success');
     expect(fn).toHaveBeenCalledTimes(2);
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(onRetry).toHaveBeenCalledWith(expect.any(Error), 1, 1);
+    expect(onRetry).toHaveBeenNthCalledWith(1, expect.any(Error), 1, 1);
   });
 
   it('should throw the error if fn fails and shouldRetry returns false', async () => {
@@ -72,6 +72,7 @@ describe('withGraphRetry', () => {
   });
 
   it('should use exponential backoff for delays', async () => {
+    jest.useFakeTimers();
     const fn = jest
       .fn()
       .mockRejectedValueOnce(new Error('fail 1'))
@@ -79,18 +80,57 @@ describe('withGraphRetry', () => {
       .mockResolvedValueOnce('success');
     const onRetry = jest.fn();
 
-    const startTime = Date.now();
-    await withGraphRetry(fn, {
+    const promise = withGraphRetry(fn, {
       maxRetries: 3,
       initialDelayMs: 10,
       shouldRetry: () => true,
       onRetry,
     });
-    const endTime = Date.now();
 
-    expect(onRetry).toHaveBeenCalledWith(expect.any(Error), 1, 10);
-    expect(onRetry).toHaveBeenCalledWith(expect.any(Error), 2, 20);
-    expect(endTime - startTime).toBeGreaterThanOrEqual(30);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(10);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(onRetry).toHaveBeenNthCalledWith(1, expect.any(Error), 1, 10);
+
+    jest.advanceTimersByTime(20);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(fn).toHaveBeenCalledTimes(3);
+    expect(onRetry).toHaveBeenNthCalledWith(2, expect.any(Error), 2, 20);
+
+    const result = await promise;
+    expect(result).toBe('success');
+
+    jest.useRealTimers();
+  });
+
+  it('should throw error if maxRetries is less than 1', async () => {
+    const fn = jest.fn();
+    await expect(
+      withGraphRetry(fn, {
+        maxRetries: 0,
+        initialDelayMs: 1,
+        shouldRetry: () => true,
+      }),
+    ).rejects.toThrow('maxRetries must be at least 1, but got 0');
+  });
+
+  it('should throw error if initialDelayMs is negative', async () => {
+    const fn = jest.fn();
+    await expect(
+      withGraphRetry(fn, {
+        maxRetries: 1,
+        initialDelayMs: -1,
+        shouldRetry: () => true,
+      }),
+    ).rejects.toThrow('initialDelayMs must be non-negative, but got -1');
   });
 });
 
@@ -108,7 +148,7 @@ describe('microsoftGraphRetry', () => {
       .mockRejectedValueOnce(error502)
       .mockResolvedValueOnce('success');
 
-    const result = await microsoftGraphRetry(fn);
+    const result = await microsoftGraphRetry(fn, { initialDelayMs: 0 });
 
     expect(result).toBe('success');
     expect(fn).toHaveBeenCalledTimes(3);
@@ -124,10 +164,24 @@ describe('microsoftGraphRetry', () => {
       .mockRejectedValueOnce(error502)
       .mockResolvedValueOnce('success');
 
-    const result = await microsoftGraphRetry(fn);
+    jest.useFakeTimers();
+    const promise = microsoftGraphRetry(fn);
 
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    jest.advanceTimersByTime(1000);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    jest.advanceTimersByTime(2000);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const result = await promise;
     expect(result).toBe('success');
     expect(fn).toHaveBeenCalledTimes(3);
+    jest.useRealTimers();
   });
 
   it('should allow overriding default values', async () => {
@@ -139,7 +193,7 @@ describe('microsoftGraphRetry', () => {
     await expect(
       microsoftGraphRetry(fn, {
         maxRetries: 2,
-        initialDelayMs: 1,
+        initialDelayMs: 0,
       }),
     ).rejects.toThrow(error502);
 
