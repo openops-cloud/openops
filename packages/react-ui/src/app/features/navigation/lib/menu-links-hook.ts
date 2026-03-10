@@ -63,6 +63,7 @@ export const useMenuLinks = () => {
               to: '/analytics',
               label: t('Analytics'),
               icon: LucideBarChart2,
+              locked: !checkAccess(Permission.WRITE_ANALYTICS),
             },
           ]
         : []),
