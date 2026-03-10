@@ -55,6 +55,7 @@ export const useMenuLinks = () => {
         to: '/tables',
         label: t('Tables'),
         icon: TableProperties,
+        locked: !checkAccess(Permission.WRITE_TABLE),
       },
       ...(hasAnalyticsAccess
         ? [
