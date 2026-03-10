@@ -13,7 +13,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
+import { getBenchmarkFeatureGuard } from './benchmark-feature-guard-factory';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
@@ -23,8 +23,9 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
-      await assertBenchmarkFeatureEnabled(
+      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
         request.principal.projectId,
+        request.principal.organization.id,
         request.params.provider,
       );
 
@@ -44,8 +45,9 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider',
     CreateBenchmarkRequestOptions,
     async (request, reply) => {
-      await assertBenchmarkFeatureEnabled(
+      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
         request.principal.projectId,
+        request.principal.organization.id,
         request.params.provider,
       );
 
@@ -59,8 +61,9 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
   app.get('/', ListBenchmarksRequestOptions, async (request, reply) => {
-    await assertBenchmarkFeatureEnabled(
+    await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
       request.principal.projectId,
+      request.principal.organization.id,
       request.query.provider,
     );
     const items = await listBenchmarks({
@@ -74,7 +77,10 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:benchmarkId/status',
     BenchmarkStatusRequestOptions,
     async (request, reply) => {
-      await assertBenchmarkFeatureEnabled(request.principal.projectId);
+      await getBenchmarkFeatureGuard().assertBenchmarkFeatureEnabled(
+        request.principal.projectId,
+        request.principal.organization.id,
+      );
       const status = await getBenchmarkStatus({
         benchmarkId: request.params.benchmarkId,
         projectId: request.principal.projectId,
