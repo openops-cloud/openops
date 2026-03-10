@@ -32,6 +32,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { projectService } from '../../project/project-service';
 import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-models';
 import { flowRunService } from '../flow-run/flow-run-service';
@@ -42,7 +43,6 @@ import {
 } from './flow-validations';
 import { flowService } from './flow.service';
 import { resolveManualPayload } from './resolve-manual-run-payload';
-import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 
 const DEFAULT_PAGE_SIZE = 10;
 
