@@ -5,8 +5,10 @@ import {
 import {
   ALL_PRINCIPAL_TYPES,
   OpenOpsId,
+  Permission,
   USE_DRAFT_QUERY_PARAM_NAME,
 } from '@openops/shared';
+import { getProjectScopedRoutePolicy } from '../../../core/security/route-policies/route-security-policy-factory';
 import { formService } from './form.service';
 
 export const formController: FastifyPluginAsyncTypebox = async (app) => {
@@ -21,6 +23,10 @@ export const formController: FastifyPluginAsyncTypebox = async (app) => {
 const GetFormRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: ALL_PRINCIPAL_TYPES,
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     description:
