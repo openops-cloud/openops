@@ -5,6 +5,7 @@ import {
 } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
+  Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
   WorkflowStats,
@@ -13,6 +14,7 @@ import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { getDashboardOverviewObject } from './get-dashboard-overview';
 import { getWorkflowsStats } from './get-workflow-stats';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 
 export const dashboardsModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(DashboardsController, { prefix: '/v1/dashboards' });
@@ -23,21 +25,32 @@ const DashboardsController: FastifyPluginCallbackTypebox = (
   _opts,
   done,
 ) => {
-  fastify.get('/overview', async (_, reply: FastifyReply) => {
-    try {
-      const dashboardOverview = await getDashboardOverviewObject();
-      if (!dashboardOverview) {
-        return await reply.status(StatusCodes.NOT_FOUND).send();
-      }
+  fastify.get(
+    '/overview',
+    {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.WRITE_ANALYTICS,
+        }),
+      },
+    },
+    async (_, reply: FastifyReply) => {
+      try {
+        const dashboardOverview = await getDashboardOverviewObject();
+        if (!dashboardOverview) {
+          return await reply.status(StatusCodes.NOT_FOUND).send();
+        }
 
-      return await reply.status(StatusCodes.OK).send(dashboardOverview);
-    } catch (error) {
-      logger.error(`Failed to fetch dashboard overview`, {
-        error,
-      });
-      return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
-    }
-  });
+        return await reply.status(StatusCodes.OK).send(dashboardOverview);
+      } catch (error) {
+        logger.error(`Failed to fetch dashboard overview`, {
+          error,
+        });
+        return reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
+      }
+    },
+  );
   fastify.get('/workflows-stats', StatsRequest, async (request, reply) => {
     try {
       const projectId = request.principal.projectId;
@@ -61,6 +74,10 @@ const DashboardsController: FastifyPluginCallbackTypebox = (
 const StatsRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     tags: ['dashboards'],
