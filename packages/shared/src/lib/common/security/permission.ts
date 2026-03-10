@@ -22,6 +22,10 @@ export enum Permission {
   WRITE_FOLDER = 'folder:write',
   DELETE_FOLDER = 'folder:delete',
 
+  // Templates
+  READ_TEMPLATE = 'template:read',
+  WRITE_TEMPLATE = 'template:write',
+
   // Users
   WRITE_USER = 'user:write',
 
