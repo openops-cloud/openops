@@ -10,12 +10,12 @@ import {
   TestTriggerRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { stepRunService } from '../step-run/step-run-service';
 import { testTriggerService } from '../test-trigger/test-trigger-service';
-import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 
 export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post('/step', TestStepRequest, async (request, reply) => {
