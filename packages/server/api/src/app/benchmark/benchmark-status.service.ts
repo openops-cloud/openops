@@ -16,6 +16,7 @@ import { benchmarkRepo } from './benchmark.repo';
 type FlowRow = {
   flowId: string;
   isOrchestrator: boolean;
+  isCleanup: boolean;
   displayName: string | null;
 };
 
@@ -59,6 +60,7 @@ async function fetchFlowRowsByBenchmarkIds(
       'bf.benchmarkId AS "benchmarkId"',
       'bf.flowId AS "flowId"',
       'bf.isOrchestrator AS "isOrchestrator"',
+      'bf.isCleanup AS "isCleanup"',
       'fv.displayName AS "displayName"',
     ])
     .where('bf.benchmarkId IN (:...benchmarkIds)', { benchmarkIds })
@@ -76,6 +78,7 @@ function buildWorkflowStatusItems(
       flowId: row.flowId,
       displayName: row.displayName ?? '',
       isOrchestrator: row.isOrchestrator,
+      isCleanup: row.isCleanup,
       runStatus: latestRun
         ? mapFlowRunStatusToBenchmarkStatus(latestRun.status)
         : BenchmarkStatus.CREATED,

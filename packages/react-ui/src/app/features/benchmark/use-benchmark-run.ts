@@ -131,7 +131,7 @@ export const useBenchmarkRun = (
     let completed = 0;
     let total = 0;
     for (const w of statusData.workflows) {
-      if (w.isOrchestrator) {
+      if (w.isOrchestrator || w.isCleanup) {
         continue;
       }
       total++;

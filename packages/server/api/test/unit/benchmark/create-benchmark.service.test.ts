@@ -132,11 +132,14 @@ function setupCreateBenchmarkMocks(folder: Folder): void {
   mockGetConnectionsWithBlockSupport.mockResolvedValue(
     createBenchmarkMockConnections,
   );
-  mockResolveWorkflowPathsForSeed.mockReturnValue([
-    { id: 'orchestrator', filePath: '/catalog/orchestrator.json' },
-    { id: 'cleanup', filePath: '/catalog/cleanup.json' },
-    { id: 'sub', filePath: '/catalog/sub.json' },
-  ]);
+  mockResolveWorkflowPathsForSeed.mockReturnValue({
+    orchestrator: {
+      id: 'orchestrator',
+      filePath: '/catalog/orchestrator.json',
+    },
+    cleanup: { id: 'cleanup', filePath: '/catalog/cleanup.json' },
+    subWorkflows: [{ id: 'sub', filePath: '/catalog/sub.json' }],
+  });
   mockReadFile.mockResolvedValue(
     JSON.stringify({
       template: {
@@ -169,6 +172,7 @@ describe('create-benchmark.service', () => {
 
   it('createBenchmark throws for unknown provider', async () => {
     const projectId = 'project-1';
+
     await expect(
       createBenchmark({
         provider: 'gcp' as BenchmarkProviders,
@@ -259,9 +263,24 @@ describe('create-benchmark.service', () => {
     });
     expect(result.folderId).toBe(folder.id);
     expect(result.workflows).toEqual([
-      { flowId: 'flow-1', displayName: 'Orchestrator', isOrchestrator: true },
-      { flowId: 'flow-2', displayName: 'Cleanup', isOrchestrator: false },
-      { flowId: 'flow-3', displayName: 'Sub', isOrchestrator: false },
+      {
+        flowId: 'flow-1',
+        displayName: 'Orchestrator',
+        isOrchestrator: true,
+        isCleanup: false,
+      },
+      {
+        flowId: 'flow-2',
+        displayName: 'Cleanup',
+        isOrchestrator: false,
+        isCleanup: true,
+      },
+      {
+        flowId: 'flow-3',
+        displayName: 'Sub',
+        isOrchestrator: false,
+        isCleanup: false,
+      },
     ]);
     expect(result.benchmarkId).toBeDefined();
     expect(result.benchmarkId).toHaveLength(21);
@@ -394,10 +413,11 @@ describe('create-benchmark.service', () => {
     );
   });
 
-  const workflowPaths = [
-    { id: 'orch', filePath: '/path/orch.json' },
-    { id: 'sub', filePath: '/path/sub.json' },
-  ];
+  const workflowPaths = {
+    orchestrator: { id: 'orch', filePath: '/path/orch.json' },
+    cleanup: { id: 'cleanup', filePath: '/path/cleanup.json' },
+    subWorkflows: [{ id: 'sub', filePath: '/path/sub.json' }],
+  };
   const seedParams = {
     provider: BenchmarkProviders.AWS,
     workflowIds: ['orch', 'sub'],
@@ -428,7 +448,8 @@ describe('create-benchmark.service', () => {
     mockGetConnectionsWithBlockSupport.mockResolvedValue(mockConnections);
     mockBulkCreateAndPublishFlows.mockResolvedValue([
       { id: 'f1', version: { id: 'v1', displayName: 'Orchestrator' } },
-      { id: 'f2', version: { id: 'v2', displayName: 'Sub' } },
+      { id: 'f2', version: { id: 'v2', displayName: 'Cleanup' } },
+      { id: 'f3', version: { id: 'v3', displayName: 'Sub' } },
     ]);
   };
 
@@ -444,9 +465,14 @@ describe('create-benchmark.service', () => {
       seedParams.projectId,
       [seedParams.connectionId],
     );
-    expect(mockReadFile).toHaveBeenCalledTimes(2);
+    expect(mockReadFile).toHaveBeenCalledTimes(3);
     expect(mockReadFile).toHaveBeenNthCalledWith(1, '/path/orch.json', 'utf-8');
-    expect(mockReadFile).toHaveBeenNthCalledWith(2, '/path/sub.json', 'utf-8');
+    expect(mockReadFile).toHaveBeenNthCalledWith(
+      2,
+      '/path/cleanup.json',
+      'utf-8',
+    );
+    expect(mockReadFile).toHaveBeenNthCalledWith(3, '/path/sub.json', 'utf-8');
     expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ template: expect.any(Object) }),
@@ -456,20 +482,36 @@ describe('create-benchmark.service', () => {
       seedParams.folderId,
     );
     expect(result).toEqual([
-      { flowId: 'f1', displayName: 'Orchestrator', isOrchestrator: true },
-      { flowId: 'f2', displayName: 'Sub', isOrchestrator: false },
+      {
+        flowId: 'f1',
+        displayName: 'Orchestrator',
+        isOrchestrator: true,
+        isCleanup: false,
+      },
+      {
+        flowId: 'f2',
+        displayName: 'Cleanup',
+        isOrchestrator: false,
+        isCleanup: true,
+      },
+      {
+        flowId: 'f3',
+        displayName: 'Sub',
+        isOrchestrator: false,
+        isCleanup: false,
+      },
     ]);
   });
 
-  it('returns empty array when workflowIds is empty', async () => {
+  it('throws when workflowIds is empty', async () => {
     setupSeedMocks();
-    mockResolveWorkflowPathsForSeed.mockReturnValue([]);
-    const result = await createBenchmarkWorkflows({
-      ...seedParams,
-      workflowIds: [],
-    });
+    await expect(
+      createBenchmarkWorkflows({
+        ...seedParams,
+        workflowIds: [],
+      }),
+    ).rejects.toThrow('At least one workflow is required');
 
-    expect(result).toEqual([]);
     expect(mockGetConnectionsWithBlockSupport).not.toHaveBeenCalled();
     expect(mockReadFile).not.toHaveBeenCalled();
     expect(mockBulkCreateAndPublishFlows).not.toHaveBeenCalled();
