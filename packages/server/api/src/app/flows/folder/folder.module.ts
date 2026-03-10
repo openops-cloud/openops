@@ -144,7 +144,7 @@ const DeleteFolderParams = {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.WRITE_FOLDER,
+      permission: Permission.DELETE_FOLDER,
     }),
   },
   schema: {
