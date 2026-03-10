@@ -12,9 +12,9 @@ import {
 } from '@openops/shared';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { getDashboardOverviewObject } from './get-dashboard-overview';
 import { getWorkflowsStats } from './get-workflow-stats';
-import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 
 export const dashboardsModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(DashboardsController, { prefix: '/v1/dashboards' });
