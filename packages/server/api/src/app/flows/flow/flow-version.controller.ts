@@ -11,12 +11,11 @@ import {
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
-  StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
-import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
+import { assertFlowVersionBelongsToProject } from '../common/flow-validations';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 
@@ -62,15 +61,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           });
         }
 
-        const isValid = await validateFlowVersionBelongsToProject(
+        await assertFlowVersionBelongsToProject(
           flowVersion,
           request.principal.projectId,
-          reply,
         );
-
-        if (!isValid) {
-          return;
-        }
 
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
@@ -147,9 +141,15 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request): Promise<Record<OpenOpsId, StepOutputWithData>> => {
+    async (request, reply) => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
+
+      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+      await assertFlowVersionBelongsToProject(
+        flowVersion,
+        request.principal.projectId,
+      );
 
       const flowStepTestOutputs = await flowStepTestOutputService.listDecrypted(
         {
@@ -216,14 +216,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         const flowVersion = await flowVersionService.getOneOrThrow(
           flowVersionId,
         );
-        const isValid = await validateFlowVersionBelongsToProject(
+
+        await assertFlowVersionBelongsToProject(
           flowVersion,
           request.principal.projectId,
-          reply,
         );
-        if (!isValid) {
-          return;
-        }
+
         const saved = await flowStepTestOutputService.save({
           stepId,
           flowVersionId,
