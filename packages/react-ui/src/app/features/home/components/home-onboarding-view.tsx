@@ -130,7 +130,7 @@ const HomeOnboardingView = ({
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
         templates={templatesWithIntegrations}
-        showFilters={!!isCloudUser}
+        showFilters={isCloudUser}
         filters={domains}
         onTemplateClick={onTemplateClick}
       />
