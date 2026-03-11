@@ -147,9 +147,10 @@ export const getPriceAction = createAction({
           Value: filter.attributeValue,
         };
       });
+      const credentials = await getCredentialsFromAuth(context.auth);
 
       const priceList = getPriceListWithCache(
-        context.auth,
+        credentials,
         service.ServiceCode!,
         filters,
         PRICING_REGION,

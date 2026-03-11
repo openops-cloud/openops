@@ -80,7 +80,7 @@ describe('getPriceAction', () => {
 
       expect(openopsCommonMock.getPriceListWithCache).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getPriceListWithCache).toHaveBeenCalledWith(
-        auth,
+        { someCreds: 'some value' },
         'some service',
         expectedFilters,
         'us-east-1',
