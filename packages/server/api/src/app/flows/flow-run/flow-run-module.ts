@@ -17,8 +17,11 @@ const EXECUTION_DATA_RETENTION_DAYS = system.getNumberOrThrow(
 
 export const flowRunModule: FastifyPluginAsync = async (app) => {
   app.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
+
   await app.register(controller, { prefix: '/v1/flow-runs' });
+
   await webhookResponseWatcher.init();
+
   systemJobHandlers.registerJobHandler(
     SystemJobName.LOGS_CLEANUP_TRIGGER,
     async () => {
@@ -67,6 +70,7 @@ export const flowRunModule: FastifyPluginAsync = async (app) => {
       );
     },
   );
+
   await systemJobsSchedule.upsertJob({
     job: {
       name: SystemJobName.LOGS_CLEANUP_TRIGGER,

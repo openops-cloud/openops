@@ -23,6 +23,7 @@ import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShowTemplatesBanner } from '../../templates/hooks/use-show-templates-banner';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
@@ -56,10 +57,11 @@ const HomeOnboardingView = ({
   });
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const { cloudUser, isHomeCloudConnectionClosed } = useAppStore((state) => ({
-    cloudUser: state.cloudUser,
+  const { isHomeCloudConnectionClosed } = useAppStore((state) => ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
+
+  const { isCloudUser } = useShowTemplatesBanner();
 
   const { checkAccess } = useAuthorization();
   const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
@@ -72,7 +74,7 @@ const HomeOnboardingView = ({
     setTimeout(() => {
       refetch({ cancelRefetch: true });
     }, 1000);
-  }, [cloudUser, refetch, setSelectedDomains]);
+  }, [isCloudUser, refetch, setSelectedDomains]);
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -123,11 +125,11 @@ const HomeOnboardingView = ({
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
         templates={templatesWithIntegrations}
-        showFilters={!!cloudUser}
+        showFilters={isCloudUser}
         filters={domains}
         onTemplateClick={onTemplateClick}
       />
-      {!cloudUser && !isHomeCloudConnectionClosed && (
+      {!isCloudUser && !isHomeCloudConnectionClosed && (
         <DismissiblePanel
           className="h-fit"
           buttonClassName="z-50 size-6"
@@ -140,7 +142,7 @@ const HomeOnboardingView = ({
           />
         </DismissiblePanel>
       )}
-      {(isHelpViewClosed || cloudUser || isHomeCloudConnectionClosed) && (
+      {(isHelpViewClosed || isCloudUser || isHomeCloudConnectionClosed) && (
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
