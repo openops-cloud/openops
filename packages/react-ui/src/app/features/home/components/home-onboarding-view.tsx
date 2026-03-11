@@ -1,11 +1,13 @@
 import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   SETTINGS_KEYS,
   userSettingsHooks,
 } from '@/app/common/hooks/user-settings-hooks';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { popupFeatures } from '@/app/features/cloud/lib/popup';
+import { useCloudProfile } from '@/app/features/cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '@/app/features/cloud/lib/use-user-info-polling';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
@@ -21,7 +23,7 @@ import {
 } from '@openops/components/ui';
 import { Permission } from '@openops/shared';
 import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useBenchmarkBannerState } from './useBenchmarkBannerState';
@@ -56,10 +58,15 @@ const HomeOnboardingView = ({
   });
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const { cloudUser, isHomeCloudConnectionClosed } = useAppStore((state) => ({
-    cloudUser: state.cloudUser,
+  const { isHomeCloudConnectionClosed } = useAppStore((state) => ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
+
+  const { isConnectedToCloudTemplates } = useCloudProfile();
+  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const isCloudUser = useMemo(() => {
+    return isConnectedToCloudTemplates && useCloudTemplates;
+  }, [isConnectedToCloudTemplates, useCloudTemplates]);
 
   const { checkAccess } = useAuthorization();
   const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
@@ -72,7 +79,7 @@ const HomeOnboardingView = ({
     setTimeout(() => {
       refetch({ cancelRefetch: true });
     }, 1000);
-  }, [cloudUser, refetch, setSelectedDomains]);
+  }, [isCloudUser, refetch, setSelectedDomains]);
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -123,11 +130,11 @@ const HomeOnboardingView = ({
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
         templates={templatesWithIntegrations}
-        showFilters={!!cloudUser}
+        showFilters={!!isCloudUser}
         filters={domains}
         onTemplateClick={onTemplateClick}
       />
-      {!cloudUser && !isHomeCloudConnectionClosed && (
+      {!isCloudUser && !isHomeCloudConnectionClosed && (
         <DismissiblePanel
           className="h-fit"
           buttonClassName="z-50 size-6"
@@ -140,7 +147,7 @@ const HomeOnboardingView = ({
           />
         </DismissiblePanel>
       )}
-      {(isHelpViewClosed || cloudUser || isHomeCloudConnectionClosed) && (
+      {(isHelpViewClosed || isCloudUser || isHomeCloudConnectionClosed) && (
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
