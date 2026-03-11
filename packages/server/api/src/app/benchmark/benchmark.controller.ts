@@ -19,7 +19,7 @@ import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
-  app.addHook('preHandler', getBenchmarkFeatureGuard());
+  app.addHook('preHandler', getBenchmarkFeatureGuard);
 
   app.post(
     '/:provider/wizard',
