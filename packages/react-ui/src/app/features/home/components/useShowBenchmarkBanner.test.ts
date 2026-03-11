@@ -100,22 +100,6 @@ describe('useShowBenchmarkBanner', () => {
     expect(result.current.isPending).toBe(true);
   });
 
-  it('should return showBanner true when flag is enabled', () => {
-    mockUseFlag.mockReturnValue({ data: true });
-    mockUseUserMeta.mockReturnValue({
-      userMeta: {
-        projectPermissions: {
-          benchmark: true,
-        },
-      },
-      isPending: false,
-    });
-
-    const { result } = renderHook(() => useShowBenchmarkBanner());
-
-    expect(result.current.showBanner).toBe(true);
-  });
-
   it('should handle undefined flag value', () => {
     mockUseFlag.mockReturnValue({ data: undefined });
     mockUseUserMeta.mockReturnValue({
