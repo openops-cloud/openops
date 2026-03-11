@@ -13,13 +13,13 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { getBenchmarkFeatureGuard } from './benchmark-feature-guard-factory';
+import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
-  app.addHook('preHandler', getBenchmarkFeatureGuard);
+  app.addHook('preHandler', assertBenchmarkFeatureEnabled);
 
   app.post(
     '/:provider/wizard',
