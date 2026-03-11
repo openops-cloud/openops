@@ -4,7 +4,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   ApplicationError,
-  ErrorCode,
   FlowVersionState,
   MinimalFlow,
   OpenOpsId,
@@ -97,6 +96,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           message: newFlowVersion.updated,
         });
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          throw error;
+          return;
+        }
+
         await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           success: false,
           message: (error as Error).message,
@@ -141,7 +145,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 
@@ -157,6 +161,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           flowVersionId,
         },
       );
+
       return Object.fromEntries(
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
@@ -203,8 +208,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             message: Type.String(),
           }),
           [StatusCodes.NOT_FOUND]: Type.Object({
-            success: Type.Boolean(),
-            message: Type.String(),
+            code: Type.String(),
+            params: Type.Object({
+              entityId: Type.String(),
+              entityType: Type.String(),
+            }),
           }),
         },
       },
@@ -229,19 +237,14 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           output,
           success,
         });
+
         await reply.status(StatusCodes.OK).send({
           success: true,
           id: saved.id,
         });
       } catch (error) {
-        if (
-          error instanceof ApplicationError &&
-          error.error.code === ErrorCode.ENTITY_NOT_FOUND
-        ) {
-          await reply.status(StatusCodes.NOT_FOUND).send({
-            success: false,
-            message: 'The defined flow version was not found',
-          });
+        if (error instanceof ApplicationError) {
+          throw error;
         } else {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
