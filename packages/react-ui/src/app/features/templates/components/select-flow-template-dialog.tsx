@@ -23,7 +23,7 @@ import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
-import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
+import { useShowTemplatesBanner } from '../hooks/use-show-templates-banner';
 import { cloudTemplatesApi } from '../lib/cloud-templates-api';
 import { SelectFlowTemplateDialogContent } from './select-flow-template-dialog-content';
 
@@ -93,7 +93,7 @@ const SelectFlowTemplateDialog = ({
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
 
-  const { isConnectedToCloudTemplates } = useCloudProfile();
+  const { isCloudUser } = useShowTemplatesBanner();
 
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
@@ -105,7 +105,7 @@ const SelectFlowTemplateDialog = ({
       categories: selectedCategories,
       useCloudTemplates,
       gettingStartedTemplateFilter: 'exclude',
-      isConnectedToCloudTemplates,
+      isConnectedToCloudTemplates: isCloudUser,
     });
 
   const {
