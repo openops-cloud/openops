@@ -1,9 +1,4 @@
-import {
-  ErrorCode,
-  Flow,
-  FlowVersion,
-  PopulatedFlow,
-} from '@openops/shared';
+import { ErrorCode, Flow, FlowVersion, PopulatedFlow } from '@openops/shared';
 import {
   assertFlowBelongsToProject,
   assertFlowVersionBelongsToProject,
