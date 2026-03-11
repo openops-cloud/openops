@@ -12,6 +12,8 @@ import {
   WorkerPrincipal,
 } from '@openops/shared';
 import { accessTokenManager } from '../../authentication/context/access-token-manager';
+import { organizationIdResolver } from '../../core/security/route-policies/property-source-factory';
+import { getOrganizationScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { organizationService } from '../../organization/organization.service';
 import { machineService } from './machine-service';
 
@@ -57,6 +59,10 @@ export const workerMachineController: FastifyPluginAsyncTypebox = async (
 const GenerateWorkerTokenParams = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getOrganizationScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      organizationIdSource: organizationIdResolver.fromBody(),
+    }),
   },
   schema: {
     description:
@@ -82,6 +88,9 @@ const HeartbeatParams = {
 const ListWorkersParams = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getOrganizationScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     description:

@@ -5,10 +5,12 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   flowHelper,
+  Permission,
   PrincipalType,
   TestTriggerRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
@@ -119,6 +121,13 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
 };
 
 const TestStepRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_STEP_FLOW,
+    }),
+  },
   schema: {
     description:
       'Test a workflow step with specified parameters. With this endpoint its possible to validate steps.',
@@ -144,6 +153,13 @@ const TestStepRequest = {
 };
 
 const TestWorkflowRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_RUN_FLOW,
+    }),
+  },
   schema: {
     description:
       'Start a test for a workflow using a defined workflow version. This endpoint starts a test run of the entire workflow.',
@@ -170,12 +186,16 @@ const TestWorkflowRequest = {
 };
 
 const TestTriggerRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_STEP_FLOW,
+    }),
+  },
   schema: {
     description:
       'Test a flow trigger with specified parameters. This endpoint allows users to validate and test flow triggers before deploying them to production, helping ensure proper configuration and behavior.',
     body: TestTriggerRequestBody,
-  },
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
   },
 };
