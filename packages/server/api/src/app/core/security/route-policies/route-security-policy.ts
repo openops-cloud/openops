@@ -22,14 +22,14 @@ export type OrganizationAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.ORGANIZATION;
   allowedPrincipals: readonly PrincipalType[];
   organizationIdSource: PropertySource;
-  permission?: Permission;
+  permission?: Permission[] | Permission;
 };
 
 export type ProjectAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.PROJECT;
   allowedPrincipals: readonly PrincipalType[];
   projectIdSource: PropertySource;
-  permission?: Permission;
+  permission?: Permission[] | Permission;
 };
 
 export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoutePolicy;
