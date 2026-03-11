@@ -16,7 +16,7 @@ export async function assertFlowVersionBelongsToProject(
     projectId,
   });
 
-  if (flow === null || flow === undefined) {
+  if (flow == null) {
     throw new ApplicationError({
       code: ErrorCode.AUTHORIZATION,
       params: {

@@ -144,7 +144,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request, _reply) => {
+    async (request) => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 
