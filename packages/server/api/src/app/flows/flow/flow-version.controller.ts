@@ -98,7 +98,6 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       } catch (error) {
         if (error instanceof ApplicationError) {
           throw error;
-          return;
         }
 
         await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
