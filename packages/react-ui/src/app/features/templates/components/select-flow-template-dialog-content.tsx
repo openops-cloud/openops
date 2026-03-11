@@ -1,5 +1,4 @@
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { ExpandedTemplate } from '@/app/features/templates/components/expanded-template';
@@ -19,8 +18,8 @@ import {
 } from '@openops/components/ui';
 import { FlowTemplateDto, Permission } from '@openops/shared';
 import { popupFeatures } from '../../cloud/lib/popup';
-import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
+import { useShowTemplatesBanner } from '../hooks/use-show-templates-banner';
 import {
   FlowTemplateFilterSidebarProps,
   PublicFlowTemplateFilterSidebarWrapper,
@@ -96,14 +95,11 @@ const SelectFlowTemplateDialogContent = ({
 }: SelectFlowTemplateDialogContentProps) => {
   const { theme } = useTheme();
   const ownerLogoUrl = useOwnerLogoUrl();
-  const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const { isCloudUser } = useShowTemplatesBanner();
   const { checkAccess } = useAuthorization();
   const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
-  const isFullCatalog =
-    !isTemplatePreselected &&
-    (isConnectedToCloudTemplates || !useCloudTemplates);
+  const isFullCatalog = !isTemplatePreselected && isCloudUser;
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();

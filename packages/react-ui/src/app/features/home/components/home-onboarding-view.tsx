@@ -1,13 +1,11 @@
 import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   SETTINGS_KEYS,
   userSettingsHooks,
 } from '@/app/common/hooks/user-settings-hooks';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { popupFeatures } from '@/app/features/cloud/lib/popup';
-import { useCloudProfile } from '@/app/features/cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '@/app/features/cloud/lib/use-user-info-polling';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
@@ -23,8 +21,9 @@ import {
 } from '@openops/components/ui';
 import { Permission } from '@openops/shared';
 import { t } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShowTemplatesBanner } from '../../templates/hooks/use-show-templates-banner';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
@@ -62,11 +61,7 @@ const HomeOnboardingView = ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
 
-  const { isConnectedToCloudTemplates } = useCloudProfile();
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
-  const isCloudUser = useMemo(() => {
-    return isConnectedToCloudTemplates && useCloudTemplates;
-  }, [isConnectedToCloudTemplates, useCloudTemplates]);
+  const { isCloudUser } = useShowTemplatesBanner();
 
   const { checkAccess } = useAuthorization();
   const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
