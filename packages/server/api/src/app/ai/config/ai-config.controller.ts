@@ -6,6 +6,7 @@ import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
 import { aiConfigService } from './ai-config.service';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 
 export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
@@ -84,6 +85,9 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
 const SaveAiConfigOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai-config'],
@@ -96,6 +100,9 @@ const SaveAiConfigOptions = {
 const getAiConfigRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai-config'],
@@ -107,6 +114,9 @@ const getAiConfigRequest = {
 const aiConfigIdRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai-config'],

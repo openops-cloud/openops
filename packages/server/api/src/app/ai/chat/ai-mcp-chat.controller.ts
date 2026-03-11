@@ -26,6 +26,7 @@ import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import removeMarkdown from 'markdown-to-text';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { extractUiToolResultsFromMessage } from '../mcp/tool-utils';
 import {
   createChatContext,
@@ -470,6 +471,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 const OpenChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -482,6 +486,9 @@ const OpenChatOptions = {
 const NewMessageOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -494,6 +501,9 @@ const NewMessageOptions = {
 const ChatNameOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -505,6 +515,9 @@ const ChatNameOptions = {
 const CodeGenerationOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat'],
@@ -517,6 +530,9 @@ const CodeGenerationOptions = {
 const RenameChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -529,6 +545,9 @@ const RenameChatOptions = {
 const DeleteChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -541,6 +560,9 @@ const DeleteChatOptions = {
 const ListChatsOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
@@ -555,6 +577,9 @@ const ListChatsOptions = {
 const UpdateChatModelOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
