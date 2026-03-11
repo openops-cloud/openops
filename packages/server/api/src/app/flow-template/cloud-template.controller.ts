@@ -12,7 +12,10 @@ import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
 } from '../helper/allow-all-origins-hook-handler';
-import { verifyUserWithPublicKeys } from '../user-info/cloud-auth';
+import {
+  filterValidKeys,
+  verifyUserWithPublicKeys,
+} from '../user-info/cloud-auth';
 import { flowTemplateService } from './flow-template.service';
 
 export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
@@ -31,9 +34,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
   }
 
   const oldPublicKey = system.get(AppSystemProp.OLD_FRONTEGG_PUBLIC_KEY);
-  const publicKeys = [publicKey, oldPublicKey].filter((key): key is string =>
-    Boolean(key),
-  );
+  const publicKeys = filterValidKeys([publicKey, oldPublicKey]);
 
   // cloud templates are available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);

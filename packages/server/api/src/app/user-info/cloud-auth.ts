@@ -49,3 +49,7 @@ export function verifyUserWithPublicKeys(
 
   return undefined;
 }
+
+export function filterValidKeys(keys: unknown[]): string[] {
+  return keys.filter((key): key is string => Boolean(key));
+}

@@ -5,7 +5,7 @@ import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
 } from '../helper/allow-all-origins-hook-handler';
-import { verifyUserWithPublicKeys } from './cloud-auth';
+import { filterValidKeys, verifyUserWithPublicKeys } from './cloud-auth';
 
 export const userInfoModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(userInfoController, { prefix: '/v1/user-info' });
@@ -25,9 +25,7 @@ export const userInfoController: FastifyPluginAsyncTypebox = async (app) => {
   }
 
   const oldPublicKey = system.get(AppSystemProp.OLD_FRONTEGG_PUBLIC_KEY);
-  const publicKeys = [publicKey, oldPublicKey].filter((key): key is string =>
-    Boolean(key),
-  );
+  const publicKeys = filterValidKeys([publicKey, oldPublicKey]);
 
   // user-info is available on any origin
   app.addHook('onRequest', allowAllOriginsHookHandler);
