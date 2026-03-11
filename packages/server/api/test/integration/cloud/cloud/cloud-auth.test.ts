@@ -1,6 +1,6 @@
 import { FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { getVerifiedUser } from '../../../../src/app/user-info/cloud-auth';
+import { verifyUserWithPublicKeys } from '../../../../src/app/user-info/cloud-auth';
 
 type MockFastifyRequest = FastifyRequest & {
   cookies: Record<string, string>;
@@ -37,7 +37,7 @@ function createMockRequest(options: {
   } as unknown as MockFastifyRequest;
 }
 
-describe('getVerifiedUser', () => {
+describe('Verify user with public keys', () => {
   const publicKey = 'test-public-key';
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('getVerifiedUser', () => {
   it('should return undefined when no token is present (no header, no cookie)', () => {
     const mockRequest = createMockRequest({ headers: {}, cookies: {} });
 
-    const result = getVerifiedUser(mockRequest, publicKey);
+    const result = verifyUserWithPublicKeys(mockRequest, [publicKey]);
 
     expect(result).toBeUndefined();
     expect(jwt.verify).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('getVerifiedUser', () => {
       cookies: {},
     });
 
-    const result = getVerifiedUser(mockRequest, publicKey);
+    const result = verifyUserWithPublicKeys(mockRequest, [publicKey]);
 
     expect(jwt.verify).toHaveBeenCalledWith('header-token', publicKey, {
       algorithms: ['RS256'],
@@ -77,7 +77,7 @@ describe('getVerifiedUser', () => {
       cookies: { 'cloud-token': 'cookie-token' },
     });
 
-    const result = getVerifiedUser(mockRequest, publicKey);
+    const result = verifyUserWithPublicKeys(mockRequest, [publicKey]);
 
     expect(jwt.verify).toHaveBeenCalledWith('cookie-token', publicKey, {
       algorithms: ['RS256'],
@@ -93,7 +93,7 @@ describe('getVerifiedUser', () => {
       cookies: {},
     });
 
-    const result = getVerifiedUser(mockRequest, publicKey);
+    const result = verifyUserWithPublicKeys(mockRequest, [publicKey]);
 
     expect(jwt.verify).toHaveBeenCalledWith('cookie-header-token', publicKey, {
       algorithms: ['RS256'],
@@ -110,7 +110,7 @@ describe('getVerifiedUser', () => {
       cookies: {},
     });
 
-    const result = getVerifiedUser(mockRequest, publicKey);
+    const result = verifyUserWithPublicKeys(mockRequest, [publicKey]);
 
     expect(result).toBeUndefined();
     expect(jwt.verify).toHaveBeenCalledWith('bad-token', publicKey, {

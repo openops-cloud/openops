@@ -129,6 +129,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     {
       config: {
         allowedPrincipals: [PrincipalType.USER],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.TEST_STEP_FLOW,
+        }),
       },
       schema: {
         description:
@@ -172,6 +176,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     {
       config: {
         allowedPrincipals: [PrincipalType.USER],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.TEST_STEP_FLOW,
+        }),
       },
       schema: {
         description:
