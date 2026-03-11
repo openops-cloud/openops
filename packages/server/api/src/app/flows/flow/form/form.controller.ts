@@ -15,6 +15,7 @@ export const formController: FastifyPluginAsyncTypebox = async (app) => {
   app.get('/:flowId', GetFormRequest, async (request) => {
     return formService.getFormByFlowIdOrThrow(
       request.params.flowId,
+      request.principal.projectId,
       request.query.useDraft ?? false,
     );
   });
