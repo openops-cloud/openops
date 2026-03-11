@@ -5,8 +5,8 @@ import {
 import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
-import { aiConfigService } from './ai-config.service';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
+import { aiConfigService } from './ai-config.service';
 
 export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
