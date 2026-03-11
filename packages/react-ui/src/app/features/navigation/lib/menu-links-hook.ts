@@ -55,6 +55,7 @@ export const useMenuLinks = () => {
         to: '/tables',
         label: t('Tables'),
         icon: TableProperties,
+        locked: !checkAccess(Permission.WRITE_TABLE),
       },
       ...(hasAnalyticsAccess
         ? [
@@ -62,6 +63,7 @@ export const useMenuLinks = () => {
               to: '/analytics',
               label: t('Analytics'),
               icon: LucideBarChart2,
+              locked: !checkAccess(Permission.WRITE_ANALYTICS),
             },
           ]
         : []),
