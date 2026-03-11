@@ -1,8 +1,10 @@
-import { preHandlerAsyncHookHandler } from 'fastify';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { preHandlerAsyncHookHandler } from 'fastify';
 import { throwFeatureDisabledError } from './errors';
 
-export const assertBenchmarkFeatureEnabled: preHandlerAsyncHookHandler = async (request) => {
+export const assertBenchmarkFeatureEnabled: preHandlerAsyncHookHandler = async (
+  request,
+) => {
   if (system.getBoolean(AppSystemProp.FINOPS_BENCHMARK_ENABLED) !== true) {
     logger.info(
       'Benchmark access denied: FINOPS_BENCHMARK_ENABLED flag is not enabled',

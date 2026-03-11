@@ -20,12 +20,16 @@ import { assertBenchmarkFeatureEnabled } from '../../../src/app/benchmark/benchm
 const mockFastifyInstance = {} as FastifyInstance;
 
 const mockRequest = (projectId: string) =>
-  ({ principal: { projectId } }) as unknown as FastifyRequest;
+  ({ principal: { projectId } } as unknown as FastifyRequest);
 
 const mockReply = {} as FastifyReply;
 
 const callHook = (projectId: string) =>
-  assertBenchmarkFeatureEnabled.call(mockFastifyInstance, mockRequest(projectId), mockReply);
+  assertBenchmarkFeatureEnabled.call(
+    mockFastifyInstance,
+    mockRequest(projectId),
+    mockReply,
+  );
 
 describe('assertBenchmarkFeatureEnabled', () => {
   const projectId = 'project-id';
