@@ -244,12 +244,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       } catch (error) {
         if (error instanceof ApplicationError) {
           throw error;
-        } else {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: (error as Error).message,
-          });
         }
+        
+        await reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message: (error as Error).message,
+        });
       }
     },
   );
