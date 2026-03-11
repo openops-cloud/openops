@@ -11,7 +11,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
-import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
+import { assertFlowVersionBelongsToProject } from '../common/flow-validations';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { stepRunService } from '../step-run/step-run-service';
@@ -24,15 +24,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
 
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    const isValid = await validateFlowVersionBelongsToProject(
-      flowVersion,
-      projectId,
-      reply,
-    );
-
-    if (!isValid) {
-      return;
-    }
+    await assertFlowVersionBelongsToProject(flowVersion, projectId);
 
     const step = flowHelper
       .getAllSteps(flowVersion.trigger)
@@ -76,15 +68,8 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
     try {
       const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-      const isValid = await validateFlowVersionBelongsToProject(
-        flowVersion,
-        projectId,
-        reply,
-      );
+      await assertFlowVersionBelongsToProject(flowVersion, projectId);
 
-      if (!isValid) {
-        return;
-      }
       const flowRun = await flowRunService.test({
         projectId,
         flowVersionId: flowVersion.id,

@@ -83,6 +83,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
     const flowRun = await flowRunService.retry({
       flowRunId: req.params.id,
       strategy: req.body.strategy,
+      projectId: req.principal.projectId,
     });
 
     if (isNil(flowRun)) {

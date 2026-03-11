@@ -4,19 +4,17 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   ApplicationError,
-  ErrorCode,
   FlowVersionState,
   MinimalFlow,
   OpenOpsId,
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
-  StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
-import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
+import { assertFlowVersionBelongsToProject } from '../common/flow-validations';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 
@@ -62,15 +60,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           });
         }
 
-        const isValid = await validateFlowVersionBelongsToProject(
+        await assertFlowVersionBelongsToProject(
           flowVersion,
           request.principal.projectId,
-          reply,
         );
-
-        if (!isValid) {
-          return;
-        }
 
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
@@ -103,6 +96,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           message: newFlowVersion.updated,
         });
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          throw error;
+        }
+
         await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           success: false,
           message: (error as Error).message,
@@ -147,9 +144,15 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request): Promise<Record<OpenOpsId, StepOutputWithData>> => {
+    async (request) => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
+
+      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+      await assertFlowVersionBelongsToProject(
+        flowVersion,
+        request.principal.projectId,
+      );
 
       const flowStepTestOutputs = await flowStepTestOutputService.listDecrypted(
         {
@@ -157,6 +160,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           flowVersionId,
         },
       );
+
       return Object.fromEntries(
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
@@ -203,8 +207,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             message: Type.String(),
           }),
           [StatusCodes.NOT_FOUND]: Type.Object({
-            success: Type.Boolean(),
-            message: Type.String(),
+            code: Type.String(),
+            params: Type.Object({
+              entityId: Type.String(),
+              entityType: Type.String(),
+            }),
           }),
         },
       },
@@ -216,14 +223,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         const flowVersion = await flowVersionService.getOneOrThrow(
           flowVersionId,
         );
-        const isValid = await validateFlowVersionBelongsToProject(
+
+        await assertFlowVersionBelongsToProject(
           flowVersion,
           request.principal.projectId,
-          reply,
         );
-        if (!isValid) {
-          return;
-        }
+
         const saved = await flowStepTestOutputService.save({
           stepId,
           flowVersionId,
@@ -231,25 +236,20 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           output,
           success,
         });
+
         await reply.status(StatusCodes.OK).send({
           success: true,
           id: saved.id,
         });
       } catch (error) {
-        if (
-          error instanceof ApplicationError &&
-          error.error.code === ErrorCode.ENTITY_NOT_FOUND
-        ) {
-          await reply.status(StatusCodes.NOT_FOUND).send({
-            success: false,
-            message: 'The defined flow version was not found',
-          });
-        } else {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: (error as Error).message,
-          });
+        if (error instanceof ApplicationError) {
+          throw error;
         }
+
+        await reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message: (error as Error).message,
+        });
       }
     },
   );

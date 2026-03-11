@@ -418,7 +418,7 @@ const DeleteFlowRequestOptions = {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.WRITE_FLOW,
+      permission: Permission.DELETE_FLOW,
     }),
   },
   schema: {
