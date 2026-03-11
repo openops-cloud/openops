@@ -10,6 +10,7 @@ import {
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { userSettingsService } from './user-settings-service';
 
 export const userSettingsModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -19,7 +20,7 @@ export const userSettingsModule: FastifyPluginAsyncTypebox = async (app) => {
 };
 
 const usersSettingsController: FastifyPluginAsyncTypebox = async (app) => {
-  app.get('/', async (request, response) => {
+  app.get('/', GetUserSettingsRequestOptions, async (request, response) => {
     const userSettings = await userSettingsService.get({
       userId: request.principal.id,
       projectId: request.principal.projectId,
@@ -57,9 +58,29 @@ const usersSettingsController: FastifyPluginAsyncTypebox = async (app) => {
   );
 };
 
+const GetUserSettingsRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
+  schema: {
+    tags: ['user'],
+    description: 'Get user settings',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    response: {
+      [StatusCodes.OK]: UserSettingsDefinition,
+    },
+  },
+};
+
 const UpsertUserSettingsRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['user'],

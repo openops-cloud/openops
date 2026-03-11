@@ -34,6 +34,12 @@ export type ResolvedWorkflowPath = {
   filePath: string;
 };
 
+export type CategorizedWorkflowPaths = {
+  orchestrator: ResolvedWorkflowPath;
+  cleanup: ResolvedWorkflowPath;
+  subWorkflows: ResolvedWorkflowPath[];
+};
+
 function resolveWorkflowPaths(
   provider: string,
   workflowIds: string[],
@@ -53,13 +59,20 @@ function resolveWorkflowPaths(
 export function resolveWorkflowPathsForSeed(
   provider: string,
   subWorkflowIds: string[],
-): ResolvedWorkflowPath[] {
+): CategorizedWorkflowPaths {
   if (subWorkflowIds.length === 0) {
-    getLifecycleWorkflow(provider);
-    return [];
+    throwValidationError('At least one sub-workflow is required');
   }
+
   const orchestratorId = getOrchestratorId(provider);
   const cleanupId = getCleanupWorkflowId(provider);
+
   const allIds = [orchestratorId, cleanupId, ...subWorkflowIds];
-  return resolveWorkflowPaths(provider, allIds);
+  const paths = resolveWorkflowPaths(provider, allIds);
+
+  return {
+    orchestrator: paths[0],
+    cleanup: paths[1],
+    subWorkflows: paths.slice(2),
+  };
 }
