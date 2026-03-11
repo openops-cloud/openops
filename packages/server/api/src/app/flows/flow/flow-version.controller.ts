@@ -245,7 +245,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         if (error instanceof ApplicationError) {
           throw error;
         }
-        
+
         await reply.status(StatusCodes.BAD_REQUEST).send({
           success: false,
           message: (error as Error).message,
