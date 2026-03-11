@@ -34,4 +34,7 @@ export enum Permission {
 
   // Analytics
   WRITE_ANALYTICS = 'analytics:write',
+
+  // Organization
+  WRITE_ORGANIZATION = 'organization:write',
 }
