@@ -160,9 +160,10 @@ const FlowStepDetailsCardItem = ({
               className={cn('break-all truncate', {
                 'text-muted-foreground italic': !step?.displayName,
               })}
-            >{`${stepIndex !== -1 ? `${stepIndex + 1}. ` : ''}${
-              step?.displayName ?? t('Deleted Step')
-            }`}</div>
+            >
+              {(stepIndex !== -1 ? `${stepIndex + 1}. ` : '') +
+                (step?.displayName ?? t('Deleted Step'))}
+            </div>
             <div className="w-2"></div>
             <div className="flex gap-1 justify-end items-center flex-grow">
               {isLoopStep && (
