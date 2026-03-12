@@ -288,7 +288,7 @@ const UpdateFlowRequestOptions = {
   config: {
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.UPDATE_FLOW_STATUS,
+      permission: Permission.WRITE_FLOW,
     }),
   },
   schema: {
