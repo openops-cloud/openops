@@ -45,19 +45,14 @@ export const runAthenaQueryAction = createAction({
         }
 
         try {
-          const authProp = auth as {
-            accessKeyId: string;
-            secretAccessKey: string;
-            defaultRegion: string;
-          };
           const credentials = await getCredentialsForAccount(
-            authProp,
+            auth,
             account?.['accounts'],
           );
 
           const databases = await listAthenaDatabases(
             credentials,
-            (region as string | undefined) ?? authProp.defaultRegion,
+            (region as string | undefined) ?? auth.defaultRegion,
           );
 
           return {
