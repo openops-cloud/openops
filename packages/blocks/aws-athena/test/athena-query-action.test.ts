@@ -1,6 +1,6 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
-  getCredentialsForaccounts: jest.fn(),
+  getCredentialsForAccount: jest.fn(),
   runAndWaitForQueryResult: jest.fn(),
 };
 
