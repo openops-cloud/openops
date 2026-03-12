@@ -3,7 +3,7 @@ import {
   amazonAuth,
   dryRunCheckBox,
   getAwsAccountsSingleSelectDropdown,
-  getCredentialsListFromAuth,
+  getCredentialsForAccount,
   getRegionsDropdownState,
   listAthenaDatabases,
   runAndWaitForQueryResult,
@@ -16,7 +16,7 @@ export const runAthenaQueryAction = createAction({
   displayName: 'Query Athena database',
   isWriteAction: false,
   props: {
-    accounts: getAwsAccountsSingleSelectDropdown().accounts,
+    account: getAwsAccountsSingleSelectDropdown().accounts,
     region: Property.StaticDropdown({
       displayName: 'Region',
       description:
@@ -33,10 +33,9 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-
-      refreshers: ['auth', 'accounts', 'region'],
+      refreshers: ['auth', 'account', 'region'],
       required: true,
-      options: async ({ auth, accounts, region }) => {
+      options: async ({ auth, account, region }: any) => {
         if (!auth) {
           return {
             disabled: true,
@@ -51,18 +50,13 @@ export const runAthenaQueryAction = createAction({
             secretAccessKey: string;
             defaultRegion: string;
           };
-          const selectedAccounts = (
-            accounts as unknown as {
-              accounts?: string[];
-            }
-          )?.accounts;
-          const credentialsList = await getCredentialsListFromAuth(
+          const credentials = await getCredentialsForAccount(
             authProp,
-            selectedAccounts,
+            account?.['accounts'],
           );
 
           const databases = await listAthenaDatabases(
-            credentialsList[0],
+            credentials,
             (region as string | undefined) ?? authProp.defaultRegion,
           );
 
@@ -119,14 +113,13 @@ export const runAthenaQueryAction = createAction({
     }
 
     try {
-      const selectedAccounts = context.propsValue.accounts?.['accounts'];
-      const credentialsList = await getCredentialsListFromAuth(
+      const credentials = await getCredentialsForAccount(
         context.auth,
-        selectedAccounts,
+        context.propsValue.account?.['accounts'],
       );
 
       return await runAndWaitForQueryResult(
-        credentialsList[0],
+        credentials,
         context.propsValue.region ?? context.auth.defaultRegion,
         query,
         database,
