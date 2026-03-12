@@ -25,7 +25,7 @@ describe('runAthenaQueryAction tests', () => {
 
   test('should create action with correct properties', () => {
     expect(runAthenaQueryAction.props).toMatchObject({
-      accounts: {
+      account: {
         type: 'DYNAMIC',
       },
       region: {
@@ -76,7 +76,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
+        account: { accounts: ['some-account-id'] },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -136,7 +136,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
+        account: { accounts: ['some-account-id'] },
         region: 'some region',
         query: 'some query',
         database: 'some database',
