@@ -34,11 +34,11 @@ export const getPriceAction = createAction({
           };
         }
 
-        const credentials = await getCredentialsForAccount(
-          auth,
-          account?.['accounts'],
-        );
         try {
+          const credentials = await getCredentialsForAccount(
+            auth,
+            account?.['accounts'],
+          );
           const services = await getServices(credentials, PRICING_REGION);
 
           if (!services.length) {
