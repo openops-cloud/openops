@@ -9,6 +9,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { mcpConfigService } from './mcp-config.service';
 
 export const mcpConfigController: FastifyPluginAsyncTypebox = async (app) => {
@@ -50,6 +51,9 @@ export const mcpConfigController: FastifyPluginAsyncTypebox = async (app) => {
 const SaveMcpConfigOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['mcp-config'],
@@ -62,6 +66,9 @@ const SaveMcpConfigOptions = {
 const getMcpConfigRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['mcp-config'],
@@ -72,6 +79,9 @@ const getMcpConfigRequest = {
 const mcpConfigIdRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
   },
   schema: {
     tags: ['mcp-config'],

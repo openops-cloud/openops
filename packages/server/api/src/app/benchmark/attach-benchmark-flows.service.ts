@@ -39,8 +39,12 @@ async function buildPayloadForWebhook(params: {
   }
 
   const webhookBaseUrl = await webhookUtils.getWebhookPrefix();
-  const subWorkflowFlowIds = workflows.slice(2).map((w) => w.flowId);
-  const cleanupFlowIds = [workflows[1].flowId];
+  const subWorkflowFlowIds = workflows
+    .filter((w) => !w.isOrchestrator && !w.isCleanup)
+    .map((w) => w.flowId);
+  const cleanupFlowIds = workflows
+    .filter((w) => w.isCleanup)
+    .map((w) => w.flowId);
 
   return {
     webhookBaseUrl,
@@ -83,6 +87,7 @@ async function insertBenchmarkRecords(params: {
       benchmarkId: savedBenchmark.id,
       flowId: w.flowId,
       isOrchestrator: w.isOrchestrator,
+      isCleanup: w.isCleanup,
       deletedAt: null as string | null,
     }));
 

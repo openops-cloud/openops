@@ -64,8 +64,18 @@ const baseBenchmark = {
 };
 
 const flowRows = [
-  { flowId: 'flow-orch', isOrchestrator: true, displayName: 'Orchestrator' },
-  { flowId: 'flow-sub1', isOrchestrator: false, displayName: 'Sub Workflow 1' },
+  {
+    flowId: 'flow-orch',
+    isOrchestrator: true,
+    isCleanup: false,
+    displayName: 'Orchestrator',
+  },
+  {
+    flowId: 'flow-sub1',
+    isOrchestrator: false,
+    isCleanup: false,
+    displayName: 'Sub Workflow 1',
+  },
 ];
 
 describe('getBenchmarkStatus', () => {
@@ -229,6 +239,7 @@ describe('getBenchmarkStatus', () => {
       {
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
     ]);
@@ -254,7 +265,12 @@ describe('getBenchmarkStatus', () => {
   it('maps displayName from publishedVersion (falling back to empty string when null)', async () => {
     mockFindOneBenchmark.mockResolvedValue(baseBenchmark);
     mockGetRawManyFlows.mockResolvedValue([
-      { flowId: 'flow-a', isOrchestrator: false, displayName: null },
+      {
+        flowId: 'flow-a',
+        isOrchestrator: false,
+        isCleanup: false,
+        displayName: null,
+      },
     ]);
 
     const result = await getBenchmarkStatus({
@@ -272,6 +288,7 @@ describe('getBenchmarkStatus', () => {
         {
           flowId: 'flow-orch',
           isOrchestrator: true,
+          isCleanup: false,
           displayName: 'Orchestrator',
         },
       ]);
@@ -355,6 +372,7 @@ describe('listBenchmarks', () => {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
     ]);
@@ -376,6 +394,7 @@ describe('listBenchmarks', () => {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
     ]);
@@ -395,6 +414,7 @@ describe('listBenchmarks', () => {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
     ]);
@@ -414,6 +434,7 @@ describe('listBenchmarks', () => {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
     ]);
@@ -460,12 +481,14 @@ describe('listBenchmarks', () => {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-orch',
         isOrchestrator: true,
+        isCleanup: false,
         displayName: 'Orchestrator',
       },
       {
         benchmarkId: BENCHMARK_ID,
         flowId: 'flow-sub1',
         isOrchestrator: false,
+        isCleanup: false,
         displayName: 'Sub 1',
       },
     ]);

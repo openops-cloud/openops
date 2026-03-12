@@ -8,6 +8,7 @@ import {
   isNil,
   PopulatedFlow,
 } from '@openops/shared';
+import { assertFlowBelongsToProject } from '../../common/flow-validations';
 import { flowVersionService } from '../../flow-version/flow-version.service';
 import { flowRepo } from '../flow.repo';
 
@@ -30,6 +31,7 @@ const FORMS_TRIGGER_NAMES = [FORM_TRIIGGER, FILE_TRIGGER];
 export const formService = {
   getFormByFlowIdOrThrow: async (
     flowId: string,
+    projectId: string,
     useDraft: boolean,
   ): Promise<FormResponse> => {
     const flow = await getPopulatedFlowById(flowId, useDraft);
@@ -48,6 +50,8 @@ export const formService = {
         },
       });
     }
+
+    assertFlowBelongsToProject(flow, projectId);
     logger.info(flow.version.trigger.settings);
     const triggerName = flow.version.trigger.settings.triggerName;
     return {

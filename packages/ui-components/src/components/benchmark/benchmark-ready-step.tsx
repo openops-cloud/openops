@@ -20,12 +20,9 @@ export const BenchmarkReadyStep = ({
   runPhase,
   runningProgress,
 }: BenchmarkReadyStepProps) => {
-  const orchestrator = result.workflows.find((w) => w.isOrchestrator);
-  const subWorkflows = result.workflows.filter((w) => !w.isOrchestrator);
-  const displayedWorkflows = [
-    ...(orchestrator ? [orchestrator] : []),
-    ...subWorkflows,
-  ];
+  const subWorkflows = result.workflows.filter(
+    (w) => !w.isOrchestrator && !w.isCleanup,
+  );
 
   return (
     <>
@@ -46,10 +43,7 @@ export const BenchmarkReadyStep = ({
         )}
       </StepDescription>
 
-      <BenchmarkWorkflowList
-        workflows={displayedWorkflows}
-        provider={providerName}
-      />
+      <BenchmarkWorkflowList workflows={subWorkflows} provider={providerName} />
 
       {runPhase === 'running' && (
         <BenchmarkRunningPhase progress={runningProgress} />

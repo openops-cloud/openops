@@ -267,9 +267,24 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     folderId: 'folder-1',
     provider: 'aws',
     workflows: [
-      { flowId: 'flow-1', displayName: 'Orchestrator', isOrchestrator: true },
-      { flowId: 'flow-2', displayName: 'Cleanup', isOrchestrator: false },
-      { flowId: 'flow-3', displayName: 'Sub', isOrchestrator: false },
+      {
+        flowId: 'flow-1',
+        displayName: 'Orchestrator',
+        isOrchestrator: true,
+        isCleanup: false,
+      },
+      {
+        flowId: 'flow-2',
+        displayName: 'Cleanup',
+        isOrchestrator: false,
+        isCleanup: true,
+      },
+      {
+        flowId: 'flow-3',
+        displayName: 'Sub',
+        isOrchestrator: false,
+        isCleanup: false,
+      },
     ],
     webhookPayload: {
       webhookBaseUrl: 'https://api.example.com',

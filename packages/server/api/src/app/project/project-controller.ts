@@ -2,7 +2,13 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { ApplicationError, Project, SeekPage } from '@openops/shared';
+import {
+  ApplicationError,
+  PrincipalType,
+  Project,
+  SeekPage,
+} from '@openops/shared';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { paginationHelper } from '../helper/pagination/pagination-utils';
 import { projectService } from './project-service';
 
@@ -53,6 +59,11 @@ export const userProjectController: FastifyPluginCallbackTypebox = (
 const ProjectWithoutToken = Type.Omit(Project, ['tablesDatabaseToken']);
 
 const GetUserProjectRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     response: {
       200: ProjectWithoutToken,
@@ -61,6 +72,11 @@ const GetUserProjectRequestOptions = {
 };
 
 const ListUserProjectsRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     response: {
       200: SeekPage(ProjectWithoutToken),
