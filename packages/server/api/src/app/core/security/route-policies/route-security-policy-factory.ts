@@ -18,7 +18,7 @@ export function getOrganizationScopedRoutePolicy({
 }: {
   allowedPrincipals: readonly PrincipalType[];
   organizationIdSource?: PropertySource;
-  permission?: Permission[] | Permission;
+  permission?: Permission | readonly Permission[];
 }): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
@@ -38,7 +38,7 @@ export function getProjectScopedRoutePolicy({
 }: {
   allowedPrincipals: readonly PrincipalType[];
   projectIdSource?: PropertySource;
-  permission?: Permission[] | Permission;
+  permission?: Permission | readonly Permission[];
 }): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
