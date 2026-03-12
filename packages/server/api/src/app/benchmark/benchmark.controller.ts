@@ -10,9 +10,11 @@ import {
   BenchmarkWizardStepResponse,
   CreateBenchmarkRequest,
   ListBenchmarksResponse,
+  Permission,
   PrincipalType,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
@@ -47,14 +49,17 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
         userId: request.principal.id,
         benchmarkConfiguration: request.body.benchmarkConfiguration,
       });
+
       return reply.status(StatusCodes.CREATED).send(result);
     },
   );
+
   app.get('/', ListBenchmarksRequestOptions, async (request, reply) => {
     const items = await listBenchmarks({
       projectId: request.principal.projectId,
       provider: request.query.provider,
     });
+
     return reply.status(StatusCodes.OK).send(items);
   });
 
@@ -74,6 +79,10 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
 const ListBenchmarksRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.READ_RUN,
+    }),
   },
   schema: {
     tags: ['benchmarks'],
@@ -91,6 +100,16 @@ const ListBenchmarksRequestOptions = {
 const WizardStepRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: [
+        Permission.READ_APP_CONNECTION,
+        Permission.UPDATE_FLOW_STATUS,
+        Permission.WRITE_FOLDER,
+        Permission.DELETE_FLOW,
+        Permission.WRITE_FLOW,
+      ],
+    }),
   },
   schema: {
     tags: ['benchmarks'],
@@ -109,6 +128,16 @@ const WizardStepRequestOptions = {
 const CreateBenchmarkRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: [
+        Permission.READ_APP_CONNECTION,
+        Permission.UPDATE_FLOW_STATUS,
+        Permission.WRITE_FOLDER,
+        Permission.DELETE_FLOW,
+        Permission.WRITE_FLOW,
+      ],
+    }),
   },
   schema: {
     tags: ['benchmarks'],
@@ -127,6 +156,10 @@ const CreateBenchmarkRequestOptions = {
 const BenchmarkStatusRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.READ_RUN,
+    }),
   },
   schema: {
     tags: ['benchmarks'],
