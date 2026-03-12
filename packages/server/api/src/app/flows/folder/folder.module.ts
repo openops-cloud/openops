@@ -127,7 +127,7 @@ const ListFoldersFlowsParams = {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.READ_FLOW,
+      permission: [Permission.READ_FOLDER, Permission.READ_FLOW],
     }),
   },
   schema: {
