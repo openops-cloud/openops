@@ -1,6 +1,6 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
-  getCredentialsForAccount: jest.fn(),
+  getCredentialsForaccounts: jest.fn(),
   runAndWaitForQueryResult: jest.fn(),
 };
 
@@ -25,7 +25,7 @@ describe('runAthenaQueryAction tests', () => {
 
   test('should create action with correct properties', () => {
     expect(runAthenaQueryAction.props).toMatchObject({
-      account: {
+      accounts: {
         type: 'DYNAMIC',
       },
       region: {
@@ -76,7 +76,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        account: { accounts: ['some-account-id'] },
+        accounts: { accounts: ['some-account-id'] },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -136,7 +136,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        account: { accounts: ['some-account-id'] },
+        accounts: { accounts: ['some-account-id'] },
         region: 'some region',
         query: 'some query',
         database: 'some database',

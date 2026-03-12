@@ -16,7 +16,7 @@ export const runAthenaQueryAction = createAction({
   displayName: 'Query Athena database',
   isWriteAction: false,
   props: {
-    account: getAwsAccountsSingleSelectDropdown().accounts,
+    accounts: getAwsAccountsSingleSelectDropdown().accounts,
     region: Property.StaticDropdown({
       displayName: 'Region',
       description:
@@ -33,9 +33,9 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-      refreshers: ['auth', 'account', 'account.accounts', 'region'],
+      refreshers: ['auth', 'accounts', 'accounts.accounts', 'region'],
       required: true,
-      options: async ({ auth, account, region }: any) => {
+      options: async ({ auth, accounts, region }: any) => {
         if (!auth) {
           return {
             disabled: true,
@@ -47,7 +47,7 @@ export const runAthenaQueryAction = createAction({
         try {
           const credentials = await getCredentialsForAccount(
             auth,
-            account?.['accounts'],
+            accounts?.['accounts'],
           );
 
           const databases = await listAthenaDatabases(
@@ -110,7 +110,7 @@ export const runAthenaQueryAction = createAction({
     try {
       const credentials = await getCredentialsForAccount(
         context.auth,
-        context.propsValue.account?.['accounts'],
+        context.propsValue.accounts?.['accounts'],
       );
 
       return await runAndWaitForQueryResult(
