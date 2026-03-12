@@ -81,7 +81,7 @@ const ListBenchmarksRequestOptions = {
     allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
-      permission: [Permission.READ_RUN],
+      permission: Permission.READ_RUN,
     }),
   },
   schema: {
@@ -104,6 +104,7 @@ const WizardStepRequestOptions = {
       allowedPrincipals: [PrincipalType.USER],
       permission: [
         Permission.READ_APP_CONNECTION,
+        Permission.UPDATE_FLOW_STATUS,
         Permission.WRITE_FOLDER,
         Permission.DELETE_FLOW,
         Permission.WRITE_FLOW,
@@ -131,6 +132,7 @@ const CreateBenchmarkRequestOptions = {
       allowedPrincipals: [PrincipalType.USER],
       permission: [
         Permission.READ_APP_CONNECTION,
+        Permission.UPDATE_FLOW_STATUS,
         Permission.WRITE_FOLDER,
         Permission.DELETE_FLOW,
         Permission.WRITE_FLOW,
@@ -156,7 +158,7 @@ const BenchmarkStatusRequestOptions = {
     allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
-      permission: [Permission.READ_RUN],
+      permission: Permission.READ_RUN,
     }),
   },
   schema: {
