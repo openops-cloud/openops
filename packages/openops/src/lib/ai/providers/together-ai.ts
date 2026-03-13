@@ -3,22 +3,23 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const togetherAiModels = [
-  'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-  'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
-  'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-  'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo',
-  'meta-llama/Meta-Llama-3-70B-Instruct-Turbo',
-  'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',
-  'Qwen/Qwen2.5-Coder-32B-Instruct',
-  'Qwen/QwQ-32B-Preview',
-  'google/gemma-2-27b-it',
-  'google/gemma-2-9b-it',
-  'databricks/dbrx-instruct',
-  'deepseek-ai/deepseek-llm-67b-chat',
+  'MiniMaxAI/MiniMax-M2.5',
+  'Qwen/Qwen3-235B-A22B-Instruct-2507-tput',
+  'Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8',
+  'Qwen/Qwen3-Coder-Next-FP8',
+  'Qwen/Qwen3-Next-80B-A3B-Instruct',
+  'Qwen/Qwen3.5-397B-A17B',
+  'deepseek-ai/DeepSeek-R1',
   'deepseek-ai/DeepSeek-V3',
-  'mistralai/Mixtral-8x22B-Instruct-v0.1',
-  'Qwen/Qwen2.5-72B-Instruct-Turbo',
-  'Qwen/Qwen2-72B-Instruct',
+  'deepseek-ai/DeepSeek-V3-1',
+  'essentialai/Rnj-1-Instruct',
+  'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+  'moonshotai/Kimi-K2-Instruct',
+  'moonshotai/Kimi-K2.5',
+  'openai/gpt-oss-120b',
+  'zai-org/GLM-4.6',
+  'zai-org/GLM-4.7',
+  'zai-org/GLM-5',
 ];
 
 function createLanguageModel(params: {
