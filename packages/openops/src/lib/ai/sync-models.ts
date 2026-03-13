@@ -1,3 +1,19 @@
+/**
+ * Syncs AI provider model lists from models.dev
+ *
+ * This script fetches the latest AI model data from models.dev and updates
+ * our provider files accordingly. It filters for text-only models and excludes
+ * embedding models.
+ *
+ * Data source: https://models.dev (MIT License)
+ * API endpoint: https://models.dev/api.json
+ * GitHub: https://github.com/anomalyco/models.dev
+ *
+ * Usage:
+ *   npx tsx sync-models.ts           # Check for differences
+ *   npx tsx sync-models.ts --update  # Update provider files
+ */
+
 import { AiProviderEnum } from '@openops/shared';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +38,7 @@ export const MODELS_DEV_KEYS: Partial<Record<AiProviderEnum, string>> = {
   [AiProviderEnum.ANTHROPIC]: 'anthropic',
   [AiProviderEnum.CEREBRAS]: 'cerebras',
   [AiProviderEnum.COHERE]: 'cohere',
+  // [AiProviderEnum.DEEPINFRA]: 'deepinfra', // Temporarily disabled until models.dev PR is merged
   [AiProviderEnum.DEEPSEEK]: 'deepseek',
   [AiProviderEnum.GOOGLE]: 'google',
   [AiProviderEnum.GOOGLE_VERTEX]: 'google-vertex',
