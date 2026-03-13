@@ -14,9 +14,9 @@
  *   npx tsx sync-models.ts --update  # Update provider files
  */
 
+import { AiProviderEnum } from '@openops/shared';
 import fs from 'fs';
 import path from 'path';
-import { AiProviderEnum } from '@openops/shared';
 
 interface ModelData {
   id: string;
@@ -46,11 +46,11 @@ interface ModelsDevAPI {
   [providerKey: string]: ProviderData;
 }
 
-const MODELS_DEV_KEYS: Partial<Record<AiProviderEnum, string>> = {
+export const MODELS_DEV_KEYS: Partial<Record<AiProviderEnum, string>> = {
   [AiProviderEnum.ANTHROPIC]: 'anthropic',
   [AiProviderEnum.CEREBRAS]: 'cerebras',
   [AiProviderEnum.COHERE]: 'cohere',
-  [AiProviderEnum.DEEPINFRA]: 'deepinfra',
+  // [AiProviderEnum.DEEPINFRA]: 'deepinfra', // Temporarily disabled until models.dev PR is merged
   [AiProviderEnum.DEEPSEEK]: 'deepseek',
   [AiProviderEnum.GOOGLE]: 'google',
   [AiProviderEnum.GOOGLE_VERTEX]: 'google-vertex',
@@ -234,9 +234,7 @@ async function main() {
     unmappedProviders.forEach((file) =>
       console.log(`   - ${file}.ts (not synced)`),
     );
-    console.log(
-      '   Add these to MODELS_DEV_KEYS if they should be synced.\n',
-    );
+    console.log('   Add these to MODELS_DEV_KEYS if they should be synced.\n');
   }
 
   const modelsDevData = await fetchModelsDevData();
@@ -263,12 +261,8 @@ async function main() {
 
     if (!providerFile) {
       console.log(`\n❌ ${provider}`);
-      console.log(
-        `   No matching provider file found for "${modelsDevKey}"`,
-      );
-      console.log(
-        `   Available files: ${getProviderFiles().join(', ')}`,
-      );
+      console.log(`   No matching provider file found for "${modelsDevKey}"`);
+      console.log(`   Available files: ${getProviderFiles().join(', ')}`);
       continue;
     }
 
@@ -329,7 +323,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error('❌ Error:', error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error('❌ Error:', error);
+    process.exit(1);
+  });
+}
