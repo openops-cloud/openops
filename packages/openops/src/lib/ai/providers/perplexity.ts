@@ -3,10 +3,10 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const perplexityModels = [
-  'sonar-reasoning-pro',
-  'sonar-reasoning',
-  'sonar-pro',
   'sonar',
+  'sonar-deep-research',
+  'sonar-pro',
+  'sonar-reasoning-pro',
 ];
 
 function createLanguageModel(params: {
