@@ -35,9 +35,13 @@ jobs:
         id: check-models
         continue-on-error: true
         run: |
+          set +e
           npx tsx packages/openops/src/lib/ai/sync-models.ts --update > sync-output.txt 2>&1
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          EXIT_CODE=$?
+          set -e
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
           cat sync-output.txt
+          exit 0
 
       - name: Upload sync output
         if: steps.check-models.outputs.exit_code == '1'
