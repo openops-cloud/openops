@@ -1,6 +1,10 @@
 name: Sync AI Models
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/sync-ai-models.yml'
+      - 'packages/openops/src/lib/ai/sync-models.ts'
   schedule:
     - cron: '0 0 * * 0'
   workflow_dispatch:
