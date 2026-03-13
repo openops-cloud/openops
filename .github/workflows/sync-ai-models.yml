@@ -1,12 +1,8 @@
 name: Sync AI Models
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/sync-ai-models.yml'
-      - 'packages/openops/src/lib/ai/sync-models.ts'
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 12 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -45,42 +41,50 @@ jobs:
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
           exit 0
 
-      - name: Create Pull Request
+      - name: Create branch and commit changes
         if: steps.check-models.outputs.exit_code == '1'
-        id: create-pr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          commit-message: 'Update AI provider models from models.dev'
-          title: 'Update AI Provider Models'
-          body: |
-            ## 🤖 Automated Model Sync
+        id: create-branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -C "sync-ai-models-${{ github.run_number }}"
+          git add packages/openops/src/lib/ai/providers/
+          git commit -m "Update AI provider models from models.dev"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
 
-            This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
+      - name: Push changes and create PR
+        if: steps.create-branch.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git push origin "sync-ai-models-${{ github.run_number }}"
+          gh pr create \
+            --title "Update AI Provider Models" \
+            --body "## 🤖 Automated Model Sync
 
-            **Review the file changes** to see which models were added or removed for each provider.
+          This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
 
-            ### What to Check
+          **Review the file changes** to see which models were added or removed for each provider.
 
-            - ✅ New models are legitimate and available
-            - ✅ Removed models are actually deprecated/retired
-            - ✅ Model IDs match provider documentation
+          ### What to Check
 
-            ### Testing Locally
+          - ✅ New models are legitimate and available
+          - ✅ Removed models are actually deprecated/retired
+          - ✅ Model IDs match provider documentation
 
-            ```bash
-            npx tsx packages/openops/src/lib/ai/sync-models.ts
-            ```
+          ### Testing Locally
 
-            ---
+          \`\`\`bash
+          npx tsx packages/openops/src/lib/ai/sync-models.ts
+          \`\`\`
 
-            🔗 **Source**: https://models.dev/api.json (MIT License)
-          branch: sync-ai-models-${{ github.run_number }}
-          delete-branch: true
-          labels: |
-            dependencies
-            automated
+          ---
+
+          🔗 **Source**: https://models.dev/api.json (MIT License)" \
+            --base main \
+            --head "sync-ai-models-${{ github.run_number }}" \
+            --label dependencies \
+            --label automated
 
       - name: Summary
         if: always()

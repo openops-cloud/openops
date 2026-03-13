@@ -111,7 +111,7 @@ function filterTextOnlyModels(models: Record<string, ModelData>): string[] {
       return true;
     })
     .map((model) => model.id)
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
 }
 
 function getProviderFilePath(providerFileName: string): string {
