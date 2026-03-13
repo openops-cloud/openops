@@ -31,6 +31,9 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --no-audit --no-fund
 
+      - name: Build shared package
+        run: npx nx run shared:build
+
       - name: Check for model updates
         id: check-models
         continue-on-error: true
@@ -43,42 +46,76 @@ jobs:
           cat sync-output.txt
           exit 0
 
-      - name: Create Pull Request
+      - name: Read warnings
         if: steps.check-models.outputs.exit_code == '1'
-        id: create-pr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          commit-message: 'Update AI provider models from models.dev'
-          title: 'Update AI Provider Models'
-          body: |
-            ## 🤖 Automated Model Sync
+        id: warnings
+        run: |
+          if [ -f warnings.txt ]; then
+            echo "HAS_WARNINGS=true" >> $GITHUB_OUTPUT
+            {
+              echo 'WARNINGS<<EOF'
+              cat warnings.txt
+              echo EOF
+            } >> $GITHUB_OUTPUT
+          else
+            echo "HAS_WARNINGS=false" >> $GITHUB_OUTPUT
+          fi
 
-            This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
+      - name: Commit and push to branch
+        if: steps.check-models.outputs.exit_code == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b sync-ai-models-${{ github.run_number }}
+          git add packages/openops/src/lib/ai/providers/
+          git commit -m "Update AI provider models from models.dev"
+          git push origin sync-ai-models-${{ github.run_number }}
 
-            **Review the file changes** to see which models were added or removed for each provider.
-
-            ### What to Check
-
-            - ✅ New models are legitimate and available
-            - ✅ Removed models are actually deprecated/retired
-            - ✅ Model IDs match provider documentation
-
-            ### Testing Locally
-
-            ```bash
-            npx tsx packages/openops/src/lib/ai/sync-models.ts
-            ```
-
-            ---
-
-            🔗 **Source**: https://models.dev/api.json (MIT License)
-          branch: sync-ai-models-${{ github.run_number }}
-          delete-branch: true
-          labels: |
-            dependencies
-            automated
+      # Commented out for testing - uncomment when ready to auto-create PRs
+      # - name: Create Pull Request
+      #   if: steps.check-models.outputs.exit_code == '1'
+      #   id: create-pr
+      #   uses: peter-evans/create-pull-request@v7
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     base: main
+      #     commit-message: 'Update AI provider models from models.dev'
+      #     title: 'Update AI Provider Models'
+      #     body: |
+      #       ## 🤖 Automated Model Sync
+      #
+      #       This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
+      #
+      #       **Review the file changes** to see which models were added or removed for each provider.
+      #
+      #       ${{ steps.warnings.outputs.HAS_WARNINGS == 'true' && format('
+      #
+      #       ---
+      #
+      #       {0}
+      #
+      #       ', steps.warnings.outputs.WARNINGS) || '' }}
+      #
+      #       ### What to Check
+      #
+      #       - ✅ New models are legitimate and available
+      #       - ✅ Removed models are actually deprecated/retired
+      #       - ✅ Model IDs match provider documentation
+      #
+      #       ### Testing Locally
+      #
+      #       ```bash
+      #       npx tsx packages/openops/src/lib/ai/sync-models.ts
+      #       ```
+      #
+      #       ---
+      #
+      #       🔗 **Source**: https://models.dev/api.json (MIT License)
+      #     branch: sync-ai-models-${{ github.run_number }}
+      #     delete-branch: true
+      #     labels: |
+      #       dependencies
+      #       automated
 
       - name: Summary
         if: always()
@@ -86,8 +123,7 @@ jobs:
           if [ "${{ steps.check-models.outputs.exit_code }}" == "0" ]; then
             echo "✅ All AI provider models are up to date!" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.check-models.outputs.exit_code }}" == "1" ]; then
-            echo "🔄 Model updates detected and PR created" >> $GITHUB_STEP_SUMMARY
-            cat sync-output.txt >> $GITHUB_STEP_SUMMARY
+            echo "🔄 Model updates detected and branch created: sync-ai-models-${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Sync script failed with unexpected error" >> $GITHUB_STEP_SUMMARY
             exit 1

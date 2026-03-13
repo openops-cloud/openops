@@ -207,10 +207,48 @@ function compareModels(
   return { added, removed, unchanged };
 }
 
+function checkForUnmappedProviders(): string[] {
+  const providerFiles = getProviderFiles();
+  const mappedKeys = Object.values(MODELS_DEV_KEYS).filter(
+    (key): key is string => key !== undefined,
+  );
+
+  const unmappedFiles = providerFiles.filter((file) => {
+    const normalizedFile = normalizeProviderKey(file);
+    return !mappedKeys.some(
+      (key) => normalizeProviderKey(key) === normalizedFile,
+    );
+  });
+
+  return unmappedFiles;
+}
+
 async function main() {
   const shouldUpdate = process.argv.includes('--update');
 
   console.log('🔄 Fetching models from models.dev...\n');
+
+  const unmappedProviders = checkForUnmappedProviders();
+  if (unmappedProviders.length > 0) {
+    console.log('⚠️  Warning: Found provider files not in MODELS_DEV_KEYS:');
+    unmappedProviders.forEach((file) =>
+      console.log(`   - ${file}.ts (not synced)`),
+    );
+    console.log(
+      '   Add these to MODELS_DEV_KEYS if they should be synced.\n',
+    );
+
+    if (shouldUpdate) {
+      const warningMessage = unmappedProviders
+        .map((file) => `- \`${file}.ts\``)
+        .join('\n');
+      fs.writeFileSync(
+        'warnings.txt',
+        `⚠️ **Warning**: The following provider files are not in \`MODELS_DEV_KEYS\` and were not synced:\n\n${warningMessage}\n\nIf these should be synced with models.dev, add them to \`MODELS_DEV_KEYS\` in \`sync-models.ts\`.`,
+        'utf-8',
+      );
+    }
+  }
 
   const modelsDevData = await fetchModelsDevData();
 
