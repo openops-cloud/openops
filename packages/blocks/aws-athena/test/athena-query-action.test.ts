@@ -76,7 +76,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
+        accounts: { accounts: 'some-account-id' },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -90,7 +90,7 @@ describe('runAthenaQueryAction tests', () => {
     expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledWith(
       auth,
-      ['some-account-id'],
+      'some-account-id',
     );
   });
 
@@ -136,7 +136,6 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
         region: 'some region',
         query: 'some query',
         database: 'some database',
@@ -159,7 +158,7 @@ describe('runAthenaQueryAction tests', () => {
     expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledWith(
       auth,
-      ['some-account-id'],
+      undefined,
     );
   });
 
