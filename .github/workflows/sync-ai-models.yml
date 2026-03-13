@@ -1,0 +1,116 @@
+name: Sync AI Models
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-models:
+    name: Sync AI Provider Models
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache/restore@v5.0.3
+        with:
+          path: node_modules
+          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Check for model updates
+        id: check-models
+        continue-on-error: true
+        run: |
+          npx tsx packages/openops/src/lib/ai/sync-models.ts --update > sync-output.txt 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          cat sync-output.txt
+
+      - name: Upload sync output
+        if: steps.check-models.outputs.exit_code == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-output
+          path: sync-output.txt
+          retention-days: 7
+
+      - name: Create Pull Request
+        if: steps.check-models.outputs.exit_code == '1'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Update AI provider models from models.dev'
+          title: 'Update AI Provider Models'
+          body: |
+            ## 🤖 Automated Model Sync
+
+            This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
+
+            ### Changes Detected
+
+            The sync script found differences between our current model lists and the latest available models.
+
+            ### What to Review
+
+            - ✅ Verify that new models are legitimate and available
+            - ✅ Check that removed models are actually deprecated
+            - ✅ Ensure model IDs match the provider's API documentation
+
+            ### Testing
+
+            Run the sync script locally to verify:
+            ```bash
+            npx tsx packages/openops/src/lib/ai/sync-models.ts
+            ```
+
+            ### Sync Output
+
+            Full details will be added in a comment below.
+
+            ---
+
+            🔗 **Source**: https://models.dev/api.json
+            📅 **Run**: ${{ github.run_id }}
+          branch: sync-ai-models-${{ github.run_number }}
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+
+      - name: Comment on PR with details
+        if: steps.create-pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('sync-output.txt', 'utf8');
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.create-pr.outputs.pull-request-number }},
+              body: `### 📊 Model Sync Details\n\n\`\`\`\n${output}\n\`\`\``
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.check-models.outputs.exit_code }}" == "0" ]; then
+            echo "✅ All AI provider models are up to date!" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.check-models.outputs.exit_code }}" == "1" ]; then
+            echo "🔄 Model updates detected and PR created" >> $GITHUB_STEP_SUMMARY
+            cat sync-output.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Sync script failed with unexpected error" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
