@@ -39,11 +39,10 @@ jobs:
         continue-on-error: true
         run: |
           set +e
-          npx tsx packages/openops/src/lib/ai/sync-models.ts --update > sync-output.txt 2>&1
+          npx tsx packages/openops/src/lib/ai/sync-models.ts --update
           EXIT_CODE=$?
           set -e
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
-          cat sync-output.txt
           exit 0
 
       - name: Read warnings
@@ -68,6 +67,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b sync-ai-models-${{ github.run_number }}
           git add packages/openops/src/lib/ai/providers/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
           git commit -m "Update AI provider models from models.dev"
           git push origin sync-ai-models-${{ github.run_number }}
 
