@@ -43,7 +43,7 @@ jobs:
         continue-on-error: true
         run: |
           set +e
-          node packages/openops/dist/lib/ai/sync-models.js --update
+          node dist/packages/openops/lib/ai/sync-models.js --update
           EXIT_CODE=$?
           set -e
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
