@@ -3,9 +3,9 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import { Permission, PrincipalType } from '@openops/shared';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { webhookSimulationService } from './webhook-simulation-service';
-import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 
 export const webhookSimulationController: FastifyPluginCallbackTypebox = (
   app,

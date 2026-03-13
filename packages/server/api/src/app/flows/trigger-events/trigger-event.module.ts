@@ -5,13 +5,13 @@ import {
   PrincipalType,
   TestPollingTriggerRequest,
 } from '@openops/shared';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { systemJobsSchedule } from '../../helper/system-jobs';
 import { SystemJobName } from '../../helper/system-jobs/common';
 import { systemJobHandlers } from '../../helper/system-jobs/job-handlers';
 import { flowService } from '../flow/flow.service';
 import { triggerEventService } from './trigger-event.service';
-import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 
 const DEFAULT_PAGE_SIZE = 10;
 
