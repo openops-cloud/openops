@@ -31,19 +31,15 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci --no-audit --no-fund
 
-      - name: Build packages
-        env:
-          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
-        run: |
-          npm run prepare
-          npx nx run openops-common:build
+      - name: Build shared package
+        run: npx nx run shared:build
 
       - name: Check for model updates
         id: check-models
         continue-on-error: true
         run: |
           set +e
-          node dist/packages/openops/lib/ai/sync-models.js --update
+          npx tsx --tsconfig tsconfig.base.json packages/openops/src/lib/ai/sync-models.ts --update
           EXIT_CODE=$?
           set -e
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
