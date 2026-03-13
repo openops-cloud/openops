@@ -32,9 +32,11 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Build packages
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
         run: |
-          npx nx run shared:build
-          npx nx run openops:build
+          npm run prepare
+          npx nx run openops-common:build
 
       - name: Check for model updates
         id: check-models
