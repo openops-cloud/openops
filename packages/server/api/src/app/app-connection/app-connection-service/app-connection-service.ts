@@ -238,7 +238,7 @@ export const appConnectionService = {
       },
       customPaginationColumn: {
         columnPath: 'updated',
-        columnName: 'updated',
+        columnName: 'app_connection.updated',
       },
     });
 
