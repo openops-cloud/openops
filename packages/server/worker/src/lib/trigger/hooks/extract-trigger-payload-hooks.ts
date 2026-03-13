@@ -38,6 +38,19 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
+      if ('status' in result && result.status === 'INTERNAL_ERROR') {
+        logger.warn(
+          {
+            result,
+            blockName,
+            blockVersion,
+            flowId: flowVersion.flowId,
+          },
+          'Failed to execute trigger because of internal error in the engine',
+        );
+        return [];
+      }
+
       logger.error(
         {
           result,
