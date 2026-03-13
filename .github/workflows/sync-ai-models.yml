@@ -43,14 +43,6 @@ jobs:
           cat sync-output.txt
           exit 0
 
-      - name: Upload sync output
-        if: steps.check-models.outputs.exit_code == '1'
-        uses: actions/upload-artifact@v4
-        with:
-          name: sync-output
-          path: sync-output.txt
-          retention-days: 7
-
       - name: Create Pull Request
         if: steps.check-models.outputs.exit_code == '1'
         id: create-pr
@@ -65,51 +57,28 @@ jobs:
 
             This PR updates AI provider model lists based on the latest data from [models.dev](https://models.dev).
 
-            ### Changes Detected
+            **Review the file changes** to see which models were added or removed for each provider.
 
-            The sync script found differences between our current model lists and the latest available models.
+            ### What to Check
 
-            ### What to Review
+            - ✅ New models are legitimate and available
+            - ✅ Removed models are actually deprecated/retired
+            - ✅ Model IDs match provider documentation
 
-            - ✅ Verify that new models are legitimate and available
-            - ✅ Check that removed models are actually deprecated
-            - ✅ Ensure model IDs match the provider's API documentation
+            ### Testing Locally
 
-            ### Testing
-
-            Run the sync script locally to verify:
             ```bash
             npx tsx packages/openops/src/lib/ai/sync-models.ts
             ```
 
-            ### Sync Output
-
-            Full details will be added in a comment below.
-
             ---
 
-            🔗 **Source**: https://models.dev/api.json
-            📅 **Run**: ${{ github.run_id }}
+            🔗 **Source**: https://models.dev/api.json (MIT License)
           branch: sync-ai-models-${{ github.run_number }}
           delete-branch: true
           labels: |
             dependencies
             automated
-
-      - name: Comment on PR with details
-        if: steps.create-pr.outputs.pull-request-number
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const output = fs.readFileSync('sync-output.txt', 'utf8');
-
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: ${{ steps.create-pr.outputs.pull-request-number }},
-              body: `### 📊 Model Sync Details\n\n\`\`\`\n${output}\n\`\`\``
-            });
 
       - name: Summary
         if: always()
