@@ -66,6 +66,7 @@ import {
 } from '@openops/shared';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
 import { restoreRedactedSecrets } from '../../../src/app/app-connection/app-connection-utils';
+import { buildPaginator } from '../../../src/app/helper/pagination/build-paginator';
 
 describe('appConnectionService.update', () => {
   const projectId = 'project-123';
@@ -199,6 +200,20 @@ describe('appConnectionService.list', () => {
       limit: 10,
       connectionsIds: undefined,
       authProviders,
+    });
+
+    expect(buildPaginator).toHaveBeenCalledWith({
+      entity: expect.any(Object),
+      query: {
+        limit: 10,
+        order: 'DESC',
+        afterCursor: null,
+        beforeCursor: null,
+      },
+      customPaginationColumn: {
+        columnPath: 'updated',
+        columnName: 'updated',
+      },
     });
 
     expect(andWhereMock).toHaveBeenCalledWith(
