@@ -5,6 +5,7 @@ import {
 import { Permission, PrincipalType } from '@openops/shared';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { webhookSimulationService } from './webhook-simulation-service';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 
 export const webhookSimulationController: FastifyPluginCallbackTypebox = (
   app,
@@ -52,6 +53,7 @@ const CreateWebhookSimulationRequest = {
       permission: Permission.TEST_STEP_FLOW,
     }),
   },
+  preHandler: getAuthorizationGuards().enforceTestStepAuthorizationFromRequest,
   schema: {
     body: Type.Object({
       flowId: Type.String(),

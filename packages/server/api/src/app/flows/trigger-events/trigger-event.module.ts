@@ -11,6 +11,7 @@ import { SystemJobName } from '../../helper/system-jobs/common';
 import { systemJobHandlers } from '../../helper/system-jobs/job-handlers';
 import { flowService } from '../flow/flow.service';
 import { triggerEventService } from './trigger-event.service';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -44,6 +45,8 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
           permission: Permission.READ_FLOW,
         }),
       },
+      preHandler:
+        getAuthorizationGuards().enforceTestStepAuthorizationFromRequest,
       schema: {
         querystring: TestPollingTriggerRequest,
       },
