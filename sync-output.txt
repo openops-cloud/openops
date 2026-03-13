@@ -1,0 +1,25 @@
+npm warn exec The following package was not found and will be installed: tsx@4.21.0
+node:internal/modules/cjs/loader:1207
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@openops/shared'
+Require stack:
+- /home/runner/work/openops/openops/packages/openops/src/lib/ai/sync-models.ts
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at nextResolveSimple (/home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///home/runner/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at require (node:internal/modules/helpers:182:18) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/runner/work/openops/openops/packages/openops/src/lib/ai/sync-models.ts'
+  ]
+}
+
+Node.js v20.20.0
