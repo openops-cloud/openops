@@ -3,6 +3,8 @@ import { Property, createAction } from '@openops/blocks-framework';
 import {
   amazonAuth,
   getAttributeValues,
+  getAwsAccountsSingleSelectDropdown,
+  getCredentialsForAccount,
   getCredentialsFromAuth,
   getPriceListWithCache,
   getServices,
@@ -17,22 +19,26 @@ export const getPriceAction = createAction({
   displayName: 'Get Price from Price Catalog',
   isWriteAction: false,
   props: {
+    account: getAwsAccountsSingleSelectDropdown().accounts,
     service: Property.Dropdown({
       displayName: 'Service Code',
       description: 'Service code for which to fetch the price',
-      refreshers: ['auth'],
+      refreshers: ['auth', 'account', 'account.accounts'],
       required: true,
-      options: async ({ auth }: any) => {
-        if (!auth) {
+      options: async ({ auth, account }: any) => {
+        if (!auth || !account) {
           return {
             disabled: true,
             options: [],
-            placeholder: 'Please authenticate first',
+            placeholder: 'Please authenticate first and select account',
           };
         }
 
-        const credentials = await getCredentialsFromAuth(auth);
         try {
+          const credentials = await getCredentialsForAccount(
+            auth,
+            account?.['accounts'],
+          );
           const services = await getServices(credentials, PRICING_REGION);
 
           if (!services.length) {
@@ -66,9 +72,9 @@ export const getPriceAction = createAction({
       displayName: '',
       description: '',
       required: true,
-      refreshers: ['auth', 'service'],
-      props: async ({ auth, service }, { input }) => {
-        if (!auth || !service) {
+      refreshers: ['auth', 'account', 'account.accounts', 'service'],
+      props: async ({ auth, account, service }, { input }) => {
+        if (!auth || !account || !service) {
           return {};
         }
 
@@ -101,7 +107,10 @@ export const getPriceAction = createAction({
                   };
                 }
 
-                const credentials = await getCredentialsFromAuth(auth);
+                const credentials = await getCredentialsForAccount(
+                  auth,
+                  account?.['accounts'],
+                );
                 try {
                   const attributeValues: AttributeValue[] =
                     await getAttributeValues(
@@ -139,7 +148,7 @@ export const getPriceAction = createAction({
   },
   async run(context) {
     try {
-      const { service, queryFilters } = context.propsValue;
+      const { account, service, queryFilters } = context.propsValue;
       const filters = queryFilters['queryFilters'].map((filter: any) => {
         return {
           Field: filter.attributeName,
@@ -147,9 +156,12 @@ export const getPriceAction = createAction({
           Value: filter.attributeValue,
         };
       });
+      const credentials = account?.['accounts']
+        ? await getCredentialsForAccount(context.auth, account['accounts'])
+        : await getCredentialsFromAuth(context.auth);
 
       const priceList = getPriceListWithCache(
-        context.auth,
+        credentials,
         service.ServiceCode!,
         filters,
         PRICING_REGION,
