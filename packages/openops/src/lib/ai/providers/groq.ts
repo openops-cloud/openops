@@ -3,15 +3,16 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const groqModels = [
+  'deepseek-r1-distill-llama-70b',
+  'deepseek-r1-distill-qwen-32b',
+  'gemma2-9b-it',
   'llama-3.1-8b-instant',
   'llama-3.3-70b-versatile',
-  'meta-llama/llama-4-maverick-17b-128e-instruct',
+  'llama3-70b-8192',
+  'llama3-8b-8192',
   'meta-llama/llama-4-scout-17b-16e-instruct',
-  'meta-llama/llama-guard-4-12b',
-  'moonshotai/kimi-k2-instruct-0905',
-  'openai/gpt-oss-120b',
-  'openai/gpt-oss-20b',
-  'qwen/qwen3-32b',
+  'mistral-saba-24b',
+  'qwen-2.5-32b',
 ];
 
 function createLanguageModel(params: {
