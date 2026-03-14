@@ -7,8 +7,8 @@ const mistralModels = [
   'ministral-8b-latest',
   'mistral-large-latest',
   'mistral-small-latest',
-  'pixtral-large-latest',
   'pixtral-12b-2409',
+  'pixtral-large-latest',
 ];
 
 function createLanguageModel(params: {
