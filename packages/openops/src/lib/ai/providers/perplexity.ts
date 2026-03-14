@@ -5,6 +5,7 @@ import { AiProvider } from '../providers';
 
 const perplexityModels = [
   'sonar',
+  'sonar-deep-research',
   'sonar-pro',
   'sonar-reasoning',
   'sonar-reasoning-pro',
