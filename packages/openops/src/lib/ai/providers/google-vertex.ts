@@ -4,27 +4,7 @@ import { createVertexAnthropic } from '@ai-sdk/google-vertex/anthropic';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
-const googleVertexGeminiModels = [
-  'gemini-1.5-flash',
-  'gemini-1.5-pro',
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-001',
-  'gemini-2.0-flash-exp',
-  'gemini-2.0-flash-lite',
-  'gemini-2.0-flash-lite-preview-02-05',
-  'gemini-2.0-pro-exp-02-05',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-flash-lite-preview-09-2025',
-  'gemini-2.5-flash-preview-09-2025',
-  'gemini-2.5-pro',
-  'gemini-3-flash-preview',
-  'gemini-3-pro-preview',
-  'gemini-3.1-flash-lite-preview',
-  'gemini-3.1-pro-preview',
-];
-
-const googleVertexClaudeModels = [
+const googleVertexModels = [
   'claude-3-5-haiku@20241022',
   'claude-3-5-sonnet-v2@20241022',
   'claude-3-5-sonnet@20240620',
@@ -39,6 +19,12 @@ const googleVertexClaudeModels = [
   'claude-sonnet-4-5@20250929',
   'claude-sonnet-4-6',
   'claude-sonnet-4@20250514',
+  'gemini-2.0-flash-001',
+  'gemini-2.0-flash-lite-001',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-pro',
+  'gemini-3-pro-preview',
 ];
 
 function safeParseJson(value: string): Record<string, unknown> | null {
@@ -95,6 +81,6 @@ function createLanguageModel(params: {
 }
 
 export const googleVertexProvider: AiProvider = {
-  models: [...googleVertexGeminiModels, ...googleVertexClaudeModels],
+  models: googleVertexModels,
   createLanguageModel,
 };
