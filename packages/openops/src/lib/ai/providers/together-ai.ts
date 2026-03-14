@@ -1,3 +1,4 @@
+// https://docs.together.ai/docs/serverless-models
 import { createTogetherAI } from '@ai-sdk/togetherai';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

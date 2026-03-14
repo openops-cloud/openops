@@ -1,3 +1,4 @@
+// https://platform.openai.com/docs/models
 import { createOpenAI } from '@ai-sdk/openai';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

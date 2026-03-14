@@ -1,3 +1,4 @@
+// https://docs.x.ai/docs/models
 import { createXai } from '@ai-sdk/xai';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

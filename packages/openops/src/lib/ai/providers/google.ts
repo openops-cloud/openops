@@ -1,3 +1,4 @@
+// https://ai.google.dev/gemini-api/docs/models
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

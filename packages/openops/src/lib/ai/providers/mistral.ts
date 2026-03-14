@@ -1,3 +1,4 @@
+// https://docs.mistral.ai/getting-started/models/models_overview/
 import { createMistral } from '@ai-sdk/mistral';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

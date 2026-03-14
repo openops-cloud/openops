@@ -1,3 +1,4 @@
+// https://console.groq.com/docs/models
 import { createGroq } from '@ai-sdk/groq';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

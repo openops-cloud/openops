@@ -1,3 +1,4 @@
+// https://docs.cohere.com/docs/models
 import { createCohere } from '@ai-sdk/cohere';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';

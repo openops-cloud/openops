@@ -1,3 +1,4 @@
+// https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
 import { createVertex } from '@ai-sdk/google-vertex';
 import { createVertexAnthropic } from '@ai-sdk/google-vertex/anthropic';
 import { LanguageModel } from 'ai';
