@@ -14,98 +14,96 @@ import { AiProviderEnum } from '@openops/shared';
 import fs from 'node:fs';
 import path from 'node:path';
 
+interface TypeSource {
+  typeName: string;
+  distPath?: string;
+  excludedModels?: string[];
+}
+
 interface AiSdkConfig {
   package: string;
-  typeName: string;
   providerFile: string;
-  distPath?: string;
-  arrayName?: string;
-  excludedModels?: string[];
-  additionalArrays?: Array<{
-    distPath: string;
-    typeName: string;
-    arrayName: string;
-    excludedModels?: string[];
-  }>;
+  typeSources: TypeSource[];
 }
 
 export const AI_SDK_CONFIGS: Partial<Record<AiProviderEnum, AiSdkConfig>> = {
   [AiProviderEnum.ANTHROPIC]: {
     package: 'anthropic',
-    typeName: 'AnthropicMessagesModelId',
     providerFile: 'anthropic',
+    typeSources: [{ typeName: 'AnthropicMessagesModelId' }],
   },
   [AiProviderEnum.CEREBRAS]: {
     package: 'cerebras',
-    typeName: 'CerebrasChatModelId',
     providerFile: 'cerebras',
+    typeSources: [{ typeName: 'CerebrasChatModelId' }],
   },
   [AiProviderEnum.COHERE]: {
     package: 'cohere',
-    typeName: 'CohereChatModelId',
     providerFile: 'cohere',
+    typeSources: [{ typeName: 'CohereChatModelId' }],
   },
   [AiProviderEnum.DEEPSEEK]: {
     package: 'deepseek',
-    typeName: 'DeepSeekChatModelId',
     providerFile: 'deep-seek',
+    typeSources: [{ typeName: 'DeepSeekChatModelId' }],
   },
   [AiProviderEnum.GOOGLE]: {
     package: 'google',
-    typeName: 'GoogleGenerativeAIModelId',
     providerFile: 'google',
+    typeSources: [{ typeName: 'GoogleGenerativeAIModelId' }],
   },
   [AiProviderEnum.GOOGLE_VERTEX]: {
     package: 'google-vertex',
-    typeName: 'GoogleVertexModelId',
     providerFile: 'google-vertex',
-    excludedModels: [
-      'gemini-1.0-pro',
-      'gemini-1.0-pro-001',
-      'gemini-1.0-pro-002',
-      'gemini-1.0-pro-vision-001',
-      'gemini-1.5-flash-001',
-      'gemini-1.5-flash-002',
-      'gemini-1.5-pro-001',
-      'gemini-1.5-pro-002',
-    ],
-    additionalArrays: [
+    typeSources: [
       {
-        distPath: 'dist/anthropic/index.d.ts',
+        typeName: 'GoogleVertexModelId',
+        excludedModels: [
+          'gemini-1.0-pro',
+          'gemini-1.0-pro-001',
+          'gemini-1.0-pro-002',
+          'gemini-1.0-pro-vision-001',
+          'gemini-1.5-flash-001',
+          'gemini-1.5-flash-002',
+          'gemini-1.5-pro-001',
+          'gemini-1.5-pro-002',
+        ],
+      },
+      {
         typeName: 'GoogleVertexAnthropicMessagesModelId',
-        arrayName: 'googleVertexClaudeModels',
+        distPath: 'dist/anthropic/index.d.ts',
       },
     ],
   },
   [AiProviderEnum.GROQ]: {
     package: 'groq',
-    typeName: 'GroqChatModelId',
     providerFile: 'groq',
+    typeSources: [{ typeName: 'GroqChatModelId' }],
   },
   [AiProviderEnum.MISTRAL]: {
     package: 'mistral',
-    typeName: 'MistralChatModelId',
     providerFile: 'mistral',
+    typeSources: [{ typeName: 'MistralChatModelId' }],
   },
   [AiProviderEnum.OPENAI]: {
     package: 'openai',
-    typeName: 'OpenAIChatModelId',
     providerFile: 'openai',
+    typeSources: [{ typeName: 'OpenAIChatModelId' }],
   },
   [AiProviderEnum.PERPLEXITY]: {
     package: 'perplexity',
-    typeName: 'PerplexityLanguageModelId',
     providerFile: 'perplexity',
+    typeSources: [{ typeName: 'PerplexityLanguageModelId' }],
   },
   [AiProviderEnum.TOGETHER_AI]: {
     package: 'togetherai',
-    typeName: 'TogetherAIChatModelId',
     providerFile: 'together-ai',
+    typeSources: [{ typeName: 'TogetherAIChatModelId' }],
   },
   [AiProviderEnum.XAI]: {
     package: 'xai',
-    typeName: 'XaiChatModelId',
     providerFile: 'xai',
+    typeSources: [{ typeName: 'XaiChatModelId' }],
   },
 };
 
@@ -127,10 +125,9 @@ const NON_CHAT_KEYWORDS = [
 
 async function fetchAiSdkModels(
   pkg: string,
-  typeName: string,
-  distPath = 'dist/index.d.ts',
-  excludedModels: string[] = [],
+  source: TypeSource,
 ): Promise<string[]> {
+  const distPath = source.distPath ?? 'dist/index.d.ts';
   const url = `https://unpkg.com/@ai-sdk/${pkg}@latest/${distPath}`;
   const response = await fetch(url);
   if (!response.ok) {
@@ -140,31 +137,31 @@ async function fetchAiSdkModels(
   }
 
   const dts = await response.text();
-  const pattern = new RegExp(`type\\s+${typeName}\\s*=\\s*([^;]+);`, 's');
+  const pattern = new RegExp(
+    `type\\s+${source.typeName}\\s*=\\s*([^;]+);`,
+    's',
+  );
   const match = dts.match(pattern);
   if (!match) {
-    throw new Error(`Could not find type ${typeName} in @ai-sdk/${pkg}`);
+    throw new Error(`Could not find type ${source.typeName} in @ai-sdk/${pkg}`);
   }
 
+  const excluded = source.excludedModels ?? [];
   return [...match[1].matchAll(/'([^']+)'/g)]
     .map((m) => m[1])
     .filter(
       (id) =>
         !NON_CHAT_KEYWORDS.some((kw) => id.toLowerCase().includes(kw)) &&
-        !excludedModels.includes(id),
-    )
-    .sort((a, b) => a.localeCompare(b));
+        !excluded.includes(id),
+    );
 }
 
-function getCurrentModels(providerFile: string, arrayName?: string): string[] {
+function getCurrentModels(providerFile: string): string[] {
   const filePath = path.join(__dirname, 'providers', `${providerFile}.ts`);
   if (!fs.existsSync(filePath)) return [];
 
   const content = fs.readFileSync(filePath, 'utf-8');
-  const pattern = arrayName
-    ? new RegExp(`const\\s+${arrayName}\\s*=\\s*\\[([\\s\\S]*?)\\];`)
-    : /const\s+\w+Models\s*=\s*\[([\s\S]*?)\];/;
-  const match = content.match(pattern);
+  const match = content.match(/const\s+\w+Models\s*=\s*\[([\s\S]*?)\];/);
   if (!match) return [];
 
   return match[1]
@@ -174,67 +171,21 @@ function getCurrentModels(providerFile: string, arrayName?: string): string[] {
     .sort();
 }
 
-function updateProviderFile(
-  providerFile: string,
-  models: string[],
-  arrayName?: string,
-): void {
+function updateProviderFile(providerFile: string, models: string[]): void {
   const filePath = path.join(__dirname, 'providers', `${providerFile}.ts`);
   const content = fs.readFileSync(filePath, 'utf-8');
-  const pattern = arrayName
-    ? new RegExp(`const\\s+(${arrayName})\\s*=\\s*\\[([\\s\\S]*?)\\];`)
-    : /const\s+(\w+Models)\s*=\s*\[([\s\S]*?)\];/;
-  const match = content.match(pattern);
+  const match = content.match(/const\s+(\w+Models)\s*=\s*\[([\s\S]*?)\];/);
   if (!match) return;
 
-  const resolvedArrayName = match[1];
+  const arrayName = match[1];
   const formattedModels = models.map((model) => `  '${model}',`).join('\n');
-  const newArray = `const ${resolvedArrayName} = [\n${formattedModels}\n];`;
-  const updatedContent = content.replace(pattern, newArray);
+  const newArray = `const ${arrayName} = [\n${formattedModels}\n];`;
+  const updatedContent = content.replace(
+    /const\s+\w+Models\s*=\s*\[([\s\S]*?)\];/,
+    newArray,
+  );
 
   fs.writeFileSync(filePath, updatedContent, 'utf-8');
-}
-
-async function syncConfig(
-  label: string,
-  pkg: string,
-  typeName: string,
-  providerFile: string,
-  distPath: string | undefined,
-  arrayName: string | undefined,
-  excludedModels: string[] | undefined,
-  shouldUpdate: boolean,
-): Promise<boolean> {
-  let latestModels: string[];
-  try {
-    latestModels = await fetchAiSdkModels(
-      pkg,
-      typeName,
-      distPath,
-      excludedModels,
-    );
-  } catch (error) {
-    console.error(`Skipping ${label}: ${(error as Error).message}`);
-    return false;
-  }
-
-  const currentModels = getCurrentModels(providerFile, arrayName);
-  const added = latestModels.filter((m) => !currentModels.includes(m));
-  const removed = currentModels.filter((m) => !latestModels.includes(m));
-
-  if (added.length === 0 && removed.length === 0) {
-    return false;
-  }
-
-  console.log(`${label}:`);
-  if (added.length > 0) console.log(`  +${added.length}`);
-  if (removed.length > 0) console.log(`  -${removed.length}`);
-
-  if (shouldUpdate) {
-    updateProviderFile(providerFile, latestModels, arrayName);
-  }
-
-  return true;
 }
 
 async function main() {
@@ -245,30 +196,36 @@ async function main() {
   for (const [provider, config] of Object.entries(AI_SDK_CONFIGS)) {
     if (!config) continue;
 
-    const changed = await syncConfig(
-      provider,
-      config.package,
-      config.typeName,
-      config.providerFile,
-      config.distPath,
-      config.arrayName,
-      config.excludedModels,
-      shouldUpdate,
-    );
-    if (changed) hasChanges = true;
-
-    for (const extra of config.additionalArrays ?? []) {
-      const extraChanged = await syncConfig(
-        `${provider} (${extra.arrayName})`,
-        config.package,
-        extra.typeName,
-        config.providerFile,
-        extra.distPath,
-        extra.arrayName,
-        extra.excludedModels,
-        shouldUpdate,
+    let latestModels: string[];
+    try {
+      const results = await Promise.all(
+        config.typeSources.map((source) =>
+          fetchAiSdkModels(config.package, source),
+        ),
       );
-      if (extraChanged) hasChanges = true;
+      latestModels = [...new Set(results.flat())].sort((a, b) =>
+        a.localeCompare(b),
+      );
+    } catch (error) {
+      console.error(`Skipping ${provider}: ${(error as Error).message}`);
+      continue;
+    }
+
+    const currentModels = getCurrentModels(config.providerFile);
+    const added = latestModels.filter((m) => !currentModels.includes(m));
+    const removed = currentModels.filter((m) => !latestModels.includes(m));
+
+    if (added.length === 0 && removed.length === 0) {
+      continue;
+    }
+
+    hasChanges = true;
+    console.log(`${provider}:`);
+    if (added.length > 0) console.log(`  +${added.length}`);
+    if (removed.length > 0) console.log(`  -${removed.length}`);
+
+    if (shouldUpdate) {
+      updateProviderFile(config.providerFile, latestModels);
     }
   }
 
