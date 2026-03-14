@@ -33,17 +33,17 @@ const googleVertexGeminiModels = [
 ];
 
 const googleVertexClaudeModels = [
-  'claude-opus-4-6',
-  'claude-sonnet-4-6',
-  'claude-opus-4-5@20251101',
-  'claude-sonnet-4-5@20250929',
-  'claude-haiku-4-5@20251001',
-  'claude-3-haiku@20240307',
   'claude-3-5-haiku@20241022',
+  'claude-3-5-sonnet@20241022',
   'claude-3-7-sonnet@20250219',
-  'claude-sonnet-4@20250514',
-  'claude-opus-4@20250514',
+  'claude-haiku-4-5@20251001',
   'claude-opus-4-1@20250805',
+  'claude-opus-4-5@20251101',
+  'claude-opus-4-6@default',
+  'claude-opus-4@20250514',
+  'claude-sonnet-4-5@20250929',
+  'claude-sonnet-4-6@default',
+  'claude-sonnet-4@20250514',
 ];
 
 function safeParseJson(value: string): Record<string, unknown> | null {
