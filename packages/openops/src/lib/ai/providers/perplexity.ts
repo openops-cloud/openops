@@ -1,9 +1,11 @@
+// https://docs.perplexity.ai/guides/model-cards
 import { createPerplexity } from '@ai-sdk/perplexity';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const perplexityModels = [
   'sonar',
+  'sonar-deep-research',
   'sonar-pro',
   'sonar-reasoning',
   'sonar-reasoning-pro',

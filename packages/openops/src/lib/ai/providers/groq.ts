@@ -1,3 +1,4 @@
+// https://console.groq.com/docs/models
 import { createGroq } from '@ai-sdk/groq';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
@@ -10,9 +11,15 @@ const groqModels = [
   'llama-3.3-70b-versatile',
   'llama3-70b-8192',
   'llama3-8b-8192',
+  'meta-llama/llama-4-maverick-17b-128e-instruct',
   'meta-llama/llama-4-scout-17b-16e-instruct',
-  'mistral-saba-24b',
+  'mixtral-8x7b-32768',
+  'moonshotai/kimi-k2-instruct-0905',
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b',
   'qwen-2.5-32b',
+  'qwen-qwq-32b',
+  'qwen/qwen3-32b',
 ];
 
 function createLanguageModel(params: {

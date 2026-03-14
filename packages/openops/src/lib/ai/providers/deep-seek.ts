@@ -1,3 +1,4 @@
+// https://api-docs.deepseek.com/quick_start/pricing
 import { createDeepSeek } from '@ai-sdk/deepseek';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
