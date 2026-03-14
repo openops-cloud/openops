@@ -138,10 +138,10 @@ async function fetchAiSdkModels(
 
   const dts = await response.text();
   const pattern = new RegExp(
-    `type\\s+${source.typeName}\\s*=\\s*([^;]+);`,
+    String.raw`type\s+${source.typeName}\s*=\s*([^;]+);`,
     's',
   );
-  const match = dts.match(pattern);
+  const match = pattern.exec(dts);
   if (!match) {
     throw new Error(`Could not find type ${source.typeName} in @ai-sdk/${pkg}`);
   }
