@@ -8,7 +8,6 @@ import {
   ENGINE_ROUTE_POLICY,
   ErrorCode,
   isNil,
-  PrincipalType,
 } from '@openops/shared';
 import { allowWorkersOnly } from '../authentication/authorization';
 import { appConnectionService } from './app-connection-service/app-connection-service';
@@ -48,7 +47,6 @@ export const appConnectionWorkerController: FastifyPluginCallbackTypebox = (
 
 const GetAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {

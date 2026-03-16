@@ -3,11 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import {
-  ALL_PRINCIPAL_TYPES,
-  OpenOpsId,
-  PUBLIC_ROUTE_POLICY,
-} from '@openops/shared';
+import { OpenOpsId, PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import {
   allowAllOriginsHookHandler,
   registerOptionsEndpoint,
@@ -45,8 +41,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
       schema: {
@@ -87,8 +81,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     '/:id',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
       schema: {
