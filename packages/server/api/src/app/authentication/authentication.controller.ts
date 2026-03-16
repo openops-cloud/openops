@@ -5,7 +5,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   createAuthResponse,
   OpsEdition,
   Permission,
@@ -39,7 +38,6 @@ export const GetBlockRequestParams = Type.Object({
 
 const AnalyticsGuestTokenRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.WRITE_ANALYTICS,
@@ -64,8 +62,6 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     '/sign-out',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
     },
@@ -79,7 +75,6 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
       '/analytics-embed-id',
       {
         config: {
-          allowedPrincipals: [PrincipalType.USER],
           security: getProjectScopedRoutePolicy({
             allowedPrincipals: [PrincipalType.USER],
             permission: Permission.WRITE_ANALYTICS,
@@ -179,7 +174,6 @@ const rateLimitOptions: RateLimitOptions = {
 
 const SignUpRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getOrganizationScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.WRITE_USER,
@@ -195,8 +189,6 @@ const SignUpRequestOptions = {
 
 const SignInRequestOptions = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
     security: PUBLIC_ROUTE_POLICY,
     rateLimit: rateLimitOptions,
   },

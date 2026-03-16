@@ -20,7 +20,6 @@ export const fileController: FastifyPluginAsyncTypebox = async (app) => {
 
 const GetFileRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_RUN,

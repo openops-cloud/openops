@@ -73,7 +73,6 @@ const DashboardsController: FastifyPluginCallbackTypebox = (
 
 const StatsRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FLOW,
