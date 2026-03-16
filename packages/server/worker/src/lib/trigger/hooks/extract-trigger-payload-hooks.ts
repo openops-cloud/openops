@@ -47,7 +47,7 @@ export async function extractPayloads(
             blockVersion,
             flowId: flowVersion.flowId,
           },
-          'Failed to execute trigger due to internal error',
+          'Failed to execute trigger due to internal issue',
         );
 
         return [];
