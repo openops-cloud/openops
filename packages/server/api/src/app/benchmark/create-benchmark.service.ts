@@ -70,8 +70,7 @@ async function deleteFlowsByIds(params: {
 }
 
 function getBenchmarkFolderDisplayName(provider: string): string {
-  const normalizedProvider = provider.toLowerCase();
-  switch (normalizedProvider) {
+  switch (provider) {
     case BenchmarkProviders.AWS:
       return 'AWS Benchmark';
     default:
