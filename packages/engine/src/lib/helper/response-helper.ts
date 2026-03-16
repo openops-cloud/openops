@@ -1,7 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { InfrastructureError } from './execution-errors';
 
-export const safeResponseJson = async <T>(response: Response): Promise<T> => {
+export const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   const contentType = response.headers.get('content-type');
   if (contentType && !contentType.includes('application/json')) {
     const text = await response.text();

@@ -14,7 +14,7 @@ import {
   TestRunLimitSettings,
   TriggerHookType,
 } from '@openops/shared';
-import { safeResponseJson } from '../../helper/response-helper';
+import { parseJsonResponse } from '../../helper/response-helper';
 import {
   createPropsResolver,
   PropsResolver,
@@ -233,7 +233,7 @@ export class EngineConstants {
       },
     });
 
-    return safeResponseJson<Project>(response);
+    return parseJsonResponse<Project>(response);
   }
 }
 
