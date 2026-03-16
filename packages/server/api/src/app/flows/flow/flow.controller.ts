@@ -32,6 +32,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { projectService } from '../../project/project-service';
 import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-models';
@@ -288,9 +289,10 @@ const UpdateFlowRequestOptions = {
   config: {
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.UPDATE_FLOW_STATUS,
+      permission: Permission.WRITE_FLOW,
     }),
   },
+  preHandler: getAuthorizationGuards().enforceWorkflowStatusAuthorization,
   schema: {
     tags: ['flows'],
     description:

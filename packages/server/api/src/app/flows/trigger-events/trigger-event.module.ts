@@ -5,6 +5,7 @@ import {
   PrincipalType,
   TestPollingTriggerRequest,
 } from '@openops/shared';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
 import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { systemJobsSchedule } from '../../helper/system-jobs';
 import { SystemJobName } from '../../helper/system-jobs/common';
@@ -44,6 +45,8 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
           permission: Permission.READ_FLOW,
         }),
       },
+      preHandler:
+        getAuthorizationGuards().enforceTestStepAuthorizationFromRequest,
       schema: {
         querystring: TestPollingTriggerRequest,
       },
