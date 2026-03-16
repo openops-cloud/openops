@@ -70,6 +70,7 @@ const GetUserSettingsRequestOptions = {
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     response: {
       [StatusCodes.OK]: UserSettingsDefinition,
+      [StatusCodes.NOT_FOUND]: Type.Unknown(),
     },
   },
 };

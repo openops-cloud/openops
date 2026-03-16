@@ -42,6 +42,18 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: Type.Boolean(),
             message: Type.String(),
           }),
+          [StatusCodes.BAD_REQUEST]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.CONFLICT]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
         },
       },
     },
