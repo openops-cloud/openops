@@ -26,11 +26,11 @@ export const getPriceAction = createAction({
       refreshers: ['auth', 'account', 'account.accounts'],
       required: true,
       options: async ({ auth, account }: any) => {
-        if (!auth || !account) {
+        if (!auth) {
           return {
             disabled: true,
             options: [],
-            placeholder: 'Please authenticate first and select account',
+            placeholder: 'Please authenticate first',
           };
         }
 
@@ -74,7 +74,7 @@ export const getPriceAction = createAction({
       required: true,
       refreshers: ['auth', 'account', 'account.accounts', 'service'],
       props: async ({ auth, account, service }, { input }) => {
-        if (!auth || !account || !service) {
+        if (!auth || !service) {
           return {};
         }
 
