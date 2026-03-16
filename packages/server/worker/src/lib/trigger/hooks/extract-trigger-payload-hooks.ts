@@ -39,6 +39,20 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
+      if (status === EngineResponseStatus.INTERNAL_ERROR) {
+        logger.warn(
+          {
+            result,
+            blockName,
+            blockVersion,
+            flowId: flowVersion.flowId,
+          },
+          'Failed to execute trigger due to internal error',
+        );
+
+        return [];
+      }
+
       logger.error(
         {
           result,
@@ -48,10 +62,6 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
-
-      if (status === EngineResponseStatus.INTERNAL_ERROR) {
-        return [];
-      }
 
       const errorMessage =
         result?.message ?? 'Trigger execution failed due to an unknown issue.';
