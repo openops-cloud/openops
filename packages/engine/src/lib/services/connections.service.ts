@@ -11,7 +11,6 @@ import {
   ConnectionExpiredError,
   ConnectionLoadingError,
   ConnectionNotFoundError,
-  ExecutionError,
   FetchError,
 } from '../helper/execution-errors';
 import { parseJsonResponse } from '../helper/response-helper';
