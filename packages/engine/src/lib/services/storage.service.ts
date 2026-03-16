@@ -19,6 +19,7 @@ import {
   StorageError,
   StorageLimitError,
 } from '../helper/execution-errors';
+import { safeResponseJson } from '../helper/response-helper';
 
 export const createStorageService = ({
   engineToken,
@@ -42,8 +43,11 @@ export const createStorageService = ({
           });
         }
 
-        return await response.json();
+        return await safeResponseJson<StoreEntry>(response);
       } catch (e) {
+        if (e instanceof ExecutionError || e instanceof Error) {
+          throw e;
+        }
         return handleFetchError({
           url,
           cause: e,
@@ -78,8 +82,11 @@ export const createStorageService = ({
           });
         }
 
-        return await response.json();
+        return await safeResponseJson<StoreEntry>(response);
       } catch (e) {
+        if (e instanceof ExecutionError || e instanceof Error) {
+          throw e;
+        }
         return handleFetchError({
           url,
           cause: e,
@@ -107,6 +114,9 @@ export const createStorageService = ({
 
         return null;
       } catch (e) {
+        if (e instanceof ExecutionError || e instanceof Error) {
+          throw e;
+        }
         return handleFetchError({
           url,
           cause: e,
@@ -136,9 +146,14 @@ export const createStorageService = ({
           throw new Error(`Failed to list keys: ${response.statusText}`);
         }
 
-        const result = await response.json();
+        const result = await safeResponseJson<{
+          entries: Array<{ key: string; value: unknown }>;
+        }>(response);
         return result.entries || [];
       } catch (e) {
+        if (e instanceof ExecutionError || e instanceof Error) {
+          throw e;
+        }
         return handleFetchError({
           url,
           cause: e,

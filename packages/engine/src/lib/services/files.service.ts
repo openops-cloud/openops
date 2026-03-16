@@ -1,6 +1,7 @@
 import { FilesService, WorkflowFile } from '@openops/blocks-framework';
 import { isNil } from '@openops/shared';
 import fs from 'fs/promises';
+import { safeResponseJson } from '../helper/response-helper';
 
 const FILE_PREFIX_URL = 'file://';
 const MEMORY_PREFIX_URL = 'memory://';
@@ -129,7 +130,7 @@ async function writeDbFile({
     throw new Error('Failed to store entry ' + response.body);
   }
 
-  const result = await response.json();
+  const result = await safeResponseJson<{ url: string }>(response);
   return result.url;
 }
 

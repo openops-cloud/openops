@@ -14,6 +14,7 @@ import {
   ExecutionError,
   FetchError,
 } from '../helper/execution-errors';
+import { safeResponseJson } from '../helper/response-helper';
 
 export const createConnectionService = ({
   projectId,
@@ -40,16 +41,17 @@ export const createConnectionService = ({
             httpStatus: response.status,
           });
         }
-        const connection: AppConnection = await response.json();
+        const connection: AppConnection = await safeResponseJson<AppConnection>(
+          response,
+        );
         if (connection.status === AppConnectionStatus.ERROR) {
           throw new ConnectionExpiredError(connectionName);
         }
         return getConnectionValue(connection);
       } catch (e) {
-        if (e instanceof ExecutionError) {
+        if (e instanceof ExecutionError || e instanceof Error) {
           throw e;
         }
-
         return handleFetchError({
           url,
           cause: e,
