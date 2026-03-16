@@ -4,7 +4,7 @@ import {
   FastifyPluginCallbackTypebox,
 } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
-import { PrincipalType, PUBLIC_ROUTE_POLICY } from '@openops/shared';
+import { PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import axios from 'axios';
 import { FastifyReply, FastifyRequest } from 'fastify';
