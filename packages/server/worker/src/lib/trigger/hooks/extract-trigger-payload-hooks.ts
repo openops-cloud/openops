@@ -5,8 +5,8 @@ import {
 } from '@openops/server-shared';
 import {
   ApplicationError,
-  EngineResponseStatus,
   ErrorCode,
+  FlowRunStatus,
   FlowVersion,
   isNil,
   ProjectId,
@@ -24,7 +24,7 @@ export async function extractPayloads(
   const { payload, flowVersion, projectId, simulate } = params;
   try {
     const { blockName, blockVersion } = flowVersion.trigger.settings;
-    const output = await engineRunner.executeTrigger(engineToken, {
+    const { result } = await engineRunner.executeTrigger(engineToken, {
       hookType: TriggerHookType.RUN,
       flowVersion,
       triggerPayload: payload,
@@ -35,26 +35,29 @@ export async function extractPayloads(
       projectId,
       test: simulate,
     });
-    logger.debug(
-      {
-        output,
-        blockName,
-        blockVersion,
-        flowId: flowVersion.flowId,
-      },
-      'executeTrigger output',
-    );
-    if (
-      !isNil(output.result) &&
-      output.result.success &&
-      Array.isArray(output.result.output)
-    ) {
+    if (!isNil(result) && result.success && Array.isArray(result.output)) {
       handleFailureFlow(flowVersion, projectId, engineToken, true);
-      return output.result.output as unknown[];
+      return result.output as unknown[];
     } else {
+      if (
+        'status' in result &&
+        result.status === FlowRunStatus.INFRASTRUCTURE_ERROR
+      ) {
+        logger.warn(
+          {
+            result,
+            blockName,
+            blockVersion,
+            flowId: flowVersion.flowId,
+          },
+          'Failed to execute trigger due to infrastructure issue',
+        );
+
+        return [];
+      }
       logger.error(
         {
-          result: output.result,
+          result,
           blockName,
           blockVersion,
           flowId: flowVersion.flowId,
@@ -63,14 +66,13 @@ export async function extractPayloads(
       );
 
       const errorMessage =
-        output.result?.message ??
-        'Trigger execution failed due to an unknown issue.';
+        result?.message ?? 'Trigger execution failed due to an unknown issue.';
 
       handleFailureFlow(flowVersion, projectId, engineToken, false, {
         reason: 'TRIGGER_HOOK_FAILED',
         flowVersionId: flowVersion.id,
         errorMessage,
-        triggerInput: output.result.input,
+        triggerInput: result.input,
       });
       return [];
     }

@@ -328,6 +328,10 @@ function evaluateError(error: Error): {
     message = error.getMessage();
   }
 
+  if (error instanceof InfrastructureError) {
+    status = FlowRunStatus.INFRASTRUCTURE_ERROR;
+  }
+
   return {
     engineResponseStatus: EngineResponseStatus.ERROR,
     response: {
