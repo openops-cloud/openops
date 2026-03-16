@@ -294,18 +294,23 @@ export async function execute(
   } catch (error) {
     logger.warn('Engine operation failed.', error);
 
-    const response = evaluateError(error as Error);
+    const { status, message } = evaluateError(error as Error);
 
     return {
-      status: response.engineResponseStatus,
-      response: response.response,
+      status: EngineResponseStatus.ERROR,
+      response: {
+        status,
+        error: {
+          message,
+        },
+      },
     };
   }
 }
 
 function evaluateError(error: Error): {
-  engineResponseStatus: EngineResponseStatus;
-  response: unknown;
+  status: FlowRunStatus;
+  message: unknown;
 } {
   let status = FlowRunStatus.INTERNAL_ERROR;
   let message = tryParseJson(error.message);
@@ -333,12 +338,7 @@ function evaluateError(error: Error): {
   }
 
   return {
-    engineResponseStatus: EngineResponseStatus.ERROR,
-    response: {
-      status,
-      error: {
-        message,
-      },
-    },
+    status,
+    message,
   };
 }
