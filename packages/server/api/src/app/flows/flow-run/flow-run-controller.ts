@@ -143,7 +143,6 @@ const FlowRunFilteredWithNoSteps = Type.Omit(FlowRun, [
 
 const ListRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_RUN,
@@ -164,7 +163,6 @@ const ListRequest = {
 
 const GetRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_RUN,
@@ -187,8 +185,6 @@ const GetRequest = {
 
 const ResumeFlowRunRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
     security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
@@ -203,7 +199,6 @@ const ResumeFlowRunRequest = {
 
 const RetryFlowRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.RETRY_RUN,
@@ -222,7 +217,6 @@ const RetryFlowRequest = {
 
 const StopFlowRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_RUN_FLOW,

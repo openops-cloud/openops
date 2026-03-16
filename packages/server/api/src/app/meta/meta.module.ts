@@ -21,8 +21,6 @@ const metaController: FastifyPluginAsyncTypebox = async (app) => {
         },
       },
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
     },

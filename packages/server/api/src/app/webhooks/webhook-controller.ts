@@ -68,8 +68,6 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
 
 const WEBHOOK_PARAMS = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
     security: PUBLIC_ROUTE_POLICY,
   },
   schema: {

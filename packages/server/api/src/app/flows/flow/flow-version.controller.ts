@@ -125,7 +125,6 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/test-output',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER],
           permission: Permission.TEST_STEP_FLOW,
@@ -179,7 +178,6 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/test-output',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER],
           permission: Permission.TEST_STEP_FLOW,
@@ -257,7 +255,6 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 
 const GetLatestVersionsByConnectionRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FLOW,

@@ -84,7 +84,6 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
 
 const SaveAiConfigOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -99,7 +98,6 @@ const SaveAiConfigOptions = {
 
 const getAiConfigRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -113,7 +111,6 @@ const getAiConfigRequest = {
 
 const aiConfigIdRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),

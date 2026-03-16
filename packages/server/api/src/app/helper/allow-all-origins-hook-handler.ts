@@ -28,8 +28,6 @@ export function registerOptionsEndpoint(app: FastifyInstance) {
     '*',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
     },

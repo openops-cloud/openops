@@ -47,7 +47,6 @@ export const webhookSimulationController: FastifyPluginCallbackTypebox = (
 
 const CreateWebhookSimulationRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_STEP_FLOW,
@@ -65,7 +64,6 @@ const CreateWebhookSimulationRequest = {
 
 const GetWebhookSimulationRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_STEP_FLOW,

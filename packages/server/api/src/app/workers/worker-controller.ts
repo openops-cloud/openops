@@ -37,7 +37,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/poll',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       logLevel: 'silent',
@@ -64,7 +63,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/delete-webhook-simulation',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {
@@ -83,7 +81,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/send-webhook-update',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {
@@ -107,7 +104,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/save-payloads',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {
@@ -137,7 +133,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/submit-payload',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {
@@ -174,7 +169,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/submit-payloads',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {
@@ -219,7 +213,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     '/resume-run',
     {
       config: {
-        allowedPrincipals: [PrincipalType.WORKER],
         security: WORKER_ROUTE_POLICY,
       },
       schema: {

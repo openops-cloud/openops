@@ -45,8 +45,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
       schema: {
@@ -87,8 +85,6 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
     '/:id',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
       schema: {

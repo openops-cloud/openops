@@ -60,7 +60,6 @@ const usersSettingsController: FastifyPluginAsyncTypebox = async (app) => {
 
 const GetUserSettingsRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -77,7 +76,6 @@ const GetUserSettingsRequestOptions = {
 
 const UpsertUserSettingsRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
