@@ -44,7 +44,7 @@ jobs:
       VERSION: ${{ needs.get-version.outputs.version }}
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@v4.0.0
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.0.0
         with:
@@ -53,9 +53,9 @@ jobs:
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to private ECR
         id: login-private-ecr
-        uses: aws-actions/amazon-ecr-login@v2.0.1
+        uses: aws-actions/amazon-ecr-login@v2.0.2
       - name: Login to public ECR
-        uses: aws-actions/amazon-ecr-login@v2.0.1
+        uses: aws-actions/amazon-ecr-login@v2.0.2
         env:
           AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
@@ -94,7 +94,7 @@ jobs:
       - name: Create a GitHub release
         id: create-github-release
         if: inputs.github_release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v2.6.1
         with:
           target_commitish: ${{ github.sha }}
           tag_name: ${{ env.VERSION }}
@@ -133,7 +133,7 @@ jobs:
     steps:
       - name: Get GitHub App token
         id: app_token
-        uses: actions/create-github-app-token@v2.2.1
+        uses: actions/create-github-app-token@v3.0.0
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
@@ -154,7 +154,7 @@ jobs:
     steps:
       - name: Get token from Github App
         id: app_token
-        uses: actions/create-github-app-token@v2.2.1
+        uses: actions/create-github-app-token@v3.0.0
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: Get GitHub App token
         id: app_token
-        uses: actions/create-github-app-token@v2.2.1
+        uses: actions/create-github-app-token@v3.0.0
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
