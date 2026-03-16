@@ -1,4 +1,4 @@
-import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
+import { PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import { FastifyInstance, onRequestHookHandler } from 'fastify';
 
 export const allowAllOriginsHookHandler: onRequestHookHandler = (
@@ -28,8 +28,6 @@ export function registerOptionsEndpoint(app: FastifyInstance) {
     '*',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
     },

@@ -470,7 +470,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
 const OpenChatOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -485,7 +484,6 @@ const OpenChatOptions = {
 
 const NewMessageOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -500,7 +498,6 @@ const NewMessageOptions = {
 
 const ChatNameOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -514,7 +511,6 @@ const ChatNameOptions = {
 
 const CodeGenerationOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -529,7 +525,6 @@ const CodeGenerationOptions = {
 
 const RenameChatOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -544,7 +539,6 @@ const RenameChatOptions = {
 
 const DeleteChatOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -559,7 +553,6 @@ const DeleteChatOptions = {
 
 const ListChatsOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -576,7 +569,6 @@ const ListChatsOptions = {
 
 const UpdateChatModelOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
