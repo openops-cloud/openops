@@ -45,9 +45,6 @@ export const createStorageService = ({
 
         return await safeResponseJson<StoreEntry>(response);
       } catch (e) {
-        if (e instanceof ExecutionError || e instanceof Error) {
-          throw e;
-        }
         return handleFetchError({
           url,
           cause: e,
@@ -84,9 +81,6 @@ export const createStorageService = ({
 
         return await safeResponseJson<StoreEntry>(response);
       } catch (e) {
-        if (e instanceof ExecutionError || e instanceof Error) {
-          throw e;
-        }
         return handleFetchError({
           url,
           cause: e,
@@ -114,9 +108,6 @@ export const createStorageService = ({
 
         return null;
       } catch (e) {
-        if (e instanceof ExecutionError || e instanceof Error) {
-          throw e;
-        }
         return handleFetchError({
           url,
           cause: e,
@@ -151,9 +142,6 @@ export const createStorageService = ({
         }>(response);
         return result.entries || [];
       } catch (e) {
-        if (e instanceof ExecutionError || e instanceof Error) {
-          throw e;
-        }
         return handleFetchError({
           url,
           cause: e,

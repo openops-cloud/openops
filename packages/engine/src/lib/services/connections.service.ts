@@ -49,9 +49,6 @@ export const createConnectionService = ({
         }
         return getConnectionValue(connection);
       } catch (e) {
-        if (e instanceof ExecutionError || e instanceof Error) {
-          throw e;
-        }
         return handleFetchError({
           url,
           cause: e,
