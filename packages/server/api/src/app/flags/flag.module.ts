@@ -1,9 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
-  ALL_PRINCIPAL_TYPES,
   ENGINE_ROUTE_POLICY,
   FlagId,
-  PrincipalType,
   PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';

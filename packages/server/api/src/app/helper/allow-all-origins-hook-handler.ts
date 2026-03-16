@@ -1,4 +1,4 @@
-import { ALL_PRINCIPAL_TYPES, PUBLIC_ROUTE_POLICY } from '@openops/shared';
+import { PUBLIC_ROUTE_POLICY } from '@openops/shared';
 import { FastifyInstance, onRequestHookHandler } from 'fastify';
 
 export const allowAllOriginsHookHandler: onRequestHookHandler = (
