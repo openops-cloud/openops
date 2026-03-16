@@ -6,16 +6,32 @@ export const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   const text = await response.text();
 
   if (contentType && !contentType.includes('application/json')) {
-    const message = `Expected JSON response, but received status ${response.status} and ${contentType}. Body: ${text}`;
-    logger.warn(message);
-    throw new InfrastructureError(message);
+    logger.warn(
+      {
+        status: response.status,
+        contentType,
+        body: text,
+      },
+      'Expected JSON response but received non-JSON content type',
+    );
+    throw new InfrastructureError(
+      `Expected JSON response, but received status ${response.status} and ${contentType}.`,
+    );
   }
 
   try {
     return JSON.parse(text) as T;
   } catch (e) {
-    const message = `Failed to parse JSON response with status ${response.status}. Body: ${text}`;
-    logger.warn(message);
-    throw new InfrastructureError(message, e);
+    logger.warn(
+      {
+        status: response.status,
+        body: text,
+      },
+      'Failed to parse JSON response',
+    );
+    throw new InfrastructureError(
+      `Failed to parse JSON response with status ${response.status}.`,
+      e,
+    );
   }
 };

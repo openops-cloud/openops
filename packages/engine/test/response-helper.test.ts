@@ -40,36 +40,40 @@ describe('parseJsonResponse', () => {
   });
 
   it('should include full status code and full body in InfrastructureError for non-json content-type', async () => {
+    const body = '<html><body><h1>502 Bad Gateway</h1><p>Nginx Error</p></body></html>';
     const response = {
       status: 502,
       headers: new Headers({ 'content-type': 'text/html' }),
-      text: jest.fn().mockResolvedValue('<html><body><h1>502 Bad Gateway</h1><p>Nginx Error</p></body></html>'),
+      text: jest.fn().mockResolvedValue(body),
     } as unknown as Response;
 
     const promise = parseJsonResponse(response);
     await expect(promise).rejects.toThrow(InfrastructureError);
     await expect(promise).rejects.toThrow(
-      'Expected JSON response, but received status 502 and text/html. Body: <html><body><h1>502 Bad Gateway</h1><p>Nginx Error</p></body></html>',
+      'Expected JSON response, but received status 502 and text/html.',
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      'Expected JSON response, but received status 502 and text/html. Body: <html><body><h1>502 Bad Gateway</h1><p>Nginx Error</p></body></html>',
+      { status: 502, contentType: 'text/html', body },
+      'Expected JSON response but received non-JSON content type',
     );
   });
 
   it('should include status code in InfrastructureError for invalid json', async () => {
+    const body = 'invalid json';
     const response = {
       status: 200,
       headers: new Headers({ 'content-type': 'application/json' }),
-      text: jest.fn().mockResolvedValue('invalid json'),
+      text: jest.fn().mockResolvedValue(body),
     } as unknown as Response;
 
     const promise = parseJsonResponse(response);
     await expect(promise).rejects.toThrow(InfrastructureError);
     await expect(promise).rejects.toThrow(
-      'Failed to parse JSON response with status 200. Body: invalid json',
+      'Failed to parse JSON response with status 200.',
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to parse JSON response with status 200. Body: invalid json',
+      { status: 200, body },
+      'Failed to parse JSON response',
     );
   });
 });
