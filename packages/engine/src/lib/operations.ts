@@ -296,7 +296,7 @@ export async function execute(
 
     if (error instanceof InfrastructureError) {
       return {
-        status: EngineResponseStatus.INTERNAL_ERROR,
+        status: EngineResponseStatus.INFRASTRUCTURE_ERROR,
         response: {
           message: error.message,
           success: false,

@@ -39,7 +39,7 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
-      if (status === EngineResponseStatus.INTERNAL_ERROR) {
+      if (status === EngineResponseStatus.INFRASTRUCTURE_ERROR) {
         logger.warn(
           {
             result,
@@ -47,7 +47,7 @@ export async function extractPayloads(
             blockVersion,
             flowId: flowVersion.flowId,
           },
-          'Failed to execute trigger due to internal issue',
+          'Failed to execute trigger due to infrastucture issue',
         );
 
         return [];
