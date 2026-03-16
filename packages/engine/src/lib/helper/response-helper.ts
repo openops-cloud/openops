@@ -3,17 +3,17 @@ import { InfrastructureError } from './execution-errors';
 
 export const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   const contentType = response.headers.get('content-type');
+  const text = await response.text();
+
   if (contentType && !contentType.includes('application/json')) {
-    const text = await response.text();
     const message = `Expected JSON response, but received status ${response.status} and ${contentType}. Body: ${text}`;
     logger.warn(message);
     throw new InfrastructureError(message);
   }
 
   try {
-    return await response.json();
+    return JSON.parse(text) as T;
   } catch (e) {
-    const text = await response.text();
     const message = `Failed to parse JSON response with status ${response.status}. Body: ${text}`;
     logger.warn(message);
     throw new InfrastructureError(message, e);
