@@ -142,7 +142,7 @@ function parseEngineResponse<Result extends EngineHelperResult>(
   ) as EngineHelperFlowResult;
 
   return {
-    status: EngineResponseStatus.OK,
+    status: executionResult.status ?? EngineResponseStatus.OK,
     result: output as Result,
   };
 }
