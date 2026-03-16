@@ -24,7 +24,7 @@ export async function extractPayloads(
   const { payload, flowVersion, projectId, simulate } = params;
   try {
     const { blockName, blockVersion } = flowVersion.trigger.settings;
-    const { result } = await engineRunner.executeTrigger(engineToken, {
+    const output = await engineRunner.executeTrigger(engineToken, {
       hookType: TriggerHookType.RUN,
       flowVersion,
       triggerPayload: payload,
@@ -35,13 +35,26 @@ export async function extractPayloads(
       projectId,
       test: simulate,
     });
-    if (!isNil(result) && result.success && Array.isArray(result.output)) {
+    logger.debug(
+      {
+        output,
+        blockName,
+        blockVersion,
+        flowId: flowVersion.flowId,
+      },
+      'executeTrigger output',
+    );
+    if (
+      !isNil(output.result) &&
+      output.result.success &&
+      Array.isArray(output.result.output)
+    ) {
       handleFailureFlow(flowVersion, projectId, engineToken, true);
-      return result.output as unknown[];
+      return output.result.output as unknown[];
     } else {
       logger.error(
         {
-          result,
+          result: output.result,
           blockName,
           blockVersion,
           flowId: flowVersion.flowId,
@@ -50,13 +63,14 @@ export async function extractPayloads(
       );
 
       const errorMessage =
-        result?.message ?? 'Trigger execution failed due to an unknown issue.';
+        output.result?.message ??
+        'Trigger execution failed due to an unknown issue.';
 
       handleFailureFlow(flowVersion, projectId, engineToken, false, {
         reason: 'TRIGGER_HOOK_FAILED',
         flowVersionId: flowVersion.id,
         errorMessage,
-        triggerInput: result.input,
+        triggerInput: output.result.input,
       });
       return [];
     }
