@@ -307,16 +307,6 @@ function evaluateError(error: Error): {
   engineResponseStatus: EngineResponseStatus;
   response: unknown;
 } {
-  if (error instanceof InfrastructureError) {
-    return {
-      engineResponseStatus: EngineResponseStatus.ERROR,
-      response: {
-        message: error.message,
-        success: false,
-      },
-    };
-  }
-
   let status = FlowRunStatus.INTERNAL_ERROR;
   let message = tryParseJson(error.message);
 
