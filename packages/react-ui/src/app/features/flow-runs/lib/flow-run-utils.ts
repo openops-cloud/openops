@@ -83,11 +83,6 @@ export const flowRunUtils = {
           variant: 'default',
           Icon: CircleStop,
         };
-      case FlowRunStatus.FAILED:
-        return {
-          variant: 'error',
-          Icon: X,
-        };
       case FlowRunStatus.IGNORED:
         return {
           variant: 'default',
@@ -106,6 +101,7 @@ export const flowRunUtils = {
       case FlowRunStatus.TIMEOUT:
       case FlowRunStatus.INTERNAL_ERROR:
       case FlowRunStatus.INFRASTRUCTURE_ERROR:
+      case FlowRunStatus.FAILED:
         return {
           variant: 'error',
           Icon: X,
