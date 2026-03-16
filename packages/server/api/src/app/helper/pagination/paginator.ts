@@ -193,7 +193,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     where: WhereExpressionBuilder,
     cursors: CursorParam,
   ): void {
-    const dbType = this.getSupportedDbType();
+    const dbType = system.get(AppSystemProp.DB_TYPE);
     const operator = this.getOperator();
     const context = this.resolveCursorContext(cursors);
 
@@ -348,7 +348,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     paramName,
     operator,
   }: {
-    dbType: DatabaseType;
+    dbType: string | undefined;
     columnName: string;
     paramName: string;
     operator: string;
@@ -383,14 +383,6 @@ export default class Paginator<Entity extends ObjectLiteral> {
       type === 'datetime' ||
       type === 'date'
     );
-  }
-
-  private getSupportedDbType(): DatabaseType {
-    const dbType = system.get(AppSystemProp.DB_TYPE);
-    if (dbType === DatabaseType.SQLITE3 || dbType === DatabaseType.POSTGRES) {
-      return dbType;
-    }
-    throw new Error('Unsupported database type');
   }
 
   private resolveCursorContext(cursors: CursorParam): CursorContext {
@@ -431,7 +423,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
   private applySingleColumnCursorFilter(
     where: WhereExpressionBuilder,
     cursors: CursorParam,
-    dbType: DatabaseType,
+    dbType: string | undefined,
     operator: string,
     context: CursorContext,
   ): void {
@@ -449,7 +441,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
   private applyCompositeCursorFilter(
     where: WhereExpressionBuilder,
     cursors: CursorParam,
-    dbType: DatabaseType,
+    dbType: string | undefined,
     operator: string,
     context: CursorContext,
   ): void {
