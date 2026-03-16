@@ -4,12 +4,14 @@ import {
   PrincipalType,
   PublicRoutePolicy,
   RouteAccessType,
+  UnscopedAuthorizationPolicy,
 } from '@openops/shared';
-import { ProjectIdSource } from './project-id-source';
+import { PropertySource } from './property-source';
 
 type AuthorizationPolicy =
   | OrganizationAuthorizationPolicy
-  | ProjectAuthorizationPolicy;
+  | ProjectAuthorizationPolicy
+  | UnscopedAuthorizationPolicy;
 
 export type AuthenticatedRoutePolicy = {
   routeAccessType: RouteAccessType.AUTHENTICATED;
@@ -19,14 +21,15 @@ export type AuthenticatedRoutePolicy = {
 export type OrganizationAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.ORGANIZATION;
   allowedPrincipals: readonly PrincipalType[];
-  permission?: Permission;
+  organizationIdSource: PropertySource;
+  permission?: Permission | readonly Permission[];
 };
 
 export type ProjectAuthorizationPolicy = {
   authorizationScope: AuthorizationScope.PROJECT;
   allowedPrincipals: readonly PrincipalType[];
-  projectIdSource: ProjectIdSource;
-  permission?: Permission;
+  projectIdSource: PropertySource;
+  permission?: Permission | readonly Permission[];
 };
 
 export type RouteSecurityPolicy = AuthenticatedRoutePolicy | PublicRoutePolicy;

@@ -2,8 +2,9 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { PrincipalType } from '@openops/shared';
+import { Permission, PrincipalType } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { fileService } from './file.service';
 
 export const fileController: FastifyPluginAsyncTypebox = async (app) => {
@@ -20,6 +21,10 @@ export const fileController: FastifyPluginAsyncTypebox = async (app) => {
 const GetFileRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_RUN,
+    }),
   },
   schema: {
     operationId: 'Get File',

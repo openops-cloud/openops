@@ -32,6 +32,8 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { projectService } from '../../project/project-service';
 import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-models';
 import { flowRunService } from '../flow-run/flow-run-service';
@@ -266,7 +268,10 @@ async function extractUserIdFromPrincipal(
 const CreateFlowRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_FLOW,
+    }),
   },
   schema: {
     tags: ['flows'],
@@ -282,8 +287,12 @@ const CreateFlowRequestOptions = {
 
 const UpdateFlowRequestOptions = {
   config: {
-    permission: Permission.UPDATE_FLOW_STATUS,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_FLOW,
+    }),
   },
+  preHandler: getAuthorizationGuards().enforceWorkflowStatusAuthorization,
   schema: {
     tags: ['flows'],
     description:
@@ -303,7 +312,14 @@ const ListFlowsRequestOptions = {
       PrincipalType.SERVICE,
       PrincipalType.WORKER,
     ],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [
+        PrincipalType.USER,
+        PrincipalType.SERVICE,
+        PrincipalType.WORKER,
+      ],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'List Workflows',
@@ -321,6 +337,10 @@ const ListFlowsRequestOptions = {
 const CountFlowsRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'Get Flow Count',
@@ -331,6 +351,13 @@ const CountFlowsRequestOptions = {
 };
 
 const GetFlowVersionRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
+  },
   schema: {
     tags: ['flows'],
     description:
@@ -347,6 +374,12 @@ const GetFlowVersionRequestOptions = {
 };
 
 const GetFlowTemplateRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
+  },
   schema: {
     params: Type.Object({
       id: OpenOpsId,
@@ -361,7 +394,10 @@ const GetFlowTemplateRequestOptions = {
 const GetFlowRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'Get Flow Details',
@@ -382,7 +418,10 @@ const GetFlowRequestOptions = {
 const DeleteFlowRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.DELETE_FLOW,
+    }),
   },
   schema: {
     tags: ['flows'],
@@ -401,7 +440,10 @@ const DeleteFlowRequestOptions = {
 const RunFlowRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.TEST_RUN_FLOW,
+    }),
     preSerializationHook: entitiesMustBeOwnedByCurrentProject,
   },
   schema: {

@@ -60,6 +60,7 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
     {
       AWS_Benchmark_Opportunities: datasets.opportunities.uuid,
       AWS_Benchmark_KPI_efficiency: datasets.kpi.uuid,
+      AWS_Benchmark_Timeseries: datasets.timeseries.uuid,
     },
   );
 

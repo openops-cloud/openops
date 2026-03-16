@@ -47,11 +47,7 @@ params:
   subheader_font_size: 0.15
   y_axis_format: $,.2f
   time_format: smart_date
-  conditional_formatting:
-    - colorScheme: '#ACE1C4'
-      column: SUM(Estimated savings USD per month)
-      operator: '>'
-      targetValue: 0
+  conditional_formatting: []
   extra_form_data: {}
   dashboards:
     - 2

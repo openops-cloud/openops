@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   ALL_PRINCIPAL_TYPES,
+  ENGINE_ROUTE_POLICY,
   FlagId,
   PrincipalType,
   PUBLIC_ROUTE_POLICY,
@@ -46,6 +47,7 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
     {
       config: {
         allowedPrincipals: [PrincipalType.ENGINE],
+        security: ENGINE_ROUTE_POLICY,
       },
       schema: {
         description:

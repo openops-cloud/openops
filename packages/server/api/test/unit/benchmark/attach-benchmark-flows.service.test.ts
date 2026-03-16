@@ -62,13 +62,20 @@ describe('create-benchmark-flows.service', () => {
         flowId: 'flow-orchestrator',
         displayName: 'Orchestrator',
         isOrchestrator: true,
+        isCleanup: false,
       },
       {
         flowId: 'flow-cleanup',
         displayName: 'Cleanup',
         isOrchestrator: false,
+        isCleanup: true,
       },
-      { flowId: 'flow-sub', displayName: 'Sub', isOrchestrator: false },
+      {
+        flowId: 'flow-sub',
+        displayName: 'Sub',
+        isOrchestrator: false,
+        isCleanup: false,
+      },
     ],
   };
 
@@ -120,10 +127,13 @@ describe('create-benchmark-flows.service', () => {
     expect(savedFlowRows).toHaveLength(3);
     expect(savedFlowRows[0].flowId).toBe('flow-orchestrator');
     expect(savedFlowRows[0].isOrchestrator).toBe(true);
+    expect(savedFlowRows[0].isCleanup).toBe(false);
     expect(savedFlowRows[1].flowId).toBe('flow-cleanup');
     expect(savedFlowRows[1].isOrchestrator).toBe(false);
+    expect(savedFlowRows[1].isCleanup).toBe(true);
     expect(savedFlowRows[2].flowId).toBe('flow-sub');
     expect(savedFlowRows[2].isOrchestrator).toBe(false);
+    expect(savedFlowRows[2].isCleanup).toBe(false);
     savedFlowRows.forEach((row) => {
       expect(row.benchmarkId).toBe(result.benchmark.id);
       expect(row.deletedAt).toBeNull();
@@ -146,6 +156,7 @@ describe('create-benchmark-flows.service', () => {
             flowId: 'f1',
             displayName: 'Orchestrator',
             isOrchestrator: true,
+            isCleanup: false,
           },
         ],
       }),
