@@ -40,6 +40,8 @@ export async function extractPayloads(
       return result.output as unknown[];
     } else {
       if (
+        !isNil(result) &&
+        typeof result === 'object' &&
         'status' in result &&
         result.status === FlowRunStatus.INFRASTRUCTURE_ERROR
       ) {
