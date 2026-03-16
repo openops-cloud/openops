@@ -235,4 +235,5 @@ export enum EngineResponseStatus {
   OK = 'OK',
   ERROR = 'ERROR',
   TIMEOUT = 'TIMEOUT',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
 }

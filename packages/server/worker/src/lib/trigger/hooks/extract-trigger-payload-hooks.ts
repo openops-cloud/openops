@@ -5,6 +5,7 @@ import {
 } from '@openops/server-shared';
 import {
   ApplicationError,
+  EngineResponseStatus,
   ErrorCode,
   FlowVersion,
   isNil,
@@ -23,7 +24,7 @@ export async function extractPayloads(
   const { payload, flowVersion, projectId, simulate } = params;
   try {
     const { blockName, blockVersion } = flowVersion.trigger.settings;
-    const { result } = await engineRunner.executeTrigger(engineToken, {
+    const { status, result } = await engineRunner.executeTrigger(engineToken, {
       hookType: TriggerHookType.RUN,
       flowVersion,
       triggerPayload: payload,
@@ -47,6 +48,11 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
+
+      if (status === EngineResponseStatus.INTERNAL_ERROR) {
+        return [];
+      }
+
       const errorMessage =
         result?.message ?? 'Trigger execution failed due to an unknown issue.';
 

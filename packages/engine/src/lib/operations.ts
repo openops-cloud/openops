@@ -34,7 +34,10 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
-import { ExecutionLimitReachedError } from './helper/execution-errors';
+import {
+  ExecutionLimitReachedError,
+  InfrastructureError,
+} from './helper/execution-errors';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { progressService } from './services/progress.service';
@@ -290,6 +293,16 @@ export async function execute(
     }
   } catch (error) {
     logger.warn('Engine operation failed.', error);
+
+    if (error instanceof InfrastructureError) {
+      return {
+        status: EngineResponseStatus.INTERNAL_ERROR,
+        response: {
+          message: error.message,
+          success: false,
+        },
+      };
+    }
 
     const { status, message } = evaluateError(error as Error);
 
