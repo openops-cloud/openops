@@ -294,34 +294,29 @@ export async function execute(
   } catch (error) {
     logger.warn('Engine operation failed.', error);
 
-    if (error instanceof InfrastructureError) {
-      return {
-        status: EngineResponseStatus.INFRASTRUCTURE_ERROR,
-        response: {
-          message: error.message,
-          success: false,
-        },
-      };
-    }
-
-    const { status, message } = evaluateError(error as Error);
+    const response = evaluateError(error as Error);
 
     return {
-      status: EngineResponseStatus.ERROR,
-      response: {
-        status,
-        error: {
-          message,
-        },
-      },
+      status: response.engineResponseStatus,
+      response: response.response,
     };
   }
 }
 
 function evaluateError(error: Error): {
-  status: FlowRunStatus;
-  message: unknown;
+  engineResponseStatus: EngineResponseStatus;
+  response: unknown;
 } {
+  if (error instanceof InfrastructureError) {
+    return {
+      engineResponseStatus: EngineResponseStatus.ERROR,
+      response: {
+        message: error.message,
+        success: false,
+      },
+    };
+  }
+
   let status = FlowRunStatus.INTERNAL_ERROR;
   let message = tryParseJson(error.message);
 
@@ -344,7 +339,12 @@ function evaluateError(error: Error): {
   }
 
   return {
-    status,
-    message,
+    engineResponseStatus: EngineResponseStatus.ERROR,
+    response: {
+      status,
+      error: {
+        message,
+      },
+    },
   };
 }

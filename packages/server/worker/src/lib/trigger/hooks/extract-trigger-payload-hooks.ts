@@ -24,7 +24,7 @@ export async function extractPayloads(
   const { payload, flowVersion, projectId, simulate } = params;
   try {
     const { blockName, blockVersion } = flowVersion.trigger.settings;
-    const { status, result } = await engineRunner.executeTrigger(engineToken, {
+    const { result } = await engineRunner.executeTrigger(engineToken, {
       hookType: TriggerHookType.RUN,
       flowVersion,
       triggerPayload: payload,
@@ -39,20 +39,6 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
-      if (status === EngineResponseStatus.INFRASTRUCTURE_ERROR) {
-        logger.warn(
-          {
-            result,
-            blockName,
-            blockVersion,
-            flowId: flowVersion.flowId,
-          },
-          'Failed to execute trigger due to infrastucture issue',
-        );
-
-        return [];
-      }
-
       logger.error(
         {
           result,

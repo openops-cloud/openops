@@ -235,5 +235,4 @@ export enum EngineResponseStatus {
   OK = 'OK',
   ERROR = 'ERROR',
   TIMEOUT = 'TIMEOUT',
-  INFRASTRUCTURE_ERROR = 'INFRASTRUCTURE_ERROR',
 }
