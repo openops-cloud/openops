@@ -5,7 +5,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   createAuthResponse,
   OpsEdition,
   Permission,

@@ -1,7 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   PLATFORM_METADATA_PLACEHOLDER,
   PlatformMetadata,
   PUBLIC_ROUTE_POLICY,

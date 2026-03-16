@@ -1,9 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import {
-  ALL_PRINCIPAL_TYPES,
-  PUBLIC_ROUTE_POLICY,
-  WebhookUrlParams,
-} from '@openops/shared';
+import { PUBLIC_ROUTE_POLICY, WebhookUrlParams } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { handleWebhook, handleWebhookSimulation } from './webhook-handler';
 

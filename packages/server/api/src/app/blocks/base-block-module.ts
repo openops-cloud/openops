@@ -8,7 +8,6 @@ import {
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
 import {
-  ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
   flowHelper,

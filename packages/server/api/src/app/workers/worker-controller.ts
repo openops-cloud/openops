@@ -18,7 +18,6 @@ import {
   ExecutionType,
   FlowRunTriggerSource,
   openOpsId,
-  PrincipalType,
   ProgressUpdateType,
   RunEnvironment,
   WORKER_ROUTE_POLICY,

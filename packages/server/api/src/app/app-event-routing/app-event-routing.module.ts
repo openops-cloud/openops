@@ -8,7 +8,6 @@ import {
   rejectedPromiseHandler,
 } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   ApplicationError,
   assertNotNullOrUndefined,
   ErrorCode,

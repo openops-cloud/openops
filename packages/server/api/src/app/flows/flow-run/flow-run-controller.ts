@@ -4,7 +4,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import { requestWorkflowCancellation } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   ApplicationError,
   assertNotNullOrUndefined,
   ErrorCode,
