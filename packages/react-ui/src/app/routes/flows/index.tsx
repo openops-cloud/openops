@@ -7,6 +7,7 @@ import qs from 'qs';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import { useCheckAccessAndRedirect } from '@/app/common/hooks/authorization-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
 import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import {
@@ -16,10 +17,11 @@ import {
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
 import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
-import { FlowStatus, FlowVersionState } from '@openops/shared';
+import { FlowStatus, FlowVersionState, Permission } from '@openops/shared';
 
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');
+  const hasAccess = useCheckAccessAndRedirect(Permission.READ_FLOW);
   const navigate = useNavigate();
   const [tableRefresh, setTableRefresh] = useState(false);
   const onTableRefresh = useCallback(
@@ -57,6 +59,10 @@ const FlowsPage = () => {
       ),
     [],
   );
+
+  if (!hasAccess) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col w-full">
