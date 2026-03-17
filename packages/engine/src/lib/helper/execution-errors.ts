@@ -100,6 +100,17 @@ export class FetchError extends ExecutionError {
   }
 }
 
+export class InfrastructureError extends ExecutionError {
+  constructor(message: string, cause?: unknown) {
+    super(
+      'InfrastructureError',
+      formatMessage(message),
+      ExecutionErrorType.ENGINE,
+      cause,
+    );
+  }
+}
+
 export class ExecutionLimitReachedError extends ExecutionError {
   formated: boolean;
 

@@ -1,9 +1,10 @@
-import { PopulatedFlow } from '@openops/shared';
+import { Permission, PopulatedFlow } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { FullPageSpinner } from '@/app/common/components/full-page-spinner';
+import { useCheckAccessAndRedirect } from '@/app/common/hooks/authorization-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
@@ -15,6 +16,7 @@ import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { AxiosError } from 'axios';
 
 const FlowBuilderPage = () => {
+  const hasAccess = useCheckAccessAndRedirect(Permission.READ_FLOW);
   const { flowId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -50,6 +52,10 @@ const FlowBuilderPage = () => {
     },
     refetchOnWindowFocus: 'always',
   });
+
+  if (!hasAccess) {
+    return null;
+  }
 
   if (isError && (error as AxiosError).status === 404) {
     return <Navigate to="/404" />;
