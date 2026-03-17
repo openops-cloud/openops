@@ -1,3 +1,4 @@
+// https://docs.mistral.ai/getting-started/models/models_overview/
 import { createMistral } from '@ai-sdk/mistral';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
@@ -7,8 +8,8 @@ const mistralModels = [
   'ministral-8b-latest',
   'mistral-large-latest',
   'mistral-small-latest',
-  'pixtral-large-latest',
   'pixtral-12b-2409',
+  'pixtral-large-latest',
 ];
 
 function createLanguageModel(params: {

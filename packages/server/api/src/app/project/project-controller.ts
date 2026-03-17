@@ -5,7 +5,7 @@ import {
 import {
   ApplicationError,
   PrincipalType,
-  Project,
+  ProjectWithoutSensitiveData,
   SeekPage,
 } from '@openops/shared';
 import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
@@ -56,8 +56,6 @@ export const userProjectController: FastifyPluginCallbackTypebox = (
   done();
 };
 
-const ProjectWithoutToken = Type.Omit(Project, ['tablesDatabaseToken']);
-
 const GetUserProjectRequestOptions = {
   config: {
     security: getProjectScopedRoutePolicy({
@@ -66,9 +64,9 @@ const GetUserProjectRequestOptions = {
   },
   schema: {
     response: {
-      200: ProjectWithoutToken,
-      401: Type.Unknown(),
-      404: Type.Unknown(),
+      200: ProjectWithoutSensitiveData,
+      401: Type.Null(),
+      404: Type.Null(),
     },
   },
 };
@@ -81,7 +79,7 @@ const ListUserProjectsRequestOptions = {
   },
   schema: {
     response: {
-      200: SeekPage(ProjectWithoutToken),
+      200: SeekPage(ProjectWithoutSensitiveData),
     },
   },
 };
