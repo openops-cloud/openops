@@ -28,7 +28,7 @@ const usersSettingsController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     if (!userSettings) {
-      return response.status(StatusCodes.NOT_FOUND);
+      return response.status(StatusCodes.NOT_FOUND).send();
     }
 
     return userSettings.settings;
