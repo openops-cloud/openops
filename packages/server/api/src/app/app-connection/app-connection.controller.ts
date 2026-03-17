@@ -258,6 +258,7 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+      [StatusCodes.BAD_REQUEST]: Type.Null(),
     },
   },
 };

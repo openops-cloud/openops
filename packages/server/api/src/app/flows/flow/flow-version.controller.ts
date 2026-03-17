@@ -42,6 +42,18 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: Type.Boolean(),
             message: Type.String(),
           }),
+          [StatusCodes.BAD_REQUEST]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.CONFLICT]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
         },
       },
     },
@@ -58,6 +70,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             message:
               'It is not possible to update the flowId of a flow version',
           });
+          return;
         }
 
         await assertFlowVersionBelongsToProject(
@@ -70,6 +83,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: false,
             message: 'The flow version is locked',
           });
+          return;
         }
 
         if (
@@ -80,6 +94,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: false,
             message: 'The flow version has been updated by another user',
           });
+          return;
         }
 
         const userId = request.principal.id;
