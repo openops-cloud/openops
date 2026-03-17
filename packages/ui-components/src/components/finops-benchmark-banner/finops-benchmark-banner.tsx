@@ -77,29 +77,33 @@ const FinOpsBenchmarkBanner = ({
       <div className={finOpsActionsVariants({ variation })}>
         {variation === 'report' && (
           <TooltipWrapper tooltipText={disabledTooltip}>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={disabled}
-              className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={onViewReportClick}
-            >
-              <LucideBarChart2 className="size-[18px]" />
-              {content.reportLabel}
-            </Button>
+            <span className={cn({ 'cursor-not-allowed': disabled })}>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={disabled}
+                className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline disabled:pointer-events-none disabled:opacity-50"
+                onClick={onViewReportClick}
+              >
+                <LucideBarChart2 className="size-[18px]" />
+                {content.reportLabel}
+              </Button>
+            </span>
           </TooltipWrapper>
         )}
         <TooltipWrapper tooltipText={disabledTooltip}>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled}
-            className="h-[38px] gap-2 rounded-[8px] border-input bg-background px-3 py-[9px] text-sm font-bold leading-5 text-primary-200 hover:bg-accent/50 disabled:pointer-events-auto disabled:cursor-not-allowed"
-            onClick={onActionClick}
-          >
-            <Sparkles className="size-5" />
-            {content.actionLabel}
-          </Button>
+          <span className={cn({ 'cursor-not-allowed': disabled })}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={disabled}
+              className="h-[38px] gap-2 rounded-[8px] border-input bg-background px-3 py-[9px] text-sm font-bold leading-5 text-primary-200 hover:bg-accent/50 disabled:pointer-events-none"
+              onClick={onActionClick}
+            >
+              <Sparkles className="size-5" />
+              {content.actionLabel}
+            </Button>
+          </span>
         </TooltipWrapper>
       </div>
     </div>
