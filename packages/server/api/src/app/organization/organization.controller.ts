@@ -41,7 +41,6 @@ export const organizationController: FastifyPluginAsyncTypebox = async (
 
 const UpdateOrganizationRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getOrganizationScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.WRITE_ORGANIZATION,
@@ -63,7 +62,6 @@ const UpdateOrganizationRequest = {
 
 const GetOrganizationRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getOrganizationScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       organizationIdSource: organizationIdResolver.fromParams('id'),

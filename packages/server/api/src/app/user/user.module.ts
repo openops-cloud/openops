@@ -45,14 +45,12 @@ const usersController: FastifyPluginAsyncTypebox = async (app) => {
 
 const MeRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
 };
 
 const UpdateTrackingRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {
