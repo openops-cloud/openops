@@ -3,6 +3,8 @@ import { t } from 'i18next';
 import { LucideBarChart2, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
+import { usePermissionMessage } from '../../ui/permission-message-context';
+import { TooltipWrapper } from '../tooltip-wrapper';
 
 const finOpsBenchmarkBannerClasses =
   'flex w-full items-center justify-between gap-4 rounded-[8px] border border-input bg-background-800 p-4';
@@ -30,6 +32,7 @@ type FinOpsBenchmarkBannerProps = {
   onActionClick?: () => void;
   onViewReportClick?: () => void;
   className?: string;
+  disabled?: boolean;
 };
 
 const FinOpsBenchmarkBanner = ({
@@ -38,7 +41,10 @@ const FinOpsBenchmarkBanner = ({
   onActionClick,
   onViewReportClick,
   className,
+  disabled = false,
 }: FinOpsBenchmarkBannerProps) => {
+  const permissionMessage = usePermissionMessage();
+  const disabledTooltip = disabled ? permissionMessage : undefined;
   const providerLabel = PROVIDER_LABELS[provider];
 
   const content =
@@ -70,25 +76,31 @@ const FinOpsBenchmarkBanner = ({
       </div>
       <div className={finOpsActionsVariants({ variation })}>
         {variation === 'report' && (
+          <TooltipWrapper tooltipText={disabledTooltip}>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={disabled}
+              className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={onViewReportClick}
+            >
+              <LucideBarChart2 className="size-[18px]" />
+              {content.reportLabel}
+            </Button>
+          </TooltipWrapper>
+        )}
+        <TooltipWrapper tooltipText={disabledTooltip}>
           <Button
             type="button"
-            variant="ghost"
-            className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline"
-            onClick={onViewReportClick}
+            variant="outline"
+            disabled={disabled}
+            className="h-[38px] gap-2 rounded-[8px] border-input bg-background px-3 py-[9px] text-sm font-bold leading-5 text-primary-200 hover:bg-accent/50 disabled:pointer-events-auto disabled:cursor-not-allowed"
+            onClick={onActionClick}
           >
-            <LucideBarChart2 className="size-[18px]" />
-            {content.reportLabel}
+            <Sparkles className="size-5" />
+            {content.actionLabel}
           </Button>
-        )}
-        <Button
-          type="button"
-          variant="outline"
-          className="h-[38px] gap-2 rounded-[8px] border-input bg-background px-3 py-[9px] text-sm font-bold leading-5 text-primary-200 hover:bg-accent/50"
-          onClick={onActionClick}
-        >
-          <Sparkles className="size-5" />
-          {content.actionLabel}
-        </Button>
+        </TooltipWrapper>
       </div>
     </div>
   );
