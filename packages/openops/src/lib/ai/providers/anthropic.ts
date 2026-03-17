@@ -4,7 +4,6 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const anthropicModels = [
-  'claude-3-haiku-20240307',
   'claude-haiku-4-5',
   'claude-haiku-4-5-20251001',
   'claude-opus-4-0',

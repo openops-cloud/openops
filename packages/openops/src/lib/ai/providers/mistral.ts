@@ -15,9 +15,6 @@ const mistralModels = [
   'mistral-medium-2508',
   'mistral-medium-latest',
   'mistral-small-latest',
-  'open-mistral-7b',
-  'open-mixtral-8x22b',
-  'open-mixtral-8x7b',
   'pixtral-12b-2409',
   'pixtral-large-latest',
 ];

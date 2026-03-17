@@ -13,12 +13,10 @@ const groqModels = [
   'llama3-8b-8192',
   'meta-llama/llama-4-maverick-17b-128e-instruct',
   'meta-llama/llama-4-scout-17b-16e-instruct',
-  'mixtral-8x7b-32768',
   'moonshotai/kimi-k2-instruct-0905',
   'openai/gpt-oss-120b',
   'openai/gpt-oss-20b',
   'qwen-2.5-32b',
-  'qwen-qwq-32b',
   'qwen/qwen3-32b',
 ];
 
