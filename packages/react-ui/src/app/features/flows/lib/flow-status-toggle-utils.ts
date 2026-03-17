@@ -3,6 +3,37 @@ import { Flow, Trigger, TriggerType } from '@openops/shared';
 import cronstrue from 'cronstrue/i18n';
 import i18n, { t } from 'i18next';
 
+const DEFAULT_PERMISSION_MESSAGE =
+  "You don't have permission to perform this action. Please contact a Workspace owner";
+
+export function getFlowStatusToggleTooltip({
+  userHasPermission,
+  isPublishedVersionAvailable,
+  isFlowPublished,
+  triggerExplanation,
+  permissionMessage,
+}: {
+  userHasPermission: boolean;
+  isPublishedVersionAvailable: boolean;
+  isFlowPublished: boolean;
+  triggerExplanation: string;
+  permissionMessage: string | undefined;
+}): string {
+  if (!userHasPermission) {
+    return permissionMessage ?? t(DEFAULT_PERMISSION_MESSAGE);
+  }
+
+  if (!isPublishedVersionAvailable) {
+    return t('Please publish workflow first');
+  }
+
+  if (isFlowPublished) {
+    return triggerExplanation;
+  }
+
+  return t('Workflow is off. It only runs if manually triggered.');
+}
+
 export function getShortTriggerExplanation(
   trigger: Trigger,
   triggerMetadata: StepMetadata | undefined,
