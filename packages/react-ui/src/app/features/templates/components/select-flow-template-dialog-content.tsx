@@ -1,4 +1,4 @@
-import { useCheckAccessAndRedirect } from '@/app/common/hooks/authorization-hooks';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { ExpandedTemplate } from '@/app/features/templates/components/expanded-template';
@@ -97,9 +97,8 @@ const SelectFlowTemplateDialogContent = ({
   const ownerLogoUrl = useOwnerLogoUrl();
   const { createPollingInterval } = useUserInfoPolling();
   const { isCloudUser } = useShowTemplatesBanner();
-  const hasWriteFlowPermission = useCheckAccessAndRedirect(
-    Permission.WRITE_FLOW,
-  );
+  const { checkAccess } = useAuthorization();
+  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
   const isFullCatalog = !isTemplatePreselected && isCloudUser;
 
   const onExploreMoreClick = () => {
