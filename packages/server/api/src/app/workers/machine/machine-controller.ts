@@ -58,7 +58,6 @@ export const workerMachineController: FastifyPluginAsyncTypebox = async (
 
 const GenerateWorkerTokenParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getOrganizationScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       organizationIdSource: organizationIdResolver.fromBody(),
@@ -87,7 +86,6 @@ const HeartbeatParams = {
 
 const ListWorkersParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getOrganizationScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),

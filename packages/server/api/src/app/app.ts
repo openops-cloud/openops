@@ -114,8 +114,9 @@ export const setupApp = async (
   const openapiRoutePrefix = '/v1/openapi';
   app.addHook('onRoute', (route) => {
     if (route.url.startsWith(openapiRoutePrefix)) {
-      route.config ??= {};
-      route.config.skipAuth = true;
+      route.config ??= {
+        security: PUBLIC_ROUTE_POLICY,
+      };
       route.config.security = PUBLIC_ROUTE_POLICY;
     }
   });

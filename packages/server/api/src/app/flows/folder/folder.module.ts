@@ -68,7 +68,6 @@ const folderController: FastifyPluginAsyncTypebox = async (fastify) => {
 
 const CreateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.WRITE_FOLDER,
@@ -85,7 +84,6 @@ const CreateFolderParams = {
 
 const UpdateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.WRITE_FOLDER,
@@ -105,7 +103,6 @@ const UpdateFolderParams = {
 
 const GetFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FOLDER,
@@ -124,10 +121,9 @@ const GetFolderParams = {
 
 const ListFoldersFlowsParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-      permission: Permission.READ_FLOW,
+      permission: [Permission.READ_FOLDER, Permission.READ_FLOW],
     }),
   },
   schema: {
@@ -141,7 +137,6 @@ const ListFoldersFlowsParams = {
 
 const DeleteFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.DELETE_FOLDER,

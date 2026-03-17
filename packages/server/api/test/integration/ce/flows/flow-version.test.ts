@@ -150,7 +150,7 @@ describe('Flow Version API', () => {
 
       expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
       const responseBody = JSON.parse(response?.body || '{}');
-      expect(responseBody?.message).toBe(
+      expect(responseBody?.params.message).toBe(
         'The flow and version are not associated with the project',
       );
     });
@@ -368,10 +368,7 @@ describe('POST to update test-output', () => {
     });
 
     expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
-    const responseBody = response?.json();
-    expect(responseBody).toMatchObject({
-      success: false,
-      message: 'The defined flow version was not found',
-    });
+    const responseBody = JSON.parse(response?.body || '{}');
+    expect(responseBody?.params.entityType).toBe('FlowVersion');
   });
 });

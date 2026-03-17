@@ -155,7 +155,6 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const UpsertAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.WRITE_APP_CONNECTION,
@@ -175,7 +174,6 @@ const UpsertAppConnectionRequest = {
 
 const PatchAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.WRITE_APP_CONNECTION,
@@ -196,7 +194,6 @@ const PatchAppConnectionRequest = {
 
 const ListAppConnectionsRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_APP_CONNECTION,
@@ -217,7 +214,6 @@ const ListAppConnectionsRequest = {
 
 const DeleteAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.DELETE_APP_CONNECTION,
@@ -239,7 +235,6 @@ const DeleteAppConnectionRequest = {
 
 const GetAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_APP_CONNECTION,
@@ -263,13 +258,13 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+      [StatusCodes.BAD_REQUEST]: Type.Null(),
     },
   },
 };
 
 const GetConnectionMetadataRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_APP_CONNECTION,

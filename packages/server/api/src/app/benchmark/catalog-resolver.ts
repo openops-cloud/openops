@@ -9,12 +9,11 @@ import { throwValidationError } from './errors';
 const WORKFLOWS_CATALOG_DIR = 'workflows-catalog';
 
 function getCatalogDir(provider: string): string {
-  return path.join(__dirname, WORKFLOWS_CATALOG_DIR, provider.toLowerCase());
+  return path.join(__dirname, WORKFLOWS_CATALOG_DIR, provider);
 }
 
 function getLifecycleWorkflow(provider: string): LifecycleWorkflow {
-  const normalized = provider.toLowerCase();
-  const lifecycleWorkflow = PROVIDER_LIFECYCLE_WORKFLOWS[normalized];
+  const lifecycleWorkflow = PROVIDER_LIFECYCLE_WORKFLOWS[provider];
   if (!lifecycleWorkflow) {
     throwValidationError(`Unsupported benchmark provider: ${provider}`);
   }
