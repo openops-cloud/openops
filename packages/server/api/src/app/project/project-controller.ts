@@ -2,7 +2,13 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { ApplicationError, Project, SeekPage } from '@openops/shared';
+import {
+  ApplicationError,
+  PrincipalType,
+  ProjectWithoutSensitiveData,
+  SeekPage,
+} from '@openops/shared';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { paginationHelper } from '../helper/pagination/pagination-utils';
 import { projectService } from './project-service';
 
@@ -50,20 +56,30 @@ export const userProjectController: FastifyPluginCallbackTypebox = (
   done();
 };
 
-const ProjectWithoutToken = Type.Omit(Project, ['tablesDatabaseToken']);
-
 const GetUserProjectRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     response: {
-      200: ProjectWithoutToken,
+      200: ProjectWithoutSensitiveData,
+      401: Type.Null(),
+      404: Type.Null(),
     },
   },
 };
 
 const ListUserProjectsRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     response: {
-      200: SeekPage(ProjectWithoutToken),
+      200: SeekPage(ProjectWithoutSensitiveData),
     },
   },
 };

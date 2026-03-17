@@ -1,8 +1,9 @@
+// https://inference-docs.cerebras.ai/introduction
 import { createCerebras } from '@ai-sdk/cerebras';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
-const cerebrasModels = ['llama3.1-8b', 'llama3.1-70b', 'llama-3.3-70b'];
+const cerebrasModels = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
 
 function createLanguageModel(params: {
   apiKey: string;

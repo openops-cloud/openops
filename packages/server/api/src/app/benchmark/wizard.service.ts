@@ -134,14 +134,13 @@ export async function resolveWizardNavigation(
   request: BenchmarkWizardRequest,
   projectId: string,
 ): Promise<BenchmarkWizardStepResponse> {
-  const normalizedProvider = provider.toLowerCase();
-  const providerAdapter = getProvider(normalizedProvider);
+  const providerAdapter = getProvider(provider);
   const config = providerAdapter.config;
 
   const context: WizardContext = {
     benchmarkConfiguration: request.benchmarkConfiguration,
     projectId,
-    provider: normalizedProvider,
+    provider,
   };
 
   const { stepToShow, nextStep } = await computeWizardStepResponse(

@@ -17,7 +17,6 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
           permission: Permission.READ_TEMPLATE,
@@ -57,7 +56,6 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/:id',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
           permission: Permission.READ_TEMPLATE,
@@ -81,7 +79,6 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
           permission: Permission.WRITE_TEMPLATE,

@@ -260,7 +260,11 @@ export const flowRunService = {
 
     return query.getCount();
   },
-  async retry({ flowRunId, strategy }: RetryParams): Promise<FlowRun | null> {
+  async retry({
+    flowRunId,
+    strategy,
+    projectId,
+  }: RetryParams): Promise<FlowRun | null> {
     if (strategy !== FlowRetryStrategy.ON_LATEST_VERSION) {
       logger.warn(`The provided strategy (${strategy}) is not valid.`, {
         flowRunId,
@@ -271,7 +275,7 @@ export const flowRunService = {
 
     const flowRun = await flowRunService.getOnePopulatedOrThrow({
       id: flowRunId,
-      projectId: undefined,
+      projectId,
     });
 
     const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
@@ -684,6 +688,7 @@ type PauseParams = {
 };
 
 type RetryParams = {
+  projectId: ProjectId;
   flowRunId: FlowRunId;
   strategy: FlowRetryStrategy;
 };

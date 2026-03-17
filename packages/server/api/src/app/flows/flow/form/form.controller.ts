@@ -15,6 +15,7 @@ export const formController: FastifyPluginAsyncTypebox = async (app) => {
   app.get('/:flowId', GetFormRequest, async (request) => {
     return formService.getFormByFlowIdOrThrow(
       request.params.flowId,
+      request.principal.projectId,
       request.query.useDraft ?? false,
     );
   });
@@ -22,7 +23,6 @@ export const formController: FastifyPluginAsyncTypebox = async (app) => {
 
 const GetFormRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: ALL_PRINCIPAL_TYPES,
       permission: Permission.READ_FLOW,

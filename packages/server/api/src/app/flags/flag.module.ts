@@ -1,9 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
-  ALL_PRINCIPAL_TYPES,
   ENGINE_ROUTE_POLICY,
   FlagId,
-  PrincipalType,
   PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
@@ -20,8 +18,6 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
         security: PUBLIC_ROUTE_POLICY,
       },
       logLevel: 'silent',
@@ -46,7 +42,6 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
     '/environment-id',
     {
       config: {
-        allowedPrincipals: [PrincipalType.ENGINE],
         security: ENGINE_ROUTE_POLICY,
       },
       schema: {
