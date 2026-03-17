@@ -4,14 +4,11 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleModels = [
-  'deep-research-pro-preview-12-2025',
   'gemini-2.0-flash',
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-lite',
-  'gemini-2.0-flash-lite-001',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
-  'gemini-2.5-flash-lite-preview-09-2025',
   'gemini-2.5-pro',
   'gemini-3-flash-preview',
   'gemini-3-pro-preview',
@@ -22,10 +19,6 @@ const googleModels = [
   'gemini-flash-lite-latest',
   'gemini-pro-latest',
   'gemma-3-12b-it',
-  'gemma-3-1b-it',
-  'gemma-3-4b-it',
-  'gemma-3n-e2b-it',
-  'gemma-3n-e4b-it',
 ];
 
 function createLanguageModel(params: {

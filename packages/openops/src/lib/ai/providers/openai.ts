@@ -4,22 +4,18 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
-  'gpt-3.5-turbo-16k',
   'gpt-4.1',
   'gpt-4.1-2025-04-14',
   'gpt-4.1-mini',
   'gpt-4.1-nano',
   'gpt-4o',
-  'gpt-4o-2024-05-13',
   'gpt-4o-2024-08-06',
   'gpt-4o-2024-11-20',
   'gpt-5',
   'gpt-5-2025-08-07',
   'gpt-5-chat-latest',
   'gpt-5-mini',
-  'gpt-5-mini-2025-08-07',
   'gpt-5-nano',
-  'gpt-5-nano-2025-08-07',
   'gpt-5.1',
   'gpt-5.1-2025-11-13',
   'gpt-5.1-chat-latest',
@@ -33,7 +29,6 @@ const openAiModels = [
   'o3',
   'o3-2025-04-16',
   'o4-mini',
-  'o4-mini-2025-04-16',
 ];
 
 function createLanguageModel(params: {
