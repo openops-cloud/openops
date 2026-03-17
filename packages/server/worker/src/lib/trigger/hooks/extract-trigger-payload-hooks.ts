@@ -45,15 +45,12 @@ export async function extractPayloads(
         'status' in result &&
         result.status === FlowRunStatus.INFRASTRUCTURE_ERROR
       ) {
-        logger.warn(
-          {
-            result,
-            blockName,
-            blockVersion,
-            flowId: flowVersion.flowId,
-          },
-          'Failed to execute trigger due to infrastructure issue',
-        );
+        logger.warn('Failed to execute trigger due to infrastructure issue', {
+          result,
+          blockName,
+          blockVersion,
+          flowId: flowVersion.flowId,
+        });
 
         return [];
       }

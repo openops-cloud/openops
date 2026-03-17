@@ -53,8 +53,9 @@ describe('parseJsonResponse', () => {
       'Expected JSON response, but received status 502 and text/html.',
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      { status: 502, contentType: 'text/html', body },
       'Expected JSON response but received non-JSON content type',
+      { status: 502, contentType: 'text/html', body },
+
     );
   });
 
@@ -72,8 +73,8 @@ describe('parseJsonResponse', () => {
       'Failed to parse JSON response with status 200.',
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      { status: 200, body },
       'Failed to parse JSON response',
+      { status: 200, body },
     );
   });
 });
