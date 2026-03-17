@@ -65,8 +65,8 @@ const GetUserProjectRequestOptions = {
   schema: {
     response: {
       200: ProjectWithoutSensitiveData,
-      401: Type.Null(),
-      404: Type.Null(),
+      401: Type.Unknown(),
+      404: Type.Unknown(),
     },
   },
 };
