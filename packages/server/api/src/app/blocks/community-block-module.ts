@@ -14,7 +14,6 @@ const communityBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
         security: getProjectScopedRoutePolicy({
           allowedPrincipals: [PrincipalType.USER],
         }),

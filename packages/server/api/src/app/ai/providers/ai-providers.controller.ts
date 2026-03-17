@@ -36,7 +36,6 @@ export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {
 
 const ListAiProvidersRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {
@@ -48,7 +47,6 @@ const ListAiProvidersRequest = {
 
 const GetAiProviderRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getUnscopedRoutePolicy([PrincipalType.USER]),
   },
   schema: {

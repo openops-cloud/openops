@@ -4,10 +4,12 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
+  'chatgpt-4o-latest',
   'gpt-3.5-turbo',
   'gpt-3.5-turbo-0125',
   'gpt-3.5-turbo-1106',
   'gpt-3.5-turbo-16k',
+  'gpt-4-0613',
   'gpt-4.1',
   'gpt-4.1-2025-04-14',
   'gpt-4.1-mini',

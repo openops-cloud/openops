@@ -50,7 +50,6 @@ export const mcpConfigController: FastifyPluginAsyncTypebox = async (app) => {
 
 const SaveMcpConfigOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -65,7 +64,6 @@ const SaveMcpConfigOptions = {
 
 const getMcpConfigRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),
@@ -78,7 +76,6 @@ const getMcpConfigRequest = {
 
 const mcpConfigIdRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
     }),

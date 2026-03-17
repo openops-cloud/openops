@@ -117,7 +117,6 @@ export const setupApp = async (
       route.config ??= {
         security: PUBLIC_ROUTE_POLICY,
       };
-      route.config.skipAuth = true;
       route.config.security = PUBLIC_ROUTE_POLICY;
     }
   });

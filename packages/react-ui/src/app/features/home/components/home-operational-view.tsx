@@ -103,7 +103,9 @@ const HomeOperationalView = ({
       )}
 
       {isFinOpsBenchmarkEnabled && (
-        <PermissionGuard permission={Permission.WRITE_FLOW}>
+        <PermissionGuard
+          permission={[Permission.WRITE_FLOW, Permission.READ_APP_CONNECTION]}
+        >
           <FinOpsBenchmarkBanner
             variation={benchmarkVariation}
             provider={benchmarkProvider}

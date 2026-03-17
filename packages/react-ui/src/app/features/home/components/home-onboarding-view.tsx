@@ -112,7 +112,9 @@ const HomeOnboardingView = ({
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <PermissionGuard permission={Permission.WRITE_FLOW}>
+        <PermissionGuard
+          permission={[Permission.WRITE_FLOW, Permission.READ_APP_CONNECTION]}
+        >
           <FinOpsBenchmarkBanner
             variation={benchmarkVariation}
             provider={benchmarkProvider}
