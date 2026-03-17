@@ -15,8 +15,6 @@ const googleVertexModels = [
   'claude-sonnet-4-5@20250929',
   'claude-sonnet-4-6',
   'claude-sonnet-4@20250514',
-  'gemini-1.5-flash',
-  'gemini-1.5-pro',
   'gemini-2.0-flash',
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-exp',

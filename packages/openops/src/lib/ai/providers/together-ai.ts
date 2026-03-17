@@ -15,7 +15,6 @@ const togetherAiModels = [
   'Qwen/Qwen2-72B-Instruct',
   'Qwen/Qwen2.5-72B-Instruct-Turbo',
   'Qwen/Qwen2.5-Coder-32B-Instruct',
-  'Qwen/QwQ-32B-Preview',
 ];
 
 function createLanguageModel(params: {
