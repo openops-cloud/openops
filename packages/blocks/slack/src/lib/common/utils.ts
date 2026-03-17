@@ -269,7 +269,8 @@ export function dynamicBlockKitProperties(): any {
         const result: any = {
           blocks: Property.Json({
             displayName: 'Block Kit blocks',
-            description: 'See https://api.slack.com/block-kit for specs',
+            description:
+              'See https://api.slack.com/block-kit for specs. Visual preview available at https://app.slack.com/block-kit-builder',
             required: true,
             defaultValue: [
               {

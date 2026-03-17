@@ -55,7 +55,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     '/runs/:runId',
     {
       config: {
-        allowedPrincipals: [PrincipalType.ENGINE],
         security: ENGINE_ROUTE_POLICY,
       },
       schema: {
@@ -77,7 +76,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     '/update-job',
     {
       config: {
-        allowedPrincipals: [PrincipalType.ENGINE],
         security: ENGINE_ROUTE_POLICY,
       },
       schema: {
@@ -399,7 +397,6 @@ async function trackExecution(
 
 const GetFileRequestParams = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -411,7 +408,6 @@ const GetFileRequestParams = {
 
 const UpdateStepProgress = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -421,7 +417,6 @@ const UpdateStepProgress = {
 
 const SendWebhookResponse = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -433,7 +428,6 @@ const SendWebhookResponse = {
 
 const UpdateFailureCount = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -445,7 +439,6 @@ const UpdateFailureCount = {
 
 const GetLockedVersionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {

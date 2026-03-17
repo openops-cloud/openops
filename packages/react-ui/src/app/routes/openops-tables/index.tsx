@@ -9,7 +9,7 @@ import { FlagId, Permission } from '@openops/shared';
 
 const OpenOpsTablesPage = () => {
   useDefaultSidebarState('minimized');
-  const hasAccess = useCheckAccessAndRedirect(Permission.WRITE_TABLE);
+  useCheckAccessAndRedirect(Permission.WRITE_TABLE);
   const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
   const parentData = encodeURIComponent(
     JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
@@ -23,10 +23,6 @@ const OpenOpsTablesPage = () => {
   const { data: openopsTablesUrl } = flagsHooks.useFlag<any>(
     FlagId.OPENOPS_TABLES_PUBLIC_URL,
   );
-
-  if (!hasAccess) {
-    return null;
-  }
 
   if (!openopsTablesUrl) {
     console.error('OpenOps Tables URL is not defined');

@@ -3,7 +3,7 @@ import {
   amazonAuth,
   dryRunCheckBox,
   getAwsAccountsSingleSelectDropdown,
-  getCredentialsListFromAuth,
+  getCredentialsForAccount,
   getRegionsDropdownState,
   listAthenaDatabases,
   runAndWaitForQueryResult,
@@ -33,10 +33,9 @@ export const runAthenaQueryAction = createAction({
     database: Property.Dropdown<string>({
       displayName: 'Database',
       description: 'Database that contains the table to query on',
-
-      refreshers: ['auth', 'accounts', 'region'],
+      refreshers: ['auth', 'accounts', 'accounts.accounts', 'region'],
       required: true,
-      options: async ({ auth, accounts, region }) => {
+      options: async ({ auth, accounts, region }: any) => {
         if (!auth) {
           return {
             disabled: true,
@@ -46,24 +45,14 @@ export const runAthenaQueryAction = createAction({
         }
 
         try {
-          const authProp = auth as {
-            accessKeyId: string;
-            secretAccessKey: string;
-            defaultRegion: string;
-          };
-          const selectedAccounts = (
-            accounts as unknown as {
-              accounts?: string[];
-            }
-          )?.accounts;
-          const credentialsList = await getCredentialsListFromAuth(
-            authProp,
-            selectedAccounts,
+          const credentials = await getCredentialsForAccount(
+            auth,
+            accounts?.['accounts'],
           );
 
           const databases = await listAthenaDatabases(
-            credentialsList[0],
-            (region as string | undefined) ?? authProp.defaultRegion,
+            credentials,
+            (region as string | undefined) ?? auth.defaultRegion,
           );
 
           return {
@@ -119,14 +108,13 @@ export const runAthenaQueryAction = createAction({
     }
 
     try {
-      const selectedAccounts = context.propsValue.accounts?.['accounts'];
-      const credentialsList = await getCredentialsListFromAuth(
+      const credentials = await getCredentialsForAccount(
         context.auth,
-        selectedAccounts,
+        context.propsValue.accounts?.['accounts'],
       );
 
       return await runAndWaitForQueryResult(
-        credentialsList[0],
+        credentials,
         context.propsValue.region ?? context.auth.defaultRegion,
         query,
         database,

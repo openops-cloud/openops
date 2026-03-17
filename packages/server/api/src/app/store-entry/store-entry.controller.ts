@@ -67,7 +67,6 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
 
 const CreateRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -79,7 +78,6 @@ const CreateRequest = {
 
 const GetRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -91,7 +89,6 @@ const GetRequest = {
 
 const DeleteStoreRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {
@@ -103,7 +100,6 @@ const DeleteStoreRequest = {
 
 const ListRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.ENGINE],
     security: ENGINE_ROUTE_POLICY,
   },
   schema: {

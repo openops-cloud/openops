@@ -1,4 +1,5 @@
 import { useCheckAccessAndRedirect } from '@/app/common/hooks/authorization-hooks';
+
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
 import { useCandu } from '@/app/features/extensions/candu/use-candu';
@@ -15,7 +16,7 @@ import { useEmbedDashboard } from './use-embed-dashboard';
 
 const OpenOpsAnalyticsPage = () => {
   useDefaultSidebarState('minimized');
-  const hasAccess = useCheckAccessAndRedirect(Permission.WRITE_ANALYTICS);
+  useCheckAccessAndRedirect(Permission.WRITE_ANALYTICS);
   const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
   const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
     FlagId.ANALYTICS_PUBLIC_URL,
@@ -36,10 +37,6 @@ const OpenOpsAnalyticsPage = () => {
     canduClientToken,
     canduUserId,
   });
-
-  if (!hasAccess) {
-    return null;
-  }
 
   if (!analyticsPublicUrl) {
     console.error('OpenOps Analytics URL is not defined');

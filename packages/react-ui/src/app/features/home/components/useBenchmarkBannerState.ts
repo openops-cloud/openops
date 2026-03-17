@@ -11,7 +11,7 @@ type BenchmarkBannerState = {
 };
 
 export const useBenchmarkBannerState = (): BenchmarkBannerState => {
-  const isEnabled = useShowBenchmarkBanner();
+  const { showBanner: isEnabled } = useShowBenchmarkBanner();
 
   const { data: benchmarks } = useQuery({
     queryKey: [QueryKeys.benchmarks],
