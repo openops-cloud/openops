@@ -18,6 +18,7 @@ import { benchmarkApi } from './benchmark-api';
 export type UseBenchmarkRunResult = {
   runPhase: BenchmarkRunPhase;
   runningProgress: { completed: number; total: number } | null;
+  failedWorkflowNames: string[];
   isRunPending: boolean;
   handleRunBenchmark: () => Promise<void>;
   handleResetRun: () => void;
@@ -43,11 +44,23 @@ function mapStatusToRunPhase(
   }
 }
 
+function getFailedSubWorkflowNames(data: BenchmarkStatusResponse): string[] {
+  return data.workflows
+    .filter(
+      (w) =>
+        !w.isOrchestrator &&
+        !w.isCleanup &&
+        w.runStatus === BenchmarkStatus.FAILED,
+    )
+    .map((w) => w.displayName);
+}
+
 export const useBenchmarkRun = (
   benchmarkCreateResult: BenchmarkCreationResult | null,
 ): UseBenchmarkRunResult => {
   const [runPhase, setRunPhase] = useState<BenchmarkRunPhase>('idle');
   const [lastRunId, setLastRunId] = useState<string | undefined>();
+  const [failedWorkflowNames, setFailedWorkflowNames] = useState<string[]>([]);
   const [runCount, setRunCount] = useState(0);
 
   const benchmarkId = benchmarkCreateResult?.benchmarkId ?? null;
@@ -80,6 +93,9 @@ export const useBenchmarkRun = (
       setLastRunId(statusData.lastRunId);
     }
     const newPhase = mapStatusToRunPhase(statusData);
+    if (newPhase === 'succeeded_with_failures') {
+      setFailedWorkflowNames(getFailedSubWorkflowNames(statusData));
+    }
     if (newPhase !== null) {
       setRunPhase(newPhase);
     }
@@ -122,6 +138,7 @@ export const useBenchmarkRun = (
   const handleResetRun = () => {
     setRunPhase('idle');
     setLastRunId(undefined);
+    setFailedWorkflowNames([]);
   };
 
   const runningProgress = useMemo(() => {
@@ -148,6 +165,7 @@ export const useBenchmarkRun = (
   return {
     runPhase,
     runningProgress,
+    failedWorkflowNames,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,
