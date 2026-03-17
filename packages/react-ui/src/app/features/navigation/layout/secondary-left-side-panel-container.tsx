@@ -1,8 +1,10 @@
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
@@ -32,6 +34,11 @@ const SecondaryLeftSidePanelContainer = ({
     setIsSidebarMinimized: s.setIsSidebarMinimized,
   }));
 
+  const { checkAccess } = useAuthorization();
+  const hasBenchmarkAccess =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
+
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
 
@@ -43,11 +50,12 @@ const SecondaryLeftSidePanelContainer = ({
   }, [hasActiveAiSettings, isAiChatOpened, isLoading]);
 
   const prevVisibilityRef = useRef({
-    shouldShowBenchmark: isBenchmarkWizardOpen,
+    shouldShowBenchmark: hasBenchmarkAccess && isBenchmarkWizardOpen,
     shouldShowAiChat,
   });
 
-  const shouldShowPanelContent = isBenchmarkWizardOpen || shouldShowAiChat;
+  const shouldShowBenchmark = hasBenchmarkAccess && isBenchmarkWizardOpen;
+  const shouldShowPanelContent = shouldShowBenchmark || shouldShowAiChat;
 
   const getDefaultPanelSize = useCallback(() => {
     if (!shouldShowPanelContent) return 0;
@@ -55,10 +63,10 @@ const SecondaryLeftSidePanelContainer = ({
   }, [getPanelSize, shouldShowPanelContent]);
 
   useEffect(() => {
-    if (isBenchmarkWizardOpen) {
+    if (shouldShowBenchmark) {
       setIsSidebarMinimized(true);
     }
-  }, [isBenchmarkWizardOpen, setIsSidebarMinimized]);
+  }, [shouldShowBenchmark, setIsSidebarMinimized]);
 
   useEffect(() => {
     if (!resizablePanelRef.current) {
@@ -67,7 +75,7 @@ const SecondaryLeftSidePanelContainer = ({
 
     const shouldUpdatePanel = shouldUpdatePanelVisibility(
       prevVisibilityRef.current,
-      isBenchmarkWizardOpen,
+      shouldShowBenchmark,
       shouldShowAiChat,
     );
 
@@ -82,20 +90,20 @@ const SecondaryLeftSidePanelContainer = ({
     }
 
     prevVisibilityRef.current = {
-      shouldShowBenchmark: isBenchmarkWizardOpen,
+      shouldShowBenchmark,
       shouldShowAiChat,
     };
   }, [
     shouldShowPanelContent,
     getPanelSize,
-    isBenchmarkWizardOpen,
+    shouldShowBenchmark,
     shouldShowAiChat,
   ]);
 
   const size = getSize(
     hasActiveAiSettings,
     isAiChatOpened,
-    isBenchmarkWizardOpen,
+    shouldShowBenchmark,
   );
 
   return (
@@ -113,7 +121,7 @@ const SecondaryLeftSidePanelContainer = ({
         collapsedSize={0}
         defaultSize={getDefaultPanelSize()}
       >
-        {isBenchmarkWizardOpen && (
+        {shouldShowBenchmark && (
           <div className="w-full h-full dark:bg-background">
             <BenchmarkWizard onClose={() => setIsBenchmarkWizardOpen(false)} />
           </div>
