@@ -88,7 +88,7 @@ const StatsRequest = {
     }),
     response: {
       [StatusCodes.OK]: WorkflowStats,
-      [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Null(),
+      [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Unknown(),
     },
   },
 };
