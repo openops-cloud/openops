@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Bar,
   Customized,
@@ -55,6 +56,38 @@ export function BarChart({
   legendClassName,
   className,
 }: BarChartProps): React.JSX.Element {
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+
+  const yAxisDomain = useMemo<[number, number]>(() => {
+    let max = 0;
+    for (const row of data) {
+      const stackTotals: Record<string, number> = {};
+      for (const bar of bars) {
+        const v = Number(row[bar.dataKey] ?? 0);
+        const groupKey = bar.stackId ?? bar.dataKey;
+        stackTotals[groupKey] = (stackTotals[groupKey] ?? 0) + v;
+      }
+      for (const total of Object.values(stackTotals)) {
+        if (total > max) {
+          max = total;
+        }
+      }
+    }
+    return [0, max];
+  }, [data, bars]);
+
+  const toggleKey = useCallback((key: string) => {
+    setHiddenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <ChartContainer config={config} className={className}>
       <RechartsBarChart
@@ -77,23 +110,30 @@ export function BarChart({
             }}
           />
         )}
-        {showYAxis && (
-          <YAxis
-            tickFormatter={yAxisTickFormatter}
-            tickLine={false}
-            axisLine={false}
-            tick={{
-              fill: 'hsl(var(--foreground))',
-            }}
-          />
-        )}
+        <YAxis
+          tickFormatter={yAxisTickFormatter}
+          tickLine={false}
+          axisLine={false}
+          tick={{
+            fill: 'hsl(var(--foreground))',
+          }}
+          domain={yAxisDomain}
+          allowDataOverflow
+          hide={!showYAxis}
+        />
         {showTooltip && (
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         )}
         {showLegend && (
           <ChartLegend
             verticalAlign="top"
-            content={<ChartLegendContent className={legendClassName} />}
+            content={
+              <ChartLegendContent
+                className={legendClassName}
+                onItemClick={toggleKey}
+                hiddenKeys={hiddenKeys}
+              />
+            }
           />
         )}
         {bars.map((bar) => (
@@ -103,6 +143,7 @@ export function BarChart({
             fill={`var(--color-${bar.dataKey})`}
             radius={bar.radius ?? 4}
             stackId={bar.stackId}
+            hide={hiddenKeys.has(bar.dataKey)}
           />
         ))}
       </RechartsBarChart>
