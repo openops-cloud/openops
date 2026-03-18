@@ -91,34 +91,32 @@ export function ComboChart({
             }}
           />
         )}
-        {showLeftYAxis && (
-          <YAxis
-            yAxisId="left"
-            orientation="left"
-            tickFormatter={leftYAxisTickFormatter}
-            tickLine={false}
-            axisLine={false}
-            ticks={leftYAxisTicks}
-            domain={leftYAxisDomain}
-            tick={{
-              fill: 'hsl(var(--foreground))',
-            }}
-          />
-        )}
-        {showRightYAxis && (
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            tickFormatter={rightYAxisTickFormatter}
-            tickLine={false}
-            axisLine={false}
-            ticks={rightYAxisTicks}
-            domain={rightYAxisDomain}
-            tick={{
-              fill: 'hsl(var(--foreground))',
-            }}
-          />
-        )}
+        <YAxis
+          yAxisId="left"
+          orientation="left"
+          hide={!showLeftYAxis}
+          tickFormatter={leftYAxisTickFormatter}
+          tickLine={false}
+          axisLine={false}
+          ticks={leftYAxisTicks}
+          domain={leftYAxisDomain}
+          tick={{
+            fill: 'hsl(var(--foreground))',
+          }}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          hide={!showRightYAxis}
+          tickFormatter={rightYAxisTickFormatter}
+          tickLine={false}
+          axisLine={false}
+          ticks={rightYAxisTicks}
+          domain={rightYAxisDomain}
+          tick={{
+            fill: 'hsl(var(--foreground))',
+          }}
+        />
         {showTooltip && (
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         )}
