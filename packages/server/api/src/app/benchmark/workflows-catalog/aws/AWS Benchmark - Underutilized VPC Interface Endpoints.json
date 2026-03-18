@@ -296,6 +296,9 @@
                           "settings": {
                             "input": {
                               "auth": "{{connections['AWS']}}",
+                              "account": {
+                                "accounts": "{{step_1['item']}}"
+                              },
                               "service": {
                                 "ServiceCode": "AmazonVPC",
                                 "AttributeNames": [
@@ -350,7 +353,10 @@
                               "customizedInputs": {
                                 "settings": {
                                   "input": {
-                                    "auth": true
+                                    "auth": true,
+                                    "account": {
+                                      "accounts": true
+                                    }
                                   }
                                 }
                               }

@@ -1,12 +1,5 @@
 import * as React from 'react';
-import { useMemo } from 'react';
-import {
-  Bar,
-  Customized,
-  BarChart as RechartsBarChart,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Bar, ComposedChart, Customized, Line, XAxis, YAxis } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
@@ -18,21 +11,35 @@ import {
 } from './chart';
 import { useHiddenKeys } from './use-hidden-keys';
 
-export type BarChartBarDefinition = {
+export type ComboChartBarDefinition = {
   dataKey: string;
   radius?: number | [number, number, number, number];
   stackId?: string;
 };
 
-export type BarChartProps = {
+export type ComboChartLineDefinition = {
+  dataKey: string;
+  dot?: boolean;
+  strokeWidth?: number;
+  type?: 'monotone' | 'natural' | 'linear' | 'step';
+};
+
+export type ComboChartProps = {
   data: Record<string, unknown>[];
   config: ChartConfig;
-  bars: BarChartBarDefinition[];
-  yAxisTickFormatter?: (value: any) => string;
+  bars: ComboChartBarDefinition[];
+  lines: ComboChartLineDefinition[];
+  leftYAxisTickFormatter?: (value: any) => string;
+  rightYAxisTickFormatter?: (value: any) => string;
   xAxisTickFormatter?: (value: any) => string;
   xAxisKey?: string;
   showXAxis?: boolean;
-  showYAxis?: boolean;
+  showLeftYAxis?: boolean;
+  showRightYAxis?: boolean;
+  leftYAxisTicks?: number[];
+  rightYAxisTicks?: number[];
+  leftYAxisDomain?: [number | string, number | string];
+  rightYAxisDomain?: [number | string, number | string];
   showTooltip?: boolean;
   showLegend?: boolean;
   barSize?: number;
@@ -41,50 +48,38 @@ export type BarChartProps = {
   className?: string;
 };
 
-export function BarChart({
+export function ComboChart({
   data,
   config,
   bars,
-  yAxisTickFormatter,
+  lines,
+  leftYAxisTickFormatter,
+  rightYAxisTickFormatter,
   xAxisTickFormatter,
   xAxisKey = 'name',
   showXAxis = true,
-  showYAxis = false,
+  showLeftYAxis = false,
+  showRightYAxis = false,
+  leftYAxisTicks,
+  rightYAxisTicks,
+  leftYAxisDomain,
+  rightYAxisDomain,
   showTooltip = true,
   showLegend = false,
   barSize,
   barCategoryGap,
   legendClassName,
   className,
-}: BarChartProps): React.JSX.Element {
+}: ComboChartProps): React.JSX.Element {
   const { hiddenKeys, toggleKey } = useHiddenKeys();
-
-  const yAxisDomain = useMemo<[number, number]>(() => {
-    let max = 0;
-    for (const row of data) {
-      const stackTotals: Record<string, number> = {};
-      for (const bar of bars) {
-        const v = Number(row[bar.dataKey] ?? 0);
-        const groupKey = bar.stackId ?? bar.dataKey;
-        stackTotals[groupKey] = (stackTotals[groupKey] ?? 0) + v;
-      }
-      for (const total of Object.values(stackTotals)) {
-        if (total > max) {
-          max = total;
-        }
-      }
-    }
-    return [0, max];
-  }, [data, bars]);
 
   return (
     <ChartContainer config={config} className={className}>
-      <RechartsBarChart
+      <ComposedChart
         data={data}
         accessibilityLayer
         barSize={barSize}
         barCategoryGap={barCategoryGap}
-        compact={false}
       >
         <Customized component={PlotAreaBackground} />
         {showXAxis && (
@@ -100,15 +95,32 @@ export function BarChart({
           />
         )}
         <YAxis
-          tickFormatter={yAxisTickFormatter}
+          yAxisId="left"
+          orientation="left"
+          hide={!showLeftYAxis}
+          tickFormatter={leftYAxisTickFormatter}
           tickLine={false}
           axisLine={false}
+          ticks={leftYAxisTicks}
+          domain={leftYAxisDomain}
+          allowDataOverflow
           tick={{
             fill: 'hsl(var(--foreground))',
           }}
-          domain={yAxisDomain}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          hide={!showRightYAxis}
+          tickFormatter={rightYAxisTickFormatter}
+          tickLine={false}
+          axisLine={false}
+          ticks={rightYAxisTicks}
+          domain={rightYAxisDomain}
           allowDataOverflow
-          hide={!showYAxis}
+          tick={{
+            fill: 'hsl(var(--foreground))',
+          }}
         />
         {showTooltip && (
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -128,6 +140,7 @@ export function BarChart({
         {bars.map((bar) => (
           <Bar
             key={bar.dataKey}
+            yAxisId="left"
             dataKey={bar.dataKey}
             fill={`var(--color-${bar.dataKey})`}
             radius={bar.radius ?? 4}
@@ -135,7 +148,19 @@ export function BarChart({
             hide={hiddenKeys.has(bar.dataKey)}
           />
         ))}
-      </RechartsBarChart>
+        {lines.map((line) => (
+          <Line
+            key={line.dataKey}
+            yAxisId="right"
+            dataKey={line.dataKey}
+            stroke={`var(--color-${line.dataKey})`}
+            dot={line.dot ?? false}
+            strokeWidth={line.strokeWidth ?? 2}
+            type={line.type ?? 'monotone'}
+            hide={hiddenKeys.has(line.dataKey)}
+          />
+        ))}
+      </ComposedChart>
     </ChartContainer>
   );
 }
