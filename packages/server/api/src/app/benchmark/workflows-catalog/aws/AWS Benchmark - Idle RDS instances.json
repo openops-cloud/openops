@@ -519,6 +519,9 @@
                                     "settings": {
                                       "input": {
                                         "auth": "{{connections['AWS']}}",
+                                        "account": {
+                                          "accounts": "{{step_20['accountId']}}"
+                                        },
                                         "service": {
                                           "ServiceCode": "AmazonRDS",
                                           "AttributeNames": [
@@ -621,6 +624,14 @@
                                       "actionName": "get_price",
                                       "inputUiInfo": {
                                         "customizedInputs": {
+                                          "settings": {
+                                            "input": {
+                                              "auth": true,
+                                              "account": {
+                                                "accounts": true
+                                              }
+                                            }
+                                          },
                                           "attributeValue__queryFilters__2": true,
                                           "attributeValue__queryFilters__51683sqr": true,
                                           "attributeValue__queryFilters__30d70fsqr": true,
