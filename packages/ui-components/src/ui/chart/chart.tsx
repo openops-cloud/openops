@@ -253,10 +253,14 @@ function ChartLegendContent({
   payload,
   verticalAlign = 'bottom',
   nameKey,
+  onItemClick,
+  hiddenKeys,
 }: React.ComponentProps<'div'> &
   Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
     hideIcon?: boolean;
     nameKey?: string;
+    onItemClick?: (dataKey: string) => void;
+    hiddenKeys?: Set<string>;
   }) {
   const { config } = useChart();
 
@@ -277,13 +281,17 @@ function ChartLegendContent({
         .map((item) => {
           const key = `${nameKey || item.dataKey || 'value'}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
+          const isHidden = hiddenKeys?.has(key);
 
           return (
             <div
               key={item.value}
               className={cn(
                 'flex items-center gap-1.5 text-foreground [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-foreground',
+                onItemClick && 'cursor-pointer select-none',
+                isHidden && 'opacity-40',
               )}
+              onClick={() => onItemClick?.(key)}
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
