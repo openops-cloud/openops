@@ -11,8 +11,8 @@ const ComposingCard = React.forwardRef<HTMLDivElement, ComposingCardProps>(
     <div
       ref={ref}
       className={cn(
-        'rounded-2xl border',
-        transparent ? 'bg-transparent' : 'bg-input',
+        'w-full rounded-2xl border',
+        transparent ? 'bg-transparent' : 'bg-neutral-50 dark:bg-background',
         className,
       )}
       {...props}
