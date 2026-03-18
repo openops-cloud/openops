@@ -125,8 +125,7 @@ export function ComboChart({
         {showLegend && (
           <ChartLegend
             verticalAlign="top"
-            className={legendClassName}
-            content={<ChartLegendContent />}
+            content={<ChartLegendContent className={legendClassName} />}
           />
         )}
         {bars.map((bar) => (
