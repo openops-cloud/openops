@@ -5,6 +5,7 @@ import { AiProvider } from '../providers';
 
 const cohereModels = [
   'command-a-03-2025',
+  'command-a-reasoning-08-2025',
   'command-r',
   'command-r-08-2024',
   'command-r-plus',

@@ -5,10 +5,9 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleVertexModels = [
-  'claude-3-5-haiku@20241022',
+  'claude-3-5-sonnet-v2@20241022',
+  'claude-3-5-sonnet@20240620',
   'claude-3-7-sonnet@20250219',
-  'claude-3-haiku@20240307',
-  'claude-haiku-4-5@20251001',
   'claude-opus-4-1@20250805',
   'claude-opus-4-5@20251101',
   'claude-opus-4-6',
@@ -16,12 +15,19 @@ const googleVertexModels = [
   'claude-sonnet-4-5@20250929',
   'claude-sonnet-4-6',
   'claude-sonnet-4@20250514',
+  'gemini-2.0-flash',
   'gemini-2.0-flash-001',
-  'gemini-2.0-flash-lite-001',
+  'gemini-2.0-flash-exp',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-pro-exp-02-05',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
+  'gemini-2.5-flash-preview-09-2025',
   'gemini-2.5-pro',
+  'gemini-3-flash-preview',
   'gemini-3-pro-preview',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-pro-preview',
 ];
 
 function safeParseJson(value: string): Record<string, unknown> | null {
