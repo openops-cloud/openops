@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useState } from 'react';
 import { Bar, ComposedChart, Customized, Line, XAxis, YAxis } from 'recharts';
 import {
   ChartConfig,
@@ -70,6 +71,20 @@ export function ComboChart({
   legendClassName,
   className,
 }: ComboChartProps): React.JSX.Element {
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+
+  const toggleKey = useCallback((key: string) => {
+    setHiddenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <ChartContainer config={config} className={className}>
       <ComposedChart
@@ -123,7 +138,13 @@ export function ComboChart({
         {showLegend && (
           <ChartLegend
             verticalAlign="top"
-            content={<ChartLegendContent className={legendClassName} />}
+            content={
+              <ChartLegendContent
+                className={legendClassName}
+                onItemClick={toggleKey}
+                hiddenKeys={hiddenKeys}
+              />
+            }
           />
         )}
         {bars.map((bar) => (
@@ -134,6 +155,7 @@ export function ComboChart({
             fill={`var(--color-${bar.dataKey})`}
             radius={bar.radius ?? 4}
             stackId={bar.stackId}
+            hide={hiddenKeys.has(bar.dataKey)}
           />
         ))}
         {lines.map((line) => (
@@ -145,6 +167,7 @@ export function ComboChart({
             dot={line.dot ?? false}
             strokeWidth={line.strokeWidth ?? 2}
             type={line.type ?? 'monotone'}
+            hide={hiddenKeys.has(line.dataKey)}
           />
         ))}
       </ComposedChart>
