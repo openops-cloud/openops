@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Bar,
   Customized,
@@ -16,6 +16,7 @@ import {
   ChartTooltipContent,
   PlotAreaBackground,
 } from './chart';
+import { useHiddenKeys } from './use-hidden-keys';
 
 export type BarChartBarDefinition = {
   dataKey: string;
@@ -56,7 +57,7 @@ export function BarChart({
   legendClassName,
   className,
 }: BarChartProps): React.JSX.Element {
-  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+  const { hiddenKeys, toggleKey } = useHiddenKeys();
 
   const yAxisDomain = useMemo<[number, number]>(() => {
     let max = 0;
@@ -75,18 +76,6 @@ export function BarChart({
     }
     return [0, max];
   }, [data, bars]);
-
-  const toggleKey = useCallback((key: string) => {
-    setHiddenKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  }, []);
 
   return (
     <ChartContainer config={config} className={className}>
