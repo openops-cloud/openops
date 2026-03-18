@@ -61,10 +61,15 @@ export function BarChart({
   const yAxisDomain = useMemo<[number, number]>(() => {
     let max = 0;
     for (const row of data) {
+      const stackTotals: Record<string, number> = {};
       for (const bar of bars) {
         const v = Number(row[bar.dataKey] ?? 0);
-        if (v > max) {
-          max = v;
+        const groupKey = bar.stackId ?? bar.dataKey;
+        stackTotals[groupKey] = (stackTotals[groupKey] ?? 0) + v;
+      }
+      for (const total of Object.values(stackTotals)) {
+        if (total > max) {
+          max = total;
         }
       }
     }
