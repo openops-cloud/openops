@@ -30,7 +30,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Default card with solid background (bg-input).
+ * Default card with the component's solid background.
  */
 export const Default: Story = {};
 
