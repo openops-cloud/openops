@@ -107,7 +107,6 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
 
 const TestStepRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_STEP_FLOW,
@@ -139,7 +138,6 @@ const TestStepRequest = {
 
 const TestWorkflowRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_RUN_FLOW,
@@ -172,7 +170,6 @@ const TestWorkflowRequest = {
 
 const TestTriggerRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.TEST_STEP_FLOW,

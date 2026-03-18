@@ -78,7 +78,6 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
 
 const ListBenchmarksRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.READ_RUN,
@@ -99,7 +98,6 @@ const ListBenchmarksRequestOptions = {
 
 const WizardStepRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: [
@@ -127,7 +125,6 @@ const WizardStepRequestOptions = {
 
 const CreateBenchmarkRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: [
@@ -155,7 +152,6 @@ const CreateBenchmarkRequestOptions = {
 
 const BenchmarkStatusRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER],
       permission: Permission.READ_RUN,

@@ -1,4 +1,3 @@
-import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   SETTINGS_KEYS,
@@ -64,7 +63,9 @@ const HomeOnboardingView = ({
   const { isCloudUser } = useShowTemplatesBanner();
 
   const { checkAccess } = useAuthorization();
-  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
+  const hasBenchmarkPermissions =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
 
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
   const openBenchmarkWizard = useOpenBenchmarkWizard();
@@ -112,14 +113,13 @@ const HomeOnboardingView = ({
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <PermissionGuard permission={Permission.WRITE_FLOW}>
-          <FinOpsBenchmarkBanner
-            variation={benchmarkVariation}
-            provider={benchmarkProvider}
-            onActionClick={openBenchmarkWizard}
-            onViewReportClick={onViewBenchmarkReportClick}
-          />
-        </PermissionGuard>
+        <FinOpsBenchmarkBanner
+          variation={benchmarkVariation}
+          provider={benchmarkProvider}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={onViewBenchmarkReportClick}
+          disabled={!hasBenchmarkPermissions}
+        />
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}
@@ -147,7 +147,7 @@ const HomeOnboardingView = ({
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
             onNewWorkflowClick={
-              hasWriteFlowPermission
+              checkAccess(Permission.WRITE_FLOW)
                 ? () => {
                     createFlow(undefined);
                   }

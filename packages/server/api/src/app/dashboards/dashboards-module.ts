@@ -73,7 +73,6 @@ const DashboardsController: FastifyPluginCallbackTypebox = (
 
 const StatsRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     security: getProjectScopedRoutePolicy({
       allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FLOW,
@@ -89,6 +88,7 @@ const StatsRequest = {
     }),
     response: {
       [StatusCodes.OK]: WorkflowStats,
+      [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Unknown(),
     },
   },
 };
