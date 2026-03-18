@@ -286,12 +286,19 @@ function ChartLegendContent({
           return (
             <div
               key={item.value}
+              role={onItemClick ? 'button' : undefined}
+              tabIndex={onItemClick ? 0 : undefined}
               className={cn(
                 'flex items-center gap-1.5 text-foreground [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-foreground',
                 onItemClick && 'cursor-pointer select-none',
                 isHidden && 'opacity-40',
               )}
               onClick={() => onItemClick?.(key)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onItemClick?.(key);
+                }
+              }}
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
