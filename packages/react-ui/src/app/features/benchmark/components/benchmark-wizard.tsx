@@ -87,7 +87,7 @@ export const BenchmarkWizard = ({
   const {
     runPhase,
     runningProgress,
-    failedWorkflowNames,
+    failedWorkflows,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,
@@ -175,7 +175,7 @@ export const BenchmarkWizard = ({
                     result={benchmarkCreateResult}
                     runPhase={runPhase}
                     runningProgress={runningProgress ?? undefined}
-                    failedWorkflowNames={failedWorkflowNames}
+                    failedWorkflows={failedWorkflows}
                   />
                 )}
               </WizardStep>

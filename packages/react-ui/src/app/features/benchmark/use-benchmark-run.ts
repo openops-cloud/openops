@@ -15,10 +15,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { benchmarkApi } from './benchmark-api';
 
+export type FailedWorkflow = {
+  displayName: string;
+  runId?: string;
+};
+
 export type UseBenchmarkRunResult = {
   runPhase: BenchmarkRunPhase;
   runningProgress: { completed: number; total: number } | null;
-  failedWorkflowNames: string[];
+  failedWorkflows: FailedWorkflow[];
   isRunPending: boolean;
   handleRunBenchmark: () => Promise<void>;
   handleResetRun: () => void;
@@ -44,7 +49,9 @@ function mapStatusToRunPhase(
   }
 }
 
-function getFailedSubWorkflowNames(data: BenchmarkStatusResponse): string[] {
+function getFailedSubWorkflows(
+  data: BenchmarkStatusResponse,
+): FailedWorkflow[] {
   return data.workflows
     .filter(
       (w) =>
@@ -52,7 +59,7 @@ function getFailedSubWorkflowNames(data: BenchmarkStatusResponse): string[] {
         !w.isCleanup &&
         w.runStatus === BenchmarkStatus.FAILED,
     )
-    .map((w) => w.displayName);
+    .map((w) => ({ displayName: w.displayName, runId: w.runId }));
 }
 
 export const useBenchmarkRun = (
@@ -60,7 +67,7 @@ export const useBenchmarkRun = (
 ): UseBenchmarkRunResult => {
   const [runPhase, setRunPhase] = useState<BenchmarkRunPhase>('idle');
   const [lastRunId, setLastRunId] = useState<string | undefined>();
-  const [failedWorkflowNames, setFailedWorkflowNames] = useState<string[]>([]);
+  const [failedWorkflows, setFailedWorkflows] = useState<FailedWorkflow[]>([]);
   const [runCount, setRunCount] = useState(0);
 
   const benchmarkId = benchmarkCreateResult?.benchmarkId ?? null;
@@ -94,7 +101,7 @@ export const useBenchmarkRun = (
     }
     const newPhase = mapStatusToRunPhase(statusData);
     if (newPhase === 'succeeded_with_failures') {
-      setFailedWorkflowNames(getFailedSubWorkflowNames(statusData));
+      setFailedWorkflows(getFailedSubWorkflows(statusData));
     }
     if (newPhase !== null) {
       setRunPhase(newPhase);
@@ -138,7 +145,7 @@ export const useBenchmarkRun = (
   const handleResetRun = () => {
     setRunPhase('idle');
     setLastRunId(undefined);
-    setFailedWorkflowNames([]);
+    setFailedWorkflows([]);
   };
 
   const runningProgress = useMemo(() => {
@@ -165,7 +172,7 @@ export const useBenchmarkRun = (
   return {
     runPhase,
     runningProgress,
-    failedWorkflowNames,
+    failedWorkflows,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,

@@ -69,9 +69,15 @@ export const Failed: ReadyStepStory = { args: { runPhase: 'failed' } };
 export const SucceededWithFailures: ReadyStepStory = {
   args: {
     runPhase: 'succeeded_with_failures',
-    failedWorkflowNames: [
-      'EC2 Reserved Instances Analysis',
-      'S3 Storage Optimization',
+    failedWorkflows: [
+      {
+        displayName: 'EC2 Reserved Instances Analysis',
+        runId: 'run-001',
+      },
+      {
+        displayName: 'S3 Storage Optimization',
+        runId: 'run-002',
+      },
     ],
   },
 };
