@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useCallback, useState } from 'react';
 import { Bar, ComposedChart, Customized, Line, XAxis, YAxis } from 'recharts';
 import {
   ChartConfig,
@@ -10,6 +9,7 @@ import {
   ChartTooltipContent,
   PlotAreaBackground,
 } from './chart';
+import { useHiddenKeys } from './use-hidden-keys';
 
 export type ComboChartBarDefinition = {
   dataKey: string;
@@ -71,19 +71,7 @@ export function ComboChart({
   legendClassName,
   className,
 }: ComboChartProps): React.JSX.Element {
-  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
-
-  const toggleKey = useCallback((key: string) => {
-    setHiddenKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  }, []);
+  const { hiddenKeys, toggleKey } = useHiddenKeys();
 
   return (
     <ChartContainer config={config} className={className}>
@@ -115,6 +103,7 @@ export function ComboChart({
           axisLine={false}
           ticks={leftYAxisTicks}
           domain={leftYAxisDomain}
+          allowDataOverflow
           tick={{
             fill: 'hsl(var(--foreground))',
           }}
@@ -128,6 +117,7 @@ export function ComboChart({
           axisLine={false}
           ticks={rightYAxisTicks}
           domain={rightYAxisDomain}
+          allowDataOverflow
           tick={{
             fill: 'hsl(var(--foreground))',
           }}
