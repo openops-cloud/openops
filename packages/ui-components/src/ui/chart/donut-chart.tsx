@@ -52,7 +52,7 @@ function RadialLabel({
         className="fill-foreground text-xs"
         style={{ fontSize: 12 }}
       >
-        {label as string}
+        {label}
       </text>
     </g>
   );
