@@ -61,8 +61,6 @@ function RadialLabel({
 export type DonutChartProps = {
   data: { name: string; value: number }[];
   config: ChartConfig;
-  dataKey?: string;
-  nameKey?: string;
   innerRadius?: number;
   outerRadius?: number;
   showTooltip?: boolean;
@@ -73,8 +71,6 @@ export type DonutChartProps = {
 export function DonutChart({
   data,
   config,
-  dataKey = 'value',
-  nameKey = 'name',
   innerRadius = 60,
   outerRadius = 90,
   showTooltip = true,
@@ -100,8 +96,8 @@ export function DonutChart({
         )}
         <Pie
           data={mappedData}
-          dataKey={dataKey}
-          nameKey={nameKey}
+          dataKey="value"
+          nameKey="name"
           innerRadius={innerRadius}
           outerRadius={outerRadius}
           label={

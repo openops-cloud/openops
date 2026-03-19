@@ -16,8 +16,6 @@ const meta: Meta<typeof DonutChart> = {
   },
   args: {
     className: 'h-[250px] min-w-[300px]',
-    dataKey: 'value',
-    nameKey: 'name',
     innerRadius: 60,
     outerRadius: 90,
     showTooltip: true,
