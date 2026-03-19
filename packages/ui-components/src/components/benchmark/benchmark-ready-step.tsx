@@ -2,7 +2,7 @@ import { BenchmarkRunPhase } from '@/lib/types';
 import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
-import { StepDescription } from '../../ui/wizard/wizard-step';
+import { StepDescription } from '../../ui/multi-step-form/multi-step-form-step-parts';
 import { BenchmarkAnalyticsPhase } from './benchmark-analytics-phase';
 import { BenchmarkFailedPhase } from './benchmark-failed-phase';
 import { BenchmarkRunningPhase } from './benchmark-running-phase';

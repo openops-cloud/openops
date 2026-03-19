@@ -32,6 +32,7 @@ export * from './ui/form';
 export * from './ui/image-with-fallback';
 export * from './ui/input';
 export * from './ui/label';
+export * from './ui/multi-step-form';
 export * from './ui/numeric-input';
 export * from './ui/permission-message-context';
 export * from './ui/permission-needed-tooltip';
@@ -64,7 +65,6 @@ export * from './ui/use-toast';
 export * from './ui/user-avatar-menu';
 export * from './ui/vertical-divider';
 export * from './ui/warning-with-icon';
-export * from './ui/wizard';
 
 /* export dashboard widgets */
 export * from './ui/big-number-chart';

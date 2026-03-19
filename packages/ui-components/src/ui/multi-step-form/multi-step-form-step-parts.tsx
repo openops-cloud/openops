@@ -1,37 +1,6 @@
 import * as React from 'react';
 
 import { cn } from '../../lib/cn';
-import { useWizard } from './wizard';
-
-interface WizardStepProps extends React.HTMLAttributes<HTMLDivElement> {
-  value: string;
-}
-
-const WizardStep = React.forwardRef<HTMLDivElement, WizardStepProps>(
-  ({ className, value, children, ...props }, ref) => {
-    const { currentStep, setSteps } = useWizard();
-
-    React.useEffect(() => {
-      setSteps((prev: string[]) => {
-        if (!prev.includes(value)) {
-          return [...prev, value];
-        }
-        return prev;
-      });
-    }, [value, setSteps]);
-
-    const isActive = currentStep === value;
-
-    if (!isActive) return null;
-
-    return (
-      <div ref={ref} className={cn('space-y-6', className)} {...props}>
-        {children}
-      </div>
-    );
-  },
-);
-WizardStep.displayName = 'WizardStep';
 
 type StepTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
@@ -90,4 +59,4 @@ const StepBody = React.forwardRef<HTMLDivElement, StepBodyProps>(
 );
 StepBody.displayName = 'StepBody';
 
-export { StepBody, StepDescription, StepTitle, WizardStep };
+export { StepBody, StepDescription, StepTitle };
