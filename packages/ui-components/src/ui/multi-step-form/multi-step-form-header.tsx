@@ -25,10 +25,10 @@ const MultiStepFormHeader = React.forwardRef<
 });
 MultiStepFormHeader.displayName = 'MultiStepFormHeader';
 
-type MultiStepFormTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
+type MultiStepFormTitleProps = React.HTMLAttributes<HTMLElement>;
 
 const MultiStepFormTitle = React.forwardRef<
-  HTMLHeadingElement,
+  HTMLElement,
   MultiStepFormTitleProps
 >(({ className, children, ...props }, ref) => {
   return (

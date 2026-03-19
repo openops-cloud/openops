@@ -62,7 +62,7 @@ const MultiStepFormPrevious = React.forwardRef<
 MultiStepFormPrevious.displayName = 'MultiStepFormPrevious';
 
 interface MultiStepFormNextProps extends ButtonProps {
-  onNext?: () => void;
+  onNext?: () => void | Promise<void>;
 }
 
 const MultiStepFormNext = React.forwardRef<
@@ -74,7 +74,7 @@ const MultiStepFormNext = React.forwardRef<
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
     if (onNext) {
-      onNext();
+      await onNext();
     } else {
       await goToNext();
     }
