@@ -12,7 +12,10 @@ const ComposingCard = React.forwardRef<HTMLDivElement, ComposingCardProps>(
       ref={ref}
       className={cn(
         'w-full rounded-2xl border',
-        transparent ? 'bg-transparent' : 'bg-neutral-50 dark:bg-background',
+        {
+          'bg-transparent': transparent,
+          'bg-neutral-50 dark:bg-background': !transparent,
+        },
         className,
       )}
       {...props}
