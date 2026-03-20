@@ -18,9 +18,10 @@ import {
   useState,
 } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
 
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { useRefreshBlock } from '@/app/features/builder/hooks/use-refresh-block';
@@ -36,6 +37,7 @@ import {
   BlockTrigger,
   flowHelper,
   isNil,
+  Permission,
   Trigger,
   TriggerType,
 } from '@openops/shared';
@@ -105,7 +107,10 @@ const constructContainerKey = (
 };
 
 const BuilderPage = ({ children }: { children?: ReactNode }) => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { checkAccess } = useAuthorization();
+  const hasFlowReadPermission = checkAccess(Permission.READ_FLOW);
 
   const [
     selectedStep,
@@ -212,14 +217,16 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
+    const canWrite = checkAccess(Permission.WRITE_FLOW);
+    const shouldSetReadOnly = !canWrite || viewOnlyParam;
 
-    if (!run && readonly !== viewOnlyParam) {
-      if (!readonly && viewOnlyParam) {
+    if (!run && readonly !== shouldSetReadOnly) {
+      if (!readonly && shouldSetReadOnly) {
         setLeftSidebar(LeftSideBarType.NONE);
       }
-      setReadOnly(viewOnlyParam);
+      setReadOnly(shouldSetReadOnly);
     }
-  }, [readonly, run, searchParams, setLeftSidebar, setReadOnly]);
+  }, [readonly, run, searchParams, setLeftSidebar, setReadOnly, checkAccess]);
 
   const { setPanelsSize, getPanelSize } = useResizablePanelGroup();
 
@@ -238,6 +245,12 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       rightHandleRef.current.collapse();
     }
   }, [isRightSidebarVisible, getPanelSize]);
+
+  useEffect(() => {
+    if (!hasFlowReadPermission) {
+      navigate('/flows');
+    }
+  }, [hasFlowReadPermission, navigate]);
 
   const middlePanelSize = useMemo(() => {
     return {

@@ -1,4 +1,9 @@
-import { AppConnection, Folder, Project } from '@openops/shared';
+import {
+  AppConnection,
+  BenchmarkProviders,
+  Folder,
+  Project,
+} from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
@@ -18,12 +23,11 @@ export type BenchmarkRow = {
   created: string;
   updated: string;
   projectId: string;
-  provider: string;
+  provider: BenchmarkProviders;
   folderId: string | null;
   connectionId: string | null;
   payload: Record<string, unknown>;
   deletedAt: string | null;
-  lastRunId: string | null;
 };
 
 export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
@@ -52,10 +56,6 @@ export const BenchmarkEntity = new EntitySchema<BenchmarkSchema>({
     },
     deletedAt: {
       type: TIMESTAMP_COLUMN_TYPE,
-      nullable: true,
-    },
-    lastRunId: {
-      ...OpenOpsIdSchema,
       nullable: true,
     },
   },

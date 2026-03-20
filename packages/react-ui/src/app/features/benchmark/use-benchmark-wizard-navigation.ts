@@ -1,12 +1,13 @@
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   BenchmarkCreationResult,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
 } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { benchmarkApi } from './benchmark-api';
 
 export type WizardPhase = 'initial' | 'provider-step' | 'benchmark-ready';
@@ -63,10 +64,10 @@ export const useBenchmarkWizardNavigation = (
         provider: string;
         request: BenchmarkWizardRequest;
       }) => benchmarkApi.getWizardStep(provider, request),
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
+
+  const queryClient = useQueryClient();
 
   const { mutateAsync: runCreateBenchmark, isPending: isCreatingBenchmark } =
     useMutation({
@@ -81,10 +82,11 @@ export const useBenchmarkWizardNavigation = (
         setBenchmarkCreateResult(result);
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
+        queryClient.invalidateQueries({
+          queryKey: [QueryKeys.foldersFlows],
+        });
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
 
   const handleNextFromInitial = async () => {
@@ -96,7 +98,7 @@ export const useBenchmarkWizardNavigation = (
       request: {},
     });
     setCurrentStepResponse(stepResponse);
-    setCurrentSelections([]);
+    setCurrentSelections(stepResponse.preselectedOptions ?? []);
     setStepHistory([]);
     setWizardPhase('provider-step');
   };
@@ -131,7 +133,7 @@ export const useBenchmarkWizardNavigation = (
 
     setStepHistory(newHistory);
     setCurrentStepResponse(nextStepResponse);
-    setCurrentSelections([]);
+    setCurrentSelections(nextStepResponse.preselectedOptions ?? []);
   };
 
   const handleEditSetup = () => {

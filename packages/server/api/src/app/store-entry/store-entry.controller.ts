@@ -5,6 +5,7 @@ import {
 import { MAX_REQUEST_BODY_BYTES } from '@openops/server-shared';
 import {
   DeleteStoreEntryRequest,
+  ENGINE_ROUTE_POLICY,
   GetStoreEntryRequest,
   PrincipalType,
   PutStoreEntryRequest,
@@ -65,6 +66,9 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
 };
 
 const CreateRequest = {
+  config: {
+    security: ENGINE_ROUTE_POLICY,
+  },
   schema: {
     body: PutStoreEntryRequest,
     description:
@@ -73,6 +77,9 @@ const CreateRequest = {
 };
 
 const GetRequest = {
+  config: {
+    security: ENGINE_ROUTE_POLICY,
+  },
   schema: {
     querystring: GetStoreEntryRequest,
     description:
@@ -81,6 +88,9 @@ const GetRequest = {
 };
 
 const DeleteStoreRequest = {
+  config: {
+    security: ENGINE_ROUTE_POLICY,
+  },
   schema: {
     querystring: DeleteStoreEntryRequest,
     description:
@@ -89,6 +99,9 @@ const DeleteStoreRequest = {
 };
 
 const ListRequest = {
+  config: {
+    security: ENGINE_ROUTE_POLICY,
+  },
   schema: {
     querystring: Type.Object({
       prefix: Type.String(),

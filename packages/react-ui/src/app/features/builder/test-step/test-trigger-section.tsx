@@ -4,14 +4,12 @@ import {
   AlertTitle,
   Button,
   Dot,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  toast,
 } from '@openops/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -24,6 +22,7 @@ import { useFormContext } from 'react-hook-form';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
@@ -110,9 +109,7 @@ const TestTriggerSection = React.memo(
       mutationFn: (data: unknown) => {
         return triggerEventsApi.saveTriggerMockdata(flowId, data);
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
       onSuccess: async (result) => {
         updateSelectedData(result);
       },

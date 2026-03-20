@@ -75,8 +75,10 @@ describe('Chat Request Router', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: 'USER' as any,
     projectId: 'test-project-id',
+    projectRole: 'ADMIN',
     organization: {
       id: 'test-org-id',
+      role: 'MEMBER',
     },
   };
 

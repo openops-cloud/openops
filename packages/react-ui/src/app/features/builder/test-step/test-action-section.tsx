@@ -1,9 +1,4 @@
-import {
-  Button,
-  Dot,
-  INTERNAL_ERROR_TOAST,
-  useToast,
-} from '@openops/components/ui';
+import { Button, Dot } from '@openops/components/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -17,6 +12,7 @@ import {
   RiskyStepConfirmationMessages,
 } from '@/app/features/builder/test-step/test-risky-step-confirmation-messages';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   Action,
@@ -47,7 +43,6 @@ const TestActionSection = React.memo(
     onTestCallback,
     readOnly,
   }: TestActionComponentProps) => {
-    const { toast } = useToast();
     const [errorMessage, setErrorMessage] = useState<string | undefined>(
       undefined,
     );
@@ -107,7 +102,7 @@ const TestActionSection = React.memo(
       },
       onError: (error) => {
         console.error(error);
-        toast(INTERNAL_ERROR_TOAST);
+        handleMutationError(error);
       },
     });
 

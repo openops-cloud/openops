@@ -21,6 +21,7 @@ export const BenchmarkWizardStepResponse = Type.Object({
   options: Type.Array(BenchmarkWizardOption),
   stepIndex: Type.Number(),
   totalSteps: Type.Number(),
+  preselectedOptions: Type.Optional(Type.Array(Type.String())),
 });
 
 export type BenchmarkWizardStepResponse = Static<

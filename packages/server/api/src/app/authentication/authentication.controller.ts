@@ -5,15 +5,20 @@ import {
 } from '@fastify/type-provider-typebox';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   createAuthResponse,
   OpsEdition,
+  Permission,
   PrincipalType,
   Provider,
+  PUBLIC_ROUTE_POLICY,
   SignInRequest,
   SignUpRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import {
+  getOrganizationScopedRoutePolicy,
+  getProjectScopedRoutePolicy,
+} from '../core/security/route-policies/route-security-policy-factory';
 import { analyticsDashboardService } from '../openops-analytics/analytics-dashboard-service';
 import { resolveOrganizationIdForAuthnRequest } from '../organization/organization-utils';
 import { userService } from '../user/user-service';
@@ -33,7 +38,10 @@ export const GetBlockRequestParams = Type.Object({
 
 const AnalyticsGuestTokenRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.WRITE_ANALYTICS,
+    }),
   },
   schema: {
     description:
@@ -54,8 +62,7 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
     '/sign-out',
     {
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
     },
     async (request, reply) => {
@@ -64,20 +71,31 @@ export const authenticationController: FastifyPluginAsyncTypebox = async (
   );
 
   if (analyticsEnabled) {
-    app.get('/analytics-embed-id', async (request, reply) => {
-      const { access_token } =
-        await analyticsAuthenticationService.authenticateAnalyticsRequest(
-          request.principal.id,
-          request.principal.projectId,
-        );
+    app.get(
+      '/analytics-embed-id',
+      {
+        config: {
+          security: getProjectScopedRoutePolicy({
+            allowedPrincipals: [PrincipalType.USER],
+            permission: Permission.WRITE_ANALYTICS,
+          }),
+        },
+      },
+      async (request, reply) => {
+        const { access_token } =
+          await analyticsAuthenticationService.authenticateAnalyticsRequest(
+            request.principal.id,
+            request.principal.projectId,
+          );
 
-      const embedId =
-        await analyticsDashboardService.fetchFinopsDashboardEmbedId(
-          access_token,
-        );
+        const embedId =
+          await analyticsDashboardService.fetchFinopsDashboardEmbedId(
+            access_token,
+          );
 
-      return reply.send(embedId);
-    });
+        return reply.send(embedId);
+      },
+    );
 
     app.get(
       '/analytics-guest-token',
@@ -156,7 +174,10 @@ const rateLimitOptions: RateLimitOptions = {
 
 const SignUpRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    security: getOrganizationScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.WRITE_USER,
+    }),
     rateLimit: rateLimitOptions,
   },
   schema: {
@@ -168,8 +189,7 @@ const SignUpRequestOptions = {
 
 const SignInRequestOptions = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
     rateLimit: rateLimitOptions,
   },
   schema: {

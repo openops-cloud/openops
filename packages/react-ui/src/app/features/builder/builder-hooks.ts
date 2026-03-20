@@ -1,14 +1,11 @@
-import {
-  AI_CHAT_CONTAINER_SIZES,
-  INTERNAL_ERROR_TOAST,
-  toast,
-} from '@openops/components/ui';
+import { AI_CHAT_CONTAINER_SIZES } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { create, StateCreator, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   Flow,
   FlowOperationRequest,
@@ -418,9 +415,7 @@ export const useSwitchToDraft = () => {
         setVersion(flow.version);
         exitRun();
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
   return {
     switchToDraft,

@@ -1,7 +1,6 @@
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { DropdownMenuItem } from '@openops/components/ui';
 import type { Flow } from '@openops/shared';
-import { t } from 'i18next';
 import { Pencil } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -28,7 +27,7 @@ export const EditFlowMenuItem: React.FC<EditFlowMenuItemProps> = ({
       >
         <div className="flex cursor-pointer flex-row gap-2 items-center">
           <Pencil className="h-4 w-4" />
-          <span>{t(text)}</span>
+          <span>{text}</span>
         </div>
       </Link>
     </DropdownMenuItem>

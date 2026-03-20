@@ -1,8 +1,12 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   ListTriggerEventsRequest,
+  Permission,
+  PrincipalType,
   TestPollingTriggerRequest,
 } from '@openops/shared';
+import { getAuthorizationGuards } from '../../core/security/authorization-guards/authorization-guards-factory';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { systemJobsSchedule } from '../../helper/system-jobs';
 import { SystemJobName } from '../../helper/system-jobs/common';
 import { systemJobHandlers } from '../../helper/system-jobs/job-handlers';
@@ -35,6 +39,14 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get(
     '/poll',
     {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.READ_FLOW,
+        }),
+      },
+      preHandler:
+        getAuthorizationGuards().enforceTestStepAuthorizationFromRequest,
       schema: {
         querystring: TestPollingTriggerRequest,
       },
@@ -55,6 +67,12 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(
     '/',
     {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.WRITE_FLOW,
+        }),
+      },
       schema: {
         querystring: TestPollingTriggerRequest,
       },
@@ -72,6 +90,12 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get(
     '/',
     {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.READ_FLOW,
+        }),
+      },
       schema: {
         querystring: ListTriggerEventsRequest,
       },

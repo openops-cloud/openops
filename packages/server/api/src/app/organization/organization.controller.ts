@@ -4,14 +4,16 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   assertEqual,
-  EndpointScope,
   OpenOpsId,
   Organization,
+  Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
   UpdateOrganizationRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { organizationIdResolver } from '../core/security/route-policies/property-source-factory';
+import { getOrganizationScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { organizationService } from './organization.service';
 
 export const organizationController: FastifyPluginAsyncTypebox = async (
@@ -38,6 +40,13 @@ export const organizationController: FastifyPluginAsyncTypebox = async (
 };
 
 const UpdateOrganizationRequest = {
+  config: {
+    security: getOrganizationScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.WRITE_ORGANIZATION,
+      organizationIdSource: organizationIdResolver.fromParams('id'),
+    }),
+  },
   schema: {
     body: UpdateOrganizationRequestBody,
     params: Type.Object({
@@ -53,8 +62,10 @@ const UpdateOrganizationRequest = {
 
 const GetOrganizationRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    scope: EndpointScope.ORGANIZATION,
+    security: getOrganizationScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      organizationIdSource: organizationIdResolver.fromParams('id'),
+    }),
   },
   schema: {
     tags: ['organizations'],

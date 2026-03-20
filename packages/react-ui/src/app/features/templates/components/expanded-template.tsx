@@ -5,7 +5,9 @@ import {
   TemplateCanvas,
   TemplateCanvasProps,
 } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { TEMPLATE_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { t } from 'i18next';
 import { ArrowLeft, PencilLine } from 'lucide-react';
@@ -37,13 +39,15 @@ const ExpandedTemplate = ({
           className="flex-1 text-[32px] font-bold text-primary-300 dark:text-primary text-center"
           text={templateName}
         ></OverflowTooltip>
-        <Button
-          className="flex gap-2 items-center justify-end ml-auto"
-          onClick={useTemplate}
-        >
-          <PencilLine />
-          {t('Use template')}
-        </Button>
+        <PermissionGuard permission={Permission.WRITE_FLOW}>
+          <Button
+            className="flex gap-2 items-center justify-end ml-auto"
+            onClick={useTemplate}
+          >
+            <PencilLine />
+            {t('Use template')}
+          </Button>
+        </PermissionGuard>
       </div>
       <div className="flex-1 rounded-2xl overflow-hidden border">
         <TemplateCanvas

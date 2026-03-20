@@ -1,6 +1,6 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
-  getCredentialsListFromAuth: jest.fn(),
+  getCredentialsForAccount: jest.fn(),
   runAndWaitForQueryResult: jest.fn(),
 };
 
@@ -12,9 +12,9 @@ describe('runAthenaQueryAction tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    openopsCommonMock.getCredentialsListFromAuth.mockResolvedValue([
-      { someCreds: 'some creds' },
-    ]);
+    openopsCommonMock.getCredentialsForAccount.mockResolvedValue({
+      someCreds: 'some creds',
+    });
   });
 
   const auth = {
@@ -76,7 +76,7 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
+        accounts: { accounts: 'some-account-id' },
         query: 'some query',
         database: 'some database',
         outputBucket: 'some outputBucket',
@@ -87,12 +87,10 @@ describe('runAthenaQueryAction tests', () => {
     const result = (await runAthenaQueryAction.run(context)) as any;
 
     expect(result).toEqual('mockResult');
-    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledTimes(
-      1,
-    );
-    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledWith(
+    expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledWith(
       auth,
-      ['some-account-id'],
+      'some-account-id',
     );
   });
 
@@ -138,7 +136,6 @@ describe('runAthenaQueryAction tests', () => {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        accounts: { accounts: ['some-account-id'] },
         region: 'some region',
         query: 'some query',
         database: 'some database',
@@ -158,12 +155,10 @@ describe('runAthenaQueryAction tests', () => {
       'some database',
       'some outputBucket',
     );
-    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledTimes(
-      1,
-    );
-    expect(openopsCommonMock.getCredentialsListFromAuth).toHaveBeenCalledWith(
+    expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledWith(
       auth,
-      ['some-account-id'],
+      undefined,
     );
   });
 

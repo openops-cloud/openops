@@ -1,3 +1,4 @@
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { HomeFlowsTable } from '@/app/features/home/flows-table';
 import {
   useDashboardData,
@@ -5,6 +6,7 @@ import {
 } from '@/app/features/home/lib/home-hooks';
 import { HomeRunsTable } from '@/app/features/home/runs-table';
 import { FinOpsBenchmarkBanner, OverviewCard } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { subDays } from 'date-fns';
 import { t } from 'i18next';
 import {
@@ -15,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
 type HomeOperationalViewProps = {
   onExploreTemplatesClick: () => void;
@@ -42,8 +44,19 @@ const HomeOperationalView = ({
 
   const flowsExist = !!existingFlowsResponse?.data?.length;
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const {
+    isEnabled: isFinOpsBenchmarkEnabled,
+    variation: benchmarkVariation,
+    provider: benchmarkProvider,
+  } = useBenchmarkBannerState();
+  const { checkAccess } = useAuthorization();
+  const hasBenchmarkPermissions =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
+
   const openBenchmarkWizard = useOpenBenchmarkWizard();
+  const onViewBenchmarkReportClick = () =>
+    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
 
   return (
     <>
@@ -95,7 +108,13 @@ const HomeOperationalView = ({
       )}
 
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        <FinOpsBenchmarkBanner
+          variation={benchmarkVariation}
+          provider={benchmarkProvider}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={onViewBenchmarkReportClick}
+          disabled={!hasBenchmarkPermissions}
+        />
       )}
 
       <HomeFlowsTable

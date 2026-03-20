@@ -15,6 +15,7 @@ import {
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
@@ -154,8 +155,10 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const UpsertAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_APP_CONNECTION,
+    }),
   },
   schema: {
     tags: ['app-connections'],
@@ -171,8 +174,10 @@ const UpsertAppConnectionRequest = {
 
 const PatchAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_APP_CONNECTION,
+    }),
   },
   schema: {
     operationId: 'Update Connection',
@@ -189,8 +194,10 @@ const PatchAppConnectionRequest = {
 
 const ListAppConnectionsRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_APP_CONNECTION,
+    }),
   },
   schema: {
     operationId: 'List Connections',
@@ -207,8 +214,10 @@ const ListAppConnectionsRequest = {
 
 const DeleteAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.DELETE_APP_CONNECTION,
+    }),
   },
   schema: {
     tags: ['app-connections'],
@@ -226,8 +235,10 @@ const DeleteAppConnectionRequest = {
 
 const GetAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_APP_CONNECTION,
+    }),
   },
   schema: {
     operationId: 'Get Connection Details',
@@ -247,14 +258,17 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+      [StatusCodes.BAD_REQUEST]: Type.Unknown(),
     },
   },
 };
 
 const GetConnectionMetadataRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_APP_CONNECTION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_APP_CONNECTION,
+    }),
   },
   schema: {
     operationId: 'Get Connection Metadata',

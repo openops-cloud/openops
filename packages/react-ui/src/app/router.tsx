@@ -27,13 +27,12 @@ import {
   OpsErrorBoundary,
   RouteErrorBoundary,
 } from './common/error-boundaries/ops-error-boundary';
-import { ConnectionsHeader } from './features/connections/components/connection-table';
 import { ConnectionsProvider } from './features/connections/components/connections-context';
 import { GlobalLayout } from './features/navigation/layout/global-layout';
 import { RouteWrapper } from './features/navigation/layout/route-wrapper';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
-import AppConnectionsPage from './routes/connections';
+import AppConnectionsPage, { ConnectionsHeader } from './routes/connections';
 import { FlowBuilderPage } from './routes/flows/id';
 import { ResetPasswordPage } from './routes/forget-password';
 import { HomePage } from './routes/home';

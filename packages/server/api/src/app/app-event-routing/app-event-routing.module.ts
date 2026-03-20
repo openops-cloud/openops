@@ -8,11 +8,11 @@ import {
   rejectedPromiseHandler,
 } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   ApplicationError,
   assertNotNullOrUndefined,
   ErrorCode,
   isNil,
+  PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -39,9 +39,8 @@ export const appEventRoutingController: FastifyPluginAsyncTypebox = async (
     '/:blockUrl',
     {
       config: {
+        security: PUBLIC_ROUTE_POLICY,
         rawBody: true,
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
       },
     },
     async (

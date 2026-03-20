@@ -4,7 +4,7 @@
     {
       "id": "connection",
       "title": "Choose the AWS connection you want to use",
-      "description": "OpenOps can pull data from AWS using the connection you select here. We provide a CloudFormation stack that installs the required permissions for you.\n\nCloudFormation stack: [Create a read-only role](https://example.com/cloudformation-readonly)\n\nDocumentation: [How to set up AWS read-only permissions](https://example.com/docs/aws-readonly)",
+      "description": "OpenOps can pull data from AWS using the connection you select here. We provide a CloudFormation stack that installs the required permissions for you.\n\nCloudFormation stack: [Benchmark Role Stack](https://docs.openops.com/cloud-access/aws-cf-role-stack#benchmark-role-stack)",
       "selectionType": "single",
       "optionsSource": { "type": "dynamic", "method": "listConnections" },
       "nextStep": "accounts"
@@ -13,8 +13,9 @@
       "id": "accounts",
       "title": "Which accounts should we include in the report?",
       "selectionType": "multi-select",
+      "selectAll": true,
       "conditional": {
-        "when": "hasMultipleAccounts",
+        "when": "hasAnyAccounts",
         "onSuccess": {
           "optionsSource": {
             "type": "dynamic",
@@ -38,100 +39,119 @@
       "id": "workflows",
       "title": "Which AWS workflows should we run to analyze the data?",
       "selectionType": "multi-select",
+      "selectAll": true,
       "optionsSource": {
         "type": "static",
         "values": [
           {
             "id": "AWS Benchmark - ASG Compute Optimizer Recommendations",
-            "displayName": "ASG Compute Optimizer Recommendations"
+            "displayName": "ASG Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - DynamoDB Over-Provisioned Tables",
-            "displayName": "DynamoDB Over-Provisioned Tables"
+            "displayName": "DynamoDB Over-Provisioned Tables",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - EBS Compute Optimizer Recommendations",
-            "displayName": "EBS Compute Optimizer Recommendations"
+            "displayName": "EBS Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - EBS Generation upgrade (gp2 to gp3)",
-            "displayName": "EBS Generation upgrade (gp2 to gp3)"
+            "displayName": "EBS Generation upgrade (gp2 to gp3)",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - EC2 Compute Optimizer Recommendations",
-            "displayName": "EC2 Compute Optimizer Recommendations"
+            "displayName": "EC2 Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - ECS Compute Optimizer Recommendations",
-            "displayName": "ECS Compute Optimizer Recommendations"
+            "displayName": "ECS Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Idle Compute Optimizer Recommendations",
-            "displayName": "Idle Compute Optimizer Recommendations"
+            "displayName": "Idle Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Idle Elastic Load Balancer (ELB)",
-            "displayName": "Idle Elastic Load Balancer (ELB)"
+            "displayName": "Idle Elastic Load Balancer (ELB)",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Idle RDS instances",
-            "displayName": "Idle RDS instances"
+            "displayName": "Idle RDS instances",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Lambda Compute Optimizer Recommendations",
-            "displayName": "Lambda Compute Optimizer Recommendations"
+            "displayName": "Lambda Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - License Compute Optimizer Recommendations",
-            "displayName": "License Compute Optimizer Recommendations"
+            "displayName": "License Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "AWS Benchmark - Migrate EC2 instances to Graviton",
-            "displayName": "Migrate EC2 instances to Graviton"
-          },
-          {
-            "id": "AWS Benchmark - Old generation EC2 instances",
-            "displayName": "Old generation EC2 instances"
+            "id": "AWS Benchmark - Migrate Linux EC2 instances to Graviton",
+            "displayName": "Migrate Linux EC2 instances to Graviton",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Orphaned RDS Snapshots",
-            "displayName": "Orphaned RDS Snapshots"
+            "displayName": "Orphaned RDS Snapshots",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - RDS Extended Support Avoidance",
-            "displayName": "RDS Extended Support Avoidance"
+            "displayName": "RDS Extended Support Avoidance",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - RDS Instance Compute Optimizer Recommendations",
-            "displayName": "RDS Instance Compute Optimizer Recommendations"
+            "displayName": "RDS Instance Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - RDS Storage Compute Optimizer Recommendations",
-            "displayName": "RDS Storage Compute Optimizer Recommendations"
+            "displayName": "RDS Storage Compute Optimizer Recommendations",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Underutilized EC2",
-            "displayName": "Underutilized EC2"
+            "displayName": "Underutilized EC2",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Underutilized RDS",
-            "displayName": "Underutilized RDS"
+            "displayName": "Underutilized RDS",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Underutilized VPC Interface Endpoints",
-            "displayName": "Underutilized VPC Interface Endpoints"
+            "displayName": "Underutilized VPC Interface Endpoints",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Unattached EBS",
-            "displayName": "Unattached EBS"
+            "displayName": "Unattached EBS",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Unattached Elastic IP Addresses",
-            "displayName": "Unattached Elastic IP Addresses"
+            "displayName": "Unattached Elastic IP Addresses",
+            "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
             "id": "AWS Benchmark - Unused NAT Gateways",
-            "displayName": "Unused NAT Gateways"
+            "displayName": "Unused NAT Gateways",
+            "imageLogoUrl": "/blocks/workflow.svg"
           }
         ]
       }

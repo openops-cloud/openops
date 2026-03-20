@@ -7,4 +7,5 @@ export type MenuLink = {
   target?: React.HTMLAttributeAnchorTarget;
   isComingSoon?: boolean;
   notificationLabel?: string;
+  locked?: boolean;
 };

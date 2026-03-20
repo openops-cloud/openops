@@ -1,0 +1,91 @@
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { authenticationApi } from '@/app/lib/authentication-api';
+import {
+  AnalyticsDashboard,
+  AnalyticsDashboardRegistry,
+  FlagId,
+  OPENOPS_ANALYTICS_FINOPS_SLUG,
+} from '@openops/shared';
+
+function resolveSelectedDashboardId(
+  registry: AnalyticsDashboardRegistry,
+  urlDashboardId: string | null,
+): string | null {
+  const enabledDashboards = registry.dashboards.filter((d) => d.enabled);
+  const urlDashboard = enabledDashboards.find((d) => d.id === urlDashboardId);
+
+  if (urlDashboard) return urlDashboard.id;
+
+  const defaultOrFirst =
+    enabledDashboards.find((d) => d.id === registry.defaultDashboardId) ??
+    enabledDashboards[0];
+  return defaultOrFirst?.id ?? null;
+}
+
+export const useAnalyticsDashboard = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { data: dashboardRegistry } = flagsHooks.useFlag<
+    AnalyticsDashboardRegistry | undefined
+  >(FlagId.ANALYTICS_DASHBOARDS);
+
+  const { data: fallbackEmbedId, isLoading: isFallbackLoading } = useQuery({
+    queryKey: ['analytics-fallback-embed-id'],
+    queryFn: () => authenticationApi.fetchAnalyticsEmbedId(),
+    enabled: !dashboardRegistry,
+    staleTime: Infinity,
+  });
+
+  const [selectedDashboardId, setSelectedDashboardId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!dashboardRegistry) return;
+    setSelectedDashboardId(
+      resolveSelectedDashboardId(
+        dashboardRegistry,
+        searchParams.get('dashboard'),
+      ),
+    );
+  }, [dashboardRegistry, searchParams]);
+
+  const handleDashboardChange = (dashboardId: string) => {
+    setSelectedDashboardId(dashboardId);
+    setSearchParams((prev) => {
+      prev.set('dashboard', dashboardId);
+      return prev;
+    });
+  };
+
+  const registryDashboard = dashboardRegistry?.dashboards.find(
+    (d) => d.id === selectedDashboardId && d.enabled,
+  );
+
+  const fallbackDashboard: AnalyticsDashboard | undefined =
+    !dashboardRegistry && fallbackEmbedId
+      ? {
+          id: OPENOPS_ANALYTICS_FINOPS_SLUG,
+          name: 'FinOps',
+          embedId: fallbackEmbedId,
+          slug: OPENOPS_ANALYTICS_FINOPS_SLUG,
+          enabled: true,
+        }
+      : undefined;
+
+  const selectedDashboard = registryDashboard ?? fallbackDashboard;
+
+  const isLoading = !dashboardRegistry && isFallbackLoading;
+
+  return {
+    dashboardRegistry,
+    selectedDashboardId,
+    selectedDashboard,
+    isLoading,
+    handleDashboardChange,
+  };
+};

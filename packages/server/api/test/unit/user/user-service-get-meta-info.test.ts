@@ -22,8 +22,10 @@ describe('userService.getMetaInfo', () => {
     id: 'user-id-1',
     type: PrincipalType.USER,
     projectId: 'project-id-123',
+    projectRole: 'ADMIN',
     organization: {
       id: 'org-id-1',
+      role: 'MEMBER',
     },
   };
 
@@ -45,6 +47,7 @@ describe('userService.getMetaInfo', () => {
     findOneByMock.mockResolvedValue(mockUser);
     getProjectPermissionsMock.mockResolvedValue({
       analytics: false,
+      benchmark: true,
     });
 
     const result = await userService.getMetaInfo({
@@ -62,6 +65,7 @@ describe('userService.getMetaInfo', () => {
       projectId: 'project-id-123',
       projectPermissions: {
         analytics: false,
+        benchmark: true,
       },
     });
   });
@@ -86,6 +90,7 @@ describe('userService.getMetaInfo', () => {
     findOneByMock.mockResolvedValue(mockUser);
     getProjectPermissionsMock.mockResolvedValue({
       analytics: true,
+      benchmark: false,
     });
 
     const result = await userService.getMetaInfo({

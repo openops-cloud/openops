@@ -12,6 +12,7 @@ import { DynamicBenchmarkStepProps } from './types';
 export const DynamicBenchmarkStep = ({
   stepResponse,
   value,
+  stepBodyClassName,
   onValueChange,
 }: DynamicBenchmarkStepProps) => {
   const isMultiSelect = stepResponse.selectionType === 'multi-select';
@@ -24,22 +25,24 @@ export const DynamicBenchmarkStep = ({
         <StepDescription>
           <Markdown
             theme={theme}
-            containerClassName="border-none p-0"
+            containerClassName="border-none p-0 bg-transparent"
             markdown={stepResponse.description}
           />
         </StepDescription>
       )}
-      <StepBody>
+      <StepBody className="flex flex-col flex-1 min-h-0 bg-transparent border-none">
         {isMultiSelect ? (
           <MultiSelectBody
             stepResponse={stepResponse}
             value={value}
+            stepBodyClassName={stepBodyClassName}
             onValueChange={onValueChange}
           />
         ) : (
           <SingleSelectBody
             stepResponse={stepResponse}
             value={value}
+            stepBodyClassName={stepBodyClassName}
             onValueChange={onValueChange}
           />
         )}

@@ -1,5 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { PrincipalType } from '@openops/shared';
+import { ENGINE_ROUTE_POLICY, PrincipalType } from '@openops/shared';
 import { projectService } from './project-service';
 
 export const projectWorkerController: FastifyPluginAsyncTypebox = async (
@@ -14,5 +14,6 @@ export const projectWorkerController: FastifyPluginAsyncTypebox = async (
 const GetWorkerProjectRequest = {
   config: {
     allowedPrincipals: [PrincipalType.ENGINE],
+    security: ENGINE_ROUTE_POLICY,
   },
 };

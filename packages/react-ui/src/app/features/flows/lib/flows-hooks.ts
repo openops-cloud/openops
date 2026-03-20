@@ -1,8 +1,5 @@
-import {
-  INTERNAL_ERROR_TOAST,
-  StepMetadataWithSuggestions,
-  toast,
-} from '@openops/components/ui';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import { StepMetadataWithSuggestions } from '@openops/components/ui';
 import { ListFlowsRequest, PopulatedFlow, RiskLevel } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -113,7 +110,7 @@ export const flowsHooks = {
           navigate(`/flows/${flow.id}?${SEARCH_PARAMS.viewOnly}=false`);
         }
       },
-      onError: () => toast(INTERNAL_ERROR_TOAST),
+      onError: handleMutationError,
     });
   },
 };

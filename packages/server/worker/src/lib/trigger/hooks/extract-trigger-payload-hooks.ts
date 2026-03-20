@@ -6,6 +6,7 @@ import {
 import {
   ApplicationError,
   ErrorCode,
+  FlowRunStatus,
   FlowVersion,
   isNil,
   ProjectId,
@@ -38,6 +39,21 @@ export async function extractPayloads(
       handleFailureFlow(flowVersion, projectId, engineToken, true);
       return result.output as unknown[];
     } else {
+      if (
+        !isNil(result) &&
+        typeof result === 'object' &&
+        'status' in result &&
+        result.status === FlowRunStatus.INFRASTRUCTURE_ERROR
+      ) {
+        logger.warn('Failed to execute trigger due to infrastructure issue', {
+          result,
+          blockName,
+          blockVersion,
+          flowId: flowVersion.flowId,
+        });
+
+        return [];
+      }
       logger.error(
         {
           result,
@@ -47,6 +63,7 @@ export async function extractPayloads(
         },
         'Failed to execute trigger',
       );
+
       const errorMessage =
         result?.message ?? 'Trigger execution failed due to an unknown issue.';
 
