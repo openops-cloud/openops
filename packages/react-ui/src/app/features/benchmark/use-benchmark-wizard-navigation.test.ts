@@ -1,6 +1,6 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import { BenchmarkWizardStepResponse } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 
 import { benchmarkApi } from './benchmark-api';
@@ -8,6 +8,7 @@ import { useBenchmarkWizardNavigation } from './use-benchmark-wizard-navigation'
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
+  useQueryClient: jest.fn(),
 }));
 
 jest.mock('./benchmark-api', () => ({
@@ -23,6 +24,7 @@ jest.mock('@openops/components/ui', () => ({
 }));
 
 const mockUseMutation = useMutation as jest.Mock;
+const mockUseQueryClient = useQueryClient as jest.Mock;
 const mockGetWizardStep = benchmarkApi.getWizardStep as jest.Mock;
 const mockCreateBenchmark = benchmarkApi.createBenchmark as jest.Mock;
 const mockToast = toast as jest.Mock;
@@ -70,6 +72,9 @@ describe('useBenchmarkWizardNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMutationMock();
+    mockUseQueryClient.mockReturnValue({
+      invalidateQueries: jest.fn(),
+    });
   });
 
   describe('initial state', () => {
@@ -165,6 +170,47 @@ describe('useBenchmarkWizardNavigation', () => {
       expect(mockGetWizardStep).toHaveBeenCalledWith('aws', {});
       expect(result.current.wizardPhase).toBe('provider-step');
       expect(result.current.currentStepResponse).toEqual(stepResponse);
+      expect(result.current.currentSelections).toEqual([]);
+    });
+
+    it('should initialize selections from preselectedOptions when step has pre-selected options', async () => {
+      const stepResponse = buildStepResponse({
+        selectionType: 'multi-select',
+        preselectedOptions: ['us-east-1'],
+      });
+      mockGetWizardStep.mockResolvedValue(stepResponse);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => {
+        result.current.setSelectedProvider('aws');
+      });
+
+      await act(async () => {
+        await result.current.handleNextFromInitial();
+      });
+
+      expect(result.current.currentSelections).toEqual(['us-east-1']);
+    });
+
+    it('should initialize selections to empty array when step has no preselectedOptions', async () => {
+      const stepResponse = buildStepResponse({ preselectedOptions: undefined });
+      mockGetWizardStep.mockResolvedValue(stepResponse);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => {
+        result.current.setSelectedProvider('aws');
+      });
+
+      await act(async () => {
+        await result.current.handleNextFromInitial();
+      });
+
       expect(result.current.currentSelections).toEqual([]);
     });
 
@@ -284,6 +330,37 @@ describe('useBenchmarkWizardNavigation', () => {
       });
       expect(result.current.currentStepResponse).toEqual(secondStep);
       expect(result.current.currentSelections).toEqual([]);
+    });
+
+    it('should initialize next step selections from preselectedOptions', async () => {
+      const firstStep = buildStepResponse({
+        currentStep: 'region',
+        nextStep: 'instance-type',
+      });
+      const secondStep = buildStepResponse({
+        currentStep: 'instance-type',
+        nextStep: 'confirm',
+        selectionType: 'multi-select',
+        preselectedOptions: ['t3.medium', 't3.large'],
+      });
+      mockGetWizardStep
+        .mockResolvedValueOnce(firstStep)
+        .mockResolvedValueOnce(secondStep);
+
+      const { result } = renderHook(() =>
+        useBenchmarkWizardNavigation(connectedProviders),
+      );
+
+      act(() => result.current.setSelectedProvider('aws'));
+      await act(async () => await result.current.handleNextFromInitial());
+
+      act(() => result.current.setCurrentSelections(['us-east-1']));
+      await act(async () => await result.current.handleNextFromProviderStep());
+
+      expect(result.current.currentSelections).toEqual([
+        't3.medium',
+        't3.large',
+      ]);
     });
 
     it('should accumulate history across multiple steps', async () => {

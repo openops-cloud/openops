@@ -32,14 +32,17 @@ export async function getProjectAndToken(
     project.organizationId,
   );
 
+  const projectRole = 'ADMIN';
   const token = await accessTokenManager.generateToken(
     {
       id: user.id,
       externalId: user.externalId,
       type: PrincipalType.USER,
       projectId: project.id,
+      projectRole,
       organization: {
         id: organization.id,
+        role: user.organizationRole,
       },
     },
     expiresInSeconds,
@@ -50,7 +53,7 @@ export async function getProjectAndToken(
     token,
     tablesRefreshToken,
     projectId: project.id,
-    projectRole: 'ADMIN',
+    projectRole,
     tablesWorkspaceId: project.tablesWorkspaceId,
   };
 }

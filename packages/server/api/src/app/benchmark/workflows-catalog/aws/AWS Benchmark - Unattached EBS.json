@@ -342,6 +342,9 @@
                         "settings": {
                           "input": {
                             "auth": "{{connections['AWS']}}",
+                            "account": {
+                              "accounts": "{{step_28['accountId']}}"
+                            },
                             "service": {
                               "ServiceCode": "AmazonEC2",
                               "AttributeNames": [
@@ -456,7 +459,10 @@
                             "customizedInputs": {
                               "settings": {
                                 "input": {
-                                  "auth": true
+                                  "auth": true,
+                                  "account": {
+                                    "accounts": true
+                                  }
                                 }
                               },
                               "attributeValue__queryFilters__2": true,

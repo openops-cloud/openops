@@ -1,7 +1,9 @@
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { CreateNewFlowInFolder } from '@/app/features/flows/components/create-new-flow-in-folder';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { SelectFlowTemplateDialog } from '@/app/features/templates/components/select-flow-template-dialog';
 import { Button, PageHeader } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { Import, LayoutTemplate } from 'lucide-react';
 import { ReactNode, useState } from 'react';
@@ -22,10 +24,12 @@ const FlowsPageHeader = ({
         <div className="ml-auto flex flex-row gap-2 pr-7">
           {children}
           <ImportFlowDialog>
-            <Button variant="outline" className="flex gap-2 items-center">
-              <Import className="w-4 h-4" />
-              {t('Import Workflow')}
-            </Button>
+            <PermissionGuard permission={Permission.WRITE_FLOW}>
+              <Button variant="outline" className="flex gap-2 items-center">
+                <Import className="w-4 h-4" />
+                {t('Import Workflow')}
+              </Button>
+            </PermissionGuard>
           </ImportFlowDialog>
           <Button
             variant="outline"

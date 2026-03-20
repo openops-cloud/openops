@@ -37,9 +37,7 @@ const FolderBreadcrumbs = ({
         {pathTokens.map((pathToken, idx) => (
           <React.Fragment key={pathToken + idx}>
             <ChevronRight className="h-7 w-7 text-foreground" />
-            <span className="text-xl font-medium max-w-[225px] truncate">
-              {pathToken}
-            </span>
+            <span className="text-xl font-medium">{pathToken}</span>
           </React.Fragment>
         ))}
       </div>

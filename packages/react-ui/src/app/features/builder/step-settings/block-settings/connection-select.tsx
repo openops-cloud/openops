@@ -15,6 +15,7 @@ import {
 } from '@openops/components/ui';
 import {
   addConnectionBrackets,
+  Permission,
   removeConnectionBrackets,
 } from '@openops/shared';
 import { t } from 'i18next';
@@ -23,6 +24,7 @@ import type React from 'react';
 import { memo, useCallback, useState } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { AutoFormFieldWrapper } from '@/app/features/builder/block-properties/auto-form-field-wrapper';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
@@ -49,6 +51,9 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [reconnectConnectionId, setReconnectConnectionId] = useState<
     string | null
   >(null);
+
+  const { checkAccess } = useAuthorization();
+  const canWriteConnection = checkAccess(Permission.WRITE_APP_CONNECTION);
 
   const form = useFormContext();
   const {
@@ -188,7 +193,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
 
                   {field.value && !field.disabled && !params.disabled && (
                     <div className="shrink-0 flex items-center gap-1">
-                      {selectConnectionOpen && (
+                      {selectConnectionOpen && canWriteConnection && (
                         <Button
                           type="button"
                           variant="ghost"
@@ -229,30 +234,15 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                   )}
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectAction
-                    onClick={() => {
+                  <ConnectionSelectContent
+                    canWriteConnection={canWriteConnection}
+                    connections={connectionsPage?.data ?? []}
+                    onCreateNew={() => {
                       setReconnectConnectionId(null);
                       setSelectConnectionOpen(false);
                       setConnectionDialogOpen(true);
                     }}
-                  >
-                    <span className="flex items-center gap-1 text-primary w-full">
-                      <Plus size={16} />
-                      {t('Create new connection')}
-                    </span>
-                  </SelectAction>
-
-                  {connectionsPage?.data &&
-                    connectionsPage.data.map((connection) => {
-                      return (
-                        <SelectItem
-                          value={addConnectionBrackets(connection.name)}
-                          key={connection.name}
-                        >
-                          {connection.name}
-                        </SelectItem>
-                      );
-                    })}
+                  />
                 </SelectContent>
               </Select>
             </AutoFormFieldWrapper>
@@ -262,6 +252,48 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     ></FormField>
   );
 });
+
+type ConnectionSelectContentProps = {
+  canWriteConnection: boolean;
+  connections: { name: string }[];
+  onCreateNew: () => void;
+};
+
+const ConnectionSelectContent = ({
+  canWriteConnection,
+  connections,
+  onCreateNew,
+}: ConnectionSelectContentProps) => {
+  if (connections.length === 0 && !canWriteConnection) {
+    return (
+      <div className="px-3 py-2 text-sm text-muted-foreground">
+        {t('No available connections')}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {canWriteConnection && (
+        <SelectAction onClick={onCreateNew}>
+          <span className="flex items-center gap-1 text-primary w-full">
+            <Plus size={16} />
+            {t('Create new connection')}
+          </span>
+        </SelectAction>
+      )}
+
+      {connections.map((connection) => (
+        <SelectItem
+          value={addConnectionBrackets(connection.name)}
+          key={connection.name}
+        >
+          {connection.name}
+        </SelectItem>
+      ))}
+    </>
+  );
+};
 
 ConnectionSelect.displayName = 'ConnectionSelect';
 export { ConnectionSelect };

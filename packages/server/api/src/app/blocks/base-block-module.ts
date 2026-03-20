@@ -8,7 +8,6 @@ import {
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
 import {
-  ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
   flowHelper,
@@ -20,10 +19,13 @@ import {
   ListVersionRequestQuery,
   ListVersionsResponse,
   OpsEdition,
+  Permission,
   PrincipalType,
+  PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { flagService } from '../flags/flag.service';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
@@ -181,8 +183,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 
 const ListBlocksRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'List Blocks',
@@ -194,8 +195,7 @@ const ListBlocksRequest = {
 
 const GetBlockParamsRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'Get Block Details',
@@ -208,8 +208,7 @@ const GetBlockParamsRequest = {
 
 const GetBlockParamsWithScopeRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'Get Scoped Block',
@@ -222,8 +221,7 @@ const GetBlockParamsWithScopeRequest = {
 
 const ListCategoriesRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     operationId: 'List Block Categories',
@@ -235,7 +233,10 @@ const ListCategoriesRequest = {
 
 const OptionsBlockRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER],
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'Execute Block Properties',
@@ -246,6 +247,11 @@ const OptionsBlockRequest = {
 };
 
 const DeleteBlockRequest = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER],
+    }),
+  },
   schema: {
     description:
       'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',
@@ -257,8 +263,7 @@ const DeleteBlockRequest = {
 
 const ListVersionsRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+    security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
     description:

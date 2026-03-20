@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@openops/components/ui';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, SquareX } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
@@ -18,6 +18,7 @@ import { ActionType, FlagId, flowHelper } from '@openops/shared';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useCenterWorkflowViewOntoStep } from '@/app/features/builder/hooks/center-workflow-view-onto-step';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
+import { t } from 'i18next';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { LoopIterationInput } from './loop-iteration-input';
 
@@ -145,10 +146,24 @@ const FlowStepDetailsCardItem = ({
                 />
               </Button>
             )}
-            <img className="w-6 h-6" alt={'logo'} src={stepMetadata?.logoUrl} />
-            <div className="break-all truncate">{`${stepIndex + 1}. ${
-              step?.displayName
-            }`}</div>
+            {stepMetadata?.logoUrl ? (
+              <img
+                className="w-6 h-6"
+                alt={'logo'}
+                src={stepMetadata?.logoUrl}
+              />
+            ) : (
+              <SquareX className="w-6 h-6 text-muted-foreground" />
+            )}
+
+            <div
+              className={cn('break-all truncate', {
+                'text-muted-foreground italic': !step?.displayName,
+              })}
+            >
+              {(stepIndex !== -1 ? `${stepIndex + 1}. ` : '') +
+                (step?.displayName ?? t('Deleted Step'))}
+            </div>
             <div className="w-2"></div>
             <div className="flex gap-1 justify-end items-center flex-grow">
               {isLoopStep && (

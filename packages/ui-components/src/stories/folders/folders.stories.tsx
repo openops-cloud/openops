@@ -344,6 +344,7 @@ export const WithFileAddons: Story = {
             <FileAddons
               item={item}
               isSelected={item.id === 'flow2'}
+              readonly={false}
               onViewClick={parameters.onViewClick}
               onEditClick={parameters.onEditClick}
             />

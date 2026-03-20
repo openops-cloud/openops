@@ -58,6 +58,7 @@ export const UserMeta = Type.Object({
   projectId: Type.String(),
   projectPermissions: Type.Object({
     analytics: Type.Boolean(),
+    benchmark: Type.Boolean(),
   }),
 });
 

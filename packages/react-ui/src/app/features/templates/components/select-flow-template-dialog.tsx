@@ -8,6 +8,7 @@ import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { usePrivateTemplates } from '@/app/features/templates/lib/private-templates-hook';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   cn,
@@ -15,16 +16,14 @@ import {
   DialogContent,
   DialogTitle,
   FlowTemplateMetadataWithIntegrations,
-  INTERNAL_ERROR_TOAST,
   TemplatesTabs,
-  toast,
 } from '@openops/components/ui';
 import { AppConnectionsWithSupportedBlocks } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
-import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
+import { useShowTemplatesBanner } from '../hooks/use-show-templates-banner';
 import { cloudTemplatesApi } from '../lib/cloud-templates-api';
 import { SelectFlowTemplateDialogContent } from './select-flow-template-dialog-content';
 
@@ -94,7 +93,7 @@ const SelectFlowTemplateDialog = ({
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
 
-  const { isConnectedToCloudTemplates } = useCloudProfile();
+  const { isCloudUser } = useShowTemplatesBanner();
 
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
@@ -106,7 +105,7 @@ const SelectFlowTemplateDialog = ({
       categories: selectedCategories,
       useCloudTemplates,
       gettingStartedTemplateFilter: 'exclude',
-      isConnectedToCloudTemplates,
+      isConnectedToCloudTemplates: isCloudUser,
     });
 
   const {
@@ -132,9 +131,7 @@ const SelectFlowTemplateDialog = ({
     onSuccess: (template) => {
       setSelectedTemplate(template);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const { mutate: useTemplate, isPending: isUseTemplatePending } = useMutation({
@@ -159,9 +156,7 @@ const SelectFlowTemplateDialog = ({
       updateHomePageOperationalViewFlag();
       navigate(`/flows/${flow.id}?${SEARCH_PARAMS.viewOnly}=false`);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   useEffect(() => {

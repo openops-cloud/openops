@@ -3,13 +3,14 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  EndpointScope,
   flowHelper,
   groupStepOutputsById,
+  Permission,
   PrincipalType,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/context/access-token-manager';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
 
@@ -59,7 +60,10 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
 const ExecuteVariableRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    scope: EndpointScope.ORGANIZATION,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     description:

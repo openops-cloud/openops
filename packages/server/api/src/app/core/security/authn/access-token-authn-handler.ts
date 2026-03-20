@@ -8,6 +8,7 @@ import {
 import { FastifyRequest } from 'fastify';
 import { accessTokenManager } from '../../../authentication/context/access-token-manager';
 import { userService } from '../../../user/user-service';
+import { isPublicRoute } from '../public-route-evaluator';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
@@ -16,11 +17,11 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   private static readonly HEADER_PREFIX = 'Bearer ';
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
-    const requiresAuth = !(request.routeOptions.config?.skipAuth ?? false);
+    const publicRoute = isPublicRoute(request);
 
     const hasToken = this.getAccessToken(request) !== undefined;
 
-    return Promise.resolve(hasToken || requiresAuth);
+    return Promise.resolve(hasToken || !publicRoute);
   }
 
   private getAccessToken(request: FastifyRequest): string | undefined {
@@ -38,7 +39,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   protected async doHandle(request: FastifyRequest): Promise<void> {
-    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
+    const publicRoute = isPublicRoute(request);
 
     try {
       const accessToken = this.extractAccessTokenOrThrow(request);
@@ -62,7 +63,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
         body: request.body,
       });
 
-      if (!skipAuth) {
+      if (!publicRoute) {
         throw error;
       }
     }

@@ -26,8 +26,10 @@ export const generateMockToken = async (
     id: principal?.id ?? openOpsId(),
     type: principal?.type ?? faker.helpers.enumValue(PrincipalType),
     projectId: principal?.projectId ?? openOpsId(),
+    projectRole: principal?.projectRole ?? 'ADMIN',
     organization: principal?.organization ?? {
       id: openOpsId(),
+      role: 'MEMBER',
     },
   };
 

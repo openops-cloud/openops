@@ -1,3 +1,4 @@
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   SETTINGS_KEYS,
   userSettingsHooks,
@@ -17,11 +18,13 @@ import {
   FlowTemplateMetadataWithIntegrations,
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
+import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShowTemplatesBanner } from '../../templates/hooks/use-show-templates-banner';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
-import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
+import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
 type HomeOnboardingViewProps = {
   isHelpViewClosed: boolean;
@@ -53,10 +56,16 @@ const HomeOnboardingView = ({
   });
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const { cloudUser, isHomeCloudConnectionClosed } = useAppStore((state) => ({
-    cloudUser: state.cloudUser,
+  const { isHomeCloudConnectionClosed } = useAppStore((state) => ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
+
+  const { isCloudUser } = useShowTemplatesBanner();
+
+  const { checkAccess } = useAuthorization();
+  const hasBenchmarkPermissions =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
 
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
   const openBenchmarkWizard = useOpenBenchmarkWizard();
@@ -66,7 +75,7 @@ const HomeOnboardingView = ({
     setTimeout(() => {
       refetch({ cancelRefetch: true });
     }, 1000);
-  }, [cloudUser, refetch, setSelectedDomains]);
+  }, [isCloudUser, refetch, setSelectedDomains]);
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -93,22 +102,34 @@ const HomeOnboardingView = ({
     updateUserSettings({ [SETTINGS_KEYS.isHomeCloudConnectionClosed]: true });
   };
 
-  const isFinOpsBenchmarkEnabled = useShowBenchmarkBanner();
+  const {
+    isEnabled: isFinOpsBenchmarkEnabled,
+    variation: benchmarkVariation,
+    provider: benchmarkProvider,
+  } = useBenchmarkBannerState();
+  const onViewBenchmarkReportClick = () =>
+    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <FinOpsBenchmarkBanner onActionClick={openBenchmarkWizard} />
+        <FinOpsBenchmarkBanner
+          variation={benchmarkVariation}
+          provider={benchmarkProvider}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={onViewBenchmarkReportClick}
+          disabled={!hasBenchmarkPermissions}
+        />
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
         templates={templatesWithIntegrations}
-        showFilters={!!cloudUser}
+        showFilters={isCloudUser}
         filters={domains}
         onTemplateClick={onTemplateClick}
       />
-      {!cloudUser && !isHomeCloudConnectionClosed && (
+      {!isCloudUser && !isHomeCloudConnectionClosed && (
         <DismissiblePanel
           className="h-fit"
           buttonClassName="z-50 size-6"
@@ -121,13 +142,17 @@ const HomeOnboardingView = ({
           />
         </DismissiblePanel>
       )}
-      {(isHelpViewClosed || cloudUser || isHomeCloudConnectionClosed) && (
+      {(isHelpViewClosed || isCloudUser || isHomeCloudConnectionClosed) && (
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
-            onNewWorkflowClick={() => {
-              createFlow(undefined);
-            }}
+            onNewWorkflowClick={
+              checkAccess(Permission.WRITE_FLOW)
+                ? () => {
+                    createFlow(undefined);
+                  }
+                : undefined
+            }
           />
         </div>
       )}

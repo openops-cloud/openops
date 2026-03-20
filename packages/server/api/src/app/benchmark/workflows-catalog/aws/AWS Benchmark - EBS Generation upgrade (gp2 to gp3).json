@@ -1,6 +1,6 @@
 {
-  "created": "1771567445836",
-  "updated": "1771567445836",
+  "created": "1772547735181",
+  "updated": "1772547735181",
   "name": "AWS Benchmark - EBS Generation upgrade (gp2 to gp3)",
   "tags": [],
   "services": [],
@@ -419,7 +419,7 @@
                                   {
                                     "fieldName": "Service",
                                     "newFieldValue": {
-                                      "newFieldValue": "Amazon EBS"
+                                      "newFieldValue": "AWS EBS"
                                     }
                                   },
                                   {
@@ -431,7 +431,7 @@
                                   {
                                     "fieldName": "Opportunity details",
                                     "newFieldValue": {
-                                      "newFieldValue": "Details:{{step_10[0]['recommendation']['options'][0]['details']}}"
+                                      "newFieldValue": "Migrate this volume to GP3 type."
                                     }
                                   },
                                   {

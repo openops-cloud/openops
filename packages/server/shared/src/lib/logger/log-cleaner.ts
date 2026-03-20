@@ -25,6 +25,11 @@ const SENSITIVE_FIELD_PATTERNS = SENSITIVE_PATTERNS.map(
     new RegExp(String.raw`"[^"]*${pattern}[^"]*"\s*:\s*"[^"]*"`, 'gi'),
 );
 
+const URL_ENCODED_SENSITIVE_PATTERNS = SENSITIVE_PATTERNS.map(
+  (pattern) =>
+    new RegExp(String.raw`([&?]|^)([^&=]*${pattern}[^&=]*)=([^&]*)`, 'gi'),
+);
+
 const shouldRedactLogs = (): boolean => {
   return system.getBoolean(SharedSystemProp.LOG_REDACTION) ?? true;
 };
@@ -39,12 +44,7 @@ const isSensitiveField = (key: string): boolean => {
 
 const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
   try {
-    if (
-      obj === null ||
-      obj === undefined ||
-      typeof obj !== 'object' ||
-      !shouldRedactLogs()
-    ) {
+    if (obj === null || obj === undefined || typeof obj !== 'object') {
       return obj;
     }
 
@@ -88,19 +88,24 @@ const redactSensitiveDataInString = (
       return `${keyPart}:"${REDACTED}"`;
     });
   });
+  URL_ENCODED_SENSITIVE_PATTERNS.forEach((pattern) => {
+    result = result.replace(pattern, (_match, prefix, key) => {
+      return `${prefix}${key}=${REDACTED}`;
+    });
+  });
   return result;
 };
 
 export const truncate = (
   value: string | undefined,
   maxLength: number = maxFieldLength,
-) => {
+): string | undefined => {
   return value && value.length > maxLength
     ? `${value.substring(0, maxLength - 3)}...`
     : value;
 };
 
-export const cleanLogEvent = (logEvent: any) => {
+export const cleanLogEvent = (logEvent: any): any => {
   if (logEvent.message) {
     logEvent.message = redactSensitiveDataInString(truncate(logEvent.message));
   }
@@ -142,7 +147,7 @@ export const cleanLogEvent = (logEvent: any) => {
   return logEvent;
 };
 
-function extractRequestFields(value: any, eventData: any, logEvent: any) {
+function extractRequestFields(value: any, eventData: any, logEvent: any): void {
   const rawResponse = value.raw;
   eventData.requestMethod = rawResponse.req.method;
   eventData.requestPath = truncate(rawResponse.req.url);
@@ -164,7 +169,7 @@ function extractErrorFields(
   value: Error | ApplicationError,
   eventData: any,
   logEvent: any,
-) {
+): void {
   const errorKey = key === 'err' ? 'error' : key;
   const { stack, message, name, ...context } = value;
   eventData[errorKey + 'Stack'] = redactSensitiveDataInString(truncate(stack));
@@ -179,15 +184,17 @@ function extractErrorFields(
   eventData[errorKey + 'Name'] = truncate(name);
   if (value instanceof ApplicationError) {
     eventData[errorKey + 'Code'] = truncate(value.error.code);
-    eventData[errorKey + 'Params'] = stringify(
-      redactSensitiveFields(value.error.params),
+    eventData[errorKey + 'Params'] = redactSensitiveDataInString(
+      stringify(redactSensitiveFields(value.error.params)),
     );
   } else if (context && Object.keys(context).length) {
-    eventData[errorKey + 'Context'] = stringify(redactSensitiveFields(context));
+    eventData[errorKey + 'Context'] = redactSensitiveDataInString(
+      stringify(redactSensitiveFields(context)),
+    );
   }
 }
 
-function stringify(value: any) {
+function stringify(value: any): string | undefined {
   try {
     return truncate(JSON.stringify(value));
   } catch (error) {

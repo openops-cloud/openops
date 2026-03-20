@@ -98,13 +98,26 @@ export function sanitizeMessagesForChatName(
     return null;
   };
 
-  return messages
+  const sanitized = messages
     .filter(isSupportedRole)
     .map((m) => {
       const text = extractText(m.content);
       return text ? ({ role: m.role, content: text } as ModelMessage) : null;
     })
     .filter((m): m is ModelMessage => m !== null);
+
+  if (sanitized.length === 0) {
+    return sanitized;
+  }
+
+  if (sanitized[sanitized.length - 1].role === 'assistant') {
+    sanitized.push({
+      role: 'user',
+      content: 'Generate a chat name based on the conversation above.',
+    });
+  }
+
+  return sanitized;
 }
 
 function isToolMessage(msg: ModelMessage): boolean {

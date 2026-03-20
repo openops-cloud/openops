@@ -2,6 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { BlockMetadataModel } from '@openops/blocks-framework';
 import { AddBlockRequestBody, PrincipalType } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { blockService } from './block-service';
 
 export const communityBlocksModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -13,7 +14,9 @@ const communityBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+        }),
       },
       schema: {
         body: AddBlockRequestBody,

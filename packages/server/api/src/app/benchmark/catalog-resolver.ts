@@ -9,12 +9,11 @@ import { throwValidationError } from './errors';
 const WORKFLOWS_CATALOG_DIR = 'workflows-catalog';
 
 function getCatalogDir(provider: string): string {
-  return path.join(__dirname, WORKFLOWS_CATALOG_DIR, provider.toLowerCase());
+  return path.join(__dirname, WORKFLOWS_CATALOG_DIR, provider);
 }
 
 function getLifecycleWorkflow(provider: string): LifecycleWorkflow {
-  const normalized = provider.toLowerCase();
-  const lifecycleWorkflow = PROVIDER_LIFECYCLE_WORKFLOWS[normalized];
+  const lifecycleWorkflow = PROVIDER_LIFECYCLE_WORKFLOWS[provider];
   if (!lifecycleWorkflow) {
     throwValidationError(`Unsupported benchmark provider: ${provider}`);
   }
@@ -32,6 +31,12 @@ function getCleanupWorkflowId(provider: string): string {
 export type ResolvedWorkflowPath = {
   id: string;
   filePath: string;
+};
+
+export type CategorizedWorkflowPaths = {
+  orchestrator: ResolvedWorkflowPath;
+  cleanup: ResolvedWorkflowPath;
+  subWorkflows: ResolvedWorkflowPath[];
 };
 
 function resolveWorkflowPaths(
@@ -53,13 +58,20 @@ function resolveWorkflowPaths(
 export function resolveWorkflowPathsForSeed(
   provider: string,
   subWorkflowIds: string[],
-): ResolvedWorkflowPath[] {
+): CategorizedWorkflowPaths {
   if (subWorkflowIds.length === 0) {
-    getLifecycleWorkflow(provider);
-    return [];
+    throwValidationError('At least one sub-workflow is required');
   }
+
   const orchestratorId = getOrchestratorId(provider);
   const cleanupId = getCleanupWorkflowId(provider);
+
   const allIds = [orchestratorId, cleanupId, ...subWorkflowIds];
-  return resolveWorkflowPaths(provider, allIds);
+  const paths = resolveWorkflowPaths(provider, allIds);
+
+  return {
+    orchestrator: paths[0],
+    cleanup: paths[1],
+    subWorkflows: paths.slice(2),
+  };
 }

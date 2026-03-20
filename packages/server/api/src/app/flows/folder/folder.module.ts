@@ -11,6 +11,7 @@ import {
 import { Type } from '@sinclair/typebox';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
 import { flowFolderService as folderService } from './folder.service';
 
 export const folderModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -19,6 +20,7 @@ export const folderModule: FastifyPluginAsyncTypebox = async (app) => {
 
 const folderController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
+
   fastify.post('/', CreateFolderParams, async (request) => {
     const createdFolder = await folderService.create({
       projectId: request.principal.projectId,
@@ -66,8 +68,10 @@ const folderController: FastifyPluginAsyncTypebox = async (fastify) => {
 
 const CreateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_FOLDER,
+    }),
   },
   schema: {
     tags: ['folders'],
@@ -80,8 +84,10 @@ const CreateFolderParams = {
 
 const UpdateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_FOLDER,
+    }),
   },
   schema: {
     tags: ['folders'],
@@ -97,8 +103,10 @@ const UpdateFolderParams = {
 
 const GetFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FOLDER,
+    }),
   },
   schema: {
     tags: ['folders'],
@@ -113,8 +121,10 @@ const GetFolderParams = {
 
 const ListFoldersFlowsParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: [Permission.READ_FOLDER, Permission.READ_FLOW],
+    }),
   },
   schema: {
     tags: ['folders'],
@@ -127,8 +137,10 @@ const ListFoldersFlowsParams = {
 
 const DeleteFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.WRITE_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.DELETE_FOLDER,
+    }),
   },
   schema: {
     params: DeleteFolderRequest,

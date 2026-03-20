@@ -11,9 +11,9 @@ import {
   ConnectionExpiredError,
   ConnectionLoadingError,
   ConnectionNotFoundError,
-  ExecutionError,
   FetchError,
 } from '../helper/execution-errors';
+import { parseJsonResponse } from '../helper/response-helper';
 
 export const createConnectionService = ({
   projectId,
@@ -40,16 +40,13 @@ export const createConnectionService = ({
             httpStatus: response.status,
           });
         }
-        const connection: AppConnection = await response.json();
+        const connection: AppConnection =
+          await parseJsonResponse<AppConnection>(response);
         if (connection.status === AppConnectionStatus.ERROR) {
           throw new ConnectionExpiredError(connectionName);
         }
         return getConnectionValue(connection);
       } catch (e) {
-        if (e instanceof ExecutionError) {
-          throw e;
-        }
-
         return handleFetchError({
           url,
           cause: e,

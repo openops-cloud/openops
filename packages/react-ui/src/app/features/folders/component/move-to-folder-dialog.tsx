@@ -11,7 +11,6 @@ import {
   FormField,
   FormItem,
   FormMessage,
-  INTERNAL_ERROR_TOAST,
   toast,
 } from '@openops/components/ui';
 import { Static, Type } from '@sinclair/typebox';
@@ -22,6 +21,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { SearchableSelect } from '@/app/common/components/searchable-select';
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { foldersHooks } from '../lib/folders-hooks';
 import {
   buildFolderHierarchy,
@@ -83,7 +83,7 @@ function MoveToFolderDialog<T extends object>({
         title: t('Moved workflow successfully'),
       });
     },
-    onError: () => toast(INTERNAL_ERROR_TOAST),
+    onError: handleMutationError,
   });
 
   return (

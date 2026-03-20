@@ -232,9 +232,13 @@ export const appConnectionService = {
       entity: AppConnectionEntity,
       query: {
         limit,
-        order: 'ASC',
+        order: 'DESC',
         afterCursor: decodedCursor.nextCursor,
         beforeCursor: decodedCursor.previousCursor,
+      },
+      customPaginationColumn: {
+        columnPath: 'updated',
+        columnName: 'app_connection.updated',
       },
     });
 

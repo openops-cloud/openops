@@ -2,9 +2,10 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { OpenOpsId, PrincipalType } from '@openops/shared';
+import { OpenOpsId, Permission, PrincipalType } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { entitiesMustBeOwnedByCurrentProject } from '../authentication/authorization';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { flowTemplateService } from './flow-template.service';
 
 export const flowTemplateController: FastifyPluginAsyncTypebox = async (
@@ -16,7 +17,10 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+          permission: Permission.READ_TEMPLATE,
+        }),
       },
       schema: {
         tags: ['flow-templates'],
@@ -52,7 +56,10 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/:id',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+          permission: Permission.READ_TEMPLATE,
+        }),
       },
       schema: {
         tags: ['flow-templates'],
@@ -72,7 +79,10 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
     '/',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+          permission: Permission.WRITE_TEMPLATE,
+        }),
       },
       schema: {
         body: {
