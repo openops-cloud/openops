@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import * as React from 'react';
 
+import { t } from 'i18next';
 import { cn } from '../../lib/cn';
 import { Button } from '../button';
 
@@ -54,26 +55,21 @@ interface MultiStepFormCloseProps
 const MultiStepFormClose = React.forwardRef<
   HTMLButtonElement,
   MultiStepFormCloseProps
->(({ className, onClose, onClick, ...props }, ref) => {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    onClose?.();
-  };
-
+>(({ className, onClose, ...props }, ref) => {
   return (
     <Button
       ref={ref}
+      {...props}
       variant="ghost"
       size="icon"
       className={cn(
         'h-6 w-6 rounded-sm opacity-70 text-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
         className,
       )}
-      onClick={handleClick}
-      {...props}
+      onClick={onClose ? () => onClose() : undefined}
     >
       <X className="h-4 w-4" />
-      <span className="sr-only">Close</span>
+      <span className="sr-only">{t('close')}</span>
     </Button>
   );
 });

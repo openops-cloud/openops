@@ -2,9 +2,7 @@ import * as React from 'react';
 
 import { cn } from '../../lib/cn';
 
-interface StepValidationFn {
-  (): boolean | Promise<boolean>;
-}
+type StepValidationFn = () => boolean | Promise<boolean>;
 
 interface MultiStepFormContextValue {
   currentStep: string;

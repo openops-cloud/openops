@@ -33,26 +33,21 @@ interface MultiStepFormPreviousProps extends ButtonProps {
 const MultiStepFormPrevious = React.forwardRef<
   HTMLButtonElement,
   MultiStepFormPreviousProps
->(({ className, children, onPrevious, onClick, disabled, ...props }, ref) => {
+>(({ className, children, onPrevious, disabled, ...props }, ref) => {
   const { isFirstStep, goToPrevious } = useMultiStepForm();
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    if (onPrevious) {
-      onPrevious();
-    } else {
-      goToPrevious();
-    }
+  const handleClick = () => {
+    (onPrevious ?? goToPrevious)();
   };
 
   return (
     <Button
       ref={ref}
+      {...props}
       variant="outline"
       className={cn('gap-2', className)}
       onClick={handleClick}
       disabled={disabled || isFirstStep}
-      {...props}
     >
       <ArrowLeft className="h-4 w-4" />
       {children || 'Previous'}
@@ -68,25 +63,20 @@ interface MultiStepFormNextProps extends ButtonProps {
 const MultiStepFormNext = React.forwardRef<
   HTMLButtonElement,
   MultiStepFormNextProps
->(({ className, children, onNext, onClick, disabled, ...props }, ref) => {
+>(({ className, children, onNext, disabled, ...props }, ref) => {
   const { goToNext } = useMultiStepForm();
 
-  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    if (onNext) {
-      await onNext();
-    } else {
-      await goToNext();
-    }
+  const handleClick = () => {
+    (onNext ?? goToNext)();
   };
 
   return (
     <Button
       ref={ref}
+      {...props}
       className={cn('gap-2', className)}
       onClick={handleClick}
       disabled={disabled}
-      {...props}
     >
       {children || 'Next'}
       <ArrowRight className="h-4 w-4" />
