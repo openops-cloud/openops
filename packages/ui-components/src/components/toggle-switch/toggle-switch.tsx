@@ -15,6 +15,7 @@ type Props = {
   onChange?: (value: string) => void;
   disabled?: boolean;
   className?: string;
+  variant?: 'default' | 'pill';
 };
 
 const ToggleSwitch = ({
@@ -23,6 +24,7 @@ const ToggleSwitch = ({
   onChange,
   disabled,
   className,
+  variant = 'default',
 }: Props) => {
   const [selectedValue, setSelectedValue] = useState<string>(
     defaultValue ?? options[0].value,
@@ -42,7 +44,12 @@ const ToggleSwitch = ({
       value={selectedValue}
       onValueChange={handleValueChange}
       className={cn(
-        'inline-flex bg-background border rounded-[4px] p-[1px] gap-[2px]',
+        'inline-flex border gap-[2px]',
+        {
+          'bg-gray-100 dark:bg-gray-900 rounded-[40px] py-[6px] px-[8px] h-[54px]':
+            variant === 'pill',
+          'bg-background rounded-[4px] p-[1px]': variant !== 'pill',
+        },
         className,
       )}
       variant="outline"
@@ -57,12 +64,12 @@ const ToggleSwitch = ({
           <ToggleGroupItem
             value={option.value}
             size="xs"
-            className={cn(
-              'w-[66px] px-2 py-1',
-              'rounded text-sm font-normal transition-colors aria-checked:bg-gray-200 dark:aria-checked:bg-gray-800',
-              'border-0',
-              'rounded-[4px]',
-            )}
+            className={cn('text-sm transition-colors border-0', {
+              'px-5 h-[42px] rounded-[40px] font-medium aria-checked:bg-primary-200 aria-checked:text-background':
+                variant === 'pill',
+              'w-[66px] px-2 py-1 rounded-[4px] font-normal aria-checked:bg-gray-200 dark:aria-checked:bg-gray-800':
+                variant !== 'pill',
+            })}
           >
             {option.label}
           </ToggleGroupItem>
