@@ -59,8 +59,8 @@ const staticAzureRegions: Record<string, string> = {
 };
 
 export function getAzureRegionsList(): RegionListItem[] {
-  return Object.entries(staticAzureRegions).map(([id, regionName]) => ({
+  return Object.entries(staticAzureRegions).map(([id, displayName]) => ({
     id,
-    displayName: `${id} (${regionName})`,
+    displayName,
   }));
 }

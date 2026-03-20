@@ -23,11 +23,11 @@ describe('getAzureRegionsList', () => {
     const westEurope = result.find((r) => r.id === 'westeurope');
     expect(eastUs).toEqual({
       id: 'eastus',
-      displayName: 'eastus (East US)',
+      displayName: 'East US',
     });
     expect(westEurope).toEqual({
       id: 'westeurope',
-      displayName: 'westeurope (West Europe)',
+      displayName: 'West Europe',
     });
   });
 });
