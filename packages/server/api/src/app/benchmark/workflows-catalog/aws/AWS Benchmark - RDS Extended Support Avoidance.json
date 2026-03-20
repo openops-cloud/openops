@@ -299,6 +299,9 @@
                           "settings": {
                             "input": {
                               "auth": "{{connections['AWS']}}",
+                              "account": {
+                                "accounts": "{{step_1['item']}}"
+                              },
                               "service": {
                                 "ServiceCode": "AmazonRDS",
                                 "AttributeNames": [
@@ -374,7 +377,10 @@
                               "customizedInputs": {
                                 "settings": {
                                   "input": {
-                                    "auth": true
+                                    "auth": true,
+                                    "account": {
+                                      "accounts": true
+                                    }
                                   }
                                 }
                               }

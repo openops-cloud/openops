@@ -1,4 +1,4 @@
-import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { HomeFlowsTable } from '@/app/features/home/flows-table';
 import {
   useDashboardData,
@@ -49,6 +49,11 @@ const HomeOperationalView = ({
     variation: benchmarkVariation,
     provider: benchmarkProvider,
   } = useBenchmarkBannerState();
+  const { checkAccess } = useAuthorization();
+  const hasBenchmarkPermissions =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
+
   const openBenchmarkWizard = useOpenBenchmarkWizard();
   const onViewBenchmarkReportClick = () =>
     navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
@@ -103,14 +108,13 @@ const HomeOperationalView = ({
       )}
 
       {isFinOpsBenchmarkEnabled && (
-        <PermissionGuard permission={Permission.WRITE_FLOW}>
-          <FinOpsBenchmarkBanner
-            variation={benchmarkVariation}
-            provider={benchmarkProvider}
-            onActionClick={openBenchmarkWizard}
-            onViewReportClick={onViewBenchmarkReportClick}
-          />
-        </PermissionGuard>
+        <FinOpsBenchmarkBanner
+          variation={benchmarkVariation}
+          provider={benchmarkProvider}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={onViewBenchmarkReportClick}
+          disabled={!hasBenchmarkPermissions}
+        />
       )}
 
       <HomeFlowsTable

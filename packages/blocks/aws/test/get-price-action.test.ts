@@ -1,6 +1,7 @@
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsFromAuth: jest.fn(),
+  getCredentialsForAccount: jest.fn(),
   getAttributeValues: jest.fn(),
   getServices: jest.fn(),
   getPriceListWithCache: jest.fn(),
@@ -16,6 +17,9 @@ describe('getPriceAction', () => {
     jest.clearAllMocks();
 
     openopsCommonMock.getCredentialsFromAuth.mockResolvedValue({
+      someCreds: 'some value',
+    });
+    openopsCommonMock.getCredentialsForAccount.mockResolvedValue({
       someCreds: 'some value',
     });
   });
@@ -34,12 +38,16 @@ describe('getPriceAction', () => {
     },
     auth: auth,
     propsValue: {
-      accountId: 'some account id',
+      account: { accounts: 'some account id' },
     },
   };
 
   test('should create action with correct properties', () => {
     expect(getPriceAction.props).toMatchObject({
+      account: {
+        type: 'DYNAMIC',
+        required: true,
+      },
       service: {
         type: 'DROPDOWN',
         required: true,
@@ -80,13 +88,31 @@ describe('getPriceAction', () => {
 
       expect(openopsCommonMock.getPriceListWithCache).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getPriceListWithCache).toHaveBeenCalledWith(
-        auth,
+        { someCreds: 'some value' },
         'some service',
         expectedFilters,
         'us-east-1',
       );
+      expect(openopsCommonMock.getCredentialsForAccount).toHaveBeenCalledWith(
+        auth,
+        'some account id',
+      );
     },
   );
+
+  test('should fallback to getCredentialsFromAuth when account is missing in run', async () => {
+    openopsCommonMock.getPriceListWithCache.mockResolvedValue('mockResult');
+    context.propsValue = {
+      service: { ServiceCode: 'some service' },
+      queryFilters: { queryFilters: [] },
+    };
+
+    const result = (await getPriceAction.run(context)) as any;
+
+    expect(result).toEqual('mockResult');
+    expect(openopsCommonMock.getCredentialsFromAuth).toHaveBeenCalledWith(auth);
+    expect(openopsCommonMock.getCredentialsForAccount).not.toHaveBeenCalled();
+  });
 
   test('should return the list of services in property service', async () => {
     openopsCommonMock.getServices.mockResolvedValue([
@@ -95,7 +121,7 @@ describe('getPriceAction', () => {
     ]);
 
     const result = await getPriceAction.props['service'].options(
-      { auth },
+      { auth, account: { accounts: 'some account id' } },
       context,
     );
 
@@ -118,6 +144,7 @@ describe('getPriceAction', () => {
       ServiceCode: 'some service',
       AttributeNames: ['some attibute'],
     };
+    context.propsValue.account = { accounts: 'some account id' };
     context.propsValue.auth = auth;
     context.input = { attributeName: 'some attibute' };
 

@@ -5,6 +5,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
+import { isPublicRoute } from '../public-route-evaluator';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
@@ -30,15 +31,20 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
 
   protected doHandle(request: FastifyRequest): Promise<void> {
     const principalType = request.principal.type;
+    const publicRoute = isPublicRoute(request);
+
+    const security = request.routeOptions?.config?.security;
     const configuredPrincipals =
-      request.routeOptions?.config?.allowedPrincipals;
+      security && 'authorization' in security
+        ? security.authorization.allowedPrincipals
+        : undefined;
+
     const defaultPrincipals =
       PrincipalTypeAuthzHandler.DEFAULT_ALLOWED_PRINCIPAL_TYPES;
     const allowedPrincipals = configuredPrincipals ?? defaultPrincipals;
     const principalTypeNotAllowed = !allowedPrincipals.includes(principalType);
 
-    const skipAuth = request.routeOptions.config?.skipAuth ?? false;
-    if (principalTypeNotAllowed && !skipAuth) {
+    if (principalTypeNotAllowed && !publicRoute) {
       throw new ApplicationError({
         code: ErrorCode.AUTHORIZATION,
         params: {

@@ -43,11 +43,13 @@ const buildBenchmarkCreationResult = (
       flowId: 'orch-flow-1',
       displayName: 'Orchestrator',
       isOrchestrator: true,
+      isCleanup: false,
     },
     {
       flowId: 'sub-flow-1',
       displayName: 'Sub Workflow',
       isOrchestrator: false,
+      isCleanup: false,
     },
   ],
   webhookPayload: {
@@ -70,6 +72,7 @@ const buildStatusResponse = (
       flowId: 'orch-flow-1',
       displayName: 'Orchestrator',
       isOrchestrator: true,
+      isCleanup: false,
       runStatus: BenchmarkStatus.RUNNING,
       runId: 'run-1',
     },
@@ -133,6 +136,14 @@ describe('useBenchmarkRun', () => {
 
       expect(result.current.isRunPending).toBe(false);
     });
+
+    it('should start with empty failedWorkflows', () => {
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      expect(result.current.failedWorkflows).toEqual([]);
+    });
   });
 
   describe('handleRunBenchmark', () => {
@@ -184,6 +195,7 @@ describe('useBenchmarkRun', () => {
             flowId: 'sub-flow-1',
             displayName: 'Sub Workflow',
             isOrchestrator: false,
+            isCleanup: false,
           },
         ],
       });
@@ -225,6 +237,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.SUCCEEDED,
               runId: 'run-1',
             },
@@ -232,6 +245,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.SUCCEEDED,
               runId: 'run-2',
             },
@@ -249,6 +263,7 @@ describe('useBenchmarkRun', () => {
       });
 
       expect(result.current.runPhase).toBe('succeeded');
+      expect(result.current.failedWorkflows).toEqual([]);
     });
 
     it('should transition to succeeded_with_failures when some sub-workflows failed', async () => {
@@ -261,6 +276,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.SUCCEEDED,
               runId: 'run-1',
             },
@@ -268,6 +284,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.FAILED,
               runId: 'run-2',
             },
@@ -285,6 +302,9 @@ describe('useBenchmarkRun', () => {
       });
 
       expect(result.current.runPhase).toBe('succeeded_with_failures');
+      expect(result.current.failedWorkflows).toEqual([
+        { displayName: 'Sub', runId: 'run-2' },
+      ]);
     });
 
     it('should transition to failed when status is FAILED', async () => {
@@ -411,6 +431,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-1',
             },
@@ -418,6 +439,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub 1',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-2',
             },
@@ -425,6 +447,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-2',
               displayName: 'Sub 2',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-3',
             },
@@ -455,6 +478,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-1',
             },
@@ -462,6 +486,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub 1',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.SUCCEEDED,
               runId: 'run-2',
             },
@@ -469,6 +494,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-2',
               displayName: 'Sub 2',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.FAILED,
               runId: 'run-3',
             },
@@ -476,6 +502,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-3',
               displayName: 'Sub 3',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-4',
             },
@@ -506,6 +533,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.SUCCEEDED,
               runId: 'run-1',
             },
@@ -513,6 +541,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub 1',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-2',
             },
@@ -543,6 +572,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-1',
             },
@@ -550,6 +580,7 @@ describe('useBenchmarkRun', () => {
               flowId: 'sub-flow-1',
               displayName: 'Sub 1',
               isOrchestrator: false,
+              isCleanup: false,
               runStatus: BenchmarkStatus.RUNNING,
               runId: 'run-2',
             },

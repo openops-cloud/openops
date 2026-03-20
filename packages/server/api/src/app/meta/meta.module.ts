@@ -1,9 +1,9 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import {
-  ALL_PRINCIPAL_TYPES,
   PLATFORM_METADATA_PLACEHOLDER,
   PlatformMetadata,
+  PUBLIC_ROUTE_POLICY,
 } from '@openops/shared';
 
 export const metaModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -20,8 +20,7 @@ const metaController: FastifyPluginAsyncTypebox = async (app) => {
         },
       },
       config: {
-        allowedPrincipals: ALL_PRINCIPAL_TYPES,
-        skipAuth: true,
+        security: PUBLIC_ROUTE_POLICY,
       },
     },
     async (): Promise<PlatformMetadata> => {

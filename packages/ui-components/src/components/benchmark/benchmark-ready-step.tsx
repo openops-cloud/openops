@@ -1,17 +1,55 @@
 import { BenchmarkRunPhase } from '@/lib/types';
 import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
-import { StepDescription } from '../../ui/wizard/wizard-step';
+import { Link } from 'react-router-dom';
+import { StepDescription } from '../../ui/multi-step-form/multi-step-form-step-parts';
 import { BenchmarkAnalyticsPhase } from './benchmark-analytics-phase';
 import { BenchmarkFailedPhase } from './benchmark-failed-phase';
 import { BenchmarkRunningPhase } from './benchmark-running-phase';
 import { BenchmarkWorkflowList } from './benchmark-workflow-list';
+
+export type FailedWorkflow = {
+  displayName: string;
+  runId?: string;
+};
+
+const FailedWorkflowsList = ({
+  workflows,
+}: {
+  workflows: FailedWorkflow[];
+}) => (
+  <div className="flex flex-col gap-1 py-2">
+    <p className="text-sm dark:text-muted-foreground font-medium">
+      {t('The following workflows failed:')}
+    </p>
+    <ul className="list-disc pl-5 text-sm dark:text-muted-foreground">
+      {workflows.map((workflow) => (
+        <li key={workflow.displayName}>
+          {workflow.runId ? (
+            <Link
+              to={`/runs/${workflow.runId}`}
+              className="text-primary hover:underline"
+            >
+              {workflow.displayName}
+            </Link>
+          ) : (
+            workflow.displayName
+          )}
+        </li>
+      ))}
+    </ul>
+    <p className="text-sm dark:text-muted-foreground mt-1">
+      {t('Click on a workflow name to review failure details.')}
+    </p>
+  </div>
+);
 
 interface BenchmarkReadyStepProps {
   providerName: string;
   result: BenchmarkCreationResult;
   runPhase: BenchmarkRunPhase;
   runningProgress?: { completed: number; total: number };
+  failedWorkflows?: FailedWorkflow[];
 }
 
 export const BenchmarkReadyStep = ({
@@ -19,13 +57,11 @@ export const BenchmarkReadyStep = ({
   result,
   runPhase,
   runningProgress,
+  failedWorkflows,
 }: BenchmarkReadyStepProps) => {
-  const orchestrator = result.workflows.find((w) => w.isOrchestrator);
-  const subWorkflows = result.workflows.filter((w) => !w.isOrchestrator);
-  const displayedWorkflows = [
-    ...(orchestrator ? [orchestrator] : []),
-    ...subWorkflows,
-  ];
+  const subWorkflows = result.workflows.filter(
+    (w) => !w.isOrchestrator && !w.isCleanup,
+  );
 
   return (
     <>
@@ -46,10 +82,7 @@ export const BenchmarkReadyStep = ({
         )}
       </StepDescription>
 
-      <BenchmarkWorkflowList
-        workflows={displayedWorkflows}
-        provider={providerName}
-      />
+      <BenchmarkWorkflowList workflows={subWorkflows} provider={providerName} />
 
       {runPhase === 'running' && (
         <BenchmarkRunningPhase progress={runningProgress} />
@@ -58,12 +91,17 @@ export const BenchmarkReadyStep = ({
       {runPhase === 'failed' && <BenchmarkFailedPhase />}
 
       {runPhase === 'succeeded_with_failures' && (
-        <BenchmarkAnalyticsPhase
-          provider={providerName}
-          message={t(
-            "You can review your Benchmark Report here (it's not final since there are some failed workflows)",
+        <>
+          <BenchmarkAnalyticsPhase
+            provider={providerName}
+            message={t(
+              'You can access the Benchmark Report here. Note: results only cover services from workflows that ran successfully.',
+            )}
+          />
+          {failedWorkflows && failedWorkflows.length > 0 && (
+            <FailedWorkflowsList workflows={failedWorkflows} />
           )}
-        />
+        </>
       )}
 
       {runPhase === 'succeeded' && (

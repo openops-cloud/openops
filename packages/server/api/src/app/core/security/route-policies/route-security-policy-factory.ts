@@ -2,36 +2,43 @@ import {
   AuthorizationScope,
   Permission,
   PrincipalType,
-  PublicRoutePolicy,
   RouteAccessType,
 } from '@openops/shared';
-import { ProjectIdLocation, ProjectIdSource } from './project-id-source';
+import { PropertyLocation, PropertySource } from './property-source';
 import { AuthenticatedRoutePolicy } from './route-security-policy';
 
-const defaultProjectIdSource: ProjectIdSource = {
-  location: ProjectIdLocation.TOKEN,
+const defaultSource: PropertySource = {
+  location: PropertyLocation.TOKEN,
 };
 
-export function getOrganizationScopedRoutePolicy(
-  allowedPrincipals: readonly PrincipalType[],
-): AuthenticatedRoutePolicy {
+export function getOrganizationScopedRoutePolicy({
+  organizationIdSource = defaultSource,
+  allowedPrincipals,
+  permission,
+}: {
+  allowedPrincipals: readonly PrincipalType[];
+  organizationIdSource?: PropertySource;
+  permission?: Permission | readonly Permission[];
+}): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
     authorization: {
       authorizationScope: AuthorizationScope.ORGANIZATION,
+      organizationIdSource,
       allowedPrincipals,
+      permission,
     },
   };
 }
 
 export function getProjectScopedRoutePolicy({
-  projectIdSource = defaultProjectIdSource,
+  projectIdSource = defaultSource,
   allowedPrincipals,
   permission,
 }: {
   allowedPrincipals: readonly PrincipalType[];
-  projectIdSource?: ProjectIdSource;
-  permission?: Permission;
+  projectIdSource?: PropertySource;
+  permission?: Permission | readonly Permission[];
 }): AuthenticatedRoutePolicy {
   return {
     routeAccessType: RouteAccessType.AUTHENTICATED,
@@ -44,6 +51,14 @@ export function getProjectScopedRoutePolicy({
   };
 }
 
-export const PUBLIC_ROUTE_POLICY: Readonly<PublicRoutePolicy> = Object.freeze({
-  routeAccessType: RouteAccessType.PUBLIC,
-});
+export function getUnscopedRoutePolicy(
+  allowedPrincipals: PrincipalType[],
+): AuthenticatedRoutePolicy {
+  return {
+    routeAccessType: RouteAccessType.AUTHENTICATED,
+    authorization: {
+      authorizationScope: AuthorizationScope.UNSCOPED,
+      allowedPrincipals,
+    },
+  };
+}

@@ -26,6 +26,7 @@ const SideMenuNavigation = ({
           key={index}
           isMinimized={isMinimized}
           isComingSoon={link.isComingSoon}
+          locked={link.locked}
         />
       ))}
       {NavBottom}

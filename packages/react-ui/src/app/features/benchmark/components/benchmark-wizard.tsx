@@ -1,13 +1,13 @@
 import {
   BenchmarkCreatingPlaceholder,
   BenchmarkReadyStep,
-  Wizard,
-  WizardClose,
-  WizardContent,
-  WizardFooter,
-  WizardHeader,
-  WizardStep,
-  WizardTitle,
+  MultiStepForm,
+  MultiStepFormClose,
+  MultiStepFormContent,
+  MultiStepFormFooter,
+  MultiStepFormHeader,
+  MultiStepFormStep,
+  MultiStepFormTitle,
 } from '@openops/components/ui';
 import { BenchmarkCreationResult } from '@openops/shared';
 import { t } from 'i18next';
@@ -87,6 +87,7 @@ export const BenchmarkWizard = ({
   const {
     runPhase,
     runningProgress,
+    failedWorkflows,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,
@@ -126,30 +127,30 @@ export const BenchmarkWizard = ({
           onClose={handleCloseConnectionDialog}
         />
       )}
-      <Wizard
+      <MultiStepForm
         className="border-l-0 border-t-0 pb-9"
         value={wizardPhase}
         onValueChange={noop}
       >
-        <WizardHeader className="min-h-[60px] bg-white border-gray-200">
-          <WizardTitle>{t('Run a Benchmark')}</WizardTitle>
-          <WizardClose onClose={onClose} />
-        </WizardHeader>
+        <MultiStepFormHeader className="min-h-[60px] bg-white border-gray-200">
+          <MultiStepFormTitle>{t('Run a Benchmark')}</MultiStepFormTitle>
+          <MultiStepFormClose onClose={onClose} />
+        </MultiStepFormHeader>
 
-        <WizardContent className="flex flex-col overflow-hidden">
+        <MultiStepFormContent className="flex flex-col overflow-hidden">
           {isCreatingBenchmark ? (
             <BenchmarkCreatingPlaceholder />
           ) : (
             <>
-              <WizardStep value="initial" key="initial">
+              <MultiStepFormStep value="initial" key="initial">
                 <InitialBenchmarkStep
                   selectedProvider={selectedProvider}
                   onProviderChange={setSelectedProvider}
                   onConnect={setConnectingProvider}
                   connectedProviders={connectedProviders}
                 />
-              </WizardStep>
-              <WizardStep
+              </MultiStepFormStep>
+              <MultiStepFormStep
                 value="provider-step"
                 key="provider-step"
                 className="flex flex-col flex-1 min-h-0"
@@ -162,8 +163,8 @@ export const BenchmarkWizard = ({
                     onValueChange={setCurrentSelections}
                   />
                 )}
-              </WizardStep>
-              <WizardStep
+              </MultiStepFormStep>
+              <MultiStepFormStep
                 value="benchmark-ready"
                 key="benchmark-ready"
                 className="flex flex-col flex-1 min-h-0"
@@ -174,14 +175,15 @@ export const BenchmarkWizard = ({
                     result={benchmarkCreateResult}
                     runPhase={runPhase}
                     runningProgress={runningProgress ?? undefined}
+                    failedWorkflows={failedWorkflows}
                   />
                 )}
-              </WizardStep>
+              </MultiStepFormStep>
             </>
           )}
-        </WizardContent>
+        </MultiStepFormContent>
 
-        <WizardFooter>
+        <MultiStepFormFooter>
           <BenchmarkWizardFooter
             wizardPhase={wizardPhase}
             runPhase={runPhase}
@@ -196,8 +198,8 @@ export const BenchmarkWizard = ({
             onViewRun={handleViewRun}
             onRunAgain={handleRunBenchmark}
           />
-        </WizardFooter>
-      </Wizard>
+        </MultiStepFormFooter>
+      </MultiStepForm>
     </div>
   );
 };

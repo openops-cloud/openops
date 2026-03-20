@@ -85,7 +85,7 @@ const SelectOption = React.forwardRef<HTMLLabelElement, SelectOptionProps>(
         htmlFor={inputId}
         className={cn(
           'flex items-center gap-4 px-4 py-3 cursor-pointer border-b border-border last:border-b-0 transition-colors',
-          'hover:bg-accent first:rounded-t-lg last:rounded-b-lg',
+          'hover:bg-accent last:rounded-b-lg',
           isDisabled && 'cursor-not-allowed opacity-50',
           className,
         )}

@@ -38,8 +38,11 @@ describe('useBenchmarkBannerState', () => {
     mockListBenchmarks.mockResolvedValue([]);
   });
 
-  it('returns isEnabled false and default variation when flag is disabled', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(false);
+  it('returns isEnabled false and default variation when banner should not be shown', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: false,
+      isPending: false,
+    });
     setupQueryMock(undefined);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -49,8 +52,11 @@ describe('useBenchmarkBannerState', () => {
     expect(result.current.provider).toBe(undefined);
   });
 
-  it('does not call listBenchmarks when flag is disabled', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(false);
+  it('does not call listBenchmarks when banner should not be shown', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: false,
+      isPending: false,
+    });
     mockUseQuery.mockImplementation(({ enabled }) => {
       if (!enabled) return { data: undefined };
       benchmarkApi.listBenchmarks();
@@ -62,8 +68,11 @@ describe('useBenchmarkBannerState', () => {
     expect(mockListBenchmarks).not.toHaveBeenCalled();
   });
 
-  it('calls listBenchmarks when flag is enabled', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+  it('calls listBenchmarks when banner should be shown', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([]);
 
     renderHook(() => useBenchmarkBannerState());
@@ -71,8 +80,11 @@ describe('useBenchmarkBannerState', () => {
     expect(mockListBenchmarks).toHaveBeenCalledTimes(1);
   });
 
-  it('returns default variation when flag is enabled but no benchmarks exist', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+  it('returns default variation when banner is shown but no benchmarks exist', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -82,8 +94,11 @@ describe('useBenchmarkBannerState', () => {
     expect(result.current.provider).toBe(undefined);
   });
 
-  it('returns default variation when flag is enabled but benchmark is RUNNING', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+  it('returns default variation when banner is shown but benchmark is RUNNING', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([
       { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.RUNNING },
     ]);
@@ -94,7 +109,10 @@ describe('useBenchmarkBannerState', () => {
   });
 
   it('returns default variation when benchmark is CREATED', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([
       { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.CREATED },
     ]);
@@ -105,7 +123,10 @@ describe('useBenchmarkBannerState', () => {
   });
 
   it('returns default variation when benchmark has FAILED status', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([
       { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.FAILED },
     ]);
@@ -116,7 +137,10 @@ describe('useBenchmarkBannerState', () => {
   });
 
   it('returns report variation and aws provider when aws benchmark has SUCCEEDED', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([
       {
         benchmarkId: 'bm-1',
@@ -132,7 +156,10 @@ describe('useBenchmarkBannerState', () => {
   });
 
   it('returns report variation when there are multiple benchmarks and one has SUCCEEDED', () => {
-    mockUseShowBenchmarkBanner.mockReturnValue(true);
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
     setupQueryMock([
       { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.RUNNING },
       {

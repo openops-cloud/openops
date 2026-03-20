@@ -1,12 +1,12 @@
 import {
   ApplicationError,
+  type BenchmarkConfiguration,
+  type BenchmarkCreationResult,
   BenchmarkProviders,
+  type BenchmarkWorkflowBase,
   ContentType,
   ErrorCode,
   Folder,
-  type BenchmarkConfiguration,
-  type BenchmarkCreationResult,
-  type BenchmarkWorkflowBase,
 } from '@openops/shared';
 import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
@@ -20,7 +20,10 @@ import {
 } from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
-import { resolveWorkflowPathsForSeed } from './catalog-resolver';
+import {
+  type CategorizedWorkflowPaths,
+  resolveWorkflowPathsForSeed,
+} from './catalog-resolver';
 import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
 
@@ -67,8 +70,7 @@ async function deleteFlowsByIds(params: {
 }
 
 function getBenchmarkFolderDisplayName(provider: string): string {
-  const normalizedProvider = provider.toLowerCase();
-  switch (normalizedProvider) {
+  switch (provider) {
     case BenchmarkProviders.AWS:
       return 'AWS Benchmark';
     default:
@@ -133,25 +135,83 @@ export async function deleteFlowsForExistingBenchmark(params: {
   );
 }
 
+async function loadWorkflowTemplate(
+  filePath: string,
+): Promise<WorkflowTemplate> {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const parsed = JSON.parse(content) as {
+    template: WorkflowTemplate['template'];
+  };
+  return { template: parsed.template };
+}
+
+type CategorizedWorkflowTemplates = {
+  orchestrator: WorkflowTemplate;
+  cleanup: WorkflowTemplate;
+  subWorkflows: WorkflowTemplate[];
+};
+
 async function loadWorkflowTemplates(
-  provider: string,
-  workflowIds: string[],
-): Promise<WorkflowTemplate[]> {
-  const paths = resolveWorkflowPathsForSeed(provider, workflowIds);
+  categorizedPaths: CategorizedWorkflowPaths,
+): Promise<CategorizedWorkflowTemplates> {
+  const [orchestrator, cleanup, ...subWorkflows] = await Promise.all([
+    loadWorkflowTemplate(categorizedPaths.orchestrator.filePath),
+    loadWorkflowTemplate(categorizedPaths.cleanup.filePath),
+    ...categorizedPaths.subWorkflows.map((path) =>
+      loadWorkflowTemplate(path.filePath),
+    ),
+  ]);
 
-  if (paths.length === 0) {
-    return [];
-  }
+  return {
+    orchestrator,
+    cleanup,
+    subWorkflows,
+  };
+}
 
-  const parsedTemplates = paths.map(async ({ filePath }) => {
-    const content = await fs.readFile(filePath, 'utf-8');
-    const parsed = JSON.parse(content) as {
-      template: WorkflowTemplate['template'];
-    };
-    return { template: parsed.template };
-  });
+type CategorizedFlowResults = {
+  orchestrator: { id: string; displayName: string };
+  cleanup: { id: string; displayName: string };
+  subWorkflows: Array<{ id: string; displayName: string }>;
+};
 
-  return Promise.all(parsedTemplates);
+async function createCategorizedWorkflows(
+  templates: CategorizedWorkflowTemplates,
+  connections: Awaited<ReturnType<typeof getConnectionsWithBlockSupport>>,
+  projectId: string,
+  folderId: string,
+): Promise<CategorizedFlowResults> {
+  const allTemplates = [
+    templates.orchestrator,
+    templates.cleanup,
+    ...templates.subWorkflows,
+  ];
+
+  const allResults = await bulkCreateAndPublishFlows(
+    allTemplates,
+    connections,
+    projectId,
+    folderId,
+  );
+
+  const orchestratorIndex = 0;
+  const cleanupIndex = 1;
+  const subWorkflowStartIndex = 2;
+
+  return {
+    orchestrator: {
+      id: allResults[orchestratorIndex].id,
+      displayName: allResults[orchestratorIndex].version.displayName,
+    },
+    cleanup: {
+      id: allResults[cleanupIndex].id,
+      displayName: allResults[cleanupIndex].version.displayName,
+    },
+    subWorkflows: allResults.slice(subWorkflowStartIndex).map((r) => ({
+      id: r.id,
+      displayName: r.version.displayName,
+    })),
+  };
 }
 
 export async function createBenchmarkWorkflows(params: {
@@ -164,26 +224,43 @@ export async function createBenchmarkWorkflows(params: {
   const { provider, workflowIds, connectionId, projectId, folderId } = params;
 
   if (workflowIds.length === 0) {
-    return [];
+    throwValidationError('At least one workflow is required');
   }
 
-  const templates = await loadWorkflowTemplates(provider, workflowIds);
+  const categorizedPaths = resolveWorkflowPathsForSeed(provider, workflowIds);
+  const templates = await loadWorkflowTemplates(categorizedPaths);
 
   const connections = await getConnectionsWithBlockSupport(projectId, [
     connectionId,
   ]);
-  const results = await bulkCreateAndPublishFlows(
+
+  const results = await createCategorizedWorkflows(
     templates,
     connections,
     projectId,
     folderId,
   );
 
-  return results.map((r, index) => ({
-    flowId: r.id,
-    displayName: r.version.displayName,
-    isOrchestrator: index === 0,
-  }));
+  return [
+    {
+      flowId: results.orchestrator.id,
+      displayName: results.orchestrator.displayName,
+      isOrchestrator: true,
+      isCleanup: false,
+    },
+    {
+      flowId: results.cleanup.id,
+      displayName: results.cleanup.displayName,
+      isOrchestrator: false,
+      isCleanup: true,
+    },
+    ...results.subWorkflows.map((sw) => ({
+      flowId: sw.id,
+      displayName: sw.displayName,
+      isOrchestrator: false,
+      isCleanup: false,
+    })),
+  ];
 }
 
 export async function createBenchmark(params: {

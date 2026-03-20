@@ -5,6 +5,7 @@ import {
 import {
   AppConnection,
   ApplicationError,
+  ENGINE_ROUTE_POLICY,
   ErrorCode,
   isNil,
 } from '@openops/shared';
@@ -45,6 +46,9 @@ export const appConnectionWorkerController: FastifyPluginCallbackTypebox = (
 };
 
 const GetAppConnectionRequest = {
+  config: {
+    security: ENGINE_ROUTE_POLICY,
+  },
   schema: {
     params: Type.Object({
       connectionName: Type.String(),

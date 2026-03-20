@@ -15,7 +15,7 @@ import {
   TooltipWrapper,
   WarningWithIcon,
 } from '@openops/components/ui';
-import { UNCATEGORIZED_FOLDER_ID } from '@openops/shared';
+import { Permission, UNCATEGORIZED_FOLDER_ID } from '@openops/shared';
 import { useEffect, useMemo, useState } from 'react';
 import {
   useLocation,
@@ -25,6 +25,8 @@ import {
 } from 'react-router-dom';
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
+import { PermissionGuard } from '@/app/common/components/permission-guard';
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   flowsHooks,
   FlowsSearchState,
@@ -121,49 +123,69 @@ const FolderAddonContent = ({
         </DropdownMenuTrigger>
       </TooltipWrapper>
       <DropdownMenuContent>
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault();
-            onCreateFlow();
-          }}
+        <PermissionGuard
+          permission={Permission.WRITE_FLOW}
+          tooltipClassName="flex"
         >
-          <div className="flex flex-row gap-2 items-center">
-            <WorkflowIcon className="h-4 w-4" data-testid="add-flow" />
-            <span>{t('New workflow')}</span>
-          </div>
-        </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              onCreateFlow();
+            }}
+          >
+            <div className="flex flex-row gap-2 items-center">
+              <WorkflowIcon className="h-4 w-4" data-testid="add-flow" />
+              <span>{t('New workflow')}</span>
+            </div>
+          </DropdownMenuItem>
+        </PermissionGuard>
         {!isUncategorizedFolder && (
           <>
             <CreateSubfolderDialog
               folderId={item.id}
               onCreate={onCreateSubfolder}
             >
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <div className="flex flex-row gap-2 items-center">
-                  <FolderIcon className="h-4 w-4" />
-                  <span>{t('New sub-folder')}</span>
-                </div>
-              </DropdownMenuItem>
+              <PermissionGuard
+                permission={Permission.WRITE_FOLDER}
+                tooltipClassName="flex"
+              >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <div className="flex flex-row gap-2 items-center">
+                    <FolderIcon className="h-4 w-4" />
+                    <span>{t('New sub-folder')}</span>
+                  </div>
+                </DropdownMenuItem>
+              </PermissionGuard>
             </CreateSubfolderDialog>
             <RenameFolderDialog
               folderId={item.id}
               name={item.displayName}
               onRename={refetchFolderTree}
             >
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <div className="flex flex-row gap-2 items-center">
-                  <PencilIcon className="h-4 w-4" />
-                  <span>{t('Rename')}</span>
-                </div>
-              </DropdownMenuItem>
+              <PermissionGuard
+                permission={Permission.WRITE_FOLDER}
+                tooltipClassName="flex"
+              >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <div className="flex flex-row gap-2 items-center">
+                    <PencilIcon className="h-4 w-4" />
+                    <span>{t('Rename')}</span>
+                  </div>
+                </DropdownMenuItem>
+              </PermissionGuard>
             </RenameFolderDialog>
             <MoveSubfolderDialog folder={item}>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <div className="flex cursor-pointer  flex-row gap-2 items-center">
-                  <FolderOutputIcon className="h-4 w-4" />
-                  <span>{t('Move To')}</span>
-                </div>
-              </DropdownMenuItem>
+              <PermissionGuard
+                permission={Permission.WRITE_FOLDER}
+                tooltipClassName="flex"
+              >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <div className="flex cursor-pointer  flex-row gap-2 items-center">
+                    <FolderOutputIcon className="h-4 w-4" />
+                    <span>{t('Move To')}</span>
+                  </div>
+                </DropdownMenuItem>
+              </PermissionGuard>
             </MoveSubfolderDialog>
             <ConfirmationDeleteDialog
               title={
@@ -223,12 +245,17 @@ const FolderAddonContent = ({
               mutationFn={() => onDeleteFolder(item.id)}
               entityName={item.displayName}
             >
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <div className="flex flex-row gap-2 items-center">
-                  <TrashIcon className="h-4 w-4 text-destructive" />
-                  <span className="text-destructive">{t('Delete')}</span>
-                </div>
-              </DropdownMenuItem>
+              <PermissionGuard
+                permission={Permission.DELETE_FOLDER}
+                tooltipClassName="flex"
+              >
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <div className="flex flex-row gap-2 items-center">
+                    <TrashIcon className="h-4 w-4 text-destructive" />
+                    <span className="text-destructive">{t('Delete')}</span>
+                  </div>
+                </DropdownMenuItem>
+              </PermissionGuard>
             </ConfirmationDeleteDialog>
           </>
         )}
@@ -252,6 +279,8 @@ const FolderTreeWrapper = ({
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const updateSearchParams = useUpdateSearchParams();
+  const { checkAccess } = useAuthorization();
+  const canWriteFlow = checkAccess(Permission.WRITE_FLOW);
 
   const expandSubfolder = (folderItem?: FolderItem) => {
     if (
@@ -294,6 +323,7 @@ const FolderTreeWrapper = ({
           <FileAddons
             item={item}
             isSelected={item.id === flowId}
+            readonly={!canWriteFlow}
             onViewClick={(item) => {
               navigate(getFlowLink(item.id, true));
             }}

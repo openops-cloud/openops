@@ -15,9 +15,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { benchmarkApi } from './benchmark-api';
 
+export type FailedWorkflow = {
+  displayName: string;
+  runId?: string;
+};
+
 export type UseBenchmarkRunResult = {
   runPhase: BenchmarkRunPhase;
   runningProgress: { completed: number; total: number } | null;
+  failedWorkflows: FailedWorkflow[];
   isRunPending: boolean;
   handleRunBenchmark: () => Promise<void>;
   handleResetRun: () => void;
@@ -43,11 +49,25 @@ function mapStatusToRunPhase(
   }
 }
 
+function getFailedSubWorkflows(
+  data: BenchmarkStatusResponse,
+): FailedWorkflow[] {
+  return data.workflows
+    .filter(
+      (w) =>
+        !w.isOrchestrator &&
+        !w.isCleanup &&
+        w.runStatus === BenchmarkStatus.FAILED,
+    )
+    .map((w) => ({ displayName: w.displayName, runId: w.runId }));
+}
+
 export const useBenchmarkRun = (
   benchmarkCreateResult: BenchmarkCreationResult | null,
 ): UseBenchmarkRunResult => {
   const [runPhase, setRunPhase] = useState<BenchmarkRunPhase>('idle');
   const [lastRunId, setLastRunId] = useState<string | undefined>();
+  const [failedWorkflows, setFailedWorkflows] = useState<FailedWorkflow[]>([]);
   const [runCount, setRunCount] = useState(0);
 
   const benchmarkId = benchmarkCreateResult?.benchmarkId ?? null;
@@ -80,6 +100,9 @@ export const useBenchmarkRun = (
       setLastRunId(statusData.lastRunId);
     }
     const newPhase = mapStatusToRunPhase(statusData);
+    if (newPhase === 'succeeded_with_failures') {
+      setFailedWorkflows(getFailedSubWorkflows(statusData));
+    }
     if (newPhase !== null) {
       setRunPhase(newPhase);
     }
@@ -122,6 +145,7 @@ export const useBenchmarkRun = (
   const handleResetRun = () => {
     setRunPhase('idle');
     setLastRunId(undefined);
+    setFailedWorkflows([]);
   };
 
   const runningProgress = useMemo(() => {
@@ -131,7 +155,7 @@ export const useBenchmarkRun = (
     let completed = 0;
     let total = 0;
     for (const w of statusData.workflows) {
-      if (w.isOrchestrator) {
+      if (w.isOrchestrator || w.isCleanup) {
         continue;
       }
       total++;
@@ -148,6 +172,7 @@ export const useBenchmarkRun = (
   return {
     runPhase,
     runningProgress,
+    failedWorkflows,
     isRunPending,
     handleRunBenchmark,
     handleResetRun,

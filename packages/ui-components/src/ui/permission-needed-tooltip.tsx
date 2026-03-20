@@ -4,7 +4,7 @@ type PermissionNeededTooltipProps = {
   children: React.ReactNode;
   message?: string;
   className?: string;
-  tooltipPlacement?: 'bottom' | 'left';
+  tooltipPlacement?: 'bottom' | 'left' | 'right';
 };
 
 export const PermissionNeededTooltip = ({

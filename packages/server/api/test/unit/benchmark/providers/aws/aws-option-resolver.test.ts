@@ -128,6 +128,55 @@ describe('resolveOptions', () => {
     ]);
   });
 
+  it('deduplicates accounts with the same account ID for getConnectionAccounts', async () => {
+    mockGetOneOrThrow.mockResolvedValue({
+      authProviderKey: 'AWS',
+      value: {
+        type: 'CUSTOM_AUTH',
+        props: {
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/OpenOpsApp',
+              accountName: 'my-sandbox-1',
+            },
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/OpenOpsApp2',
+              accountName: 'my-sandbox-2',
+            },
+            {
+              assumeRoleArn: 'arn:aws:iam::222222222222:role/ReadOnly',
+              accountName: 'another-account',
+            },
+          ],
+        },
+      },
+    });
+    mockGetAuthProviderMetadata.mockResolvedValue({
+      authProviderKey: 'AWS',
+      authProviderLogoUrl: '/blocks/aws.png',
+    });
+
+    const result = await resolveOptions('getConnectionAccounts', {
+      projectId,
+      provider,
+      benchmarkConfiguration: { connection: ['conn-123'] },
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result).toEqual([
+      {
+        id: '111111111111',
+        displayName: 'my-sandbox-1',
+        imageLogoUrl: '/blocks/aws.png',
+      },
+      {
+        id: '222222222222',
+        displayName: 'another-account',
+        imageLogoUrl: '/blocks/aws.png',
+      },
+    ]);
+  });
+
   it('omits imageLogoUrl for getConnectionAccounts when auth metadata has no logo', async () => {
     mockGetOneOrThrow.mockResolvedValue({
       authProviderKey: 'SomeProvider',

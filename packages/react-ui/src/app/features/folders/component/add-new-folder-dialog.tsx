@@ -22,8 +22,9 @@ import { PlusIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { api } from '@/app/lib/api';
-import { FolderDto } from '@openops/shared';
+import { FolderDto, Permission } from '@openops/shared';
 
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
 import { foldersApi } from '../lib/folders-api';
@@ -110,14 +111,16 @@ const AddNewFolderDialog = ({ updateSearchParams }: Props) => {
     <div className="flex items-center justify-center">
       <Dialog open={isDialogOpen} onOpenChange={opDialogOpenChange}>
         <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-primary/90 enabled:hover:text-primary/90"
-          >
-            <PlusIcon size={18} className="mr-1" />
-            {t('New folder')}
-          </Button>
+          <PermissionGuard permission={Permission.WRITE_FOLDER}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary/90 enabled:hover:text-primary/90"
+            >
+              <PlusIcon size={18} className="mr-1" />
+              {t('New folder')}
+            </Button>
+          </PermissionGuard>
         </DialogTrigger>
 
         <DialogContent>

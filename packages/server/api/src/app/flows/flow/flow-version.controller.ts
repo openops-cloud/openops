@@ -4,18 +4,17 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   ApplicationError,
-  ErrorCode,
   FlowVersionState,
   MinimalFlow,
   OpenOpsId,
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
-  StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
+import { getProjectScopedRoutePolicy } from '../../core/security/route-policies/route-security-policy-factory';
+import { assertFlowVersionBelongsToProject } from '../common/flow-validations';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 
@@ -25,6 +24,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
   fastify.post(
     '/:flowVersionId/trigger',
     {
+      config: {
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+          permission: Permission.WRITE_FLOW,
+        }),
+      },
       schema: {
         description:
           'Updates the trigger configuration for a specific flow version',
@@ -34,6 +39,18 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         body: UpdateFlowVersionRequest,
         response: {
           [StatusCodes.OK]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.BAD_REQUEST]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.CONFLICT]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.INTERNAL_SERVER_ERROR]: Type.Object({
             success: Type.Boolean(),
             message: Type.String(),
           }),
@@ -53,23 +70,20 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             message:
               'It is not possible to update the flowId of a flow version',
           });
-        }
-
-        const isValid = await validateFlowVersionBelongsToProject(
-          flowVersion,
-          request.principal.projectId,
-          reply,
-        );
-
-        if (!isValid) {
           return;
         }
+
+        await assertFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+        );
 
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
             message: 'The flow version is locked',
           });
+          return;
         }
 
         if (
@@ -80,6 +94,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: false,
             message: 'The flow version has been updated by another user',
           });
+          return;
         }
 
         const userId = request.principal.id;
@@ -96,6 +111,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           message: newFlowVersion.updated,
         });
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          throw error;
+        }
+
         await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           success: false,
           message: (error as Error).message,
@@ -121,7 +140,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/test-output',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.TEST_STEP_FLOW,
+        }),
       },
       schema: {
         description:
@@ -136,9 +158,15 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request): Promise<Record<OpenOpsId, StepOutputWithData>> => {
+    async (request) => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
+
+      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+      await assertFlowVersionBelongsToProject(
+        flowVersion,
+        request.principal.projectId,
+      );
 
       const flowStepTestOutputs = await flowStepTestOutputService.listDecrypted(
         {
@@ -146,6 +174,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           flowVersionId,
         },
       );
+
       return Object.fromEntries(
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
@@ -164,7 +193,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/test-output',
     {
       config: {
-        allowedPrincipals: [PrincipalType.USER],
+        security: getProjectScopedRoutePolicy({
+          allowedPrincipals: [PrincipalType.USER],
+          permission: Permission.TEST_STEP_FLOW,
+        }),
       },
       schema: {
         description:
@@ -188,8 +220,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             message: Type.String(),
           }),
           [StatusCodes.NOT_FOUND]: Type.Object({
-            success: Type.Boolean(),
-            message: Type.String(),
+            code: Type.String(),
+            params: Type.Object({
+              entityId: Type.String(),
+              entityType: Type.String(),
+            }),
           }),
         },
       },
@@ -201,14 +236,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         const flowVersion = await flowVersionService.getOneOrThrow(
           flowVersionId,
         );
-        const isValid = await validateFlowVersionBelongsToProject(
+
+        await assertFlowVersionBelongsToProject(
           flowVersion,
           request.principal.projectId,
-          reply,
         );
-        if (!isValid) {
-          return;
-        }
+
         const saved = await flowStepTestOutputService.save({
           stepId,
           flowVersionId,
@@ -216,25 +249,20 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           output,
           success,
         });
+
         await reply.status(StatusCodes.OK).send({
           success: true,
           id: saved.id,
         });
       } catch (error) {
-        if (
-          error instanceof ApplicationError &&
-          error.error.code === ErrorCode.ENTITY_NOT_FOUND
-        ) {
-          await reply.status(StatusCodes.NOT_FOUND).send({
-            success: false,
-            message: 'The defined flow version was not found',
-          });
-        } else {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: (error as Error).message,
-          });
+        if (error instanceof ApplicationError) {
+          throw error;
         }
+
+        await reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message: (error as Error).message,
+        });
       }
     },
   );
@@ -242,8 +270,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 
 const GetLatestVersionsByConnectionRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.READ_FLOW,
+    }),
   },
   schema: {
     operationId: 'List Flows By Connection',
