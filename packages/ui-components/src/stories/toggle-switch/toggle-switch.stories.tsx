@@ -87,4 +87,21 @@ export const Disabled: Story = {
   },
 };
 
+export const Pill: Story = {
+  args: {
+    options,
+    variant: 'pill',
+    onChange: action('onChange'),
+  },
+};
+
+export const PillDisabled: Story = {
+  args: {
+    options,
+    variant: 'pill',
+    disabled: true,
+    onChange: action('onChange'),
+  },
+};
+
 export default meta;
