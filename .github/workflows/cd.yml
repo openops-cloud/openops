@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Get token from Github App
         id: app_token
-        uses: actions/create-github-app-token@v2.2.1
+        uses: actions/create-github-app-token@v3.0.0
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
