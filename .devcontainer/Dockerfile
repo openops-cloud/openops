@@ -63,13 +63,6 @@ RUN <<-```
 ENV PATH="/opt/google-cloud-sdk/bin:$PATH"
 
 SHELL ["/bin/bash", "-c"]
-WORKDIR /root/.mcp/superset
-RUN <<-```
-    set -ex
-    git clone https://github.com/openops-cloud/superset-mcp .
-    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
-    uv venv && uv pip install .
-```
 
 WORKDIR /root/.mcp/openops-mcp
 RUN <<-```

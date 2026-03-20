@@ -34,13 +34,6 @@ export const getMcpSystemPrompt = async ({
   }
 
   if (
-    queryClassification.includes(QueryClassification.analytics) &&
-    hasToolProvider(selectedTools, 'superset')
-  ) {
-    promptsToLoad.push('mcp-analytics.txt');
-  }
-
-  if (
     queryClassification.includes(QueryClassification.openops) &&
     hasToolProvider(selectedTools, 'openops')
   ) {
