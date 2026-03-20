@@ -16343,7 +16343,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The following npm packages may be included in this product:
 
  - iconv-lite@0.6.3
- - iconv-lite@0.7.0
  - iconv-lite@0.7.2
 
 These packages each contain the following license:
@@ -16712,7 +16711,6 @@ The complete list of contributors can be found at:
 
 The following npm packages may be included in this product:
 
- - nodemailer@7.0.6
  - nodemailer@8.0.2
  - nodemailer@8.0.3
 
@@ -18858,7 +18856,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - imapflow@1.0.196
+ - imapflow@1.2.15
 
 This package contains the following license:
 
@@ -26617,12 +26615,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
  - @zone-eu/mailsplit@5.4.8
- - mailsplit@5.4.6
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -30863,6 +30860,7 @@ The following npm packages may be included in this product:
  - on-exit-leak-free@2.1.2
  - thread-stream@2.7.0
  - thread-stream@3.1.0
+ - thread-stream@4.0.0
 
 These packages each contain the following license:
 
@@ -30924,6 +30922,7 @@ The following npm packages may be included in this product:
 
  - pino-abstract-transport@1.2.0
  - pino-abstract-transport@2.0.0
+ - pino-abstract-transport@3.0.0
 
 These packages each contain the following license:
 
@@ -38739,8 +38738,8 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
+ - pino@10.3.1
  - pino@9.14.0
- - pino@9.9.5
 
 These packages each contain the following license:
 
