@@ -200,7 +200,7 @@
     "i18next-browser-languagedetector": "8.0.0",
     "i18next-http-backend": "2.5.2",
     "i18next-icu": "2.3.0",
-    "imapflow": "1.0.196",
+    "imapflow": "1.2.15",
     "import-fresh": "3.3.0",
     "intl-messageformat": "10.5.14",
     "ioredis": "5.4.1",
