@@ -1,0 +1,87 @@
+{
+  "provider": "azure",
+  "steps": [
+    {
+      "id": "connection",
+      "title": "Choose the Azure connection you want to use",
+      "description": "OpenOps can pull data from Azure using the connection you select here.",
+      "selectionType": "single",
+      "optionsSource": { "type": "dynamic", "method": "listConnections" },
+      "nextStep": "subscriptions"
+    },
+    {
+      "id": "subscriptions",
+      "title": "Which subscriptions should we include in the report?",
+      "selectionType": "multi-select",
+      "optionsSource": {
+        "type": "dynamic",
+        "method": "getSubscriptionsList"
+      },
+      "selectAll": true,
+      "nextStep": "regions"
+    },
+    {
+      "id": "regions",
+      "title": "Which regions should we include in the report?",
+      "selectionType": "multi-select",
+      "optionsSource": { "type": "dynamic", "method": "getRegionsList" },
+      "nextStep": "workflows"
+    },
+    {
+      "id": "workflows",
+      "title": "Which Azure workflows should we run to analyze the data?",
+      "selectionType": "multi-select",
+      "selectAll": true,
+      "optionsSource": {
+        "type": "static",
+        "values": [
+          {
+            "id": "Azure Benchmark - Elastic Pool Storage",
+            "displayName": "Elastic Pool Storage",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Elastic Pools",
+            "displayName": "Elastic Pools",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Idle VMs",
+            "displayName": "Idle VMs",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Rightsizing ASE",
+            "displayName": "Rightsizing ASE",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Rightsizing App Service Plans",
+            "displayName": "Rightsizing App Service Plans",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Rightsizing VMs",
+            "displayName": "Rightsizing VMs",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Single Databases",
+            "displayName": "Single Databases",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Unattached Managed Disks",
+            "displayName": "Unattached Managed Disks",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Unused App Services Plans",
+            "displayName": "Unused App Services Plans",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          }
+        ]
+      }
+    }
+  ]
+}
