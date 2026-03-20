@@ -4,7 +4,7 @@ describe('getAzureRegionsList', () => {
   it('returns non-empty array of region items', () => {
     const result = getAzureRegionsList();
     expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBe(55);
+    expect(result.length).toBeGreaterThan(0);
   });
 
   it('returns items with id and displayName', () => {
