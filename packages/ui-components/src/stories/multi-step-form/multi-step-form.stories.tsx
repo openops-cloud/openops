@@ -4,21 +4,21 @@ import { useState } from 'react';
 import {
   Avatar,
   AvatarFallback,
+  MultiStepForm,
+  MultiStepFormClose,
+  MultiStepFormContent,
+  MultiStepFormFooter,
+  MultiStepFormHeader,
+  MultiStepFormNext,
+  MultiStepFormPrevious,
+  MultiStepFormStep,
+  MultiStepFormTitle,
   SelectAllCheckbox,
   SelectForm,
   SelectOption,
   StepBody,
   StepDescription,
   StepTitle,
-  Wizard,
-  WizardClose,
-  WizardContent,
-  WizardFooter,
-  WizardHeader,
-  WizardNext,
-  WizardPrevious,
-  WizardStep,
-  WizardTitle,
   type SelectAllChangeAction,
 } from '../../index';
 
@@ -62,21 +62,17 @@ const SERVICES = [
   { id: 'redshift', name: 'Redshift', code: 'Re' },
 ];
 
-type WizardStep = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
+type Step = 'step1' | 'step2' | 'step3' | 'step4' | 'step5';
 
-const WizardExample = () => {
-  const [currentStep, setCurrentStep] = useState<WizardStep>('step1');
+const MultiStepFormExample = () => {
+  const [currentStep, setCurrentStep] = useState<Step>('step1');
   const [cloudProvider, setCloudProvider] = useState('');
   const [awsConnection, setAwsConnection] = useState('');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
-  const steps: WizardStep[] = ['step1', 'step2', 'step3', 'step4', 'step5'];
-
-  const handleStepChange = (value: string) => {
-    setCurrentStep(value as WizardStep);
-  };
+  const steps: Step[] = ['step1', 'step2', 'step3', 'step4', 'step5'];
 
   const isCurrentStepValid = (): boolean => {
     switch (currentStep) {
@@ -113,14 +109,17 @@ const WizardExample = () => {
 
   return (
     <div className="w-[500px] h-[600px] bg-[#FBFBFE] dark:bg-background">
-      <Wizard value={currentStep} onValueChange={handleStepChange}>
-        <WizardHeader>
-          <WizardTitle>Run a Benchmark</WizardTitle>
-          <WizardClose onClose={() => alert('Wizard closed')} />
-        </WizardHeader>
+      <MultiStepForm
+        value={currentStep}
+        onValueChange={(v) => setCurrentStep(v as Step)}
+      >
+        <MultiStepFormHeader>
+          <MultiStepFormTitle>Run a Benchmark</MultiStepFormTitle>
+          <MultiStepFormClose onClose={() => alert('Form closed')} />
+        </MultiStepFormHeader>
 
-        <WizardContent>
-          <WizardStep value="step1">
+        <MultiStepFormContent>
+          <MultiStepFormStep value="step1">
             <StepTitle>Let&apos;s create your Benchmark Report!</StepTitle>
             <StepDescription className="!mt-0">
               <button
@@ -205,9 +204,9 @@ const WizardExample = () => {
                 </SelectOption>
               </SelectForm>
             </StepBody>
-          </WizardStep>
+          </MultiStepFormStep>
 
-          <WizardStep value="step2">
+          <MultiStepFormStep value="step2">
             <StepTitle>Choose the AWS connection you want to use</StepTitle>
             <StepDescription className="!mt-0">
               OpenOps can pull data from AWS using the connection you select
@@ -258,9 +257,9 @@ const WizardExample = () => {
                 ))}
               </SelectForm>
             </StepBody>
-          </WizardStep>
+          </MultiStepFormStep>
 
-          <WizardStep value="step3">
+          <MultiStepFormStep value="step3">
             <StepDescription>
               This connection supports multiple accounts, which of them would
               like to include in the report?
@@ -306,9 +305,9 @@ const WizardExample = () => {
                 </SelectForm>
               </div>
             </StepBody>
-          </WizardStep>
+          </MultiStepFormStep>
 
-          <WizardStep value="step4">
+          <MultiStepFormStep value="step4">
             <StepDescription>
               Choose which AWS regions to include in your benchmark report
             </StepDescription>
@@ -351,9 +350,9 @@ const WizardExample = () => {
                 </SelectForm>
               </div>
             </StepBody>
-          </WizardStep>
+          </MultiStepFormStep>
 
-          <WizardStep value="step5">
+          <MultiStepFormStep value="step5">
             <StepDescription>
               Choose which AWS services to include in your benchmark report
             </StepDescription>
@@ -383,7 +382,7 @@ const WizardExample = () => {
                         value={service.id}
                         icon={
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-orange-500 bg-[#FFEDD4] text-[#F54900] text-xs">
+                            <AvatarFallback className="bg-[#FFEDD4] text-[#F54900] text-xs">
                               {service.code}
                             </AvatarFallback>
                           </Avatar>
@@ -396,34 +395,34 @@ const WizardExample = () => {
                 </SelectForm>
               </div>
             </StepBody>
-          </WizardStep>
-        </WizardContent>
+          </MultiStepFormStep>
+        </MultiStepFormContent>
 
-        <WizardFooter>
+        <MultiStepFormFooter>
           {steps.includes(currentStep) && steps.indexOf(currentStep) !== 0 ? (
-            <WizardPrevious />
+            <MultiStepFormPrevious />
           ) : (
             <div className="w-[112px]" />
           )}
-          <WizardNext disabled={!isCurrentStepValid()} />
-        </WizardFooter>
-      </Wizard>
+          <MultiStepFormNext disabled={!isCurrentStepValid()} />
+        </MultiStepFormFooter>
+      </MultiStepForm>
     </div>
   );
 };
 
 const meta = {
-  title: 'ui/Wizard',
-  component: Wizard,
+  title: 'ui/MultiStepForm',
+  component: MultiStepForm,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
   },
-} satisfies Meta<typeof Wizard>;
+} satisfies Meta<typeof MultiStepForm>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 export const BenchmarkWizard: Story = {
-  render: () => <WizardExample />,
+  render: () => <MultiStepFormExample />,
 };
