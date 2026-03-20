@@ -94,9 +94,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
   [AppSystemProp.AI_PROMPTS_LOCATION]:
     'https://raw.githubusercontent.com/openops-cloud/openops/main/ai-prompts',
-  [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: 'https://docs.openops.com/mcp',
-  [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
   [SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE]: 'false',
   [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
   [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
