@@ -31,6 +31,8 @@ export * from './lib/aws/sts-common';
 export * from './lib/aws/tags/tag-resources';
 export * from './lib/aws/tags/tags';
 
+export * from './lib/region-list-item';
+
 export * from './lib/condition-watcher';
 
 export * from './lib/aws/pricing';
@@ -60,6 +62,7 @@ export * from './lib/iac/rds-properties';
 export * from './lib/openops-analytics/requests-helpers';
 
 export * from './lib/azure/auth';
+export * from './lib/azure/regions';
 export * from './lib/azure/subscription/get-subscription-dropdown';
 
 export * from './lib/axios-wrapper';
