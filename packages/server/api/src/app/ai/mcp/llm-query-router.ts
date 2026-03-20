@@ -22,8 +22,6 @@ export type ToolsAndQueryResult = {
 
 const baseQueryClassificationDescriptions: Record<QueryClassification, string> =
   {
-    [QueryClassification.analytics]:
-      'requires data visualization, charts, dashboards, or Superset-related functionality',
     [QueryClassification.tables]:
       'requires database access, schema information, or table operations',
     [QueryClassification.openops]:

@@ -16,7 +16,6 @@ export type AssistantUITools = Record<
 >;
 
 export const QueryClassification = {
-  analytics: 'analytics',
   tables: 'tables',
   openops: 'openops',
   aws_cost: 'aws_cost',
