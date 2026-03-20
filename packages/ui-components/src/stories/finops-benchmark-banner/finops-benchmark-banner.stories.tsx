@@ -41,3 +41,17 @@ export const AzureReport: Story = {
     provider: 'azure',
   },
 };
+
+export const DisabledDefault: Story = {
+  args: {
+    disabled: true,
+  },
+};
+
+export const DisabledReport: Story = {
+  args: {
+    variation: 'report',
+    provider: 'aws',
+    disabled: true,
+  },
+};

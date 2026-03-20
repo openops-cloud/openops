@@ -1,4 +1,3 @@
-import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   SETTINGS_KEYS,
@@ -23,6 +22,7 @@ import { Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShowTemplatesBanner } from '../../templates/hooks/use-show-templates-banner';
 import { useOpenBenchmarkWizard } from './use-open-benchmark-wizard';
 import { useBenchmarkBannerState } from './useBenchmarkBannerState';
 
@@ -56,13 +56,16 @@ const HomeOnboardingView = ({
   });
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const { cloudUser, isHomeCloudConnectionClosed } = useAppStore((state) => ({
-    cloudUser: state.cloudUser,
+  const { isHomeCloudConnectionClosed } = useAppStore((state) => ({
     isHomeCloudConnectionClosed: state.userSettings.isHomeCloudConnectionClosed,
   }));
 
+  const { isCloudUser } = useShowTemplatesBanner();
+
   const { checkAccess } = useAuthorization();
-  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
+  const hasBenchmarkPermissions =
+    checkAccess(Permission.WRITE_FLOW) &&
+    checkAccess(Permission.READ_APP_CONNECTION);
 
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
   const openBenchmarkWizard = useOpenBenchmarkWizard();
@@ -72,7 +75,7 @@ const HomeOnboardingView = ({
     setTimeout(() => {
       refetch({ cancelRefetch: true });
     }, 1000);
-  }, [cloudUser, refetch, setSelectedDomains]);
+  }, [isCloudUser, refetch, setSelectedDomains]);
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -110,24 +113,23 @@ const HomeOnboardingView = ({
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
-        <PermissionGuard permission={Permission.WRITE_FLOW}>
-          <FinOpsBenchmarkBanner
-            variation={benchmarkVariation}
-            provider={benchmarkProvider}
-            onActionClick={openBenchmarkWizard}
-            onViewReportClick={onViewBenchmarkReportClick}
-          />
-        </PermissionGuard>
+        <FinOpsBenchmarkBanner
+          variation={benchmarkVariation}
+          provider={benchmarkProvider}
+          onActionClick={openBenchmarkWizard}
+          onViewReportClick={onViewBenchmarkReportClick}
+          disabled={!hasBenchmarkPermissions}
+        />
       )}
       <ExploreTemplatesCarousel
         onSeeAllClick={onExploreTemplatesClick}
         onFilterClick={onTemplatesFilterClick}
         templates={templatesWithIntegrations}
-        showFilters={!!cloudUser}
+        showFilters={isCloudUser}
         filters={domains}
         onTemplateClick={onTemplateClick}
       />
-      {!cloudUser && !isHomeCloudConnectionClosed && (
+      {!isCloudUser && !isHomeCloudConnectionClosed && (
         <DismissiblePanel
           className="h-fit"
           buttonClassName="z-50 size-6"
@@ -140,12 +142,12 @@ const HomeOnboardingView = ({
           />
         </DismissiblePanel>
       )}
-      {(isHelpViewClosed || cloudUser || isHomeCloudConnectionClosed) && (
+      {(isHelpViewClosed || isCloudUser || isHomeCloudConnectionClosed) && (
         <div className="flex-1 border rounded-sm overflow-hidden min-h-[120px]">
           <NoWorkflowsPlaceholder
             onExploreTemplatesClick={onExploreTemplatesClick}
             onNewWorkflowClick={
-              hasWriteFlowPermission
+              checkAccess(Permission.WRITE_FLOW)
                 ? () => {
                     createFlow(undefined);
                   }

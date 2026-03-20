@@ -2,11 +2,11 @@ import {
   BenchmarkRunPhase,
   Button,
   INTERNAL_ERROR_TOAST,
+  MultiStepFormNext,
+  MultiStepFormPrevious,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  WizardNext,
-  WizardPrevious,
   toast,
 } from '@openops/components/ui';
 import { BenchmarkCreationResult } from '@openops/shared';
@@ -115,8 +115,8 @@ export const BenchmarkWizardFooter = ({
   if (wizardPhase === 'provider-step') {
     return (
       <>
-        <WizardPrevious onPrevious={handlePrevious} />
-        <WizardNext
+        <MultiStepFormPrevious onPrevious={handlePrevious} />
+        <MultiStepFormNext
           onNext={handleNextFromProviderStep}
           disabled={isNextDisabled}
         />
@@ -129,7 +129,7 @@ export const BenchmarkWizardFooter = ({
       <div className="flex-1" />
       <Tooltip>
         <TooltipTrigger asChild className="disabled:pointer-events-auto">
-          <WizardNext
+          <MultiStepFormNext
             onNext={handleNextFromInitial}
             disabled={isNextDisabled}
           />

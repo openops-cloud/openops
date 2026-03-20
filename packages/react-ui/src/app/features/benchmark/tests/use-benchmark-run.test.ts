@@ -136,6 +136,14 @@ describe('useBenchmarkRun', () => {
 
       expect(result.current.isRunPending).toBe(false);
     });
+
+    it('should start with empty failedWorkflows', () => {
+      const { result } = renderHook(() =>
+        useBenchmarkRun(buildBenchmarkCreationResult()),
+      );
+
+      expect(result.current.failedWorkflows).toEqual([]);
+    });
   });
 
   describe('handleRunBenchmark', () => {
@@ -255,6 +263,7 @@ describe('useBenchmarkRun', () => {
       });
 
       expect(result.current.runPhase).toBe('succeeded');
+      expect(result.current.failedWorkflows).toEqual([]);
     });
 
     it('should transition to succeeded_with_failures when some sub-workflows failed', async () => {
@@ -293,6 +302,9 @@ describe('useBenchmarkRun', () => {
       });
 
       expect(result.current.runPhase).toBe('succeeded_with_failures');
+      expect(result.current.failedWorkflows).toEqual([
+        { displayName: 'Sub', runId: 'run-2' },
+      ]);
     });
 
     it('should transition to failed when status is FAILED', async () => {

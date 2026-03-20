@@ -61,9 +61,16 @@ export async function getConnectionAccounts(
     context.projectId,
   );
 
-  return roles.map((role) => ({
-    id: parseArn(role.assumeRoleArn).accountId,
-    displayName: role.accountName,
-    ...(imageLogoUrl && { imageLogoUrl }),
-  }));
+  const accountMap = new Map<string, BenchmarkWizardOption>();
+  for (const role of roles) {
+    const accountId = parseArn(role.assumeRoleArn).accountId;
+    if (!accountMap.has(accountId)) {
+      accountMap.set(accountId, {
+        id: accountId,
+        displayName: role.accountName,
+        ...(imageLogoUrl && { imageLogoUrl }),
+      });
+    }
+  }
+  return Array.from(accountMap.values());
 }

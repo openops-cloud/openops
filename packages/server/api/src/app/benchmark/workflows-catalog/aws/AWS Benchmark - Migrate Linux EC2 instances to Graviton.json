@@ -318,6 +318,9 @@
                             "settings": {
                               "input": {
                                 "auth": "{{connections['AWS']}}",
+                                "account": {
+                                  "accounts": "{{step_1['item']}}"
+                                },
                                 "service": {
                                   "ServiceCode": "AmazonEC2",
                                   "AttributeNames": [
@@ -451,7 +454,10 @@
                                 "customizedInputs": {
                                   "settings": {
                                     "input": {
-                                      "auth": true
+                                      "auth": true,
+                                      "account": {
+                                        "accounts": true
+                                      }
                                     }
                                   }
                                 }
@@ -475,6 +481,9 @@
                               "settings": {
                                 "input": {
                                   "auth": "{{connections['AWS']}}",
+                                  "account": {
+                                    "accounts": "{{step_1['item']}}"
+                                  },
                                   "service": {
                                     "ServiceCode": "AmazonEC2",
                                     "AttributeNames": [
@@ -605,7 +614,16 @@
                                 "blockType": "OFFICIAL",
                                 "actionName": "get_price",
                                 "inputUiInfo": {
-                                  "customizedInputs": {}
+                                  "customizedInputs": {
+                                    "settings": {
+                                      "input": {
+                                        "auth": true,
+                                        "account": {
+                                          "accounts": true
+                                        }
+                                      }
+                                    }
+                                  }
                                 },
                                 "packageType": "REGISTRY",
                                 "blockVersion": "0.0.3",
