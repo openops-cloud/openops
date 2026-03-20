@@ -1,6 +1,6 @@
 {
-  "created": "1771792686077",
-  "updated": "1771792686077",
+  "created": "1772547717030",
+  "updated": "1772547717030",
   "name": "Clean-up AWS Benchmark data",
   "tags": [],
   "services": [],
@@ -14,7 +14,7 @@
       "type": "TRIGGER",
       "settings": {
         "blockName": "@openops/block-webhook",
-        "blockVersion": "0.1.5",
+        "blockVersion": "~0.1.5",
         "blockType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
@@ -56,7 +56,7 @@
             "customizedInputs": {}
           },
           "packageType": "REGISTRY",
-          "blockVersion": "0.0.1",
+          "blockVersion": "~0.0.1",
           "errorHandlingOptions": {
             "retryOnFailure": {
               "value": false
@@ -105,7 +105,7 @@
                 "customizedInputs": {}
               },
               "packageType": "REGISTRY",
-              "blockVersion": "0.0.1",
+              "blockVersion": "~0.0.1",
               "errorHandlingOptions": {
                 "retryOnFailure": {
                   "value": false
@@ -126,7 +126,7 @@
                   "customizedInputs": {}
                 }
               },
-              "displayName": "Loop on Opportunities",
+              "displayName": "Loop on Opportunities",
               "firstLoopAction": {
                 "id": "UYI6CVO2zKmD8VRis1x7Z",
                 "name": "step_c",
@@ -144,7 +144,7 @@
                     "customizedInputs": {}
                   },
                   "packageType": "REGISTRY",
-                  "blockVersion": "0.0.1",
+                  "blockVersion": "~0.0.1",
                   "errorHandlingOptions": {
                     "retryOnFailure": {
                       "value": false
@@ -180,7 +180,7 @@
                 "customizedInputs": {}
               },
               "packageType": "REGISTRY",
-              "blockVersion": "0.0.1",
+              "blockVersion": "~0.0.1",
               "errorHandlingOptions": {
                 "retryOnFailure": {
                   "value": false

@@ -2,9 +2,7 @@ import {
   Button,
   CardListItem,
   cn,
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
-  toast,
 } from '@openops/components/ui';
 import { StopwatchIcon } from '@radix-ui/react-icons';
 import { useMutation } from '@tanstack/react-query';
@@ -16,6 +14,7 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import { FlowRun, isNil, PopulatedFlow } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
@@ -54,8 +53,8 @@ const FlowRunCard = React.memo((params: FlowRunCardProps) => {
       setLeftSidebar(LeftSideBarType.RUN_DETAILS);
     },
     onError: (error) => {
-      toast(INTERNAL_ERROR_TOAST);
       console.error(error);
+      handleMutationError(error);
     },
   });
 

@@ -1,9 +1,9 @@
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   getRunWorkflowManuallySuccessToast,
-  INTERNAL_ERROR_TOAST,
   toast,
 } from '@openops/components/ui';
 import { FlowVersion, TriggerType } from '@openops/shared';
@@ -50,9 +50,7 @@ export const useRunWorkflowManually = ({
         getRunWorkflowManuallySuccessToast(`runs/${response.flowRunId}`) as any,
       );
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const canRun =

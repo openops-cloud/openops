@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { Permission } from '@openops/shared';
@@ -11,4 +12,18 @@ export const useAuthorization = () => {
   }, []);
 
   return { checkAccess, role };
+};
+
+export const useCheckAccessAndRedirect = (permission: Permission) => {
+  const { checkAccess } = useAuthorization();
+  const navigate = useNavigate();
+  const hasAccess = checkAccess(permission);
+
+  useEffect(() => {
+    if (!hasAccess) {
+      navigate('/', { replace: true });
+    }
+  }, [hasAccess, navigate]);
+
+  return hasAccess;
 };

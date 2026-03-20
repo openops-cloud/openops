@@ -1,14 +1,11 @@
-import {
-  INTERNAL_ERROR_TOAST,
-  RenameDialog,
-  toast,
-} from '@openops/components/ui';
+import { RenameDialog, toast } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import React from 'react';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { FlowOperationType, PopulatedFlow } from '@openops/shared';
 
 type RenameFlowDialogProps = {
@@ -64,7 +61,7 @@ const RenameFlowDialog: React.FC<RenameFlowDialogProps> = ({
       placeholder={placeholder ?? t('New Workflow Name')}
       confirmLabel={confirmLabel ?? t('Confirm')}
       onSubmit={(newName) => mutate({ displayName: newName })}
-      onError={() => toast(INTERNAL_ERROR_TOAST)}
+      onError={handleMutationError}
     >
       {children}
     </RenameDialog>

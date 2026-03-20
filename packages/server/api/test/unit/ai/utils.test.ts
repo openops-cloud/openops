@@ -927,6 +927,10 @@ describe('sanitizeMessagesForChatName', () => {
     expect(result).toEqual([
       { role: 'user', content: 'hello' },
       { role: 'assistant', content: 'hi' },
+      {
+        role: 'user',
+        content: 'Generate a chat name based on the conversation above.',
+      },
     ]);
   });
 
@@ -937,7 +941,13 @@ describe('sanitizeMessagesForChatName', () => {
     ];
 
     const result = sanitizeMessagesForChatName(messages);
-    expect(result).toEqual([{ role: 'assistant', content: 'answer' }]);
+    expect(result).toEqual([
+      { role: 'assistant', content: 'answer' },
+      {
+        role: 'user',
+        content: 'Generate a chat name based on the conversation above.',
+      },
+    ]);
   });
 
   it('merges multiple text parts with newlines and trims overall', () => {
@@ -970,6 +980,10 @@ describe('sanitizeMessagesForChatName', () => {
     const result = sanitizeMessagesForChatName(messages);
     expect(result).toEqual([
       { role: 'assistant', content: 'Only this is kept' },
+      {
+        role: 'user',
+        content: 'Generate a chat name based on the conversation above.',
+      },
     ]);
   });
 
@@ -982,5 +996,68 @@ describe('sanitizeMessagesForChatName', () => {
 
     const result = sanitizeMessagesForChatName(messages);
     expect(result).toEqual([]);
+  });
+
+  it('appends user prompt when last message is from assistant', () => {
+    const messages: ModelMessage[] = [
+      { role: 'user', content: 'What is the weather?' },
+      { role: 'assistant', content: 'Let me check that for you.' },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([
+      { role: 'user', content: 'What is the weather?' },
+      { role: 'assistant', content: 'Let me check that for you.' },
+      {
+        role: 'user',
+        content: 'Generate a chat name based on the conversation above.',
+      },
+    ]);
+  });
+
+  it('does not append user prompt when last message is from user', () => {
+    const messages: ModelMessage[] = [
+      { role: 'assistant', content: 'How can I help you?' },
+      { role: 'user', content: 'Tell me a joke' },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([
+      { role: 'assistant', content: 'How can I help you?' },
+      { role: 'user', content: 'Tell me a joke' },
+    ]);
+  });
+
+  it('does not append user prompt when result is empty', () => {
+    const messages: ModelMessage[] = [
+      { role: 'system', content: 'system message' },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([]);
+  });
+
+  it('appends user prompt after trimming and filtering', () => {
+    const messages: ModelMessage[] = [
+      { role: 'user', content: '   hello   ' },
+      { role: 'system', content: 'system' },
+      {
+        role: 'assistant',
+        content: [
+          { type: 'text', text: 'response' } as any,
+          { type: 'tool-call', toolName: 'search' } as any,
+        ],
+      },
+    ];
+
+    const result = sanitizeMessagesForChatName(messages);
+    expect(result).toEqual([
+      { role: 'user', content: 'hello' },
+      { role: 'assistant', content: 'response' },
+      {
+        role: 'user',
+        content: 'Generate a chat name based on the conversation above.',
+      },
+    ]);
   });
 });

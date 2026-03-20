@@ -8,8 +8,10 @@ export type Principal = {
   externalId?: string;
   type: PrincipalType;
   projectId: ProjectId;
+  projectRole: string;
   organization: {
     id: OpenOpsId;
+    role: string;
   };
 };
 

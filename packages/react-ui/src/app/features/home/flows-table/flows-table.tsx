@@ -2,12 +2,13 @@ import { DataTable, NoWorkflowsPlaceholder } from '@openops/components/ui';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
   columnVisibility,
   createColumns,
 } from '@/app/features/flows/flows-columns';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
-import { PopulatedFlow } from '@openops/shared';
+import { Permission, PopulatedFlow } from '@openops/shared';
 
 import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import { useMemo } from 'react';
@@ -29,6 +30,8 @@ const HomeFlowsTable = ({
   onExploreTemplatesClick,
 }: Props) => {
   const navigate = useNavigate();
+  const { checkAccess } = useAuthorization();
+  const hasWriteFlowPermission = checkAccess(Permission.WRITE_FLOW);
   const { mutate: createFlow } = flowsHooks.useCreateFlow(navigate);
 
   const columns = useMemo(
@@ -67,7 +70,9 @@ const HomeFlowsTable = ({
       ) : (
         <NoWorkflowsPlaceholder
           onExploreTemplatesClick={onExploreTemplatesClick}
-          onNewWorkflowClick={() => createFlow(undefined)}
+          onNewWorkflowClick={
+            hasWriteFlowPermission ? () => createFlow(undefined) : undefined
+          }
         />
       )}
     </HomeTableWrapper>

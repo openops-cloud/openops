@@ -53,6 +53,9 @@ params:
       showCellBars: false
     Opportunity details:
       horizontalAlign: left
+    Percent:
+      d3NumberFormat: ',.1%'
+      showCellBars: false
     Region:
       columnWidth: 100
       horizontalAlign: center

@@ -1,11 +1,10 @@
 import {
-  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   Switch,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  usePermissionMessage,
 } from '@openops/components/ui';
 import {
   Flow,
@@ -30,8 +29,11 @@ import {
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
-import { t } from 'i18next';
-import { getShortTriggerExplanation } from '../lib/flow-status-toggle-utils';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import {
+  getFlowStatusToggleTooltip,
+  getShortTriggerExplanation,
+} from '../lib/flow-status-toggle-utils';
 
 type FlowStatusToggleProps = {
   flow: Flow;
@@ -51,6 +53,7 @@ const FlowStatusToggle = ({
   const userHasPermissionToToggleFlowStatus = checkAccess(
     Permission.UPDATE_FLOW_STATUS,
   );
+  const permissionMessage = usePermissionMessage();
 
   useEffect(() => {
     setIsChecked(flow.status === FlowStatus.ENABLED);
@@ -73,9 +76,7 @@ const FlowStatusToggle = ({
       setIsChecked(flow.status === FlowStatus.ENABLED);
       onFlowStatusChange?.(flow.status);
     },
-    onError: () => {
-      toast(INTERNAL_ERROR_TOAST);
-    },
+    onError: handleMutationError,
   });
 
   const { stepMetadata: triggerMetadata } = blocksHooks.useStepMetadata({
@@ -131,17 +132,17 @@ const FlowStatusToggle = ({
           sideOffset={10}
           className="max-w-[300px] whitespace-normal"
         >
-          {userHasPermissionToToggleFlowStatus
-            ? isNil(flow.publishedVersionId)
-              ? t('Please publish workflow first')
-              : isFlowPublished
-              ? getShortTriggerExplanation(
-                  flowVersion.trigger,
-                  triggerMetadata,
-                  flow,
-                )
-              : t('Workflow is off. It only runs if manually triggered.')
-            : t('Permission Needed')}
+          {getFlowStatusToggleTooltip({
+            userHasPermission: userHasPermissionToToggleFlowStatus,
+            isPublishedVersionAvailable: !isNil(flow.publishedVersionId),
+            isFlowPublished,
+            triggerExplanation: getShortTriggerExplanation(
+              flowVersion.trigger,
+              triggerMetadata,
+              flow,
+            ),
+            permissionMessage,
+          })}
         </TooltipContent>
       </Tooltip>
       {isLoading ? (

@@ -26,7 +26,7 @@ export const setupServer = async (): Promise<FastifyInstance> => {
 
 async function setupBaseApp(): Promise<FastifyInstance> {
   const app = fastify({
-    loggerInstance: logger as FastifyBaseLogger,
+    loggerInstance: logger as unknown as FastifyBaseLogger,
     pluginTimeout: 30000,
     bodyLimit: MAX_REQUEST_BODY_BYTES,
     genReqId: () => {

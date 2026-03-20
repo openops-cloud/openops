@@ -15,7 +15,7 @@ position:
       height: 24
       sliceName: Estimated Monthly Savings
       uuid: 6a9f0091-7fcb-4b63-ac39-6c1acbb0ae28
-      width: 4
+      width: 3
     parents:
       - ROOT_ID
       - GRID_ID
@@ -29,7 +29,7 @@ position:
       height: 24
       sliceName: Total Opportunities
       uuid: 1f2e7352-4935-40cf-ba60-b83549e1c116
-      width: 4
+      width: 3
     parents:
       - ROOT_ID
       - GRID_ID
@@ -99,11 +99,25 @@ position:
       height: 24
       sliceName: Unified Cost Efficiency Metric
       uuid: 48cc43c9-0f6b-4158-9129-1adf8aece20b
-      width: 4
+      width: 3
     parents:
       - ROOT_ID
       - GRID_ID
-      - ROW-OryzygZMMHPbYac9DWioo
+      - ROW-ndno4IT57hnxkF0gN3Pp2
+    type: CHART
+  CHART-explore-9-1:
+    children: []
+    id: CHART-explore-9-1
+    meta:
+      chartId: 9
+      height: 24
+      sliceName: Monthly Amortized Cost Over Time
+      uuid: 2005ee5c-dfb1-43f8-899d-9a2a66315f81
+      width: 3
+    parents:
+      - ROOT_ID
+      - GRID_ID
+      - ROW-ndno4IT57hnxkF0gN3Pp2
     type: CHART
   DASHBOARD_VERSION_KEY: v2
   GRID_ID:
@@ -113,6 +127,7 @@ position:
       - HEADER-O4DA3aT4_KMNU--9TYnnK
       - ROW-c1OXrCleqVwiZuFLlhOtH
       - ROW-T4KPfkUoA6ACxwqO4IMmz
+      - ROW-gAUWmXz8U_H0QYKZzd1vb
     id: GRID_ID
     parents:
       - ROOT_ID
@@ -172,11 +187,35 @@ position:
       - ROOT_ID
       - GRID_ID
     type: ROW
+  ROW-gAUWmXz8U_H0QYKZzd1vb:
+    children:
+      - MARKDOWN-HKNnJ2lH0FIKW4k4DebL7
+    id: ROW-gAUWmXz8U_H0QYKZzd1vb
+    meta:
+      '0': ROOT_ID
+      background: BACKGROUND_TRANSPARENT
+    parents:
+      - ROOT_ID
+      - GRID_ID
+    type: ROW
+  MARKDOWN-HKNnJ2lH0FIKW4k4DebL7:
+    children: []
+    id: MARKDOWN-HKNnJ2lH0FIKW4k4DebL7
+    meta:
+      code: 'Please select any of Service, Region or Account number to filter the dashboard. '
+      height: 9
+      width: 12
+    parents:
+      - ROOT_ID
+      - GRID_ID
+      - ROW-gAUWmXz8U_H0QYKZzd1vb
+    type: MARKDOWN
   ROW-ndno4IT57hnxkF0gN3Pp2:
     children:
       - CHART-explore-1-1
       - CHART-explore-2-1
       - CHART-explore-8-1
+      - CHART-explore-9-1
     id: ROW-ndno4IT57hnxkF0gN3Pp2
     meta:
       '0': ROOT_ID
@@ -198,6 +237,7 @@ metadata:
           - 5
           - 6
           - 8
+          - 9
     '4':
       id: 4
       crossFilters:
@@ -209,6 +249,7 @@ metadata:
           - 5
           - 6
           - 8
+          - 9
     '5':
       id: 5
       crossFilters:
@@ -220,6 +261,7 @@ metadata:
           - 4
           - 6
           - 8
+          - 9
     '6':
       id: 6
       crossFilters:
@@ -230,6 +272,19 @@ metadata:
           - 3
           - 4
           - 5
+          - 8
+          - 9
+    '9':
+      id: 9
+      crossFilters:
+        scope: global
+        chartsInScope:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
           - 8
   global_chart_configuration:
     scope:
@@ -244,6 +299,7 @@ metadata:
       - 5
       - 6
       - 8
+      - 9
   color_scheme: ''
   refresh_frequency: 0
   expanded_slices: {}

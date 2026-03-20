@@ -1,5 +1,7 @@
+import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import { formatUtils } from '@/app/lib/utils';
 import {
   DataTableColumnHeader,
@@ -7,10 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  INTERNAL_ERROR_TOAST,
   RowDataWithActions,
   StatusIconWithText,
-  toast,
 } from '@openops/components/ui';
 import {
   FlagId,
@@ -18,6 +18,7 @@ import {
   FlowRun,
   FlowRunStatus,
   FlowRunTriggerSource,
+  Permission,
   isFailedState,
   isRunningState,
 } from '@openops/shared';
@@ -56,7 +57,7 @@ export const useRunsTableColumns = ({
     },
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 
@@ -71,7 +72,7 @@ export const useRunsTableColumns = ({
     },
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 
@@ -192,23 +193,28 @@ export const useRunsTableColumns = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {(isFailed || isStopped || isSuccessfulRun) && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          mutate({
-                            row: row.original,
-                            strategy: FlowRetryStrategy.ON_LATEST_VERSION,
-                          })
-                        }
+                      <PermissionGuard
+                        permission={Permission.RETRY_RUN}
+                        tooltipClassName="flex"
                       >
-                        <div className="flex flex-row gap-2 items-center">
-                          <RefreshCw className="h-4 w-4" />
-                          <span>
-                            {isSuccessfulRun
-                              ? t('Rerun on latest version')
-                              : t('Retry on latest version')}
-                          </span>
-                        </div>
-                      </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            mutate({
+                              row: row.original,
+                              strategy: FlowRetryStrategy.ON_LATEST_VERSION,
+                            })
+                          }
+                        >
+                          <div className="flex flex-row gap-2 items-center">
+                            <RefreshCw className="h-4 w-4" />
+                            <span>
+                              {isSuccessfulRun
+                                ? t('Rerun on latest version')
+                                : t('Retry on latest version')}
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      </PermissionGuard>
                     )}
                     {isRunning && (
                       <StopRunDialog
@@ -219,12 +225,19 @@ export const useRunsTableColumns = ({
                           setIsStopDialogOpen(false);
                         }}
                       >
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <div className="flex flex-row gap-2 items-center">
-                            <CircleStop className="h-4 w-4" />
-                            <span>{t('Stop Run')}</span>
-                          </div>
-                        </DropdownMenuItem>
+                        <PermissionGuard
+                          permission={Permission.TEST_RUN_FLOW}
+                          tooltipClassName="flex"
+                        >
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <div className="flex flex-row gap-2 items-center">
+                              <CircleStop className="h-4 w-4" />
+                              <span>{t('Stop Run')}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        </PermissionGuard>
                       </StopRunDialog>
                     )}
                   </DropdownMenuContent>

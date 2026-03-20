@@ -87,8 +87,10 @@ beforeAll(async () => {
     externalId: mockAdminUser.externalId,
     type: PrincipalType.USER,
     projectId: mockProject.id,
+    projectRole: 'ADMIN',
     organization: {
       id: mockOrganization.id,
+      role: 'MEMBER',
     },
   });
 });

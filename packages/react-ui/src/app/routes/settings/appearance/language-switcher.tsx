@@ -1,5 +1,6 @@
 'use client';
 
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   Button,
   cn,
@@ -9,12 +10,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  INTERNAL_ERROR_TOAST,
   Popover,
   PopoverContent,
   PopoverTrigger,
   ScrollArea,
-  toast,
 } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -78,7 +77,7 @@ export function LanguageSwitcher() {
     },
     onError: (error) => {
       console.error(error);
-      toast(INTERNAL_ERROR_TOAST);
+      handleMutationError(error);
     },
   });
 

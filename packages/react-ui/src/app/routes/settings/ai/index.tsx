@@ -10,7 +10,8 @@ import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { mcpSettingsHooks } from '@/app/features/ai/lib/mcp-settings-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
-import { INTERNAL_ERROR_TOAST, Skeleton, toast } from '@openops/components/ui';
+import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import { Skeleton, toast } from '@openops/components/ui';
 import {
   ApplicationErrorParams,
   ErrorCode,
@@ -83,9 +84,7 @@ const AiSettingsPage = () => {
         refetchMcpSettings();
         toast(MCP_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
       },
-      onError: () => {
-        toast(INTERNAL_ERROR_TOAST);
-      },
+      onError: handleMutationError,
     });
 
   const isAiConfigured = !!aiSettings?.[0]?.connection;

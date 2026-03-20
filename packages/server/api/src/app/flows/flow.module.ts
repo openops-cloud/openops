@@ -1,7 +1,9 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
+  ApplicationError,
   CreateStepRunRequestBody,
+  ErrorCode,
   FlowRunStatus,
   StepRunResponse,
   TestFlowRunRequestBody,
@@ -9,6 +11,8 @@ import {
   WebsocketServerEvent,
   flowHelper,
 } from '@openops/shared';
+import { Socket } from 'socket.io';
+import { getAuthorizationGuards } from '../core/security/authorization-guards/authorization-guards-factory';
 import { sendStepFailureEvent } from '../telemetry/event-models/step';
 import {
   sendWorkflowTestFailureEvent,
@@ -31,12 +35,18 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(flowVersionController, { prefix: '/v1/flow-versions' });
   await app.register(flowController, { prefix: '/v1/flows' });
   await app.register(testController, { prefix: '/v1/test' });
+
   websocketService.addListener(WebsocketServerEvent.TEST_FLOW_RUN, (socket) => {
     return async (data: TestFlowRunRequestBody) => {
       let principal;
       let flowRun;
       try {
         principal = await getPrincipalFromWebsocket(socket);
+
+        await getAuthorizationGuards().enforceTestRunAuthorization(
+          data,
+          principal,
+        );
 
         flowRun = await flowRunService.test({
           projectId: principal.projectId,
@@ -62,6 +72,11 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         );
         socket.emit(WebsocketClientEvent.TEST_FLOW_RUN_STARTED, flowRun);
       } catch (err) {
+        if (isAuthorizationError(err)) {
+          sendAuthorizationError(socket, err);
+          return;
+        }
+
         sendWorkflowTestFailureEvent({
           userId: principal?.id ?? '',
           projectId: principal?.projectId ?? '',
@@ -82,11 +97,17 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
       }
     };
   });
+
   websocketService.addListener(WebsocketServerEvent.TEST_STEP_RUN, (socket) => {
     return async (data: CreateStepRunRequestBody) => {
       let principal;
       try {
         principal = await getPrincipalFromWebsocket(socket);
+
+        await getAuthorizationGuards().enforceTestStepAuthorization(
+          data,
+          principal,
+        );
 
         logger.debug({ data }, '[Socket#testStepRun]');
         const stepRun = await stepRunService.create({
@@ -103,6 +124,11 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         };
         socket.emit(WebsocketClientEvent.TEST_STEP_FINISHED, response);
       } catch (err) {
+        if (isAuthorizationError(err)) {
+          sendAuthorizationError(socket, err);
+          return;
+        }
+
         let step;
         try {
           const flowVersion = await flowVersionService.getOneOrThrow(
@@ -137,3 +163,20 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
     };
   });
 };
+
+function isAuthorizationError(error: unknown): boolean {
+  logger.debug('isAuthorizationError', error);
+  return (
+    error instanceof ApplicationError &&
+    error.error.code === ErrorCode.AUTHORIZATION
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendAuthorizationError(socket: Socket, error: any): void {
+  socket.emit('error', {
+    success: false,
+    code: error.error.code,
+    output: error.error.params.message,
+  });
+}

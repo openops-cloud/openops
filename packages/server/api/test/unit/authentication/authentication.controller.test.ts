@@ -108,7 +108,7 @@ describe('authenticationController analytics routes', () => {
       ([path]) => path === '/analytics-embed-id',
     );
     expect(embedRoute).toBeDefined();
-    expect(embedRoute?.[1]).toEqual(expect.any(Function));
+    expect(embedRoute?.[2]).toEqual(expect.any(Function));
 
     const guestRoute = app.get.mock.calls.find(
       ([path]) => path === '/analytics-guest-token',

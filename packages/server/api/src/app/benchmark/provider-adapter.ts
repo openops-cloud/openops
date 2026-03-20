@@ -35,6 +35,7 @@ export type WizardConfigStep = {
   optionsSource?: WizardStepOptionsSource;
   nextStep?: string;
   conditional?: WizardStepConditional;
+  selectAll?: boolean;
 };
 
 export type WizardConfig = {
@@ -60,12 +61,11 @@ export function registerProvider(
   provider: string,
   adapter: ProviderAdapter,
 ): void {
-  providers.set(provider.toLowerCase(), adapter);
+  providers.set(provider, adapter);
 }
 
 export function getProvider(provider: string): ProviderAdapter {
-  const normalized = provider.toLowerCase();
-  const adapter = providers.get(normalized);
+  const adapter = providers.get(provider);
   if (!adapter) {
     throwValidationError(`Provider not found: ${provider}`);
   }

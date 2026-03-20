@@ -36,6 +36,8 @@ import { MoveTablesWorkspaceIdFromOrganizationToProject1760500000000 } from './m
 import { AddTablesDatabaseTokenToProject1763394159990 } from './migrations/1763394159990-AddTablesTokenToProject';
 import { MigrateTablesUserPassword1763755045436 } from './migrations/1763755045436-MigrateTablesUserPassword';
 import { AddBenchmarkAndBenchmarkFlowTables1770297289194 } from './migrations/1770297289194-AddBenchmarkAndBenchmarkFlowTables';
+import { DropLastRunIdFromBenchmark1772449919844 } from './migrations/1772449919844-DropLastRunIdFromBenchmark';
+import { AddIsCleanupToBenchmarkFlow1773046640936 } from './migrations/1773046640936-AddIsCleanupToBenchmarkFlow';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -84,6 +86,8 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddTablesDatabaseTokenToProject1763394159990,
     MigrateTablesUserPassword1763755045436,
     AddBenchmarkAndBenchmarkFlowTables1770297289194,
+    DropLastRunIdFromBenchmark1772449919844,
+    AddIsCleanupToBenchmarkFlow1773046640936,
   ];
 };
 
