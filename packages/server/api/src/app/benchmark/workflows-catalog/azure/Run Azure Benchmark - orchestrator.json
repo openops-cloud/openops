@@ -1,0 +1,377 @@
+{
+  "created": "1774008914967",
+  "updated": "1774008914967",
+  "name": "Run Azure Benchmark - orchestrator",
+  "tags": [],
+  "services": [],
+  "domains": [],
+  "template": {
+    "displayName": "Run Azure Benchmark - orchestrator",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "TRIGGER",
+      "settings": {
+        "blockName": "@openops/block-webhook",
+        "blockVersion": "0.1.5",
+        "blockType": "OFFICIAL",
+        "packageType": "REGISTRY",
+        "input": {
+          "authType": "none",
+          "markdown": null,
+          "authFields": {}
+        },
+        "inputUiInfo": {
+          "customizedInputs": {}
+        },
+        "triggerName": "catch_webhook"
+      },
+      "stepIndex": 1,
+      "nextAction": {
+        "id": "VShpvArFrRdY1UDndip0F",
+        "name": "step_b",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "params": "{{trigger}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const params = inputs.params.body?.data || {\n    webhookBaseUrl: 'http://localhost:4200/api/v1/webhooks',\n    workflows: [],\n    cleanupWorkflows: [],\n    subscriptions: [],\n    regions: [],\n  };\n\n  return params;\n};",
+            "packageJson": "{}"
+          },
+          "inputUiInfo": {
+            "customizedInputs": {}
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "id": "e0VGVQQKkvKIKADkAJbMX",
+          "name": "step_c",
+          "type": "LOOP_ON_ITEMS",
+          "valid": true,
+          "settings": {
+            "items": "{{step_b['cleanupWorkflows']}}",
+            "inputUiInfo": {
+              "customizedInputs": {}
+            }
+          },
+          "nextAction": {
+            "id": "U1mgOfY0ZUmFG2ZDuylcD",
+            "name": "step_am",
+            "type": "CODE",
+            "valid": true,
+            "settings": {
+              "input": {},
+              "sourceCode": {
+                "code": "import dayjs from 'dayjs';\n\nexport const code = async (inputs) => {\n  const now = dayjs();\n  const firstDay = now.subtract(6, 'month').startOf('month').format('YYYY-MM-DD');\n  const lastDay = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');\n\n  return {\n    firstDay,\n    lastDay,\n  };\n};",
+                "packageJson": "{\n  \"dependencies\": {\n    \"dayjs\": \"^1.11.10\"\n  }\n}"
+              },
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "id": "o4W8Jd7gCpYWBWUayaaJD",
+              "name": "step_ak",
+              "type": "LOOP_ON_ITEMS",
+              "valid": true,
+              "settings": {
+                "items": "{{step_b['subscriptions']}}",
+                "inputUiInfo": {
+                  "customizedInputs": {}
+                }
+              },
+              "nextAction": {
+                "id": "rjxyvGxYw42djbJbtKX5K",
+                "name": "step_h",
+                "type": "LOOP_ON_ITEMS",
+                "valid": true,
+                "settings": {
+                  "items": "{{step_b['workflows']}}",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  }
+                },
+                "displayName": "Loop on benchmark flows",
+                "firstLoopAction": {
+                  "id": "m2tQyXsoO8lF1P9c8nHPD",
+                  "name": "step_a",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "url": "{{step_b['webhookBaseUrl']}}/{{step_h['item']}}/sync",
+                      "auth": null,
+                      "body": {
+                        "data": {
+                          "azure_regions_array": "{{step_b['regions']}}",
+                          "azure_subscriptions_array": "{{step_b['subscriptions']}}"
+                        }
+                      },
+                      "method": "POST",
+                      "headers": {},
+                      "timeout": null,
+                      "failsafe": false,
+                      "body_type": "json",
+                      "use_proxy": false,
+                      "queryParams": {},
+                      "proxy_settings": {}
+                    },
+                    "blockName": "@openops/block-http",
+                    "blockType": "OFFICIAL",
+                    "actionName": "send_request",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.5.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": true
+                      }
+                    }
+                  },
+                  "displayName": "Run sub-workflow",
+                  "stepIndex": 12
+                },
+                "stepIndex": 11
+              },
+              "displayName": "Loop on subscriptions",
+              "firstLoopAction": {
+                "id": "SbahlYYwhgflh3A4lCcbe",
+                "name": "step_f",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "auth": "{{connections['Azure']}}",
+                    "dryRun": false,
+                    "commandToRun": "az rest --method POST \\\n  --url \"https://management.azure.com/subscriptions/{{step_ak['item']}}/providers/Microsoft.CostManagement/query?api-version=2023-11-01\" \\\n  --headers \"Content-Type=application/json\" \\\n  --body '{\n    \"type\": \"AmortizedCost\",\n    \"timeframe\": \"Custom\",\n    \"timePeriod\": { \"from\": \"{{step_am['firstDay']}}T00:00:00Z\", \"to\": \"{{step_am['lastDay']}}T00:00:00Z\" },\n    \"dataset\": {\n      \"granularity\": \"Monthly\",\n      \"aggregation\": { \"totalCost\": { \"name\": \"PreTaxCost\", \"function\": \"Sum\" } },\n      \"filter\": {\n        \"dimensions\": {\n          \"name\": \"ChargeType\",\n          \"operator\": \"In\",\n          \"values\": [\"Usage\"]\n        }\n      }\n    }\n  }'",
+                    "subscriptions": {
+                      "subDropdown": "{{step_ak['item']}}"
+                    },
+                    "useHostSession": {}
+                  },
+                  "blockName": "@openops/block-azure",
+                  "blockType": "OFFICIAL",
+                  "actionName": "azure_cli",
+                  "inputUiInfo": {
+                    "customizedInputs": {
+                      "settings": {
+                        "input": {
+                          "subscriptions": {
+                            "subDropdown": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.0.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "ClflsNTJG8CGapBkHeksZ",
+                  "name": "step_an",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_f['properties']['rows']}}",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "displayName": "Loop on Items",
+                  "firstLoopAction": {
+                    "id": "bbtZ1eOtGr0ApBbpFEoSA",
+                    "name": "step_d",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "inputDate": "{{step_an['item'][1]}}",
+                        "inputFormat": "YYYY-MM-DDTHH:mm:ss",
+                        "outputFormat": "YYYY-MM-DD",
+                        "inputTimeZone": "UTC",
+                        "outputTimeZone": "UTC"
+                      },
+                      "blockName": "@openops/block-date-helper",
+                      "blockType": "OFFICIAL",
+                      "actionName": "format_date",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.0.7",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "hmtz5uaGgOaqn8rDYnFZq",
+                      "name": "step_al",
+                      "type": "BLOCK",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "tableName": "Timeseries",
+                          "rowPrimaryKey": {},
+                          "fieldsProperties": {
+                            "fieldsProperties": [
+                              {
+                                "fieldName": "Workflow",
+                                "newFieldValue": {
+                                  "newFieldValue": "Run Azure Benchmark"
+                                }
+                              },
+                              {
+                                "fieldName": "Value",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_an['item'][0]}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Date",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_d}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Account",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_ak['item']}}"
+                                }
+                              },
+                              {
+                                "fieldName": "Type",
+                                "newFieldValue": {
+                                  "newFieldValue": "Monthly Amortized Costs "
+                                }
+                              }
+                            ]
+                          },
+                          "roundToFieldPrecision": true
+                        },
+                        "blockName": "@openops/block-openops-tables",
+                        "blockType": "OFFICIAL",
+                        "actionName": "update_record",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.0.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Save monthly cost into Timeseries",
+                      "stepIndex": 10
+                    },
+                    "displayName": "Format Date",
+                    "stepIndex": 9
+                  },
+                  "stepIndex": 8
+                },
+                "displayName": "Retrieve last month bill",
+                "stepIndex": 7
+              },
+              "stepIndex": 6
+            },
+            "displayName": "Get dates",
+            "stepIndex": 5
+          },
+          "displayName": "Loop on cleanup flows",
+          "firstLoopAction": {
+            "id": "Alc93Df5nGvOlzt7TIWgP",
+            "name": "step_e",
+            "type": "BLOCK",
+            "valid": true,
+            "settings": {
+              "input": {
+                "url": "{{step_b['webhookBaseUrl']}}/{{step_c['item']}}/sync",
+                "auth": null,
+                "body": {},
+                "method": "GET",
+                "headers": {},
+                "timeout": null,
+                "failsafe": false,
+                "body_type": "none",
+                "use_proxy": false,
+                "queryParams": {},
+                "proxy_settings": {}
+              },
+              "blockName": "@openops/block-http",
+              "blockType": "OFFICIAL",
+              "actionName": "send_request",
+              "inputUiInfo": {
+                "customizedInputs": {}
+              },
+              "packageType": "REGISTRY",
+              "blockVersion": "0.5.1",
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "displayName": "Run cleanup workflow",
+            "stepIndex": 4
+          },
+          "stepIndex": 3
+        },
+        "displayName": "Fetch webhook params",
+        "stepIndex": 2
+      }
+    },
+    "valid": true,
+    "description": ""
+  },
+  "blocks": [
+    "@openops/block-webhook",
+    "@openops/block-http",
+    "@openops/block-azure",
+    "@openops/block-date-helper",
+    "@openops/block-openops-tables"
+  ],
+  "categories": []
+}
