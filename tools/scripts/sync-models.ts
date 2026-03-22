@@ -6,8 +6,8 @@
  * Models confirmed to work with the AI SDK are included.
  *
  * Usage:
- *   npx tsx sync-models.ts           # Check for differences
- *   npx tsx sync-models.ts --update  # Update provider files
+ *   npx tsx tools/scripts/sync-models.ts           # Check for differences
+ *   npx tsx tools/scripts/sync-models.ts --update  # Update provider files
  */
 
 import { AiProviderEnum } from '@openops/shared';
@@ -262,6 +262,11 @@ const NON_CHAT_KEYWORDS = [
   '-image',
 ];
 
+const PROVIDERS_DIR = path.join(
+  __dirname,
+  '../../packages/openops/src/lib/ai/providers',
+);
+
 async function fetchAiSdkModels(
   pkg: string,
   source: TypeSource,
@@ -293,7 +298,7 @@ async function fetchAiSdkModels(
 }
 
 function getCurrentModels(providerFile: string): string[] {
-  const filePath = path.join(__dirname, 'providers', `${providerFile}.ts`);
+  const filePath = path.join(PROVIDERS_DIR, `${providerFile}.ts`);
   if (!fs.existsSync(filePath)) return [];
 
   const content = fs.readFileSync(filePath, 'utf-8');
@@ -308,7 +313,7 @@ function getCurrentModels(providerFile: string): string[] {
 }
 
 function updateProviderFile(providerFile: string, models: string[]): void {
-  const filePath = path.join(__dirname, 'providers', `${providerFile}.ts`);
+  const filePath = path.join(PROVIDERS_DIR, `${providerFile}.ts`);
   const content = fs.readFileSync(filePath, 'utf-8');
   const match = content.match(/const\s+(\w+Models)\s*=\s*\[([\s\S]*?)\];/);
   if (!match) return;
