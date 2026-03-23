@@ -50,12 +50,6 @@ async function getSubscriptionsList(
 
   const credentials = (connection.value as CustomAuthConnectionValue)?.props;
 
-  if (!credentials || typeof credentials !== 'object') {
-    throwValidationError(
-      'Selected connection is misconfigured or missing Azure credentials.',
-    );
-  }
-
   let subscriptions: { subscriptionId: string; displayName: string }[];
   try {
     const tokenResult = await authenticateUserWithAzure(credentials);
