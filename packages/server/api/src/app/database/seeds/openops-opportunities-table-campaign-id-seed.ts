@@ -25,8 +25,6 @@ const setFlag = async (): Promise<void> => {
 };
 
 export const seedOpportunitiesCampaignIdField = async (): Promise<void> => {
-  await setFlag();
-  return;
   if (await alreadyApplied()) {
     logger.info('Skip: Opportunities Campaign ID field already seeded', {
       name: 'seedOpportunitiesCampaignIdField',
