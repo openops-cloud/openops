@@ -1,0 +1,111 @@
+slice_name: Azure Unified Cost Efficiency Metric
+description: null
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  datasource: 6__table
+  viz_type: big_number_total
+  slice_id: 10
+  metric:
+    aggregate: null
+    column: null
+    datasourceWarning: false
+    expressionType: SQL
+    hasCustomLabel: false
+    label: "CASE\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\n  WHEN (1 - (SUM(savings)\
+      \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+      \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
+    optionName: metric_8n81cekkkvg_lszhg36gvtn
+    sqlExpression: "CASE\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\n  WHEN (1 - (SUM(savings)\
+      \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+      \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
+  adhoc_filters:
+  - clause: WHERE
+    comparator: null
+    datasourceWarning: false
+    expressionType: SIMPLE
+    filterOptionName: filter_t0i5moi5eb_i5dy7umccqr
+    isExtra: false
+    isNew: false
+    operator: IS NOT NULL
+    operatorId: IS_NOT_NULL
+    sqlExpression: null
+    subject: Account
+  subheader: ''
+  header_font_size: 0.5
+  subheader_font_size: 0.15
+  y_axis_format: .2%
+  currency_format:
+    symbolPosition: suffix
+  time_format: smart_date
+  force_timestamp_formatting: false
+  conditional_formatting:
+  - colorScheme: '#EFA1AA'
+    column: "CASE\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\n  WHEN (1 - (SUM(savings)\
+      \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+      \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
+    operator: <
+    targetValue: 0.8
+  - colorScheme: '#FDE380'
+    column: "CASE\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\n  WHEN (1 - (SUM(savings)\
+      \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+      \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
+    operator: < x <
+    targetValueLeft: '0.8'
+    targetValueRight: '0.9'
+  - colorScheme: '#ACE1C4'
+    column: "CASE\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\n  WHEN (1 - (SUM(savings)\
+      \ / SUM(monthly_cost))) < 0 THEN 0.0\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+      \ > 100 THEN 0.0\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\nEND"
+    operator: "\u2265"
+    targetValue: 0.9
+  extra_form_data: {}
+  dashboards:
+  - 3
+query_context: "{\"datasource\":{\"id\":6,\"type\":\"table\"},\"force\":false,\"queries\"\
+  :[{\"filters\":[{\"col\":\"Account\",\"op\":\"IS NOT NULL\"}],\"extras\":{\"having\"\
+  :\"\",\"where\":\"\"},\"applied_time_extras\":{},\"columns\":[],\"metrics\":[{\"\
+  aggregate\":null,\"column\":null,\"datasourceWarning\":false,\"expressionType\"\
+  :\"SQL\",\"hasCustomLabel\":false,\"label\":\"CASE\\n  WHEN SUM(monthly_cost) =\
+  \ 0 THEN 0.0\\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\n \
+  \ WHEN (1 - (SUM(savings) / SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings)\
+  \ / SUM(monthly_cost)))\\nEND\",\"optionName\":\"metric_8n81cekkkvg_lszhg36gvtn\"\
+  ,\"sqlExpression\":\"CASE\\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\\n  WHEN (1 -\
+  \ (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\n  WHEN (1 - (SUM(savings) /\
+  \ SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\\\
+  nEND\"}],\"annotation_layers\":[],\"series_limit\":0,\"order_desc\":true,\"url_params\"\
+  :{},\"custom_params\":{},\"custom_form_data\":{}}],\"form_data\":{\"datasource\"\
+  :\"6__table\",\"viz_type\":\"big_number_total\",\"slice_id\":10,\"metric\":{\"aggregate\"\
+  :null,\"column\":null,\"datasourceWarning\":false,\"expressionType\":\"SQL\",\"\
+  hasCustomLabel\":false,\"label\":\"CASE\\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\\\
+  n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\n  WHEN (1 - (SUM(savings)\
+  \ / SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\\\
+  nEND\",\"optionName\":\"metric_8n81cekkkvg_lszhg36gvtn\",\"sqlExpression\":\"CASE\\\
+  n  WHEN SUM(monthly_cost) = 0 THEN 0.0\\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost)))\
+  \ < 0 THEN 0.0\\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) > 100 THEN 0.0\\\
+  n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\\nEND\"},\"adhoc_filters\":[{\"\
+  clause\":\"WHERE\",\"comparator\":null,\"datasourceWarning\":false,\"expressionType\"\
+  :\"SIMPLE\",\"filterOptionName\":\"filter_t0i5moi5eb_i5dy7umccqr\",\"isExtra\":false,\"\
+  isNew\":false,\"operator\":\"IS NOT NULL\",\"operatorId\":\"IS_NOT_NULL\",\"sqlExpression\"\
+  :null,\"subject\":\"Account\"}],\"subheader\":\"\",\"header_font_size\":0.5,\"subheader_font_size\"\
+  :0.15,\"y_axis_format\":\".2%\",\"currency_format\":{\"symbolPosition\":\"suffix\"\
+  },\"time_format\":\"smart_date\",\"force_timestamp_formatting\":false,\"conditional_formatting\"\
+  :[{\"colorScheme\":\"#EFA1AA\",\"column\":\"CASE\\n  WHEN SUM(monthly_cost) = 0\
+  \ THEN 0.0\\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\n  WHEN\
+  \ (1 - (SUM(savings) / SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings)\
+  \ / SUM(monthly_cost)))\\nEND\",\"operator\":\"<\",\"targetValue\":0.8},{\"colorScheme\"\
+  :\"#FDE380\",\"column\":\"CASE\\n  WHEN SUM(monthly_cost) = 0 THEN 0.0\\n  WHEN\
+  \ (1 - (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\n  WHEN (1 - (SUM(savings)\
+  \ / SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings) / SUM(monthly_cost)))\\\
+  nEND\",\"operator\":\"< x <\",\"targetValueLeft\":\"0.8\",\"targetValueRight\":\"\
+  0.9\"},{\"colorScheme\":\"#ACE1C4\",\"column\":\"CASE\\n  WHEN SUM(monthly_cost)\
+  \ = 0 THEN 0.0\\n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) < 0 THEN 0.0\\\
+  n  WHEN (1 - (SUM(savings) / SUM(monthly_cost))) > 100 THEN 0.0\\n  ELSE (1 - (SUM(savings)\
+  \ / SUM(monthly_cost)))\\nEND\",\"operator\":\"\u2265\",\"targetValue\":0.9}],\"\
+  extra_form_data\":{},\"dashboards\":[3],\"force\":false,\"result_format\":\"json\"\
+  ,\"result_type\":\"full\"},\"result_format\":\"json\",\"result_type\":\"full\"}"
+cache_timeout: null
+uuid: 4c087d7d-26d5-4967-929d-f025da4d056c
+version: 1.0.0
+dataset_uuid: 43c9a804-792a-493a-8e86-7b92c8a15a8a
