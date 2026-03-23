@@ -1,6 +1,6 @@
 {
-  "created": "1774008873129",
-  "updated": "1774008873129",
+  "created": "1774257738652",
+  "updated": "1774257738652",
   "name": "Azure Benchmark - Elastic Pools",
   "tags": [],
   "services": [],
@@ -259,7 +259,7 @@
                           "input": {
                             "auth": "{{connections['Azure']}}",
                             "dryRun": false,
-                            "commandToRun": "az sql elastic-pool list --resource-group \"{{step_d['item']['resourceGroup']}}\" --server \"{{step_e[0]['name']}}\" ",
+                            "commandToRun": "az sql elastic-pool list --resource-group \"{{step_d['item']['resourceGroup']}}\" --server \"{{step_d['item']['name']}}\" ",
                             "subscriptions": {
                               "subDropdown": "{{step_1['item']}}"
                             },
