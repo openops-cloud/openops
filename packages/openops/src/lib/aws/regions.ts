@@ -1,5 +1,6 @@
 import { DropdownState, Property } from '@openops/blocks-framework';
 import { convertToStringArrayWithValidation } from '@openops/shared';
+import type { RegionListItem } from '../region-list-item';
 import { parseArn } from './arn-handler';
 
 const staticRegions = {
@@ -35,11 +36,6 @@ const staticRegions = {
   'me-south-1 (Middle East (Bahrain))': 'me-south-1',
   'me-central-1 (Middle East (UAE))': 'me-central-1',
   'sa-east-1 (South America (São Paulo))': 'sa-east-1',
-};
-
-export type RegionListItem = {
-  id: string;
-  displayName: string;
 };
 
 export function getRegionsList(): RegionListItem[] {
