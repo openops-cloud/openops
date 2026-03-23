@@ -49,10 +49,28 @@ async function getSubscriptionsList(
   });
 
   const credentials = (connection.value as CustomAuthConnectionValue)?.props;
-  const tokenResult = await authenticateUserWithAzure(credentials);
-  const subscriptions = await getAzureSubscriptionsList(
-    tokenResult.access_token,
-  );
+
+  if (!credentials || typeof credentials !== 'object') {
+    throwValidationError(
+      'Selected connection is misconfigured or missing Azure credentials.',
+    );
+  }
+
+  let subscriptions: { subscriptionId: string; displayName: string }[];
+  try {
+    const tokenResult = await authenticateUserWithAzure(credentials);
+    subscriptions = await getAzureSubscriptionsList(tokenResult.access_token);
+  } catch {
+    throwValidationError(
+      'Unable to retrieve Azure subscriptions with the provided connection details.',
+    );
+  }
+
+  if (subscriptions.length === 0) {
+    throwValidationError(
+      'No Azure subscriptions were returned for this connection. Check access and tenant configuration.',
+    );
+  }
 
   const imageLogoUrl = await getAuthProviderLogoUrl(
     connection.authProviderKey,

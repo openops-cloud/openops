@@ -1,4 +1,4 @@
-import { REGION_IMAGE_LOGO_URL } from '@openops/shared';
+import { ErrorCode, REGION_IMAGE_LOGO_URL } from '@openops/shared';
 
 import { resolveOptions } from '../../../../../src/app/benchmark/providers/azure/azure-option-resolver';
 
@@ -176,6 +176,61 @@ describe('resolveOptions (Azure)', () => {
     });
 
     expect(result).toEqual([{ id: 'sub-1', displayName: 'One' }]);
+  });
+
+  it('throws validation error when subscriptions list is empty', async () => {
+    mockGetOneOrThrow.mockResolvedValue({
+      authProviderKey: 'Azure',
+      value: {
+        type: 'CUSTOM_AUTH',
+        props: {
+          clientId: 'client_id',
+          clientSecret: 'client_secret',
+          tenantId: 'tenant',
+        },
+      },
+    });
+    mockAuthenticateUserWithAzure.mockResolvedValue({ access_token: 't' });
+    mockGetAzureSubscriptionsList.mockResolvedValue([]);
+
+    const rejection = resolveOptions('getSubscriptionsList', {
+      projectId,
+      provider,
+      benchmarkConfiguration: { connection: ['c1'] },
+    });
+    await expect(rejection).rejects.toMatchObject({
+      error: { code: ErrorCode.VALIDATION },
+    });
+    await expect(rejection).rejects.toThrow(
+      /No Azure subscriptions were returned for this connection/,
+    );
+  });
+
+  it('throws validation error when subscription listing fails', async () => {
+    mockGetOneOrThrow.mockResolvedValue({
+      authProviderKey: 'Azure',
+      value: {
+        type: 'CUSTOM_AUTH',
+        props: {
+          clientId: 'client_id',
+          clientSecret: 'client_secret',
+          tenantId: 'tenant',
+        },
+      },
+    });
+    mockAuthenticateUserWithAzure.mockRejectedValue(new Error('token failed'));
+
+    const rejection = resolveOptions('getSubscriptionsList', {
+      projectId,
+      provider,
+      benchmarkConfiguration: { connection: ['c1'] },
+    });
+    await expect(rejection).rejects.toMatchObject({
+      error: { code: ErrorCode.VALIDATION },
+    });
+    await expect(rejection).rejects.toThrow(
+      /Unable to retrieve Azure subscriptions with the provided connection details/,
+    );
   });
 
   it('delegates to getAzureRegionsList and returns options with imageLogoUrl for getRegionsList', async () => {
