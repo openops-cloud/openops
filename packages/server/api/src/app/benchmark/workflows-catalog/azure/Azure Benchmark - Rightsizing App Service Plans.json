@@ -179,7 +179,7 @@
                     "input": {
                       "auth": "{{connections['Azure']}}",
                       "dryRun": false,
-                      "commandToRun": "az resource list --resource-type \"Microsoft.Web/serverfarms\" --location polandcentral",
+                      "commandToRun": "az resource list --resource-type \"Microsoft.Web/serverfarms\" --location {{step_32['item']}}",
                       "subscriptions": {
                         "subDropdown": "{{step_1['item']}}"
                       },
