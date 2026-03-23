@@ -1,6 +1,6 @@
 {
-  "created": "1774008911507",
-  "updated": "1774008911507",
+  "created": "1774252548632",
+  "updated": "1774252548632",
   "name": "Clean-up Azure Benchmark data",
   "tags": [],
   "services": [],
@@ -14,7 +14,7 @@
       "type": "TRIGGER",
       "settings": {
         "blockName": "@openops/block-webhook",
-        "blockVersion": "~0.1.5",
+        "blockVersion": "0.1.5",
         "blockType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
@@ -35,7 +35,17 @@
         "valid": true,
         "settings": {
           "input": {
-            "filters": {},
+            "filters": {
+              "filters": [
+                {
+                  "value": {
+                    "value": "Azure Benchmark"
+                  },
+                  "fieldName": "Workflow",
+                  "filterType": "Contains"
+                }
+              ]
+            },
             "tableName": "Timeseries",
             "filterType": "AND"
           },
@@ -46,7 +56,7 @@
             "customizedInputs": {}
           },
           "packageType": "REGISTRY",
-          "blockVersion": "~0.0.1",
+          "blockVersion": "0.0.1",
           "errorHandlingOptions": {
             "retryOnFailure": {
               "value": false
@@ -95,7 +105,7 @@
                 "customizedInputs": {}
               },
               "packageType": "REGISTRY",
-              "blockVersion": "~0.0.1",
+              "blockVersion": "0.0.1",
               "errorHandlingOptions": {
                 "retryOnFailure": {
                   "value": false
@@ -134,7 +144,7 @@
                     "customizedInputs": {}
                   },
                   "packageType": "REGISTRY",
-                  "blockVersion": "~0.0.1",
+                  "blockVersion": "0.0.1",
                   "errorHandlingOptions": {
                     "retryOnFailure": {
                       "value": false
@@ -170,7 +180,7 @@
                 "customizedInputs": {}
               },
               "packageType": "REGISTRY",
-              "blockVersion": "~0.0.1",
+              "blockVersion": "0.0.1",
               "errorHandlingOptions": {
                 "retryOnFailure": {
                   "value": false
@@ -192,9 +202,6 @@
     "valid": true,
     "description": ""
   },
-  "blocks": [
-    "@openops/block-webhook",
-    "@openops/block-openops-tables"
-  ],
+  "blocks": ["@openops/block-webhook", "@openops/block-openops-tables"],
   "categories": []
 }
