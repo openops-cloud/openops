@@ -149,7 +149,7 @@ export async function createOpportunitiesTable(
   });
 
   await addField(tokenOrResolver, table.id, {
-    name: 'Last status change at',
+    name: 'Last status changed at',
     type: 'date',
     date_format: 'ISO',
     date_include_time: true,

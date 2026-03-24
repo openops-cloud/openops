@@ -44,7 +44,7 @@ export const seedOpportunitiesNewFields = async (): Promise<void> => {
       }
 
       const tokenOrResolver = await resolveTokenProvider(tablesContext);
-      const createField = (field: object) =>
+      const createField = (field: object): Promise<unknown> =>
         makeOpenOpsTablesPost(
           `api/database/fields/table/${table.id}/`,
           field,
@@ -53,7 +53,7 @@ export const seedOpportunitiesNewFields = async (): Promise<void> => {
 
       await createField({ name: 'Campaign ID', type: 'text' });
       await createField({
-        name: 'Last status change at',
+        name: 'Last status changed at',
         type: 'date',
         date_format: 'ISO',
         date_include_time: true,
