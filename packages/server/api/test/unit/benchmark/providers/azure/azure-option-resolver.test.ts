@@ -6,13 +6,17 @@ const mockListConnections = jest.fn();
 const mockAuthenticateUserWithAzure = jest.fn();
 const mockGetAzureSubscriptionsList = jest.fn();
 const mockGetAzureRegionsList = jest.fn();
-const mockGetAuthProviderMetadata = jest.fn();
+const mockGetAuthProviderLogoUrl = jest.fn();
 
 jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
   ...jest.requireActual('../../../../../src/app/benchmark/common-resolvers'),
   listConnections: (
     ...args: unknown[]
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
+  getAuthProviderLogoUrl: (
+    ...args: unknown[]
+  ): ReturnType<typeof mockGetAuthProviderLogoUrl> =>
+    mockGetAuthProviderLogoUrl(...args),
 }));
 
 jest.mock('@openops/common', () => ({
@@ -30,16 +34,6 @@ jest.mock('@openops/common', () => ({
   ): ReturnType<typeof mockGetAzureRegionsList> =>
     mockGetAzureRegionsList(...args),
 }));
-
-jest.mock(
-  '../../../../../src/app/app-connection/connection-providers-resolver',
-  () => ({
-    getAuthProviderMetadata: (
-      ...args: unknown[]
-    ): ReturnType<typeof mockGetAuthProviderMetadata> =>
-      mockGetAuthProviderMetadata(...args),
-  }),
-);
 
 const mockGetOneOrThrow = jest.fn();
 jest.mock(
@@ -116,10 +110,7 @@ describe('resolveOptions (Azure)', () => {
         displayName: 'Sub B',
       },
     ]);
-    mockGetAuthProviderMetadata.mockResolvedValue({
-      authProviderKey: 'Azure',
-      authProviderLogoUrl: '/blocks/azure.svg',
-    });
+    mockGetAuthProviderLogoUrl.mockResolvedValue('/blocks/azure.svg');
 
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
@@ -137,6 +128,7 @@ describe('resolveOptions (Azure)', () => {
       tenantId: 'tenant',
     });
     expect(mockGetAzureSubscriptionsList).toHaveBeenCalledWith('token-1');
+    expect(mockGetAuthProviderLogoUrl).toHaveBeenCalledWith('Azure', projectId);
     expect(result).toEqual([
       {
         id: 'sub-a',
@@ -151,7 +143,7 @@ describe('resolveOptions (Azure)', () => {
     ]);
   });
 
-  it('omits imageLogoUrl for getSubscriptionsList when auth metadata has no logo', async () => {
+  it('omits imageLogoUrl for getSubscriptionsList when getAuthProviderLogoUrl returns undefined', async () => {
     mockGetOneOrThrow.mockResolvedValue({
       authProviderKey: 'Azure',
       value: {
@@ -167,7 +159,7 @@ describe('resolveOptions (Azure)', () => {
     mockGetAzureSubscriptionsList.mockResolvedValue([
       { subscriptionId: 'sub-1', displayName: 'One' },
     ]);
-    mockGetAuthProviderMetadata.mockResolvedValue(undefined);
+    mockGetAuthProviderLogoUrl.mockResolvedValue(undefined);
 
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
@@ -175,6 +167,7 @@ describe('resolveOptions (Azure)', () => {
       benchmarkConfiguration: { connection: ['c1'] },
     });
 
+    expect(mockGetAuthProviderLogoUrl).toHaveBeenCalledWith('Azure', projectId);
     expect(result).toEqual([{ id: 'sub-1', displayName: 'One' }]);
   });
 
