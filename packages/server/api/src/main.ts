@@ -16,7 +16,7 @@ import { ensureTablesMcpEndpointExists } from './app/database/seeds/ensure-table
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-known-cost-types-by-application-seed';
-import { seedOpportunitiesCampaignIdField } from './app/database/seeds/openops-opportunities-table-campaign-id-seed';
+import { seedOpportunitiesNewFields } from './app/database/seeds/openops-opportunities-table-new-fields-seed';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
 import { seedTimeseriesTemplateTable } from './app/database/seeds/openops-timeseries-table-seed';
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
@@ -98,7 +98,7 @@ const main = async (): Promise<void> => {
 
     await seedTemplateTables();
     await seedOpportunitesTemplateTable();
-    await seedOpportunitiesCampaignIdField();
+    await seedOpportunitiesNewFields();
     await seedFocusDataAggregationTemplateTable();
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();

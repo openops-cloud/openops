@@ -11,23 +11,23 @@ import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/cr
 import { databaseConnection } from '../database-connection';
 import { applyToEachTablesDatabase } from './tables-database-iterator';
 
-const OPPORTUNITIES_CAMPAIGN_ID_SEED = 'OPP_CAMPAIGN_ID_SEED';
+const OPPORTUNITIES_NEW_FIELDS_SEED = 'OPP_NEW_FIELDS_SEED';
 
 const alreadyApplied = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
-  const flag = await flagRepo.findOneBy({ id: OPPORTUNITIES_CAMPAIGN_ID_SEED });
+  const flag = await flagRepo.findOneBy({ id: OPPORTUNITIES_NEW_FIELDS_SEED });
   return flag?.value === true;
 };
 
 const setFlag = async (): Promise<void> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
-  await flagRepo.save({ id: OPPORTUNITIES_CAMPAIGN_ID_SEED, value: true });
+  await flagRepo.save({ id: OPPORTUNITIES_NEW_FIELDS_SEED, value: true });
 };
 
-export const seedOpportunitiesCampaignIdField = async (): Promise<void> => {
+export const seedOpportunitiesNewFields = async (): Promise<void> => {
   if (await alreadyApplied()) {
-    logger.info('Skip: Opportunities Campaign ID field already seeded', {
-      name: 'seedOpportunitiesCampaignIdField',
+    logger.info('Skip: Opportunities new fields already seeded', {
+      name: 'seedOpportunitiesNewFields',
     });
     return;
   }
@@ -44,11 +44,20 @@ export const seedOpportunitiesCampaignIdField = async (): Promise<void> => {
       }
 
       const tokenOrResolver = await resolveTokenProvider(tablesContext);
-      await makeOpenOpsTablesPost(
-        `api/database/fields/table/${table.id}/`,
-        { name: 'Campaign ID', type: 'text' },
-        createAxiosHeaders(tokenOrResolver),
-      );
+      const createField = (field: object) =>
+        makeOpenOpsTablesPost(
+          `api/database/fields/table/${table.id}/`,
+          field,
+          createAxiosHeaders(tokenOrResolver),
+        );
+
+      await createField({ name: 'Campaign ID', type: 'text' });
+      await createField({
+        name: 'Last status change at',
+        type: 'date',
+        date_format: 'ISO',
+        date_include_time: true,
+      });
     },
   );
 

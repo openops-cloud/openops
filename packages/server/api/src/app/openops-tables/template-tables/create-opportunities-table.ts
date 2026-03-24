@@ -130,11 +130,6 @@ export async function createOpportunitiesTable(
   });
 
   await addField(tokenOrResolver, table.id, {
-    name: 'Campaign ID',
-    type: 'text',
-  });
-
-  await addField(tokenOrResolver, table.id, {
     name: 'Creation time',
     type: 'created_on',
     date_format: 'ISO',
@@ -144,6 +139,18 @@ export async function createOpportunitiesTable(
   await addField(tokenOrResolver, table.id, {
     name: 'Last modified time',
     type: 'last_modified',
+    date_format: 'ISO',
+    date_include_time: true,
+  });
+
+  await addField(tokenOrResolver, table.id, {
+    name: 'Campaign ID',
+    type: 'text',
+  });
+
+  await addField(tokenOrResolver, table.id, {
+    name: 'Last status change at',
+    type: 'date',
     date_format: 'ISO',
     date_include_time: true,
   });
