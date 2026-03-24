@@ -25,7 +25,7 @@ jobs:
     - name: Get next version
       if: inputs.version == ''
       id: semver
-      uses: flatherskevin/semver-action@fc3c4e67353e3c45b8164521ddd17c9e38d6d4d8
+      uses: flatherskevin/semver-action@7ce18d3c29fa36251f492a5121013455741c072c
       with:
         incrementLevel: patch
         source: tags
@@ -53,9 +53,9 @@ jobs:
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to private ECR
         id: login-private-ecr
-        uses: aws-actions/amazon-ecr-login@v2.0.2
+        uses: aws-actions/amazon-ecr-login@v2.1.0
       - name: Login to public ECR
-        uses: aws-actions/amazon-ecr-login@v2.0.2
+        uses: aws-actions/amazon-ecr-login@v2.1.0
         env:
           AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
