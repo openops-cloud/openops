@@ -31,3 +31,39 @@ type Story = StoryObj<typeof meta>;
  * The default card displaying one item.
  */
 export const Default: Story = {};
+
+/**
+ * Card without a bottom line text.
+ */
+export const WithoutBottomLineText: Story = {
+  args: {
+    bottomLineText: undefined,
+  },
+};
+
+/**
+ * Card without an onClick handler — no pointer cursor is shown.
+ */
+export const NonClickable: Story = {
+  args: {
+    onClick: undefined,
+  },
+};
+
+/**
+ * Card with a custom title class name.
+ */
+export const CustomTitleClassName: Story = {
+  args: {
+    titleClassName: 'text-blue-400',
+  },
+};
+
+/**
+ * Card with a custom icon wrapper class name.
+ */
+export const CustomIconWrapperClassName: Story = {
+  args: {
+    iconWrapperClassName: 'bg-green-400',
+  },
+};
