@@ -44,7 +44,13 @@ async function resolveNextStep(
   if (!nextStepDef.conditional) {
     return nextStepDef;
   }
-  const conditionResult = await providerAdapter.evaluateCondition(
+  const evaluateCondition = providerAdapter.evaluateCondition;
+  if (!evaluateCondition) {
+    throwValidationError(
+      'Benchmark provider does not support conditional wizard steps',
+    );
+  }
+  const conditionResult = await evaluateCondition(
     nextStepDef.conditional.when,
     context,
   );

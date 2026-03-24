@@ -64,6 +64,7 @@ export * from './lib/openops-analytics/requests-helpers';
 export * from './lib/azure/auth';
 export * from './lib/azure/regions';
 export * from './lib/azure/subscription/get-subscription-dropdown';
+export * from './lib/azure/subscription/get-subscriptions';
 
 export * from './lib/axios-wrapper';
 export * from './lib/cloud-cli-common';

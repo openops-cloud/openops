@@ -49,10 +49,10 @@ export type ProviderAdapter = {
     method: string,
     context: WizardContext,
   ): Promise<BenchmarkWizardOption[]>;
-  evaluateCondition(
+  evaluateCondition?: (
     condition: string,
     context: WizardContext,
-  ): Promise<boolean>;
+  ) => Promise<boolean>;
 };
 
 const providers = new Map<string, ProviderAdapter>();

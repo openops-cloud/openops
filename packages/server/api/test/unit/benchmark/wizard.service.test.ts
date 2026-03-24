@@ -404,4 +404,62 @@ describe('resolveWizardNavigation', () => {
       adapters.delete('misconfig');
     }
   });
+
+  it('throws when next step has conditional but adapter has no evaluateCondition', async () => {
+    const noConditionAdapterConfig = {
+      provider: 'no-condition-fn' as const,
+      steps: [
+        {
+          id: 'a',
+          title: 'Step A',
+          selectionType: 'single' as const,
+          optionsSource: { type: 'dynamic' as const, method: 'listA' },
+          nextStep: 'b',
+        },
+        {
+          id: 'b',
+          title: 'Step B',
+          selectionType: 'single' as const,
+          conditional: {
+            when: 'showB',
+            onSuccess: {
+              optionsSource: {
+                type: 'static' as const,
+                values: [{ id: 'b1', displayName: 'B1' }],
+              },
+            },
+            onFailure: { skipToStep: 'c' },
+          },
+          nextStep: 'c',
+        },
+        {
+          id: 'c',
+          title: 'Step C',
+          selectionType: 'single' as const,
+          optionsSource: {
+            type: 'static' as const,
+            values: [{ id: 'c1', displayName: 'C1' }],
+          },
+        },
+      ],
+    };
+    const noConditionAdapter: ProviderAdapter = {
+      config: noConditionAdapterConfig,
+      resolveOptions: mockResolveOptions,
+    };
+    adapters.set('no-condition-fn', noConditionAdapter);
+    try {
+      await expect(
+        resolveWizardNavigation(
+          'no-condition-fn',
+          { currentStep: 'a' },
+          TEST_PROJECT_ID,
+        ),
+      ).rejects.toThrow(
+        /Benchmark provider does not support conditional wizard steps/,
+      );
+    } finally {
+      adapters.delete('no-condition-fn');
+    }
+  });
 });
