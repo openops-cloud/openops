@@ -6,6 +6,7 @@ import {
   SEED_OPENOPS_TABLE_NAME,
 } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
+import { OPPORTUNITIES_NEW_FIELDS_SEED } from './openops-opportunities-table-new-fields-seed';
 import { applyToEachTablesDatabase } from './tables-database-iterator';
 
 const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
@@ -49,4 +50,7 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
   );
 
   await setTableSeedFlag();
+
+  const flagRepo = databaseConnection().getRepository(FlagEntity);
+  await flagRepo.save({ id: OPPORTUNITIES_NEW_FIELDS_SEED, value: true });
 };

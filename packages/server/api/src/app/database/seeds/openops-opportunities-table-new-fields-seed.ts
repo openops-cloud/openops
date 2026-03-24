@@ -11,7 +11,7 @@ import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/cr
 import { databaseConnection } from '../database-connection';
 import { applyToEachTablesDatabase } from './tables-database-iterator';
 
-const OPPORTUNITIES_NEW_FIELDS_SEED = 'OPP_NEW_FIELDS_SEED';
+export const OPPORTUNITIES_NEW_FIELDS_SEED = 'OPP_NEW_FIELDS_SEED';
 
 const alreadyApplied = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
