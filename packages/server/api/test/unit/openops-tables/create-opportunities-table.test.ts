@@ -126,7 +126,7 @@ describe('createOpportunityTable', () => {
         date_include_time: true,
       },
       {
-        name: 'Campaign ID',
+        name: 'Campaign Id',
         type: 'text',
       },
       {
