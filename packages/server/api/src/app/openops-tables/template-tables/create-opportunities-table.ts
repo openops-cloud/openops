@@ -144,7 +144,7 @@ export async function createOpportunitiesTable(
   });
 
   await addField(tokenOrResolver, table.id, {
-    name: 'Campaign ID',
+    name: 'Campaign Id',
     type: 'text',
   });
 
