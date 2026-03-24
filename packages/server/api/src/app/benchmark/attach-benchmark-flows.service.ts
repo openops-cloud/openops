@@ -67,7 +67,7 @@ async function buildPayloadForWebhook(params: {
       };
     default: {
       throwValidationError(
-        `Unsupported benchmark provider for webhook payload`,
+        `Unsupported benchmark provider for webhook payload: ${provider}`,
       );
     }
   }
