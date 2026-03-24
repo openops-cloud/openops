@@ -143,8 +143,52 @@ describe('create-benchmark-flows.service', () => {
     expect(result.payload.webhookBaseUrl).toBe(defaultWebhookBaseUrl);
     expect(result.payload.workflows).toEqual(['flow-sub']);
     expect(result.payload.cleanupWorkflows).toEqual(['flow-cleanup']);
-    expect(result.payload.accounts).toEqual([]);
+    expect('accounts' in result.payload).toBe(true);
+    if ('accounts' in result.payload) {
+      expect(result.payload.accounts).toEqual([]);
+    }
     expect(result.payload.regions).toEqual(['us-east-1']);
+  });
+
+  it('attachFlowsToBenchmark builds Azure payload with subscriptions from configuration', async () => {
+    mockBenchmarkRepoSave.mockImplementation((row: Record<string, unknown>) =>
+      Promise.resolve({
+        ...row,
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+      }),
+    );
+    mockBenchmarkFlowRepoSave.mockResolvedValue(undefined);
+
+    const azureRequest: AttachFlowsToBenchmarkRequest = {
+      ...attachFlowsToBenchmarkRequest,
+      provider: BenchmarkProviders.AZURE,
+      benchmarkConfiguration: {
+        connection: ['conn-1'],
+        workflows: ['w1'],
+        subscriptions: ['sub-a', 'sub-b'],
+        regions: ['eastus'],
+      },
+    };
+
+    const result = await attachFlowsToBenchmark(azureRequest);
+
+    expect('subscriptions' in result.payload).toBe(true);
+    if ('subscriptions' in result.payload) {
+      expect(result.payload.subscriptions).toEqual(['sub-a', 'sub-b']);
+    }
+    expect(result.payload.regions).toEqual(['eastus']);
+    expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
+    const saved = mockBenchmarkRepoSave.mock.calls[0][0] as Record<
+      string,
+      unknown
+    >;
+    expect(saved.payload).toEqual(
+      expect.objectContaining({
+        subscriptions: ['sub-a', 'sub-b'],
+        regions: ['eastus'],
+      }),
+    );
   });
 
   it('attachFlowsToBenchmark throws when workflows has fewer than 3 items', async () => {

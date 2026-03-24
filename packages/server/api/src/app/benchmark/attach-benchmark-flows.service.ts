@@ -27,10 +27,11 @@ export type AttachFlowsToBenchmarkResponse = {
 };
 
 async function buildPayloadForWebhook(params: {
+  provider: BenchmarkProviders;
   benchmarkConfiguration: BenchmarkConfiguration;
   workflows: BenchmarkWorkflowBase[];
 }): Promise<BenchmarkWebhookPayload> {
-  const { benchmarkConfiguration, workflows } = params;
+  const { provider, benchmarkConfiguration, workflows } = params;
 
   if (workflows.length < 3) {
     throwValidationError(
@@ -46,13 +47,30 @@ async function buildPayloadForWebhook(params: {
     .filter((w) => w.isCleanup)
     .map((w) => w.flowId);
 
-  return {
+  const webhookPayloadCommon = {
     webhookBaseUrl,
     workflows: subWorkflowFlowIds,
     cleanupWorkflows: cleanupFlowIds,
-    accounts: benchmarkConfiguration.accounts ?? [],
-    regions: benchmarkConfiguration.regions,
+    regions: benchmarkConfiguration.regions ?? [],
   };
+
+  switch (provider) {
+    case BenchmarkProviders.AWS:
+      return {
+        ...webhookPayloadCommon,
+        accounts: benchmarkConfiguration.accounts ?? [],
+      };
+    case BenchmarkProviders.AZURE:
+      return {
+        ...webhookPayloadCommon,
+        subscriptions: benchmarkConfiguration.subscriptions ?? [],
+      };
+    default: {
+      throwValidationError(
+        `Unsupported benchmark provider for webhook payload`,
+      );
+    }
+  }
 }
 
 async function insertBenchmarkRecords(params: {
@@ -110,6 +128,7 @@ export async function attachFlowsToBenchmark(
   } = params;
 
   const payload = await buildPayloadForWebhook({
+    provider,
     benchmarkConfiguration,
     workflows,
   });
