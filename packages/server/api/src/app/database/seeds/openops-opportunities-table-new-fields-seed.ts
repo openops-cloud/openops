@@ -51,7 +51,7 @@ export const seedOpportunitiesNewFields = async (): Promise<void> => {
           createAxiosHeaders(tokenOrResolver),
         );
 
-      await createField({ name: 'Campaign ID', type: 'text' });
+      await createField({ name: 'Campaign Id', type: 'text' });
       await createField({
         name: 'Last status changed at',
         type: 'date',
