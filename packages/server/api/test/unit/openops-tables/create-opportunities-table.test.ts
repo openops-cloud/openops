@@ -125,6 +125,10 @@ describe('createOpportunityTable', () => {
         date_format: 'ISO',
         date_include_time: true,
       },
+      {
+        name: 'Campaign ID',
+        type: 'text',
+      },
     ];
 
     expect(openopsCommonMock.makeOpenOpsTablesPost).toHaveBeenCalledTimes(
