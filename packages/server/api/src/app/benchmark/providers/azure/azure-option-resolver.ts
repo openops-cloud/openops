@@ -3,6 +3,7 @@ import {
   getAzureRegionsList,
   getAzureSubscriptionsList,
 } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import {
   BenchmarkWizardOption,
   CustomAuthConnectionValue,
@@ -54,7 +55,12 @@ async function getSubscriptionsList(
   try {
     const tokenResult = await authenticateUserWithAzure(credentials);
     subscriptions = await getAzureSubscriptionsList(tokenResult.access_token);
-  } catch {
+  } catch (error) {
+    logger.warn('Failed to retrieve Azure subscriptions for benchmark wizard', {
+      projectId: context.projectId,
+      connectionId,
+      error,
+    });
     throwValidationError(
       'Unable to retrieve Azure subscriptions with the provided connection details.',
     );
