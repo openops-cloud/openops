@@ -18,7 +18,7 @@ export const CLOUD_PROVIDERS: CloudProvider[] = [
     value: 'azure',
     name: 'Azure',
     icon: '/blocks/azure.svg',
-    enabled: false,
+    enabled: true,
     authProviderKey: 'Azure',
   },
   {
