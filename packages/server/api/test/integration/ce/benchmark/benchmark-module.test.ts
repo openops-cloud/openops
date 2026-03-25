@@ -108,9 +108,7 @@ afterAll(async () => {
   process.env = originalEnv;
 });
 
-const allBenchmarkProviders = Object.values(
-  BenchmarkProviders,
-) as BenchmarkProviders[];
+const allBenchmarkProviders = Object.values(BenchmarkProviders);
 
 describe('Benchmark wizard API', () => {
   const postWizard = async ({
