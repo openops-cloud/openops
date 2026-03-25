@@ -49,7 +49,7 @@ describe('useBenchmarkBannerState', () => {
 
     expect(result.current.isEnabled).toBe(false);
     expect(result.current.variation).toBe('default');
-    expect(result.current.provider).toBe(undefined);
+    expect(result.current.providers).toEqual([]);
   });
 
   it('does not call listBenchmarks when banner should not be shown', () => {
@@ -91,7 +91,7 @@ describe('useBenchmarkBannerState', () => {
 
     expect(result.current.isEnabled).toBe(true);
     expect(result.current.variation).toBe('default');
-    expect(result.current.provider).toBe(undefined);
+    expect(result.current.providers).toEqual([]);
   });
 
   it('returns default variation when banner is shown but benchmark is RUNNING', () => {
@@ -152,7 +152,7 @@ describe('useBenchmarkBannerState', () => {
     const { result } = renderHook(() => useBenchmarkBannerState());
 
     expect(result.current.variation).toBe('report');
-    expect(result.current.provider).toBe('aws');
+    expect(result.current.providers).toEqual(['aws']);
   });
 
   it('returns report variation when there are multiple benchmarks and one has SUCCEEDED', () => {
@@ -172,6 +172,59 @@ describe('useBenchmarkBannerState', () => {
     const { result } = renderHook(() => useBenchmarkBannerState());
 
     expect(result.current.variation).toBe('report');
-    expect(result.current.provider).toBe('azure');
+    expect(result.current.providers).toEqual(['azure']);
+  });
+
+  it('returns succeeded providers in API order', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
+    setupQueryMock([
+      {
+        benchmarkId: 'bm-1',
+        provider: 'azure',
+        status: BenchmarkStatus.SUCCEEDED,
+      },
+      {
+        benchmarkId: 'bm-2',
+        provider: 'aws',
+        status: BenchmarkStatus.SUCCEEDED,
+      },
+    ]);
+
+    const { result } = renderHook(() => useBenchmarkBannerState());
+
+    expect(result.current.variation).toBe('report');
+    expect(result.current.providers).toEqual(['azure', 'aws']);
+  });
+
+  it('dedupes providers when multiple succeeded benchmarks share provider', () => {
+    mockUseShowBenchmarkBanner.mockReturnValue({
+      showBanner: true,
+      isPending: false,
+    });
+    setupQueryMock([
+      {
+        benchmarkId: 'bm-1',
+        provider: 'aws',
+        status: BenchmarkStatus.SUCCEEDED,
+      },
+      {
+        benchmarkId: 'bm-2',
+        provider: 'aws',
+        status: BenchmarkStatus.SUCCEEDED,
+      },
+      {
+        benchmarkId: 'bm-3',
+        provider: 'azure',
+        status: BenchmarkStatus.SUCCEEDED,
+      },
+    ]);
+
+    const { result } = renderHook(() => useBenchmarkBannerState());
+
+    expect(result.current.variation).toBe('report');
+    expect(result.current.providers).toEqual(['aws', 'azure']);
   });
 });
