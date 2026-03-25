@@ -73,6 +73,8 @@ function getBenchmarkFolderDisplayName(provider: string): string {
   switch (provider) {
     case BenchmarkProviders.AWS:
       return 'AWS Benchmark';
+    case BenchmarkProviders.AZURE:
+      return 'Azure Benchmark';
     default:
       throwValidationError(`Unknown provider: ${provider}`);
   }

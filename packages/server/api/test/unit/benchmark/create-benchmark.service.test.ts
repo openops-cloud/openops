@@ -115,6 +115,13 @@ const defaultBenchmarkConfiguration = {
   regions: ['us-east-1'] as string[],
 };
 
+const azureBenchmarkConfiguration = {
+  connection: ['conn-1'],
+  workflows: ['Azure Benchmark - Unattached Managed Disks'],
+  subscriptions: ['sub-a', 'sub-b'],
+  regions: ['eastus'] as string[],
+};
+
 const createBenchmarkMockConnections = [
   {
     id: 'conn-1',
@@ -235,84 +242,117 @@ describe('create-benchmark.service', () => {
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
   });
 
-  it('createBenchmark returns BenchmarkCreationResult with workflows from seed', async () => {
-    const projectId = 'project-1';
-    const folder: Folder = {
-      id: 'folder-2',
-      projectId,
-      displayName: 'AWS Benchmark',
-      created: '',
-      updated: '',
-      contentType: ContentType.WORKFLOW,
-    };
-    setupCreateBenchmarkMocks(folder);
+  const workflowsFromSeedExpectation = [
+    {
+      flowId: 'flow-1',
+      displayName: 'Orchestrator',
+      isOrchestrator: true,
+      isCleanup: false,
+    },
+    {
+      flowId: 'flow-2',
+      displayName: 'Cleanup',
+      isOrchestrator: false,
+      isCleanup: true,
+    },
+    {
+      flowId: 'flow-3',
+      displayName: 'Sub',
+      isOrchestrator: false,
+      isCleanup: false,
+    },
+  ];
 
-    const result = await createBenchmark({
+  it.each([
+    {
+      name: 'AWS',
       provider: BenchmarkProviders.AWS,
-      projectId,
-      userId: 'user-1',
+      folderDisplayName: 'AWS Benchmark',
       benchmarkConfiguration: defaultBenchmarkConfiguration,
-    });
-
-    expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
-      projectId,
-      request: {
-        displayName: 'AWS Benchmark',
+      expectedWebhookPayload: {
+        webhookBaseUrl: defaultWebhookBaseUrl,
+        workflows: ['flow-3'],
+        cleanupWorkflows: ['flow-2'],
+        accounts: [],
+        regions: ['us-east-1'],
+      },
+    },
+    {
+      name: 'Azure',
+      provider: BenchmarkProviders.AZURE,
+      folderDisplayName: 'Azure Benchmark',
+      benchmarkConfiguration: azureBenchmarkConfiguration,
+      expectedWebhookPayload: {
+        webhookBaseUrl: defaultWebhookBaseUrl,
+        workflows: ['flow-3'],
+        cleanupWorkflows: ['flow-2'],
+        subscriptions: ['sub-a', 'sub-b'],
+        regions: ['eastus'],
+      },
+    },
+  ])(
+    'createBenchmark returns BenchmarkCreationResult with workflows from seed ($name)',
+    async ({
+      provider,
+      folderDisplayName,
+      benchmarkConfiguration,
+      expectedWebhookPayload,
+    }) => {
+      const projectId = 'project-1';
+      const folder: Folder = {
+        id: 'folder-2',
+        projectId,
+        displayName: folderDisplayName,
+        created: '',
+        updated: '',
         contentType: ContentType.WORKFLOW,
-      },
-    });
-    expect(result.folderId).toBe(folder.id);
-    expect(result.workflows).toEqual([
-      {
-        flowId: 'flow-1',
-        displayName: 'Orchestrator',
-        isOrchestrator: true,
-        isCleanup: false,
-      },
-      {
-        flowId: 'flow-2',
-        displayName: 'Cleanup',
-        isOrchestrator: false,
-        isCleanup: true,
-      },
-      {
-        flowId: 'flow-3',
-        displayName: 'Sub',
-        isOrchestrator: false,
-        isCleanup: false,
-      },
-    ]);
-    expect(result.benchmarkId).toBeDefined();
-    expect(result.benchmarkId).toHaveLength(21);
-    expect(result.provider).toBe(BenchmarkProviders.AWS);
-    expect(result.webhookPayload).toEqual({
-      webhookBaseUrl: defaultWebhookBaseUrl,
-      workflows: ['flow-3'],
-      cleanupWorkflows: ['flow-2'],
-      accounts: [],
-      regions: ['us-east-1'],
-    });
-    expect(mockGetWebhookPrefix).toHaveBeenCalled();
-    expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
-    expect(mockBenchmarkFlowRepoSave).toHaveBeenCalledTimes(1);
-    expect(mockBenchmarkFlowRepo.createQueryBuilder).toHaveBeenCalledWith('bf');
-    expect(mockResolveWorkflowPathsForSeed).toHaveBeenCalledWith(
-      'aws',
-      defaultBenchmarkConfiguration.workflows,
-    );
-    expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
-      expect.any(Array),
-      createBenchmarkMockConnections,
-      projectId,
-      folder.id,
-    );
-    expect(
-      benchmarkDashboardService.createBenchmarkDashboard,
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      benchmarkDashboardService.createBenchmarkDashboard,
-    ).toHaveBeenCalledWith('aws');
-  });
+      };
+      setupCreateBenchmarkMocks(folder);
+
+      const result = await createBenchmark({
+        provider,
+        projectId,
+        userId: 'user-1',
+        benchmarkConfiguration,
+      });
+
+      expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
+        projectId,
+        request: {
+          displayName: folderDisplayName,
+          contentType: ContentType.WORKFLOW,
+        },
+      });
+      expect(result.folderId).toBe(folder.id);
+      expect(result.workflows).toEqual(workflowsFromSeedExpectation);
+      expect(result.benchmarkId).toBeDefined();
+      expect(result.benchmarkId).toHaveLength(21);
+      expect(result.provider).toBe(provider);
+      expect(result.webhookPayload).toEqual(expectedWebhookPayload);
+      expect(mockGetWebhookPrefix).toHaveBeenCalled();
+      expect(mockBenchmarkRepoSave).toHaveBeenCalledTimes(1);
+      expect(mockBenchmarkFlowRepoSave).toHaveBeenCalledTimes(1);
+      expect(mockBenchmarkFlowRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'bf',
+      );
+      expect(mockResolveWorkflowPathsForSeed).toHaveBeenCalledWith(
+        provider,
+        benchmarkConfiguration.workflows,
+      );
+      expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
+        expect.any(Array),
+        createBenchmarkMockConnections,
+        projectId,
+        folder.id,
+      );
+      expect(
+        benchmarkDashboardService.createBenchmarkDashboard,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        benchmarkDashboardService.createBenchmarkDashboard,
+      ).toHaveBeenCalledWith(provider);
+    },
+  );
 
   it('createBenchmark deletes newly created flows and rethrows when attachFlowsToBenchmark fails', async () => {
     const projectId = 'project-1';
