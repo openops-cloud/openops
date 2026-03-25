@@ -143,7 +143,7 @@ describe('resolveOptions (Azure)', () => {
     ]);
   });
 
-  it('omits imageLogoUrl for getSubscriptionsList when getAuthProviderLogoUrl returns undefined', async () => {
+  it('omits imageLogoUrl for getSubscriptionsList when auth metadata has no logo', async () => {
     mockGetOneOrThrow.mockResolvedValue({
       authProviderKey: 'Azure',
       value: {

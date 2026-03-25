@@ -9,13 +9,39 @@ export const BenchmarkWorkflowBase = Type.Object({
 
 export type BenchmarkWorkflowBase = Static<typeof BenchmarkWorkflowBase>;
 
-export const BenchmarkWebhookPayload = Type.Object({
+const BenchmarkWebhookPayloadBase = Type.Object({
   webhookBaseUrl: Type.String(),
   workflows: Type.Array(Type.String()),
   cleanupWorkflows: Type.Array(Type.String()),
-  accounts: Type.Array(Type.String()),
   regions: Type.Array(Type.String()),
 });
+
+export const AwsBenchmarkWebhookPayload = Type.Intersect([
+  BenchmarkWebhookPayloadBase,
+  Type.Object({
+    accounts: Type.Array(Type.String()),
+  }),
+]);
+
+export type AwsBenchmarkWebhookPayload = Static<
+  typeof AwsBenchmarkWebhookPayload
+>;
+
+export const AzureBenchmarkWebhookPayload = Type.Intersect([
+  BenchmarkWebhookPayloadBase,
+  Type.Object({
+    subscriptions: Type.Array(Type.String()),
+  }),
+]);
+
+export type AzureBenchmarkWebhookPayload = Static<
+  typeof AzureBenchmarkWebhookPayload
+>;
+
+export const BenchmarkWebhookPayload = Type.Union([
+  AwsBenchmarkWebhookPayload,
+  AzureBenchmarkWebhookPayload,
+]);
 
 export type BenchmarkWebhookPayload = Static<typeof BenchmarkWebhookPayload>;
 
