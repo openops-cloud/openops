@@ -6,7 +6,7 @@ import {
 } from '@/app/features/home/lib/home-hooks';
 import { HomeRunsTable } from '@/app/features/home/runs-table';
 import { FinOpsBenchmarkBanner, OverviewCard } from '@openops/components/ui';
-import { Permission } from '@openops/shared';
+import { BenchmarkProviders, Permission } from '@openops/shared';
 import { subDays } from 'date-fns';
 import { t } from 'i18next';
 import {
@@ -55,7 +55,7 @@ const HomeOperationalView = ({
     checkAccess(Permission.READ_APP_CONNECTION);
 
   const openBenchmarkWizard = useOpenBenchmarkWizard();
-  const onViewBenchmarkReportClick = (provider: string) =>
+  const onViewBenchmarkReportClick = (provider: BenchmarkProviders) =>
     navigate(`/analytics?dashboard=${provider}_benchmark`);
 
   return (

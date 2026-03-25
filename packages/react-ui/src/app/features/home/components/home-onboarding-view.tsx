@@ -18,7 +18,7 @@ import {
   FlowTemplateMetadataWithIntegrations,
   NoWorkflowsPlaceholder,
 } from '@openops/components/ui';
-import { Permission } from '@openops/shared';
+import { BenchmarkProviders, Permission } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -107,7 +107,7 @@ const HomeOnboardingView = ({
     variation: benchmarkVariation,
     providers: benchmarkProviders,
   } = useBenchmarkBannerState();
-  const onViewBenchmarkReportClick = (provider: string) =>
+  const onViewBenchmarkReportClick = (provider: BenchmarkProviders) =>
     navigate(`/analytics?dashboard=${provider}_benchmark`);
 
   return (

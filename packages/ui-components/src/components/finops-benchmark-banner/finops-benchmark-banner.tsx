@@ -46,18 +46,17 @@ const FinOpsBenchmarkBanner = ({
 }: FinOpsBenchmarkBannerProps) => {
   const permissionMessage = usePermissionMessage();
   const disabledTooltip = disabled ? permissionMessage : undefined;
-  const providerLabels = providers.map((provider) => PROVIDER_LABELS[provider]);
-  const providersLabel = providerLabels.join(', ');
-  const hasMultipleProviders = providers.length > 1;
-  const reportDescription = hasMultipleProviders
-    ? t('Your benchmark reports are ready.')
-    : t('Your') + ` ${providersLabel} ` + t('benchmark report is ready.');
 
   const content =
     variation === 'report'
       ? {
           title: t('FinOps Benchmark'),
-          description: reportDescription,
+          description:
+            providers.length > 1
+              ? t('Your benchmark reports are ready.')
+              : t('Your') +
+                ` ${PROVIDER_LABELS[providers[0]]} ` +
+                t('benchmark report is ready.'),
           actionLabel: t('Re-run a Benchmark'),
         }
       : {
