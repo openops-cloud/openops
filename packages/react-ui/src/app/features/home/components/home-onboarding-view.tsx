@@ -105,17 +105,17 @@ const HomeOnboardingView = ({
   const {
     isEnabled: isFinOpsBenchmarkEnabled,
     variation: benchmarkVariation,
-    provider: benchmarkProvider,
+    providers: benchmarkProviders,
   } = useBenchmarkBannerState();
-  const onViewBenchmarkReportClick = () =>
-    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
+  const onViewBenchmarkReportClick = (provider: string) =>
+    navigate(`/analytics?dashboard=${provider}_benchmark`);
 
   return (
     <div className="flex flex-col gap-6 flex-1">
       {isFinOpsBenchmarkEnabled && (
         <FinOpsBenchmarkBanner
           variation={benchmarkVariation}
-          provider={benchmarkProvider}
+          providers={benchmarkProviders}
           onActionClick={openBenchmarkWizard}
           onViewReportClick={onViewBenchmarkReportClick}
           disabled={!hasBenchmarkPermissions}

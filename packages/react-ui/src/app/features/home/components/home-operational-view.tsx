@@ -47,7 +47,7 @@ const HomeOperationalView = ({
   const {
     isEnabled: isFinOpsBenchmarkEnabled,
     variation: benchmarkVariation,
-    provider: benchmarkProvider,
+    providers: benchmarkProviders,
   } = useBenchmarkBannerState();
   const { checkAccess } = useAuthorization();
   const hasBenchmarkPermissions =
@@ -55,8 +55,8 @@ const HomeOperationalView = ({
     checkAccess(Permission.READ_APP_CONNECTION);
 
   const openBenchmarkWizard = useOpenBenchmarkWizard();
-  const onViewBenchmarkReportClick = () =>
-    navigate(`/analytics?dashboard=${benchmarkProvider}_benchmark`);
+  const onViewBenchmarkReportClick = (provider: string) =>
+    navigate(`/analytics?dashboard=${provider}_benchmark`);
 
   return (
     <>
@@ -110,7 +110,7 @@ const HomeOperationalView = ({
       {isFinOpsBenchmarkEnabled && (
         <FinOpsBenchmarkBanner
           variation={benchmarkVariation}
-          provider={benchmarkProvider}
+          providers={benchmarkProviders}
           onActionClick={openBenchmarkWizard}
           onViewReportClick={onViewBenchmarkReportClick}
           disabled={!hasBenchmarkPermissions}
