@@ -17,7 +17,7 @@ import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
 import {
   bulkCreateAndPublishFlows,
   type WorkflowTemplate,
-} from './benchmark-flow-bulk-create';
+} from '../flows/flow/flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import {
