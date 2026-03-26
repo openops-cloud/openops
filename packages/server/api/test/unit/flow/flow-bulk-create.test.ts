@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const mockInsert = jest.fn().mockResolvedValue(undefined);
 const mockQuery = jest.fn().mockResolvedValue(undefined);
 const mockGetRepository = jest.fn().mockReturnValue({ insert: mockInsert });
