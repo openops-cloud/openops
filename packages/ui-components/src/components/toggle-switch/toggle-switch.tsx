@@ -65,9 +65,9 @@ const ToggleSwitch = ({
             value={option.value}
             size="xs"
             className={cn('text-sm transition-colors border-0', {
-              'px-5 h-[42px] rounded-[40px] font-medium data-[state=on]:bg-primary-200 data-[state=on]:text-background':
+              'px-5 h-[42px] rounded-[40px] font-medium aria-checked:!bg-primary-200 aria-checked:!text-background':
                 variant === 'pill',
-              'w-[66px] px-2 py-1 rounded-[4px] font-normal data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-800':
+              'w-[66px] px-2 py-1 rounded-[4px] font-normal aria-checked:bg-gray-200 dark:aria-checked:bg-gray-800':
                 variant !== 'pill',
             })}
           >
