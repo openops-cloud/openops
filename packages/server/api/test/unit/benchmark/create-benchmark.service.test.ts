@@ -66,7 +66,7 @@ jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
 
 const mockGetConnectionsWithBlockSupport = jest.fn();
 jest.mock(
-  '../../../src/app/benchmark/connections-with-supported-blocks',
+  '../../../src/app/app-connection/connections-with-block-support',
   () => ({
     getConnectionsWithBlockSupport: (
       ...args: unknown[]

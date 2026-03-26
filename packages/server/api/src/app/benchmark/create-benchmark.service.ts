@@ -10,6 +10,7 @@ import {
 } from '@openops/shared';
 import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
+import { getConnectionsWithBlockSupport } from '../app-connection/connections-with-block-support';
 import {
   bulkCreateAndPublishFlows,
   type WorkflowTemplate,
@@ -24,7 +25,6 @@ import {
   type CategorizedWorkflowPaths,
   resolveWorkflowPathsForSeed,
 } from './catalog-resolver';
-import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
 
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
