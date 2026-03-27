@@ -66,7 +66,7 @@ jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
 
 const mockGetConnectionsWithBlockSupport = jest.fn();
 jest.mock(
-  '../../../src/app/benchmark/connections-with-supported-blocks',
+  '../../../src/app/app-connection/connections-with-block-support',
   () => ({
     getConnectionsWithBlockSupport: (
       ...args: unknown[]
@@ -84,7 +84,7 @@ jest.mock('server-worker', () => ({
   },
 }));
 
-jest.mock('../../../src/app/benchmark/benchmark-flow-bulk-create', () => ({
+jest.mock('../../../src/app/flows/flow/flow-bulk-create', () => ({
   bulkCreateAndPublishFlows: (
     ...args: unknown[]
   ): ReturnType<typeof mockBulkCreateAndPublishFlows> =>

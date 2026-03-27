@@ -1,6 +1,6 @@
 import type { AppConnectionsWithSupportedBlocks } from '@openops/shared';
-import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { getProviderMetadataForAllBlocks } from '../app-connection/connection-providers-resolver';
+import { appConnectionService } from './app-connection-service/app-connection-service';
+import { getProviderMetadataForAllBlocks } from './connection-providers-resolver';
 
 export async function getConnectionsWithBlockSupport(
   projectId: string,

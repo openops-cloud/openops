@@ -8,7 +8,7 @@ import {
   openOpsId,
 } from '@openops/shared';
 import { EntityManager } from 'typeorm';
-import { flowRepo } from '../flows/flow/flow.repo';
+import { flowRepo } from './flow.repo';
 
 export type WorkflowTemplate = {
   template: {
