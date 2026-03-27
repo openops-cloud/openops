@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 type SkeletonFieldContextType = {
   showSkeleton: boolean;
@@ -25,8 +25,13 @@ const SkeletonFieldProvider = ({
 }: SkeletonFieldProviderProps) => {
   const [showSkeleton, setShowSkeleton] = useState(initialShow);
 
+  const value = useMemo(
+    () => ({ showSkeleton, setShowSkeleton }),
+    [showSkeleton, setShowSkeleton],
+  );
+
   return (
-    <SkeletonFieldContext.Provider value={{ showSkeleton, setShowSkeleton }}>
+    <SkeletonFieldContext.Provider value={value}>
       {children}
     </SkeletonFieldContext.Provider>
   );

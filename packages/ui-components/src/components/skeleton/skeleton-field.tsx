@@ -14,7 +14,7 @@ const SkeletonField = ({
   show: showProp,
 }: SkeletonFieldProps) => {
   const { showSkeleton: showContext } = useSkeletonField();
-  const show = showProp !== undefined ? showProp : showContext;
+  const show = showProp ?? showContext;
 
   if (show) {
     return (
