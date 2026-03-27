@@ -19,6 +19,7 @@ const SkeletonField = ({
   if (show) {
     return (
       <div
+        data-testid="skeleton-field"
         className={cn(
           'w-full h-full rounded-xl',
           'bg-gradient-to-r from-muted to-border',

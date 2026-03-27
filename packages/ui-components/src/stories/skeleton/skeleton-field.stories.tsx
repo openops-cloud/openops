@@ -40,8 +40,7 @@ export const ShowingSkeleton: Story = {
     expect(
       canvas.queryByText('This content is hidden.'),
     ).not.toBeInTheDocument();
-    const skeleton = canvasElement.querySelector('.rounded-xl');
-    expect(skeleton).not.toBeNull();
+    expect(canvas.getByTestId('skeleton-field')).toBeInTheDocument();
   },
 };
 
@@ -87,8 +86,9 @@ export const WithContextShowingSkeleton: Story = {
     const canvas = selectLightOrDarkCanvas(canvasElement);
     expect(canvas.queryByText('Field one content.')).not.toBeInTheDocument();
     expect(canvas.queryByText('Field two content.')).not.toBeInTheDocument();
-    const skeletons = canvasElement.querySelectorAll('.rounded-xl');
-    expect(skeletons.length).toBeGreaterThanOrEqual(2);
+    expect(
+      canvas.getAllByTestId('skeleton-field').length,
+    ).toBeGreaterThanOrEqual(2);
   },
 };
 
