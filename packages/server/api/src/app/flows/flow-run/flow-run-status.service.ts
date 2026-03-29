@@ -7,9 +7,7 @@ export type FlowRunSummary = {
   finishTime?: string;
 };
 
-export function resolveRunStatus(
-  status: FlowRunStatus,
-): SimplifiedRunStatus {
+export function resolveRunStatus(status: FlowRunStatus): SimplifiedRunStatus {
   switch (status) {
     case FlowRunStatus.RUNNING:
     case FlowRunStatus.PAUSED:
