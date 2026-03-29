@@ -257,14 +257,16 @@ function getEqualityFilterType(
   return ViewFilterTypesEnum.equal;
 }
 
-export async function batchDeleteRows(params: BatchDeleteRowsParams) {
+export async function batchDeleteRows(
+  params: BatchDeleteRowsParams,
+): Promise<void> {
   if (params.rowIds.length === 0) {
     return;
   }
 
   const url = `api/database/rows/table/${params.tableId}/batch-delete/`;
 
-  return executeWithConcurrencyLimit(
+  await executeWithConcurrencyLimit(
     async () => {
       const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
       return await makeOpenOpsTablesPost(
@@ -277,7 +279,8 @@ export async function batchDeleteRows(params: BatchDeleteRowsParams) {
       logger.error('Error while batch deleting rows:', {
         error,
         url,
-        rowIds: params.rowIds,
+        rowIdsCount: params.rowIds.length,
+        rowIdsSample: params.rowIds.slice(0, 10),
       });
     },
   );
