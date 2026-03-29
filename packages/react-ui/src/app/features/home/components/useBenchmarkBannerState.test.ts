@@ -1,4 +1,4 @@
-import { BenchmarkStatus } from '@openops/shared';
+import { SimplifiedRunStatus } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 
@@ -100,7 +100,7 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.RUNNING },
+      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.RUNNING },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -114,7 +114,7 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.CREATED },
+      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.CREATED },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -128,7 +128,7 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.FAILED },
+      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.FAILED },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -145,7 +145,7 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
     ]);
 
@@ -161,11 +161,11 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: BenchmarkStatus.RUNNING },
+      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.RUNNING },
       {
         benchmarkId: 'bm-2',
         provider: 'azure',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
     ]);
 
@@ -184,12 +184,12 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'azure',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-2',
         provider: 'aws',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
     ]);
 
@@ -208,17 +208,17 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-2',
         provider: 'aws',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-3',
         provider: 'azure',
-        status: BenchmarkStatus.SUCCEEDED,
+        status: SimplifiedRunStatus.SUCCEEDED,
       },
     ]);
 

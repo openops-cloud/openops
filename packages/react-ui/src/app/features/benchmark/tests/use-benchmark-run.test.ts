@@ -1,8 +1,8 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
-  BenchmarkStatus,
   BenchmarkStatusResponse,
+  SimplifiedRunStatus,
 } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
@@ -66,14 +66,14 @@ const buildStatusResponse = (
   overrides?: Partial<BenchmarkStatusResponse>,
 ): BenchmarkStatusResponse => ({
   benchmarkId: 'bm-1',
-  status: BenchmarkStatus.RUNNING,
+  status: SimplifiedRunStatus.RUNNING,
   workflows: [
     {
       flowId: 'orch-flow-1',
       displayName: 'Orchestrator',
       isOrchestrator: true,
       isCleanup: false,
-      runStatus: BenchmarkStatus.RUNNING,
+      runStatus: SimplifiedRunStatus.RUNNING,
       runId: 'run-1',
     },
   ],
@@ -231,14 +231,14 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.SUCCEEDED,
+          status: SimplifiedRunStatus.SUCCEEDED,
           workflows: [
             {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.SUCCEEDED,
+              runStatus: SimplifiedRunStatus.SUCCEEDED,
               runId: 'run-1',
             },
             {
@@ -246,7 +246,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.SUCCEEDED,
+              runStatus: SimplifiedRunStatus.SUCCEEDED,
               runId: 'run-2',
             },
           ],
@@ -270,14 +270,14 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.SUCCEEDED,
+          status: SimplifiedRunStatus.SUCCEEDED,
           workflows: [
             {
               flowId: 'orch-flow-1',
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.SUCCEEDED,
+              runStatus: SimplifiedRunStatus.SUCCEEDED,
               runId: 'run-1',
             },
             {
@@ -285,7 +285,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.FAILED,
+              runStatus: SimplifiedRunStatus.FAILED,
               runId: 'run-2',
             },
           ],
@@ -311,7 +311,7 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.FAILED,
+          status: SimplifiedRunStatus.FAILED,
           lastRunId: 'run-1',
         }),
       );
@@ -331,7 +331,7 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.CREATED,
+          status: SimplifiedRunStatus.CREATED,
           lastRunId: undefined,
         }),
       );
@@ -351,7 +351,7 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.SUCCEEDED,
+          status: SimplifiedRunStatus.SUCCEEDED,
           lastRunId: 'run-42',
         }),
       );
@@ -373,7 +373,7 @@ describe('useBenchmarkRun', () => {
       mockRunBenchmark.mockResolvedValue(undefined);
       setupQueryMock(
         buildStatusResponse({
-          status: BenchmarkStatus.FAILED,
+          status: SimplifiedRunStatus.FAILED,
           lastRunId: 'run-1',
         }),
       );
@@ -432,7 +432,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-1',
             },
             {
@@ -440,7 +440,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 1',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-2',
             },
             {
@@ -448,7 +448,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 2',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-3',
             },
           ],
@@ -479,7 +479,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-1',
             },
             {
@@ -487,7 +487,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 1',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.SUCCEEDED,
+              runStatus: SimplifiedRunStatus.SUCCEEDED,
               runId: 'run-2',
             },
             {
@@ -495,7 +495,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 2',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.FAILED,
+              runStatus: SimplifiedRunStatus.FAILED,
               runId: 'run-3',
             },
             {
@@ -503,7 +503,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 3',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-4',
             },
           ],
@@ -534,7 +534,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.SUCCEEDED,
+              runStatus: SimplifiedRunStatus.SUCCEEDED,
               runId: 'run-1',
             },
             {
@@ -542,7 +542,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 1',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-2',
             },
           ],
@@ -573,7 +573,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Orchestrator',
               isOrchestrator: true,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-1',
             },
             {
@@ -581,7 +581,7 @@ describe('useBenchmarkRun', () => {
               displayName: 'Sub 1',
               isOrchestrator: false,
               isCleanup: false,
-              runStatus: BenchmarkStatus.RUNNING,
+              runStatus: SimplifiedRunStatus.RUNNING,
               runId: 'run-2',
             },
           ],

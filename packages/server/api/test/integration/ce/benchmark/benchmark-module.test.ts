@@ -27,12 +27,12 @@ import {
   ApplicationError,
   BenchmarkListItem,
   BenchmarkProviders,
-  BenchmarkStatus,
-  type BenchmarkStatusResponse,
-  type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
   Project,
+  SimplifiedRunStatus,
+  type BenchmarkStatusResponse,
+  type BenchmarkWizardStepResponse,
 } from '@openops/shared';
 import { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -57,7 +57,7 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
 
 const mockBenchmarkStatus: BenchmarkStatusResponse = {
   benchmarkId: 'benchmark-001',
-  status: BenchmarkStatus.CREATED,
+  status: SimplifiedRunStatus.CREATED,
   workflows: [],
 };
 
@@ -575,7 +575,7 @@ describe('List benchmarks API', () => {
   const mockListItem: BenchmarkListItem = {
     benchmarkId: 'benchmark-001',
     provider: BenchmarkProviders.AWS,
-    status: BenchmarkStatus.CREATED,
+    status: SimplifiedRunStatus.CREATED,
   };
 
   describe('GET /v1/benchmarks', () => {

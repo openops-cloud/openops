@@ -2,10 +2,10 @@ import {
   ApplicationError,
   BenchmarkListItem,
   BenchmarkProviders,
-  BenchmarkStatus,
   BenchmarkStatusResponse,
   BenchmarkWorkflowStatusItem,
   ErrorCode,
+  SimplifiedRunStatus,
 } from '@openops/shared';
 import { IsNull } from 'typeorm';
 import {
@@ -60,7 +60,7 @@ function buildWorkflowStatusItems(
       isCleanup: row.isCleanup,
       runStatus: latestRun
         ? resolveRunStatus(latestRun.status)
-        : BenchmarkStatus.CREATED,
+        : SimplifiedRunStatus.CREATED,
       runId: latestRun?.id,
     };
   });
@@ -68,14 +68,14 @@ function buildWorkflowStatusItems(
 
 function resolveOrchestratorStatus(
   run: FlowRunSummary | undefined,
-): BenchmarkStatus {
-  return run ? resolveRunStatus(run.status) : BenchmarkStatus.CREATED;
+): SimplifiedRunStatus {
+  return run ? resolveRunStatus(run.status) : SimplifiedRunStatus.CREATED;
 }
 
 async function resolveStatusByBenchmarkId(
   benchmarkIds: string[],
   projectId: string,
-): Promise<Map<string, BenchmarkStatus>> {
+): Promise<Map<string, SimplifiedRunStatus>> {
   const allFlowRows = await fetchFlowRowsByBenchmarkIds(benchmarkIds);
 
   const orchestratorFlowIdByBenchmarkId = new Map<string, string>();
@@ -91,7 +91,7 @@ async function resolveStatusByBenchmarkId(
       ? await getLatestRunByFlowId(orchestratorFlowIds, projectId)
       : {};
 
-  const statusByBenchmarkId = new Map<string, BenchmarkStatus>();
+  const statusByBenchmarkId = new Map<string, SimplifiedRunStatus>();
 
   for (const benchmarkId of benchmarkIds) {
     const flowId = orchestratorFlowIdByBenchmarkId.get(benchmarkId);
@@ -133,7 +133,7 @@ export async function listBenchmarks(params: {
   return rows.map((row) => ({
     benchmarkId: row.id,
     provider: row.provider,
-    status: statusByBenchmarkId.get(row.id) ?? BenchmarkStatus.CREATED,
+    status: statusByBenchmarkId.get(row.id) ?? SimplifiedRunStatus.CREATED,
   }));
 }
 

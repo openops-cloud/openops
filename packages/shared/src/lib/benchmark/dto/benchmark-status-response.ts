@@ -2,8 +2,6 @@ import { Static, Type } from '@sinclair/typebox';
 import { SimplifiedRunStatus } from '../../common/run-status';
 import { BenchmarkWorkflowBase } from './create-benchmark-response';
 
-export { SimplifiedRunStatus as BenchmarkStatus };
-
 export const BenchmarkWorkflowStatusItem = Type.Intersect([
   BenchmarkWorkflowBase,
   Type.Object({
