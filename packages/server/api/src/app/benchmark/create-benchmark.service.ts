@@ -8,11 +8,11 @@ import {
   ErrorCode,
   Folder,
 } from '@openops/shared';
-import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
 import { getConnectionsWithBlockSupport } from '../app-connection/connections-with-block-support';
 import {
   bulkCreateAndPublishFlows,
+  loadWorkflowTemplate,
   type WorkflowTemplate,
 } from '../flows/flow/flow-bulk-create';
 import { flowService } from '../flows/flow/flow.service';
@@ -135,16 +135,6 @@ export async function deleteFlowsForExistingBenchmark(params: {
     { id: benchmarkId, deletedAt: IsNull() },
     { deletedAt: now },
   );
-}
-
-async function loadWorkflowTemplate(
-  filePath: string,
-): Promise<WorkflowTemplate> {
-  const content = await fs.readFile(filePath, 'utf-8');
-  const parsed = JSON.parse(content) as {
-    template: WorkflowTemplate['template'];
-  };
-  return { template: parsed.template };
 }
 
 type CategorizedWorkflowTemplates = {
