@@ -17,6 +17,7 @@ export function resolveRunStatus(status: FlowRunStatus): SimplifiedRunStatus {
     case FlowRunStatus.INTERNAL_ERROR:
     case FlowRunStatus.TIMEOUT:
     case FlowRunStatus.IGNORED:
+    case FlowRunStatus.INFRASTRUCTURE_ERROR:
       return SimplifiedRunStatus.FAILED;
     default:
       return SimplifiedRunStatus.SUCCEEDED;

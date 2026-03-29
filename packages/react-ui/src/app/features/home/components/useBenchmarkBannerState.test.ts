@@ -100,7 +100,11 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.RUNNING },
+      {
+        benchmarkId: 'bm-1',
+        provider: 'aws',
+        status: SimplifiedRunStatus.RUNNING,
+      },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -114,7 +118,11 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.CREATED },
+      {
+        benchmarkId: 'bm-1',
+        provider: 'aws',
+        status: SimplifiedRunStatus.CREATED,
+      },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -128,7 +136,11 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.FAILED },
+      {
+        benchmarkId: 'bm-1',
+        provider: 'aws',
+        status: SimplifiedRunStatus.FAILED,
+      },
     ]);
 
     const { result } = renderHook(() => useBenchmarkBannerState());
@@ -161,7 +173,11 @@ describe('useBenchmarkBannerState', () => {
       isPending: false,
     });
     setupQueryMock([
-      { benchmarkId: 'bm-1', provider: 'aws', status: SimplifiedRunStatus.RUNNING },
+      {
+        benchmarkId: 'bm-1',
+        provider: 'aws',
+        status: SimplifiedRunStatus.RUNNING,
+      },
       {
         benchmarkId: 'bm-2',
         provider: 'azure',
