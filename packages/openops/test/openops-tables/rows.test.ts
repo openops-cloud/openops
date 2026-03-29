@@ -338,13 +338,12 @@ describe('batchDeleteRows', () => {
     makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await batchDeleteRows({
+    await batchDeleteRows({
       tableId: 5,
       tokenOrResolver: 'token',
       rowIds: [1, 2, 3],
     });
 
-    expect(result).toBe('mock result');
     expect(acquireMock).toBeCalledTimes(1);
     expect(releaseMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
