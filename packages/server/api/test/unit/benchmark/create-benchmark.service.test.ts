@@ -85,6 +85,7 @@ jest.mock('server-worker', () => ({
 }));
 
 jest.mock('../../../src/app/flows/flow/flow-bulk-create', () => ({
+  ...jest.requireActual('../../../src/app/flows/flow/flow-bulk-create'),
   bulkCreateAndPublishFlows: (
     ...args: unknown[]
   ): ReturnType<typeof mockBulkCreateAndPublishFlows> =>
