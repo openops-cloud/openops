@@ -222,7 +222,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         if: vars.ECR_REGION
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.1
       - name: Format image tag parts
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -278,7 +278,7 @@ jobs:
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.1
       - name: Format image tag components
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
