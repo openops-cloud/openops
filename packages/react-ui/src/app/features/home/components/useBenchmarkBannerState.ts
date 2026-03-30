@@ -1,5 +1,5 @@
 import { QueryKeys } from '@/app/constants/query-keys';
-import { BenchmarkProviders, SimplifiedRunStatus } from '@openops/shared';
+import { BenchmarkProviders, BenchmarkStatus } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { benchmarkApi } from '../../benchmark/benchmark-api';
 import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
@@ -21,7 +21,7 @@ export const useBenchmarkBannerState = (): BenchmarkBannerState => {
 
   const succeededProviders =
     benchmarks?.reduce<BenchmarkProviders[]>((providers, benchmark) => {
-      if (benchmark.status !== SimplifiedRunStatus.SUCCEEDED) {
+      if (benchmark.status !== BenchmarkStatus.SUCCEEDED) {
         return providers;
       }
 

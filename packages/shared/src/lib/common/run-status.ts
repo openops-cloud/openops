@@ -1,4 +1,4 @@
-export enum SimplifiedRunStatus {
+export enum ExecutionStatus {
   CREATED = 'CREATED',
   RUNNING = 'RUNNING',
   SUCCEEDED = 'SUCCEEDED',

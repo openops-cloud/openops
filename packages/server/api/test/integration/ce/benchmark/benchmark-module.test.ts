@@ -27,10 +27,10 @@ import {
   ApplicationError,
   BenchmarkListItem,
   BenchmarkProviders,
+  BenchmarkStatus,
   ErrorCode,
   PrincipalType,
   Project,
-  SimplifiedRunStatus,
   type BenchmarkStatusResponse,
   type BenchmarkWizardStepResponse,
 } from '@openops/shared';
@@ -57,7 +57,7 @@ const mockWizardStep: BenchmarkWizardStepResponse = {
 
 const mockBenchmarkStatus: BenchmarkStatusResponse = {
   benchmarkId: 'benchmark-001',
-  status: SimplifiedRunStatus.CREATED,
+  status: BenchmarkStatus.CREATED,
   workflows: [],
 };
 
@@ -575,7 +575,7 @@ describe('List benchmarks API', () => {
   const mockListItem: BenchmarkListItem = {
     benchmarkId: 'benchmark-001',
     provider: BenchmarkProviders.AWS,
-    status: SimplifiedRunStatus.CREATED,
+    status: BenchmarkStatus.CREATED,
   };
 
   describe('GET /v1/benchmarks', () => {

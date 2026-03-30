@@ -1,4 +1,4 @@
-import { FlowRunStatus, SimplifiedRunStatus } from '@openops/shared';
+import { ExecutionStatus, FlowRunStatus } from '@openops/shared';
 import { flowRunRepo } from './flow-run-service';
 
 export type FlowRunSummary = {
@@ -7,20 +7,20 @@ export type FlowRunSummary = {
   finishTime?: string;
 };
 
-export function resolveRunStatus(status: FlowRunStatus): SimplifiedRunStatus {
+export function resolveRunStatus(status: FlowRunStatus): ExecutionStatus {
   switch (status) {
     case FlowRunStatus.RUNNING:
     case FlowRunStatus.PAUSED:
     case FlowRunStatus.SCHEDULED:
-      return SimplifiedRunStatus.RUNNING;
+      return ExecutionStatus.RUNNING;
     case FlowRunStatus.FAILED:
     case FlowRunStatus.INTERNAL_ERROR:
     case FlowRunStatus.TIMEOUT:
     case FlowRunStatus.IGNORED:
     case FlowRunStatus.INFRASTRUCTURE_ERROR:
-      return SimplifiedRunStatus.FAILED;
+      return ExecutionStatus.FAILED;
     default:
-      return SimplifiedRunStatus.SUCCEEDED;
+      return ExecutionStatus.SUCCEEDED;
   }
 }
 

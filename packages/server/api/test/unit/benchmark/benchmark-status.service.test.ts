@@ -1,8 +1,8 @@
 import {
   BenchmarkProviders,
+  BenchmarkStatus,
   ErrorCode,
   FlowRunStatus,
-  SimplifiedRunStatus,
 } from '@openops/shared';
 import {
   getBenchmarkStatus,
@@ -125,7 +125,7 @@ describe('getBenchmarkStatus', () => {
       projectId: PROJECT_ID,
     });
 
-    expect(result.status).toBe(SimplifiedRunStatus.CREATED);
+    expect(result.status).toBe(BenchmarkStatus.CREATED);
     expect(result.lastRunId).toBeUndefined();
     expect(result.lastRunFinishedAt).toBeUndefined();
   });
@@ -147,7 +147,7 @@ describe('getBenchmarkStatus', () => {
       projectId: PROJECT_ID,
     });
 
-    expect(result.status).toBe(SimplifiedRunStatus.RUNNING);
+    expect(result.status).toBe(BenchmarkStatus.RUNNING);
     expect(result.lastRunId).toBe('run-001');
     expect(result.lastRunFinishedAt).toBeUndefined();
   });
@@ -169,7 +169,7 @@ describe('getBenchmarkStatus', () => {
       projectId: PROJECT_ID,
     });
 
-    expect(result.status).toBe(SimplifiedRunStatus.SUCCEEDED);
+    expect(result.status).toBe(BenchmarkStatus.SUCCEEDED);
     expect(result.lastRunId).toBe('run-002');
     expect(result.lastRunFinishedAt).toBe('2024-01-01T12:00:00.000Z');
   });
@@ -191,7 +191,7 @@ describe('getBenchmarkStatus', () => {
       projectId: PROJECT_ID,
     });
 
-    expect(result.status).toBe(SimplifiedRunStatus.FAILED);
+    expect(result.status).toBe(BenchmarkStatus.FAILED);
   });
 
   it('sets runStatus to IDLE for workflows with no run found', async () => {
@@ -206,7 +206,7 @@ describe('getBenchmarkStatus', () => {
 
     expect(result.workflows).toHaveLength(2);
     result.workflows.forEach((wf) => {
-      expect(wf.runStatus).toBe(SimplifiedRunStatus.CREATED);
+      expect(wf.runStatus).toBe(BenchmarkStatus.CREATED);
       expect(wf.runId).toBeUndefined();
     });
   });
@@ -228,9 +228,9 @@ describe('getBenchmarkStatus', () => {
     const subWf = result.workflows.find((w) => !w.isOrchestrator);
 
     expect(orchestratorWf?.runId).toBe('fr-orch');
-    expect(orchestratorWf?.runStatus).toBe(SimplifiedRunStatus.SUCCEEDED);
+    expect(orchestratorWf?.runStatus).toBe(BenchmarkStatus.SUCCEEDED);
     expect(subWf?.runId).toBe('fr-sub1');
-    expect(subWf?.runStatus).toBe(SimplifiedRunStatus.RUNNING);
+    expect(subWf?.runStatus).toBe(BenchmarkStatus.RUNNING);
   });
 
   it('uses the single run returned by distinctOn per flowId', async () => {
@@ -259,7 +259,7 @@ describe('getBenchmarkStatus', () => {
 
     expect(result.workflows).toHaveLength(1);
     expect(result.workflows[0].runId).toBe('run-newer-id');
-    expect(result.workflows[0].runStatus).toBe(SimplifiedRunStatus.SUCCEEDED);
+    expect(result.workflows[0].runStatus).toBe(BenchmarkStatus.SUCCEEDED);
   });
 
   it('maps displayName from publishedVersion (falling back to empty string when null)', async () => {
@@ -303,32 +303,32 @@ describe('getBenchmarkStatus', () => {
 
     it('maps PAUSED → RUNNING', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.PAUSED);
-      expect(result.status).toBe(SimplifiedRunStatus.RUNNING);
+      expect(result.status).toBe(BenchmarkStatus.RUNNING);
     });
 
     it('maps SCHEDULED → RUNNING', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.SCHEDULED);
-      expect(result.status).toBe(SimplifiedRunStatus.RUNNING);
+      expect(result.status).toBe(BenchmarkStatus.RUNNING);
     });
 
     it('maps TIMEOUT → FAILED', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.TIMEOUT);
-      expect(result.status).toBe(SimplifiedRunStatus.FAILED);
+      expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps INTERNAL_ERROR → FAILED', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.INTERNAL_ERROR);
-      expect(result.status).toBe(SimplifiedRunStatus.FAILED);
+      expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps IGNORED → FAILED', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.IGNORED);
-      expect(result.status).toBe(SimplifiedRunStatus.FAILED);
+      expect(result.status).toBe(BenchmarkStatus.FAILED);
     });
 
     it('maps STOPPED → SUCCEEDED', async () => {
       const result = await withOrchestratorRun(FlowRunStatus.STOPPED);
-      expect(result.status).toBe(SimplifiedRunStatus.SUCCEEDED);
+      expect(result.status).toBe(BenchmarkStatus.SUCCEEDED);
     });
   });
 });
@@ -383,7 +383,7 @@ describe('listBenchmarks', () => {
     expect(result[0]).toEqual({
       benchmarkId: BENCHMARK_ID,
       provider: 'aws',
-      status: SimplifiedRunStatus.CREATED,
+      status: BenchmarkStatus.CREATED,
     });
   });
 
@@ -404,7 +404,7 @@ describe('listBenchmarks', () => {
 
     const result = await listBenchmarks({ projectId: PROJECT_ID });
 
-    expect(result[0].status).toBe(SimplifiedRunStatus.RUNNING);
+    expect(result[0].status).toBe(BenchmarkStatus.RUNNING);
   });
 
   it('returns SUCCEEDED status when orchestrator run is SUCCEEDED', async () => {
@@ -424,7 +424,7 @@ describe('listBenchmarks', () => {
 
     const result = await listBenchmarks({ projectId: PROJECT_ID });
 
-    expect(result[0].status).toBe(SimplifiedRunStatus.SUCCEEDED);
+    expect(result[0].status).toBe(BenchmarkStatus.SUCCEEDED);
   });
 
   it('returns FAILED status when orchestrator run is FAILED', async () => {
@@ -444,7 +444,7 @@ describe('listBenchmarks', () => {
 
     const result = await listBenchmarks({ projectId: PROJECT_ID });
 
-    expect(result[0].status).toBe(SimplifiedRunStatus.FAILED);
+    expect(result[0].status).toBe(BenchmarkStatus.FAILED);
   });
 
   it('passes provider to find when provider filter is supplied', async () => {
@@ -498,6 +498,6 @@ describe('listBenchmarks', () => {
 
     const result = await listBenchmarks({ projectId: PROJECT_ID });
 
-    expect(result[0].status).toBe(SimplifiedRunStatus.SUCCEEDED);
+    expect(result[0].status).toBe(BenchmarkStatus.SUCCEEDED);
   });
 });

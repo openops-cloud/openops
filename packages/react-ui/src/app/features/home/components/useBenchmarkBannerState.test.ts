@@ -1,4 +1,4 @@
-import { SimplifiedRunStatus } from '@openops/shared';
+import { BenchmarkStatus } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 
@@ -103,7 +103,7 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.RUNNING,
+        status: BenchmarkStatus.RUNNING,
       },
     ]);
 
@@ -121,7 +121,7 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.CREATED,
+        status: BenchmarkStatus.CREATED,
       },
     ]);
 
@@ -139,7 +139,7 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.FAILED,
+        status: BenchmarkStatus.FAILED,
       },
     ]);
 
@@ -157,7 +157,7 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
     ]);
 
@@ -176,12 +176,12 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.RUNNING,
+        status: BenchmarkStatus.RUNNING,
       },
       {
         benchmarkId: 'bm-2',
         provider: 'azure',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
     ]);
 
@@ -200,12 +200,12 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'azure',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-2',
         provider: 'aws',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
     ]);
 
@@ -224,17 +224,17 @@ describe('useBenchmarkBannerState', () => {
       {
         benchmarkId: 'bm-1',
         provider: 'aws',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-2',
         provider: 'aws',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
       {
         benchmarkId: 'bm-3',
         provider: 'azure',
-        status: SimplifiedRunStatus.SUCCEEDED,
+        status: BenchmarkStatus.SUCCEEDED,
       },
     ]);
 

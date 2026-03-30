@@ -6,9 +6,9 @@ import {
 } from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
+  BenchmarkStatus,
   BenchmarkStatusResponse,
   BenchmarkWebhookPayload,
-  SimplifiedRunStatus,
 } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
@@ -34,15 +34,15 @@ function mapStatusToRunPhase(
   data: BenchmarkStatusResponse,
 ): BenchmarkRunPhase | null {
   switch (data.status) {
-    case SimplifiedRunStatus.CREATED:
+    case BenchmarkStatus.CREATED:
       return null;
-    case SimplifiedRunStatus.RUNNING:
+    case BenchmarkStatus.RUNNING:
       return 'running';
-    case SimplifiedRunStatus.FAILED:
+    case BenchmarkStatus.FAILED:
       return 'failed';
-    case SimplifiedRunStatus.SUCCEEDED: {
+    case BenchmarkStatus.SUCCEEDED: {
       const hasFailedSubWorkflow = data.workflows.some(
-        (w) => !w.isOrchestrator && w.runStatus === SimplifiedRunStatus.FAILED,
+        (w) => !w.isOrchestrator && w.runStatus === BenchmarkStatus.FAILED,
       );
       return hasFailedSubWorkflow ? 'succeeded_with_failures' : 'succeeded';
     }
@@ -57,7 +57,7 @@ function getFailedSubWorkflows(
       (w) =>
         !w.isOrchestrator &&
         !w.isCleanup &&
-        w.runStatus === SimplifiedRunStatus.FAILED,
+        w.runStatus === BenchmarkStatus.FAILED,
     )
     .map((w) => ({ displayName: w.displayName, runId: w.runId }));
 }
@@ -160,8 +160,8 @@ export const useBenchmarkRun = (
       }
       total++;
       if (
-        w.runStatus === SimplifiedRunStatus.SUCCEEDED ||
-        w.runStatus === SimplifiedRunStatus.FAILED
+        w.runStatus === BenchmarkStatus.SUCCEEDED ||
+        w.runStatus === BenchmarkStatus.FAILED
       ) {
         completed++;
       }
