@@ -1,8 +1,8 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import {
   BenchmarkCreationResult,
-  BenchmarkStatusResponse,
   BenchmarkStatus,
+  BenchmarkStatusResponse,
 } from '@openops/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
