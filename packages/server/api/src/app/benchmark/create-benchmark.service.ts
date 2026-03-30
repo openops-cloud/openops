@@ -8,23 +8,23 @@ import {
   ErrorCode,
   Folder,
 } from '@openops/shared';
-import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
+import { getConnectionsWithBlockSupport } from '../app-connection/connections-with-block-support';
+import {
+  bulkCreateAndPublishFlows,
+  loadWorkflowTemplate,
+  type WorkflowTemplate,
+} from '../flows/flow/flow-bulk-create';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
 import { createBenchmarkDashboard } from '../openops-analytics/benchmark/benchmark-dashboard-service';
 import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
-import {
-  bulkCreateAndPublishFlows,
-  type WorkflowTemplate,
-} from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import {
   type CategorizedWorkflowPaths,
   resolveWorkflowPathsForSeed,
 } from './catalog-resolver';
-import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
 import { throwValidationError } from './errors';
 
 function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
@@ -135,16 +135,6 @@ export async function deleteFlowsForExistingBenchmark(params: {
     { id: benchmarkId, deletedAt: IsNull() },
     { deletedAt: now },
   );
-}
-
-async function loadWorkflowTemplate(
-  filePath: string,
-): Promise<WorkflowTemplate> {
-  const content = await fs.readFile(filePath, 'utf-8');
-  const parsed = JSON.parse(content) as {
-    template: WorkflowTemplate['template'];
-  };
-  return { template: parsed.template };
 }
 
 type CategorizedWorkflowTemplates = {

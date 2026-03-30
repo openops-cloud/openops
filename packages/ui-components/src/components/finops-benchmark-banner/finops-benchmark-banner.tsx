@@ -1,3 +1,4 @@
+import { BenchmarkProviders } from '@openops/shared';
 import { cva } from 'class-variance-authority';
 import { t } from 'i18next';
 import { LucideBarChart2, Sparkles } from 'lucide-react';
@@ -21,23 +22,23 @@ const finOpsActionsVariants = cva('flex shrink-0 items-center', {
   },
 });
 
-const PROVIDER_LABELS: Record<string, string> = {
-  aws: 'AWS',
-  azure: 'Azure',
+const PROVIDER_LABELS: Record<BenchmarkProviders, string> = {
+  [BenchmarkProviders.AWS]: 'AWS',
+  [BenchmarkProviders.AZURE]: 'Azure',
 };
 
 type FinOpsBenchmarkBannerProps = {
   variation?: 'default' | 'report';
-  provider?: 'aws' | 'azure';
+  providers?: BenchmarkProviders[];
   onActionClick?: () => void;
-  onViewReportClick?: () => void;
+  onViewReportClick?: (provider: BenchmarkProviders) => void;
   className?: string;
   disabled?: boolean;
 };
 
 const FinOpsBenchmarkBanner = ({
   variation = 'default',
-  provider = 'aws',
+  providers = [BenchmarkProviders.AWS],
   onActionClick,
   onViewReportClick,
   className,
@@ -45,16 +46,18 @@ const FinOpsBenchmarkBanner = ({
 }: FinOpsBenchmarkBannerProps) => {
   const permissionMessage = usePermissionMessage();
   const disabledTooltip = disabled ? permissionMessage : undefined;
-  const providerLabel = PROVIDER_LABELS[provider];
 
   const content =
     variation === 'report'
       ? {
           title: t('FinOps Benchmark'),
           description:
-            t('Your') + ` ${providerLabel} ` + t('benchmark report is ready.'),
+            providers.length > 1
+              ? t('Your benchmark reports are ready.')
+              : t('Your') +
+                ` ${PROVIDER_LABELS[providers[0]]} ` +
+                t('benchmark report is ready.'),
           actionLabel: t('Re-run a Benchmark'),
-          reportLabel: t('See') + ` ${providerLabel} ` + t('Benchmark Report'),
         }
       : {
           title: t('FinOps Benchmark'),
@@ -75,22 +78,25 @@ const FinOpsBenchmarkBanner = ({
         </p>
       </div>
       <div className={finOpsActionsVariants({ variation })}>
-        {variation === 'report' && (
-          <TooltipWrapper tooltipText={disabledTooltip}>
-            <span className={cn({ 'cursor-not-allowed': disabled })}>
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={disabled}
-                className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline disabled:pointer-events-none disabled:opacity-50"
-                onClick={onViewReportClick}
-              >
-                <LucideBarChart2 className="size-[18px]" />
-                {content.reportLabel}
-              </Button>
-            </span>
-          </TooltipWrapper>
-        )}
+        {variation === 'report' &&
+          providers.map((provider) => (
+            <TooltipWrapper key={provider} tooltipText={disabledTooltip}>
+              <span className={cn({ 'cursor-not-allowed': disabled })}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={disabled}
+                  className="h-auto gap-1 px-0 py-0 text-sm font-bold leading-5 text-primary-200 hover:bg-transparent hover:underline disabled:pointer-events-none disabled:opacity-50"
+                  onClick={() => onViewReportClick?.(provider)}
+                >
+                  <LucideBarChart2 className="size-[18px]" />
+                  {t('See') +
+                    ` ${PROVIDER_LABELS[provider]} ` +
+                    t('Benchmark Report')}
+                </Button>
+              </span>
+            </TooltipWrapper>
+          ))}
         <TooltipWrapper tooltipText={disabledTooltip}>
           <span className={cn({ 'cursor-not-allowed': disabled })}>
             <Button

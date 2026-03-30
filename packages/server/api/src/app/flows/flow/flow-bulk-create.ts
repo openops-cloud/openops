@@ -7,8 +7,19 @@ import {
   flowHelper,
   openOpsId,
 } from '@openops/shared';
+import fs from 'node:fs/promises';
 import { EntityManager } from 'typeorm';
-import { flowRepo } from '../flows/flow/flow.repo';
+import { flowRepo } from './flow.repo';
+
+export async function loadWorkflowTemplate(
+  filePath: string,
+): Promise<WorkflowTemplate> {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const parsed = JSON.parse(content) as {
+    template: WorkflowTemplate['template'];
+  };
+  return { template: parsed.template };
+}
 
 export type WorkflowTemplate = {
   template: {

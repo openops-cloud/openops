@@ -1,3 +1,4 @@
+import { BenchmarkProviders } from '@openops/shared';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
@@ -31,14 +32,21 @@ export const Default: Story = {};
 export const AwsReport: Story = {
   args: {
     variation: 'report',
-    provider: 'aws',
+    providers: [BenchmarkProviders.AWS],
   },
 };
 
 export const AzureReport: Story = {
   args: {
     variation: 'report',
-    provider: 'azure',
+    providers: [BenchmarkProviders.AZURE],
+  },
+};
+
+export const MultiProviderReport: Story = {
+  args: {
+    variation: 'report',
+    providers: [BenchmarkProviders.AWS, BenchmarkProviders.AZURE],
   },
 };
 
@@ -51,7 +59,7 @@ export const DisabledDefault: Story = {
 export const DisabledReport: Story = {
   args: {
     variation: 'report',
-    provider: 'aws',
+    providers: [BenchmarkProviders.AWS],
     disabled: true,
   },
 };

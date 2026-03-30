@@ -7,7 +7,7 @@ import { useShowBenchmarkBanner } from './useShowBenchmarkBanner';
 type BenchmarkBannerState = {
   isEnabled: boolean;
   variation: 'default' | 'report';
-  provider?: BenchmarkProviders;
+  providers: BenchmarkProviders[];
 };
 
 export const useBenchmarkBannerState = (): BenchmarkBannerState => {
@@ -19,13 +19,22 @@ export const useBenchmarkBannerState = (): BenchmarkBannerState => {
     enabled: isEnabled,
   });
 
-  const succeededBenchmark = benchmarks?.find(
-    (b) => b.status === BenchmarkStatus.SUCCEEDED,
-  );
+  const succeededProviders =
+    benchmarks?.reduce<BenchmarkProviders[]>((providers, benchmark) => {
+      if (benchmark.status !== BenchmarkStatus.SUCCEEDED) {
+        return providers;
+      }
+
+      if (!providers.includes(benchmark.provider)) {
+        providers.push(benchmark.provider);
+      }
+
+      return providers;
+    }, []) ?? [];
 
   return {
     isEnabled,
-    variation: succeededBenchmark ? 'report' : 'default',
-    provider: succeededBenchmark?.provider,
+    variation: succeededProviders.length > 0 ? 'report' : 'default',
+    providers: succeededProviders,
   };
 };
