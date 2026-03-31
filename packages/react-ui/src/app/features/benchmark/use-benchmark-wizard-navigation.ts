@@ -17,7 +17,7 @@ type StepHistoryEntry = {
   selections: string[];
 };
 
-const buildBenchmarkConfiguration = (
+const buildWizardState = (
   history: StepHistoryEntry[],
 ): Record<string, string[]> =>
   history.reduce<Record<string, string[]>>((acc, entry) => {
@@ -115,7 +115,7 @@ export const useBenchmarkWizardNavigation = (
       selections: currentSelections,
     };
     const newHistory = [...stepHistory, committed];
-    const wizardState = buildBenchmarkConfiguration(newHistory);
+    const wizardState = buildWizardState(newHistory);
 
     if (currentStepResponse.nextStep === null) {
       setStepHistory(newHistory);

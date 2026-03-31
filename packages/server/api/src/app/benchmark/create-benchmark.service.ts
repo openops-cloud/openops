@@ -27,10 +27,10 @@ import {
 } from './catalog-resolver';
 import { throwValidationError } from './errors';
 
-function validateBenchmarkConfiguration(config: WizardState): void {
-  const connection = config.connection ?? [];
-  const workflows = config.workflows ?? [];
-  const regions = config.regions ?? [];
+function validateWizardState(wizardState: WizardState): void {
+  const connection = wizardState.connection ?? [];
+  const workflows = wizardState.workflows ?? [];
+  const regions = wizardState.regions ?? [];
   if (connection.length === 0) {
     throwValidationError(
       'You must select at least one connection to create a benchmark',
@@ -263,7 +263,7 @@ export async function createBenchmark(params: {
 }): Promise<BenchmarkCreationResult> {
   const { provider, projectId, userId, wizardState } = params;
 
-  validateBenchmarkConfiguration(wizardState);
+  validateWizardState(wizardState);
 
   const workflowIds = wizardState.workflows ?? [];
   const connectionId = wizardState.connection[0];
