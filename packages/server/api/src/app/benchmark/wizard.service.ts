@@ -2,17 +2,14 @@ import {
   BenchmarkWizardOption,
   BenchmarkWizardRequest,
   BenchmarkWizardStepResponse,
+  ProviderAdapter,
+  StaticOptionValue,
+  WizardConfig,
+  WizardConfigStep,
+  WizardContext,
 } from '@openops/shared';
 import { throwValidationError } from './errors';
-import {
-  getProvider,
-  type ProviderAdapter,
-  type StaticOptionValue,
-  type WizardConfig,
-  type WizardConfigStep,
-  type WizardContext,
-} from './provider-adapter';
-import './register-providers';
+import { getProvider } from './providers/providers-registry';
 
 function getStepProgress(
   config: WizardConfig,

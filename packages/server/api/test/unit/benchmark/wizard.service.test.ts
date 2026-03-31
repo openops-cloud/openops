@@ -1,7 +1,5 @@
-import type { ProviderAdapter } from '../../../src/app/benchmark/provider-adapter';
+import type { ProviderAdapter } from '@openops/shared';
 import { resolveWizardNavigation } from '../../../src/app/benchmark/wizard.service';
-
-jest.mock('../../../src/app/benchmark/register-providers', () => ({}));
 
 const mockResolveOptions = jest.fn().mockResolvedValue([]);
 const mockEvaluateCondition = jest.fn().mockResolvedValue(true);
@@ -66,14 +64,15 @@ adapters.set('test', mockProviderAdapter);
 
 const mockGetProvider = jest.fn((provider: string): ProviderAdapter => {
   const adapter = adapters.get(provider);
+
   if (!adapter) {
     throw new Error(`Provider not found: ${provider}`);
   }
+
   return adapter;
 });
 
-jest.mock('../../../src/app/benchmark/provider-adapter', () => ({
-  ...jest.requireActual('../../../src/app/benchmark/provider-adapter'),
+jest.mock('../../../src/app/benchmark/providers/providers-registry', () => ({
   getProvider: (p: string): ProviderAdapter => mockGetProvider(p),
 }));
 
