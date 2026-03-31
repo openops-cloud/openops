@@ -22,7 +22,7 @@ const SkeletonField = ({
         data-testid="skeleton-field"
         className={cn(
           'w-full h-full rounded-xl',
-          'bg-gradient-to-r from-muted to-border',
+          'animate-shimmer bg-gradient-to-l from-muted via-border to-muted bg-[length:200%_100%]',
           className,
         )}
       />

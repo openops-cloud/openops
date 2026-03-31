@@ -16,6 +16,7 @@ const meta: Meta<typeof SkeletonField> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    chromatic: { pauseAnimationAtEnd: true },
   },
   decorators: [ThemeAwareDecorator],
 };
