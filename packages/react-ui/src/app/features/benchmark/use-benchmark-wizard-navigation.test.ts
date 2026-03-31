@@ -3,6 +3,7 @@ import { BenchmarkWizardStepResponse } from '@openops/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { benchmarkApi } from './benchmark-api';
 import { useBenchmarkWizardNavigation } from './use-benchmark-wizard-navigation';
 
@@ -588,6 +589,11 @@ describe('useBenchmarkWizardNavigation', () => {
       mockGetWizardStep.mockResolvedValue(lastStep);
       mockCreateBenchmark.mockResolvedValue(benchmarkResult);
 
+      const mockInvalidateQueries = jest.fn();
+      mockUseQueryClient.mockReturnValue({
+        invalidateQueries: mockInvalidateQueries,
+      });
+
       const { result } = renderHook(() =>
         useBenchmarkWizardNavigation(connectedProviders),
       );
@@ -603,6 +609,12 @@ describe('useBenchmarkWizardNavigation', () => {
       });
       expect(result.current.wizardPhase).toBe('benchmark-ready');
       expect(result.current.benchmarkCreateResult).toEqual(benchmarkResult);
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: [QueryKeys.foldersFlows],
+      });
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: [QueryKeys.flags],
+      });
     });
 
     it('should call onBenchmarkCreated callback with the result', async () => {
