@@ -161,7 +161,6 @@ describe('Benchmark wizard API', () => {
               steps: expect.arrayContaining([expect.anything()]),
             }),
             resolveOptions: expect.any(Function),
-            evaluateCondition: expect.any(Function),
           }),
           {
             currentStep: undefined,
@@ -197,7 +196,6 @@ describe('Benchmark wizard API', () => {
               steps: expect.arrayContaining([expect.anything()]),
             }),
             resolveOptions: expect.any(Function),
-            evaluateCondition: expect.any(Function),
           }),
           {
             currentStep: 'connection',
