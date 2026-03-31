@@ -155,6 +155,14 @@ describe('Benchmark wizard API', () => {
         );
         expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
           provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+            evaluateCondition: expect.any(Function),
+          }),
           {
             currentStep: undefined,
             wizardState: undefined,
@@ -183,6 +191,14 @@ describe('Benchmark wizard API', () => {
         expect(response?.json()).toEqual(mockWizardStep);
         expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
           provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+            evaluateCondition: expect.any(Function),
+          }),
           {
             currentStep: 'connection',
             wizardState: { connection: ['conn-1'] },
