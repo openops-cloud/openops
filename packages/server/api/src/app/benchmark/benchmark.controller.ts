@@ -18,6 +18,7 @@ import { getProjectScopedRoutePolicy } from '../core/security/route-policies/rou
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
+import { getProvider } from './providers/providers-registry';
 import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
@@ -27,8 +28,12 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
+      const provider = request.params.provider;
+      const providerAdapter = getProvider(provider);
+
       const step = await resolveWizardNavigation(
-        request.params.provider,
+        provider,
+        providerAdapter,
         {
           currentStep: request.body.currentStep,
           wizardState: request.body.wizardState,

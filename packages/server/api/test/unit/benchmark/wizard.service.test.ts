@@ -62,7 +62,7 @@ const mockProviderAdapter: ProviderAdapter = {
 const adapters = new Map<string, ProviderAdapter>();
 adapters.set('test', mockProviderAdapter);
 
-const mockGetProvider = jest.fn((provider: string): ProviderAdapter => {
+const getProvider = (provider: string): ProviderAdapter => {
   const adapter = adapters.get(provider);
 
   if (!adapter) {
@@ -70,11 +70,7 @@ const mockGetProvider = jest.fn((provider: string): ProviderAdapter => {
   }
 
   return adapter;
-});
-
-jest.mock('../../../src/app/benchmark/providers/providers-registry', () => ({
-  getProvider: (p: string): ProviderAdapter => mockGetProvider(p),
-}));
+};
 
 const TEST_PROJECT_ID = 'test-project-id';
 
@@ -88,6 +84,7 @@ describe('resolveWizardNavigation', () => {
   it('returns last_step with nextStep null when wizard complete', async () => {
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'last_step' },
       TEST_PROJECT_ID,
     );
@@ -97,9 +94,13 @@ describe('resolveWizardNavigation', () => {
   });
 
   it('uses provider adapter config and returns first step with dynamic options', async () => {
-    const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
+    const result = await resolveWizardNavigation(
+      'test',
+      getProvider('test'),
+      {},
+      TEST_PROJECT_ID,
+    );
 
-    expect(mockGetProvider).toHaveBeenCalledWith('test');
     expect(result.currentStep).toBe('step1');
     expect(result.title).toContain('first');
     expect(result.selectionType).toBe('single');
@@ -117,6 +118,7 @@ describe('resolveWizardNavigation', () => {
   it('returns step3 after step2 with static options', async () => {
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'step2' },
       TEST_PROJECT_ID,
     );
@@ -129,6 +131,7 @@ describe('resolveWizardNavigation', () => {
   it('returns last_step after step3 with static options', async () => {
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'step3' },
       TEST_PROJECT_ID,
     );
@@ -139,7 +142,12 @@ describe('resolveWizardNavigation', () => {
   });
 
   it('returns stepIndex 1 and totalSteps 4 for first step', async () => {
-    const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
+    const result = await resolveWizardNavigation(
+      'test',
+      getProvider('test'),
+      {},
+      TEST_PROJECT_ID,
+    );
     expect(result.stepIndex).toBe(1);
     expect(result.totalSteps).toBe(4);
   });
@@ -147,6 +155,7 @@ describe('resolveWizardNavigation', () => {
   it('returns stepIndex 2 and totalSteps 4 for step2 (after step1)', async () => {
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'step1' },
       TEST_PROJECT_ID,
     );
@@ -156,17 +165,11 @@ describe('resolveWizardNavigation', () => {
     expect(result.totalSteps).toBe(4);
   });
 
-  it('throws when provider is not found', async () => {
-    await expect(
-      resolveWizardNavigation('unknown', {}, TEST_PROJECT_ID),
-    ).rejects.toThrow('Provider not found: unknown');
-    expect(mockGetProvider).toHaveBeenCalledWith('unknown');
-  });
-
   it('throws for unknown currentStep', async () => {
     await expect(
       resolveWizardNavigation(
         'test',
+        getProvider('test'),
         { currentStep: 'unknown_step' },
         TEST_PROJECT_ID,
       ),
@@ -178,6 +181,7 @@ describe('resolveWizardNavigation', () => {
 
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'step1' },
       TEST_PROJECT_ID,
     );
@@ -198,6 +202,7 @@ describe('resolveWizardNavigation', () => {
 
     const result = await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       { currentStep: 'step1' },
       TEST_PROJECT_ID,
     );
@@ -215,6 +220,7 @@ describe('resolveWizardNavigation', () => {
 
     await resolveWizardNavigation(
       'test',
+      getProvider('test'),
       {
         currentStep: 'step1',
         wizardState: { connection: ['conn-1'] },
@@ -262,6 +268,7 @@ describe('resolveWizardNavigation', () => {
       try {
         const result = await resolveWizardNavigation(
           'selectall',
+          getProvider('selectall'),
           {},
           TEST_PROJECT_ID,
         );
@@ -295,6 +302,7 @@ describe('resolveWizardNavigation', () => {
       try {
         const result = await resolveWizardNavigation(
           'selectall-empty',
+          getProvider('selectall-empty'),
           {},
           TEST_PROJECT_ID,
         );
@@ -305,7 +313,12 @@ describe('resolveWizardNavigation', () => {
     });
 
     it('returns preselectedOptions as undefined when selectAll is not set', async () => {
-      const result = await resolveWizardNavigation('test', {}, TEST_PROJECT_ID);
+      const result = await resolveWizardNavigation(
+        'test',
+        getProvider('test'),
+        {},
+        TEST_PROJECT_ID,
+      );
       expect(result.preselectedOptions).toBeUndefined();
     });
 
@@ -336,7 +349,12 @@ describe('resolveWizardNavigation', () => {
 
       try {
         await expect(
-          resolveWizardNavigation('selectall-single', {}, TEST_PROJECT_ID),
+          resolveWizardNavigation(
+            'selectall-single',
+            getProvider('selectall-single'),
+            {},
+            TEST_PROJECT_ID,
+          ),
         ).rejects.toThrow();
       } finally {
         adapters.delete('selectall-single');
@@ -393,6 +411,7 @@ describe('resolveWizardNavigation', () => {
       await expect(
         resolveWizardNavigation(
           'misconfig',
+          getProvider('misconfig'),
           { currentStep: 'a' },
           TEST_PROJECT_ID,
         ),
@@ -451,6 +470,7 @@ describe('resolveWizardNavigation', () => {
       await expect(
         resolveWizardNavigation(
           'no-condition-fn',
+          getProvider('no-condition-fn'),
           { currentStep: 'a' },
           TEST_PROJECT_ID,
         ),

@@ -9,7 +9,6 @@ import {
   WizardStepResponse,
 } from '@openops/shared';
 import { throwValidationError } from './errors';
-import { getProvider } from './providers/providers-registry';
 
 function getStepProgress(
   config: WizardConfig,
@@ -132,10 +131,10 @@ async function resolveOptions(
 
 export async function resolveWizardNavigation(
   provider: string,
+  providerAdapter: ProviderAdapter,
   request: WizardRequest,
   projectId: string,
 ): Promise<WizardStepResponse> {
-  const providerAdapter = getProvider(provider);
   const config = providerAdapter.config;
 
   const context: WizardContext = {
