@@ -27,6 +27,19 @@ export async function getTableIdByTableName(
   return table.id;
 }
 
+export async function getTableById(
+  tableId: number,
+  tablesServerContext: TablesServerContext,
+): Promise<OpenOpsTable | undefined> {
+  const tokenOrResolver = await resolveTokenProvider(tablesServerContext);
+  const authenticationHeader = createAxiosHeaders(tokenOrResolver);
+  const tables = await getTables(
+    tablesServerContext.tablesDatabaseId,
+    authenticationHeader,
+  );
+  return tables.find((t) => t.id === tableId);
+}
+
 export async function getTableByName(
   tableName: string,
   tablesServerContext: TablesServerContext,
