@@ -1,8 +1,11 @@
-import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
+import {
+  AppConnectionStatus,
+  BenchmarkWizardOption,
+  WizardContext,
+} from '@openops/shared';
 import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
 import { getAuthProviderMetadata } from '../app-connection/connection-providers-resolver';
 import { throwValidationError } from './errors';
-import type { WizardContext } from './provider-adapter';
 
 export async function getAuthProviderLogoUrl(
   authProviderKey: string,

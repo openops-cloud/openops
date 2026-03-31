@@ -3,6 +3,7 @@ import {
   BenchmarkWizardOption,
   CustomAuthConnectionValue,
   REGION_IMAGE_LOGO_URL,
+  WizardContext,
 } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
 import {
@@ -10,7 +11,6 @@ import {
   listConnections,
 } from '../../common-resolvers';
 import { throwValidationError } from '../../errors';
-import type { WizardContext } from '../../provider-adapter';
 
 type AwsAuthProps = {
   roles?: Array<{ assumeRoleArn: string; accountName: string }>;
