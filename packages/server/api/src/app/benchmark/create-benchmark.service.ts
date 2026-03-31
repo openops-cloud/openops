@@ -1,12 +1,12 @@
 import {
   ApplicationError,
-  type BenchmarkConfiguration,
   type BenchmarkCreationResult,
   BenchmarkProviders,
   type BenchmarkWorkflowBase,
   ContentType,
   ErrorCode,
   Folder,
+  type WizardState,
 } from '@openops/shared';
 import { IsNull } from 'typeorm';
 import { getConnectionsWithBlockSupport } from '../app-connection/connections-with-block-support';
@@ -27,7 +27,7 @@ import {
 } from './catalog-resolver';
 import { throwValidationError } from './errors';
 
-function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
+function validateBenchmarkConfiguration(config: WizardState): void {
   const connection = config.connection ?? [];
   const workflows = config.workflows ?? [];
   const regions = config.regions ?? [];
@@ -259,14 +259,14 @@ export async function createBenchmark(params: {
   provider: BenchmarkProviders;
   projectId: string;
   userId: string;
-  benchmarkConfiguration: BenchmarkConfiguration;
+  wizardState: WizardState;
 }): Promise<BenchmarkCreationResult> {
-  const { provider, projectId, userId, benchmarkConfiguration } = params;
+  const { provider, projectId, userId, wizardState } = params;
 
-  validateBenchmarkConfiguration(benchmarkConfiguration);
+  validateBenchmarkConfiguration(wizardState);
 
-  const workflowIds = benchmarkConfiguration.workflows ?? [];
-  const connectionId = benchmarkConfiguration.connection[0];
+  const workflowIds = wizardState.workflows ?? [];
+  const connectionId = wizardState.connection[0];
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
@@ -291,7 +291,7 @@ export async function createBenchmark(params: {
   let result: BenchmarkCreationResult;
   try {
     const { benchmark, payload } = await attachFlowsToBenchmark({
-      benchmarkConfiguration,
+      wizardState,
       workflows,
       projectId,
       provider,

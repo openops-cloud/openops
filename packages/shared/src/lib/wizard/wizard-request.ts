@@ -1,15 +1,15 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const BenchmarkConfiguration = Type.Record(
+export const WizardState = Type.Record(
   Type.String(),
   Type.Array(Type.String()),
 );
 
-export type BenchmarkConfiguration = Static<typeof BenchmarkConfiguration>;
+export type WizardState = Static<typeof WizardState>;
 
-export const BenchmarkWizardRequest = Type.Object({
+export const WizardRequest = Type.Object({
   currentStep: Type.Optional(Type.String()),
-  benchmarkConfiguration: Type.Optional(BenchmarkConfiguration),
+  wizardState: Type.Optional(WizardState),
 });
 
-export type BenchmarkWizardRequest = Static<typeof BenchmarkWizardRequest>;
+export type WizardRequest = Static<typeof WizardRequest>;

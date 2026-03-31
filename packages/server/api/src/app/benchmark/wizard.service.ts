@@ -1,12 +1,12 @@
 import {
-  BenchmarkWizardOption,
-  BenchmarkWizardRequest,
-  BenchmarkWizardStepResponse,
   ProviderAdapter,
   StaticOptionValue,
   WizardConfig,
   WizardConfigStep,
   WizardContext,
+  WizardOption,
+  WizardRequest,
+  WizardStepResponse,
 } from '@openops/shared';
 import { throwValidationError } from './errors';
 import { getProvider } from './providers/providers-registry';
@@ -100,9 +100,7 @@ async function computeWizardStepResponse(
   return { stepToShow, nextStep };
 }
 
-function staticValuesToOptions(
-  values: StaticOptionValue[],
-): BenchmarkWizardOption[] {
+function staticValuesToOptions(values: StaticOptionValue[]): WizardOption[] {
   return values.map((v) => ({
     id: v.id,
     displayName: v.displayName,
@@ -113,9 +111,9 @@ function staticValuesToOptions(
 async function resolveOptions(
   providerAdapter: ProviderAdapter,
   step: WizardConfigStep,
-  request: BenchmarkWizardRequest,
+  request: WizardRequest,
   projectId: string,
-): Promise<BenchmarkWizardOption[]> {
+): Promise<WizardOption[]> {
   const optionsSource =
     step.conditional?.onSuccess?.optionsSource ?? step.optionsSource;
   if (!optionsSource) {
@@ -125,7 +123,7 @@ async function resolveOptions(
     return staticValuesToOptions(optionsSource.values);
   }
   const context = {
-    benchmarkConfiguration: request.benchmarkConfiguration,
+    wizardState: request.wizardState,
     projectId,
     provider: providerAdapter.config.provider,
   };
@@ -134,14 +132,14 @@ async function resolveOptions(
 
 export async function resolveWizardNavigation(
   provider: string,
-  request: BenchmarkWizardRequest,
+  request: WizardRequest,
   projectId: string,
-): Promise<BenchmarkWizardStepResponse> {
+): Promise<WizardStepResponse> {
   const providerAdapter = getProvider(provider);
   const config = providerAdapter.config;
 
   const context: WizardContext = {
-    benchmarkConfiguration: request.benchmarkConfiguration,
+    wizardState: request.wizardState,
     projectId,
     provider,
   };

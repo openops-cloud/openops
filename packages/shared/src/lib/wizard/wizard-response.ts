@@ -1,15 +1,15 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const BenchmarkWizardOption = Type.Object({
+export const WizardOption = Type.Object({
   id: Type.String(),
   displayName: Type.String(),
   imageLogoUrl: Type.Optional(Type.String()),
   metadata: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
 });
 
-export type BenchmarkWizardOption = Static<typeof BenchmarkWizardOption>;
+export type WizardOption = Static<typeof WizardOption>;
 
-export const BenchmarkWizardStepResponse = Type.Object({
+export const WizardStepResponse = Type.Object({
   currentStep: Type.String(),
   title: Type.String(),
   description: Type.Optional(Type.String()),
@@ -18,12 +18,10 @@ export const BenchmarkWizardStepResponse = Type.Object({
     Type.Literal('single'),
     Type.Literal('multi-select'),
   ]),
-  options: Type.Array(BenchmarkWizardOption),
+  options: Type.Array(WizardOption),
   stepIndex: Type.Number(),
   totalSteps: Type.Number(),
   preselectedOptions: Type.Optional(Type.Array(Type.String())),
 });
 
-export type BenchmarkWizardStepResponse = Static<
-  typeof BenchmarkWizardStepResponse
->;
+export type WizardStepResponse = Static<typeof WizardStepResponse>;

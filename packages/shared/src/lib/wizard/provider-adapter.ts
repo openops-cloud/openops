@@ -1,8 +1,8 @@
-import { BenchmarkConfiguration } from './wizard-request';
-import { BenchmarkWizardOption } from './wizard-response';
+import { WizardState } from './wizard-request';
+import { WizardOption } from './wizard-response';
 
 export type WizardContext = {
-  benchmarkConfiguration?: BenchmarkConfiguration;
+  wizardState?: WizardState;
   projectId: string;
   provider: string;
 };
@@ -48,7 +48,7 @@ export type ProviderAdapter = {
   resolveOptions(
     method: string,
     context: WizardContext,
-  ): Promise<BenchmarkWizardOption[]>;
+  ): Promise<WizardOption[]>;
   evaluateCondition?: (
     condition: string,
     context: WizardContext,

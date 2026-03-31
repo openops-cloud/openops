@@ -210,14 +210,14 @@ describe('resolveWizardNavigation', () => {
     );
   });
 
-  it('passes benchmarkConfiguration in context to evaluateCondition', async () => {
+  it('passes wizardState in context to evaluateCondition', async () => {
     mockEvaluateCondition.mockResolvedValue(true);
 
     await resolveWizardNavigation(
       'test',
       {
         currentStep: 'step1',
-        benchmarkConfiguration: { connection: ['conn-1'] },
+        wizardState: { connection: ['conn-1'] },
       },
       TEST_PROJECT_ID,
     );
@@ -225,7 +225,7 @@ describe('resolveWizardNavigation', () => {
     expect(mockEvaluateCondition).toHaveBeenCalledWith(
       'step1.supportsMulti',
       expect.objectContaining({
-        benchmarkConfiguration: { connection: ['conn-1'] },
+        wizardState: { connection: ['conn-1'] },
         projectId: TEST_PROJECT_ID,
         provider: 'test',
       }),
