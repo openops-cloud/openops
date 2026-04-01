@@ -44,7 +44,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ArrowLeft, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import {
   buildConnectionSchema,
@@ -125,11 +125,11 @@ const CreateEditConnectionDialogContent = ({
   const [errorMessage, setErrorMessage] = useState('');
   const queryClient = useQueryClient();
 
-  const formValues = form.watch();
-  const hasRoles =
-    authProviderKey === 'AWS' &&
-    formValues?.request?.value?.props?.roles &&
-    formValues.request.value.props.roles.length > 0;
+  const roles = useWatch({
+    control: form.control,
+    name: 'request.value.props.roles',
+  });
+  const hasRoles = authProviderKey === 'AWS' && roles && roles.length > 0;
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
