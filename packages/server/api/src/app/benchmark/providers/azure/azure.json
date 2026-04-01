@@ -36,18 +36,28 @@
         "type": "static",
         "values": [
           {
+            "id": "Azure Benchmark - Advisor Idle App Service Plan",
+            "displayName": "Advisor Idle App Service Plan",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Advisor Idle VMs",
+            "displayName": "Advisor Idle VMs",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
             "id": "Azure Benchmark - Elastic Pool Storage",
             "displayName": "Elastic Pool Storage",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "Azure Benchmark - Elastic Pools",
-            "displayName": "Elastic Pools",
+            "id": "Azure Benchmark - Idle VMs",
+            "displayName": "Idle VMs",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "Azure Benchmark - Idle VMs",
-            "displayName": "Idle VMs",
+            "id": "Azure Benchmark - Elastic Pools",
+            "displayName": "Elastic Pools",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
