@@ -46,6 +46,7 @@ export async function getCredentialsFromAuth(
     auth.defaultRegion,
     auth.assumeRoleArn,
     auth.assumeRoleExternalId,
+    auth.endpoint,
   );
 
   return {
@@ -95,6 +96,7 @@ export async function getCredentialsListFromAuth(
         auth.defaultRegion,
         role.assumeRoleArn,
         role.assumeRoleExternalId,
+        auth.endpoint,
       ),
     );
 
@@ -225,6 +227,7 @@ async function validateRoleAssumptions(
         auth.defaultRegion,
         role.assumeRoleArn,
         role.assumeRoleExternalId,
+        auth.endpoint,
       );
     } catch (error) {
       const errorMessage =

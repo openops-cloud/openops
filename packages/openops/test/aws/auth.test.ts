@@ -228,6 +228,7 @@ describe('AWS Auth Validation', () => {
         'us-east-1',
         'arn:aws:iam::111111111111:role/ProductionRole',
         undefined,
+        undefined,
       );
       expect(mockAssumeRole).toHaveBeenNthCalledWith(
         2,
@@ -236,6 +237,41 @@ describe('AWS Auth Validation', () => {
         'us-east-1',
         'arn:aws:iam::222222222222:role/StagingRole',
         'external123',
+        undefined,
+      );
+    });
+
+    test('should pass endpoint to assumeRole when provided', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockResolvedValue({
+        AccessKeyId: 'ASIATEMP',
+        SecretAccessKey: 'tempSecret',
+        SessionToken: 'tempToken',
+      });
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          endpoint: 'http://localhost:4566',
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
+              accountName: 'Production',
+            },
+          ],
+        } as any,
+      });
+
+      expect(result).toEqual({ valid: true });
+      expect(mockAssumeRole).toHaveBeenCalledWith(
+        'AKIAIOSFODNN7EXAMPLE',
+        'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        'us-east-1',
+        'arn:aws:iam::111111111111:role/ProductionRole',
+        undefined,
+        'http://localhost:4566',
       );
     });
 
@@ -338,6 +374,7 @@ describe('AWS Auth Validation', () => {
         '',
         'us-east-1',
         'arn:aws:iam::111111111111:role/ProductionRole',
+        undefined,
         undefined,
       );
     });
