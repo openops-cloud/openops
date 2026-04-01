@@ -2,7 +2,7 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
-import { assumeRole } from './sts-common';
+import { assumeRole, getAccountId } from './sts-common';
 
 const isImplicitRoleEnabled = system.getBoolean(
   SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
@@ -166,6 +166,77 @@ export function getAwsAccountsSingleSelectDropdown() {
   return createAwsAccountsDropdown(false);
 }
 
+async function validateRequiredFields(
+  auth: any,
+): Promise<{ valid: true } | { valid: false; error: string }> {
+  if (!auth.defaultRegion) {
+    return { valid: false, error: 'Default region is required' };
+  }
+
+  const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
+  if (!hasCredentials && !isImplicitRoleEnabled) {
+    return {
+      valid: false,
+      error: 'Access Key ID and Secret Access Key are required',
+    };
+  }
+
+  return { valid: true };
+}
+
+async function validateBaseCredentials(
+  auth: any,
+): Promise<{ valid: true } | { valid: false; error: string }> {
+  try {
+    const credentials = {
+      accessKeyId: auth.accessKeyId || '',
+      secretAccessKey: auth.secretAccessKey || '',
+      endpoint: auth.endpoint,
+    };
+    await getAccountId(credentials, auth.defaultRegion);
+    return { valid: true };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    return {
+      valid: false,
+      error: `Base credentials validation failed: ${errorMessage}`,
+    };
+  }
+}
+
+async function validateRoleAssumptions(
+  auth: any,
+): Promise<{ valid: true } | { valid: false; error: string }> {
+  if (!auth.roles || auth.roles.length === 0) {
+    return { valid: true };
+  }
+
+  const accessKeyId = auth.accessKeyId || '';
+  const secretAccessKey = auth.secretAccessKey || '';
+
+  for (const role of auth.roles as Role[]) {
+    try {
+      await assumeRole(
+        accessKeyId,
+        secretAccessKey,
+        auth.defaultRegion,
+        role.assumeRoleArn,
+        role.assumeRoleExternalId,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      return {
+        valid: false,
+        error: `Role validation failed for ARN "${role.assumeRoleArn}" (${role.accountName}): ${errorMessage}`,
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
 export const amazonAuth = BlockAuth.CustomAuth({
   authProviderKey: 'AWS',
   authProviderDisplayName: 'AWS',
@@ -229,16 +300,19 @@ For large or complex setups, enhanced features are available, including:
   },
   required: true,
   validate: async ({ auth }) => {
-    if (!auth.defaultRegion) {
-      return { valid: false, error: 'Default region is required' };
+    const fieldValidation = await validateRequiredFields(auth);
+    if (!fieldValidation.valid) {
+      return fieldValidation;
     }
 
-    if (!auth.accessKeyId && !isImplicitRoleEnabled) {
-      return { valid: false, error: 'Access Key ID is required' };
+    const baseCredentialsValidation = await validateBaseCredentials(auth);
+    if (!baseCredentialsValidation.valid) {
+      return baseCredentialsValidation;
     }
 
-    if (!auth.secretAccessKey && !isImplicitRoleEnabled) {
-      return { valid: false, error: 'Secret Access Key is required' };
+    const roleValidation = await validateRoleAssumptions(auth);
+    if (!roleValidation.valid) {
+      return roleValidation;
     }
 
     return { valid: true };
