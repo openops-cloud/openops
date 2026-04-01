@@ -104,7 +104,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: {
+      wizardState: {
         connection: ['conn-123'],
       },
     });
@@ -159,7 +159,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(result).toHaveLength(2);
@@ -197,7 +197,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(result).toEqual([
@@ -213,7 +213,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-456'] },
+      wizardState: { connection: ['conn-456'] },
     });
 
     expect(mockGetOneOrThrow).toHaveBeenCalledWith({

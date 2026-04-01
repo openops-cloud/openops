@@ -115,7 +115,7 @@ describe('resolveOptions (Azure)', () => {
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(mockGetOneOrThrow).toHaveBeenCalledWith({
@@ -164,7 +164,7 @@ describe('resolveOptions (Azure)', () => {
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
 
     expect(mockGetAuthProviderLogoUrl).toHaveBeenCalledWith('Azure', projectId);
@@ -189,7 +189,7 @@ describe('resolveOptions (Azure)', () => {
     const rejection = resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
     await expect(rejection).rejects.toMatchObject({
       error: { code: ErrorCode.VALIDATION },
@@ -216,7 +216,7 @@ describe('resolveOptions (Azure)', () => {
     const rejection = resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
     await expect(rejection).rejects.toMatchObject({
       error: { code: ErrorCode.VALIDATION },

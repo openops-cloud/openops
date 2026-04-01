@@ -1,5 +1,5 @@
 import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
-import { BenchmarkWizardStepResponse } from '@openops/shared';
+import { WizardStepResponse } from '@openops/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 
@@ -31,8 +31,8 @@ const mockCreateBenchmark = benchmarkApi.createBenchmark as jest.Mock;
 const mockToast = toast as jest.Mock;
 
 const buildStepResponse = (
-  overrides?: Partial<BenchmarkWizardStepResponse>,
-): BenchmarkWizardStepResponse => ({
+  overrides?: Partial<WizardStepResponse>,
+): WizardStepResponse => ({
   currentStep: 'region',
   title: 'Select Region',
   description: 'Choose your cloud region',
@@ -327,7 +327,7 @@ describe('useBenchmarkWizardNavigation', () => {
 
       expect(mockGetWizardStep).toHaveBeenNthCalledWith(2, 'aws', {
         currentStep: 'region',
-        benchmarkConfiguration: { region: ['us-east-1'] },
+        wizardState: { region: ['us-east-1'] },
       });
       expect(result.current.currentStepResponse).toEqual(secondStep);
       expect(result.current.currentSelections).toEqual([]);
@@ -399,7 +399,7 @@ describe('useBenchmarkWizardNavigation', () => {
 
       expect(mockGetWizardStep).toHaveBeenNthCalledWith(3, 'aws', {
         currentStep: 'instance-type',
-        benchmarkConfiguration: {
+        wizardState: {
           region: ['us-east-1'],
           'instance-type': ['t3.medium'],
         },
@@ -502,9 +502,7 @@ describe('useBenchmarkWizardNavigation', () => {
   });
 
   describe('isNextDisabled in provider-step phase', () => {
-    const setupAtProviderStep = async (
-      stepResponse: BenchmarkWizardStepResponse,
-    ) => {
+    const setupAtProviderStep = async (stepResponse: WizardStepResponse) => {
       mockGetWizardStep.mockResolvedValue(stepResponse);
       const { result } = renderHook(() =>
         useBenchmarkWizardNavigation(connectedProviders),

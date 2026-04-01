@@ -5,10 +5,10 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
-  BenchmarkWizardOption,
   CustomAuthConnectionValue,
   REGION_IMAGE_LOGO_URL,
   WizardContext,
+  WizardOption,
 } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
 import {
@@ -20,7 +20,7 @@ import { throwValidationError } from '../../errors';
 export async function resolveOptions(
   method: string,
   context: WizardContext,
-): Promise<BenchmarkWizardOption[]> {
+): Promise<WizardOption[]> {
   switch (method) {
     case 'listConnections':
       return listConnections(context);
@@ -38,8 +38,8 @@ export async function resolveOptions(
 
 async function getSubscriptionsList(
   context: WizardContext,
-): Promise<BenchmarkWizardOption[]> {
-  const connectionId = context.benchmarkConfiguration?.connection?.[0];
+): Promise<WizardOption[]> {
+  const connectionId = context.wizardState?.connection?.[0];
   if (!connectionId) {
     throwValidationError('Connection must be selected to list subscriptions');
   }

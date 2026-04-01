@@ -17,7 +17,7 @@ describe('evaluateCondition', () => {
   const contextWithConnection = {
     projectId,
     provider,
-    benchmarkConfiguration: { connection: ['conn-123'] },
+    wizardState: { connection: ['conn-123'] },
   };
 
   beforeEach(() => {
