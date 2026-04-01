@@ -169,10 +169,56 @@ export function getAwsAccountsSingleSelectDropdown() {
   return createAwsAccountsDropdown(false);
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function validateRequiredFields(
-  auth: any,
-): Promise<{ valid: true } | { valid: false; error: string }> {
+const ROLE_VALIDATION_BATCH_SIZE = 5;
+
+type ValidationResult = { valid: true } | { valid: false; error: string };
+
+function extractErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
+function formatRoleValidationError(role: Role, errorMessage: string): string {
+  return `role "${role.assumeRoleArn}" (${
+    role.accountName
+  }): ${sanitizeAwsError(errorMessage)}`;
+}
+
+async function validateRoleBatch(
+  roles: Role[],
+  accessKeyId: string,
+  secretAccessKey: string,
+  defaultRegion: string,
+  endpoint?: string | undefined | null,
+): Promise<ValidationResult> {
+  const results = await Promise.allSettled(
+    roles.map((role) =>
+      assumeRole(
+        accessKeyId,
+        secretAccessKey,
+        defaultRegion,
+        role.assumeRoleArn,
+        role.assumeRoleExternalId,
+        endpoint,
+      ),
+    ),
+  );
+
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === 'rejected') {
+      const role = roles[i];
+      const errorMessage = extractErrorMessage(result.reason);
+      return {
+        valid: false,
+        error: formatRoleValidationError(role, errorMessage),
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+async function validateRequiredFields(auth: any): Promise<ValidationResult> {
   if (!auth.defaultRegion) {
     return { valid: false, error: 'Default region is required' };
   }
@@ -188,9 +234,7 @@ async function validateRequiredFields(
   return { valid: true };
 }
 
-async function validateBaseCredentials(
-  auth: any,
-): Promise<{ valid: true } | { valid: false; error: string }> {
+async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
   try {
     const credentials = {
       accessKeyId: auth.accessKeyId || '',
@@ -200,8 +244,7 @@ async function validateBaseCredentials(
     await getAccountId(credentials, auth.defaultRegion);
     return { valid: true };
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = extractErrorMessage(error);
     return {
       valid: false,
       error: sanitizeAwsError(errorMessage),
@@ -209,9 +252,7 @@ async function validateBaseCredentials(
   }
 }
 
-async function validateRoleAssumptions(
-  auth: any,
-): Promise<{ valid: true } | { valid: false; error: string }> {
+async function validateRoleAssumptions(auth: any): Promise<ValidationResult> {
   if (!auth.roles || auth.roles.length === 0) {
     return { valid: true };
   }
@@ -219,40 +260,20 @@ async function validateRoleAssumptions(
   const accessKeyId = auth.accessKeyId || '';
   const secretAccessKey = auth.secretAccessKey || '';
   const roles = auth.roles as Role[];
-  const CONCURRENCY_LIMIT = 5;
 
-  // Process roles in batches to limit concurrent AWS API calls
-  for (let i = 0; i < roles.length; i += CONCURRENCY_LIMIT) {
-    const batch = roles.slice(i, i + CONCURRENCY_LIMIT);
+  for (let i = 0; i < roles.length; i += ROLE_VALIDATION_BATCH_SIZE) {
+    const batch = roles.slice(i, i + ROLE_VALIDATION_BATCH_SIZE);
 
-    const results = await Promise.allSettled(
-      batch.map((role) =>
-        assumeRole(
-          accessKeyId,
-          secretAccessKey,
-          auth.defaultRegion,
-          role.assumeRoleArn,
-          role.assumeRoleExternalId,
-          auth.endpoint,
-        ),
-      ),
+    const result = await validateRoleBatch(
+      batch,
+      accessKeyId,
+      secretAccessKey,
+      auth.defaultRegion,
+      auth.endpoint,
     );
 
-    // Check results in order to report first failure deterministically
-    for (let j = 0; j < results.length; j++) {
-      const result = results[j];
-      if (result.status === 'rejected') {
-        const role = batch[j];
-        const error = result.reason;
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        return {
-          valid: false,
-          error: `role "${role.assumeRoleArn}" (${
-            role.accountName
-          }): ${sanitizeAwsError(errorMessage)}`,
-        };
-      }
+    if (!result.valid) {
+      return result;
     }
   }
 
