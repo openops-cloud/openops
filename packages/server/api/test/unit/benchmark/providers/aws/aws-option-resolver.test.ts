@@ -1,12 +1,12 @@
 import { REGION_IMAGE_LOGO_URL } from '@openops/shared';
 
-import { resolveOptions } from '../../../../../src/app/benchmark/providers/aws/aws-option-resolver';
+import { resolveOptions } from '../../../../../src/app/wizard/resolvers/aws/aws-option-resolver';
 
 const mockListConnections = jest.fn();
 const mockGetRegionsList = jest.fn();
 const mockGetAuthProviderMetadata = jest.fn();
-jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
-  ...jest.requireActual('../../../../../src/app/benchmark/common-resolvers'),
+jest.mock('../../../../../src/app/wizard/resolvers/common-resolvers', () => ({
+  ...jest.requireActual('../../../../../src/app/wizard/resolvers/common-resolvers'),
   listConnections: (
     ...args: unknown[]
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),

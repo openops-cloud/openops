@@ -2,7 +2,7 @@ const wizardServiceMock = {
   resolveWizardNavigation: jest.fn(),
 };
 jest.mock(
-  '../../../../src/app/benchmark/wizard.service',
+  '../../../../src/app/wizard/wizard.service',
   () => wizardServiceMock,
 );
 

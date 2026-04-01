@@ -1,5 +1,4 @@
-import { BenchmarkProviders } from '@openops/shared';
-import { throwValidationError } from '../../benchmark/errors';
+import { BenchmarkProviders, throwValidationError } from '@openops/shared';
 import { createAwsBenchmarkDashboard } from './create-aws-benchmark-dashboard';
 import { createAzureBenchmarkDashboard } from './create-azure-benchmark-dashboard';
 

@@ -1,5 +1,4 @@
-import { WizardContext } from '@openops/shared';
-import { throwValidationError } from '../../errors';
+import { throwValidationError, WizardContext } from '@openops/shared';
 import { getConnectionAccounts } from './aws-option-resolver';
 
 export async function evaluateCondition(
