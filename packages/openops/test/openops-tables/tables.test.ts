@@ -12,6 +12,7 @@ jest.mock('../../src/lib/openops-tables/create-axios-headers', () => ({
 import { EncryptedObject } from '@openops/shared';
 import { TablesServerContext } from '../../src/lib/openops-tables/context-helpers';
 import {
+  getTableById,
   getTableByName,
   getTableIdByTableName,
   getTableNames,
@@ -173,6 +174,46 @@ describe('get table id by table name', () => {
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
+  });
+});
+
+describe('get table by id', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return the matching table', async () => {
+    makeOpenOpsTablesGetMock.mockResolvedValue([
+      { id: 1, name: 'table name 1' },
+      { id: 2, name: 'table name 2' },
+    ]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await getTableById(2, mockTablesServerContext);
+
+    expect(result).toStrictEqual({ id: 2, name: 'table name 2' });
+    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
+      'api/database/tables/database/1/',
+      'some header',
+    );
+    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith({
+      getToken: expect.any(Function),
+    });
+  });
+
+  test('should return undefined if table id is not found', async () => {
+    makeOpenOpsTablesGetMock.mockResolvedValue([
+      { id: 1, name: 'table name 1' },
+    ]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await getTableById(99, mockTablesServerContext);
+
+    expect(result).toBeUndefined();
+    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toBeCalledTimes(1);
   });
 });
 
