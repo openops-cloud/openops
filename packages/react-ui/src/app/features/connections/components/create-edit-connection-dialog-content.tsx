@@ -307,8 +307,8 @@ const CreateEditConnectionDialogContent = ({
             )}
 
             {hasRoles && (
-              <div className="w-full p-4 flex items-center gap-3 bg-blueAccent/10 text-blueAccent-300 rounded-sm mb-4">
-                <Info className="shrink-0" />
+              <div className="w-full p-4 flex items-center gap-3 bg-blueAccent/10 text-blueAccent-300 rounded-sm mb-4 text-sm">
+                <Info className="shrink-0 w-4 h-4" />
                 <span>
                   {t(
                     'Validating AWS roles may take 10-30 seconds. We will verify access to all configured roles.',
