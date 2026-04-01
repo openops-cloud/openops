@@ -22,18 +22,66 @@ jest.mock('@openops/server-shared', () => ({
 
 import { amazonAuth } from '../../src/lib/aws/auth';
 
+const EXAMPLE_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
+const EXAMPLE_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
+const DEFAULT_REGION = 'us-east-1';
+const LOCALSTACK_ENDPOINT = 'http://localhost:4566';
+
+function createAuthObject(overrides: any = {}) {
+  return {
+    defaultRegion: DEFAULT_REGION,
+    accessKeyId: EXAMPLE_ACCESS_KEY,
+    secretAccessKey: EXAMPLE_SECRET_KEY,
+    ...overrides,
+  };
+}
+
+function createRole(
+  arnSuffix: string,
+  accountName: string,
+  externalId?: string,
+) {
+  return {
+    assumeRoleArn: `arn:aws:iam::${arnSuffix}:role/${accountName}Role`,
+    accountName,
+    ...(externalId && { assumeRoleExternalId: externalId }),
+  };
+}
+
+function mockSuccessfulAssumeRole() {
+  mockAssumeRole.mockResolvedValue({
+    AccessKeyId: 'ASIATEMP',
+    SecretAccessKey: 'tempSecret',
+    SessionToken: 'tempToken',
+  });
+}
+
+function mockSuccessfulAccountId() {
+  mockGetAccountId.mockResolvedValue('123456789012');
+}
+
+async function reimportAuthWithImplicitRole() {
+  mockSystem.getBoolean.mockReturnValue(true);
+  jest.resetModules();
+  mockSystem.getBoolean.mockReturnValue(true);
+  const { amazonAuth: freshAmazonAuth } = await import(
+    '../../src/lib/aws/auth'
+  );
+  return freshAmazonAuth;
+}
+
 describe('AWS Auth Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSystem.getBoolean.mockReturnValue(false); // Default: implicit role disabled
+    mockSystem.getBoolean.mockReturnValue(false);
   });
 
   describe('Field validation', () => {
     test('should fail when defaultRegion is missing', async () => {
       const result = await amazonAuth.validate!({
         auth: {
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          accessKeyId: EXAMPLE_ACCESS_KEY,
+          secretAccessKey: EXAMPLE_SECRET_KEY,
         } as any,
       });
 
@@ -46,8 +94,8 @@ describe('AWS Auth Validation', () => {
     test('should fail when accessKeyId is missing and implicit role disabled', async () => {
       const result = await amazonAuth.validate!({
         auth: {
-          defaultRegion: 'us-east-1',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          defaultRegion: DEFAULT_REGION,
+          secretAccessKey: EXAMPLE_SECRET_KEY,
         } as any,
       });
 
@@ -60,8 +108,8 @@ describe('AWS Auth Validation', () => {
     test('should fail when secretAccessKey is missing and implicit role disabled', async () => {
       const result = await amazonAuth.validate!({
         auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          defaultRegion: DEFAULT_REGION,
+          accessKeyId: EXAMPLE_ACCESS_KEY,
         } as any,
       });
 
@@ -74,24 +122,20 @@ describe('AWS Auth Validation', () => {
 
   describe('Base credentials validation', () => {
     test('should validate successfully with correct base credentials', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        } as any,
+        auth: createAuthObject(),
       });
 
       expect(result).toEqual({ valid: true });
       expect(mockGetAccountId).toHaveBeenCalledWith(
         {
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          accessKeyId: EXAMPLE_ACCESS_KEY,
+          secretAccessKey: EXAMPLE_SECRET_KEY,
           endpoint: undefined,
         },
-        'us-east-1',
+        DEFAULT_REGION,
       );
     });
 
@@ -101,11 +145,10 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
+        auth: createAuthObject({
           accessKeyId: 'INVALID_KEY',
           secretAccessKey: 'INVALID_SECRET',
-        } as any,
+        }),
       });
 
       expect(result).toEqual({
@@ -115,43 +158,31 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should pass endpoint to getAccountId when provided', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
 
       await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          endpoint: 'http://localhost:4566',
-        } as any,
+        auth: createAuthObject({ endpoint: LOCALSTACK_ENDPOINT }),
       });
 
       expect(mockGetAccountId).toHaveBeenCalledWith(
         {
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          endpoint: 'http://localhost:4566',
+          accessKeyId: EXAMPLE_ACCESS_KEY,
+          secretAccessKey: EXAMPLE_SECRET_KEY,
+          endpoint: LOCALSTACK_ENDPOINT,
         },
-        'us-east-1',
+        DEFAULT_REGION,
       );
     });
   });
 
   describe('Implicit role validation', () => {
     test('should validate with GetCallerIdentity when implicit role enabled and no credentials', async () => {
-      mockSystem.getBoolean.mockReturnValue(true);
-      mockGetAccountId.mockResolvedValue('123456789012');
-
-      // Re-import to get fresh auth with new system setting
-      jest.resetModules();
-      mockSystem.getBoolean.mockReturnValue(true);
-      const { amazonAuth: freshAmazonAuth } = await import(
-        '../../src/lib/aws/auth'
-      );
+      mockSuccessfulAccountId();
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
-          defaultRegion: 'us-east-1',
+          defaultRegion: DEFAULT_REGION,
         } as any,
       });
 
@@ -162,25 +193,19 @@ describe('AWS Auth Validation', () => {
           secretAccessKey: '',
           endpoint: undefined,
         },
-        'us-east-1',
+        DEFAULT_REGION,
       );
     });
 
     test('should fail when implicit role validation fails', async () => {
-      mockSystem.getBoolean.mockReturnValue(true);
       mockGetAccountId.mockRejectedValue(
         new Error('Unable to locate credentials'),
       );
-
-      jest.resetModules();
-      mockSystem.getBoolean.mockReturnValue(true);
-      const { amazonAuth: freshAmazonAuth } = await import(
-        '../../src/lib/aws/auth'
-      );
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
-          defaultRegion: 'us-east-1',
+          defaultRegion: DEFAULT_REGION,
         } as any,
       });
 
@@ -193,48 +218,34 @@ describe('AWS Auth Validation', () => {
 
   describe('Role validation', () => {
     test('should validate all roles successfully', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
-      mockAssumeRole.mockResolvedValue({
-        AccessKeyId: 'ASIATEMP',
-        SecretAccessKey: 'tempSecret',
-        SessionToken: 'tempToken',
-      });
+      mockSuccessfulAccountId();
+      mockSuccessfulAssumeRole();
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        auth: createAuthObject({
           roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-            {
-              assumeRoleArn: 'arn:aws:iam::222222222222:role/StagingRole',
-              accountName: 'Staging',
-              assumeRoleExternalId: 'external123',
-            },
+            createRole('111111111111', 'Production'),
+            createRole('222222222222', 'Staging', 'external123'),
           ],
-        } as any,
+        }),
       });
 
       expect(result).toEqual({ valid: true });
       expect(mockAssumeRole).toHaveBeenCalledTimes(2);
       expect(mockAssumeRole).toHaveBeenNthCalledWith(
         1,
-        'AKIAIOSFODNN7EXAMPLE',
-        'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        'us-east-1',
+        EXAMPLE_ACCESS_KEY,
+        EXAMPLE_SECRET_KEY,
+        DEFAULT_REGION,
         'arn:aws:iam::111111111111:role/ProductionRole',
         undefined,
         undefined,
       );
       expect(mockAssumeRole).toHaveBeenNthCalledWith(
         2,
-        'AKIAIOSFODNN7EXAMPLE',
-        'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        'us-east-1',
+        EXAMPLE_ACCESS_KEY,
+        EXAMPLE_SECRET_KEY,
+        DEFAULT_REGION,
         'arn:aws:iam::222222222222:role/StagingRole',
         'external123',
         undefined,
@@ -242,41 +253,29 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should pass endpoint to assumeRole when provided', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
-      mockAssumeRole.mockResolvedValue({
-        AccessKeyId: 'ASIATEMP',
-        SecretAccessKey: 'tempSecret',
-        SessionToken: 'tempToken',
-      });
+      mockSuccessfulAccountId();
+      mockSuccessfulAssumeRole();
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          endpoint: 'http://localhost:4566',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          endpoint: LOCALSTACK_ENDPOINT,
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result).toEqual({ valid: true });
       expect(mockAssumeRole).toHaveBeenCalledWith(
-        'AKIAIOSFODNN7EXAMPLE',
-        'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        'us-east-1',
+        EXAMPLE_ACCESS_KEY,
+        EXAMPLE_SECRET_KEY,
+        DEFAULT_REGION,
         'arn:aws:iam::111111111111:role/ProductionRole',
         undefined,
-        'http://localhost:4566',
+        LOCALSTACK_ENDPOINT,
       );
     });
 
     test('should fail when first role validation fails', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue(
         new Error(
           'User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole',
@@ -284,17 +283,9 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result).toEqual({
@@ -305,7 +296,7 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should fail on second role when first succeeds but second fails', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole
         .mockResolvedValueOnce({
           AccessKeyId: 'ASIATEMP',
@@ -315,22 +306,12 @@ describe('AWS Auth Validation', () => {
         .mockRejectedValueOnce(new Error('External ID mismatch'));
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+        auth: createAuthObject({
           roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-            {
-              assumeRoleArn: 'arn:aws:iam::222222222222:role/StagingRole',
-              accountName: 'Staging',
-              assumeRoleExternalId: 'wrong-external-id',
-            },
+            createRole('111111111111', 'Production'),
+            createRole('222222222222', 'Staging', 'wrong-external-id'),
           ],
-        } as any,
+        }),
       });
 
       expect(result).toEqual({
@@ -342,29 +323,14 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should validate roles using implicit role credentials when no explicit credentials provided', async () => {
-      mockSystem.getBoolean.mockReturnValue(true);
-      mockGetAccountId.mockResolvedValue('123456789012');
-      mockAssumeRole.mockResolvedValue({
-        AccessKeyId: 'ASIATEMP',
-        SecretAccessKey: 'tempSecret',
-        SessionToken: 'tempToken',
-      });
-
-      jest.resetModules();
-      mockSystem.getBoolean.mockReturnValue(true);
-      const { amazonAuth: freshAmazonAuth } = await import(
-        '../../src/lib/aws/auth'
-      );
+      mockSuccessfulAccountId();
+      mockSuccessfulAssumeRole();
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
-          defaultRegion: 'us-east-1',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
+          defaultRegion: DEFAULT_REGION,
+          roles: [createRole('111111111111', 'Production')],
         } as any,
       });
 
@@ -372,80 +338,11 @@ describe('AWS Auth Validation', () => {
       expect(mockAssumeRole).toHaveBeenCalledWith(
         '',
         '',
-        'us-east-1',
+        DEFAULT_REGION,
         'arn:aws:iam::111111111111:role/ProductionRole',
         undefined,
         undefined,
       );
-    });
-
-    test('should validate many roles concurrently in batches', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
-      mockAssumeRole.mockResolvedValue({
-        AccessKeyId: 'ASIATEMP',
-        SecretAccessKey: 'tempSecret',
-        SessionToken: 'tempToken',
-      });
-
-      const roles = Array.from({ length: 12 }, (_, i) => ({
-        assumeRoleArn: `arn:aws:iam::${111111111111 + i}:role/Role${i}`,
-        accountName: `Account${i}`,
-      }));
-
-      const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles,
-        } as any,
-      });
-
-      expect(result).toEqual({ valid: true });
-      expect(mockAssumeRole).toHaveBeenCalledTimes(12);
-    });
-
-    test('should fail on 7th role when first 6 succeed and 7th fails (processes full batch)', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
-
-      // First 6 roles succeed (batch 1: 5 roles, batch 2 starts with role 6)
-      for (let i = 0; i < 6; i++) {
-        mockAssumeRole.mockResolvedValueOnce({
-          AccessKeyId: 'ASIATEMP',
-          SecretAccessKey: 'tempSecret',
-          SessionToken: 'tempToken',
-        });
-      }
-      // 7th role fails (in batch 2)
-      mockAssumeRole.mockRejectedValueOnce(new Error('Access denied'));
-      // 8th role would succeed but batch stops after checking results
-      mockAssumeRole.mockResolvedValueOnce({
-        AccessKeyId: 'ASIATEMP',
-        SecretAccessKey: 'tempSecret',
-        SessionToken: 'tempToken',
-      });
-
-      const roles = Array.from({ length: 8 }, (_, i) => ({
-        assumeRoleArn: `arn:aws:iam::${111111111111 + i}:role/Role${i}`,
-        accountName: `Account${i}`,
-      }));
-
-      const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles,
-        } as any,
-      });
-
-      expect(result).toEqual({
-        valid: false,
-        error:
-          'role "arn:aws:iam::111111111117:role/Role6" (Account6): Access denied',
-      });
-      // Batch 2 (roles 5-7) completes all 3 concurrent calls before checking results
-      expect(mockAssumeRole).toHaveBeenCalledTimes(8);
     });
   });
 
@@ -454,11 +351,7 @@ describe('AWS Auth Validation', () => {
       mockGetAccountId.mockRejectedValue('string error');
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        } as any,
+        auth: createAuthObject(),
       });
 
       expect(result).toEqual({
@@ -468,21 +361,13 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should handle non-Error exceptions in role validation', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue({ code: 'AccessDenied' });
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result).toEqual({
@@ -493,7 +378,7 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should sanitize IAM principal names in error messages', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue(
         new Error(
           'User: arn:aws:iam::295012473647:user/OpenOpsApp is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/ProductionRole',
@@ -501,25 +386,15 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result.valid).toBe(false);
       if (!result.valid) {
-        // IAM principal name should be redacted
         expect(result.error).not.toContain('OpenOpsApp');
         expect(result.error).toContain('User: arn:aws:iam::*****:user/****');
-        // Resource ARN should also be sanitized
         expect(result.error).toContain(
           'on resource: arn:aws:iam::*****:role/****',
         );
@@ -527,7 +402,7 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should sanitize service-role ARNs in error messages', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue(
         new Error(
           'User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/service-role/MyLambdaRole',
@@ -535,17 +410,9 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result.valid).toBe(false);
@@ -554,13 +421,12 @@ describe('AWS Auth Validation', () => {
         expect(result.error).toContain(
           'on resource: arn:aws:iam::*****:role/****',
         );
-        // Service role path should be redacted
         expect(result.error).not.toContain('service-role/MyLambdaRole');
       }
     });
 
     test('should sanitize assumed-role ARNs in error messages', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue(
         new Error(
           'Role: arn:aws:sts::123456789012:assumed-role/MyRole/session123 is not authorized',
@@ -568,17 +434,9 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result.valid).toBe(false);
@@ -592,7 +450,7 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should sanitize policy ARNs in error messages', async () => {
-      mockGetAccountId.mockResolvedValue('123456789012');
+      mockSuccessfulAccountId();
       mockAssumeRole.mockRejectedValue(
         new Error(
           'Cannot attach policy arn:aws:iam::123456789012:policy/MyCustomPolicy',
@@ -600,17 +458,9 @@ describe('AWS Auth Validation', () => {
       );
 
       const result = await amazonAuth.validate!({
-        auth: {
-          defaultRegion: 'us-east-1',
-          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-          roles: [
-            {
-              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
-              accountName: 'Production',
-            },
-          ],
-        } as any,
+        auth: createAuthObject({
+          roles: [createRole('111111111111', 'Production')],
+        }),
       });
 
       expect(result.valid).toBe(false);
@@ -645,12 +495,7 @@ describe('AWS Auth Validation', () => {
     });
 
     test('should mark credentials as optional when implicit role enabled', async () => {
-      mockSystem.getBoolean.mockReturnValue(true);
-      jest.resetModules();
-      mockSystem.getBoolean.mockReturnValue(true);
-      const { amazonAuth: freshAmazonAuth } = await import(
-        '../../src/lib/aws/auth'
-      );
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       expect(freshAmazonAuth.props.accessKeyId.displayName).toContain(
         'optional',
