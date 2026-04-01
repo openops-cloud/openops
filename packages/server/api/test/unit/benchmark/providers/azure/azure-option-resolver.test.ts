@@ -9,7 +9,9 @@ const mockGetAzureRegionsList = jest.fn();
 const mockGetAuthProviderLogoUrl = jest.fn();
 
 jest.mock('../../../../../src/app/wizard/resolvers/common-resolvers', () => ({
-  ...jest.requireActual('../../../../../src/app/wizard/resolvers/common-resolvers'),
+  ...jest.requireActual(
+    '../../../../../src/app/wizard/resolvers/common-resolvers',
+  ),
   listConnections: (
     ...args: unknown[]
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
