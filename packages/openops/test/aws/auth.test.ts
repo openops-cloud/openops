@@ -187,7 +187,8 @@ describe('AWS Auth Validation', () => {
 
       expect(result).toEqual({
         valid: false,
-        error: 'Base credentials validation failed: Unable to locate credentials',
+        error:
+          'Base credentials validation failed: Unable to locate credentials',
       });
     });
   });
