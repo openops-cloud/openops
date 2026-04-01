@@ -218,26 +218,41 @@ async function validateRoleAssumptions(
 
   const accessKeyId = auth.accessKeyId || '';
   const secretAccessKey = auth.secretAccessKey || '';
+  const roles = auth.roles as Role[];
+  const CONCURRENCY_LIMIT = 5;
 
-  for (const role of auth.roles as Role[]) {
-    try {
-      await assumeRole(
-        accessKeyId,
-        secretAccessKey,
-        auth.defaultRegion,
-        role.assumeRoleArn,
-        role.assumeRoleExternalId,
-        auth.endpoint,
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      return {
-        valid: false,
-        error: `role "${role.assumeRoleArn}" (${
-          role.accountName
-        }): ${sanitizeAwsError(errorMessage)}`,
-      };
+  // Process roles in batches to limit concurrent AWS API calls
+  for (let i = 0; i < roles.length; i += CONCURRENCY_LIMIT) {
+    const batch = roles.slice(i, i + CONCURRENCY_LIMIT);
+
+    const results = await Promise.allSettled(
+      batch.map((role) =>
+        assumeRole(
+          accessKeyId,
+          secretAccessKey,
+          auth.defaultRegion,
+          role.assumeRoleArn,
+          role.assumeRoleExternalId,
+          auth.endpoint,
+        ),
+      ),
+    );
+
+    // Check results in order to report first failure deterministically
+    for (let j = 0; j < results.length; j++) {
+      const result = results[j];
+      if (result.status === 'rejected') {
+        const role = batch[j];
+        const error = result.reason;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        return {
+          valid: false,
+          error: `role "${role.assumeRoleArn}" (${
+            role.accountName
+          }): ${sanitizeAwsError(errorMessage)}`,
+        };
+      }
     }
   }
 

@@ -378,6 +378,75 @@ describe('AWS Auth Validation', () => {
         undefined,
       );
     });
+
+    test('should validate many roles concurrently in batches', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockResolvedValue({
+        AccessKeyId: 'ASIATEMP',
+        SecretAccessKey: 'tempSecret',
+        SessionToken: 'tempToken',
+      });
+
+      const roles = Array.from({ length: 12 }, (_, i) => ({
+        assumeRoleArn: `arn:aws:iam::${111111111111 + i}:role/Role${i}`,
+        accountName: `Account${i}`,
+      }));
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles,
+        } as any,
+      });
+
+      expect(result).toEqual({ valid: true });
+      expect(mockAssumeRole).toHaveBeenCalledTimes(12);
+    });
+
+    test('should fail on 7th role when first 6 succeed and 7th fails (processes full batch)', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+
+      // First 6 roles succeed (batch 1: 5 roles, batch 2 starts with role 6)
+      for (let i = 0; i < 6; i++) {
+        mockAssumeRole.mockResolvedValueOnce({
+          AccessKeyId: 'ASIATEMP',
+          SecretAccessKey: 'tempSecret',
+          SessionToken: 'tempToken',
+        });
+      }
+      // 7th role fails (in batch 2)
+      mockAssumeRole.mockRejectedValueOnce(new Error('Access denied'));
+      // 8th role would succeed but batch stops after checking results
+      mockAssumeRole.mockResolvedValueOnce({
+        AccessKeyId: 'ASIATEMP',
+        SecretAccessKey: 'tempSecret',
+        SessionToken: 'tempToken',
+      });
+
+      const roles = Array.from({ length: 8 }, (_, i) => ({
+        assumeRoleArn: `arn:aws:iam::${111111111111 + i}:role/Role${i}`,
+        accountName: `Account${i}`,
+      }));
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles,
+        } as any,
+      });
+
+      expect(result).toEqual({
+        valid: false,
+        error:
+          'role "arn:aws:iam::111111111117:role/Role6" (Account6): Access denied',
+      });
+      // Batch 2 (roles 5-7) completes all 3 concurrent calls before checking results
+      expect(mockAssumeRole).toHaveBeenCalledTimes(8);
+    });
   });
 
   describe('Error handling', () => {
