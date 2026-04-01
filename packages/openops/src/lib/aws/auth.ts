@@ -2,6 +2,7 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
+import { sanitizeAwsError } from './sanitization';
 import { assumeRole, getAccountId } from './sts-common';
 
 const isImplicitRoleEnabled = system.getBoolean(
@@ -167,34 +168,6 @@ export function getAwsAccountsSingleSelectDropdown() {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function sanitizeAwsError(errorMessage: string): string {
-  let sanitized = errorMessage;
-
-  // Redact IAM principal names in ARNs to prevent infrastructure disclosure
-  // Covers: IAM users, roles, service roles, policies, and assumed roles
-  // Example: "User: arn:aws:iam::123:user/OpenOpsApp" -> "User: arn:aws:iam::*****:user/****"
-
-  // Pattern 1: "User:" or "Role:" prefix in error messages
-  sanitized = sanitized.replace(
-    /(User|Role): arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,]+/g,
-    '$1: arn:aws:$2::*****:$3/****',
-  );
-
-  // Pattern 2: "on resource:" prefix in error messages
-  sanitized = sanitized.replace(
-    /on resource: arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,]+/g,
-    'on resource: arn:aws:$1::*****:$2/****',
-  );
-
-  // Pattern 3: Catch any remaining IAM/STS ARNs with paths (service-role, etc.)
-  sanitized = sanitized.replace(
-    /arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,)]+/g,
-    'arn:aws:$1::*****:$2/****',
-  );
-
-  return sanitized;
-}
-
 async function validateRequiredFields(
   auth: any,
 ): Promise<{ valid: true } | { valid: false; error: string }> {
