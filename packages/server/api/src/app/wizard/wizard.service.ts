@@ -1,6 +1,7 @@
 import {
   ProviderAdapter,
   StaticOptionValue,
+  throwValidationError,
   WizardConfig,
   WizardConfigStep,
   WizardContext,
@@ -8,7 +9,6 @@ import {
   WizardRequest,
   WizardStepResponse,
 } from '@openops/shared';
-import { throwValidationError } from './errors';
 
 function getStepProgress(
   config: WizardConfig,

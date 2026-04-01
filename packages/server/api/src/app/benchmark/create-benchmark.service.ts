@@ -6,6 +6,7 @@ import {
   ContentType,
   ErrorCode,
   Folder,
+  throwValidationError,
   type WizardState,
 } from '@openops/shared';
 import { IsNull } from 'typeorm';
@@ -25,7 +26,6 @@ import {
   type CategorizedWorkflowPaths,
   resolveWorkflowPathsForSeed,
 } from './catalog-resolver';
-import { throwValidationError } from './errors';
 
 function validateWizardState(wizardState: WizardState): void {
   const connection = wizardState.connection ?? [];

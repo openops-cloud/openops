@@ -2,15 +2,12 @@ import { getRegionsList, parseArn } from '@openops/common';
 import {
   CustomAuthConnectionValue,
   REGION_IMAGE_LOGO_URL,
+  throwValidationError,
   WizardContext,
   WizardOption,
 } from '@openops/shared';
 import { appConnectionService } from '../../../app-connection/app-connection-service/app-connection-service';
-import {
-  getAuthProviderLogoUrl,
-  listConnections,
-} from '../../common-resolvers';
-import { throwValidationError } from '../../errors';
+import { getAuthProviderLogoUrl, listConnections } from '../common-resolvers';
 
 type AwsAuthProps = {
   roles?: Array<{ assumeRoleArn: string; accountName: string }>;
