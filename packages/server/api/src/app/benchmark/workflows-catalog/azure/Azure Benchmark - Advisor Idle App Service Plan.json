@@ -608,7 +608,7 @@
                             "dryRun": false,
                             "commandToRun": "az resource show --ids \"{{step_d['item']['resourceMetadata']['resourceId']}}\" --query location -o tsv",
                             "subscriptions": {
-                              "subDropdown": "3713fdce-ec3c-4060-a5ff-15c6364f2a10"
+                              "subDropdown": "{{step_1['item']}}"
                             },
                             "useHostSession": {}
                           },
