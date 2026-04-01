@@ -719,7 +719,7 @@
                 },
                 "stepIndex": 6
               },
-              "displayName": "Get recommendations related to unused App Service Plans",
+              "displayName": "Get recommendations related to idle VMs",
               "stepIndex": 5
             },
             "stepIndex": 4
