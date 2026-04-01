@@ -264,7 +264,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::*****:user/**** is not authorized to perform: sts:AssumeRole',
+          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::*****:user/**** is not authorized to perform: sts:AssumeRole',
       });
     });
 
@@ -300,7 +300,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role "arn:aws:iam::222222222222:role/StagingRole" (Staging): External ID mismatch',
+          'role "arn:aws:iam::222222222222:role/StagingRole" (Staging): External ID mismatch',
       });
       expect(mockAssumeRole).toHaveBeenCalledTimes(2);
     });
@@ -382,7 +382,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
+          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
       });
     });
 
@@ -417,6 +417,100 @@ describe('AWS Auth Validation', () => {
         expect(result.error).toContain(
           'on resource: arn:aws:iam::*****:role/****',
         );
+      }
+    });
+
+    test('should sanitize service-role ARNs in error messages', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockRejectedValue(
+        new Error(
+          'User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/service-role/MyLambdaRole',
+        ),
+      );
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
+              accountName: 'Production',
+            },
+          ],
+        } as any,
+      });
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toContain('User: arn:aws:iam::*****:user/****');
+        expect(result.error).toContain(
+          'on resource: arn:aws:iam::*****:role/****',
+        );
+        // Service role path should be redacted
+        expect(result.error).not.toContain('service-role/MyLambdaRole');
+      }
+    });
+
+    test('should sanitize assumed-role ARNs in error messages', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockRejectedValue(
+        new Error(
+          'Role: arn:aws:sts::123456789012:assumed-role/MyRole/session123 is not authorized',
+        ),
+      );
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
+              accountName: 'Production',
+            },
+          ],
+        } as any,
+      });
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toContain(
+          'Role: arn:aws:sts::*****:assumed-role/****',
+        );
+        expect(result.error).not.toContain('MyRole');
+        expect(result.error).not.toContain('session123');
+      }
+    });
+
+    test('should sanitize policy ARNs in error messages', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockRejectedValue(
+        new Error(
+          'Cannot attach policy arn:aws:iam::123456789012:policy/MyCustomPolicy',
+        ),
+      );
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
+              accountName: 'Production',
+            },
+          ],
+        } as any,
+      });
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toContain('arn:aws:iam::*****:policy/****');
+        expect(result.error).not.toContain('MyCustomPolicy');
       }
     });
   });

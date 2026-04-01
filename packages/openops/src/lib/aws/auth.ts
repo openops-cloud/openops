@@ -170,17 +170,26 @@ export function getAwsAccountsSingleSelectDropdown() {
 function sanitizeAwsError(errorMessage: string): string {
   let sanitized = errorMessage;
 
-  // Redact IAM user/role names in "User:" or "Role:" ARNs (these reveal infrastructure)
-  // Example: "User: arn:aws:iam::123:user/OpenOpsApp" -> "User: arn:aws:iam::123:user/****"
+  // Redact IAM principal names in ARNs to prevent infrastructure disclosure
+  // Covers: IAM users, roles, service roles, policies, and assumed roles
+  // Example: "User: arn:aws:iam::123:user/OpenOpsApp" -> "User: arn:aws:iam::*****:user/****"
+
+  // Pattern 1: "User:" or "Role:" prefix in error messages
   sanitized = sanitized.replace(
-    /(User|Role): arn:aws:iam::\d{12}:(user|role)\/[^\s]+/g,
-    '$1: arn:aws:iam::*****:$2/****',
+    /(User|Role): arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,]+/g,
+    '$1: arn:aws:$2::*****:$3/****',
   );
 
-  // Redact IAM user/role names in "on resource:" ARNs
+  // Pattern 2: "on resource:" prefix in error messages
   sanitized = sanitized.replace(
-    /on resource: arn:aws:iam::\d{12}:(user|role)\/[^\s]+/g,
-    'on resource: arn:aws:iam::*****:$1/****',
+    /on resource: arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,]+/g,
+    'on resource: arn:aws:$1::*****:$2/****',
+  );
+
+  // Pattern 3: Catch any remaining IAM/STS ARNs with paths (service-role, etc.)
+  sanitized = sanitized.replace(
+    /arn:aws:(iam|sts)::\d{12}:(user|role|assumed-role|policy)\/[^\s,)]+/g,
+    'arn:aws:$1::*****:$2/****',
   );
 
   return sanitized;
@@ -249,7 +258,7 @@ async function validateRoleAssumptions(
         error instanceof Error ? error.message : 'Unknown error';
       return {
         valid: false,
-        error: `Role "${role.assumeRoleArn}" (${
+        error: `role "${role.assumeRoleArn}" (${
           role.accountName
         }): ${sanitizeAwsError(errorMessage)}`,
       };
