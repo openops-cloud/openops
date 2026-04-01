@@ -166,6 +166,26 @@ export function getAwsAccountsSingleSelectDropdown() {
   return createAwsAccountsDropdown(false);
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function sanitizeAwsError(errorMessage: string): string {
+  let sanitized = errorMessage;
+
+  // Redact IAM user/role names in "User:" or "Role:" ARNs (these reveal infrastructure)
+  // Example: "User: arn:aws:iam::123:user/OpenOpsApp" -> "User: arn:aws:iam::123:user/****"
+  sanitized = sanitized.replace(
+    /(User|Role): arn:aws:iam::\d{12}:(user|role)\/[^\s]+/g,
+    '$1: arn:aws:iam::*****:$2/****',
+  );
+
+  // Redact IAM user/role names in "on resource:" ARNs
+  sanitized = sanitized.replace(
+    /on resource: arn:aws:iam::\d{12}:(user|role)\/[^\s]+/g,
+    'on resource: arn:aws:iam::*****:$1/****',
+  );
+
+  return sanitized;
+}
+
 async function validateRequiredFields(
   auth: any,
 ): Promise<{ valid: true } | { valid: false; error: string }> {
@@ -200,7 +220,7 @@ async function validateBaseCredentials(
       error instanceof Error ? error.message : 'Unknown error';
     return {
       valid: false,
-      error: `Base credentials validation failed: ${errorMessage}`,
+      error: sanitizeAwsError(errorMessage),
     };
   }
 }
@@ -229,7 +249,9 @@ async function validateRoleAssumptions(
         error instanceof Error ? error.message : 'Unknown error';
       return {
         valid: false,
-        error: `Role validation failed for ARN "${role.assumeRoleArn}" (${role.accountName}): ${errorMessage}`,
+        error: `Role "${role.assumeRoleArn}" (${
+          role.accountName
+        }): ${sanitizeAwsError(errorMessage)}`,
       };
     }
   }

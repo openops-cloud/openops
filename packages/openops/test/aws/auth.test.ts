@@ -110,8 +110,7 @@ describe('AWS Auth Validation', () => {
 
       expect(result).toEqual({
         valid: false,
-        error:
-          'Base credentials validation failed: The security token included in the request is invalid',
+        error: 'The security token included in the request is invalid',
       });
     });
 
@@ -187,8 +186,7 @@ describe('AWS Auth Validation', () => {
 
       expect(result).toEqual({
         valid: false,
-        error:
-          'Base credentials validation failed: Unable to locate credentials',
+        error: 'Unable to locate credentials',
       });
     });
   });
@@ -266,7 +264,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role validation failed for ARN "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole',
+          'Role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::*****:user/**** is not authorized to perform: sts:AssumeRole',
       });
     });
 
@@ -302,7 +300,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role validation failed for ARN "arn:aws:iam::222222222222:role/StagingRole" (Staging): External ID mismatch',
+          'Role "arn:aws:iam::222222222222:role/StagingRole" (Staging): External ID mismatch',
       });
       expect(mockAssumeRole).toHaveBeenCalledTimes(2);
     });
@@ -359,7 +357,7 @@ describe('AWS Auth Validation', () => {
 
       expect(result).toEqual({
         valid: false,
-        error: 'Base credentials validation failed: Unknown error',
+        error: 'Unknown error',
       });
     });
 
@@ -384,8 +382,42 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'Role validation failed for ARN "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
+          'Role "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
       });
+    });
+
+    test('should sanitize IAM principal names in error messages', async () => {
+      mockGetAccountId.mockResolvedValue('123456789012');
+      mockAssumeRole.mockRejectedValue(
+        new Error(
+          'User: arn:aws:iam::295012473647:user/OpenOpsApp is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/ProductionRole',
+        ),
+      );
+
+      const result = await amazonAuth.validate!({
+        auth: {
+          defaultRegion: 'us-east-1',
+          accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+          secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          roles: [
+            {
+              assumeRoleArn: 'arn:aws:iam::111111111111:role/ProductionRole',
+              accountName: 'Production',
+            },
+          ],
+        } as any,
+      });
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        // IAM principal name should be redacted
+        expect(result.error).not.toContain('OpenOpsApp');
+        expect(result.error).toContain('User: arn:aws:iam::*****:user/****');
+        // Resource ARN should also be sanitized
+        expect(result.error).toContain(
+          'on resource: arn:aws:iam::*****:role/****',
+        );
+      }
     });
   });
 
