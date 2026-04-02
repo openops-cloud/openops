@@ -14,7 +14,7 @@
       "type": "TRIGGER",
       "settings": {
         "blockName": "@openops/block-webhook",
-        "blockVersion": "~0.1.5",
+        "blockVersion": "0.1.5",
         "blockType": "OFFICIAL",
         "packageType": "REGISTRY",
         "input": {
@@ -73,7 +73,7 @@
               "customizedInputs": {}
             },
             "packageType": "REGISTRY",
-            "blockVersion": "~0.5.1",
+            "blockVersion": "0.5.1",
             "errorHandlingOptions": {
               "retryOnFailure": {
                 "value": false
@@ -119,7 +119,7 @@
                   "customizedInputs": {}
                 },
                 "packageType": "REGISTRY",
-                "blockVersion": "~0.5.1",
+                "blockVersion": "0.5.1",
                 "errorHandlingOptions": {
                   "retryOnFailure": {
                     "value": false
@@ -175,7 +175,7 @@
                     }
                   },
                   "packageType": "REGISTRY",
-                  "blockVersion": "~0.0.1",
+                  "blockVersion": "0.0.1",
                   "errorHandlingOptions": {
                     "retryOnFailure": {
                       "value": false
@@ -204,7 +204,7 @@
                       "customizedInputs": {}
                     },
                     "packageType": "REGISTRY",
-                    "blockVersion": "~0.5.1",
+                    "blockVersion": "0.5.1",
                     "errorHandlingOptions": {
                       "retryOnFailure": {
                         "value": false
@@ -263,7 +263,7 @@
                           "customizedInputs": {}
                         },
                         "packageType": "REGISTRY",
-                        "blockVersion": "~0.0.1",
+                        "blockVersion": "0.0.1",
                         "errorHandlingOptions": {
                           "retryOnFailure": {
                             "value": false
@@ -324,7 +324,7 @@
                               }
                             },
                             "packageType": "REGISTRY",
-                            "blockVersion": "~0.0.1",
+                            "blockVersion": "0.0.1",
                             "errorHandlingOptions": {
                               "retryOnFailure": {
                                 "value": false
@@ -416,7 +416,7 @@
                                     }
                                   },
                                   "packageType": "REGISTRY",
-                                  "blockVersion": "~0.0.1",
+                                  "blockVersion": "0.0.1",
                                   "errorHandlingOptions": {
                                     "retryOnFailure": {
                                       "value": false
@@ -456,7 +456,7 @@
                                       }
                                     },
                                     "packageType": "REGISTRY",
-                                    "blockVersion": "~0.0.1",
+                                    "blockVersion": "0.0.1",
                                     "errorHandlingOptions": {
                                       "retryOnFailure": {
                                         "value": false
@@ -539,7 +539,7 @@
                                             "customizedInputs": {}
                                           },
                                           "packageType": "REGISTRY",
-                                          "blockVersion": "~0.0.7",
+                                          "blockVersion": "0.0.7",
                                           "errorHandlingOptions": {
                                             "retryOnFailure": {
                                               "value": false
@@ -568,7 +568,7 @@
                                               "customizedInputs": {}
                                             },
                                             "packageType": "REGISTRY",
-                                            "blockVersion": "~0.0.7",
+                                            "blockVersion": "0.0.7",
                                             "errorHandlingOptions": {
                                               "retryOnFailure": {
                                                 "value": false
@@ -608,7 +608,7 @@
                                                 }
                                               },
                                               "packageType": "REGISTRY",
-                                              "blockVersion": "~0.0.1",
+                                              "blockVersion": "0.0.1",
                                               "errorHandlingOptions": {
                                                 "retryOnFailure": {
                                                   "value": false
@@ -660,7 +660,7 @@
                                                     "customizedInputs": {}
                                                   },
                                                   "packageType": "REGISTRY",
-                                                  "blockVersion": "~0.0.8",
+                                                  "blockVersion": "0.0.8",
                                                   "errorHandlingOptions": {
                                                     "retryOnFailure": {
                                                       "value": false
@@ -687,7 +687,7 @@
                                                       "customizedInputs": {}
                                                     },
                                                     "packageType": "REGISTRY",
-                                                    "blockVersion": "~0.0.8",
+                                                    "blockVersion": "0.0.8",
                                                     "errorHandlingOptions": {
                                                       "retryOnFailure": {
                                                         "value": false
@@ -801,7 +801,7 @@
                                                         }
                                                       },
                                                       "packageType": "REGISTRY",
-                                                      "blockVersion": "~0.0.1",
+                                                      "blockVersion": "0.0.1",
                                                       "errorHandlingOptions": {
                                                         "retryOnFailure": {
                                                           "value": false
@@ -865,7 +865,7 @@
                               "customizedInputs": {}
                             },
                             "packageType": "REGISTRY",
-                            "blockVersion": "~0.0.1",
+                            "blockVersion": "0.0.1",
                             "errorHandlingOptions": {
                               "retryOnFailure": {
                                 "value": false
