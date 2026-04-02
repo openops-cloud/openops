@@ -1,16 +1,16 @@
 import {
   BenchmarkProviders,
+  WizardState,
   openOpsId,
+  throwValidationError,
   type BenchmarkWebhookPayload,
   type BenchmarkWorkflowBase,
-  type WizardState,
 } from '@openops/shared';
 import { webhookUtils } from 'server-worker';
 import { transaction } from '../core/db/transaction';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import type { BenchmarkRow } from './benchmark.entity';
 import { benchmarkRepo } from './benchmark.repo';
-import { throwValidationError } from './errors';
 
 export type AttachFlowsToBenchmarkRequest = {
   wizardState: WizardState;

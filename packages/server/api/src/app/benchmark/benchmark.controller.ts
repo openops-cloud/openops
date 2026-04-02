@@ -15,11 +15,11 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
+import { resolveWizardNavigation } from '../wizard/wizard.service';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
 import { getProvider } from './providers/providers-registry';
-import { resolveWizardNavigation } from './wizard.service';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('preHandler', assertBenchmarkFeatureEnabled);

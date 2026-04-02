@@ -1,8 +1,8 @@
-import { evaluateCondition } from '../../../../../src/app/benchmark/providers/aws/aws-condition-resolver';
+import { evaluateCondition } from '../../../../../src/app/wizard/resolvers/aws/aws-condition-resolver';
 
 const mockGetConnectionAccounts = jest.fn();
 jest.mock(
-  '../../../../../src/app/benchmark/providers/aws/aws-option-resolver',
+  '../../../../../src/app/wizard/resolvers/aws/aws-option-resolver',
   () => ({
     getConnectionAccounts: (
       ...args: unknown[]

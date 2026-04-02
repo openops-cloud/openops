@@ -50,7 +50,7 @@ export async function getTableNames(
   return tables.map((t) => t.name);
 }
 
-async function getAvailableTablesInOpenopsTables(
+export async function getAvailableTablesInOpenopsTables(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
   const tables = await fetchAllTables(serverContext);

@@ -1,11 +1,11 @@
 import {
   AppConnectionStatus,
+  throwValidationError,
   WizardContext,
   WizardOption,
 } from '@openops/shared';
-import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { getAuthProviderMetadata } from '../app-connection/connection-providers-resolver';
-import { throwValidationError } from './errors';
+import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
+import { getAuthProviderMetadata } from '../../app-connection/connection-providers-resolver';
 
 export async function getAuthProviderLogoUrl(
   authProviderKey: string,

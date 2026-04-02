@@ -1,5 +1,5 @@
 import type { ProviderAdapter } from '@openops/shared';
-import { resolveWizardNavigation } from '../../../src/app/benchmark/wizard.service';
+import { resolveWizardNavigation } from '../../../src/app/wizard/wizard.service';
 
 const mockResolveOptions = jest.fn().mockResolvedValue([]);
 const mockEvaluateCondition = jest.fn().mockResolvedValue(true);

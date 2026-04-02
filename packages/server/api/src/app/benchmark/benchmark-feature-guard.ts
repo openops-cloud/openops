@@ -1,6 +1,6 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { throwFeatureDisabledError } from '@openops/shared';
 import { preHandlerAsyncHookHandler } from 'fastify';
-import { throwFeatureDisabledError } from './errors';
 
 export const assertBenchmarkFeatureEnabled: preHandlerAsyncHookHandler = async (
   request,
