@@ -22097,6 +22097,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 The following npm packages may be included in this product:
 
  - lodash-es@4.17.21
+ - lodash-es@4.18.1
  - lodash@4.17.23
 
 These packages each contain the following license:
