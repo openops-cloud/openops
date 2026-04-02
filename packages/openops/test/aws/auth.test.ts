@@ -291,7 +291,7 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::*****:user/**** is not authorized to perform: sts:AssumeRole',
+          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole',
       });
     });
 
@@ -375,99 +375,6 @@ describe('AWS Auth Validation', () => {
         error:
           'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
       });
-    });
-
-    test('should sanitize IAM principal names in error messages', async () => {
-      mockSuccessfulAccountId();
-      mockAssumeRole.mockRejectedValue(
-        new Error(
-          'User: arn:aws:iam::295012473647:user/OpenOpsApp is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/ProductionRole',
-        ),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({
-          roles: [createRole('111111111111', 'Production')],
-        }),
-      });
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).not.toContain('OpenOpsApp');
-        expect(result.error).toContain('User: arn:aws:iam::*****:user/****');
-        expect(result.error).toContain(
-          'on resource: arn:aws:iam::*****:role/****',
-        );
-      }
-    });
-
-    test('should sanitize service-role ARNs in error messages', async () => {
-      mockSuccessfulAccountId();
-      mockAssumeRole.mockRejectedValue(
-        new Error(
-          'User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::111111111111:role/service-role/MyLambdaRole',
-        ),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({
-          roles: [createRole('111111111111', 'Production')],
-        }),
-      });
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain('User: arn:aws:iam::*****:user/****');
-        expect(result.error).toContain(
-          'on resource: arn:aws:iam::*****:role/****',
-        );
-        expect(result.error).not.toContain('service-role/MyLambdaRole');
-      }
-    });
-
-    test('should sanitize assumed-role ARNs in error messages', async () => {
-      mockSuccessfulAccountId();
-      mockAssumeRole.mockRejectedValue(
-        new Error(
-          'Role: arn:aws:sts::123456789012:assumed-role/MyRole/session123 is not authorized',
-        ),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({
-          roles: [createRole('111111111111', 'Production')],
-        }),
-      });
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain(
-          'Role: arn:aws:sts::*****:assumed-role/****',
-        );
-        expect(result.error).not.toContain('MyRole');
-        expect(result.error).not.toContain('session123');
-      }
-    });
-
-    test('should sanitize policy ARNs in error messages', async () => {
-      mockSuccessfulAccountId();
-      mockAssumeRole.mockRejectedValue(
-        new Error(
-          'Cannot attach policy arn:aws:iam::123456789012:policy/MyCustomPolicy',
-        ),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({
-          roles: [createRole('111111111111', 'Production')],
-        }),
-      });
-
-      expect(result.valid).toBe(false);
-      if (!result.valid) {
-        expect(result.error).toContain('arn:aws:iam::*****:policy/****');
-        expect(result.error).not.toContain('MyCustomPolicy');
-      }
     });
   });
 

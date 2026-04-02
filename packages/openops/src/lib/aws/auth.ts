@@ -2,7 +2,6 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
-import { sanitizeAwsError } from './sanitization';
 import { assumeRole, getAccountId } from './sts-common';
 
 const isImplicitRoleEnabled = system.getBoolean(
@@ -178,9 +177,7 @@ function extractErrorMessage(error: unknown): string {
 }
 
 function formatRoleValidationError(role: Role, errorMessage: string): string {
-  return `role "${role.assumeRoleArn}" (${
-    role.accountName
-  }): ${sanitizeAwsError(errorMessage)}`;
+  return `role "${role.assumeRoleArn}" (${role.accountName}): ${errorMessage}`;
 }
 
 async function validateRoleBatch(
@@ -247,7 +244,7 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
     const errorMessage = extractErrorMessage(error);
     return {
       valid: false,
-      error: sanitizeAwsError(errorMessage),
+      error: errorMessage,
     };
   }
 }
