@@ -36402,7 +36402,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - path-to-regexp@8.3.0
+ - path-to-regexp@8.4.2
  - ts-node@10.9.1
 
 These packages each contain the following license:
