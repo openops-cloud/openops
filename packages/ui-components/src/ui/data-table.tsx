@@ -99,6 +99,7 @@ interface DataTableProps<
   actions?: DataTableAction<TData>[];
   stickyHeader?: boolean;
   border?: boolean;
+  cellClassName?: string;
   emptyStateComponent?: React.ReactNode;
   getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
   navigationExcludedColumns?: string[];
@@ -122,6 +123,7 @@ export function DataTable<
   onSelectedRowsChange,
   stickyHeader = false,
   border = true,
+  cellClassName,
   emptyStateComponent,
   getRowHref,
   navigationExcludedColumns,
@@ -329,8 +331,12 @@ export function DataTable<
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const meta = header.column.columnDef.meta as
+                    | { className?: string }
+                    | undefined;
+
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className={meta?.className}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -364,28 +370,38 @@ export function DataTable<
                     className={onRowClick ? 'cursor-pointer' : ''}
                     data-state={row.getIsSelected() && 'selected'}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {rowHref &&
-                        !navigationExcludedColumns?.includes(cell.column.id) ? (
-                          <Link
-                            to={rowHref}
-                            onClick={(e) => e.stopPropagation()}
-                            rel="noopener noreferrer"
-                          >
-                            {flexRender(
+                    {row.getVisibleCells().map((cell) => {
+                      const meta = cell.column.columnDef.meta as
+                        | { className?: string }
+                        | undefined;
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={cn(meta?.className, cellClassName)}
+                        >
+                          {rowHref &&
+                          !navigationExcludedColumns?.includes(
+                            cell.column.id,
+                          ) ? (
+                            <Link
+                              to={rowHref}
+                              onClick={(e) => e.stopPropagation()}
+                              rel="noopener noreferrer"
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </Link>
+                          ) : (
+                            flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
-                            )}
-                          </Link>
-                        ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )
-                        )}
-                      </TableCell>
-                    ))}
+                            )
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 );
               })
