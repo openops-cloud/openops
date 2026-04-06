@@ -1,3 +1,13 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  return {
+    logger: {
+      debug: debugMock,
+    },
+  };
+});
+
 jest.mock('@aws-sdk/client-rds');
 import * as RDS from '@aws-sdk/client-rds';
 
@@ -59,6 +69,42 @@ describe('describeRdsSnapshots', () => {
     expect(sendMock).toHaveBeenCalledTimes(2);
   });
 
+  test('should skip permission denied regions for snapshots', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({ DBSnapshots: [{ obj: '1' }] })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsSnapshots('credentials', [
+      'some-region1',
+      'some-region2',
+    ]);
+
+    expect(result).toStrictEqual([{ obj: '1', region: 'some-region1' }]);
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all snapshot regions are denied', async () => {
+    const sendMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsSnapshots('credentials', [
+      'some-region1',
+      'some-region2',
+    ]);
+
+    expect(result).toStrictEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
+  });
+
   test(`should throw if send throws`, async () => {
     const sendMock = jest.fn().mockRejectedValue(new Error('some error'));
     getAwsClientMock.getAwsClient.mockImplementation(() => ({
@@ -66,7 +112,7 @@ describe('describeRdsSnapshots', () => {
     }));
 
     await expect(
-      describeRdsInstances('credentials', ['some-region1'], []),
+      describeRdsSnapshots('credentials', ['some-region1'], []),
     ).rejects.toThrow('some error');
     expect(sendMock).toHaveBeenCalledTimes(1);
   });
@@ -110,6 +156,44 @@ describe('describeRdsInstances', () => {
       { instance: 'instance2', region: 'some-region2' },
     ]);
     expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+
+  test('should skip permission denied regions for instances', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({ DBInstances: [{ instance: 'instance1' }] })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsInstances('credentials', [
+      'some-region1',
+      'some-region2',
+    ]);
+
+    expect(result).toStrictEqual([
+      { instance: 'instance1', region: 'some-region1' },
+    ]);
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all instance regions are denied', async () => {
+    const sendMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsInstances('credentials', [
+      'some-region1',
+      'some-region2',
+    ]);
+
+    expect(result).toStrictEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
   });
 
   test(`should throw if send throws`, async () => {

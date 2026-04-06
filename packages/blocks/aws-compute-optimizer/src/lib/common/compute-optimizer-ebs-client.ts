@@ -1,5 +1,6 @@
 import { EBSFinding } from '@aws-sdk/client-compute-optimizer';
-import { groupARNsByRegion } from '@openops/common';
+import { groupARNsByRegion, isAwsPermissionError } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { EbsRecommendationsBuilder } from './ebs-recommendations-builder';
 import { ComputeOptimizerRecommendation } from './get-recommendations';
 
@@ -18,12 +19,24 @@ export async function getEbsRecommendationsForRegions(
   );
 
   for (const region of regions) {
-    const recommendations = await recommendationsBuilder.getRecommendations(
-      credentials,
-      region,
-    );
+    try {
+      const recommendations = await recommendationsBuilder.getRecommendations(
+        credentials,
+        region,
+      );
 
-    result.push(...recommendations);
+      result.push(...recommendations);
+    } catch (error) {
+      if (isAwsPermissionError(error)) {
+        logger.debug('Skipping AWS region due to permission error', {
+          region,
+          error,
+        });
+        continue;
+      }
+
+      throw error;
+    }
   }
 
   return result;
@@ -45,13 +58,25 @@ export async function getEbsRecommendationsForARNs(
   );
 
   for (const region in arnsPerRegion) {
-    const recommendations = await recommendationsBuilder.getRecommendations(
-      credentials,
-      region,
-      arnsPerRegion[region],
-    );
+    try {
+      const recommendations = await recommendationsBuilder.getRecommendations(
+        credentials,
+        region,
+        arnsPerRegion[region],
+      );
 
-    result.push(...recommendations);
+      result.push(...recommendations);
+    } catch (error) {
+      if (isAwsPermissionError(error)) {
+        logger.debug('Skipping AWS region due to permission error', {
+          region,
+          error,
+        });
+        continue;
+      }
+
+      throw error;
+    }
   }
 
   return result;

@@ -1,5 +1,6 @@
 import * as EC2 from '@aws-sdk/client-ec2';
 import * as ArnParser from '@aws-sdk/util-arn-parser';
+import { fetchArraysAcrossRegions } from '../fetch-arrays-across-regions';
 import { getAwsClient } from '../get-client';
 import { getAccountName } from '../organizations-common';
 import { getAccountId } from '../sts-common';
@@ -29,10 +30,7 @@ export async function getEbsVolumes(
     );
   };
 
-  const volumesFromAllRegions = await Promise.all(
-    regions.map(fetchVolumesInRegion),
-  );
-  return volumesFromAllRegions.flat();
+  return fetchArraysAcrossRegions(regions, fetchVolumesInRegion);
 }
 
 function mapVolumeToOpenOpsVolume(

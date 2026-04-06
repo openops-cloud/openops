@@ -3,7 +3,12 @@ import {
   GetRecommendationSummariesCommand,
   RecommendationSummary,
 } from '@aws-sdk/client-compute-optimizer';
-import { getAwsClient, makeAwsRequest } from '@openops/common';
+import {
+  getAwsClient,
+  isAwsPermissionError,
+  makeAwsRequest,
+} from '@openops/common';
+import { logger } from '@openops/server-shared';
 
 export async function getRecommendationSummaries(
   credentials: any,
@@ -12,21 +17,33 @@ export async function getRecommendationSummaries(
   const results: RecommendationSummary[] = [];
 
   for (const region of regions) {
-    const client = getComputeOptimizerClient(credentials, region);
-    const command = new GetRecommendationSummariesCommand({
-      nextToken: '',
-    });
-    const regionalResults = await makeAwsRequest(client, command);
+    try {
+      const client = getComputeOptimizerClient(credentials, region);
+      const command = new GetRecommendationSummariesCommand({
+        nextToken: '',
+      });
+      const regionalResults = await makeAwsRequest(client, command);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const result of regionalResults as any) {
-      const recommendationSummaries = result.recommendationSummaries?.map(
-        (item: any) => ({ ...item, region }),
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const result of regionalResults as any) {
+        const recommendationSummaries = result.recommendationSummaries?.map(
+          (item: any) => ({ ...item, region }),
+        );
 
-      if (recommendationSummaries) {
-        results.push(...recommendationSummaries);
+        if (recommendationSummaries) {
+          results.push(...recommendationSummaries);
+        }
       }
+    } catch (error) {
+      if (isAwsPermissionError(error)) {
+        logger.debug('Skipping AWS region due to permission error', {
+          region,
+          error,
+        });
+        continue;
+      }
+
+      throw error;
     }
   }
 

@@ -1,3 +1,17 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+
+  return {
+    ...actual,
+    logger: {
+      ...actual.logger,
+      debug: debugMock,
+    },
+  };
+});
+
 const CREDENTIALS = {
   accessKeyId: 'some accessKeyId',
   secretAccessKey: 'some secretAccessKey',
@@ -159,6 +173,41 @@ describe('Get recommendations summary', () => {
       'region2',
     ]);
     expect(openopsCommonMock.getAwsClient).toHaveBeenCalledTimes(2);
+  });
+
+  test('should skip permission denied regions when fetching recommendation summaries', async () => {
+    const summary = createRecommendationsSummaryResponse([
+      {
+        recommendationResourceType: RecommendationSourceType.EBS_VOLUME,
+      },
+    ]);
+
+    openopsCommonMock.makeAwsRequest
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockResolvedValueOnce([summary]);
+
+    const recommendations: any[] = await getRecommendationSummaries(
+      CREDENTIALS,
+      ['region1', 'region2'],
+    );
+
+    expect(recommendations).toHaveLength(1);
+    expect(recommendations[0].region).toBe('region2');
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when every recommendation summary region is denied', async () => {
+    openopsCommonMock.makeAwsRequest
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    const recommendations = await getRecommendationSummaries(CREDENTIALS, [
+      'region1',
+      'region2',
+    ]);
+
+    expect(recommendations).toEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
   });
 });
 

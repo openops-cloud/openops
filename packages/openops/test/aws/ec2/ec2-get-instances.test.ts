@@ -1,3 +1,13 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  return {
+    logger: {
+      debug: debugMock,
+    },
+  };
+});
+
 const describeInstancesCommandMock = jest.fn();
 jest.mock('@aws-sdk/client-ec2', () => {
   return {
@@ -171,5 +181,57 @@ describe('getEc2Instances', () => {
       Filters: filters,
       DryRun: true,
     });
+  });
+
+  test('should skip permission denied regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        Reservations: [
+          {
+            Instances: [
+              { InstanceId: 'mockResult1', InstanceType: 'c1.medium' },
+            ],
+          },
+        ],
+      })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEc2Instances(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].instance_id).toBe('mockResult1');
+    expect(result[0].region).toBe('some-region1');
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all regions are denied', async () => {
+    const sendMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEc2Instances(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
   });
 });
