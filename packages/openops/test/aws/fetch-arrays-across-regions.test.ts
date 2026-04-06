@@ -25,7 +25,7 @@ describe('fetchArraysAcrossRegions', () => {
     expect(debugMock).not.toHaveBeenCalled();
   });
 
-  test('skips permission errors and warns', async () => {
+  test('skips permission errors and debugs', async () => {
     const result = await fetchArraysAcrossRegions(
       ['ok', 'denied'],
       async (region) => {

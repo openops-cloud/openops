@@ -13,12 +13,12 @@ export async function fetchArraysAcrossRegions<T>(
     regions.map((region) => fetchPerRegion(region)),
   );
 
-  const merged: T[] = [];
+  const results: T[] = [];
   let unexpectedError: unknown;
 
   settled.forEach((outcome, index) => {
     if (outcome.status === 'fulfilled') {
-      merged.push(...outcome.value);
+      results.push(...outcome.value);
       return;
     }
 
@@ -38,5 +38,5 @@ export async function fetchArraysAcrossRegions<T>(
     throw unexpectedError;
   }
 
-  return merged;
+  return results;
 }
