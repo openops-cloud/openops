@@ -3,8 +3,9 @@
   "version": "0.100.0",
   "rcVersion": "0.100.0",
   "scripts": {
+    "setup:husky": "husky || true",
     "setup:env": "[ ! -e .env ] && cp -v .env.template .env || :",
-    "prepare": "npm run setup:env && husky",
+    "prepare": "npm run setup:env && npm run setup:husky",
     "serve:frontend": "nx serve react-ui",
     "build:frontend": "nx build react-ui",
     "serve:backend": "nx run server-api:serve:development",
