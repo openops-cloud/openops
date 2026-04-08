@@ -1,4 +1,5 @@
 import { createAction, Property, Validators } from '@openops/blocks-framework';
+import { tryParseJson } from '@openops/common';
 import { common, getScopeAndKey } from './common';
 
 export const storageGetAction = createAction({
@@ -25,6 +26,12 @@ export const storageGetAction = createAction({
       required: false,
     }),
     store_scope: common.store_scope,
+    parseJSON: Property.Checkbox({
+      displayName: 'Parse as JSON',
+      description: 'Convert output into a JSON object',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     const { key, scope } = getScopeAndKey({
@@ -33,9 +40,15 @@ export const storageGetAction = createAction({
       key: context.propsValue['key'],
       scope: context.propsValue.store_scope,
     });
-    return (
+
+    const value =
       (await context.store.get(key, scope)) ??
-      context.propsValue['defaultValue']
-    );
+      context.propsValue['defaultValue'];
+
+    if (context.propsValue['parseJSON']) {
+      return tryParseJson(value);
+    }
+
+    return value;
   },
 });
