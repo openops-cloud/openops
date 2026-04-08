@@ -12,7 +12,7 @@ export async function createEbsSnapshot(params: CreateEbsSnapshotParams) {
   ) as EC2.EC2;
 
   const snapshotParams: EC2.CreateSnapshotRequest = {
-      VolumeId: params.volumeId,
+    VolumeId: params.volumeId,
     Description: params.description,
     DryRun: params.dryRun,
   };
