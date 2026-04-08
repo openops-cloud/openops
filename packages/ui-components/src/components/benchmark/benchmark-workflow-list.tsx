@@ -1,6 +1,26 @@
 import { BenchmarkWorkflowBase } from '@openops/shared';
 import { t } from 'i18next';
 
+const getBenchmarkCostMessage = (provider: string): string => {
+  switch (provider.toLowerCase()) {
+    case 'azure':
+      return t(
+        '* Running the benchmark triggers {provider} API calls, but these calls do not incur any charges.',
+        { provider },
+      );
+    case 'aws':
+      return t(
+        '* Running the benchmark triggers {provider} API calls, which may result in a small charge from {provider} (typically not exceeding $0.03 per account).',
+        { provider },
+      );
+    default:
+      return t(
+        '* Running the benchmark triggers {provider} API calls, which may result in a small charge from {provider}.',
+        { provider },
+      );
+  }
+};
+
 export const BenchmarkWorkflowList = ({
   workflows,
   provider,
@@ -18,10 +38,7 @@ export const BenchmarkWorkflowList = ({
       ))}
     </ul>
     <p className="text-xs text-muted-foreground mt-3 italic shrink-0">
-      {t(
-        '* Running the benchmark triggers {provider} API calls, which may result in a small charge from {provider} (typically not exceeding $0.03 per account).',
-        { provider },
-      )}
+      {getBenchmarkCostMessage(provider)}
     </p>
   </div>
 );
