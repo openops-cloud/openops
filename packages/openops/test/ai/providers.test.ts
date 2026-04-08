@@ -39,6 +39,10 @@ jest.mock('../../src/lib/ai/providers/groq', () => ({
   groqProvider: { models: ['groqModel'] },
 }));
 
+jest.mock('../../src/lib/ai/providers/minimax', () => ({
+  minimaxProvider: { models: ['minimaxModel'] },
+}));
+
 jest.mock('../../src/lib/ai/providers/openai-compatible', () => ({
   openaiCompatibleProvider: {
     models: ['openaiCompatibleModel'],
@@ -136,6 +140,10 @@ describe('getAvailableProvidersWithModels', () => {
         models: ['groqModel'],
       },
       {
+        provider: AiProviderEnum.MINIMAX,
+        models: ['minimaxModel'],
+      },
+      {
         provider: AiProviderEnum.MISTRAL,
         models: ['mistralModel'],
       },
@@ -161,7 +169,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(15);
+    expect(result).toHaveLength(16);
     expect(result).toEqual(expected);
   });
 });
