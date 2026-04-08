@@ -1,6 +1,6 @@
 {
-  "created": "1771567412126",
-  "updated": "1771567412126",
+  "created": "1775629995572",
+  "updated": "1775629995572",
   "name": "AWS Benchmark - ECS Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -104,7 +104,6 @@
               "valid": true,
               "settings": {
                 "input": {
-                  "auth": null,
                   "body": {
                     "data": {
                       "status": "ok"
@@ -183,7 +182,7 @@
                       "value": false
                     },
                     "continueOnFailure": {
-                      "value": false
+                      "value": true
                     }
                   }
                 },
