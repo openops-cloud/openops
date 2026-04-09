@@ -19,10 +19,7 @@ jest.mock('../../src/lib/network-utils', () => ({
   networkUtls: { getPublicUrl },
 }));
 
-import {
-  validateHost,
-  validateHostAllowingPublicWebhookUrl,
-} from '../../src/lib/host-validation';
+import { validateHost } from '../../src/lib/host-validation';
 
 describe('Host Validation', () => {
   beforeEach(() => {
@@ -127,77 +124,5 @@ describe('Host Validation', () => {
     await expect(validateHost(host)).rejects.toThrow(
       'Host must not be an internal address',
     );
-  });
-
-  describe('validateHostAllowingPublicWebhookUrl', () => {
-    test('should skip for empty url', async () => {
-      const url = '';
-      await expect(
-        validateHostAllowingPublicWebhookUrl(url),
-      ).resolves.toBeUndefined();
-    });
-
-    test('should allow public webhook url even if it resolves to private ip', async () => {
-      const publicUrl = 'https://openops.example.com/';
-      const webhookUrl =
-        'https://openops.example.com/v1/webhooks/123456789012345678901/sync';
-      getPublicUrl.mockResolvedValue(publicUrl);
-      resolve4.mockResolvedValue(['127.0.0.1']);
-      resolve6.mockResolvedValue([]);
-
-      await expect(
-        validateHostAllowingPublicWebhookUrl(webhookUrl),
-      ).resolves.toBeUndefined();
-    });
-
-    test('should throw for internal host that is not the public webhook url', async () => {
-      const publicUrl = 'https://openops.example.com/';
-      const internalUrl =
-        'https://10.0.0.1/v1/webhooks/123456789012345678901/sync';
-      getPublicUrl.mockResolvedValue(publicUrl);
-      resolve4.mockResolvedValue(['10.0.0.1']);
-      resolve6.mockResolvedValue([]);
-
-      await expect(
-        validateHostAllowingPublicWebhookUrl(internalUrl),
-      ).rejects.toThrow('Host must not be an internal address');
-    });
-
-    test('should throw for public webhook url with invalid id length', async () => {
-      const publicUrl = 'https://openops.example.com/';
-      const webhookUrl =
-        'https://openops.example.com/v1/webhooks/too-short/sync';
-      getPublicUrl.mockResolvedValue(publicUrl);
-      resolve4.mockResolvedValue(['127.0.0.1']);
-      resolve6.mockResolvedValue([]);
-
-      await expect(
-        validateHostAllowingPublicWebhookUrl(webhookUrl),
-      ).rejects.toThrow('Host must not be an internal address');
-    });
-
-    test('should allow public host', async () => {
-      const publicUrl = 'https://openops.example.com/';
-      const somePublicUrl = 'https://google.com';
-      getPublicUrl.mockResolvedValue(publicUrl);
-      resolve4.mockResolvedValue(['8.8.8.8']);
-      resolve6.mockResolvedValue([]);
-
-      await expect(
-        validateHostAllowingPublicWebhookUrl(somePublicUrl),
-      ).resolves.toBeUndefined();
-    });
-
-    test('should throw error for DNS resolution failure on non-webhook URL', async () => {
-      const publicUrl = 'https://openops.example.com/';
-      const unknownUrl = 'https://unknown.example.com';
-      getPublicUrl.mockResolvedValue(publicUrl);
-      resolve4.mockRejectedValue(new Error('DNS resolution failed'));
-      resolve6.mockRejectedValue(new Error('DNS resolution failed'));
-
-      await expect(
-        validateHostAllowingPublicWebhookUrl(unknownUrl),
-      ).rejects.toThrow('Failed to resolve host');
-    });
   });
 });

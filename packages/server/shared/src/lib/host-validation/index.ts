@@ -64,27 +64,3 @@ export async function validateHost(host: string | undefined): Promise<void> {
   const isPrivate = await isInternalHost(host);
   if (isPrivate) throw new Error('Host must not be an internal address');
 }
-
-export async function validateHostAllowingPublicWebhookUrl(
-  url: string | undefined,
-): Promise<void> {
-  if (!url) {
-    return;
-  }
-
-  try {
-    await validateHost(url);
-  } catch (error) {
-    const publicUrl = await networkUtls.getPublicUrl();
-
-    const escapedBase = publicUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    const regex = new RegExp(
-      `^${escapedBase}v1/webhooks/[0-9a-zA-Z]{21}/sync$`,
-    );
-
-    if (!regex.test(url)) {
-      throw error;
-    }
-  }
-}
