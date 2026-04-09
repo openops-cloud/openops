@@ -1,7 +1,6 @@
 const resolve4 = jest.fn();
 const resolve6 = jest.fn();
 const getBoolean = jest.fn().mockReturnValue(true);
-const getPublicUrl = jest.fn();
 
 jest.mock('dns', () => ({ promises: { resolve4, resolve6 } }));
 jest.mock('../../src/lib/system', () => ({
@@ -14,9 +13,6 @@ jest.mock('../../src/lib/system', () => ({
     FRONTEND_URL: 'FRONTEND_URL',
   },
   AppSystemProp: { CLIENT_REAL_IP_HEADER: 'CLIENT_REAL_IP_HEADER' },
-}));
-jest.mock('../../src/lib/network-utils', () => ({
-  networkUtls: { getPublicUrl },
 }));
 
 import { validateHost } from '../../src/lib/host-validation';

@@ -25,7 +25,6 @@ export async function validateAndRewritePublicWebhookUrl(
 
     const userUrlObj = new URL(userUrl);
     const publicUrlObj = new URL(publicUrl);
-
     if (userUrlObj.origin !== publicUrlObj.origin) {
       return userUrl;
     }
