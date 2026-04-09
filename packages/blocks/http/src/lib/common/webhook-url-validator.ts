@@ -1,5 +1,45 @@
 import { networkUtls, validateHost } from '@openops/server-shared';
 
+const WEBHOOK_SYNC_PATH_REGEX = /^\/v1\/webhooks\/[0-9A-Za-z]{21}\/sync$/;
+
+function normalizeBasePath(pathname: string): string {
+  return pathname.replace(/\/$/, '');
+}
+
+function normalizePath(pathname: string): string {
+  const withLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return withLeadingSlash.replace(/\/{2,}/g, '/');
+}
+
+function stripBasePath(pathname: string, basePath: string): string {
+  if (!basePath || basePath === '/') {
+    return pathname;
+  }
+
+  if (!pathname.startsWith(basePath)) {
+    return pathname;
+  }
+
+  return pathname.slice(basePath.length) || '/';
+}
+
+function extractWebhookPath(
+  pathname: string,
+  publicBasePath: string,
+  internalBasePath: string,
+): string | null {
+  const candidates = [
+    normalizePath(stripBasePath(pathname, publicBasePath)),
+    normalizePath(stripBasePath(pathname, internalBasePath)),
+    normalizePath(pathname),
+  ];
+
+  return (
+    candidates.find((candidate) => WEBHOOK_SYNC_PATH_REGEX.test(candidate)) ??
+    null
+  );
+}
+
 export async function validateAndRewritePublicWebhookUrl(
   userUrl: string,
 ): Promise<string> {
@@ -10,42 +50,35 @@ export async function validateAndRewritePublicWebhookUrl(
   try {
     await validateHost(userUrl);
     return userUrl;
-  } catch (error) {
-    const publicUrl = await networkUtls.getPublicUrl();
-    const internalApiUrl = networkUtls.getInternalApiUrl();
+  } catch (originalError) {
+    const [publicUrl, internalApiUrl] = await Promise.all([
+      networkUtls.getPublicUrl(),
+      networkUtls.getInternalApiUrl(),
+    ]);
 
     const publicUrlObj = new URL(publicUrl);
     const internalUrlObj = new URL(internalApiUrl);
     const userUrlObj = new URL(userUrl);
 
-    if (userUrlObj.origin !== publicUrlObj.origin) {
-      throw error;
+    if (userUrlObj.host !== publicUrlObj.host) {
+      throw originalError;
     }
 
-    const internalBasePath = internalUrlObj.pathname.replace(/\/$/, '');
-    let relativePath = userUrlObj.pathname;
+    const publicBasePath = normalizeBasePath(publicUrlObj.pathname);
+    const internalBasePath = normalizeBasePath(internalUrlObj.pathname);
 
-    if (
-      internalBasePath &&
-      internalBasePath !== '/' &&
-      relativePath.startsWith(internalBasePath)
-    ) {
-      relativePath = relativePath.slice(internalBasePath.length);
-    }
-
-    if (!relativePath.startsWith('/')) {
-      relativePath = `/${relativePath}`;
-    }
-
-    if (!/^\/v1\/webhooks\/[0-9A-Za-z]{21}\/sync$/.test(relativePath)) {
-      throw error;
-    }
-
-    const rewrittenPath = `${internalBasePath}${relativePath}`.replace(
-      /\/{2,}/g,
-      '/',
+    const webhookPath = extractWebhookPath(
+      userUrlObj.pathname,
+      publicBasePath,
+      internalBasePath,
     );
 
-    return `${internalUrlObj.origin}${rewrittenPath}`;
+    if (!webhookPath) {
+      throw originalError;
+    }
+
+    const rewrittenPath = normalizePath(`${internalBasePath}${webhookPath}`);
+
+    return `${internalUrlObj.origin}${rewrittenPath}${userUrlObj.search}${userUrlObj.hash}`;
   }
 }
