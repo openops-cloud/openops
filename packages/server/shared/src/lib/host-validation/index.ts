@@ -1,7 +1,6 @@
 import { promises as dns } from 'dns';
 import ipRangeCheck from 'ip-range-check';
 import { isIPv4, isIPv6 } from 'net';
-import { networkUtls } from '../network-utils';
 import { SharedSystemProp, system } from '../system';
 
 const internalV4Cidrs = [
