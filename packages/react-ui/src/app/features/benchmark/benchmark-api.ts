@@ -2,30 +2,30 @@ import {
   BenchmarkCreationResult,
   BenchmarkStatusResponse,
   BenchmarkWebhookPayload,
-  BenchmarkWizardRequest,
-  BenchmarkWizardStepResponse,
   ListBenchmarksResponse,
+  WizardRequest,
+  WizardStepResponse,
 } from '@openops/shared';
 
 import { api } from '@/app/lib/api';
 
 const getWizardStep = (
   provider: string,
-  request: BenchmarkWizardRequest,
-): Promise<BenchmarkWizardStepResponse> =>
-  api.post<BenchmarkWizardStepResponse, BenchmarkWizardRequest>(
+  request: WizardRequest,
+): Promise<WizardStepResponse> =>
+  api.post<WizardStepResponse, WizardRequest>(
     `/v1/benchmarks/${provider}/wizard`,
     request,
   );
 
 const createBenchmark = (
   provider: string,
-  benchmarkConfiguration: Record<string, string[]>,
+  wizardState: Record<string, string[]>,
 ): Promise<BenchmarkCreationResult> =>
-  api.post<
-    BenchmarkCreationResult,
-    { benchmarkConfiguration: Record<string, string[]> }
-  >(`/v1/benchmarks/${provider}`, { benchmarkConfiguration });
+  api.post<BenchmarkCreationResult, { wizardState: Record<string, string[]> }>(
+    `/v1/benchmarks/${provider}`,
+    { wizardState: wizardState },
+  );
 
 const runBenchmark = (
   orchestratorFlowId: string,

@@ -913,7 +913,7 @@
                                                                         {
                                                                           "fieldName": "Service",
                                                                           "newFieldValue": {
-                                                                            "newFieldValue": "AZURE VM"
+                                                                            "newFieldValue": "Virtual Machines"
                                                                           }
                                                                         },
                                                                         {

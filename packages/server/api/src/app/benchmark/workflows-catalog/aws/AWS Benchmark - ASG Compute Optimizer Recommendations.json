@@ -1,6 +1,6 @@
 {
-  "created": "1772547722558",
-  "updated": "1772547722558",
+  "created": "1775629953478",
+  "updated": "1775629953478",
   "name": "AWS Benchmark - ASG Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -182,7 +182,7 @@
                       "value": false
                     },
                     "continueOnFailure": {
-                      "value": false
+                      "value": true
                     }
                   }
                 },

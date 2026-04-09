@@ -1,10 +1,7 @@
 const wizardServiceMock = {
   resolveWizardNavigation: jest.fn(),
 };
-jest.mock(
-  '../../../../src/app/benchmark/wizard.service',
-  () => wizardServiceMock,
-);
+jest.mock('../../../../src/app/wizard/wizard.service', () => wizardServiceMock);
 
 const createBenchmarkServiceMock = {
   createBenchmark: jest.fn(),
@@ -28,11 +25,11 @@ import {
   BenchmarkListItem,
   BenchmarkProviders,
   BenchmarkStatus,
-  type BenchmarkStatusResponse,
-  type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
   Project,
+  type BenchmarkStatusResponse,
+  type WizardStepResponse,
 } from '@openops/shared';
 import { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -45,7 +42,7 @@ import {
   createMockUser,
 } from '../../../helpers/mocks';
 
-const mockWizardStep: BenchmarkWizardStepResponse = {
+const mockWizardStep: WizardStepResponse = {
   currentStep: 'mock-current-step-id',
   title: 'Mock current step title',
   nextStep: 'mock-next-step-id',
@@ -155,9 +152,16 @@ describe('Benchmark wizard API', () => {
         );
         expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
           provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+          }),
           {
             currentStep: undefined,
-            benchmarkConfiguration: undefined,
+            wizardState: undefined,
           },
           project.id,
         );
@@ -165,12 +169,12 @@ describe('Benchmark wizard API', () => {
     );
 
     it.each(allBenchmarkProviders)(
-      'passes currentStep and benchmarkConfiguration to resolveWizardNavigation (%s)',
+      'passes currentStep and wizardState to resolveWizardNavigation (%s)',
       async (provider) => {
         const { token, project } = await createAndInsertMocks();
         const body = {
           currentStep: 'connection',
-          benchmarkConfiguration: { connection: ['conn-1'] },
+          wizardState: { connection: ['conn-1'] },
         };
 
         const response = await postWizard({
@@ -183,9 +187,16 @@ describe('Benchmark wizard API', () => {
         expect(response?.json()).toEqual(mockWizardStep);
         expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
           provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+          }),
           {
             currentStep: 'connection',
-            benchmarkConfiguration: { connection: ['conn-1'] },
+            wizardState: { connection: ['conn-1'] },
           },
           project.id,
         );
@@ -264,7 +275,7 @@ describe('Benchmark wizard API', () => {
 
 describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
   const validAwsCreateBody = {
-    benchmarkConfiguration: {
+    wizardState: {
       connection: ['conn-1'],
       workflows: ['AWS Benchmark - Unattached EBS'],
       regions: ['us-east-1'],
@@ -272,7 +283,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
   };
 
   const validAzureCreateBody = {
-    benchmarkConfiguration: {
+    wizardState: {
       connection: ['conn-1'],
       workflows: ['Azure Benchmark - Unattached Managed Disks'],
       regions: ['eastus'],
@@ -388,7 +399,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
         provider,
         projectId: project.id,
         userId: expect.any(String),
-        benchmarkConfiguration: body.benchmarkConfiguration,
+        wizardState: body.wizardState,
       });
     },
   );
@@ -432,7 +443,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     expect(createBenchmarkServiceMock.createBenchmark).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when body is missing benchmarkConfiguration', async () => {
+  it('returns 400 when body is missing wizardState', async () => {
     const { token } = await createAndInsertMocks();
 
     const response = await postCreate({
@@ -464,7 +475,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
       provider: BenchmarkProviders.AWS,
       token,
       body: {
-        benchmarkConfiguration: {
+        wizardState: {
           connection: ['conn-1'],
           workflows: [],
           regions: ['us-east-1'],

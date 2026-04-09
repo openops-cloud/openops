@@ -51,7 +51,7 @@ describe('create-benchmark-flows.service', () => {
     provider: BenchmarkProviders.AWS,
     folderId: 'folder-1',
     connectionId: 'conn-1',
-    benchmarkConfiguration: {
+    wizardState: {
       connection: ['conn-1'],
       workflows: ['w1'],
       accounts: [] as string[],
@@ -163,7 +163,7 @@ describe('create-benchmark-flows.service', () => {
     const azureRequest: AttachFlowsToBenchmarkRequest = {
       ...attachFlowsToBenchmarkRequest,
       provider: BenchmarkProviders.AZURE,
-      benchmarkConfiguration: {
+      wizardState: {
         connection: ['conn-1'],
         workflows: ['w1'],
         subscriptions: ['sub-a', 'sub-b'],

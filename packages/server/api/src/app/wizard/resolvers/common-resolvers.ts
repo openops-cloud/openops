@@ -1,8 +1,11 @@
-import { AppConnectionStatus, BenchmarkWizardOption } from '@openops/shared';
-import { appConnectionService } from '../app-connection/app-connection-service/app-connection-service';
-import { getAuthProviderMetadata } from '../app-connection/connection-providers-resolver';
-import { throwValidationError } from './errors';
-import type { WizardContext } from './provider-adapter';
+import {
+  AppConnectionStatus,
+  throwValidationError,
+  WizardContext,
+  WizardOption,
+} from '@openops/shared';
+import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
+import { getAuthProviderMetadata } from '../../app-connection/connection-providers-resolver';
 
 export async function getAuthProviderLogoUrl(
   authProviderKey: string,
@@ -14,7 +17,7 @@ export async function getAuthProviderLogoUrl(
 
 export async function listConnections(
   context: WizardContext,
-): Promise<BenchmarkWizardOption[]> {
+): Promise<WizardOption[]> {
   if (!context.projectId) {
     throwValidationError('projectId is required to list connections');
   }

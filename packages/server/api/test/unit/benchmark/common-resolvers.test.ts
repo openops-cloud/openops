@@ -1,5 +1,5 @@
 import { AppConnectionStatus } from '@openops/shared';
-import { listConnections } from '../../../src/app/benchmark/common-resolvers';
+import { listConnections } from '../../../src/app/wizard/resolvers/common-resolvers';
 
 const mockList = jest.fn();
 const mockGetAuthProviderMetadata = jest.fn();

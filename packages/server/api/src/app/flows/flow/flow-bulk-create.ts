@@ -1,14 +1,32 @@
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   AppConnectionsWithSupportedBlocks,
+  BlockTrigger,
+  flowHelper,
+  FlowScheduleOptions,
   FlowStatus,
   FlowVersion,
   FlowVersionState,
-  TriggerWithOptionalId,
-  flowHelper,
+  isNil,
   openOpsId,
+  ScheduleType,
+  TriggerWithOptionalId,
 } from '@openops/shared';
+import fs from 'node:fs/promises';
 import { EntityManager } from 'typeorm';
-import { flowRepo } from '../flows/flow/flow.repo';
+import { triggerHooks } from '../trigger';
+import { triggerUtils } from '../trigger/hooks/trigger-utils';
+import { flowRepo } from './flow.repo';
+
+export async function loadWorkflowTemplate(
+  filePath: string,
+): Promise<WorkflowTemplate> {
+  const content = await fs.readFile(filePath, 'utf-8');
+  const parsed = JSON.parse(content) as {
+    template: WorkflowTemplate['template'];
+  };
+  return { template: parsed.template };
+}
 
 export type WorkflowTemplate = {
   template: {
@@ -30,7 +48,7 @@ type FlowInsertRecord = {
   status: FlowStatus;
   publishedVersionId: null;
   isInternal: boolean;
-  schedule: null;
+  schedule?: FlowScheduleOptions | null;
 };
 
 export async function bulkCreateAndPublishFlows(
@@ -46,6 +64,8 @@ export async function bulkCreateAndPublishFlows(
   const flowsWithVersions = templates.map((template) =>
     buildFlowAndVersion(template, projectId, folderId, connections),
   );
+
+  await enableFlowTriggers(flowsWithVersions, projectId);
 
   await flowRepo().manager.transaction(async (trx) => {
     await trx
@@ -144,4 +164,43 @@ function buildFlowAndVersion(
   };
 
   return { flow, version: lockedVersion };
+}
+
+async function enableFlowTriggers(
+  flowsWithVersions: Array<{
+    flow: FlowInsertRecord;
+    version: FlowVersion;
+  }>,
+  projectId: string,
+): Promise<void> {
+  for (const { flow, version } of flowsWithVersions) {
+    const trigger = version.trigger as BlockTrigger;
+
+    const blockTrigger = await triggerUtils.getBlockTriggerOrThrow({
+      trigger,
+      projectId,
+    });
+
+    if (blockTrigger.type === TriggerStrategy.WEBHOOK) {
+      continue;
+    }
+
+    const enableResult = await triggerHooks.enable({
+      flowVersion: version,
+      projectId: flow.projectId,
+      simulate: false,
+    });
+
+    const scheduleOptions = enableResult?.result.scheduleOptions;
+
+    if (isNil(scheduleOptions)) {
+      continue;
+    }
+
+    flow.schedule = {
+      ...scheduleOptions,
+      type: ScheduleType.CRON_EXPRESSION,
+      failureCount: 0,
+    };
+  }
 }

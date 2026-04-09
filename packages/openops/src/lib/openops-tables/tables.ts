@@ -27,38 +27,42 @@ export async function getTableIdByTableName(
   return table.id;
 }
 
+export async function getTableById(
+  tableId: number,
+  tablesServerContext: TablesServerContext,
+): Promise<OpenOpsTable | undefined> {
+  const tables = await fetchAllTables(tablesServerContext);
+  return tables.find((t) => t.id === tableId);
+}
+
 export async function getTableByName(
   tableName: string,
   tablesServerContext: TablesServerContext,
 ): Promise<OpenOpsTable | undefined> {
   const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
-
-  const table = tables.find((t) => t.name === tableName);
-
-  return table;
+  return tables.find((t) => t.name === tableName);
 }
 
 export async function getTableNames(
   tablesServerContext: TablesServerContext,
 ): Promise<string[]> {
   const tables = await getAvailableTablesInOpenopsTables(tablesServerContext);
-
   return tables.map((t) => t.name);
 }
 
-async function getAvailableTablesInOpenopsTables(
+export async function getAvailableTablesInOpenopsTables(
+  serverContext: TablesServerContext,
+): Promise<OpenOpsTable[]> {
+  const tables = await fetchAllTables(serverContext);
+  return getDistinctTableNames(tables);
+}
+
+async function fetchAllTables(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
   const tokenOrResolver = await resolveTokenProvider(serverContext);
-
   const authenticationHeader = createAxiosHeaders(tokenOrResolver);
-
-  const tables = await getTables(
-    serverContext.tablesDatabaseId,
-    authenticationHeader,
-  );
-
-  return getDistinctTableNames(tables);
+  return getTables(serverContext.tablesDatabaseId, authenticationHeader);
 }
 
 // Tables allows you to have tables with the same name in the same database.

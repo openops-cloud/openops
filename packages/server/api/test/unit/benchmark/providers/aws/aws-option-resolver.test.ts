@@ -1,12 +1,14 @@
 import { REGION_IMAGE_LOGO_URL } from '@openops/shared';
 
-import { resolveOptions } from '../../../../../src/app/benchmark/providers/aws/aws-option-resolver';
+import { resolveOptions } from '../../../../../src/app/wizard/resolvers/aws/aws-option-resolver';
 
 const mockListConnections = jest.fn();
 const mockGetRegionsList = jest.fn();
 const mockGetAuthProviderMetadata = jest.fn();
-jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
-  ...jest.requireActual('../../../../../src/app/benchmark/common-resolvers'),
+jest.mock('../../../../../src/app/wizard/resolvers/common-resolvers', () => ({
+  ...jest.requireActual(
+    '../../../../../src/app/wizard/resolvers/common-resolvers',
+  ),
   listConnections: (
     ...args: unknown[]
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
@@ -104,7 +106,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: {
+      wizardState: {
         connection: ['conn-123'],
       },
     });
@@ -159,7 +161,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(result).toHaveLength(2);
@@ -197,7 +199,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(result).toEqual([
@@ -213,7 +215,7 @@ describe('resolveOptions', () => {
     const result = await resolveOptions('getConnectionAccounts', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-456'] },
+      wizardState: { connection: ['conn-456'] },
     });
 
     expect(mockGetOneOrThrow).toHaveBeenCalledWith({

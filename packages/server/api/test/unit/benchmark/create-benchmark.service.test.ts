@@ -66,7 +66,7 @@ jest.mock('../../../src/app/benchmark/catalog-resolver', () => ({
 
 const mockGetConnectionsWithBlockSupport = jest.fn();
 jest.mock(
-  '../../../src/app/benchmark/connections-with-supported-blocks',
+  '../../../src/app/app-connection/connections-with-block-support',
   () => ({
     getConnectionsWithBlockSupport: (
       ...args: unknown[]
@@ -84,7 +84,8 @@ jest.mock('server-worker', () => ({
   },
 }));
 
-jest.mock('../../../src/app/benchmark/benchmark-flow-bulk-create', () => ({
+jest.mock('../../../src/app/flows/flow/flow-bulk-create', () => ({
+  ...jest.requireActual('../../../src/app/flows/flow/flow-bulk-create'),
   bulkCreateAndPublishFlows: (
     ...args: unknown[]
   ): ReturnType<typeof mockBulkCreateAndPublishFlows> =>
@@ -108,14 +109,14 @@ const flowFolderServiceMock = flowFolderService as jest.Mocked<
 >;
 const flowServiceMock = flowService as jest.Mocked<typeof flowService>;
 
-const defaultBenchmarkConfiguration = {
+const defaultWizardState = {
   connection: ['conn-1'],
   workflows: ['AWS Benchmark - Unattached EBS'],
   accounts: [] as string[],
   regions: ['us-east-1'] as string[],
 };
 
-const azureBenchmarkConfiguration = {
+const azureWizardState = {
   connection: ['conn-1'],
   workflows: ['Azure Benchmark - Unattached Managed Disks'],
   subscriptions: ['sub-a', 'sub-b'],
@@ -185,7 +186,7 @@ describe('create-benchmark.service', () => {
         provider: 'gcp' as BenchmarkProviders,
         projectId,
         userId: 'user-1',
-        benchmarkConfiguration: defaultBenchmarkConfiguration,
+        wizardState: defaultWizardState,
       }),
     ).rejects.toThrow('Unknown provider: gcp');
     expect(flowFolderServiceMock.getOrCreate).not.toHaveBeenCalled();
@@ -197,8 +198,8 @@ describe('create-benchmark.service', () => {
         provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
-        benchmarkConfiguration: {
-          ...defaultBenchmarkConfiguration,
+        wizardState: {
+          ...defaultWizardState,
           connection: [],
         },
       }),
@@ -214,8 +215,8 @@ describe('create-benchmark.service', () => {
         provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
-        benchmarkConfiguration: {
-          ...defaultBenchmarkConfiguration,
+        wizardState: {
+          ...defaultWizardState,
           workflows: [],
         },
       }),
@@ -231,8 +232,8 @@ describe('create-benchmark.service', () => {
         provider: BenchmarkProviders.AWS,
         projectId: 'project-1',
         userId: 'user-1',
-        benchmarkConfiguration: {
-          ...defaultBenchmarkConfiguration,
+        wizardState: {
+          ...defaultWizardState,
           regions: [],
         },
       }),
@@ -268,7 +269,7 @@ describe('create-benchmark.service', () => {
       name: 'AWS',
       provider: BenchmarkProviders.AWS,
       folderDisplayName: 'AWS Benchmark',
-      benchmarkConfiguration: defaultBenchmarkConfiguration,
+      wizardState: defaultWizardState,
       expectedWebhookPayload: {
         webhookBaseUrl: defaultWebhookBaseUrl,
         workflows: ['flow-3'],
@@ -281,7 +282,7 @@ describe('create-benchmark.service', () => {
       name: 'Azure',
       provider: BenchmarkProviders.AZURE,
       folderDisplayName: 'Azure Benchmark',
-      benchmarkConfiguration: azureBenchmarkConfiguration,
+      wizardState: azureWizardState,
       expectedWebhookPayload: {
         webhookBaseUrl: defaultWebhookBaseUrl,
         workflows: ['flow-3'],
@@ -295,7 +296,7 @@ describe('create-benchmark.service', () => {
     async ({
       provider,
       folderDisplayName,
-      benchmarkConfiguration,
+      wizardState,
       expectedWebhookPayload,
     }) => {
       const projectId = 'project-1';
@@ -313,7 +314,7 @@ describe('create-benchmark.service', () => {
         provider,
         projectId,
         userId: 'user-1',
-        benchmarkConfiguration,
+        wizardState,
       });
 
       expect(flowFolderServiceMock.getOrCreate).toHaveBeenCalledWith({
@@ -337,7 +338,7 @@ describe('create-benchmark.service', () => {
       );
       expect(mockResolveWorkflowPathsForSeed).toHaveBeenCalledWith(
         provider,
-        benchmarkConfiguration.workflows,
+        wizardState.workflows,
       );
       expect(mockBulkCreateAndPublishFlows).toHaveBeenCalledWith(
         expect.any(Array),
@@ -373,7 +374,7 @@ describe('create-benchmark.service', () => {
         provider: BenchmarkProviders.AWS,
         projectId,
         userId,
-        benchmarkConfiguration: defaultBenchmarkConfiguration,
+        wizardState: defaultWizardState,
       }),
     ).rejects.toThrow('DB error');
 

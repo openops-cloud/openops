@@ -25,6 +25,10 @@ export interface RowParams {
   tokenOrResolver: TokenOrResolver;
 }
 
+export interface BatchDeleteRowsParams extends RowParams {
+  rowIds: number[];
+}
+
 export interface GetRowsParams extends RowParams {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
@@ -251,4 +255,33 @@ function getEqualityFilterType(
   }
 
   return ViewFilterTypesEnum.equal;
+}
+
+export async function batchDeleteRows(
+  params: BatchDeleteRowsParams,
+): Promise<void> {
+  if (params.rowIds.length === 0) {
+    return;
+  }
+
+  const url = `api/database/rows/table/${params.tableId}/batch-delete/`;
+
+  await executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost(
+        url,
+        { items: params.rowIds },
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while batch deleting rows:', {
+        error,
+        url,
+        rowIdsCount: params.rowIds.length,
+        rowIdsSample: params.rowIds.slice(0, 10),
+      });
+    },
+  );
 }

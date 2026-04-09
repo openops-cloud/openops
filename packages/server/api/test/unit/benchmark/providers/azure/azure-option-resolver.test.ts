@@ -1,6 +1,6 @@
 import { ErrorCode, REGION_IMAGE_LOGO_URL } from '@openops/shared';
 
-import { resolveOptions } from '../../../../../src/app/benchmark/providers/azure/azure-option-resolver';
+import { resolveOptions } from '../../../../../src/app/wizard/resolvers/azure/azure-option-resolver';
 
 const mockListConnections = jest.fn();
 const mockAuthenticateUserWithAzure = jest.fn();
@@ -8,8 +8,10 @@ const mockGetAzureSubscriptionsList = jest.fn();
 const mockGetAzureRegionsList = jest.fn();
 const mockGetAuthProviderLogoUrl = jest.fn();
 
-jest.mock('../../../../../src/app/benchmark/common-resolvers', () => ({
-  ...jest.requireActual('../../../../../src/app/benchmark/common-resolvers'),
+jest.mock('../../../../../src/app/wizard/resolvers/common-resolvers', () => ({
+  ...jest.requireActual(
+    '../../../../../src/app/wizard/resolvers/common-resolvers',
+  ),
   listConnections: (
     ...args: unknown[]
   ): ReturnType<typeof mockListConnections> => mockListConnections(...args),
@@ -115,7 +117,7 @@ describe('resolveOptions (Azure)', () => {
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['conn-123'] },
+      wizardState: { connection: ['conn-123'] },
     });
 
     expect(mockGetOneOrThrow).toHaveBeenCalledWith({
@@ -164,7 +166,7 @@ describe('resolveOptions (Azure)', () => {
     const result = await resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
 
     expect(mockGetAuthProviderLogoUrl).toHaveBeenCalledWith('Azure', projectId);
@@ -189,7 +191,7 @@ describe('resolveOptions (Azure)', () => {
     const rejection = resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
     await expect(rejection).rejects.toMatchObject({
       error: { code: ErrorCode.VALIDATION },
@@ -216,7 +218,7 @@ describe('resolveOptions (Azure)', () => {
     const rejection = resolveOptions('getSubscriptionsList', {
       projectId,
       provider,
-      benchmarkConfiguration: { connection: ['c1'] },
+      wizardState: { connection: ['c1'] },
     });
     await expect(rejection).rejects.toMatchObject({
       error: { code: ErrorCode.VALIDATION },

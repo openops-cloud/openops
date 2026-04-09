@@ -1,8 +1,8 @@
-import { BenchmarkConfiguration, BenchmarkWizardOption } from '@openops/shared';
-import { throwValidationError } from './errors';
+import { WizardState } from './wizard-request';
+import { WizardOption } from './wizard-response';
 
 export type WizardContext = {
-  benchmarkConfiguration?: BenchmarkConfiguration;
+  wizardState?: WizardState;
   projectId: string;
   provider: string;
 };
@@ -48,26 +48,9 @@ export type ProviderAdapter = {
   resolveOptions(
     method: string,
     context: WizardContext,
-  ): Promise<BenchmarkWizardOption[]>;
+  ): Promise<WizardOption[]>;
   evaluateCondition?: (
     condition: string,
     context: WizardContext,
   ) => Promise<boolean>;
 };
-
-const providers = new Map<string, ProviderAdapter>();
-
-export function registerProvider(
-  provider: string,
-  adapter: ProviderAdapter,
-): void {
-  providers.set(provider, adapter);
-}
-
-export function getProvider(provider: string): ProviderAdapter {
-  const adapter = providers.get(provider);
-  if (!adapter) {
-    throwValidationError(`Provider not found: ${provider}`);
-  }
-  return adapter;
-}
