@@ -1,6 +1,6 @@
 {
-  "created": "1771567491415",
-  "updated": "1771567491415",
+  "created": "1775630021968",
+  "updated": "1775630021968",
   "name": "AWS Benchmark - Idle Elastic Load Balancer (ELB)",
   "tags": [],
   "services": [],
@@ -179,7 +179,6 @@
                     "valid": true,
                     "settings": {
                       "input": {
-                        "auth": null,
                         "body": {
                           "data": {
                             "status": "ok"
@@ -258,7 +257,7 @@
                             "value": false
                           },
                           "continueOnFailure": {
-                            "value": false
+                            "value": true
                           }
                         }
                       },
