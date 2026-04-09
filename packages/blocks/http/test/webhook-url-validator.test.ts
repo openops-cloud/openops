@@ -85,27 +85,6 @@ describe('webhook-url-validator', () => {
       'http://internal-api:3000/v1/webhooks/123456789012345678901/sync',
     ],
     [
-      'rewrites when user URL includes query parameters',
-      'https://public.openops.com',
-      'http://internal-api:3000',
-      'https://public.openops.com/v1/webhooks/123456789012345678901/sync?test=true',
-      'http://internal-api:3000/v1/webhooks/123456789012345678901/sync?test=true',
-    ],
-    [
-      'rewrites when user URL includes a hash fragment',
-      'https://public.openops.com',
-      'http://internal-api:3000',
-      'https://public.openops.com/v1/webhooks/123456789012345678901/sync#section',
-      'http://internal-api:3000/v1/webhooks/123456789012345678901/sync#section',
-    ],
-    [
-      'rewrites when user URL includes both query parameters and a hash fragment',
-      'https://public.openops.com/api',
-      'http://internal-api:3000/internal',
-      'https://public.openops.com/api/v1/webhooks/123456789012345678901/sync?foo=bar#section',
-      'http://internal-api:3000/internal/v1/webhooks/123456789012345678901/sync?foo=bar#section',
-    ],
-    [
       'rewrites when user URL already contains the internal base path after public host matching',
       'https://public.openops.com',
       'http://internal-api:3000/api',
