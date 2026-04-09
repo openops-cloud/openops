@@ -104,7 +104,7 @@ describe('webhook-url-validator', () => {
 
       (validateHost as jest.Mock).mockRejectedValue(originalError);
       (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(publicUrl);
-      (networkUtls.getInternalApiUrl as jest.Mock).mockResolvedValue(
+      (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
         internalApiUrl,
       );
 
@@ -155,7 +155,7 @@ describe('webhook-url-validator', () => {
 
       (validateHost as jest.Mock).mockRejectedValue(originalError);
       (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(publicUrl);
-      (networkUtls.getInternalApiUrl as jest.Mock).mockResolvedValue(
+      (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
         internalApiUrl,
       );
 
