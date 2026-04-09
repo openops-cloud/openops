@@ -12,38 +12,40 @@ export async function validateAndRewritePublicWebhookUrl(
     return userUrl;
   } catch (error) {
     const publicUrl = await networkUtls.getPublicUrl();
-    const internalUrl = new URL(networkUtls.getInternalApiUrl());
-    const escapedBase = publicUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const internalApiUrl = networkUtls.getInternalApiUrl();
 
-    const regex = new RegExp(
-      `^${escapedBase}v1/webhooks/[0-9a-zA-Z]{21}/sync$`,
-    );
+    const publicUrlObj = new URL(publicUrl);
+    const internalUrlObj = new URL(internalApiUrl);
+    const userUrlObj = new URL(userUrl);
 
-    if (!regex.test(userUrl)) {
+    if (userUrlObj.origin !== publicUrlObj.origin) {
       throw error;
     }
 
-    const userUrlObj = new URL(userUrl);
-    const publicUrlObj = new URL(publicUrl);
-    if (userUrlObj.origin !== publicUrlObj.origin) {
-      return userUrl;
-    }
-
-    userUrlObj.protocol = internalUrl.protocol;
-    userUrlObj.hostname = internalUrl.hostname;
-    userUrlObj.port = internalUrl.port;
-
-    const publicBasePath = publicUrlObj.pathname.replace(/\/$/, '');
+    const internalBasePath = internalUrlObj.pathname.replace(/\/$/, '');
+    let relativePath = userUrlObj.pathname;
 
     if (
-      publicBasePath &&
-      publicBasePath !== '/' &&
-      userUrlObj.pathname.startsWith(publicBasePath)
+      internalBasePath &&
+      internalBasePath !== '/' &&
+      relativePath.startsWith(internalBasePath)
     ) {
-      const newPath = userUrlObj.pathname.slice(publicBasePath.length);
-      userUrlObj.pathname = newPath.startsWith('/') ? newPath : `/${newPath}`;
+      relativePath = relativePath.slice(internalBasePath.length);
     }
 
-    return userUrlObj.toString();
+    if (!relativePath.startsWith('/')) {
+      relativePath = `/${relativePath}`;
+    }
+
+    if (!/^\/v1\/webhooks\/[0-9A-Za-z]{21}\/sync$/.test(relativePath)) {
+      throw error;
+    }
+
+    const rewrittenPath = `${internalBasePath}${relativePath}`.replace(
+      /\/{2,}/g,
+      '/',
+    );
+
+    return `${internalUrlObj.origin}${rewrittenPath}`;
   }
 }

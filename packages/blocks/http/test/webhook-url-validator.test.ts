@@ -19,7 +19,7 @@ describe('webhook-url-validator', () => {
     expect(result).toBe('');
   });
 
-  it('should return the original URL if validateHost succeeds', async () => {
+  it('should return the original URL if validateHost passes', async () => {
     (validateHost as jest.Mock).mockResolvedValue(undefined);
     const userUrl = 'https://example.com/webhook';
     const result = await validateAndRewritePublicWebhookUrl(userUrl);
@@ -27,62 +27,95 @@ describe('webhook-url-validator', () => {
     expect(validateHost).toHaveBeenCalledWith(userUrl);
   });
 
-  describe('when validateHost fails', () => {
+  it('should rewrite the URL if it matches the public URL origin and valid webhook path', async () => {
     const error = new Error('Host must not be an internal address');
-    const publicUrl = 'https://app.openops.com/';
-    const internalApiUrl = 'http://api-service:3000/';
+    (validateHost as jest.Mock).mockRejectedValue(error);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://public.openops.com',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://internal-api:3000',
+    );
 
-    beforeEach(() => {
-      (validateHost as jest.Mock).mockRejectedValue(error);
-      (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(publicUrl);
-      (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
-        internalApiUrl,
-      );
-    });
+    const userUrl =
+      'https://public.openops.com/v1/webhooks/123456789012345678901/sync';
+    const result = await validateAndRewritePublicWebhookUrl(userUrl);
 
-    it('should re-throw the error if the URL does not match the webhook regex', async () => {
-      const userUrl = 'https://internal.host/some-other-path';
-      await expect(validateAndRewritePublicWebhookUrl(userUrl)).rejects.toThrow(
-        error,
-      );
-    });
+    expect(result).toBe(
+      'http://internal-api:3000/v1/webhooks/123456789012345678901/sync',
+    );
+  });
 
-    it('should rewrite the URL to internal API URL when it is a valid system webhook', async () => {
-      const webhookId = 'abc123456789012345678';
-      const userUrl = `${publicUrl}v1/webhooks/${webhookId}/sync`;
+  it('should rewrite the URL when public URL has a base path', async () => {
+    const error = new Error('Host must not be an internal address');
+    (validateHost as jest.Mock).mockRejectedValue(error);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://openops.com/',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://internal-api:3000/api',
+    );
 
-      const result = await validateAndRewritePublicWebhookUrl(userUrl);
+    const userUrl =
+      'https://openops.com/api/v1/webhooks/123456789012345678901/sync';
+    const result = await validateAndRewritePublicWebhookUrl(userUrl);
 
-      expect(result).toBe(
-        `http://api-service:3000/v1/webhooks/${webhookId}/sync`,
-      );
-    });
+    expect(result).toBe(
+      'http://internal-api:3000/api/v1/webhooks/123456789012345678901/sync',
+    );
+  });
 
-    it('should handle public URL with a base path correctly during rewrite', async () => {
-      const basePublicUrl = 'https://openops.com/app/';
-      const internalUrl = 'http://internal:3000/';
-      (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(basePublicUrl);
-      (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(internalUrl);
+  it('should throw the original error if origin does not match public URL origin', async () => {
+    const error = new Error('Host must not be an internal address');
+    (validateHost as jest.Mock).mockRejectedValue(error);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://public.openops.com',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://internal-api:3000',
+    );
 
-      const webhookId = 'abc123456789012345678';
-      const userUrl = `${basePublicUrl}v1/webhooks/${webhookId}/sync`;
+    const userUrl =
+      'https://other-domain.com/v1/webhooks/123456789012345678901/sync';
 
-      const result = await validateAndRewritePublicWebhookUrl(userUrl);
+    await expect(validateAndRewritePublicWebhookUrl(userUrl)).rejects.toThrow(
+      error,
+    );
+  });
 
-      expect(result).toBe(`http://internal:3000/v1/webhooks/${webhookId}/sync`);
-    });
+  it('should throw the original error if the path does not match the webhook pattern', async () => {
+    const error = new Error('Host must not be an internal address');
+    (validateHost as jest.Mock).mockRejectedValue(error);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://public.openops.com',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://internal-api:3000',
+    );
 
-    it('should handle public URL with trailing slash in base path correctly', async () => {
-      const basePublicUrl = 'https://openops.com/app/';
-      const internalUrl = 'http://internal:3000/';
-      (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(basePublicUrl);
-      (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(internalUrl);
+    const userUrl = 'https://public.openops.com/v1/webhooks/invalid-id/sync';
 
-      const webhookId = 'abc123456789012345678';
-      const userUrl = `https://openops.com/app/v1/webhooks/${webhookId}/sync`;
+    await expect(validateAndRewritePublicWebhookUrl(userUrl)).rejects.toThrow(
+      error,
+    );
+  });
 
-      const result = await validateAndRewritePublicWebhookUrl(userUrl);
-      expect(result).toBe(`http://internal:3000/v1/webhooks/${webhookId}/sync`);
-    });
+  it('should handle multiple slashes correctly during rewrite', async () => {
+    const error = new Error('Host must not be an internal address');
+    (validateHost as jest.Mock).mockRejectedValue(error);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://public.openops.com/',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://internal-api:3000/',
+    );
+
+    const userUrl =
+      'https://public.openops.com/v1/webhooks/123456789012345678901/sync';
+    const result = await validateAndRewritePublicWebhookUrl(userUrl);
+
+    expect(result).toBe(
+      'http://internal-api:3000/v1/webhooks/123456789012345678901/sync',
+    );
   });
 });
