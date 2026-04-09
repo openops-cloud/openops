@@ -129,6 +129,13 @@ export const WithFetcher: Story = {
   },
 };
 
+export const MutedBackground: Story = {
+  args: {
+    loading: false,
+    cellClassName: 'bg-muted',
+  },
+};
+
 export const StickyHeader: Story = {
   args: {
     loading: false,

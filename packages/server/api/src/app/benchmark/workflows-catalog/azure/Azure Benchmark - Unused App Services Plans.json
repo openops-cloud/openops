@@ -528,7 +528,7 @@
                                                   {
                                                     "fieldName": "Service",
                                                     "newFieldValue": {
-                                                      "newFieldValue": "AZURE APP SERVICE PLANS"
+                                                      "newFieldValue": "App Service Plans"
                                                     }
                                                   },
                                                   {

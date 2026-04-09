@@ -1,10 +1,10 @@
+import { throwValidationError } from '@openops/shared';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
   type LifecycleWorkflow,
   PROVIDER_LIFECYCLE_WORKFLOWS,
 } from './catalog-manifests';
-import { throwValidationError } from './errors';
 
 const WORKFLOWS_CATALOG_DIR = 'workflows-catalog';
 

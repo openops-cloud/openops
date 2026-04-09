@@ -498,3 +498,17 @@ export enum ErrorCode {
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
   OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED = 'OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED',
 }
+
+export function throwFeatureDisabledError(message: string): never {
+  throw new ApplicationError(
+    { code: ErrorCode.FEATURE_DISABLED, params: { message } },
+    message,
+  );
+}
+
+export function throwValidationError(message: string): never {
+  throw new ApplicationError(
+    { code: ErrorCode.VALIDATION, params: { message } },
+    message,
+  );
+}

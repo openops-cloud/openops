@@ -54,6 +54,7 @@ import {
 import { axiosTablesRetryConfig } from '../../src/lib/openops-tables/requests-helpers';
 import {
   addRow,
+  batchDeleteRows,
   deleteRow,
   getRowByPrimaryKeyValue,
   getRows,
@@ -317,6 +318,40 @@ describe('delete row', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+});
+
+describe('batchDeleteRows', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('does nothing when rowIds is empty', async () => {
+    await batchDeleteRows({ tableId: 1, tokenOrResolver: 'token', rowIds: [] });
+
+    expect(makeOpenOpsTablesPostMock).not.toHaveBeenCalled();
+    expect(acquireMock).not.toHaveBeenCalled();
+  });
+
+  test('posts to batch-delete endpoint with correct url and body', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await batchDeleteRows({
+      tableId: 5,
+      tokenOrResolver: 'token',
+      rowIds: [1, 2, 3],
+    });
+
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/table/5/batch-delete/',
+      { items: [1, 2, 3] },
+      'some header',
+    );
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });

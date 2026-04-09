@@ -74,6 +74,7 @@ describe('getCredentialsFromAuth tests', () => {
       'some region',
       'some role',
       'some external id',
+      undefined,
     );
   });
 
@@ -225,6 +226,7 @@ describe('getCredentialsListFromAuth tests', () => {
       'region',
       'arn:aws:iam::2:user/roleName2',
       'externalId2',
+      undefined,
     );
   });
 
@@ -334,6 +336,7 @@ describe('getCredentialsForAccount tests', () => {
       'region',
       'arn:aws:iam::2:user/roleName2',
       'externalId2',
+      undefined,
     );
   });
 

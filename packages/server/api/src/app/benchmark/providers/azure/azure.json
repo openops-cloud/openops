@@ -4,7 +4,7 @@
     {
       "id": "connection",
       "title": "Choose the Azure connection you want to use",
-      "description": "OpenOps can pull data from Azure using the connection you select here.",
+      "description": "OpenOps can pull data from Azure using the connection you select here. We provide Azure RBAC custom role definitions (Bicep or JSON) you can deploy for the required read-only permissions.\n\nRBAC custom role: [OpenOps Azure Benchmark Reader](https://docs.openops.com/cloud-access/azure-rbac#openops-azure-benchmark-reader)",
       "selectionType": "single",
       "optionsSource": { "type": "dynamic", "method": "listConnections" },
       "nextStep": "subscriptions"
@@ -36,18 +36,28 @@
         "type": "static",
         "values": [
           {
+            "id": "Azure Benchmark - Advisor Idle App Service Plan",
+            "displayName": "Advisor Idle App Service Plan",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
+            "id": "Azure Benchmark - Advisor Idle VMs",
+            "displayName": "Advisor Idle VMs",
+            "imageLogoUrl": "/blocks/workflow.svg"
+          },
+          {
             "id": "Azure Benchmark - Elastic Pool Storage",
             "displayName": "Elastic Pool Storage",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "Azure Benchmark - Elastic Pools",
-            "displayName": "Elastic Pools",
+            "id": "Azure Benchmark - Idle VMs",
+            "displayName": "Idle VMs",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
-            "id": "Azure Benchmark - Idle VMs",
-            "displayName": "Idle VMs",
+            "id": "Azure Benchmark - Elastic Pools",
+            "displayName": "Elastic Pools",
             "imageLogoUrl": "/blocks/workflow.svg"
           },
           {
