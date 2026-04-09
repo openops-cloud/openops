@@ -47,19 +47,6 @@ describe('webhook-url-validator', () => {
       );
     });
 
-    it('should re-throw the error if the URL matches regex but has different origin', async () => {
-      // In reality, it will throw because it won't pass the regex (since regex includes publicUrl)
-      // but let's test if we can somehow hit the "return userUrl" branch at line 30.
-      // If publicUrl is 'https://app.openops.com/'
-      // escapedBase is 'https:\/\/app\.openops\.com\/'
-      // regex is '^https:\/\/app\.openops\.com\/v1/webhooks/[0-9a-zA-Z]{21}/sync$'
-      // To pass regex, the URL MUST start with the publicUrl.
-      // So let's see if origin comparison could still fail?
-      // Maybe with case differences or port differences?
-      // But URL origin and regex should match.
-      // Let's test the main rewrite case.
-    });
-
     it('should rewrite the URL to internal API URL when it is a valid system webhook', async () => {
       const webhookId = 'abc123456789012345678';
       const userUrl = `${publicUrl}v1/webhooks/${webhookId}/sync`;
