@@ -1,6 +1,6 @@
 {
-  "created": "1774008914967",
-  "updated": "1774008914967",
+  "created": "1775713528580",
+  "updated": "1775713528580",
   "name": "Run Azure Benchmark - orchestrator",
   "tags": [],
   "services": [],
@@ -108,6 +108,119 @@
                   "inputUiInfo": {
                     "customizedInputs": {}
                   }
+                },
+                "nextAction": {
+                  "id": "uVmo87r5sVzjVLYJxdHIv",
+                  "name": "step_g",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "filters": {
+                        "filters": [
+                          {
+                            "value": {
+                              "value": "Azure Benchmark - "
+                            },
+                            "fieldName": "Workflow",
+                            "filterType": "Contains"
+                          }
+                        ]
+                      },
+                      "tableName": "Opportunities",
+                      "filterType": "AND"
+                    },
+                    "blockName": "@openops/block-openops-tables",
+                    "blockType": "OFFICIAL",
+                    "actionName": "get_records",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "id": "57qCWEPCLaNdZqm7AGI6W",
+                    "name": "step_i",
+                    "type": "CODE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "opportunities": "{{step_g['items']}}"
+                      },
+                      "sourceCode": {
+                        "code": "// @ts-nocheck\n\nconst DEFAULT_CONFIG = {\n  preferAdvisor: true,\n  // Preferred source (Advisor/CO) is only favoured when its best savings\n  // are at least this fraction of the overall highest savings in the group.\n  // e.g. 0.8 means CO must be within 20% of the best non-CO saving.\n  preferAdvisorThreshold: 0.8,\n  debug: false,\n};\n\nconst parseSavings = (opportunity) => {\n  const raw = opportunity?.['Estimated savings USD per month'];\n  const parsed = parseFloat(raw);\n  return Number.isFinite(parsed) ? parsed : 0;\n};\n\nconst isPreferredSource = (workflow) => {\n  const w = String(workflow || '').toLowerCase();\n  return w.includes('advisor') || w.includes('compute optimizer');\n};\n\nconst briefOpp = (opp) => ({\n  id: opp.id,\n  workflow: opp['Workflow'],\n  service: opp['Service'],\n  resourceId: opp['Resource Id'],\n  savings: parseSavings(opp),\n});\n\nconst buildGroupKey = (opp) =>\n  String(opp?.['Resource Id'] || '').trim();\n\nconst selectWinner = (opportunities, config) => {\n  if (opportunities.length === 1) {\n    return {\n      winner: opportunities[0],\n      losers: [],\n      reason: 'Only one opportunity in group',\n    };\n  }\n\n  let candidates = opportunities;\n  let reasonPrefix = 'Selected by highest savings';\n\n  if (config.preferAdvisor) {\n    const preferredCandidates = opportunities.filter((opp) =>\n      isPreferredSource(opp?.['Workflow'])\n    );\n\n    if (preferredCandidates.length > 0) {\n      const maxAllSavings = Math.max(...opportunities.map(parseSavings));\n      const maxPreferredSavings = Math.max(...preferredCandidates.map(parseSavings));\n      const threshold = config.preferAdvisorThreshold ?? 0.8;\n\n      if (maxPreferredSavings >= threshold * maxAllSavings) {\n        candidates = preferredCandidates;\n        reasonPrefix = 'Selected from Advisor/Compute Optimizer opportunities by highest savings';\n      }\n    }\n  }\n\n  const sorted = [...candidates].sort((a, b) => parseSavings(b) - parseSavings(a));\n  const winner = sorted[0];\n\n  const losers = opportunities.filter((opp) => opp !== winner);\n\n  return {\n    winner,\n    losers,\n    reason: `${reasonPrefix}. Winner: ${winner?.['Workflow']} ($${parseSavings(winner).toFixed(2)})`,\n  };\n};\n\nconst deDuplicate = (opportunities, config) => {\n  const toKeep = [];\n  const toRemove = [];\n  const debugLog = [];\n\n  const allOpps = Array.isArray(opportunities) ? opportunities : [];\n  for (const opp of allOpps) {\n    if (parseSavings(opp) === 0) {\n      toRemove.push(opp);\n    }\n  }\n  const nonZeroOpps = allOpps.filter((opp) => parseSavings(opp) !== 0);\n\n  const groups = new Map();\n\n  for (const opp of nonZeroOpps) {\n    const key = buildGroupKey(opp);\n    if (!groups.has(key)) {\n      groups.set(key, []);\n    }\n    groups.get(key).push(opp);\n  }\n\n  for (const [groupKey, groupOpps] of groups.entries()) {\n    const { winner, losers, reason } = selectWinner(groupOpps, config);\n\n    toKeep.push(winner);\n    toRemove.push(...losers);\n\n    if (config.debug) {\n      debugLog.push({\n        groupKey,\n        kept: [briefOpp(winner)],\n        removed: losers.map(briefOpp),\n        reason,\n      });\n    }\n  }\n\n  const result = {\n    toKeep,\n    toRemove,\n    toKeepCount: toKeep.length,\n    toRemoveCount: toRemove.length,\n  };\n\n  if (config.debug) {\n    result.debugLog = debugLog;\n  }\n\n  return result;\n};\n\nexport const code = async ({ opportunities }) => {\n  const config = { ...DEFAULT_CONFIG };\n  return deDuplicate(opportunities, config);\n};\n\nexport {\n  deDuplicate,\n  selectWinner,\n  parseSavings,\n  isPreferredSource,\n  buildGroupKey,\n  DEFAULT_CONFIG,\n};",
+                        "packageJson": "{}"
+                      },
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "i3CHtbRS9g62Aj1xrcVJg",
+                      "name": "step_j",
+                      "type": "LOOP_ON_ITEMS",
+                      "valid": true,
+                      "settings": {
+                        "items": "{{step_i['toRemove']}}",
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "displayName": "Remove duplicated opportunities",
+                      "firstLoopAction": {
+                        "id": "sAef8Jxg4vTcFr5EyZ1hf",
+                        "name": "step_k",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "tableName": "Opportunities",
+                            "rowPrimaryKey": "{{step_j['item']['ID']}}"
+                          },
+                          "blockName": "@openops/block-openops-tables",
+                          "blockType": "OFFICIAL",
+                          "actionName": "delete_record",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "displayName": "Delete Record",
+                        "stepIndex": 16
+                      },
+                      "stepIndex": 15
+                    },
+                    "displayName": "DeDuplicator",
+                    "stepIndex": 14
+                  },
+                  "displayName": "Get Records",
+                  "stepIndex": 13
                 },
                 "displayName": "Loop on benchmark flows",
                 "firstLoopAction": {
