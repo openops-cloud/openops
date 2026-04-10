@@ -1,4 +1,5 @@
 import * as RDS from '@aws-sdk/client-rds';
+import { fetchArraysAcrossRegions } from '../fetch-arrays-across-regions';
 import { getAwsClient } from '../get-client';
 
 export async function describeRdsSnapshots(
@@ -23,10 +24,7 @@ export async function describeRdsSnapshots(
     );
   };
 
-  const snapshotsFromAllRegions = await Promise.all(
-    regions.map(fetchSnapshotsInRegion),
-  );
-  return snapshotsFromAllRegions.flat();
+  return fetchArraysAcrossRegions(regions, fetchSnapshotsInRegion);
 }
 
 export async function describeRdsInstances(
@@ -51,8 +49,5 @@ export async function describeRdsInstances(
     );
   };
 
-  const instancesFromAllRegions = await Promise.all(
-    regions.map(fetchInstancesInRegion),
-  );
-  return instancesFromAllRegions.flat();
+  return fetchArraysAcrossRegions(regions, fetchInstancesInRegion);
 }

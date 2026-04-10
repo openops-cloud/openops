@@ -1,3 +1,13 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  return {
+    logger: {
+      debug: debugMock,
+    },
+  };
+});
+
 const describeVolumesCommandMock = jest.fn();
 jest.mock('@aws-sdk/client-ec2', () => {
   return {
@@ -170,5 +180,51 @@ describe('getEbsVolumes', () => {
       Filters: filters,
       DryRun: false,
     });
+  });
+
+  test('should skip permission denied volume regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        Volumes: [{ VolumeId: 'mockResult1', VolumeType: 'gp2', Size: 100 }],
+      })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEbsVolumes(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].volume_id).toBe('mockResult1');
+    expect(result[0].region).toBe('some-region1');
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all volume regions are denied', async () => {
+    const sendMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEbsVolumes(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
   });
 });

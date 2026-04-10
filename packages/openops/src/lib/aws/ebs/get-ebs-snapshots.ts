@@ -1,4 +1,5 @@
 import * as EC2 from '@aws-sdk/client-ec2';
+import { fetchArraysAcrossRegions } from '../fetch-arrays-across-regions';
 import { getAwsClient } from '../get-client';
 
 export async function getEbsSnapshots(
@@ -25,8 +26,5 @@ export async function getEbsSnapshots(
     );
   };
 
-  const snapshotsFromAllRegions = await Promise.all(
-    regions.map(fetchSnapshotsInRegion),
-  );
-  return snapshotsFromAllRegions.flat();
+  return fetchArraysAcrossRegions(regions, fetchSnapshotsInRegion);
 }

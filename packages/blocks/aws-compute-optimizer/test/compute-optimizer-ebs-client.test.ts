@@ -1,3 +1,17 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+
+  return {
+    ...actual,
+    logger: {
+      ...actual.logger,
+      debug: debugMock,
+    },
+  };
+});
+
 const CREDENTIALS = {
   accessKeyId: 'some accessKeyId',
   secretAccessKey: 'some secretAccessKey',
@@ -156,6 +170,41 @@ describe('Get ebs volumes recommendations', () => {
     expect(recommendations.length).toBe(0);
   });
 
+  test('should skip permission denied regions for EBS recommendations', async () => {
+    const recommendationsInRegion = createRecommendationsResponse([
+      createRecommendations('arn:aws:ec2:us-east-1:123456789123:volume/vol-1'),
+    ]);
+
+    sendMock
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockResolvedValueOnce([recommendationsInRegion]);
+
+    const recommendations = await getEbsRecommendationsForRegions(
+      CREDENTIALS,
+      EBSFinding.OPTIMIZED,
+      ['eu-west-1', 'us-east-1'],
+    );
+
+    expect(recommendations.map((result) => result.arn)).toEqual([
+      'arn:aws:ec2:us-east-1:123456789123:volume/vol-1',
+    ]);
+  });
+
+  test('should return empty array when all EBS recommendation regions are denied', async () => {
+    sendMock
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    const recommendations = await getEbsRecommendationsForRegions(
+      CREDENTIALS,
+      EBSFinding.NOT_OPTIMIZED,
+      ['eu-west-1', 'us-east-1'],
+    );
+
+    expect(recommendations).toEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
+  });
+
   test('should return all the Ebs Volumes Recommendations for the provided volumes', async () => {
     const recommendationsInRegion1 = createRecommendationsResponse([
       createRecommendations('arn:aws:ec2:us-east-1:123456789123:volume/vol-1'),
@@ -220,6 +269,31 @@ describe('Get ebs volumes recommendations', () => {
 
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(recommendations.length).toBe(0);
+  });
+
+  test('should skip permission denied arn regions for EBS recommendations', async () => {
+    sendMock
+      .mockResolvedValueOnce([
+        createRecommendationsResponse([
+          createRecommendations(
+            'arn:aws:ec2:us-east-1:123456789123:volume/vol-1',
+          ),
+        ]),
+      ])
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    const recommendations = await getEbsRecommendationsForARNs(
+      CREDENTIALS,
+      EBSFinding.OPTIMIZED,
+      [
+        'arn:aws:ec2:us-east-1:123456789123:volume/vol-1',
+        'arn:aws:ec2:us-east-2:123456789123:volume/vol-2',
+      ],
+    );
+
+    expect(recommendations.map((result) => result.arn)).toEqual([
+      'arn:aws:ec2:us-east-1:123456789123:volume/vol-1',
+    ]);
   });
 
   test('should return an empty array when the given volumes have 0 savings recommendations', async () => {

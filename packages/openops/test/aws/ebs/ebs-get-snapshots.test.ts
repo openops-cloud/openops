@@ -1,3 +1,13 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  return {
+    logger: {
+      debug: debugMock,
+    },
+  };
+});
+
 const describeSnapshotsCommandMock = jest.fn();
 jest.mock('@aws-sdk/client-ec2', () => {
   return {
@@ -72,5 +82,51 @@ describe('getEbsSnapshots', () => {
       DryRun: true,
       OwnerIds: ['self'],
     });
+  });
+
+  test('should skip permission denied snapshot regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        Snapshots: [{ SnapshotId: 'mockResult1', Status: 'pending' }],
+      })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEbsSnapshots(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toStrictEqual([
+      { SnapshotId: 'mockResult1', Status: 'pending', region: 'some-region1' },
+    ]);
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all snapshot regions are denied', async () => {
+    const sendMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEbsSnapshots(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result).toStrictEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,3 +1,17 @@
+const debugMock = jest.fn();
+
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+
+  return {
+    ...actual,
+    logger: {
+      ...actual.logger,
+      debug: debugMock,
+    },
+  };
+});
+
 const CREDENTIALS = {
   accessKeyId: 'some accessKeyId',
   secretAccessKey: 'some secretAccessKey',
@@ -156,6 +170,45 @@ describe('Get ec2 instances recommendations', () => {
     expect(recommendations.length).toBe(0);
   });
 
+  test('should skip permission denied regions for EC2 recommendations', async () => {
+    const recommendationsInRegion = createRecommendationsResponse([
+      createRecommendations(
+        'arn:aws:ec2:us-east-1:123456789123:instance/i-1',
+        Finding.OPTIMIZED,
+      ),
+    ]);
+
+    sendMock
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockResolvedValueOnce([recommendationsInRegion]);
+
+    const recommendations = await getEC2RecommendationsForRegions(
+      CREDENTIALS,
+      Finding.OPTIMIZED,
+      ['eu-west-1', 'us-east-1'],
+    );
+
+    expect(recommendations.map((result) => result.arn)).toEqual([
+      'arn:aws:ec2:us-east-1:123456789123:instance/i-1',
+    ]);
+    expect(debugMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should return empty array when all EC2 recommendation regions are denied', async () => {
+    sendMock
+      .mockRejectedValueOnce(new Error('AccessDenied'))
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    const recommendations = await getEC2RecommendationsForRegions(
+      CREDENTIALS,
+      Finding.OVER_PROVISIONED,
+      ['eu-west-1', 'us-east-1'],
+    );
+
+    expect(recommendations).toEqual([]);
+    expect(debugMock).toHaveBeenCalledTimes(2);
+  });
+
   test('should return all the EC2 Recommendations for the provided instances', async () => {
     const recommendationsInRegion1 = createRecommendationsResponse([
       createRecommendations('arn:aws:ec2:us-east-2:123456789123:instance/i-1'),
@@ -220,6 +273,31 @@ describe('Get ec2 instances recommendations', () => {
 
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(recommendations.length).toBe(0);
+  });
+
+  test('should skip permission denied arn regions for EC2 recommendations', async () => {
+    sendMock
+      .mockResolvedValueOnce([
+        createRecommendationsResponse([
+          createRecommendations(
+            'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+          ),
+        ]),
+      ])
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    const recommendations = await getEC2RecommendationsForARNs(
+      CREDENTIALS,
+      Finding.OPTIMIZED,
+      [
+        'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+        'arn:aws:ec2:us-east-1:123456789123:instance/i-2',
+      ],
+    );
+
+    expect(recommendations.map((result) => result.arn)).toEqual([
+      'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+    ]);
   });
 
   test('should return an empty array when the given ec2 have 0 savings recommendations', async () => {
