@@ -28,7 +28,10 @@ const getAwsClientMock = {
 jest.mock('../../../src/lib/aws/get-client', () => getAwsClientMock);
 
 import * as EC2 from '@aws-sdk/client-ec2';
-import { getEc2Instances } from '../../../src/lib/aws/ec2/ec2-get-instances';
+import {
+  getEc2Instances,
+  getEc2InstancesWithPartialResults,
+} from '../../../src/lib/aws/ec2/ec2-get-instances';
 
 describe('getEc2Instances', () => {
   beforeEach(() => {
@@ -171,5 +174,74 @@ describe('getEc2Instances', () => {
       Filters: filters,
       DryRun: true,
     });
+  });
+});
+
+describe('getEc2InstancesWithPartialResults', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns instances from successful regions and skips failed regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        Reservations: [
+          {
+            Instances: [
+              { InstanceId: 'ok-instance', InstanceType: 'c1.medium' },
+            ],
+          },
+        ],
+      })
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEc2InstancesWithPartialResults(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result.results).toMatchObject([
+      {
+        instance_id: 'ok-instance',
+        region: 'some-region1',
+        account_id: ACCOUNT_ID,
+      },
+    ]);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'some-region2',
+        accountId: ACCOUNT_ID,
+        error: 'UnauthorizedOperation',
+      },
+    ]);
+    expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+
+  test('when getAccountId fails, marks all regions failed without accountId', async () => {
+    const { getAccountId } = jest.requireMock(
+      '../../../src/lib/aws/sts-common',
+    ) as { getAccountId: jest.Mock };
+    getAccountId.mockRejectedValueOnce(new Error('STS failed'));
+
+    const result = await getEc2InstancesWithPartialResults(
+      CREDENTIALS,
+      ['r1', 'r2'],
+      false,
+      [],
+    );
+
+    expect(result.results).toEqual([]);
+    expect(result.failedRegions).toEqual([
+      { region: 'r1', error: 'STS failed' },
+      { region: 'r2', error: 'STS failed' },
+    ]);
+    expect(getAwsClientMock.getAwsClient).not.toHaveBeenCalled();
   });
 });
