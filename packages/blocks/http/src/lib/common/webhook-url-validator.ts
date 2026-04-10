@@ -51,10 +51,8 @@ export async function validateAndRewritePublicWebhookUrl(
     await validateHost(userUrl);
     return userUrl;
   } catch (originalError) {
-    const [publicUrl, internalApiUrl] = await Promise.all([
-      networkUtls.getPublicUrl(),
-      networkUtls.getInternalApiUrl(),
-    ]);
+    const publicUrl = await networkUtls.getPublicUrl();
+    const internalApiUrl = networkUtls.getInternalApiUrl();
 
     const publicUrlObj = new URL(publicUrl);
     const internalUrlObj = new URL(internalApiUrl);
