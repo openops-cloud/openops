@@ -1,19 +1,6 @@
 {
   "name": "server-worker",
   "version": "0.0.1",
-  "dependencies": {
-    "tslib": "^2.3.0",
-    "@openops/shared": "*",
-    "@openops/server-shared": "*",
-    "@openops/blocks-framework": "0.7.34",
-    "http-status-codes": "2.3.0",
-    "chalk": "4.1.2",
-    "async-mutex": "0.5.0",
-    "axios-retry": "4.5.0",
-    "write-file-atomic": "5.0.1",
-    "nanoid": "3.3.8",
-    "axios": "1.12.0"
-  },
   "type": "commonjs",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts"
