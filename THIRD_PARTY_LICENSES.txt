@@ -16712,7 +16712,7 @@ The complete list of contributors can be found at:
 The following npm packages may be included in this product:
 
  - nodemailer@8.0.2
- - nodemailer@8.0.3
+ - nodemailer@8.0.5
 
 These packages each contain the following license:
 
