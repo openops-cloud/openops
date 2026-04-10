@@ -17,6 +17,7 @@ import FormData from 'form-data';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { httpAuth } from '../common/auth';
 import { httpMethodDropdown } from '../common/props';
+import { validateAndRewritePublicWebhookUrl } from '../common/webhook-url-validator';
 
 const toLowerCaseKeys = (obj: HttpHeaders) =>
   Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
@@ -170,7 +171,7 @@ export const httpSendRequestAction = createAction({
     assertNotNullOrUndefined(method, 'Method');
     assertNotNullOrUndefined(url, 'URL');
 
-    await validateHost(url);
+    const newUrl = await validateAndRewritePublicWebhookUrl(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
     const headersArray =
@@ -191,7 +192,7 @@ export const httpSendRequestAction = createAction({
 
     const request: HttpRequest = {
       method,
-      url,
+      url: newUrl,
       headers: mergedHeaders,
       queryParams: (queryParams ?? {}) as QueryParams,
       timeout: timeout ? timeout * 1000 : 0,

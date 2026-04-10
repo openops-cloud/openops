@@ -8479,7 +8479,7 @@ software or this license, under any kind of legal claim._**
 
 The following npm package may be included in this product:
 
- - axios@1.13.5
+ - axios@1.15.0
 
 This package contains the following license:
 
@@ -16343,7 +16343,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The following npm packages may be included in this product:
 
  - iconv-lite@0.6.3
- - iconv-lite@0.7.0
  - iconv-lite@0.7.2
 
 These packages each contain the following license:
@@ -16712,8 +16711,8 @@ The complete list of contributors can be found at:
 
 The following npm packages may be included in this product:
 
- - nodemailer@6.9.9
- - nodemailer@7.0.6
+ - nodemailer@8.0.2
+ - nodemailer@8.0.5
 
 These packages each contain the following license:
 
@@ -17396,13 +17395,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - libmime@5.2.0
- - libmime@5.2.1
  - libmime@5.3.7
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright (c) 2014-2016 Andris Reinman
 
@@ -17489,12 +17486,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - libbase64@1.2.1
  - libbase64@1.3.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright (c) 2014-2017 Andris Reinman
 
@@ -17568,12 +17564,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - libqp@2.0.1
  - libqp@2.1.1
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright (c) 2014-2022 Andris Reinman
 
@@ -18808,11 +18803,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - mailparser@3.6.7
+ - mailparser@3.9.4
 
 This package contains the following license:
 
-Copyright (c) 2020 - 2021 Andris Reinman
+Copyright (c) 2020 - 2025 Andris Reinman
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -18861,7 +18856,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - imapflow@1.0.196
+ - imapflow@1.2.15
 
 This package contains the following license:
 
@@ -26620,12 +26615,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - mailsplit@5.4.0
- - mailsplit@5.4.6
+ - @zone-eu/mailsplit@5.4.8
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -26712,12 +26706,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - encoding-japanese@2.0.0
  - encoding-japanese@2.2.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -27025,7 +27018,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - tlds@1.248.0
+ - tlds@1.261.0
 
 This package contains the following license:
 
@@ -27665,7 +27658,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fastify@5.8.2
+ - fastify@5.8.3
 
 This package contains the following license:
 
@@ -30867,6 +30860,7 @@ The following npm packages may be included in this product:
  - on-exit-leak-free@2.1.2
  - thread-stream@2.7.0
  - thread-stream@3.1.0
+ - thread-stream@4.0.0
 
 These packages each contain the following license:
 
@@ -30928,6 +30922,7 @@ The following npm packages may be included in this product:
 
  - pino-abstract-transport@1.2.0
  - pino-abstract-transport@2.0.0
+ - pino-abstract-transport@3.0.0
 
 These packages each contain the following license:
 
@@ -31239,7 +31234,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @hono/node-server@1.19.11
+ - @hono/node-server@1.19.13
 
 This package contains the following license:
 
@@ -35631,7 +35626,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - proxy-from-env@1.1.0
+ - proxy-from-env@2.1.0
 
 This package contains the following license:
 
@@ -38743,8 +38738,8 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
+ - pino@10.3.1
  - pino@9.14.0
- - pino@9.9.5
 
 These packages each contain the following license:
 

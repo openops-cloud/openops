@@ -6,19 +6,20 @@ import {
   BenchmarkCreationResult,
   BenchmarkProviders,
   BenchmarkStatusResponse,
-  BenchmarkWizardRequest,
-  BenchmarkWizardStepResponse,
   CreateBenchmarkRequest,
   ListBenchmarksResponse,
   Permission,
   PrincipalType,
+  WizardRequest,
+  WizardStepResponse,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
+import { resolveWizardNavigation } from '../wizard/wizard.service';
 import { assertBenchmarkFeatureEnabled } from './benchmark-feature-guard';
 import { getBenchmarkStatus, listBenchmarks } from './benchmark-status.service';
 import { createBenchmark } from './create-benchmark.service';
-import { resolveWizardNavigation } from './wizard.service';
+import { getProvider } from './providers/providers-registry';
 
 export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('preHandler', assertBenchmarkFeatureEnabled);
@@ -27,11 +28,15 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
     '/:provider/wizard',
     WizardStepRequestOptions,
     async (request, reply) => {
+      const provider = request.params.provider;
+      const providerAdapter = getProvider(provider);
+
       const step = await resolveWizardNavigation(
-        request.params.provider,
+        provider,
+        providerAdapter,
         {
           currentStep: request.body.currentStep,
-          benchmarkConfiguration: request.body.benchmarkConfiguration,
+          wizardState: request.body.wizardState,
         },
         request.principal.projectId,
       );
@@ -47,7 +52,7 @@ export const benchmarkController: FastifyPluginAsyncTypebox = async (app) => {
         provider: request.params.provider,
         projectId: request.principal.projectId,
         userId: request.principal.id,
-        benchmarkConfiguration: request.body.benchmarkConfiguration,
+        wizardState: request.body.wizardState,
       });
 
       return reply.status(StatusCodes.CREATED).send(result);
@@ -116,9 +121,9 @@ const WizardStepRequestOptions = {
     params: Type.Object({
       provider: Type.Enum(BenchmarkProviders),
     }),
-    body: BenchmarkWizardRequest,
+    body: WizardRequest,
     response: {
-      [StatusCodes.OK]: BenchmarkWizardStepResponse,
+      [StatusCodes.OK]: WizardStepResponse,
     },
   },
 };

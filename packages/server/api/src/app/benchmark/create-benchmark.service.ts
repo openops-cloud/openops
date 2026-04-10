@@ -1,36 +1,36 @@
 import {
   ApplicationError,
-  type BenchmarkConfiguration,
   type BenchmarkCreationResult,
   BenchmarkProviders,
   type BenchmarkWorkflowBase,
   ContentType,
   ErrorCode,
   Folder,
+  throwValidationError,
+  type WizardState,
 } from '@openops/shared';
-import fs from 'node:fs/promises';
 import { IsNull } from 'typeorm';
+import { getConnectionsWithBlockSupport } from '../app-connection/connections-with-block-support';
+import {
+  bulkCreateAndPublishFlows,
+  loadWorkflowTemplate,
+  type WorkflowTemplate,
+} from '../flows/flow/flow-bulk-create';
 import { flowService } from '../flows/flow/flow.service';
 import { flowFolderService } from '../flows/folder/folder.service';
 import { createBenchmarkDashboard } from '../openops-analytics/benchmark/benchmark-dashboard-service';
 import { attachFlowsToBenchmark } from './attach-benchmark-flows.service';
-import {
-  bulkCreateAndPublishFlows,
-  type WorkflowTemplate,
-} from './benchmark-flow-bulk-create';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import { benchmarkRepo } from './benchmark.repo';
 import {
   type CategorizedWorkflowPaths,
   resolveWorkflowPathsForSeed,
 } from './catalog-resolver';
-import { getConnectionsWithBlockSupport } from './connections-with-supported-blocks';
-import { throwValidationError } from './errors';
 
-function validateBenchmarkConfiguration(config: BenchmarkConfiguration): void {
-  const connection = config.connection ?? [];
-  const workflows = config.workflows ?? [];
-  const regions = config.regions ?? [];
+function validateWizardState(wizardState: WizardState): void {
+  const connection = wizardState.connection ?? [];
+  const workflows = wizardState.workflows ?? [];
+  const regions = wizardState.regions ?? [];
   if (connection.length === 0) {
     throwValidationError(
       'You must select at least one connection to create a benchmark',
@@ -73,6 +73,8 @@ function getBenchmarkFolderDisplayName(provider: string): string {
   switch (provider) {
     case BenchmarkProviders.AWS:
       return 'AWS Benchmark';
+    case BenchmarkProviders.AZURE:
+      return 'Azure Benchmark';
     default:
       throwValidationError(`Unknown provider: ${provider}`);
   }
@@ -133,16 +135,6 @@ export async function deleteFlowsForExistingBenchmark(params: {
     { id: benchmarkId, deletedAt: IsNull() },
     { deletedAt: now },
   );
-}
-
-async function loadWorkflowTemplate(
-  filePath: string,
-): Promise<WorkflowTemplate> {
-  const content = await fs.readFile(filePath, 'utf-8');
-  const parsed = JSON.parse(content) as {
-    template: WorkflowTemplate['template'];
-  };
-  return { template: parsed.template };
 }
 
 type CategorizedWorkflowTemplates = {
@@ -267,14 +259,14 @@ export async function createBenchmark(params: {
   provider: BenchmarkProviders;
   projectId: string;
   userId: string;
-  benchmarkConfiguration: BenchmarkConfiguration;
+  wizardState: WizardState;
 }): Promise<BenchmarkCreationResult> {
-  const { provider, projectId, userId, benchmarkConfiguration } = params;
+  const { provider, projectId, userId, wizardState } = params;
 
-  validateBenchmarkConfiguration(benchmarkConfiguration);
+  validateWizardState(wizardState);
 
-  const workflowIds = benchmarkConfiguration.workflows ?? [];
-  const connectionId = benchmarkConfiguration.connection[0];
+  const workflowIds = wizardState.workflows ?? [];
+  const connectionId = wizardState.connection[0];
 
   const benchmarkFolder = await ensureBenchmarkFolder(
     projectId,
@@ -299,7 +291,7 @@ export async function createBenchmark(params: {
   let result: BenchmarkCreationResult;
   try {
     const { benchmark, payload } = await attachFlowsToBenchmark({
-      benchmarkConfiguration,
+      wizardState,
       workflows,
       projectId,
       provider,

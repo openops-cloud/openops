@@ -1,7 +1,8 @@
 import {
   BenchmarkProviders,
+  WizardState,
   openOpsId,
-  type BenchmarkConfiguration,
+  throwValidationError,
   type BenchmarkWebhookPayload,
   type BenchmarkWorkflowBase,
 } from '@openops/shared';
@@ -10,10 +11,9 @@ import { transaction } from '../core/db/transaction';
 import { benchmarkFlowRepo } from './benchmark-flow.repo';
 import type { BenchmarkRow } from './benchmark.entity';
 import { benchmarkRepo } from './benchmark.repo';
-import { throwValidationError } from './errors';
 
 export type AttachFlowsToBenchmarkRequest = {
-  benchmarkConfiguration: BenchmarkConfiguration;
+  wizardState: WizardState;
   workflows: BenchmarkWorkflowBase[];
   projectId: string;
   provider: BenchmarkProviders;
@@ -27,10 +27,11 @@ export type AttachFlowsToBenchmarkResponse = {
 };
 
 async function buildPayloadForWebhook(params: {
-  benchmarkConfiguration: BenchmarkConfiguration;
+  provider: BenchmarkProviders;
+  wizardState: WizardState;
   workflows: BenchmarkWorkflowBase[];
 }): Promise<BenchmarkWebhookPayload> {
-  const { benchmarkConfiguration, workflows } = params;
+  const { provider, wizardState, workflows } = params;
 
   if (workflows.length < 3) {
     throwValidationError(
@@ -46,13 +47,30 @@ async function buildPayloadForWebhook(params: {
     .filter((w) => w.isCleanup)
     .map((w) => w.flowId);
 
-  return {
+  const webhookPayloadCommon = {
     webhookBaseUrl,
     workflows: subWorkflowFlowIds,
     cleanupWorkflows: cleanupFlowIds,
-    accounts: benchmarkConfiguration.accounts ?? [],
-    regions: benchmarkConfiguration.regions,
+    regions: wizardState.regions ?? [],
   };
+
+  switch (provider) {
+    case BenchmarkProviders.AWS:
+      return {
+        ...webhookPayloadCommon,
+        accounts: wizardState.accounts ?? [],
+      };
+    case BenchmarkProviders.AZURE:
+      return {
+        ...webhookPayloadCommon,
+        subscriptions: wizardState.subscriptions ?? [],
+      };
+    default: {
+      throwValidationError(
+        `Unsupported benchmark provider for webhook payload: ${provider}`,
+      );
+    }
+  }
 }
 
 async function insertBenchmarkRecords(params: {
@@ -101,7 +119,7 @@ export async function attachFlowsToBenchmark(
   params: AttachFlowsToBenchmarkRequest,
 ): Promise<AttachFlowsToBenchmarkResponse> {
   const {
-    benchmarkConfiguration,
+    wizardState,
     workflows,
     projectId,
     provider,
@@ -110,7 +128,8 @@ export async function attachFlowsToBenchmark(
   } = params;
 
   const payload = await buildPayloadForWebhook({
-    benchmarkConfiguration,
+    provider,
+    wizardState,
     workflows,
   });
 

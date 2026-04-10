@@ -42,9 +42,9 @@ import {
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import {
   buildConnectionSchema,
@@ -124,6 +124,12 @@ const CreateEditConnectionDialogContent = ({
 
   const [errorMessage, setErrorMessage] = useState('');
   const queryClient = useQueryClient();
+
+  const roles = useWatch({
+    control: form.control,
+    name: 'request.value.props.roles',
+  });
+  const hasRoles = authProviderKey === 'AWS' && roles && roles.length > 0;
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -300,6 +306,23 @@ const CreateEditConnectionDialogContent = ({
               />
             )}
 
+            {hasRoles && (
+              <div className="w-full p-4 flex items-center gap-3 bg-blueAccent/10 text-blueAccent-300 rounded-sm mb-4 text-sm">
+                <Info className="shrink-0 w-4 h-4" />
+                <span>
+                  {t(
+                    'Validating AWS roles may take 10-30 seconds. We will verify access to all configured roles.',
+                  )}
+                </span>
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="text-left text-sm text-destructive mb-4 whitespace-pre-wrap">
+                {errorMessage}
+              </div>
+            )}
+
             <DialogFooter className="mt-5">
               <Button
                 onClick={(e) => form.handleSubmit(() => mutate())(e)}
@@ -314,12 +337,6 @@ const CreateEditConnectionDialogContent = ({
           </form>
         </Form>
       </ScrollArea>
-
-      {errorMessage && (
-        <div className="text-left text-sm text-destructive mt-4">
-          {errorMessage}
-        </div>
-      )}
     </>
   );
 };

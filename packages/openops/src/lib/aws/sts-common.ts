@@ -24,10 +24,11 @@ export async function assumeRole(
   defaultRegion: string,
   roleArn: string,
   externalId?: string,
+  endpoint?: string | undefined | null,
 ): Promise<Credentials | undefined> {
   const client = getAwsClient(
     STSClient,
-    { accessKeyId, secretAccessKey },
+    { accessKeyId, secretAccessKey, endpoint },
     defaultRegion,
   );
   const command = new AssumeRoleCommand({

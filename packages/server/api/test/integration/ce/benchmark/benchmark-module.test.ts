@@ -1,10 +1,7 @@
 const wizardServiceMock = {
   resolveWizardNavigation: jest.fn(),
 };
-jest.mock(
-  '../../../../src/app/benchmark/wizard.service',
-  () => wizardServiceMock,
-);
+jest.mock('../../../../src/app/wizard/wizard.service', () => wizardServiceMock);
 
 const createBenchmarkServiceMock = {
   createBenchmark: jest.fn(),
@@ -28,11 +25,11 @@ import {
   BenchmarkListItem,
   BenchmarkProviders,
   BenchmarkStatus,
-  type BenchmarkStatusResponse,
-  type BenchmarkWizardStepResponse,
   ErrorCode,
   PrincipalType,
   Project,
+  type BenchmarkStatusResponse,
+  type WizardStepResponse,
 } from '@openops/shared';
 import { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -45,7 +42,7 @@ import {
   createMockUser,
 } from '../../../helpers/mocks';
 
-const mockWizardStep: BenchmarkWizardStepResponse = {
+const mockWizardStep: WizardStepResponse = {
   currentStep: 'mock-current-step-id',
   title: 'Mock current step title',
   nextStep: 'mock-next-step-id',
@@ -108,6 +105,8 @@ afterAll(async () => {
   process.env = originalEnv;
 });
 
+const allBenchmarkProviders = Object.values(BenchmarkProviders);
+
 describe('Benchmark wizard API', () => {
   const postWizard = async ({
     provider,
@@ -127,61 +126,82 @@ describe('Benchmark wizard API', () => {
 
   describe('POST /v1/benchmarks/:provider/wizard', () => {
     beforeEach(() => {
+      wizardServiceMock.resolveWizardNavigation.mockClear();
       wizardServiceMock.resolveWizardNavigation.mockResolvedValue(
         mockWizardStep,
       );
       process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
     });
 
-    it('calls resolveWizardNavigation with AWS provider, body, and projectId and returns mocked step', async () => {
-      const { token, project } = await createAndInsertMocks();
-      const body = {};
+    it.each(allBenchmarkProviders)(
+      'calls resolveWizardNavigation with %s provider, body, and projectId and returns mocked step',
+      async (provider) => {
+        const { token, project } = await createAndInsertMocks();
+        const body = {};
 
-      const response = await postWizard({
-        provider: BenchmarkProviders.AWS,
-        token,
-        body,
-      });
+        const response = await postWizard({
+          provider,
+          token,
+          body,
+        });
 
-      expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(response?.json()).toEqual(mockWizardStep);
-      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
-        BenchmarkProviders.AWS,
-        {
-          currentStep: undefined,
-          benchmarkConfiguration: undefined,
-        },
-        project.id,
-      );
-    });
+        expect(response?.statusCode).toBe(StatusCodes.OK);
+        expect(response?.json()).toEqual(mockWizardStep);
+        expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
+          provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+          }),
+          {
+            currentStep: undefined,
+            wizardState: undefined,
+          },
+          project.id,
+        );
+      },
+    );
 
-    it('passes currentStep and benchmarkConfiguration to resolveWizardNavigation', async () => {
-      const { token, project } = await createAndInsertMocks();
-      const body = {
-        currentStep: 'connection',
-        benchmarkConfiguration: { connection: ['conn-1'] },
-      };
-
-      const response = await postWizard({
-        provider: BenchmarkProviders.AWS,
-        token,
-        body,
-      });
-
-      expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(response?.json()).toEqual(mockWizardStep);
-      expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
-        BenchmarkProviders.AWS,
-        {
+    it.each(allBenchmarkProviders)(
+      'passes currentStep and wizardState to resolveWizardNavigation (%s)',
+      async (provider) => {
+        const { token, project } = await createAndInsertMocks();
+        const body = {
           currentStep: 'connection',
-          benchmarkConfiguration: { connection: ['conn-1'] },
-        },
-        project.id,
-      );
-    });
+          wizardState: { connection: ['conn-1'] },
+        };
+
+        const response = await postWizard({
+          provider,
+          token,
+          body,
+        });
+
+        expect(response?.statusCode).toBe(StatusCodes.OK);
+        expect(response?.json()).toEqual(mockWizardStep);
+        expect(wizardServiceMock.resolveWizardNavigation).toHaveBeenCalledWith(
+          provider,
+          expect.objectContaining({
+            config: expect.objectContaining({
+              provider,
+              steps: expect.arrayContaining([expect.anything()]),
+            }),
+            resolveOptions: expect.any(Function),
+          }),
+          {
+            currentStep: 'connection',
+            wizardState: { connection: ['conn-1'] },
+          },
+          project.id,
+        );
+      },
+    );
 
     it('returns 400 when provider is not in BenchmarkProviders enum', async () => {
       const { token } = await createAndInsertMocks();
@@ -254,38 +274,49 @@ describe('Benchmark wizard API', () => {
 });
 
 describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
-  const validCreateBody = {
-    benchmarkConfiguration: {
+  const validAwsCreateBody = {
+    wizardState: {
       connection: ['conn-1'],
       workflows: ['AWS Benchmark - Unattached EBS'],
       regions: ['us-east-1'],
     },
   };
 
-  const mockCreateResult = {
+  const validAzureCreateBody = {
+    wizardState: {
+      connection: ['conn-1'],
+      workflows: ['Azure Benchmark - Unattached Managed Disks'],
+      regions: ['eastus'],
+      subscriptions: ['sub-a', 'sub-b'],
+    },
+  };
+
+  const mockCreateBenchmarkWorkflows = [
+    {
+      flowId: 'flow-1',
+      displayName: 'Orchestrator',
+      isOrchestrator: true,
+      isCleanup: false,
+    },
+    {
+      flowId: 'flow-2',
+      displayName: 'Cleanup',
+      isOrchestrator: false,
+      isCleanup: true,
+    },
+    {
+      flowId: 'flow-3',
+      displayName: 'Sub',
+      isOrchestrator: false,
+      isCleanup: false,
+    },
+  ];
+
+  const mockAwsCreateResult = {
     benchmarkId: 'bench-1',
     folderId: 'folder-1',
-    provider: 'aws',
-    workflows: [
-      {
-        flowId: 'flow-1',
-        displayName: 'Orchestrator',
-        isOrchestrator: true,
-        isCleanup: false,
-      },
-      {
-        flowId: 'flow-2',
-        displayName: 'Cleanup',
-        isOrchestrator: false,
-        isCleanup: true,
-      },
-      {
-        flowId: 'flow-3',
-        displayName: 'Sub',
-        isOrchestrator: false,
-        isCleanup: false,
-      },
-    ],
+    provider: BenchmarkProviders.AWS,
+    workflows: mockCreateBenchmarkWorkflows,
     webhookPayload: {
       webhookBaseUrl: 'https://api.example.com',
       workflows: ['flow-3'],
@@ -294,6 +325,37 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
       regions: ['us-east-1'],
     },
   };
+
+  const mockAzureCreateResult = {
+    benchmarkId: 'bench-1',
+    folderId: 'folder-1',
+    provider: BenchmarkProviders.AZURE,
+    workflows: mockCreateBenchmarkWorkflows,
+    webhookPayload: {
+      webhookBaseUrl: 'https://api.example.com',
+      workflows: ['flow-3'],
+      cleanupWorkflows: ['flow-2'],
+      subscriptions: ['sub-a', 'sub-b'],
+      regions: ['eastus'],
+    },
+  };
+
+  const createBenchmarkSuccessCases: ReadonlyArray<{
+    provider: BenchmarkProviders;
+    body: typeof validAwsCreateBody | typeof validAzureCreateBody;
+    mockResult: typeof mockAwsCreateResult | typeof mockAzureCreateResult;
+  }> = [
+    {
+      provider: BenchmarkProviders.AWS,
+      body: validAwsCreateBody,
+      mockResult: mockAwsCreateResult,
+    },
+    {
+      provider: BenchmarkProviders.AZURE,
+      body: validAzureCreateBody,
+      mockResult: mockAzureCreateResult,
+    },
+  ];
 
   const postCreate = async ({
     provider,
@@ -308,7 +370,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
       method: 'POST',
       url: `/v1/benchmarks/${provider}`,
       headers: token ? { authorization: `Bearer ${token}` } : undefined,
-      body: body ?? validCreateBody,
+      body: body ?? validAwsCreateBody,
     });
 
   beforeEach(() => {
@@ -316,33 +378,36 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     process.env.OPS_FINOPS_BENCHMARK_ENABLED = 'true';
   });
 
-  it('returns 201 and BenchmarkCreationResult when body is valid', async () => {
-    createBenchmarkServiceMock.createBenchmark.mockResolvedValue(
-      mockCreateResult,
-    );
-    const { token, project } = await createAndInsertMocks();
+  it.each(createBenchmarkSuccessCases)(
+    'returns 201 and BenchmarkCreationResult when body is valid ($provider)',
+    async ({ provider, body, mockResult }) => {
+      createBenchmarkServiceMock.createBenchmark.mockResolvedValue(mockResult);
+      const { token, project } = await createAndInsertMocks();
 
-    const response = await postCreate({
-      provider: BenchmarkProviders.AWS,
-      token,
-      body: validCreateBody,
-    });
+      const response = await postCreate({
+        provider,
+        token,
+        body,
+      });
 
-    expect(response?.statusCode).toBe(StatusCodes.CREATED);
-    expect(response?.json()).toEqual(mockCreateResult);
-    expect(createBenchmarkServiceMock.createBenchmark).toHaveBeenCalledTimes(1);
-    expect(createBenchmarkServiceMock.createBenchmark).toHaveBeenCalledWith({
-      provider: BenchmarkProviders.AWS,
-      projectId: project.id,
-      userId: expect.any(String),
-      benchmarkConfiguration: validCreateBody.benchmarkConfiguration,
-    });
-  });
+      expect(response?.statusCode).toBe(StatusCodes.CREATED);
+      expect(response?.json()).toEqual(mockResult);
+      expect(createBenchmarkServiceMock.createBenchmark).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(createBenchmarkServiceMock.createBenchmark).toHaveBeenCalledWith({
+        provider,
+        projectId: project.id,
+        userId: expect.any(String),
+        wizardState: body.wizardState,
+      });
+    },
+  );
 
   it('returns 401 when not authenticated', async () => {
     const response = await postCreate({
       provider: BenchmarkProviders.AWS,
-      body: validCreateBody,
+      body: validAwsCreateBody,
     });
 
     expect(response?.statusCode).toBe(StatusCodes.UNAUTHORIZED);
@@ -356,7 +421,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     const response = await postCreate({
       provider: BenchmarkProviders.AWS,
       token,
-      body: validCreateBody,
+      body: validAwsCreateBody,
     });
 
     expect(response?.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
@@ -371,14 +436,14 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
     const response = await postCreate({
       provider: 'invalidprovider',
       token,
-      body: validCreateBody,
+      body: validAwsCreateBody,
     });
 
     expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
     expect(createBenchmarkServiceMock.createBenchmark).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when body is missing benchmarkConfiguration', async () => {
+  it('returns 400 when body is missing wizardState', async () => {
     const { token } = await createAndInsertMocks();
 
     const response = await postCreate({
@@ -410,7 +475,7 @@ describe('Create Benchmark API (POST /v1/benchmarks/:provider)', () => {
       provider: BenchmarkProviders.AWS,
       token,
       body: {
-        benchmarkConfiguration: {
+        wizardState: {
           connection: ['conn-1'],
           workflows: [],
           regions: ['us-east-1'],
@@ -546,20 +611,23 @@ describe('List benchmarks API', () => {
       });
     });
 
-    it('passes provider filter to listBenchmarks', async () => {
-      const { token, project } = await createAndInsertMocks();
+    it.each(allBenchmarkProviders)(
+      'passes provider filter to listBenchmarks (%s)',
+      async (provider) => {
+        const { token, project } = await createAndInsertMocks();
 
-      const response = await getBenchmarkList({
-        token,
-        provider: BenchmarkProviders.AWS,
-      });
+        const response = await getBenchmarkList({
+          token,
+          provider,
+        });
 
-      expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(benchmarkStatusServiceMock.listBenchmarks).toHaveBeenCalledWith({
-        projectId: project.id,
-        provider: BenchmarkProviders.AWS,
-      });
-    });
+        expect(response?.statusCode).toBe(StatusCodes.OK);
+        expect(benchmarkStatusServiceMock.listBenchmarks).toHaveBeenCalledWith({
+          projectId: project.id,
+          provider,
+        });
+      },
+    );
 
     it('returns 400 when provider is not a valid BenchmarkProviders value', async () => {
       const { token } = await createAndInsertMocks();

@@ -1,8 +1,8 @@
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
 import {
   BenchmarkCreationResult,
-  BenchmarkWizardRequest,
-  BenchmarkWizardStepResponse,
+  WizardRequest,
+  WizardStepResponse,
 } from '@openops/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -13,11 +13,11 @@ import { benchmarkApi } from './benchmark-api';
 export type WizardPhase = 'initial' | 'provider-step' | 'benchmark-ready';
 
 type StepHistoryEntry = {
-  stepResponse: BenchmarkWizardStepResponse;
+  stepResponse: WizardStepResponse;
   selections: string[];
 };
 
-const buildBenchmarkConfiguration = (
+const buildWizardState = (
   history: StepHistoryEntry[],
 ): Record<string, string[]> =>
   history.reduce<Record<string, string[]>>((acc, entry) => {
@@ -29,7 +29,7 @@ type UseBenchmarkWizardNavigationResult = {
   selectedProvider: string | undefined;
   setSelectedProvider: (provider: string) => void;
   wizardPhase: WizardPhase;
-  currentStepResponse: BenchmarkWizardStepResponse | null;
+  currentStepResponse: WizardStepResponse | null;
   currentSelections: string[];
   setCurrentSelections: (selections: string[]) => void;
   isLoadingStep: boolean;
@@ -49,7 +49,7 @@ export const useBenchmarkWizardNavigation = (
   const [selectedProvider, setSelectedProvider] = useState<string>();
   const [wizardPhase, setWizardPhase] = useState<WizardPhase>('initial');
   const [currentStepResponse, setCurrentStepResponse] =
-    useState<BenchmarkWizardStepResponse | null>(null);
+    useState<WizardStepResponse | null>(null);
   const [currentSelections, setCurrentSelections] = useState<string[]>([]);
   const [stepHistory, setStepHistory] = useState<StepHistoryEntry[]>([]);
   const [benchmarkCreateResult, setBenchmarkCreateResult] =
@@ -62,7 +62,7 @@ export const useBenchmarkWizardNavigation = (
         request,
       }: {
         provider: string;
-        request: BenchmarkWizardRequest;
+        request: WizardRequest;
       }) => benchmarkApi.getWizardStep(provider, request),
       onError: handleMutationError,
     });
@@ -73,17 +73,20 @@ export const useBenchmarkWizardNavigation = (
     useMutation({
       mutationFn: ({
         provider,
-        benchmarkConfiguration,
+        wizardState,
       }: {
         provider: string;
-        benchmarkConfiguration: Record<string, string[]>;
-      }) => benchmarkApi.createBenchmark(provider, benchmarkConfiguration),
+        wizardState: Record<string, string[]>;
+      }) => benchmarkApi.createBenchmark(provider, wizardState),
       onSuccess: (result) => {
         setBenchmarkCreateResult(result);
         setWizardPhase('benchmark-ready');
         onBenchmarkCreated?.(result);
         queryClient.invalidateQueries({
           queryKey: [QueryKeys.foldersFlows],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKeys.flags],
         });
       },
       onError: handleMutationError,
@@ -112,13 +115,13 @@ export const useBenchmarkWizardNavigation = (
       selections: currentSelections,
     };
     const newHistory = [...stepHistory, committed];
-    const benchmarkConfiguration = buildBenchmarkConfiguration(newHistory);
+    const wizardState = buildWizardState(newHistory);
 
     if (currentStepResponse.nextStep === null) {
       setStepHistory(newHistory);
       await runCreateBenchmark({
         provider: selectedProvider,
-        benchmarkConfiguration,
+        wizardState: wizardState,
       });
       return;
     }
@@ -127,7 +130,7 @@ export const useBenchmarkWizardNavigation = (
       provider: selectedProvider,
       request: {
         currentStep: currentStepResponse.currentStep,
-        benchmarkConfiguration,
+        wizardState: wizardState,
       },
     });
 

@@ -1,11 +1,11 @@
 import { Static, Type } from '@sinclair/typebox';
+import { ExecutionStatus } from '../../common/run-status';
 import { BenchmarkProviders } from '../benchmark-providers';
-import { BenchmarkStatus } from './benchmark-status-response';
 
 export const BenchmarkListItem = Type.Object({
   benchmarkId: Type.String(),
   provider: Type.Enum(BenchmarkProviders),
-  status: Type.Enum(BenchmarkStatus),
+  status: Type.Enum(ExecutionStatus),
 });
 
 export type BenchmarkListItem = Static<typeof BenchmarkListItem>;
