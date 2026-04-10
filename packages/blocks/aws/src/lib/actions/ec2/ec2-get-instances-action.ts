@@ -10,6 +10,7 @@ import {
   getAwsAccountsMultiSelectDropdown,
   getCredentialsListFromAuth,
   getEc2Instances,
+  getEc2InstancesWithPartialResults,
   groupARNsByRegion,
   parseArn,
 } from '@openops/common';
@@ -55,6 +56,13 @@ export const ec2GetInstancesAction = createAction({
     }),
     ...filterTagsProperties(),
     dryRun: dryRunCheckBox(),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow partial results',
+      description:
+        'When enabled, the step returns { results, failedRegions } and continues when some regions fail.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -65,12 +73,71 @@ export const ec2GetInstancesAction = createAction({
         tags,
         condition,
         dryRun,
+        allowPartialResults,
       } = context.propsValue;
       const filters: Filter[] = getFilters(context);
       const credentials = await getCredentialsListFromAuth(
         context.auth,
         accounts['accounts'],
       );
+
+      const partial = allowPartialResults === true;
+
+      if (partial) {
+        const partialPromises = [];
+        if (filterByARNs) {
+          const arns = convertToStringArrayWithValidation(
+            filterProperty['arns'] as unknown as string[],
+            'Invalid input for ARNs: input should be a single string or an array of strings',
+          );
+          const groupedARNs = groupARNsByRegion(arns);
+
+          for (const region in groupedARNs) {
+            const arnsForRegion = groupedARNs[region];
+            const instanceIdFilter = {
+              Name: 'instance-id',
+              Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+            };
+            partialPromises.push(
+              ...credentials.map((creds) =>
+                getEc2InstancesWithPartialResults(
+                  creds,
+                  [region] as [string, ...string[]],
+                  dryRun,
+                  [...filters, instanceIdFilter],
+                ),
+              ),
+            );
+          }
+        } else {
+          const regions = convertToStringArrayWithValidation(
+            filterProperty['regions'],
+            'Invalid input for regions: input should be a single string or an array of strings',
+          );
+          partialPromises.push(
+            ...credentials.map((creds) =>
+              getEc2InstancesWithPartialResults(
+                creds,
+                regions as [string, ...string[]],
+                dryRun,
+                filters,
+              ),
+            ),
+          );
+        }
+
+        const partialOutcomes = await Promise.all(partialPromises);
+        let instances = partialOutcomes.flatMap((o) => o.results);
+        const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
+
+        if (tags?.length) {
+          instances = instances.filter((instance) =>
+            filterTags((instance.Tags as AwsTag[]) ?? [], tags, condition),
+          );
+        }
+
+        return { results: instances, failedRegions };
+      }
 
       const promises: any[] = [];
       if (filterByARNs) {
@@ -87,9 +154,9 @@ export const ec2GetInstancesAction = createAction({
             Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
           };
           promises.push(
-            ...credentials.map((credentials) =>
+            ...credentials.map((creds) =>
               getEc2Instances(
-                credentials,
+                creds,
                 [region] as [string, ...string[]],
                 dryRun,
                 [...filters, instanceIdFilter],
@@ -103,8 +170,8 @@ export const ec2GetInstancesAction = createAction({
           'Invalid input for regions: input should be a single string or an array of strings',
         );
         promises.push(
-          ...credentials.map((credentials) =>
-            getEc2Instances(credentials, regions, dryRun, filters),
+          ...credentials.map((creds) =>
+            getEc2Instances(creds, regions, dryRun, filters),
           ),
         );
       }
