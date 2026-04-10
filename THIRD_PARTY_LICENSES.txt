@@ -7308,7 +7308,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - socket.io-adapter@2.5.6
- - socket.io-parser@4.2.5
+ - socket.io-parser@4.2.6
 
 These packages each contain the following license:
 
@@ -21679,12 +21679,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - yaml@2.4.1
- - yaml@2.8.2
+ - yaml@2.8.3
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright Eemeli Aro <eemeli@gmail.com>
 
