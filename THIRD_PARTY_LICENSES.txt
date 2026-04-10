@@ -21679,12 +21679,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - yaml@2.4.1
- - yaml@2.8.2
+ - yaml@2.8.3
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright Eemeli Aro <eemeli@gmail.com>
 
