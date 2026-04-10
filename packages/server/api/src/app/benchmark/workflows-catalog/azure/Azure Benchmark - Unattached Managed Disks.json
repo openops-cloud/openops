@@ -575,7 +575,7 @@
                                                   {
                                                     "fieldName": "Service",
                                                     "newFieldValue": {
-                                                      "newFieldValue": "AZURE DISKS"
+                                                      "newFieldValue": "Azure Managed Disks"
                                                     }
                                                   },
                                                   {

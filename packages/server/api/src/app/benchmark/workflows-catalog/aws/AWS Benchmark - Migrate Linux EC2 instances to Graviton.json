@@ -1,6 +1,6 @@
 {
-  "created": "1772547770997",
-  "updated": "1772547770997",
+  "created": "1775630076826",
+  "updated": "1775630076826",
   "name": "AWS Benchmark - Migrate Linux EC2 instances to Graviton",
   "tags": [],
   "services": [],
@@ -104,7 +104,6 @@
               "valid": true,
               "settings": {
                 "input": {
-                  "auth": null,
                   "body": {
                     "data": {
                       "status": "ok"
@@ -183,7 +182,7 @@
                       "value": false
                     },
                     "continueOnFailure": {
-                      "value": false
+                      "value": true
                     }
                   }
                 },

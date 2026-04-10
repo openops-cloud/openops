@@ -1,6 +1,6 @@
 {
-  "created": "1771567435864",
-  "updated": "1771567435864",
+  "created": "1775630120131",
+  "updated": "1775630120131",
   "name": "AWS Benchmark - RDS Storage Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -104,7 +104,6 @@
               "valid": true,
               "settings": {
                 "input": {
-                  "auth": null,
                   "body": {
                     "data": {
                       "status": "ok"
@@ -183,7 +182,7 @@
                       "value": false
                     },
                     "continueOnFailure": {
-                      "value": false
+                      "value": true
                     }
                   }
                 },

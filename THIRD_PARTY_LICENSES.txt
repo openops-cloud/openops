@@ -8479,7 +8479,7 @@ software or this license, under any kind of legal claim._**
 
 The following npm package may be included in this product:
 
- - axios@1.13.5
+ - axios@1.15.0
 
 This package contains the following license:
 
@@ -16712,7 +16712,7 @@ The complete list of contributors can be found at:
 The following npm packages may be included in this product:
 
  - nodemailer@8.0.2
- - nodemailer@8.0.3
+ - nodemailer@8.0.5
 
 These packages each contain the following license:
 
@@ -27658,7 +27658,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fastify@5.8.2
+ - fastify@5.8.3
 
 This package contains the following license:
 
@@ -31234,7 +31234,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @hono/node-server@1.19.11
+ - @hono/node-server@1.19.13
 
 This package contains the following license:
 
@@ -35626,7 +35626,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - proxy-from-env@1.1.0
+ - proxy-from-env@2.1.0
 
 This package contains the following license:
 

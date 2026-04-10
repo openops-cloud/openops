@@ -1,6 +1,6 @@
 {
-  "created": "1771567504464",
-  "updated": "1771567504464",
+  "created": "1775630179298",
+  "updated": "1775630179298",
   "name": "AWS Benchmark - Unused NAT Gateways",
   "tags": [],
   "services": [],
@@ -160,7 +160,6 @@
                   "valid": true,
                   "settings": {
                     "input": {
-                      "auth": null,
                       "body": {
                         "data": {
                           "status": "ok"
@@ -239,7 +238,7 @@
                           "value": false
                         },
                         "continueOnFailure": {
-                          "value": false
+                          "value": true
                         }
                       }
                     },

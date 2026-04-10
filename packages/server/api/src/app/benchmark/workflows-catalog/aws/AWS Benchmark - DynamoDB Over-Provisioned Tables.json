@@ -1,6 +1,6 @@
 {
-  "created": "1771567608581",
-  "updated": "1771567608581",
+  "created": "1775629968537",
+  "updated": "1775629968537",
   "name": "AWS Benchmark - DynamoDB Over-Provisioned Tables",
   "tags": [],
   "services": [],
@@ -214,7 +214,6 @@
                       "valid": true,
                       "settings": {
                         "input": {
-                          "auth": null,
                           "body": {
                             "data": {
                               "status": "ok"
@@ -293,7 +292,7 @@
                               "value": false
                             },
                             "continueOnFailure": {
-                              "value": false
+                              "value": true
                             }
                           }
                         },
@@ -578,7 +577,8 @@
                                         "valid": true,
                                         "settings": {
                                           "input": {
-                                            "arn": "{{step_n['Table']['TableArn']}}"
+                                            "arn": "{{step_n['Table']['TableArn']}}",
+                                            "auth": "{{connections['AWS']}}"
                                           },
                                           "blockName": "@openops/block-aws",
                                           "blockType": "OFFICIAL",

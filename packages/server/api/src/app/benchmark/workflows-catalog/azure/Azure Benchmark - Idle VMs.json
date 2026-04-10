@@ -1,6 +1,6 @@
 {
-  "created": "1774008876814",
-  "updated": "1774008876814",
+  "created": "1775033975193",
+  "updated": "1775033975193",
   "name": "Azure Benchmark - Idle VMs",
   "tags": [],
   "services": [],
@@ -54,6 +54,7 @@
             }
           }
         },
+        "stepIndex": 2,
         "nextAction": {
           "id": "YMLkxklyLsj7rrrwsLugX",
           "name": "step_26",
@@ -82,6 +83,7 @@
               }
             }
           },
+          "stepIndex": 3,
           "nextAction": {
             "id": "VT0cBElTnCZ4fm2Wo0wet",
             "name": "step_1",
@@ -93,6 +95,7 @@
                 "customizedInputs": {}
               }
             },
+            "stepIndex": 4,
             "nextAction": {
               "id": "wYhOoAQSqg2UXkOuIblN4",
               "name": "step_a",
@@ -126,8 +129,8 @@
                   }
                 }
               },
-              "displayName": "Return Response",
-              "stepIndex": 26
+              "stepIndex": 26,
+              "displayName": "Return Response"
             },
             "displayName": "SUBSCRIPTIONS",
             "firstLoopAction": {
@@ -182,6 +185,7 @@
                     }
                   }
                 },
+                "stepIndex": 6,
                 "nextAction": {
                   "id": "TjvsFxZ3H1c3yn3qrAeXe",
                   "name": "step_e",
@@ -210,6 +214,7 @@
                       }
                     }
                   },
+                  "stepIndex": 7,
                   "nextAction": {
                     "id": "LHAbqJkJRFWC7dgbsm72Z",
                     "name": "step_d",
@@ -221,6 +226,7 @@
                         "customizedInputs": {}
                       }
                     },
+                    "stepIndex": 8,
                     "displayName": "RESOURCE",
                     "firstLoopAction": {
                       "id": "3j132XCJpe98LLdcMlvMt",
@@ -287,6 +293,7 @@
                             "customizedInputs": {}
                           }
                         },
+                        "stepIndex": 10,
                         "nextAction": {
                           "id": "32VtOyQo8BanrUNnwIVN7",
                           "name": "step_b",
@@ -352,6 +359,7 @@
                                 }
                               }
                             },
+                            "stepIndex": 13,
                             "nextAction": {
                               "id": "8teTIu8KQK5b08Ki7Z3dY",
                               "name": "step_h",
@@ -377,6 +385,7 @@
                                   }
                                 }
                               },
+                              "stepIndex": 14,
                               "nextAction": {
                                 "id": "qbyCx2bL1VVKkGAbri8D3",
                                 "name": "step_i",
@@ -722,7 +731,7 @@
                                                             {
                                                               "fieldName": "Service",
                                                               "newFieldValue": {
-                                                                "newFieldValue": "AZURE VM"
+                                                                "newFieldValue": "Virtual Machines"
                                                               }
                                                             },
                                                             {
@@ -834,11 +843,9 @@
                                 "displayName": "Get Network In metrics",
                                 "stepIndex": 15
                               },
-                              "displayName": "Get peak CPU metric",
-                              "stepIndex": 14
+                              "displayName": "Get peak CPU metric"
                             },
-                            "displayName": "Get max average CPU metric",
-                            "stepIndex": 13
+                            "displayName": "Get max average CPU metric"
                           },
                           "displayName": "Get CPU metrics",
                           "stepIndex": 12
@@ -868,31 +875,24 @@
                               }
                             }
                           },
-                          "displayName": "Skip recommendation",
-                          "stepIndex": 11
-                        },
-                        "stepIndex": 10
+                          "stepIndex": 11,
+                          "displayName": "Skip recommendation"
+                        }
                       },
                       "displayName": "Get existing opportunity",
                       "stepIndex": 9
-                    },
-                    "stepIndex": 8
+                    }
                   },
-                  "displayName": "Number of analyzed days",
-                  "stepIndex": 7
+                  "displayName": "Number of analyzed days"
                 },
-                "displayName": "Get running VMs",
-                "stepIndex": 6
+                "displayName": "Get running VMs"
               },
               "stepIndex": 5
-            },
-            "stepIndex": 4
+            }
           },
-          "displayName": "This Workflow Name",
-          "stepIndex": 3
+          "displayName": "This Workflow Name"
         },
-        "displayName": "Format regions and accounts",
-        "stepIndex": 2
+        "displayName": "Format regions and accounts"
       }
     },
     "valid": true,

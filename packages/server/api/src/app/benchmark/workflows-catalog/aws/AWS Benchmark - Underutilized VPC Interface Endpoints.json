@@ -1,6 +1,6 @@
 {
-  "created": "1771567500301",
-  "updated": "1771567500301",
+  "created": "1775630146957",
+  "updated": "1775630146957",
   "name": "AWS Benchmark - Underutilized VPC Interface Endpoints",
   "tags": [],
   "services": [],
@@ -187,7 +187,6 @@
                     "valid": true,
                     "settings": {
                       "input": {
-                        "auth": null,
                         "body": {
                           "data": {
                             "status": "ok"
@@ -266,7 +265,7 @@
                             "value": false
                           },
                           "continueOnFailure": {
-                            "value": false
+                            "value": true
                           }
                         }
                       },

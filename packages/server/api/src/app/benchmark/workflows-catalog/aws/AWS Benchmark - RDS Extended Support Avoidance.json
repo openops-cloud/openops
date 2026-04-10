@@ -1,6 +1,6 @@
 {
-  "created": "1771567469989",
-  "updated": "1771567469989",
+  "created": "1775630095436",
+  "updated": "1775630095436",
   "name": "AWS Benchmark - RDS Extended Support Avoidance",
   "tags": [],
   "services": [],
@@ -123,7 +123,6 @@
                 "valid": true,
                 "settings": {
                   "input": {
-                    "auth": null,
                     "body": {
                       "data": {
                         "status": "ok"
@@ -202,7 +201,7 @@
                         "value": false
                       },
                       "continueOnFailure": {
-                        "value": false
+                        "value": true
                       }
                     }
                   },

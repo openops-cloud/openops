@@ -4,8 +4,15 @@ const getBoolean = jest.fn().mockReturnValue(true);
 
 jest.mock('dns', () => ({ promises: { resolve4, resolve6 } }));
 jest.mock('../../src/lib/system', () => ({
-  system: { getBoolean },
-  SharedSystemProp: { ENABLE_HOST_VALIDATION: 'ENABLE_HOST_VALIDATION' },
+  system: {
+    getBoolean,
+    getOrThrow: jest.fn().mockReturnValue('x-forwarded-for'),
+  },
+  SharedSystemProp: {
+    ENABLE_HOST_VALIDATION: 'ENABLE_HOST_VALIDATION',
+    FRONTEND_URL: 'FRONTEND_URL',
+  },
+  AppSystemProp: { CLIENT_REAL_IP_HEADER: 'CLIENT_REAL_IP_HEADER' },
 }));
 
 import { validateHost } from '../../src/lib/host-validation';
