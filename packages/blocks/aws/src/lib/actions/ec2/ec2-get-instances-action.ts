@@ -82,51 +82,24 @@ export const ec2GetInstancesAction = createAction({
       );
 
       const partial = allowPartialResults === true;
+      const batches = buildEc2GetInstancesBatches(
+        filterByARNs,
+        filterProperty,
+        credentials,
+        filters,
+      );
 
       if (partial) {
-        const partialPromises = [];
-        if (filterByARNs) {
-          const arns = convertToStringArrayWithValidation(
-            filterProperty['arns'] as unknown as string[],
-            'Invalid input for ARNs: input should be a single string or an array of strings',
-          );
-          const groupedARNs = groupARNsByRegion(arns);
-
-          for (const region in groupedARNs) {
-            const arnsForRegion = groupedARNs[region];
-            const instanceIdFilter = {
-              Name: 'instance-id',
-              Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-            };
-            partialPromises.push(
-              ...credentials.map((creds) =>
-                getEc2InstancesWithPartialResults(
-                  creds,
-                  [region] as [string, ...string[]],
-                  dryRun,
-                  [...filters, instanceIdFilter],
-                ),
-              ),
-            );
-          }
-        } else {
-          const regions = convertToStringArrayWithValidation(
-            filterProperty['regions'],
-            'Invalid input for regions: input should be a single string or an array of strings',
-          );
-          partialPromises.push(
-            ...credentials.map((creds) =>
-              getEc2InstancesWithPartialResults(
-                creds,
-                regions as [string, ...string[]],
-                dryRun,
-                filters,
-              ),
+        const partialOutcomes = await Promise.all(
+          batches.map((batch) =>
+            getEc2InstancesWithPartialResults(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
             ),
-          );
-        }
-
-        const partialOutcomes = await Promise.all(partialPromises);
+          ),
+        );
         let instances = partialOutcomes.flatMap((o) => o.results);
         const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
 
@@ -139,44 +112,18 @@ export const ec2GetInstancesAction = createAction({
         return { results: instances, failedRegions };
       }
 
-      const promises: any[] = [];
-      if (filterByARNs) {
-        const arns = convertToStringArrayWithValidation(
-          filterProperty['arns'] as unknown as string[],
-          'Invalid input for ARNs: input should be a single string or an array of strings',
-        );
-        const groupedARNs = groupARNsByRegion(arns);
-
-        for (const region in groupedARNs) {
-          const arnsForRegion = groupedARNs[region];
-          const instanceIdFilter = {
-            Name: 'instance-id',
-            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-          };
-          promises.push(
-            ...credentials.map((creds) =>
-              getEc2Instances(
-                creds,
-                [region] as [string, ...string[]],
-                dryRun,
-                [...filters, instanceIdFilter],
-              ),
+      const instances = (
+        await Promise.all(
+          batches.map((batch) =>
+            getEc2Instances(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
             ),
-          );
-        }
-      } else {
-        const regions = convertToStringArrayWithValidation(
-          filterProperty['regions'],
-          'Invalid input for regions: input should be a single string or an array of strings',
-        );
-        promises.push(
-          ...credentials.map((creds) =>
-            getEc2Instances(creds, regions, dryRun, filters),
           ),
-        );
-      }
-
-      const instances = (await Promise.all(promises)).flat();
+        )
+      ).flat();
 
       if (tags?.length) {
         return instances.filter((instance) =>
@@ -192,6 +139,58 @@ export const ec2GetInstancesAction = createAction({
     }
   },
 });
+
+type Ec2GetInstancesBatch = {
+  creds: any;
+  regions: [string, ...string[]];
+  fetchFilters: Filter[];
+};
+
+function buildEc2GetInstancesBatches(
+  filterByARNs: boolean,
+  filterProperty: Record<string, unknown>,
+  credentials: any[],
+  filters: Filter[],
+): Ec2GetInstancesBatch[] {
+  const batches: Ec2GetInstancesBatch[] = [];
+
+  if (filterByARNs) {
+    const arns = convertToStringArrayWithValidation(
+      filterProperty['arns'] as unknown as string[],
+      'Invalid input for ARNs: input should be a single string or an array of strings',
+    );
+    const groupedARNs = groupARNsByRegion(arns);
+
+    for (const region in groupedARNs) {
+      const arnsForRegion = groupedARNs[region];
+      const instanceIdFilter: Filter = {
+        Name: 'instance-id',
+        Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+      };
+      for (const creds of credentials) {
+        batches.push({
+          creds,
+          regions: [region] as [string, ...string[]],
+          fetchFilters: [...filters, instanceIdFilter],
+        });
+      }
+    }
+  } else {
+    const regions = convertToStringArrayWithValidation(
+      filterProperty['regions'],
+      'Invalid input for regions: input should be a single string or an array of strings',
+    );
+    for (const creds of credentials) {
+      batches.push({
+        creds,
+        regions: regions as [string, ...string[]],
+        fetchFilters: filters,
+      });
+    }
+  }
+
+  return batches;
+}
 
 function getFilters(context: any): Filter[] {
   const filters: Filter[] = [];
