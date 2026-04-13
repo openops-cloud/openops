@@ -30,7 +30,7 @@ jest.mock('../../../src/lib/aws/get-client', () => getAwsClientMock);
 import * as EC2 from '@aws-sdk/client-ec2';
 import {
   getEc2Instances,
-  getEc2InstancesWithPartialResults,
+  getEc2InstancesAllowPartial,
 } from '../../../src/lib/aws/ec2/ec2-get-instances';
 
 describe('getEc2Instances', () => {
@@ -177,7 +177,7 @@ describe('getEc2Instances', () => {
   });
 });
 
-describe('getEc2InstancesWithPartialResults', () => {
+describe('getEc2InstancesAllowPartial', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -200,7 +200,7 @@ describe('getEc2InstancesWithPartialResults', () => {
       send: sendMock,
     }));
 
-    const result = await getEc2InstancesWithPartialResults(
+    const result = await getEc2InstancesAllowPartial(
       CREDENTIALS,
       ['some-region1', 'some-region2'],
       false,

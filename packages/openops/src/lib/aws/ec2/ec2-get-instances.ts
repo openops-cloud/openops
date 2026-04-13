@@ -4,18 +4,18 @@ import { getAwsClient } from '../get-client';
 import { getAccountName } from '../organizations-common';
 import { getAccountId } from '../sts-common';
 
-export type AwsPartialFetchFailedRegion = {
+export type FailedRegion = {
   region: string;
   accountId?: string;
   error: string;
 };
 
-export type AwsPartialFetchResult<T = unknown> = {
+export type PartialResult<T = unknown> = {
   results: T[];
-  failedRegions: AwsPartialFetchFailedRegion[];
+  failedRegions: FailedRegion[];
 };
 
-export function formatAwsPartialFetchError(error: unknown): string {
+export function formatAwsError(error: unknown): string {
   if (error instanceof Error) {
     return `${error.name}: ${error.message}`;
   }
@@ -77,12 +77,12 @@ export async function getEc2Instances(
   return instancesFromAllRegions.flat();
 }
 
-export async function getEc2InstancesWithPartialResults(
+export async function getEc2InstancesAllowPartial(
   credentials: any,
   regions: [string, ...string[]],
   dryRun: boolean,
   filters?: EC2.Filter[],
-): Promise<AwsPartialFetchResult<any>> {
+): Promise<PartialResult<any>> {
   const accountId = await getAccountId(credentials, regions[0]);
   const accountName = await getAccountName(credentials, regions[0], accountId);
 
@@ -100,7 +100,7 @@ export async function getEc2InstancesWithPartialResults(
   );
 
   const results: any[] = [];
-  const failedRegions: AwsPartialFetchFailedRegion[] = [];
+  const failedRegions: FailedRegion[] = [];
 
   settled.forEach((outcome, index) => {
     const region = regions[index];
@@ -110,7 +110,7 @@ export async function getEc2InstancesWithPartialResults(
       failedRegions.push({
         region,
         accountId,
-        error: formatAwsPartialFetchError(outcome.reason),
+        error: formatAwsError(outcome.reason),
       });
     }
   });

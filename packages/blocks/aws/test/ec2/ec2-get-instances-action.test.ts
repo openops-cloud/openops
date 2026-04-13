@@ -2,7 +2,7 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsListFromAuth: jest.fn(),
   getEc2Instances: jest.fn(),
-  getEc2InstancesWithPartialResults: jest.fn(),
+  getEc2InstancesAllowPartial: jest.fn(),
   dryRunCheckBox: jest.fn().mockReturnValue({
     required: false,
     defaultValue: false,
@@ -522,7 +522,7 @@ describe('ec2GetInstancesAction', () => {
   });
 
   test('when allowPartialResults, uses partial helper and returns object shape', async () => {
-    openopsCommonMock.getEc2InstancesWithPartialResults.mockResolvedValue({
+    openopsCommonMock.getEc2InstancesAllowPartial.mockResolvedValue({
       results: [{ instance_id: 'i-1' }],
       failedRegions: [
         { region: 'eu-west-1', accountId: '111', error: 'AccessDenied' },
@@ -548,9 +548,7 @@ describe('ec2GetInstancesAction', () => {
         { region: 'eu-west-1', accountId: '111', error: 'AccessDenied' },
       ],
     });
-    expect(
-      openopsCommonMock.getEc2InstancesWithPartialResults,
-    ).toHaveBeenCalledWith(
+    expect(openopsCommonMock.getEc2InstancesAllowPartial).toHaveBeenCalledWith(
       'credentials',
       ['us-east-1', 'eu-west-1'],
       false,
@@ -564,7 +562,7 @@ describe('ec2GetInstancesAction', () => {
       'cred-a',
       'cred-b',
     ]);
-    openopsCommonMock.getEc2InstancesWithPartialResults
+    openopsCommonMock.getEc2InstancesAllowPartial
       .mockResolvedValueOnce({
         results: [{ id: 'a' }],
         failedRegions: [],
@@ -591,8 +589,8 @@ describe('ec2GetInstancesAction', () => {
     expect(result.failedRegions).toEqual([
       { region: 'us-west-2', accountId: '2', error: 'e' },
     ]);
-    expect(
-      openopsCommonMock.getEc2InstancesWithPartialResults,
-    ).toHaveBeenCalledTimes(2);
+    expect(openopsCommonMock.getEc2InstancesAllowPartial).toHaveBeenCalledTimes(
+      2,
+    );
   });
 });

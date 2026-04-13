@@ -10,7 +10,7 @@ import {
   getAwsAccountsMultiSelectDropdown,
   getCredentialsListFromAuth,
   getEc2Instances,
-  getEc2InstancesWithPartialResults,
+  getEc2InstancesAllowPartial,
   groupARNsByRegion,
   parseArn,
 } from '@openops/common';
@@ -92,7 +92,7 @@ export const ec2GetInstancesAction = createAction({
       if (partial) {
         const partialOutcomes = await Promise.all(
           batches.map((batch) =>
-            getEc2InstancesWithPartialResults(
+            getEc2InstancesAllowPartial(
               batch.creds,
               batch.regions,
               dryRun,
