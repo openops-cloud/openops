@@ -59,7 +59,7 @@ export const ec2GetInstancesAction = createAction({
     allowPartialResults: Property.Checkbox({
       displayName: 'Allow partial results',
       description:
-        'When enabled, the step returns { results, failedRegions } and continues when some regions fail.',
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
       required: false,
       defaultValue: false,
     }),

@@ -218,7 +218,7 @@ describe('getEc2InstancesWithPartialResults', () => {
       {
         region: 'some-region2',
         accountId: ACCOUNT_ID,
-        error: 'UnauthorizedOperation',
+        error: 'Error: UnauthorizedOperation',
       },
     ]);
     expect(sendMock).toHaveBeenCalledTimes(2);
@@ -239,8 +239,8 @@ describe('getEc2InstancesWithPartialResults', () => {
 
     expect(result.results).toEqual([]);
     expect(result.failedRegions).toEqual([
-      { region: 'r1', error: 'STS failed' },
-      { region: 'r2', error: 'STS failed' },
+      { region: 'r1', error: 'Error: STS failed' },
+      { region: 'r2', error: 'Error: STS failed' },
     ]);
     expect(getAwsClientMock.getAwsClient).not.toHaveBeenCalled();
   });

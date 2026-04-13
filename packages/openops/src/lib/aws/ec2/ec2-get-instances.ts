@@ -17,7 +17,7 @@ export type AwsPartialFetchResult<T = unknown> = {
 
 export function formatAwsPartialFetchError(error: unknown): string {
   if (error instanceof Error) {
-    return error.message;
+    return `${error.name}: ${error.message}`;
   }
   return String(error);
 }
