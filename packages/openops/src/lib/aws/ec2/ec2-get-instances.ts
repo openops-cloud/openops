@@ -83,22 +83,8 @@ export async function getEc2InstancesWithPartialResults(
   dryRun: boolean,
   filters?: EC2.Filter[],
 ): Promise<AwsPartialFetchResult<any>> {
-  let accountId: string;
-  let accountName: string | undefined;
-
-  try {
-    accountId = await getAccountId(credentials, regions[0]);
-    accountName = await getAccountName(credentials, regions[0], accountId);
-  } catch (error) {
-    const message = formatAwsPartialFetchError(error);
-    return {
-      results: [],
-      failedRegions: regions.map((region) => ({
-        region,
-        error: message,
-      })),
-    };
-  }
+  const accountId = await getAccountId(credentials, regions[0]);
+  const accountName = await getAccountName(credentials, regions[0], accountId);
 
   const settled = await Promise.allSettled(
     regions.map((region) =>

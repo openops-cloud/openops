@@ -57,7 +57,7 @@ export const ec2GetInstancesAction = createAction({
     ...filterTagsProperties(),
     dryRun: dryRunCheckBox(),
     allowPartialResults: Property.Checkbox({
-      displayName: 'Allow partial results',
+      displayName: 'Allow Partial Results',
       description:
         'When enabled, the step returns partial results if the operation fails in some selected regions.',
       required: false,

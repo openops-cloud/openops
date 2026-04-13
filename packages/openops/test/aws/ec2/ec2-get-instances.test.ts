@@ -223,25 +223,4 @@ describe('getEc2InstancesWithPartialResults', () => {
     ]);
     expect(sendMock).toHaveBeenCalledTimes(2);
   });
-
-  test('when getAccountId fails, marks all regions failed without accountId', async () => {
-    const { getAccountId } = jest.requireMock(
-      '../../../src/lib/aws/sts-common',
-    ) as { getAccountId: jest.Mock };
-    getAccountId.mockRejectedValueOnce(new Error('STS failed'));
-
-    const result = await getEc2InstancesWithPartialResults(
-      CREDENTIALS,
-      ['r1', 'r2'],
-      false,
-      [],
-    );
-
-    expect(result.results).toEqual([]);
-    expect(result.failedRegions).toEqual([
-      { region: 'r1', error: 'Error: STS failed' },
-      { region: 'r2', error: 'Error: STS failed' },
-    ]);
-    expect(getAwsClientMock.getAwsClient).not.toHaveBeenCalled();
-  });
 });
