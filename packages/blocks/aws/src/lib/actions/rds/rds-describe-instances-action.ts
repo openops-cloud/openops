@@ -1,4 +1,4 @@
-import { DBInstance, Filter } from '@aws-sdk/client-rds';
+import { Filter } from '@aws-sdk/client-rds';
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -14,7 +14,6 @@ import {
   getCredentialsListFromAuth,
   groupARNsByRegion,
   parseArn,
-  type PartialResult,
 } from '@openops/common';
 
 export const rdsGetInstancesAction = createAction({
@@ -64,43 +63,23 @@ export const rdsGetInstancesAction = createAction({
     );
 
     const partial = allowPartialResults === true;
+    const batches = buildRdsDescribeInstancesBatches(
+      filterByARNs,
+      filterProperty,
+      credentials,
+      filters,
+    );
 
     if (partial) {
-      const promises: Promise<PartialResult<DBInstance>>[] = [];
-      if (filterByARNs) {
-        const arns = convertToARNArrayWithValidation(
-          filterProperty['arns'] as unknown as string[],
-        );
-        const groupedARNs = groupARNsByRegion(arns);
-
-        for (const region in groupedARNs) {
-          const arnsForRegion = groupedARNs[region];
-          const instanceIdFilter = {
-            Name: 'db-instance-id',
-            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-          };
-          promises.push(
-            ...credentials.map((creds) =>
-              describeRdsInstancesAllowPartial(
-                creds,
-                [region] as [string, ...string[]],
-                [...filters, instanceIdFilter],
-              ),
-            ),
-          );
-        }
-      } else {
-        const regions = convertToRegionsArrayWithValidation(
-          filterProperty['regions'],
-        );
-        promises.push(
-          ...credentials.map((creds) =>
-            describeRdsInstancesAllowPartial(creds, regions, filters),
+      const partialOutcomes = await Promise.all(
+        batches.map((batch) =>
+          describeRdsInstancesAllowPartial(
+            batch.creds,
+            batch.regions,
+            batch.filters,
           ),
-        );
-      }
-
-      const partialOutcomes = await Promise.all(promises);
+        ),
+      );
       let instances = partialOutcomes.flatMap((o) => o.results);
       const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
 
@@ -113,40 +92,13 @@ export const rdsGetInstancesAction = createAction({
       return { results: instances, failedRegions };
     }
 
-    const promises: any[] = [];
-    if (filterByARNs) {
-      const arns = convertToARNArrayWithValidation(
-        filterProperty['arns'] as unknown as string[],
-      );
-      const groupedARNs = groupARNsByRegion(arns);
-
-      for (const region in groupedARNs) {
-        const arnsForRegion = groupedARNs[region];
-        const instanceIdFilter = {
-          Name: 'db-instance-id',
-          Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-        };
-        promises.push(
-          ...credentials.map((creds) =>
-            describeRdsInstances(creds, [region] as [string, ...string[]], [
-              ...filters,
-              instanceIdFilter,
-            ]),
-          ),
-        );
-      }
-    } else {
-      const regions = convertToRegionsArrayWithValidation(
-        filterProperty['regions'],
-      );
-      promises.push(
-        ...credentials.map((creds) =>
-          describeRdsInstances(creds, regions, filters),
+    const instances = (
+      await Promise.all(
+        batches.map((batch) =>
+          describeRdsInstances(batch.creds, batch.regions, batch.filters),
         ),
-      );
-    }
-
-    const instances = (await Promise.all(promises)).flat();
+      )
+    ).flat();
 
     if (tags?.length > 0) {
       return instances.filter((instance) =>
@@ -157,6 +109,56 @@ export const rdsGetInstancesAction = createAction({
     return instances;
   },
 });
+
+type RdsDescribeInstancesBatch = {
+  creds: unknown;
+  regions: [string, ...string[]];
+  filters: Filter[];
+};
+
+function buildRdsDescribeInstancesBatches(
+  filterByARNs: boolean,
+  filterProperty: Record<string, unknown>,
+  credentials: unknown[],
+  filters: Filter[],
+): RdsDescribeInstancesBatch[] {
+  const batches: RdsDescribeInstancesBatch[] = [];
+
+  if (filterByARNs) {
+    const arns = convertToARNArrayWithValidation(
+      filterProperty['arns'] as unknown as string[],
+    );
+    const groupedARNs = groupARNsByRegion(arns);
+
+    for (const region in groupedARNs) {
+      const arnsForRegion = groupedARNs[region];
+      const instanceIdFilter: Filter = {
+        Name: 'db-instance-id',
+        Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+      };
+      for (const creds of credentials) {
+        batches.push({
+          creds,
+          regions: [region] as [string, ...string[]],
+          filters: [...filters, instanceIdFilter],
+        });
+      }
+    }
+  } else {
+    const regions = convertToRegionsArrayWithValidation(
+      filterProperty['regions'],
+    );
+    for (const creds of credentials) {
+      batches.push({
+        creds,
+        regions,
+        filters,
+      });
+    }
+  }
+
+  return batches;
+}
 
 function getFilters(context: any): Filter[] {
   const filters: Filter[] = [];
