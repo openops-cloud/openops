@@ -1,4 +1,4 @@
-import { Filter } from '@aws-sdk/client-rds';
+import { DBInstance, Filter } from '@aws-sdk/client-rds';
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -6,6 +6,7 @@ import {
   convertToARNArrayWithValidation,
   convertToRegionsArrayWithValidation,
   describeRdsInstances,
+  describeRdsInstancesAllowPartial,
   filterByArnsOrRegionsProperties,
   filterTags,
   filterTagsProperties,
@@ -13,6 +14,7 @@ import {
   getCredentialsListFromAuth,
   groupARNsByRegion,
   parseArn,
+  type PartialResult,
 } from '@openops/common';
 
 export const rdsGetInstancesAction = createAction({
@@ -38,15 +40,78 @@ export const rdsGetInstancesAction = createAction({
       required: false,
     }),
     ...filterTagsProperties(),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
-    const { accounts, filterByARNs, filterProperty, tags, condition } =
-      context.propsValue;
+    const {
+      accounts,
+      filterByARNs,
+      filterProperty,
+      tags,
+      condition,
+      allowPartialResults,
+    } = context.propsValue;
     const filters: Filter[] = getFilters(context);
     const credentials = await getCredentialsListFromAuth(
       context.auth,
       accounts['accounts'],
     );
+
+    const partial = allowPartialResults === true;
+
+    if (partial) {
+      const promises: Promise<PartialResult<DBInstance>>[] = [];
+      if (filterByARNs) {
+        const arns = convertToARNArrayWithValidation(
+          filterProperty['arns'] as unknown as string[],
+        );
+        const groupedARNs = groupARNsByRegion(arns);
+
+        for (const region in groupedARNs) {
+          const arnsForRegion = groupedARNs[region];
+          const instanceIdFilter = {
+            Name: 'db-instance-id',
+            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+          };
+          promises.push(
+            ...credentials.map((creds) =>
+              describeRdsInstancesAllowPartial(
+                creds,
+                [region] as [string, ...string[]],
+                [...filters, instanceIdFilter],
+              ),
+            ),
+          );
+        }
+      } else {
+        const regions = convertToRegionsArrayWithValidation(
+          filterProperty['regions'],
+        );
+        promises.push(
+          ...credentials.map((creds) =>
+            describeRdsInstancesAllowPartial(creds, regions, filters),
+          ),
+        );
+      }
+
+      const partialOutcomes = await Promise.all(promises);
+      let instances = partialOutcomes.flatMap((o) => o.results);
+      const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
+
+      if (tags?.length > 0) {
+        instances = instances.filter((instance) =>
+          filterTags((instance.TagList as AwsTag[]) ?? [], tags, condition),
+        );
+      }
+
+      return { results: instances, failedRegions };
+    }
 
     const promises: any[] = [];
     if (filterByARNs) {
@@ -62,12 +127,11 @@ export const rdsGetInstancesAction = createAction({
           Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
         };
         promises.push(
-          ...credentials.map((credentials) =>
-            describeRdsInstances(
-              credentials,
-              [region] as [string, ...string[]],
-              [...filters, instanceIdFilter],
-            ),
+          ...credentials.map((creds) =>
+            describeRdsInstances(creds, [region] as [string, ...string[]], [
+              ...filters,
+              instanceIdFilter,
+            ]),
           ),
         );
       }
@@ -76,8 +140,8 @@ export const rdsGetInstancesAction = createAction({
         filterProperty['regions'],
       );
       promises.push(
-        ...credentials.map((credentials) =>
-          describeRdsInstances(credentials, regions, filters),
+        ...credentials.map((creds) =>
+          describeRdsInstances(creds, regions, filters),
         ),
       );
     }

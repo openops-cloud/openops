@@ -1,4 +1,4 @@
-import { Filter } from '@aws-sdk/client-rds';
+import { DBSnapshot, Filter } from '@aws-sdk/client-rds';
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -6,6 +6,7 @@ import {
   convertToARNArrayWithValidation,
   convertToRegionsArrayWithValidation,
   describeRdsSnapshots,
+  describeRdsSnapshotsAllowPartial,
   filterByArnsOrRegionsProperties,
   filterTags,
   filterTagsProperties,
@@ -13,6 +14,7 @@ import {
   getCredentialsListFromAuth,
   groupARNsByRegion,
   parseArn,
+  type PartialResult,
 } from '@openops/common';
 
 export const rdsGetSnapshotsAction = createAction({
@@ -48,6 +50,13 @@ export const rdsGetSnapshotsAction = createAction({
       required: false,
     }),
     ...filterTagsProperties(),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     const {
@@ -58,12 +67,69 @@ export const rdsGetSnapshotsAction = createAction({
       condition,
       minimumCreationDate,
       maximumCreationDate,
+      allowPartialResults,
     } = context.propsValue;
     const filters: Filter[] = getFilters(context);
     const credentials = await getCredentialsListFromAuth(
       context.auth,
       accounts['accounts'],
     );
+
+    const partial = allowPartialResults === true;
+
+    if (partial) {
+      const promises: Promise<PartialResult<DBSnapshot>>[] = [];
+      if (filterByARNs) {
+        const arns = convertToARNArrayWithValidation(
+          filterProperty['arns'] as unknown as string[],
+        );
+        const groupedARNs = groupARNsByRegion(arns);
+
+        for (const region in groupedARNs) {
+          const arnsForRegion = groupedARNs[region];
+          const instanceFilter = {
+            Name: 'db-snapshot-id',
+            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+          };
+          promises.push(
+            ...credentials.map((creds) =>
+              describeRdsSnapshotsAllowPartial(
+                creds,
+                [region] as [string, ...string[]],
+                [...filters, instanceFilter],
+              ),
+            ),
+          );
+        }
+      } else {
+        const regions = convertToRegionsArrayWithValidation(
+          filterProperty['regions'],
+        );
+        promises.push(
+          ...credentials.map((creds) =>
+            describeRdsSnapshotsAllowPartial(creds, regions, filters),
+          ),
+        );
+      }
+
+      const partialOutcomes = await Promise.all(promises);
+      let snapshots = partialOutcomes.flatMap((o) => o.results);
+      const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
+
+      if (tags?.length > 0) {
+        snapshots = filterByTags(snapshots, tags, condition);
+      }
+
+      if (minimumCreationDate || maximumCreationDate) {
+        snapshots = filterByDate(
+          snapshots,
+          minimumCreationDate,
+          maximumCreationDate,
+        );
+      }
+
+      return { results: snapshots, failedRegions };
+    }
 
     const promises: any[] = [];
     if (filterByARNs) {
@@ -79,12 +145,11 @@ export const rdsGetSnapshotsAction = createAction({
           Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
         };
         promises.push(
-          ...credentials.map((credentials) =>
-            describeRdsSnapshots(
-              credentials,
-              [region] as [string, ...string[]],
-              [...filters, instanceFilter],
-            ),
+          ...credentials.map((creds) =>
+            describeRdsSnapshots(creds, [region] as [string, ...string[]], [
+              ...filters,
+              instanceFilter,
+            ]),
           ),
         );
       }
@@ -93,8 +158,8 @@ export const rdsGetSnapshotsAction = createAction({
         filterProperty['regions'],
       );
       promises.push(
-        ...credentials.map((credentials) =>
-          describeRdsSnapshots(credentials, regions, filters),
+        ...credentials.map((creds) =>
+          describeRdsSnapshots(creds, regions, filters),
         ),
       );
     }

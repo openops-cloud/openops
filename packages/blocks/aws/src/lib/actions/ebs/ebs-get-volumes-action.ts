@@ -1,4 +1,4 @@
-import { Filter, VolumeType } from '@aws-sdk/client-ec2';
+import { Filter, Volume, VolumeType } from '@aws-sdk/client-ec2';
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -12,8 +12,10 @@ import {
   getAwsAccountsMultiSelectDropdown,
   getCredentialsListFromAuth,
   getEbsVolumes,
+  getEbsVolumesAllowPartial,
   groupARNsByRegion,
   parseArn,
+  type PartialResult,
 } from '@openops/common';
 
 const volumeTypeArray = Object.entries(VolumeType).map(([label, value]) => ({
@@ -49,6 +51,13 @@ export const ebsGetVolumesAction = createAction({
     }),
     dryRun: dryRunCheckBox(),
     ...filterTagsProperties(),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -59,12 +68,63 @@ export const ebsGetVolumesAction = createAction({
         tags,
         condition,
         dryRun,
+        allowPartialResults,
       } = context.propsValue;
       const filters: Filter[] | undefined = getFilters(context);
       const credentials = await getCredentialsListFromAuth(
         context.auth,
         accounts['accounts'],
       );
+      const partial = allowPartialResults === true;
+
+      if (partial) {
+        const promises: Promise<PartialResult<Volume>>[] = [];
+
+        if (filterByARNs) {
+          const arns = convertToARNArrayWithValidation(
+            filterProperty['arns'] as unknown as string[],
+          );
+          const groupedARNs = groupARNsByRegion(arns);
+
+          for (const region in groupedARNs) {
+            const arnsForRegion = groupedARNs[region];
+            const volumeIdFilter = {
+              Name: 'volume-id',
+              Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+            };
+            promises.push(
+              ...credentials.map((creds) =>
+                getEbsVolumesAllowPartial(creds, [region], dryRun, [
+                  ...filters,
+                  volumeIdFilter,
+                ]),
+              ),
+            );
+          }
+        } else {
+          const regions = convertToRegionsArrayWithValidation(
+            filterProperty['regions'],
+          );
+          promises.push(
+            ...credentials.map((creds) =>
+              getEbsVolumesAllowPartial(creds, regions, dryRun, filters),
+            ),
+          );
+        }
+
+        const partialOutcomes = await Promise.all(promises);
+        let volumes = partialOutcomes.flatMap((o) => o.results);
+        const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
+
+        if (tags?.length) {
+          volumes = volumes.filter((volume) =>
+            filterTags((volume.Tags as AwsTag[]) ?? [], tags, condition),
+          );
+        }
+
+        return { results: volumes, failedRegions };
+      }
+
       const promises: any[] = [];
 
       if (filterByARNs) {
