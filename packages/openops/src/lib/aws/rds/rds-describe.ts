@@ -1,6 +1,5 @@
 import * as RDS from '@aws-sdk/client-rds';
 import { getAwsClient } from '../get-client';
-import { getAccountName } from '../organizations-common';
 import {
   type FailedRegion,
   formatAwsError,
@@ -48,7 +47,6 @@ export async function describeRdsSnapshotsAllowPartial(
   filters?: RDS.Filter[] | undefined,
 ): Promise<PartialResult<RDS.DBSnapshot>> {
   const accountId = await getAccountId(credentials, regions[0]);
-  await getAccountName(credentials, regions[0], accountId);
 
   const settled = await Promise.allSettled(
     regions.map((region) =>
@@ -115,7 +113,6 @@ export async function describeRdsInstancesAllowPartial(
   filters?: RDS.Filter[] | undefined,
 ): Promise<PartialResult<RDS.DBInstance>> {
   const accountId = await getAccountId(credentials, regions[0]);
-  await getAccountName(credentials, regions[0], accountId);
 
   const settled = await Promise.allSettled(
     regions.map((region) =>
