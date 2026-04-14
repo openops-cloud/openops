@@ -1,4 +1,4 @@
-import { Filter, Volume, VolumeType } from '@aws-sdk/client-ec2';
+import { Filter, VolumeType } from '@aws-sdk/client-ec2';
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -15,7 +15,6 @@ import {
   getEbsVolumesAllowPartial,
   groupARNsByRegion,
   parseArn,
-  type PartialResult,
 } from '@openops/common';
 
 const volumeTypeArray = Object.entries(VolumeType).map(([label, value]) => ({
@@ -76,43 +75,24 @@ export const ebsGetVolumesAction = createAction({
         accounts['accounts'],
       );
       const partial = allowPartialResults === true;
+      const batches = buildEbsGetVolumesBatches(
+        filterByARNs,
+        filterProperty,
+        credentials,
+        filters,
+      );
 
       if (partial) {
-        const promises: Promise<PartialResult<Volume>>[] = [];
-
-        if (filterByARNs) {
-          const arns = convertToARNArrayWithValidation(
-            filterProperty['arns'] as unknown as string[],
-          );
-          const groupedARNs = groupARNsByRegion(arns);
-
-          for (const region in groupedARNs) {
-            const arnsForRegion = groupedARNs[region];
-            const volumeIdFilter = {
-              Name: 'volume-id',
-              Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-            };
-            promises.push(
-              ...credentials.map((creds) =>
-                getEbsVolumesAllowPartial(creds, [region], dryRun, [
-                  ...filters,
-                  volumeIdFilter,
-                ]),
-              ),
-            );
-          }
-        } else {
-          const regions = convertToRegionsArrayWithValidation(
-            filterProperty['regions'],
-          );
-          promises.push(
-            ...credentials.map((creds) =>
-              getEbsVolumesAllowPartial(creds, regions, dryRun, filters),
+        const partialOutcomes = await Promise.all(
+          batches.map((batch) =>
+            getEbsVolumesAllowPartial(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
             ),
-          );
-        }
-
-        const partialOutcomes = await Promise.all(promises);
+          ),
+        );
         let volumes = partialOutcomes.flatMap((o) => o.results);
         const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
 
@@ -125,41 +105,18 @@ export const ebsGetVolumesAction = createAction({
         return { results: volumes, failedRegions };
       }
 
-      const promises: any[] = [];
-
-      if (filterByARNs) {
-        const arns = convertToARNArrayWithValidation(
-          filterProperty['arns'] as unknown as string[],
-        );
-        const groupedARNs = groupARNsByRegion(arns);
-
-        for (const region in groupedARNs) {
-          const arnsForRegion = groupedARNs[region];
-          const volumeIdFilter = {
-            Name: 'volume-id',
-            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-          };
-          promises.push(
-            ...credentials.map((credentials) =>
-              getEbsVolumes(credentials, [region], dryRun, [
-                ...filters,
-                volumeIdFilter,
-              ]),
+      const volumes = (
+        await Promise.all(
+          batches.map((batch) =>
+            getEbsVolumes(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
             ),
-          );
-        }
-      } else {
-        const regions = convertToRegionsArrayWithValidation(
-          filterProperty['regions'],
-        );
-        promises.push(
-          ...credentials.map((credentials) =>
-            getEbsVolumes(credentials, regions, dryRun, filters),
           ),
-        );
-      }
-
-      const volumes = (await Promise.all(promises)).flat();
+        )
+      ).flat();
 
       if (tags?.length) {
         return volumes.filter((volume) =>
@@ -173,6 +130,57 @@ export const ebsGetVolumesAction = createAction({
     }
   },
 });
+
+type EbsGetVolumesBatch = {
+  creds: unknown;
+  regions: [string, ...string[]];
+  fetchFilters: Filter[];
+};
+
+function buildEbsGetVolumesBatches(
+  filterByARNs: boolean,
+  filterProperty: Record<string, unknown>,
+  credentials: unknown[],
+  filters: Filter[] | undefined,
+): EbsGetVolumesBatch[] {
+  const batches: EbsGetVolumesBatch[] = [];
+  const baseFilters = filters ?? [];
+
+  if (filterByARNs) {
+    const arns = convertToARNArrayWithValidation(
+      filterProperty['arns'] as unknown as string[],
+    );
+    const groupedARNs = groupARNsByRegion(arns);
+
+    for (const region in groupedARNs) {
+      const arnsForRegion = groupedARNs[region];
+      const volumeIdFilter: Filter = {
+        Name: 'volume-id',
+        Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+      };
+      for (const creds of credentials) {
+        batches.push({
+          creds,
+          regions: [region] as [string, ...string[]],
+          fetchFilters: [...baseFilters, volumeIdFilter],
+        });
+      }
+    }
+  } else {
+    const regions = convertToRegionsArrayWithValidation(
+      filterProperty['regions'],
+    );
+    for (const creds of credentials) {
+      batches.push({
+        creds,
+        regions,
+        fetchFilters: baseFilters,
+      });
+    }
+  }
+
+  return batches;
+}
 
 function getFilters(context: any): Filter[] {
   const filters: Filter[] = [];
