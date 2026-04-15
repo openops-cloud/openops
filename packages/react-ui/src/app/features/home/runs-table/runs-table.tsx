@@ -28,8 +28,6 @@ const HomeRunsTable = ({ data, loading, refetch }: Props) => {
       <DataTable
         data={data}
         columns={runsColumns}
-        enableSorting={true}
-        syncWithSearchParams={false}
         loading={loading}
         stickyHeader
         border={false}

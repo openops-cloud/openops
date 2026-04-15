@@ -53,8 +53,6 @@ const HomeFlowsTable = ({
         <DataTable
           data={data}
           columns={columns}
-          enableSorting={true}
-          syncWithSearchParams={false}
           columnVisibility={columnVisibility}
           loading={loading}
           stickyHeader
