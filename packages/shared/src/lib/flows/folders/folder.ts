@@ -14,6 +14,7 @@ export const Folder = Type.Object({
   projectId: Type.String(),
   displayName: Type.String(),
   contentType: Type.Enum(ContentType),
+  parentFolderId: Type.Optional(Type.String()),
 });
 
 export type Folder = Static<typeof Folder>;
