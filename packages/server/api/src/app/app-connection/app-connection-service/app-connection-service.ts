@@ -18,14 +18,17 @@ import {
   OAuth2GrantType,
   openOpsId,
   PatchAppConnectionRequestBody,
+  PatchAppConnectionRequestBody as PatchAppConnectionRequestBodySchema,
   ProjectId,
   SeekPage,
   UpsertAppConnectionRequestBody,
+  UpsertAppConnectionRequestBody as UpsertAppConnectionRequestBodySchema,
   UserId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { FindOperator, ILike, In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
+import { parseAndVerify } from '../../helper/json-validator';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import {
@@ -49,6 +52,8 @@ const repo = repoFactory(AppConnectionEntity);
 export const appConnectionService = {
   async upsert(params: UpsertParams): Promise<AppConnection> {
     const { projectId, request } = params;
+
+    parseAndVerify(UpsertAppConnectionRequestBodySchema, request);
 
     const validatedConnectionValue = await validateConnectionValue({
       connection: request,
@@ -100,6 +105,8 @@ export const appConnectionService = {
 
   async patch(params: PatchParams): Promise<AppConnection> {
     const { projectId, request } = params;
+
+    parseAndVerify(PatchAppConnectionRequestBodySchema, request);
 
     const existingConnection = await repo().findOneBy({
       id: request.id,
