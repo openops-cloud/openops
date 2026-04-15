@@ -16,9 +16,11 @@ export function DataTableColumnHeader<TData, TValue>({
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const sortingState = column.getIsSorted();
   const isSortable = column.getCanSort();
+  const hasRows = column.getFacetedRowModel().rows.length > 0;
+  const canShowSorting = isSortable && hasRows;
 
   const renderSortIcon = () => {
-    if (!isSortable) {
+    if (!canShowSorting) {
       return null;
     }
 
@@ -35,7 +37,7 @@ export function DataTableColumnHeader<TData, TValue>({
 
   return (
     <div className={`w-full ${className}`}>
-      {isSortable ? (
+      {canShowSorting ? (
         <Button
           variant="ghost"
           className="-mx-4 flex h-full w-[calc(100%+2rem)] items-center justify-start rounded-none px-4 py-4 text-sm font-semibold text-black dark:text-white hover:bg-transparent"
