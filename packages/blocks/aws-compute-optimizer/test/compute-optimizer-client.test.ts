@@ -7,6 +7,7 @@ const CREDENTIALS = {
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getAccountName: jest.fn(),
+  getAccountId: jest.fn().mockResolvedValue('123456789123'),
   getAwsClient: jest.fn(),
   makeAwsRequest: jest.fn(),
 };
@@ -17,11 +18,15 @@ import {
   RecommendationSourceType,
   RecommendationSummary,
 } from '@aws-sdk/client-compute-optimizer';
-import { getRecommendationSummaries } from '../src/lib/common/compute-optimizer-client';
+import {
+  getRecommendationSummaries,
+  getRecommendationSummariesAllowPartial,
+} from '../src/lib/common/compute-optimizer-client';
 
 describe('Get recommendations summary', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    openopsCommonMock.getAccountId.mockResolvedValue('123456789123');
   });
 
   test('should return recommendations summary', async () => {
@@ -159,6 +164,33 @@ describe('Get recommendations summary', () => {
       'region2',
     ]);
     expect(openopsCommonMock.getAwsClient).toHaveBeenCalledTimes(2);
+  });
+
+  test('getRecommendationSummariesAllowPartial merges regional failures', async () => {
+    const summaryOk = createRecommendationsSummaryResponse([
+      {
+        recommendationResourceType: RecommendationSourceType.EBS_VOLUME,
+      },
+    ]);
+
+    openopsCommonMock.makeAwsRequest
+      .mockResolvedValueOnce([summaryOk])
+      .mockRejectedValueOnce(new Error('api error'));
+
+    const result = await getRecommendationSummariesAllowPartial(CREDENTIALS, [
+      'region1',
+      'region2',
+    ]);
+
+    expect(result.results.length).toBe(1);
+    expect((result.results[0] as { region: string }).region).toBe('region1');
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'region2',
+        accountId: '123456789123',
+        error: 'Error: api error',
+      },
+    ]);
   });
 });
 
