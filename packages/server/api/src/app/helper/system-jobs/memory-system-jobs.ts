@@ -36,6 +36,9 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
     }
     scheduled[key] = true;
   },
+  async removeJob(jobId: string): Promise<void> {
+    scheduled[jobId] = false;
+  },
   async close(): Promise<void> {
     //
   },

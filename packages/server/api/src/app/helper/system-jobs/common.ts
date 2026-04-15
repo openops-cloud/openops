@@ -77,5 +77,6 @@ type UpsertJobParams<T extends SystemJobName> = {
 export type SystemJobSchedule = {
   init(): Promise<void>;
   upsertJob<T extends SystemJobName>(params: UpsertJobParams<T>): Promise<void>;
+  removeJob(jobId: string): Promise<void>;
   close(): Promise<void>;
 };

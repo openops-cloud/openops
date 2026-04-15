@@ -70,6 +70,11 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
     }
   },
 
+  async removeJob(jobId: string): Promise<void> {
+    const job = await systemJobsQueue.getJob(jobId);
+    await job?.remove();
+  },
+
   async close(): Promise<void> {
     if (isNil(systemJobsQueue)) {
       return;
