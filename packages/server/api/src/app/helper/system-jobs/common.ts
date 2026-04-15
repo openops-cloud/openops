@@ -27,7 +27,7 @@ type IssuesReminderSystemJobData = {
 
 type CampaignCompletionSystemJobData = {
   campaignId: string;
-  projectId: string;
+  projectId: ProjectId;
 };
 
 type SystemJobDataMap = {
