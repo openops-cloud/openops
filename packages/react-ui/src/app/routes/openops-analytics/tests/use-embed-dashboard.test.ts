@@ -23,9 +23,6 @@ const baseParams = {
     slug: 'finops',
     enabled: true,
   },
-  isCanduEnabled: false,
-  canduClientToken: null,
-  canduUserId: null,
 };
 
 // Test component that attaches the ref to a real DOM node so useEffect can proceed
@@ -72,28 +69,6 @@ describe('useEmbedDashboard', () => {
         supersetDomain: 'https://analytics.example.com/openops-analytics',
       }),
     );
-  });
-
-  it('encodes parentData with candu fields in dashboardUiConfig urlParams', () => {
-    render(
-      React.createElement(TestComponent, {
-        ...baseParams,
-        isCanduEnabled: true,
-        canduUserId: 'user-42',
-        canduClientToken: 'tok-abc',
-      }),
-    );
-
-    expect(mockEmbedDashboard).toHaveBeenCalledTimes(1);
-    const call = mockEmbedDashboard.mock.calls[0][0];
-    const decoded = JSON.parse(
-      decodeURIComponent(call.dashboardUiConfig.urlParams.parentData),
-    );
-    expect(decoded).toMatchObject({
-      isCanduEnabled: true,
-      userId: 'user-42',
-      canduClientToken: 'tok-abc',
-    });
   });
 
   it('passes a fetchGuestToken function that calls authenticationApi', () => {
