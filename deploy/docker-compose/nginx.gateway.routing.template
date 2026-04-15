@@ -8,7 +8,6 @@ add_header X-XSS-Protection "1; mode=block";
 add_header Referrer-Policy "no-referrer-when-downgrade";
 ssi off;
 server_tokens off;
-more_clear_headers Server;
 
 location / {
     add_header X-Frame-Options DENY;
