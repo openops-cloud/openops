@@ -14,7 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDeepCompareEffect } from 'react-use';
 
-import { SeekPage } from '@openops/shared';
+import { SeekPage, SortDirection } from '@openops/shared';
 
 import { cn } from '../lib/cn';
 import { Button } from './button';
@@ -38,6 +38,26 @@ import {
   TableRow,
 } from './table';
 import { INTERNAL_ERROR_TOAST, toast } from './use-toast';
+
+const DEFAULT_DATA_TABLE_PAGE_SIZE = 10;
+
+const DATA_TABLE_SEARCH_PARAM = {
+  CURSOR: 'cursor',
+  LIMIT: 'limit',
+  SORT_BY: 'sortBy',
+  SORT_DIRECTION: 'sortDirection',
+  CREATED_AFTER: 'createdAfter',
+  CREATED_BEFORE: 'createdBefore',
+} as const;
+
+function sortDirectionFromSearchParam(
+  value: string | null,
+): SortDirection | undefined {
+  if (value === SortDirection.ASC || value === SortDirection.DESC) {
+    return value;
+  }
+  return undefined;
+}
 
 export type DataWithId = {
   id?: string;
@@ -75,7 +95,7 @@ export type PaginationParams = {
   createdAfter?: string;
   createdBefore?: string;
   sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: SortDirection;
 };
 
 interface DataTableProps<
@@ -161,26 +181,29 @@ export function DataTable<
 
   const [searchParams, setSearchParams] = useSearchParams();
   const startingCursor = syncWithSearchParams
-    ? searchParams.get('cursor') || undefined
+    ? searchParams.get(DATA_TABLE_SEARCH_PARAM.CURSOR) || undefined
     : undefined;
+  const defaultLimitString = String(DEFAULT_DATA_TABLE_PAGE_SIZE);
   const startingLimit =
-    syncWithSearchParams && searchParams.get('limit')
-      ? searchParams.get('limit') || '10'
-      : '10';
+    syncWithSearchParams && searchParams.get(DATA_TABLE_SEARCH_PARAM.LIMIT)
+      ? searchParams.get(DATA_TABLE_SEARCH_PARAM.LIMIT) || defaultLimitString
+      : defaultLimitString;
   const startingSortBy = syncWithSearchParams
-    ? searchParams.get('sortBy') || undefined
+    ? searchParams.get(DATA_TABLE_SEARCH_PARAM.SORT_BY) || undefined
     : undefined;
-  const startingSortDirection = syncWithSearchParams
-    ? searchParams.get('sortDirection')
-    : null;
+  const parsedStartingSortDirection = sortDirectionFromSearchParam(
+    syncWithSearchParams
+      ? searchParams.get(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION)
+      : null,
+  );
   const hasValidStartingSortDirection =
-    startingSortDirection === 'asc' || startingSortDirection === 'desc';
+    parsedStartingSortDirection !== undefined;
   const initialSorting: SortingState =
     enableSorting && startingSortBy && hasValidStartingSortDirection
       ? [
           {
             id: startingSortBy,
-            desc: startingSortDirection === 'desc',
+            desc: parsedStartingSortDirection === SortDirection.DESC,
           },
         ]
       : [];
@@ -225,7 +248,7 @@ export function DataTable<
     setLoading(true);
     setTableData([]);
     try {
-      const limit = params.get('limit') ?? undefined;
+      const limit = params.get(DATA_TABLE_SEARCH_PARAM.LIMIT) ?? undefined;
       const filterNames = (filters ?? []).map((filter) => filter.accessorKey);
       const paramsObject = filterNames
         .map((key) => [key, params.getAll(key)] as const)
@@ -238,16 +261,16 @@ export function DataTable<
         }, {} as FilterRecord<Keys, F>);
 
       const response = await fetchData(paramsObject, {
-        cursor: params.get('cursor') ?? undefined,
+        cursor: params.get(DATA_TABLE_SEARCH_PARAM.CURSOR) ?? undefined,
         limit: limit ? parseInt(limit) : undefined,
-        createdAfter: params.get('createdAfter') ?? undefined,
-        createdBefore: params.get('createdBefore') ?? undefined,
-        sortBy: params.get('sortBy') ?? undefined,
-        sortDirection:
-          params.get('sortDirection') === 'asc' ||
-          params.get('sortDirection') === 'desc'
-            ? (params.get('sortDirection') as 'asc' | 'desc')
-            : undefined,
+        createdAfter:
+          params.get(DATA_TABLE_SEARCH_PARAM.CREATED_AFTER) ?? undefined,
+        createdBefore:
+          params.get(DATA_TABLE_SEARCH_PARAM.CREATED_BEFORE) ?? undefined,
+        sortBy: params.get(DATA_TABLE_SEARCH_PARAM.SORT_BY) ?? undefined,
+        sortDirection: sortDirectionFromSearchParam(
+          params.get(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION),
+        ),
       });
 
       const newData = mapDataWithActions(response.data);
@@ -313,17 +336,23 @@ export function DataTable<
       (prev) => {
         const newParams = new URLSearchParams(prev);
         if (currentCursor) {
-          newParams.set('cursor', currentCursor);
+          newParams.set(DATA_TABLE_SEARCH_PARAM.CURSOR, currentCursor);
         } else {
-          newParams.delete('cursor');
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.CURSOR);
         }
-        newParams.set('limit', `${table.getState().pagination.pageSize}`);
+        newParams.set(
+          DATA_TABLE_SEARCH_PARAM.LIMIT,
+          `${table.getState().pagination.pageSize}`,
+        );
         if (enableSorting && sorting.length > 0) {
-          newParams.set('sortBy', sorting[0].id);
-          newParams.set('sortDirection', sorting[0].desc ? 'desc' : 'asc');
+          newParams.set(DATA_TABLE_SEARCH_PARAM.SORT_BY, sorting[0].id);
+          newParams.set(
+            DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION,
+            sorting[0].desc ? SortDirection.DESC : SortDirection.ASC,
+          );
         } else {
-          newParams.delete('sortBy');
-          newParams.delete('sortDirection');
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.SORT_BY);
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION);
         }
         return newParams;
       },
@@ -492,7 +521,7 @@ export function DataTable<
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 30, 50].map((pageSize) => (
+              {[DEFAULT_DATA_TABLE_PAGE_SIZE, 30, 50].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
