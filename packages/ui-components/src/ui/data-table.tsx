@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
@@ -72,6 +74,8 @@ export type PaginationParams = {
   limit?: number;
   createdAfter?: string;
   createdBefore?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 };
 
 interface DataTableProps<
@@ -103,6 +107,8 @@ interface DataTableProps<
   emptyStateComponent?: React.ReactNode;
   getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
   navigationExcludedColumns?: string[];
+  enableSorting?: boolean;
+  syncWithSearchParams?: boolean;
 }
 
 export function DataTable<
@@ -127,10 +133,13 @@ export function DataTable<
   emptyStateComponent,
   getRowHref,
   navigationExcludedColumns,
+  enableSorting = false,
+  syncWithSearchParams = true,
 }: DataTableProps<TData, TValue, Keys, F>) {
   const columns = columnsInitial.concat([
     {
       accessorKey: '__actions',
+      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="" />
       ),
@@ -151,8 +160,30 @@ export function DataTable<
   ]);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const startingCursor = searchParams.get('cursor') || undefined;
-  const startingLimit = searchParams.get('limit') || '10';
+  const startingCursor = syncWithSearchParams
+    ? searchParams.get('cursor') || undefined
+    : undefined;
+  const startingLimit =
+    syncWithSearchParams && searchParams.get('limit')
+      ? searchParams.get('limit') || '10'
+      : '10';
+  const startingSortBy = syncWithSearchParams
+    ? searchParams.get('sortBy') || undefined
+    : undefined;
+  const startingSortDirection = syncWithSearchParams
+    ? searchParams.get('sortDirection')
+    : null;
+  const hasValidStartingSortDirection =
+    startingSortDirection === 'asc' || startingSortDirection === 'desc';
+  const initialSorting: SortingState =
+    enableSorting && startingSortBy && hasValidStartingSortDirection
+      ? [
+          {
+            id: startingSortBy,
+            desc: startingSortDirection === 'desc',
+          },
+        ]
+      : [];
   const [currentCursor, setCurrentCursor] = useState<string | undefined>(
     startingCursor,
   );
@@ -184,6 +215,7 @@ export function DataTable<
   const [tableData, setTableData] = useState<RowDataWithActions<TData>[]>(
     data ? mapDataWithActions(data) : [],
   );
+  const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [deletedRows = [], setDeletedRows] = useState<TData[]>([]);
   const [internalLoading, setLoading] = useState<boolean>(true);
 
@@ -210,6 +242,12 @@ export function DataTable<
         limit: limit ? parseInt(limit) : undefined,
         createdAfter: params.get('createdAfter') ?? undefined,
         createdBefore: params.get('createdBefore') ?? undefined,
+        sortBy: params.get('sortBy') ?? undefined,
+        sortDirection:
+          params.get('sortDirection') === 'asc' ||
+          params.get('sortDirection') === 'desc'
+            ? (params.get('sortDirection') as 'asc' | 'desc')
+            : undefined,
       });
 
       const newData = mapDataWithActions(response.data);
@@ -230,9 +268,13 @@ export function DataTable<
     data: tableData,
     columns,
     manualPagination: true,
+    enableSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     state: {
       columnVisibility,
+      sorting,
     },
     initialState: {
       pagination: {
@@ -264,6 +306,9 @@ export function DataTable<
   }, [table.getSelectedRowModel().rows]);
 
   useEffect(() => {
+    if (!syncWithSearchParams) {
+      return;
+    }
     setSearchParams(
       (prev) => {
         const newParams = new URLSearchParams(prev);
@@ -273,11 +318,30 @@ export function DataTable<
           newParams.delete('cursor');
         }
         newParams.set('limit', `${table.getState().pagination.pageSize}`);
+        if (enableSorting && sorting.length > 0) {
+          newParams.set('sortBy', sorting[0].id);
+          newParams.set('sortDirection', sorting[0].desc ? 'desc' : 'asc');
+        } else {
+          newParams.delete('sortBy');
+          newParams.delete('sortDirection');
+        }
         return newParams;
       },
       { replace: true },
     );
-  }, [currentCursor, table.getState().pagination.pageSize]);
+  }, [
+    currentCursor,
+    enableSorting,
+    sorting,
+    syncWithSearchParams,
+    table.getState().pagination.pageSize,
+  ]);
+
+  useEffect(() => {
+    if (enableSorting) {
+      setCurrentCursor(undefined);
+    }
+  }, [enableSorting, sorting]);
 
   useEffect(() => {
     if (fetchData) {

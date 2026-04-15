@@ -56,6 +56,8 @@ jest.mock('../../../src/app/helper/pagination/pagination-utils', () => ({
 import { BlockMetadataModel } from '@openops/blocks-framework';
 import { encryptUtils } from '@openops/server-shared';
 import {
+  AppConnectionSortBy,
+  AppConnectionSortDirection,
   AppConnectionStatus,
   AppConnectionType,
   ApplicationError,
@@ -221,5 +223,33 @@ describe('appConnectionService.list', () => {
       'LOWER(app_connection.authProviderKey) IN (:...authProviders)',
       { authProviders: ['github', 'slack'] },
     );
+  });
+
+  test('should apply requested sorting for connections list', async () => {
+    await appConnectionService.list({
+      projectId,
+      cursorRequest: null,
+      name: undefined,
+      status: undefined,
+      limit: 10,
+      connectionsIds: undefined,
+      authProviders: undefined,
+      sortBy: AppConnectionSortBy.NAME,
+      sortDirection: AppConnectionSortDirection.ASC,
+    });
+
+    expect(buildPaginator).toHaveBeenCalledWith({
+      entity: AppConnectionEntity,
+      query: {
+        limit: 10,
+        order: 'ASC',
+        afterCursor: null,
+        beforeCursor: null,
+      },
+      customPaginationColumn: {
+        columnPath: 'name',
+        columnName: 'app_connection.name',
+      },
+    });
   });
 });

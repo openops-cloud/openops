@@ -16,6 +16,8 @@ import {
   FlowId,
   FlowOperationRequest,
   FlowOperationType,
+  FlowSortBy,
+  FlowSortDirection,
   FlowStatus,
   FlowTemplateWithoutProjectInformation,
   FlowVersion,
@@ -60,6 +62,9 @@ import { flowRepo } from './flow.repo';
 const TRIGGER_FAILURES_THRESHOLD = system.getNumberOrThrow(
   AppSystemProp.TRIGGER_FAILURES_THRESHOLD,
 );
+
+const DEFAULT_FLOW_SORT_BY = FlowSortBy.UPDATED;
+const DEFAULT_FLOW_SORT_DIRECTION = FlowSortDirection.DESC;
 
 export const flowService = {
   async create(params: CreateParams): Promise<PopulatedFlow> {
@@ -129,21 +134,27 @@ export const flowService = {
     status,
     name,
     versionState,
+    sortBy,
+    sortDirection,
   }: ListParams): Promise<SeekPage<PopulatedFlow>> {
+    const sortingConfig = resolveFlowSorting({
+      sortBy,
+      sortDirection,
+    });
     const decodedCursor = paginationHelper.decodeCursor(cursorRequest);
 
     const paginator = buildPaginator({
       entity: FlowEntity,
       query: {
         limit,
-        order: 'DESC',
+        order: sortingConfig.order,
         afterCursor: decodedCursor.nextCursor,
         beforeCursor: decodedCursor.previousCursor,
       },
       customPaginationColumn: {
-        columnPath: 'versions[0].updated',
-        columnName: 'fv.updated',
-        columnType: 'timestamp with time zone',
+        columnPath: sortingConfig.columnPath,
+        columnName: sortingConfig.columnName,
+        columnType: sortingConfig.columnType,
       },
       customPaginationSecondaryColumn: {
         columnPath: 'id',
@@ -789,6 +800,8 @@ type ListParams = {
   status: FlowStatus[] | undefined;
   name: string | undefined;
   versionState: FlowVersionState[] | null;
+  sortBy: FlowSortBy | undefined;
+  sortDirection: FlowSortDirection | undefined;
 };
 
 type GetOneParams = {
@@ -863,3 +876,45 @@ type ExistsByProjectAndStatusParams = {
   status: FlowStatus;
   entityManager: EntityManager;
 };
+
+function resolveFlowSorting({
+  sortBy,
+  sortDirection,
+}: {
+  sortBy: FlowSortBy | undefined;
+  sortDirection: FlowSortDirection | undefined;
+}): {
+  columnPath: string;
+  columnName: string;
+  columnType: string;
+  order: 'ASC' | 'DESC';
+} {
+  const resolvedSortBy = sortBy ?? DEFAULT_FLOW_SORT_BY;
+  const resolvedSortDirection = sortDirection ?? DEFAULT_FLOW_SORT_DIRECTION;
+
+  const sortByToColumnMap: Record<
+    FlowSortBy,
+    { columnPath: string; columnName: string; columnType: string }
+  > = {
+    [FlowSortBy.NAME]: {
+      columnPath: 'versions[0].displayName',
+      columnName: 'fv.displayName',
+      columnType: 'string',
+    },
+    [FlowSortBy.CREATED]: {
+      columnPath: 'created',
+      columnName: 'flow.created',
+      columnType: 'timestamp with time zone',
+    },
+    [FlowSortBy.UPDATED]: {
+      columnPath: 'versions[0].updated',
+      columnName: 'fv.updated',
+      columnType: 'timestamp with time zone',
+    },
+  };
+
+  return {
+    ...sortByToColumnMap[resolvedSortBy],
+    order: resolvedSortDirection === FlowSortDirection.ASC ? 'ASC' : 'DESC',
+  };
+}

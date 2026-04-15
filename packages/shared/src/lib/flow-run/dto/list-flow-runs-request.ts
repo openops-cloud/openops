@@ -3,6 +3,18 @@ import { OpenOpsId } from '../../common/id-generator';
 import { FlowRunStatus } from '../execution/flow-execution';
 import { FlowRunTriggerSource } from '../flow-run';
 
+export enum FlowRunSortBy {
+  FLOW_NAME = 'flowName',
+  STATUS = 'status',
+  TRIGGER_SOURCE = 'triggerSource',
+  CREATED = 'created',
+}
+
+export enum FlowRunSortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 export const ListFlowRunsRequestQuery = Type.Object({
   flowId: Type.Optional(Type.Array(OpenOpsId)),
   tags: Type.Optional(Type.Array(Type.String({}))),
@@ -12,6 +24,8 @@ export const ListFlowRunsRequestQuery = Type.Object({
   cursor: Type.Optional(Type.String({})),
   createdAfter: Type.Optional(Type.String({})),
   createdBefore: Type.Optional(Type.String({})),
+  sortBy: Type.Optional(Type.Enum(FlowRunSortBy)),
+  sortDirection: Type.Optional(Type.Enum(FlowRunSortDirection)),
 });
 
 export type ListFlowRunsRequestQuery = Static<typeof ListFlowRunsRequestQuery>;

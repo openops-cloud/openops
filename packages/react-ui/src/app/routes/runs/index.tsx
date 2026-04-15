@@ -1,5 +1,10 @@
 import { DataTable, PaginationParams } from '@openops/components/ui';
-import { FlowRunStatus, FlowRunTriggerSource } from '@openops/shared';
+import {
+  FlowRunSortBy,
+  FlowRunSortDirection,
+  FlowRunStatus,
+  FlowRunTriggerSource,
+} from '@openops/shared';
 import { t } from 'i18next';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -12,6 +17,30 @@ import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { formatUtils } from '@/app/lib/utils';
+
+const isFlowRunSortBy = (sortBy?: string): sortBy is FlowRunSortBy => {
+  return (
+    !!sortBy && Object.values(FlowRunSortBy).includes(sortBy as FlowRunSortBy)
+  );
+};
+
+const isFlowRunSortDirection = (
+  sortDirection?: string,
+): sortDirection is FlowRunSortDirection => {
+  return (
+    !!sortDirection &&
+    Object.values(FlowRunSortDirection).includes(
+      sortDirection as FlowRunSortDirection,
+    )
+  );
+};
+
+const toFlowRunSortBy = (sortBy?: string): FlowRunSortBy | undefined => {
+  if (sortBy === 'flowId') {
+    return FlowRunSortBy.FLOW_NAME;
+  }
+  return isFlowRunSortBy(sortBy) ? sortBy : undefined;
+};
 
 const fetchData = async (
   params: {
@@ -31,6 +60,10 @@ const fetchData = async (
     limit: pagination.limit ?? 10,
     createdAfter: pagination.createdAfter,
     createdBefore: pagination.createdBefore,
+    sortBy: toFlowRunSortBy(pagination.sortBy),
+    sortDirection: isFlowRunSortDirection(pagination.sortDirection)
+      ? pagination.sortDirection
+      : undefined,
   });
 };
 
@@ -110,6 +143,7 @@ const FlowRunsPage = () => {
         <DataTable
           columns={columns}
           fetchData={fetchData}
+          enableSorting={true}
           navigationExcludedColumns={['actions']}
           filters={filters}
           refresh={refresh}
