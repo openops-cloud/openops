@@ -3,6 +3,7 @@ import {
   formatAwsError,
   getAccountId,
   groupARNsByRegion,
+  parseArn,
   type FailedRegion,
   type PartialResult,
 } from '@openops/common';
@@ -110,7 +111,7 @@ export async function getEC2RecommendationsForARNsAllowPartial(
   const arnsPerRegion = groupARNsByRegion(arns);
   const regionEntries = Object.entries(arnsPerRegion);
 
-  const accountId = await getAccountId(credentials, regionEntries[0][0]);
+  const accountId = parseArn(arns[0]).accountId;
   const recommendationType = getRecommendationType(findingType);
   const recommendationsBuilder = new Ec2RecommendationsBuilder(
     credentials,
