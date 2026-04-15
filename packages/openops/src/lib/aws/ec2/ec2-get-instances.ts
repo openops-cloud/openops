@@ -2,7 +2,11 @@ import * as EC2 from '@aws-sdk/client-ec2';
 import * as ArnParser from '@aws-sdk/util-arn-parser';
 import { getAwsClient } from '../get-client';
 import { getAccountName } from '../organizations-common';
-import { FailedRegion, formatAwsError, PartialResult } from '../partial-result';
+import {
+  type FailedRegion,
+  formatAwsError,
+  type PartialResult,
+} from '../partial-result';
 import { getAccountId } from '../sts-common';
 
 async function describeInstancesInRegion(
