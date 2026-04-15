@@ -75,12 +75,14 @@ describe('appConnectionService.update', () => {
   const projectId = 'project-123';
   const userId = 'user-123';
   const connectionName = 'test-conn';
+  const authProviderKey = 'test-provider';
 
   const request: PatchAppConnectionRequestBody = {
     id: 'conn-id-123',
     type: AppConnectionType.SECRET_TEXT,
     projectId,
     name: connectionName,
+    authProviderKey,
     value: {
       type: AppConnectionType.SECRET_TEXT,
       secret_text: 'abc',
@@ -91,6 +93,7 @@ describe('appConnectionService.update', () => {
     id: 'conn-id-123',
     name: connectionName,
     projectId,
+    authProviderKey,
     value: 'encrypted-{"type":"SECRET_TEXT","secret_text":"old"}',
     status: AppConnectionStatus.ACTIVE,
   };
@@ -158,6 +161,22 @@ describe('appConnectionService.update', () => {
       status: AppConnectionStatus.ACTIVE,
       value: { type: 'SECRET_TEXT', secret_text: 'abc' },
     });
+  });
+
+  test('should throw an error if the connection name contains invalid characters', async () => {
+    const invalidRequest: PatchAppConnectionRequestBody = {
+      ...request,
+      name: 'test-conn$%&',
+    };
+
+    await expect(
+      appConnectionService.patch({
+        projectId,
+        request: invalidRequest,
+        userId,
+        authProperty: blockMetadata.auth,
+      }),
+    ).rejects.toThrow();
   });
 
   test('should throw if the connection was not found', async () => {

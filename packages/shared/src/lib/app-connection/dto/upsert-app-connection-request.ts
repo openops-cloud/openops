@@ -3,7 +3,10 @@ import { AppConnectionType } from '../app-connection';
 import { OAuth2AuthorizationMethod } from '../oauth2-authorization-method';
 
 const commonAuthProps = {
-  name: Type.String({}),
+  name: Type.String({
+    pattern: '^[A-Za-z0-9_\\-@\\+\\.]*$',
+    minLength: 1,
+  }),
   authProviderKey: Type.String({}),
 };
 
