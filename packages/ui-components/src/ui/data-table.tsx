@@ -287,13 +287,17 @@ export function DataTable<
     }
   };
 
+  const manualSorting =
+    fetchData !== undefined && typeof fetchData === 'function' && enableSorting;
+
   const table = useReactTable({
     data: tableData,
     columns,
     manualPagination: true,
     enableSorting,
+    manualSorting,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
     onSortingChange: setSorting,
     state: {
       columnVisibility,
