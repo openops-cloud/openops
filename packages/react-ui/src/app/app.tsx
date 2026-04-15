@@ -10,7 +10,6 @@ import { ThemeProvider } from '@/app/common/providers/theme-provider';
 import { HelmetProvider } from 'react-helmet-async';
 import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
 import { InitialDataGuard } from './common/guards/intial-data-guard';
-import { Extensions } from './features/extensions';
 import './interceptors';
 import { useLogoutEventListener } from './lib/navigation-events';
 import { queryClient } from './lib/query-client';
@@ -38,7 +37,6 @@ export function App() {
                 <Toaster />
               </ThemeProvider>
             </TooltipProvider>
-            <Extensions />
           </InitialDataGuard>
         </QueryClientProvider>
       </OpsErrorBoundary>
