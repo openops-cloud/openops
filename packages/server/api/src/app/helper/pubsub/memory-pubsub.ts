@@ -1,3 +1,5 @@
+import { logger } from '@openops/server-shared';
+
 const subscriptions = new Map<
   string,
   ((channel: string, message: string) => Promise<void>)[]
@@ -17,9 +19,18 @@ export const memoryPubSub = {
   async publish(channel: string, message: string): Promise<void> {
     const listeners = subscriptions.get(channel);
     if (listeners) {
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         [...listeners].map((listener) => listener(channel, message)),
       );
+
+      results
+        .filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === 'rejected',
+        )
+        .forEach((result) => {
+          logger.error('Error while processing Memory pub/sub message', result);
+        });
     }
   },
   async unsubscribe(channel: string): Promise<void> {
