@@ -7,7 +7,6 @@ import {
   BlockType,
   FlowOperationType,
   FlowSortBy,
-  FlowSortDirection,
   FlowStatus,
   FlowTemplateDto,
   FlowVersionState,
@@ -15,6 +14,7 @@ import {
   PackageType,
   PrincipalType,
   RiskLevel,
+  SortDirection,
   TemplateType,
   TriggerTestStrategy,
   TriggerType,
@@ -581,7 +581,7 @@ describe('Flow API', () => {
         url: '/v1/flows',
         query: {
           sortBy: FlowSortBy.NAME,
-          sortDirection: FlowSortDirection.ASC,
+          sortDirection: SortDirection.ASC,
         },
         headers: {
           authorization: `Bearer ${mockToken}`,

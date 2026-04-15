@@ -1,6 +1,7 @@
 import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import { isSortDirection } from '@/app/lib/sort-direction';
 import { formatUtils } from '@/app/lib/utils';
 import {
   BlockIcon,
@@ -17,7 +18,6 @@ import {
 import {
   AppConnection,
   AppConnectionSortBy,
-  AppConnectionSortDirection,
   AppConnectionStatus,
   MinimalFlow,
   Permission,
@@ -42,17 +42,6 @@ const isAppConnectionSortBy = (
   return (
     !!sortBy &&
     Object.values(AppConnectionSortBy).includes(sortBy as AppConnectionSortBy)
-  );
-};
-
-const isAppConnectionSortDirection = (
-  sortDirection?: string,
-): sortDirection is AppConnectionSortDirection => {
-  return (
-    !!sortDirection &&
-    Object.values(AppConnectionSortDirection).includes(
-      sortDirection as AppConnectionSortDirection,
-    )
   );
 };
 
@@ -291,7 +280,7 @@ const fetchData = async (
     sortBy: isAppConnectionSortBy(pagination.sortBy)
       ? pagination.sortBy
       : undefined,
-    sortDirection: isAppConnectionSortDirection(pagination.sortDirection)
+    sortDirection: isSortDirection(pagination.sortDirection)
       ? pagination.sortDirection
       : undefined,
   });

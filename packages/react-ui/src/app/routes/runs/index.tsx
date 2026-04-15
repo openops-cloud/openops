@@ -1,7 +1,6 @@
 import { DataTable, PaginationParams } from '@openops/components/ui';
 import {
   FlowRunSortBy,
-  FlowRunSortDirection,
   FlowRunStatus,
   FlowRunTriggerSource,
 } from '@openops/shared';
@@ -16,22 +15,12 @@ import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTable
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
+import { isSortDirection } from '@/app/lib/sort-direction';
 import { formatUtils } from '@/app/lib/utils';
 
 const isFlowRunSortBy = (sortBy?: string): sortBy is FlowRunSortBy => {
   return (
     !!sortBy && Object.values(FlowRunSortBy).includes(sortBy as FlowRunSortBy)
-  );
-};
-
-const isFlowRunSortDirection = (
-  sortDirection?: string,
-): sortDirection is FlowRunSortDirection => {
-  return (
-    !!sortDirection &&
-    Object.values(FlowRunSortDirection).includes(
-      sortDirection as FlowRunSortDirection,
-    )
   );
 };
 
@@ -61,7 +50,7 @@ const fetchData = async (
     createdAfter: pagination.createdAfter,
     createdBefore: pagination.createdBefore,
     sortBy: toFlowRunSortBy(pagination.sortBy),
-    sortDirection: isFlowRunSortDirection(pagination.sortDirection)
+    sortDirection: isSortDirection(pagination.sortDirection)
       ? pagination.sortDirection
       : undefined,
   });

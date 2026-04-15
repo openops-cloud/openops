@@ -1,15 +1,11 @@
 import { Static, Type } from '@sinclair/typebox';
+import { SortDirectionSchema } from '../../common/sort-direction';
 import { AppConnectionStatus } from '../app-connection';
 
 export enum AppConnectionSortBy {
   NAME = 'name',
   CREATED = 'created',
   UPDATED = 'updated',
-}
-
-export enum AppConnectionSortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 export const ListAppConnectionsRequestQuery = Type.Object({
@@ -19,7 +15,7 @@ export const ListAppConnectionsRequestQuery = Type.Object({
   limit: Type.Optional(Type.Number({})),
   authProviders: Type.Optional(Type.Array(Type.String({}))),
   sortBy: Type.Optional(Type.Enum(AppConnectionSortBy)),
-  sortDirection: Type.Optional(Type.Enum(AppConnectionSortDirection)),
+  sortDirection: Type.Optional(SortDirectionSchema),
 });
 export type ListAppConnectionsRequestQuery = Static<
   typeof ListAppConnectionsRequestQuery

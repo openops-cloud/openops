@@ -17,9 +17,9 @@ import {
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
 import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
+import { isSortDirection } from '@/app/lib/sort-direction';
 import {
   FlowSortBy,
-  FlowSortDirection,
   FlowStatus,
   FlowVersionState,
   Permission,
@@ -27,17 +27,6 @@ import {
 
 const isFlowSortBy = (sortBy?: string): sortBy is FlowSortBy => {
   return !!sortBy && Object.values(FlowSortBy).includes(sortBy as FlowSortBy);
-};
-
-const isFlowSortDirection = (
-  sortDirection?: string,
-): sortDirection is FlowSortDirection => {
-  return (
-    !!sortDirection &&
-    Object.values(FlowSortDirection).includes(
-      sortDirection as FlowSortDirection,
-    )
-  );
 };
 
 const FlowsPage = () => {
@@ -65,7 +54,7 @@ const FlowsPage = () => {
         cursor: pagination.cursor,
         limit: pagination.limit ?? 10,
         sortBy: isFlowSortBy(pagination.sortBy) ? pagination.sortBy : undefined,
-        sortDirection: isFlowSortDirection(pagination.sortDirection)
+        sortDirection: isSortDirection(pagination.sortDirection)
           ? pagination.sortDirection
           : undefined,
         status: params.status,

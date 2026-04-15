@@ -1,5 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
 import { Cursor } from '../../common/seek-page';
+import { SortDirectionSchema } from '../../common/sort-direction';
 import { FlowStatus } from '../flow';
 import { FlowVersionState } from '../flow-version';
 
@@ -7,11 +8,6 @@ export enum FlowSortBy {
   NAME = 'name',
   CREATED = 'created',
   UPDATED = 'updated',
-}
-
-export enum FlowSortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 export const ListFlowsRequest = Type.Object({
@@ -22,7 +18,7 @@ export const ListFlowsRequest = Type.Object({
   versionState: Type.Optional(Type.Array(Type.Enum(FlowVersionState))),
   name: Type.Optional(Type.String({})),
   sortBy: Type.Optional(Type.Enum(FlowSortBy)),
-  sortDirection: Type.Optional(Type.Enum(FlowSortDirection)),
+  sortDirection: Type.Optional(SortDirectionSchema),
 });
 
 export type ListFlowsRequest = Omit<

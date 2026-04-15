@@ -17,7 +17,6 @@ import {
   FlowOperationRequest,
   FlowOperationType,
   FlowSortBy,
-  FlowSortDirection,
   FlowStatus,
   FlowTemplateWithoutProjectInformation,
   FlowVersion,
@@ -28,6 +27,7 @@ import {
   PopulatedFlow,
   ProjectId,
   SeekPage,
+  SortDirection,
   TriggerWithOptionalId,
   UNCATEGORIZED_FOLDER_ID,
   UserId,
@@ -64,7 +64,7 @@ const TRIGGER_FAILURES_THRESHOLD = system.getNumberOrThrow(
 );
 
 const DEFAULT_FLOW_SORT_BY = FlowSortBy.UPDATED;
-const DEFAULT_FLOW_SORT_DIRECTION = FlowSortDirection.DESC;
+const DEFAULT_FLOW_SORT_DIRECTION = SortDirection.DESC;
 
 export const flowService = {
   async create(params: CreateParams): Promise<PopulatedFlow> {
@@ -801,7 +801,7 @@ type ListParams = {
   name: string | undefined;
   versionState: FlowVersionState[] | null;
   sortBy: FlowSortBy | undefined;
-  sortDirection: FlowSortDirection | undefined;
+  sortDirection: SortDirection | undefined;
 };
 
 type GetOneParams = {
@@ -882,7 +882,7 @@ function resolveFlowSorting({
   sortDirection,
 }: {
   sortBy: FlowSortBy | undefined;
-  sortDirection: FlowSortDirection | undefined;
+  sortDirection: SortDirection | undefined;
 }): {
   columnPath: string;
   columnName: string;
@@ -915,6 +915,6 @@ function resolveFlowSorting({
 
   return {
     ...sortByToColumnMap[resolvedSortBy],
-    order: resolvedSortDirection === FlowSortDirection.ASC ? 'ASC' : 'DESC',
+    order: resolvedSortDirection === SortDirection.ASC ? 'ASC' : 'DESC',
   };
 }

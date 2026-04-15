@@ -13,7 +13,6 @@ import {
   FlowRun,
   FlowRunId,
   FlowRunSortBy,
-  FlowRunSortDirection,
   FlowRunStatus,
   FlowRunTriggerSource,
   FlowVersionId,
@@ -26,6 +25,7 @@ import {
   ProjectId,
   RunEnvironment,
   SeekPage,
+  SortDirection,
   spreadIfDefined,
   StepOutput,
   StepOutputStatus,
@@ -676,7 +676,7 @@ type ListParams = {
   createdAfter?: string;
   createdBefore?: string;
   sortBy?: FlowRunSortBy;
-  sortDirection?: FlowRunSortDirection;
+  sortDirection?: SortDirection;
 };
 
 type GetOneParams = {
@@ -718,7 +718,7 @@ function resolveFlowRunSorting({
   sortDirection,
 }: {
   sortBy?: FlowRunSortBy;
-  sortDirection?: FlowRunSortDirection;
+  sortDirection?: SortDirection;
 }): {
   columnPath: string;
   columnName: string;
@@ -726,7 +726,7 @@ function resolveFlowRunSorting({
   order: Order;
 } {
   const resolvedSortBy = sortBy ?? FlowRunSortBy.CREATED;
-  const resolvedSortDirection = sortDirection ?? FlowRunSortDirection.DESC;
+  const resolvedSortDirection = sortDirection ?? SortDirection.DESC;
 
   const sortByToColumnMap: Record<
     FlowRunSortBy,
@@ -756,9 +756,6 @@ function resolveFlowRunSorting({
 
   return {
     ...sortByToColumnMap[resolvedSortBy],
-    order:
-      resolvedSortDirection === FlowRunSortDirection.ASC
-        ? Order.ASC
-        : Order.DESC,
+    order: resolvedSortDirection === SortDirection.ASC ? Order.ASC : Order.DESC,
   };
 }

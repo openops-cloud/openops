@@ -8,7 +8,6 @@ import {
   AppConnection,
   AppConnectionId,
   AppConnectionSortBy,
-  AppConnectionSortDirection,
   AppConnectionStatus,
   AppConnectionType,
   AppConnectionValue,
@@ -23,6 +22,7 @@ import {
   PatchAppConnectionRequestBody as PatchAppConnectionRequestBodySchema,
   ProjectId,
   SeekPage,
+  SortDirection,
   UpsertAppConnectionRequestBody,
   UpsertAppConnectionRequestBody as UpsertAppConnectionRequestBodySchema,
   UserId,
@@ -51,7 +51,7 @@ import { engineValidateAuth } from './validate-auth';
 
 const repo = repoFactory(AppConnectionEntity);
 const DEFAULT_APP_CONNECTION_SORT_BY = AppConnectionSortBy.UPDATED;
-const DEFAULT_APP_CONNECTION_SORT_DIRECTION = AppConnectionSortDirection.DESC;
+const DEFAULT_APP_CONNECTION_SORT_DIRECTION = SortDirection.DESC;
 
 export const appConnectionService = {
   async upsert(params: UpsertParams): Promise<AppConnection> {
@@ -558,7 +558,7 @@ type ListParams = {
   limit: number;
   authProviders: string[] | undefined;
   sortBy?: AppConnectionSortBy;
-  sortDirection?: AppConnectionSortDirection;
+  sortDirection?: SortDirection;
 };
 
 type CountByProjectParams = {
@@ -575,7 +575,7 @@ function resolveAppConnectionSorting({
   sortDirection,
 }: {
   sortBy?: AppConnectionSortBy;
-  sortDirection?: AppConnectionSortDirection;
+  sortDirection?: SortDirection;
 }): {
   columnPath: string;
   columnName: string;
@@ -605,7 +605,6 @@ function resolveAppConnectionSorting({
 
   return {
     ...sortByToColumnMap[resolvedSortBy],
-    order:
-      resolvedSortDirection === AppConnectionSortDirection.ASC ? 'ASC' : 'DESC',
+    order: resolvedSortDirection === SortDirection.ASC ? 'ASC' : 'DESC',
   };
 }

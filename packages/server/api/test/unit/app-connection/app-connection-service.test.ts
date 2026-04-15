@@ -57,7 +57,6 @@ import { BlockMetadataModel } from '@openops/blocks-framework';
 import { encryptUtils } from '@openops/server-shared';
 import {
   AppConnectionSortBy,
-  AppConnectionSortDirection,
   AppConnectionStatus,
   AppConnectionType,
   ApplicationError,
@@ -65,6 +64,7 @@ import {
   ErrorCode,
   PackageType,
   PatchAppConnectionRequestBody,
+  SortDirection,
 } from '@openops/shared';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
 import { restoreRedactedSecrets } from '../../../src/app/app-connection/app-connection-utils';
@@ -254,7 +254,7 @@ describe('appConnectionService.list', () => {
       connectionsIds: undefined,
       authProviders: undefined,
       sortBy: AppConnectionSortBy.NAME,
-      sortDirection: AppConnectionSortDirection.ASC,
+      sortDirection: SortDirection.ASC,
     });
 
     expect(buildPaginator).toHaveBeenCalledWith({

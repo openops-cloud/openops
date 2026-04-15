@@ -1,5 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
 import { OpenOpsId } from '../../common/id-generator';
+import { SortDirectionSchema } from '../../common/sort-direction';
 import { FlowRunStatus } from '../execution/flow-execution';
 import { FlowRunTriggerSource } from '../flow-run';
 
@@ -8,11 +9,6 @@ export enum FlowRunSortBy {
   STATUS = 'status',
   TRIGGER_SOURCE = 'triggerSource',
   CREATED = 'created',
-}
-
-export enum FlowRunSortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
 }
 
 export const ListFlowRunsRequestQuery = Type.Object({
@@ -25,7 +21,7 @@ export const ListFlowRunsRequestQuery = Type.Object({
   createdAfter: Type.Optional(Type.String({})),
   createdBefore: Type.Optional(Type.String({})),
   sortBy: Type.Optional(Type.Enum(FlowRunSortBy)),
-  sortDirection: Type.Optional(Type.Enum(FlowRunSortDirection)),
+  sortDirection: Type.Optional(SortDirectionSchema),
 });
 
 export type ListFlowRunsRequestQuery = Static<typeof ListFlowRunsRequestQuery>;

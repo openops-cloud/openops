@@ -1,8 +1,4 @@
-import {
-  FlowRunSortBy,
-  FlowRunSortDirection,
-  PrincipalType,
-} from '@openops/shared';
+import { FlowRunSortBy, PrincipalType, SortDirection } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { databaseConnection } from '../../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../../src/app/server';
@@ -127,7 +123,7 @@ describe('List flow runs endpoint', () => {
       url: '/v1/flow-runs',
       query: {
         sortBy: FlowRunSortBy.FLOW_NAME,
-        sortDirection: FlowRunSortDirection.ASC,
+        sortDirection: SortDirection.ASC,
       },
       headers: {
         authorization: `Bearer ${testToken}`,
