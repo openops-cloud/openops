@@ -11,7 +11,8 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
     //
   },
   async upsertJob({ job, schedule }): Promise<void> {
-    if (scheduled[job.name]) {
+    const key = job.jobId ?? job.name;
+    if (scheduled[key]) {
       return;
     }
     const jobHandler = systemJobHandlers.getJobHandler(job.name);
@@ -33,7 +34,7 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
         break;
       }
     }
-    scheduled[job.name] = true;
+    scheduled[key] = true;
   },
   async close(): Promise<void> {
     //
