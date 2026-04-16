@@ -17,6 +17,8 @@ jest.mock('@openops/common', () => openopsCommon);
 const computeOptimizerMock = {
   getEC2RecommendationsForARNs: jest.fn(),
   getEC2RecommendationsForRegions: jest.fn(),
+  getEC2RecommendationsForARNsAllowPartial: jest.fn(),
+  getEC2RecommendationsForRegionsAllowPartial: jest.fn(),
 };
 
 jest.mock(
@@ -60,6 +62,10 @@ describe('ec2GetRecommendationsAction', () => {
       accounts: {
         required: true,
         type: 'STATIC_MULTI_SELECT_DROPDOWN',
+      },
+      allowPartialResults: {
+        type: 'CHECKBOX',
+        required: false,
       },
     });
   });
@@ -288,5 +294,88 @@ describe('ec2GetRecommendationsAction', () => {
     expect(
       computeOptimizerMock.getEC2RecommendationsForRegions,
     ).toHaveBeenNthCalledWith(2, 'credentials2', 'Optimized', ['us-east-2']);
+  });
+
+  test('when allowPartialResults with regions, uses partial helper and returns object shape', async () => {
+    openopsCommon.getCredentialsListFromAuth.mockResolvedValue([
+      'credentials1',
+      'credentials2',
+    ]);
+    computeOptimizerMock.getEC2RecommendationsForRegionsAllowPartial
+      .mockResolvedValueOnce({
+        results: [{ arn: 'a1' }],
+        failedRegions: [{ region: 'us-east-1', accountId: '1', error: 'e1' }],
+      })
+      .mockResolvedValueOnce({
+        results: [{ arn: 'a2' }],
+        failedRegions: [],
+      });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        accounts: { accounts: ['1', '2'] },
+        recommendationType: 'Optimized',
+        allowPartialResults: true,
+        filterProperty: {
+          regions: ['us-east-2'],
+        },
+      },
+    };
+
+    const result = (await ec2GetRecommendationsAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ arn: 'a1' }, { arn: 'a2' }],
+      failedRegions: [{ region: 'us-east-1', accountId: '1', error: 'e1' }],
+    });
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForRegionsAllowPartial,
+    ).toHaveBeenCalledTimes(2);
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForRegionsAllowPartial,
+    ).toHaveBeenNthCalledWith(1, 'credentials1', 'Optimized', ['us-east-2']);
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForRegionsAllowPartial,
+    ).toHaveBeenNthCalledWith(2, 'credentials2', 'Optimized', ['us-east-2']);
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForRegions,
+    ).not.toHaveBeenCalled();
+  });
+
+  test('when allowPartialResults with ARNs, uses partial helper and returns object shape', async () => {
+    computeOptimizerMock.getEC2RecommendationsForARNsAllowPartial.mockResolvedValue(
+      {
+        results: [{ arn: 'arn:aws:ec2:us-east-2:1:instance/i-1' }],
+        failedRegions: [],
+      },
+    );
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        accounts: {},
+        recommendationType: 'Optimized',
+        allowPartialResults: true,
+        filterProperty: {
+          resourceARNs: ['arn:aws:iam::1:instance/instance-id'],
+        },
+      },
+    };
+
+    const result = (await ec2GetRecommendationsAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ arn: 'arn:aws:ec2:us-east-2:1:instance/i-1' }],
+      failedRegions: [],
+    });
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForARNsAllowPartial,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      computeOptimizerMock.getEC2RecommendationsForARNs,
+    ).not.toHaveBeenCalled();
   });
 });
