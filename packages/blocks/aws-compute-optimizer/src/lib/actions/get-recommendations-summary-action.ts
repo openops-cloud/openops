@@ -1,4 +1,4 @@
-import { createAction } from '@openops/blocks-framework';
+import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
   convertToRegionsArrayWithValidation,
@@ -6,7 +6,10 @@ import {
   getCredentialsListFromAuth,
   regionsStaticMultiSelectDropdown,
 } from '@openops/common';
-import { getRecommendationSummaries } from '../common/compute-optimizer-client';
+import {
+  getRecommendationSummaries,
+  getRecommendationSummariesAllowPartial,
+} from '../common/compute-optimizer-client';
 
 export const getRecommendationsSummaryAction = createAction({
   auth: amazonAuth,
@@ -17,6 +20,13 @@ export const getRecommendationsSummaryAction = createAction({
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     regions: regionsStaticMultiSelectDropdown(true).regions,
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -26,14 +36,28 @@ export const getRecommendationsSummaryAction = createAction({
       const regions = convertToRegionsArrayWithValidation(
         context.propsValue.regions,
       );
+      const partial = context.propsValue.allowPartialResults === true;
       const credentials = await getCredentialsListFromAuth(
         context.auth,
         accounts,
       );
 
-      const promises = credentials.map((credentials) => {
-        return getRecommendationSummaries(credentials, regions);
-      });
+      if (partial) {
+        const partialOutcomes = await Promise.all(
+          credentials.map((creds) =>
+            getRecommendationSummariesAllowPartial(creds, regions),
+          ),
+        );
+
+        return {
+          results: partialOutcomes.flatMap((o) => o.results),
+          failedRegions: partialOutcomes.flatMap((o) => o.failedRegions),
+        };
+      }
+
+      const promises = credentials.map((creds) =>
+        getRecommendationSummaries(creds, regions),
+      );
 
       const recommendations = await Promise.all(promises);
 

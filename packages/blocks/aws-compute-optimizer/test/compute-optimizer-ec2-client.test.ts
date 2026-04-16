@@ -22,17 +22,21 @@ import {
 import { _InstanceType } from '@aws-sdk/client-ec2';
 import {
   getEC2RecommendationsForARNs,
+  getEC2RecommendationsForARNsAllowPartial,
   getEC2RecommendationsForRegions,
+  getEC2RecommendationsForRegionsAllowPartial,
 } from '../src/lib/common/compute-optimizer-ec2-client';
 
 jest.mock('@openops/common', () => ({
   ...jest.requireActual('@openops/common'),
   makeAwsRequest: sendMock,
+  getAccountId: jest.fn().mockResolvedValue('123456789123'),
 }));
 
 describe('Get ec2 instances recommendations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sendMock.mockReset();
   });
 
   test('should return all the EC2 Recommendations of the given type for the regions making two requests', async () => {
@@ -258,6 +262,67 @@ describe('Get ec2 instances recommendations', () => {
 
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(recommendations.length).toBe(0);
+  });
+
+  test('getEC2RecommendationsForRegionsAllowPartial collects successes and failed regions', async () => {
+    const findingType = Finding.OVER_PROVISIONED;
+    const ok = createRecommendationsResponse([
+      createRecommendations(
+        'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+        findingType,
+      ),
+    ]);
+
+    sendMock
+      .mockResolvedValueOnce([ok])
+      .mockRejectedValueOnce(new Error('region down'));
+
+    const result = await getEC2RecommendationsForRegionsAllowPartial(
+      CREDENTIALS,
+      findingType,
+      ['us-east-2', 'us-east-1'],
+    );
+
+    expect(result.results.length).toBe(1);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'us-east-1',
+        accountId: '123456789123',
+        error: 'Error: region down',
+      },
+    ]);
+  });
+
+  test('getEC2RecommendationsForARNsAllowPartial collects per-region failures', async () => {
+    const findingType = Finding.OPTIMIZED;
+    const ok = createRecommendationsResponse([
+      createRecommendations(
+        'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+        findingType,
+      ),
+    ]);
+
+    sendMock.mockResolvedValueOnce([ok]).mockRejectedValueOnce(new Error('no'));
+
+    const arns = [
+      'arn:aws:ec2:us-east-2:123456789123:instance/i-1',
+      'arn:aws:ec2:us-east-1:123456789123:instance/i-2',
+    ];
+
+    const result = await getEC2RecommendationsForARNsAllowPartial(
+      CREDENTIALS,
+      findingType,
+      arns,
+    );
+
+    expect(result.results.length).toBe(1);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'us-east-1',
+        accountId: '123456789123',
+        error: 'Error: no',
+      },
+    ]);
   });
 });
 
