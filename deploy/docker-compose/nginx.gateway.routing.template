@@ -9,15 +9,7 @@ add_header X-Frame-Options DENY;
 add_header X-Content-Type-Options "nosniff" always;
 add_header Referrer-Policy "no-referrer-when-downgrade";
 add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-add_header Content-Security-Policy "
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' https://fonts.gstatic.com https://fonts.cdnfonts.com;
-  img-src 'self' data: blob:;
-  connect-src 'self' https://api.github.com https://*.openops.com;
-  frame-ancestors 'none';
-" always;
+add_header Content-Security-Policy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*.openops.com https://assets.frontegg.com https://fonts.cdnfonts.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.github.com https://cdn.jsdelivr.net" always;
 
 ssi off;
 server_tokens off;
