@@ -104,6 +104,8 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       status: request.query.status,
       name: request.query.name,
       versionState: request.query.versionState ?? null,
+      sortBy: request.query.sortBy,
+      sortDirection: request.query.sortDirection,
     });
   });
 

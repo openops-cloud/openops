@@ -27,7 +27,10 @@ const getAwsClientMock = {
 
 jest.mock('../../../src/lib/aws/get-client', () => getAwsClientMock);
 import * as EC2 from '@aws-sdk/client-ec2';
-import { getEbsVolumes } from '../../../src/lib/aws/ebs/get-ebs-volumes';
+import {
+  getEbsVolumes,
+  getEbsVolumesAllowPartial,
+} from '../../../src/lib/aws/ebs/get-ebs-volumes';
 
 describe('getEbsVolumes', () => {
   beforeEach(() => {
@@ -170,5 +173,47 @@ describe('getEbsVolumes', () => {
       Filters: filters,
       DryRun: false,
     });
+  });
+});
+
+describe('getEbsVolumesAllowPartial', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns volumes from successful regions and records failed regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        Volumes: [{ VolumeId: 'vol-ok', VolumeType: 'gp2', Size: 8 }],
+      })
+      .mockRejectedValueOnce(new Error('UnauthorizedOperation'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await getEbsVolumesAllowPartial(
+      CREDENTIALS,
+      ['some-region1', 'some-region2'],
+      false,
+      [],
+    );
+
+    expect(result.results).toMatchObject([
+      {
+        volume_id: 'vol-ok',
+        region: 'some-region1',
+        account_id: ACCOUNT_ID,
+      },
+    ]);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'some-region2',
+        accountId: ACCOUNT_ID,
+        error: 'Error: UnauthorizedOperation',
+      },
+    ]);
+    expect(sendMock).toHaveBeenCalledTimes(2);
   });
 });
