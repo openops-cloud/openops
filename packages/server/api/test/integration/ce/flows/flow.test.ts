@@ -6,6 +6,7 @@ import {
 import {
   BlockType,
   FlowOperationType,
+  FlowSortBy,
   FlowStatus,
   FlowTemplateDto,
   FlowVersionState,
@@ -13,6 +14,7 @@ import {
   PackageType,
   PrincipalType,
   RiskLevel,
+  SortDirection,
   TemplateType,
   TriggerTestStrategy,
   TriggerType,
@@ -538,6 +540,122 @@ describe('Flow API', () => {
   });
 
   describe('List Flows endpoint', () => {
+    it('Sorts Flows by name', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const flowA = createMockFlow({ projectId: mockProject.id });
+      const flowB = createMockFlow({ projectId: mockProject.id });
+      await databaseConnection().getRepository('flow').save([flowA, flowB]);
+
+      const versionA = createMockFlowVersion({
+        flowId: flowA.id,
+        displayName: 'Beta flow',
+      });
+      const versionB = createMockFlowVersion({
+        flowId: flowB.id,
+        displayName: 'Alpha flow',
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([versionA, versionB]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'GET',
+        url: '/v1/flows',
+        query: {
+          sortBy: FlowSortBy.NAME,
+          sortDirection: SortDirection.ASC,
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+
+      expect(responseBody.data).toHaveLength(2);
+      expect(responseBody.data[0].version.displayName).toBe('Alpha flow');
+      expect(responseBody.data[1].version.displayName).toBe('Beta flow');
+    });
+
+    it('Uses default sorting when sorting is not provided', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const olderFlow = createMockFlow({ projectId: mockProject.id });
+      const newerFlow = createMockFlow({ projectId: mockProject.id });
+      await databaseConnection()
+        .getRepository('flow')
+        .save([olderFlow, newerFlow]);
+
+      const olderVersion = createMockFlowVersion({
+        flowId: olderFlow.id,
+        displayName: 'Older updated flow',
+        updated: '2024-01-01T00:00:00.000Z',
+      });
+      const newerVersion = createMockFlowVersion({
+        flowId: newerFlow.id,
+        displayName: 'Newer updated flow',
+        updated: '2024-01-02T00:00:00.000Z',
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([olderVersion, newerVersion]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'GET',
+        url: '/v1/flows',
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+
+      expect(responseBody.data).toHaveLength(2);
+      expect(responseBody.data[0].version.displayName).toBe(
+        'Newer updated flow',
+      );
+      expect(responseBody.data[1].version.displayName).toBe(
+        'Older updated flow',
+      );
+    });
+
     it('Filters Flows by status', async () => {
       const mockUser = createMockUser();
       await databaseConnection().getRepository('user').save([mockUser]);

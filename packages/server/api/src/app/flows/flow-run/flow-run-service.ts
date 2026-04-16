@@ -12,6 +12,7 @@ import {
   FlowRetryStrategy,
   FlowRun,
   FlowRunId,
+  FlowRunSortBy,
   FlowRunStatus,
   FlowRunTriggerSource,
   FlowVersionId,
@@ -24,6 +25,7 @@ import {
   ProjectId,
   RunEnvironment,
   SeekPage,
+  SortDirection,
   spreadIfDefined,
   StepOutput,
   StepOutputStatus,
@@ -177,15 +179,31 @@ export const flowRunService = {
     tags,
     createdAfter,
     createdBefore,
+    sortBy,
+    sortDirection,
   }: ListParams): Promise<SeekPage<FlowRun>> {
+    const sortingConfig = resolveFlowRunSorting({
+      sortBy,
+      sortDirection,
+    });
     const decodedCursor = paginationHelper.decodeCursor(cursor);
     const paginator = buildPaginator<FlowRun>({
       entity: FlowRunEntity,
       query: {
         limit,
-        order: Order.DESC,
+        order: sortingConfig.order,
         afterCursor: decodedCursor.nextCursor,
         beforeCursor: decodedCursor.previousCursor,
+      },
+      customPaginationColumn: {
+        columnPath: sortingConfig.columnPath,
+        columnName: sortingConfig.columnName,
+        columnType: sortingConfig.columnType,
+      },
+      customPaginationSecondaryColumn: {
+        columnPath: 'id',
+        columnName: 'flow_run.id',
+        columnType: 'string',
       },
     });
 
@@ -657,6 +675,8 @@ type ListParams = {
   limit: number;
   createdAfter?: string;
   createdBefore?: string;
+  sortBy?: FlowRunSortBy;
+  sortDirection?: SortDirection;
 };
 
 type GetOneParams = {
@@ -692,3 +712,50 @@ type RetryParams = {
   flowRunId: FlowRunId;
   strategy: FlowRetryStrategy;
 };
+
+function resolveFlowRunSorting({
+  sortBy,
+  sortDirection,
+}: {
+  sortBy?: FlowRunSortBy;
+  sortDirection?: SortDirection;
+}): {
+  columnPath: string;
+  columnName: string;
+  columnType: string;
+  order: Order;
+} {
+  const resolvedSortBy = sortBy ?? FlowRunSortBy.CREATED;
+  const resolvedSortDirection = sortDirection ?? SortDirection.DESC;
+
+  const sortByToColumnMap: Record<
+    FlowRunSortBy,
+    { columnPath: string; columnName: string; columnType: string }
+  > = {
+    [FlowRunSortBy.FLOW_NAME]: {
+      columnPath: 'flowDisplayName',
+      columnName: 'flow_run.flowDisplayName',
+      columnType: 'string',
+    },
+    [FlowRunSortBy.STATUS]: {
+      columnPath: 'status',
+      columnName: 'flow_run.status',
+      columnType: 'string',
+    },
+    [FlowRunSortBy.TRIGGER_SOURCE]: {
+      columnPath: 'triggerSource',
+      columnName: 'flow_run.triggerSource',
+      columnType: 'string',
+    },
+    [FlowRunSortBy.CREATED]: {
+      columnPath: 'created',
+      columnName: 'flow_run.created',
+      columnType: 'timestamp with time zone',
+    },
+  };
+
+  return {
+    ...sortByToColumnMap[resolvedSortBy],
+    order: resolvedSortDirection === SortDirection.ASC ? Order.ASC : Order.DESC,
+  };
+}

@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
@@ -12,7 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDeepCompareEffect } from 'react-use';
 
-import { SeekPage } from '@openops/shared';
+import { SeekPage, SortDirection } from '@openops/shared';
 
 import { cn } from '../lib/cn';
 import { Button } from './button';
@@ -36,6 +38,26 @@ import {
   TableRow,
 } from './table';
 import { INTERNAL_ERROR_TOAST, toast } from './use-toast';
+
+const DEFAULT_DATA_TABLE_PAGE_SIZE = 10;
+
+const DATA_TABLE_SEARCH_PARAM = {
+  CURSOR: 'cursor',
+  LIMIT: 'limit',
+  SORT_BY: 'sortBy',
+  SORT_DIRECTION: 'sortDirection',
+  CREATED_AFTER: 'createdAfter',
+  CREATED_BEFORE: 'createdBefore',
+} as const;
+
+function sortDirectionFromSearchParam(
+  value: string | null,
+): SortDirection | undefined {
+  if (value === SortDirection.ASC || value === SortDirection.DESC) {
+    return value;
+  }
+  return undefined;
+}
 
 export type DataWithId = {
   id?: string;
@@ -72,6 +94,8 @@ export type PaginationParams = {
   limit?: number;
   createdAfter?: string;
   createdBefore?: string;
+  sortBy?: string;
+  sortDirection?: SortDirection;
 };
 
 interface DataTableProps<
@@ -103,6 +127,8 @@ interface DataTableProps<
   emptyStateComponent?: React.ReactNode;
   getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
   navigationExcludedColumns?: string[];
+  enableSorting?: boolean;
+  syncWithSearchParams?: boolean;
 }
 
 export function DataTable<
@@ -127,10 +153,13 @@ export function DataTable<
   emptyStateComponent,
   getRowHref,
   navigationExcludedColumns,
+  enableSorting = false,
+  syncWithSearchParams = true,
 }: DataTableProps<TData, TValue, Keys, F>) {
   const columns = columnsInitial.concat([
     {
       accessorKey: '__actions',
+      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="" />
       ),
@@ -151,8 +180,33 @@ export function DataTable<
   ]);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const startingCursor = searchParams.get('cursor') || undefined;
-  const startingLimit = searchParams.get('limit') || '10';
+  const startingCursor = syncWithSearchParams
+    ? searchParams.get(DATA_TABLE_SEARCH_PARAM.CURSOR) || undefined
+    : undefined;
+  const defaultLimitString = String(DEFAULT_DATA_TABLE_PAGE_SIZE);
+  const startingLimit =
+    syncWithSearchParams && searchParams.get(DATA_TABLE_SEARCH_PARAM.LIMIT)
+      ? searchParams.get(DATA_TABLE_SEARCH_PARAM.LIMIT) || defaultLimitString
+      : defaultLimitString;
+  const startingSortBy = syncWithSearchParams
+    ? searchParams.get(DATA_TABLE_SEARCH_PARAM.SORT_BY) || undefined
+    : undefined;
+  const parsedStartingSortDirection = sortDirectionFromSearchParam(
+    syncWithSearchParams
+      ? searchParams.get(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION)
+      : null,
+  );
+  const hasValidStartingSortDirection =
+    parsedStartingSortDirection !== undefined;
+  const initialSorting: SortingState =
+    enableSorting && startingSortBy && hasValidStartingSortDirection
+      ? [
+          {
+            id: startingSortBy,
+            desc: parsedStartingSortDirection === SortDirection.DESC,
+          },
+        ]
+      : [];
   const [currentCursor, setCurrentCursor] = useState<string | undefined>(
     startingCursor,
   );
@@ -184,6 +238,7 @@ export function DataTable<
   const [tableData, setTableData] = useState<RowDataWithActions<TData>[]>(
     data ? mapDataWithActions(data) : [],
   );
+  const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [deletedRows = [], setDeletedRows] = useState<TData[]>([]);
   const [internalLoading, setLoading] = useState<boolean>(true);
 
@@ -193,7 +248,7 @@ export function DataTable<
     setLoading(true);
     setTableData([]);
     try {
-      const limit = params.get('limit') ?? undefined;
+      const limit = params.get(DATA_TABLE_SEARCH_PARAM.LIMIT) ?? undefined;
       const filterNames = (filters ?? []).map((filter) => filter.accessorKey);
       const paramsObject = filterNames
         .map((key) => [key, params.getAll(key)] as const)
@@ -206,10 +261,16 @@ export function DataTable<
         }, {} as FilterRecord<Keys, F>);
 
       const response = await fetchData(paramsObject, {
-        cursor: params.get('cursor') ?? undefined,
+        cursor: params.get(DATA_TABLE_SEARCH_PARAM.CURSOR) ?? undefined,
         limit: limit ? parseInt(limit) : undefined,
-        createdAfter: params.get('createdAfter') ?? undefined,
-        createdBefore: params.get('createdBefore') ?? undefined,
+        createdAfter:
+          params.get(DATA_TABLE_SEARCH_PARAM.CREATED_AFTER) ?? undefined,
+        createdBefore:
+          params.get(DATA_TABLE_SEARCH_PARAM.CREATED_BEFORE) ?? undefined,
+        sortBy: params.get(DATA_TABLE_SEARCH_PARAM.SORT_BY) ?? undefined,
+        sortDirection: sortDirectionFromSearchParam(
+          params.get(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION),
+        ),
       });
 
       const newData = mapDataWithActions(response.data);
@@ -226,13 +287,21 @@ export function DataTable<
     }
   };
 
+  const manualSorting =
+    fetchData !== undefined && typeof fetchData === 'function' && enableSorting;
+
   const table = useReactTable({
     data: tableData,
     columns,
     manualPagination: true,
+    enableSorting,
+    manualSorting,
     getCoreRowModel: getCoreRowModel(),
+    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
+    onSortingChange: setSorting,
     state: {
       columnVisibility,
+      sorting,
     },
     initialState: {
       pagination: {
@@ -264,20 +333,48 @@ export function DataTable<
   }, [table.getSelectedRowModel().rows]);
 
   useEffect(() => {
+    if (!syncWithSearchParams) {
+      return;
+    }
     setSearchParams(
       (prev) => {
         const newParams = new URLSearchParams(prev);
         if (currentCursor) {
-          newParams.set('cursor', currentCursor);
+          newParams.set(DATA_TABLE_SEARCH_PARAM.CURSOR, currentCursor);
         } else {
-          newParams.delete('cursor');
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.CURSOR);
         }
-        newParams.set('limit', `${table.getState().pagination.pageSize}`);
+        newParams.set(
+          DATA_TABLE_SEARCH_PARAM.LIMIT,
+          `${table.getState().pagination.pageSize}`,
+        );
+        if (enableSorting && sorting.length > 0) {
+          newParams.set(DATA_TABLE_SEARCH_PARAM.SORT_BY, sorting[0].id);
+          newParams.set(
+            DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION,
+            sorting[0].desc ? SortDirection.DESC : SortDirection.ASC,
+          );
+        } else {
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.SORT_BY);
+          newParams.delete(DATA_TABLE_SEARCH_PARAM.SORT_DIRECTION);
+        }
         return newParams;
       },
       { replace: true },
     );
-  }, [currentCursor, table.getState().pagination.pageSize]);
+  }, [
+    currentCursor,
+    enableSorting,
+    sorting,
+    syncWithSearchParams,
+    table.getState().pagination.pageSize,
+  ]);
+
+  useEffect(() => {
+    if (enableSorting) {
+      setCurrentCursor(undefined);
+    }
+  }, [enableSorting, sorting]);
 
   useEffect(() => {
     if (fetchData) {
@@ -428,7 +525,7 @@ export function DataTable<
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 30, 50].map((pageSize) => (
+              {[DEFAULT_DATA_TABLE_PAGE_SIZE, 30, 50].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
