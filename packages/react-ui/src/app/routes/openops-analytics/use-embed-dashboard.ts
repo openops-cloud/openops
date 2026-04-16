@@ -7,12 +7,9 @@ import { AnalyticsDashboard } from '@openops/shared';
 interface UseEmbedDashboardParams {
   analyticsPublicUrl: string | null | undefined;
   selectedDashboard: AnalyticsDashboard | undefined;
-  isCanduEnabled: string | boolean | null | undefined;
-  canduClientToken: string | null | undefined;
-  canduUserId: string | null | undefined;
 }
 
-const buildDashboardUiConfig = (parentData: string) => ({
+const buildDashboardUiConfig = () => ({
   hideTitle: true,
   hideChartControls: false,
   hideTab: false,
@@ -20,32 +17,13 @@ const buildDashboardUiConfig = (parentData: string) => ({
     expanded: false,
     visible: false,
   },
-  urlParams: { parentData },
 });
-
-const encodeParentData = (
-  isCanduEnabled: string | boolean | null | undefined,
-  canduUserId: string | null | undefined,
-  canduClientToken: string | null | undefined,
-) =>
-  encodeURIComponent(
-    JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
-  );
 
 export const useEmbedDashboard = ({
   analyticsPublicUrl,
   selectedDashboard,
-  isCanduEnabled,
-  canduClientToken,
-  canduUserId,
 }: UseEmbedDashboardParams) => {
   const iframeContainerRef = useRef<HTMLDivElement>(null);
-
-  const parentData = encodeParentData(
-    isCanduEnabled,
-    canduUserId,
-    canduClientToken,
-  );
 
   useEffect(() => {
     if (!analyticsPublicUrl || !selectedDashboard?.embedId) {
@@ -65,9 +43,9 @@ export const useEmbedDashboard = ({
       mountPoint,
       fetchGuestToken: () =>
         authenticationApi.fetchAnalyticsGuestToken(selectedDashboard.embedId),
-      dashboardUiConfig: buildDashboardUiConfig(parentData),
+      dashboardUiConfig: buildDashboardUiConfig(),
     });
-  }, [analyticsPublicUrl, selectedDashboard?.embedId, parentData]);
+  }, [analyticsPublicUrl, selectedDashboard?.embedId]);
 
   return { iframeContainerRef };
 };
