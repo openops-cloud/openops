@@ -13,6 +13,7 @@ export enum SystemJobName {
   ISSUES_REMINDER = 'issue-reminder',
   LOGS_CLEANUP_TRIGGER = 'logs-cleanup-trigger',
   CREATE_TEMPLATE_TABLES = 'create-template-tables',
+  CAMPAIGN_COMPLETION = 'campaign-completion',
 }
 
 type HardDeleteProjectSystemJobData = {
@@ -24,7 +25,13 @@ type IssuesReminderSystemJobData = {
   organizationId: string;
 };
 
+type CampaignCompletionSystemJobData = {
+  campaignId: string;
+  projectId: ProjectId;
+};
+
 type SystemJobDataMap = {
+  [SystemJobName.CAMPAIGN_COMPLETION]: CampaignCompletionSystemJobData;
   [SystemJobName.HARD_DELETE_PROJECT]: HardDeleteProjectSystemJobData;
   [SystemJobName.ISSUES_REMINDER]: IssuesReminderSystemJobData;
   [SystemJobName.PROJECT_USAGE_REPORT]: Record<string, never>;
@@ -70,5 +77,6 @@ type UpsertJobParams<T extends SystemJobName> = {
 export type SystemJobSchedule = {
   init(): Promise<void>;
   upsertJob<T extends SystemJobName>(params: UpsertJobParams<T>): Promise<void>;
+  removeJob(jobId: string): Promise<void>;
   close(): Promise<void>;
 };
