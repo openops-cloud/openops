@@ -5,6 +5,9 @@ client_body_buffer_size 1K;
 client_header_buffer_size 1k;
 large_client_header_buffers 4 16k;
 add_header Referrer-Policy "no-referrer-when-downgrade";
+add_header X-Content-Type-Options "nosniff" always;
+add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*.openops.com https://fonts.cdnfonts.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.github.com https://cdn.jsdelivr.net" always;
+add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
 ssi off;
 server_tokens off;
 
