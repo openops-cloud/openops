@@ -127,6 +127,7 @@
                   "filterProperty": {
                     "regions": "{{step_b['regions']}}"
                   },
+                  "allowPartialResults": true,
                   "shouldQueryOnlyUnattached": true
                 },
                 "blockName": "@openops/block-aws",
@@ -139,6 +140,7 @@
                     "settings": {
                       "input": {
                         "auth": true,
+                        "allowPartialResults": true,
                         "accounts": {
                           "accounts": true
                         },
@@ -167,7 +169,7 @@
                 "type": "LOOP_ON_ITEMS",
                 "valid": true,
                 "settings": {
-                  "items": "{{step_1}}",
+                  "items": "{{step_1['results']}}",
                   "inputUiInfo": {
                     "customizedInputs": {}
                   }
