@@ -17,6 +17,7 @@ export * from './lib/aws/ec2/ec2-modify-instance-attribute';
 export * from './lib/aws/ec2/ec2-terminate-instances';
 export * from './lib/aws/get-client';
 export * from './lib/aws/organizations-common';
+export * from './lib/aws/partial-result';
 export * from './lib/aws/rds/rds-create-snapshot';
 export * from './lib/aws/rds/rds-delete-instance';
 export * from './lib/aws/rds/rds-delete-snapshot';

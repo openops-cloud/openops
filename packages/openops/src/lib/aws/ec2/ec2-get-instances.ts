@@ -2,25 +2,12 @@ import * as EC2 from '@aws-sdk/client-ec2';
 import * as ArnParser from '@aws-sdk/util-arn-parser';
 import { getAwsClient } from '../get-client';
 import { getAccountName } from '../organizations-common';
+import {
+  type FailedRegion,
+  formatAwsError,
+  type PartialResult,
+} from '../partial-result';
 import { getAccountId } from '../sts-common';
-
-export type FailedRegion = {
-  region: string;
-  accountId?: string;
-  error: string;
-};
-
-export type PartialResult<T = unknown> = {
-  results: T[];
-  failedRegions: FailedRegion[];
-};
-
-export function formatAwsError(error: unknown): string {
-  if (error instanceof Error) {
-    return `${error.name}: ${error.message}`;
-  }
-  return String(error);
-}
 
 async function describeInstancesInRegion(
   credentials: any,

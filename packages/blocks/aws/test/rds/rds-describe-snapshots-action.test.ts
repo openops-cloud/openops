@@ -2,6 +2,7 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsListFromAuth: jest.fn(),
   describeRdsSnapshots: jest.fn(),
+  describeRdsSnapshotsAllowPartial: jest.fn(),
   getAwsAccountsMultiSelectDropdown: jest.fn().mockReturnValue({
     accounts: {
       required: true,
@@ -47,7 +48,7 @@ describe('rdsGetSnapshotsAction', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(rdsGetSnapshotsAction.props).length).toBe(9);
+    expect(Object.keys(rdsGetSnapshotsAction.props).length).toBe(10);
     expect(rdsGetSnapshotsAction.props).toMatchObject({
       accounts: {
         required: true,
@@ -80,6 +81,11 @@ describe('rdsGetSnapshotsAction', () => {
       },
       condition: {
         type: 'STATIC_DROPDOWN',
+      },
+      allowPartialResults: {
+        required: false,
+        defaultValue: false,
+        type: 'CHECKBOX',
       },
     });
   });
@@ -388,5 +394,68 @@ describe('rdsGetSnapshotsAction', () => {
     expect(result).toStrictEqual([
       { Name: 'snapshot1', SnapshotCreateTime: '2020-02-02T00:00:00Z' },
     ]);
+  });
+
+  test('when allowPartialResults, uses partial helper and returns object shape', async () => {
+    openopsCommonMock.describeRdsSnapshotsAllowPartial.mockResolvedValue({
+      results: [{ DBSnapshotIdentifier: 'snap-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '1', error: 'Error: x' },
+      ],
+    });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterByARNs: false,
+        filterProperty: { regions: ['us-east-1', 'eu-west-1'] },
+        accounts: {},
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await rdsGetSnapshotsAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ DBSnapshotIdentifier: 'snap-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '1', error: 'Error: x' },
+      ],
+    });
+    expect(
+      openopsCommonMock.describeRdsSnapshotsAllowPartial,
+    ).toHaveBeenCalledWith('credentials1', ['us-east-1', 'eu-west-1'], []);
+    expect(openopsCommonMock.describeRdsSnapshots).not.toHaveBeenCalled();
+  });
+
+  test('when allowPartialResults, date filters apply only to results', async () => {
+    openopsCommonMock.describeRdsSnapshotsAllowPartial.mockResolvedValue({
+      results: [
+        { Name: 's1', SnapshotCreateTime: '2020-02-02T00:00:00Z' },
+        { Name: 's2', SnapshotCreateTime: '2019-01-01T00:00:00Z' },
+      ],
+      failedRegions: [],
+    });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterByARNs: false,
+        filterProperty: { regions: ['region1'] },
+        accounts: {},
+        allowPartialResults: true,
+        minimumCreationDate: '2020-01-01T00:00:00Z',
+        maximumCreationDate: '2021-01-01T00:00:00Z',
+      },
+    };
+
+    const result = (await rdsGetSnapshotsAction.run(context)) as any;
+
+    expect(result.results).toStrictEqual([
+      { Name: 's1', SnapshotCreateTime: '2020-02-02T00:00:00Z' },
+    ]);
+    expect(result.failedRegions).toEqual([]);
   });
 });
