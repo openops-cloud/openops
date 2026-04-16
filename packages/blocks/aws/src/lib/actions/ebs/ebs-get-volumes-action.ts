@@ -12,6 +12,7 @@ import {
   getAwsAccountsMultiSelectDropdown,
   getCredentialsListFromAuth,
   getEbsVolumes,
+  getEbsVolumesAllowPartial,
   groupARNsByRegion,
   parseArn,
 } from '@openops/common';
@@ -49,6 +50,13 @@ export const ebsGetVolumesAction = createAction({
     }),
     dryRun: dryRunCheckBox(),
     ...filterTagsProperties(),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -59,47 +67,56 @@ export const ebsGetVolumesAction = createAction({
         tags,
         condition,
         dryRun,
+        allowPartialResults,
       } = context.propsValue;
       const filters: Filter[] | undefined = getFilters(context);
       const credentials = await getCredentialsListFromAuth(
         context.auth,
         accounts['accounts'],
       );
-      const promises: any[] = [];
+      const partial = allowPartialResults === true;
+      const batches = buildEbsGetVolumesBatches(
+        filterByARNs,
+        filterProperty,
+        credentials,
+        filters,
+      );
 
-      if (filterByARNs) {
-        const arns = convertToARNArrayWithValidation(
-          filterProperty['arns'] as unknown as string[],
-        );
-        const groupedARNs = groupARNsByRegion(arns);
-
-        for (const region in groupedARNs) {
-          const arnsForRegion = groupedARNs[region];
-          const volumeIdFilter = {
-            Name: 'volume-id',
-            Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
-          };
-          promises.push(
-            ...credentials.map((credentials) =>
-              getEbsVolumes(credentials, [region], dryRun, [
-                ...filters,
-                volumeIdFilter,
-              ]),
+      if (partial) {
+        const partialOutcomes = await Promise.all(
+          batches.map((batch) =>
+            getEbsVolumesAllowPartial(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
             ),
-          );
-        }
-      } else {
-        const regions = convertToRegionsArrayWithValidation(
-          filterProperty['regions'],
-        );
-        promises.push(
-          ...credentials.map((credentials) =>
-            getEbsVolumes(credentials, regions, dryRun, filters),
           ),
         );
+        let volumes = partialOutcomes.flatMap((o) => o.results);
+        const failedRegions = partialOutcomes.flatMap((o) => o.failedRegions);
+
+        if (tags?.length) {
+          volumes = volumes.filter((volume) =>
+            filterTags((volume.Tags as AwsTag[]) ?? [], tags, condition),
+          );
+        }
+
+        return { results: volumes, failedRegions };
       }
 
-      const volumes = (await Promise.all(promises)).flat();
+      const volumes = (
+        await Promise.all(
+          batches.map((batch) =>
+            getEbsVolumes(
+              batch.creds,
+              batch.regions,
+              dryRun,
+              batch.fetchFilters,
+            ),
+          ),
+        )
+      ).flat();
 
       if (tags?.length) {
         return volumes.filter((volume) =>
@@ -113,6 +130,57 @@ export const ebsGetVolumesAction = createAction({
     }
   },
 });
+
+type EbsGetVolumesBatch = {
+  creds: unknown;
+  regions: [string, ...string[]];
+  fetchFilters: Filter[];
+};
+
+function buildEbsGetVolumesBatches(
+  filterByARNs: boolean,
+  filterProperty: Record<string, unknown>,
+  credentials: unknown[],
+  filters: Filter[] | undefined,
+): EbsGetVolumesBatch[] {
+  const batches: EbsGetVolumesBatch[] = [];
+  const baseFilters = filters ?? [];
+
+  if (filterByARNs) {
+    const arns = convertToARNArrayWithValidation(
+      filterProperty['arns'] as unknown as string[],
+    );
+    const groupedARNs = groupARNsByRegion(arns);
+
+    for (const region in groupedARNs) {
+      const arnsForRegion = groupedARNs[region];
+      const volumeIdFilter: Filter = {
+        Name: 'volume-id',
+        Values: arnsForRegion.map((arn) => parseArn(arn).resourceId),
+      };
+      for (const creds of credentials) {
+        batches.push({
+          creds,
+          regions: [region] as [string, ...string[]],
+          fetchFilters: [...baseFilters, volumeIdFilter],
+        });
+      }
+    }
+  } else {
+    const regions = convertToRegionsArrayWithValidation(
+      filterProperty['regions'],
+    );
+    for (const creds of credentials) {
+      batches.push({
+        creds,
+        regions,
+        fetchFilters: baseFilters,
+      });
+    }
+  }
+
+  return batches;
+}
 
 function getFilters(context: any): Filter[] {
   const filters: Filter[] = [];

@@ -5,7 +5,7 @@ import { pubsub } from '../../helper/pubsub';
 
 const listeners = new Map<
   string,
-  (flowResponse: EngineResponseWithId) => void
+  (flowResponse: EngineResponseWithId) => Promise<void>
 >();
 const WEBHOOK_TIMEOUT_MS =
   (system.getNumber(AppSystemProp.WEBHOOK_TIMEOUT_SECONDS) ?? 30) * 1000;
@@ -18,7 +18,7 @@ export const webhookResponseWatcher = {
   async init(): Promise<void> {
     await pubsub().subscribe(
       `engine-run:sync:${SERVER_ID}`,
-      (_channel, message) => {
+      async (_channel, message): Promise<void> => {
         const parsedMessage: EngineResponseWithId = JSON.parse(message);
         const listener = listeners.get(parsedMessage.flowRunId);
 
@@ -27,7 +27,7 @@ export const webhookResponseWatcher = {
         });
 
         if (listener) {
-          listener(parsedMessage);
+          await listener(parsedMessage);
         }
       },
     );
@@ -57,7 +57,9 @@ export const webhookResponseWatcher = {
         }, WEBHOOK_TIMEOUT_MS);
       }
 
-      const responseHandler = (flowResponse: EngineResponseWithId) => {
+      const responseHandler = async (
+        flowResponse: EngineResponseWithId,
+      ): Promise<void> => {
         if (timeout) {
           clearTimeout(timeout);
         }
@@ -72,6 +74,39 @@ export const webhookResponseWatcher = {
 
       listeners.set(flowRunId, responseHandler);
     });
+  },
+  oneTimeListenerCustom(
+    flowRunId: string,
+    handler: (flowResponse: EngineResponseWithId) => Promise<void>,
+  ): void {
+    logger.info(`Add listener for the flow run ${flowRunId}.`, {
+      flowRunId,
+    });
+
+    listeners.set(
+      flowRunId,
+      async (flowResponse: EngineResponseWithId): Promise<void> => {
+        listeners.delete(flowRunId);
+        try {
+          await handler(flowResponse);
+        } catch (error) {
+          logger.error(
+            `Error while handling webhook response for flow run ${flowRunId}.`,
+            {
+              flowRunId,
+              error,
+            },
+          );
+        }
+      },
+    );
+  },
+  removeListener(flowRunId: string): void {
+    logger.info(`Remove listener for the flow run ${flowRunId}.`, {
+      flowRunId,
+    });
+
+    listeners.delete(flowRunId);
   },
   async publish(
     flowRunId: string,
