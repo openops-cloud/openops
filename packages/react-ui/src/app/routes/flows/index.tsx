@@ -17,7 +17,17 @@ import {
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
 import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
-import { FlowStatus, FlowVersionState, Permission } from '@openops/shared';
+import { isSortDirection } from '@/app/lib/sort-direction';
+import {
+  FlowSortBy,
+  FlowStatus,
+  FlowVersionState,
+  Permission,
+} from '@openops/shared';
+
+const isFlowSortBy = (sortBy?: string): sortBy is FlowSortBy => {
+  return !!sortBy && Object.values(FlowSortBy).includes(sortBy as FlowSortBy);
+};
 
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');
@@ -43,6 +53,10 @@ const FlowsPage = () => {
       return flowsApi.list({
         cursor: pagination.cursor,
         limit: pagination.limit ?? 10,
+        sortBy: isFlowSortBy(pagination.sortBy) ? pagination.sortBy : undefined,
+        sortDirection: isSortDirection(pagination.sortDirection)
+          ? pagination.sortDirection
+          : undefined,
         status: params.status,
         versionState: params.versionState,
         name: params.name,
@@ -75,6 +89,7 @@ const FlowsPage = () => {
             columns={columns}
             fetchData={fetchData}
             filters={FLOWS_TABLE_FILTERS}
+            enableSorting={true}
             columnVisibility={columnVisibility}
             navigationExcludedColumns={['status', 'actions']}
             refresh={tableRefresh}

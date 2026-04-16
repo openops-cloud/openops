@@ -137,6 +137,7 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'duration',
+          enableSorting: false,
           header: ({ column }) => (
             <DataTableColumnHeader column={column} title={t('Duration')} />
           ),
@@ -151,6 +152,7 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'actions',
+          enableSorting: false,
           header: () => null,
           cell: ({ row }) => {
             const isFailed = isFailedState(row.original.status);

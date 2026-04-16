@@ -79,6 +79,8 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         cursorRequest: cursor ?? null,
         limit: limit ?? DEFAULT_PAGE_SIZE,
         authProviders,
+        sortBy: request.query.sortBy,
+        sortDirection: request.query.sortDirection,
       });
 
       return {
