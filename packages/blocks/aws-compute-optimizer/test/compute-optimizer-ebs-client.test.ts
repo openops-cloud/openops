@@ -22,17 +22,21 @@ import {
 import { VolumeType } from '@aws-sdk/client-ec2';
 import {
   getEbsRecommendationsForARNs,
+  getEbsRecommendationsForARNsAllowPartial,
   getEbsRecommendationsForRegions,
+  getEbsRecommendationsForRegionsAllowPartial,
 } from '../src/lib/common/compute-optimizer-ebs-client';
 
 jest.mock('@openops/common', () => ({
   ...jest.requireActual('@openops/common'),
   makeAwsRequest: sendMock,
+  getAccountId: jest.fn().mockResolvedValue('123456789123'),
 }));
 
 describe('Get ebs volumes recommendations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sendMock.mockReset();
   });
 
   test('should return all the Ebs Volumes Recommendations of the given type for the region making two requests', async () => {
@@ -258,6 +262,69 @@ describe('Get ebs volumes recommendations', () => {
 
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(recommendations.length).toBe(0);
+  });
+
+  test('getEbsRecommendationsForRegionsAllowPartial collects successes and failed regions', async () => {
+    const findingType = EBSFinding.NOT_OPTIMIZED;
+    const ok = createRecommendationsResponse([
+      createRecommendations(
+        'arn:aws:ec2:us-east-2:123456789123:volume/vol-1',
+        findingType,
+      ),
+    ]);
+
+    sendMock
+      .mockResolvedValueOnce([ok])
+      .mockRejectedValueOnce(new Error('throttled'));
+
+    const result = await getEbsRecommendationsForRegionsAllowPartial(
+      CREDENTIALS,
+      findingType,
+      ['us-east-2', 'eu-central-1'],
+    );
+
+    expect(result.results.length).toBe(1);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'eu-central-1',
+        accountId: '123456789123',
+        error: 'Error: throttled',
+      },
+    ]);
+  });
+
+  test('getEbsRecommendationsForARNsAllowPartial collects per-region failures', async () => {
+    const findingType = EBSFinding.NOT_OPTIMIZED;
+    const ok = createRecommendationsResponse([
+      createRecommendations(
+        'arn:aws:ec2:us-east-2:123456789123:volume/vol-1',
+        findingType,
+      ),
+    ]);
+
+    sendMock
+      .mockResolvedValueOnce([ok])
+      .mockRejectedValueOnce(new Error('denied'));
+
+    const arns: string[] = [
+      'arn:aws:ec2:us-east-2:123456789123:volume/vol-1',
+      'arn:aws:ec2:us-east-1:123456789123:volume/vol-2',
+    ];
+
+    const result = await getEbsRecommendationsForARNsAllowPartial(
+      CREDENTIALS,
+      findingType,
+      arns,
+    );
+
+    expect(result.results.length).toBe(1);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'us-east-1',
+        accountId: '123456789123',
+        error: 'Error: denied',
+      },
+    ]);
   });
 });
 
