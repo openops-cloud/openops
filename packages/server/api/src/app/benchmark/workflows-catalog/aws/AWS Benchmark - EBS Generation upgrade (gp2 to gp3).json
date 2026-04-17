@@ -98,6 +98,7 @@
                   "accounts": "{{step_c['accounts']}}"
                 },
                 "filterByARNs": false,
+                "allowPartialResults": true,
                 "filterProperty": {
                   "regions": "{{step_c['regions']}}"
                 },
@@ -111,6 +112,7 @@
                   "settings": {
                     "input": {
                       "auth": true,
+                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       },
@@ -166,7 +168,7 @@
                 "type": "LOOP_ON_ITEMS",
                 "valid": true,
                 "settings": {
-                  "items": "{{step_10}}",
+                  "items": "{{step_10['results']}}",
                   "inputUiInfo": {
                     "customizedInputs": {}
                   }
@@ -252,10 +254,9 @@
                         "condition": "AND",
                         "volumeTypes": [],
                         "filterByARNs": true,
+                        "allowPartialResults": true,
                         "filterProperty": {
-                          "arns": [
-                            "{{step_4['item']['arn']}}"
-                          ]
+                          "arns": ["{{step_4['item']['arn']}}"]
                         },
                         "shouldQueryOnlyUnattached": false
                       },
@@ -269,6 +270,7 @@
                           "settings": {
                             "input": {
                               "auth": true,
+                              "allowPartialResults": true,
                               "accounts": {
                                 "accounts": true
                               }
@@ -395,13 +397,13 @@
                                   {
                                     "fieldName": "Resource Id",
                                     "newFieldValue": {
-                                      "newFieldValue": "{{step_3[0]['arn']}}"
+                                      "newFieldValue": "{{step_3['results'][0]['arn']}}"
                                     }
                                   },
                                   {
                                     "fieldName": "Account",
                                     "newFieldValue": {
-                                      "newFieldValue": "{{step_3[0]['account_id']}}"
+                                      "newFieldValue": "{{step_3['results'][0]['account_id']}}"
                                     },
                                     "dynamicViewToggled": {
                                       "newFieldValue": false
@@ -410,7 +412,7 @@
                                   {
                                     "fieldName": "Region",
                                     "newFieldValue": {
-                                      "newFieldValue": "{{step_3[0]['region']}}"
+                                      "newFieldValue": "{{step_3['results'][0]['region']}}"
                                     },
                                     "dynamicViewToggled": {
                                       "newFieldValue": false
