@@ -34,6 +34,7 @@ export async function runCommands(
   executeCliTool = 'gcloud',
 ): Promise<string[]> {
   const envVars: Record<string, string> = {
+    HOME: process.env['HOME'] || '/tmp',
     PATH: process.env['PATH'] || '',
     CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
   };

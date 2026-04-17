@@ -96,6 +96,8 @@ async function initializeMcpClient(
       command: pythonPath,
       args: [serverPath],
       env: {
+        HOME: process.env['HOME'] ?? '/tmp',
+        PATH: process.env['PATH'] ?? '',
         AWS_ACCESS_KEY_ID: credentials.accessKeyId,
         AWS_SECRET_ACCESS_KEY: credentials.secretAccessKey,
         AWS_REGION: credentials.region,
