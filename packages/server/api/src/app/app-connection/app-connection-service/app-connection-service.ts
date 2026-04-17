@@ -256,6 +256,7 @@ export const appConnectionService = {
       customPaginationColumn: {
         columnPath: sortingConfig.columnPath,
         columnName: sortingConfig.columnName,
+        columnType: sortingConfig.columnType,
       },
     });
 
@@ -579,6 +580,7 @@ function resolveAppConnectionSorting({
 }): {
   columnPath: string;
   columnName: string;
+  columnType?: string;
   order: 'ASC' | 'DESC';
 } {
   const resolvedSortBy = sortBy ?? DEFAULT_APP_CONNECTION_SORT_BY;
@@ -587,11 +589,12 @@ function resolveAppConnectionSorting({
 
   const sortByToColumnMap: Record<
     AppConnectionSortBy,
-    { columnPath: string; columnName: string }
+    { columnPath: string; columnName: string; columnType?: string }
   > = {
     [AppConnectionSortBy.NAME]: {
       columnPath: 'name',
       columnName: 'app_connection.name',
+      columnType: 'string',
     },
     [AppConnectionSortBy.CREATED]: {
       columnPath: 'created',

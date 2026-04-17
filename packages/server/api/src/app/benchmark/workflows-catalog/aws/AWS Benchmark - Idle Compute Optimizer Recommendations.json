@@ -1,6 +1,6 @@
 {
-  "created": "1775630008688",
-  "updated": "1775630008688",
+  "created": "1776417484381",
+  "updated": "1776417484381",
   "name": "AWS Benchmark - Idle Compute Optimizer Recommendations",
   "tags": [],
   "services": [],
@@ -131,7 +131,7 @@
                 }
               },
               "displayName": "Return Response",
-              "stepIndex": 12
+              "stepIndex": 13
             },
             "displayName": "ACCOUNT",
             "firstLoopAction": {
@@ -273,103 +273,131 @@
                         }
                       },
                       "nextAction": {
-                        "id": "0KqyHzXl5yo5yGPzyyByJ",
-                        "name": "step_b",
-                        "type": "BLOCK",
+                        "id": "XDTXpt9uCfEqoLD8VCzZj",
+                        "name": "step_c",
+                        "type": "CODE",
                         "valid": true,
                         "settings": {
                           "input": {
-                            "tableName": "Opportunities",
-                            "rowPrimaryKey": {
-                              "rowPrimaryKey": null
-                            },
-                            "fieldsProperties": {
-                              "fieldsProperties": [
-                                {
-                                  "fieldName": "Status",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Created"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Estimated savings USD per month",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_d['item']['savingsOpportunity']['estimatedMonthlySavings']['value']}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Workflow",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_26}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Resource Id",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_d['item']['resourceArn']}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Account",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_1['item']}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Region",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_32['item']}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Service",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_d['item']['resourceType']}}"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity generator",
-                                  "newFieldValue": {
-                                    "newFieldValue": "AWS Compute Optimizer"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity Type",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Workflow optimization"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity details",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_d['item']['findingDescription']}}"
-                                  }
-                                }
-                              ]
-                            },
-                            "roundToFieldPrecision": true
+                            "type": "{{step_d['item']['resourceType']}}"
                           },
-                          "blockName": "@openops/block-openops-tables",
-                          "blockType": "OFFICIAL",
-                          "pieceName": "@openops/piece-openops-tables",
-                          "pieceType": "OFFICIAL",
-                          "actionName": "update_record",
+                          "sourceCode": {
+                            "code": "export const code = async ({type}) => {\n\n  if(type == \"EBSVolume\") {\n    return \"AWS EBS\";\n  }\n  if(type == \"RDSDBInstance\") {\n    return \"AWS RDS\";\n  }\n  if(type == \"EC2Instance\") {\n    return \"AWS EC2\";\n  }\n  \n  return type;\n};",
+                            "packageJson": "{}"
+                          },
                           "inputUiInfo": {
                             "customizedInputs": {}
                           },
-                          "packageType": "REGISTRY",
-                          "blockVersion": "0.0.1",
-                          "pieceVersion": "~0.0.1",
                           "errorHandlingOptions": {
                             "retryOnFailure": {
                               "value": false
                             },
                             "continueOnFailure": {
-                              "value": true
+                              "value": false
                             }
                           }
                         },
-                        "displayName": "Create OpenOps opportunity",
+                        "nextAction": {
+                          "id": "0KqyHzXl5yo5yGPzyyByJ",
+                          "name": "step_b",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "tableName": "Opportunities",
+                              "rowPrimaryKey": {
+                                "rowPrimaryKey": null
+                              },
+                              "fieldsProperties": {
+                                "fieldsProperties": [
+                                  {
+                                    "fieldName": "Status",
+                                    "newFieldValue": {
+                                      "newFieldValue": "Created"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Estimated savings USD per month",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_d['item']['savingsOpportunity']['estimatedMonthlySavings']['value']}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Workflow",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_26}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Resource Id",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_d['item']['resourceArn']}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Account",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_1['item']}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Region",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_32['item']}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Service",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_c}}"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity generator",
+                                    "newFieldValue": {
+                                      "newFieldValue": "AWS Compute Optimizer"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity Type",
+                                    "newFieldValue": {
+                                      "newFieldValue": "Workflow optimization"
+                                    }
+                                  },
+                                  {
+                                    "fieldName": "Opportunity details",
+                                    "newFieldValue": {
+                                      "newFieldValue": "{{step_d['item']['findingDescription']}}"
+                                    }
+                                  }
+                                ]
+                              },
+                              "roundToFieldPrecision": true
+                            },
+                            "blockName": "@openops/block-openops-tables",
+                            "blockType": "OFFICIAL",
+                            "pieceName": "@openops/piece-openops-tables",
+                            "pieceType": "OFFICIAL",
+                            "actionName": "update_record",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.1",
+                            "pieceVersion": "~0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": true
+                              }
+                            }
+                          },
+                          "displayName": "Create OpenOps opportunity",
+                          "stepIndex": 12
+                        },
+                        "displayName": "Resource Service Name",
                         "stepIndex": 11
                       },
                       "displayName": "Opportunity doesn't exist or snooze expired",
