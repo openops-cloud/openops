@@ -4849,7 +4849,7 @@ The following npm packages may be included in this product:
  - @smithy/middleware-serde@4.2.14
  - @smithy/protocol-http@5.3.12
  - @smithy/smithy-client@4.12.5
- - @smithy/types@4.13.1
+ - @smithy/types@4.14.1
 
 These packages each contain the following license:
 
@@ -8069,7 +8069,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor@7.57.7
+ - @microsoft/api-extractor@7.58.2
 
 This package contains the following license:
 
@@ -8102,7 +8102,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor-model@7.33.4
+ - @microsoft/api-extractor-model@7.33.6
 
 This package contains the following license:
 
@@ -8135,7 +8135,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/node-core-library@5.20.3
+ - @rushstack/node-core-library@5.22.0
 
 This package contains the following license:
 
@@ -8234,7 +8234,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/terminal@0.22.3
+ - @rushstack/terminal@0.22.5
 
 This package contains the following license:
 
@@ -8267,7 +8267,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/ts-command-line@5.3.3
+ - @rushstack/ts-command-line@5.3.5
 
 This package contains the following license:
 
@@ -14031,7 +14031,7 @@ The following npm packages may be included in this product:
  - @aws-sdk/util-endpoints@3.996.5
  - @aws-sdk/util-format-url@3.972.8
  - @aws-sdk/util-locate-window@3.965.5
- - @aws-sdk/xml-builder@3.972.11
+ - @aws-sdk/xml-builder@3.972.18
  - @smithy/abort-controller@4.2.12
  - @smithy/chunked-blob-reader-native@4.2.3
  - @smithy/chunked-blob-reader@5.2.2
@@ -15110,7 +15110,7 @@ third-party archives.
 The following npm packages may be included in this product:
 
  - typescript@5.5.4
- - typescript@5.8.2
+ - typescript@5.9.3
 
 These packages each contain the following license:
 
@@ -20744,7 +20744,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 The following npm package may be included in this product:
 
- - follow-redirects@1.15.11
+ - follow-redirects@1.16.0
 
 This package contains the following license:
 
@@ -22097,6 +22097,7 @@ The following npm packages may be included in this product:
 
  - lodash-es@4.17.21
  - lodash@4.17.23
+ - lodash@4.18.1
 
 These packages each contain the following license:
 
@@ -26984,9 +26985,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - brace-expansion@1.1.12
+ - brace-expansion@1.1.14
  - brace-expansion@2.0.1
- - brace-expansion@2.0.2
+ - brace-expansion@2.1.0
  - isarray@2.0.5
 
 These packages each contain the following license:
@@ -27747,7 +27748,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fast-xml-parser@5.4.1
+ - fast-xml-parser@5.5.8
 
 This package contains the following license:
 
@@ -32023,7 +32024,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - path-expression-matcher@1.1.3
+ - path-expression-matcher@1.5.0
 
 This package contains the following license:
 
@@ -32578,7 +32579,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fast-xml-builder@1.1.3
+ - fast-xml-builder@1.1.5
 
 This package contains the following license:
 
@@ -33847,7 +33848,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @isaacs/brace-expansion@5.0.1
- - brace-expansion@5.0.4
+ - brace-expansion@5.0.5
 
 These packages each contain the following license:
 
@@ -39136,9 +39137,9 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - picomatch@2.3.1
+ - picomatch@2.3.2
  - picomatch@4.0.2
- - picomatch@4.0.3
+ - picomatch@4.0.4
 
 These packages each contain the following license:
 
@@ -42368,7 +42369,7 @@ For more information, please refer to <http://unlicense.org>
 
 The following npm package may be included in this product:
 
- - protobufjs@7.5.4
+ - protobufjs@7.5.5
 
 This package contains the following license:
 
