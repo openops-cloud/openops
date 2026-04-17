@@ -42368,7 +42368,7 @@ For more information, please refer to <http://unlicense.org>
 
 The following npm package may be included in this product:
 
- - protobufjs@7.5.4
+ - protobufjs@7.5.5
 
 This package contains the following license:
 
