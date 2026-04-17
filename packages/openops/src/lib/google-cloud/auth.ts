@@ -52,6 +52,7 @@ async function runAuthCommand(keyObject: string): Promise<string> {
   const gcpConfigDir = await getDefaultCloudSDKConfig();
 
   const envVars: Record<string, string> = {
+    HOME: process.env['HOME'] || '/tmp',
     PATH: process.env['PATH'] || '',
     CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
     CLOUDSDK_CONFIG: gcpConfigDir,

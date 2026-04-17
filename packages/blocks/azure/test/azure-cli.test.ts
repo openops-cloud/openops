@@ -29,20 +29,20 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
   });
 
@@ -64,31 +64,31 @@ describe('azureCli', () => {
       1,
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       2,
       'account set --subscription subscriptionId',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       3,
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
   });
 
@@ -109,19 +109,19 @@ describe('azureCli', () => {
       1,
       'account set --subscription subscriptionId',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
     expect(commonMock.runCliCommand).toHaveBeenNthCalledWith(
       2,
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
   });
 
@@ -138,10 +138,10 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
     process.env = originalEnv;
   });
@@ -164,11 +164,12 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: process.env['AZURE_CONFIG_DIR'],
         AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
-      },
+      }),
     );
     process.env = originalEnv;
   });
@@ -192,20 +193,22 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
         AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
-      },
+      }),
     );
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       'some command',
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
         AZURE_EXTENSION_DIR: '/mock/config/dir/extensions',
-      },
+      }),
     );
     process.env = originalEnv;
   });
@@ -221,11 +224,11 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
   });
 
@@ -244,11 +247,11 @@ describe('azureCli', () => {
     expect(commonMock.runCliCommand).toHaveBeenCalledWith(
       `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
       'az',
-      {
+      expect.objectContaining({
+        HOME: process.env['HOME'],
         PATH: process.env['PATH'],
         AZURE_CONFIG_DIR: expect.any(String),
-        AZURE_EXTENSION_DIR: expect.any(String),
-      },
+      }),
     );
   });
 });

@@ -89,6 +89,8 @@ export async function getOpenOpsTools(
       command: pythonPath,
       args: [serverPath],
       env: {
+        HOME: process.env['HOME'] ?? '/tmp',
+        PATH: process.env['PATH'] ?? '',
         OPENAPI_SCHEMA_PATH: tempSchemaPath,
         AUTH_TOKEN: serviceToken,
         API_BASE_URL: networkUtls.getInternalApiUrl(),

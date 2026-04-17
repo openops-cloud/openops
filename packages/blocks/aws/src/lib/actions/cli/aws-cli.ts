@@ -8,6 +8,7 @@ export async function runCommand(
 ): Promise<string> {
   const envVars: any = {
     AWS_DEFAULT_REGION: region,
+    HOME: process.env['HOME'] ?? '/tmp',
     PATH: process.env['PATH'] ?? '',
   };
 

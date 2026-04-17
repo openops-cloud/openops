@@ -36,6 +36,7 @@ describe('awsCli', () => {
       'some command',
       'aws',
       {
+        HOME: process.env['HOME'],
         AWS_ACCESS_KEY_ID: credential.accessKeyId,
         AWS_SECRET_ACCESS_KEY: credential.secretAccessKey,
         AWS_SESSION_TOKEN: credential.sessionToken,
@@ -62,10 +63,8 @@ describe('awsCli', () => {
         'some command',
         'aws',
         {
+          HOME: process.env['HOME'],
           AWS_DEFAULT_REGION: 'region',
-          AWS_ACCESS_KEY_ID: undefined,
-          AWS_SECRET_ACCESS_KEY: undefined,
-          AWS_SESSION_TOKEN: undefined,
           PATH: process.env['PATH'],
         },
       );
