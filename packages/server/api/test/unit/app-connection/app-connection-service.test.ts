@@ -235,6 +235,7 @@ describe('appConnectionService.list', () => {
       customPaginationColumn: {
         columnPath: 'updated',
         columnName: 'app_connection.updated',
+        columnType: undefined,
       },
     });
 
@@ -268,6 +269,7 @@ describe('appConnectionService.list', () => {
       customPaginationColumn: {
         columnPath: 'name',
         columnName: 'app_connection.name',
+        columnType: 'string',
       },
     });
   });
