@@ -98,11 +98,11 @@
                   "accounts": "{{step_c['accounts']}}"
                 },
                 "filterByARNs": false,
-                "allowPartialResults": true,
                 "filterProperty": {
                   "regions": "{{step_c['regions']}}"
                 },
-                "recommendationType": "Optimized"
+                "recommendationType": "Optimized",
+                "allowPartialResults": true
               },
               "blockName": "@openops/block-aws-compute-optimizer",
               "blockType": "OFFICIAL",
@@ -112,14 +112,14 @@
                   "settings": {
                     "input": {
                       "auth": true,
-                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       },
                       "filterProperty": {
                         "regions": true
                       },
-                      "recommendationType": false
+                      "recommendationType": false,
+                      "allowPartialResults": true
                     }
                   }
                 }
@@ -180,7 +180,6 @@
                   "valid": true,
                   "settings": {
                     "input": {
-                      "auth": null,
                       "body": {
                         "data": {
                           "status": "ok"
@@ -208,7 +207,7 @@
                     }
                   },
                   "displayName": "Return Response",
-                  "stepIndex": 13
+                  "stepIndex": 12
                 },
                 "displayName": "Loop on Items",
                 "firstLoopAction": {
@@ -239,48 +238,41 @@
                     }
                   },
                   "nextAction": {
-                    "id": "M6BXex4u5BbIPZnEbD1JQ",
-                    "name": "step_3",
+                    "id": "5CNE6yhQpFwXvAto16zUQ",
+                    "name": "step_21",
                     "type": "BLOCK",
                     "valid": true,
                     "settings": {
                       "input": {
-                        "auth": "{{connections['AWS']}}",
-                        "tags": [],
-                        "dryRun": false,
-                        "accounts": {
-                          "accounts": "{{step_20['accountId']}}"
-                        },
-                        "condition": "AND",
-                        "volumeTypes": [],
-                        "filterByARNs": true,
-                        "allowPartialResults": true,
-                        "filterProperty": {
-                          "arns": ["{{step_4['item']['arn']}}"]
-                        },
-                        "shouldQueryOnlyUnattached": false
-                      },
-                      "blockName": "@openops/block-aws",
-                      "blockType": "OFFICIAL",
-                      "pieceName": "@openops/piece-aws",
-                      "pieceType": "OFFICIAL",
-                      "actionName": "ebs_get_volumes",
-                      "inputUiInfo": {
-                        "customizedInputs": {
-                          "settings": {
-                            "input": {
-                              "auth": true,
-                              "allowPartialResults": true,
-                              "accounts": {
-                                "accounts": true
-                              }
+                        "filters": {
+                          "filters": [
+                            {
+                              "value": {
+                                "value": "{{step_b}}"
+                              },
+                              "fieldName": "Workflow",
+                              "filterType": "Is equal"
+                            },
+                            {
+                              "value": {
+                                "value": "{{step_4['item']['arn']}}"
+                              },
+                              "fieldName": "Resource Id",
+                              "filterType": "Is equal"
                             }
-                          }
-                        }
+                          ]
+                        },
+                        "tableName": "Opportunities",
+                        "filterType": "AND"
+                      },
+                      "blockName": "@openops/block-openops-tables",
+                      "blockType": "OFFICIAL",
+                      "actionName": "get_records",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
                       },
                       "packageType": "REGISTRY",
-                      "blockVersion": "0.0.3",
-                      "pieceVersion": "~0.0.3",
+                      "blockVersion": "0.0.1",
                       "errorHandlingOptions": {
                         "retryOnFailure": {
                           "value": false
@@ -291,233 +283,185 @@
                       }
                     },
                     "nextAction": {
-                      "id": "5CNE6yhQpFwXvAto16zUQ",
-                      "name": "step_21",
-                      "type": "BLOCK",
+                      "id": "s3wXdx2cwrkot1grLjjnk",
+                      "name": "step_22",
+                      "type": "BRANCH",
                       "valid": true,
                       "settings": {
-                        "input": {
-                          "filters": {
-                            "filters": [
-                              {
-                                "value": {
-                                  "value": "{{step_b}}"
-                                },
-                                "fieldName": "Workflow",
-                                "filterType": "Is equal"
-                              },
-                              {
-                                "value": {
-                                  "value": "{{step_4['item']['arn']}}"
-                                },
-                                "fieldName": "Resource Id",
-                                "filterType": "Is equal"
-                              }
-                            ]
-                          },
-                          "tableName": "Opportunities",
-                          "filterType": "AND"
-                        },
-                        "blockName": "@openops/block-openops-tables",
-                        "blockType": "OFFICIAL",
-                        "actionName": "get_records",
+                        "conditions": [
+                          [
+                            {
+                              "operator": "NUMBER_IS_EQUAL_TO",
+                              "firstValue": "{{step_21['count']}}",
+                              "secondValue": "0",
+                              "caseSensitive": false
+                            }
+                          ],
+                          [
+                            {
+                              "operator": "TEXT_EXACTLY_MATCHES",
+                              "firstValue": "{{step_21['items'][0]['Status']['value']}}",
+                              "secondValue": "Snoozed",
+                              "caseSensitive": false
+                            },
+                            {
+                              "operator": "DATE_IS_BEFORE",
+                              "firstValue": "{{step_21['items'][0]['Snoozed until']}}",
+                              "secondValue": "{{step_26}}",
+                              "caseSensitive": false
+                            }
+                          ]
+                        ],
                         "inputUiInfo": {
                           "customizedInputs": {}
-                        },
-                        "packageType": "REGISTRY",
-                        "blockVersion": "0.0.1",
-                        "errorHandlingOptions": {
-                          "retryOnFailure": {
-                            "value": false
-                          },
-                          "continueOnFailure": {
-                            "value": false
-                          }
                         }
                       },
                       "nextAction": {
-                        "id": "s3wXdx2cwrkot1grLjjnk",
-                        "name": "step_22",
-                        "type": "BRANCH",
+                        "id": "anyTzgcKpc3vTSoC1ifaH",
+                        "name": "step_6",
+                        "type": "BLOCK",
                         "valid": true,
                         "settings": {
-                          "conditions": [
-                            [
-                              {
-                                "operator": "NUMBER_IS_EQUAL_TO",
-                                "firstValue": "{{step_21['count']}}",
-                                "secondValue": "0",
-                                "caseSensitive": false
-                              }
-                            ],
-                            [
-                              {
-                                "operator": "TEXT_EXACTLY_MATCHES",
-                                "firstValue": "{{step_21['items'][0]['Status']['value']}}",
-                                "secondValue": "Snoozed",
-                                "caseSensitive": false
-                              },
-                              {
-                                "operator": "DATE_IS_BEFORE",
-                                "firstValue": "{{step_21['items'][0]['Snoozed until']}}",
-                                "secondValue": "{{step_26}}",
-                                "caseSensitive": false
-                              }
-                            ]
-                          ],
+                          "input": {
+                            "tableName": "Opportunities",
+                            "rowPrimaryKey": {
+                              "rowPrimaryKey": "{{step_21['items'][0]['ID']}}"
+                            },
+                            "fieldsProperties": {
+                              "fieldsProperties": [
+                                {
+                                  "fieldName": "Status",
+                                  "newFieldValue": {
+                                    "newFieldValue": "Created"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Workflow",
+                                  "newFieldValue": {
+                                    "newFieldValue": "{{step_b}}"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Resource Id",
+                                  "newFieldValue": {
+                                    "newFieldValue": "{{step_4['item']['arn']}}"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Account",
+                                  "newFieldValue": {
+                                    "newFieldValue": "{{step_20['accountId']}}"
+                                  },
+                                  "dynamicViewToggled": {
+                                    "newFieldValue": false
+                                  }
+                                },
+                                {
+                                  "fieldName": "Region",
+                                  "newFieldValue": {
+                                    "newFieldValue": "{{step_20['region']}}"
+                                  },
+                                  "dynamicViewToggled": {
+                                    "newFieldValue": false
+                                  }
+                                },
+                                {
+                                  "fieldName": "Service",
+                                  "newFieldValue": {
+                                    "newFieldValue": "AWS EBS"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Opportunity generator",
+                                  "newFieldValue": {
+                                    "newFieldValue": "AWS Compute Optimizer"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Opportunity details",
+                                  "newFieldValue": {
+                                    "newFieldValue": "Migrate this volume to GP3 type."
+                                  }
+                                },
+                                {
+                                  "fieldName": "Opportunity Type",
+                                  "newFieldValue": {
+                                    "newFieldValue": "Workflow optimization"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Complexity",
+                                  "newFieldValue": {
+                                    "newFieldValue": "S"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Risk",
+                                  "newFieldValue": {
+                                    "newFieldValue": "Low"
+                                  }
+                                },
+                                {
+                                  "fieldName": "Estimated savings USD per month",
+                                  "newFieldValue": {
+                                    "newFieldValue": "{{step_4['item']['recommendation']['options'][0]['monthlyPotentialSavings']['value']}}"
+                                  }
+                                }
+                              ]
+                            },
+                            "roundToFieldPrecision": true
+                          },
+                          "blockName": "@openops/block-openops-tables",
+                          "blockType": "OFFICIAL",
+                          "actionName": "update_record",
                           "inputUiInfo": {
                             "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
                           }
                         },
-                        "nextAction": {
-                          "id": "anyTzgcKpc3vTSoC1ifaH",
-                          "name": "step_6",
-                          "type": "BLOCK",
-                          "valid": true,
-                          "settings": {
-                            "input": {
-                              "tableName": "Opportunities",
-                              "rowPrimaryKey": {
-                                "rowPrimaryKey": "{{step_21['items'][0]['ID']}}"
-                              },
-                              "fieldsProperties": {
-                                "fieldsProperties": [
-                                  {
-                                    "fieldName": "Status",
-                                    "newFieldValue": {
-                                      "newFieldValue": "Created"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Workflow",
-                                    "newFieldValue": {
-                                      "newFieldValue": "{{step_b}}"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Resource Id",
-                                    "newFieldValue": {
-                                      "newFieldValue": "{{step_3['results'][0]['arn']}}"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Account",
-                                    "newFieldValue": {
-                                      "newFieldValue": "{{step_3['results'][0]['account_id']}}"
-                                    },
-                                    "dynamicViewToggled": {
-                                      "newFieldValue": false
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Region",
-                                    "newFieldValue": {
-                                      "newFieldValue": "{{step_3['results'][0]['region']}}"
-                                    },
-                                    "dynamicViewToggled": {
-                                      "newFieldValue": false
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Service",
-                                    "newFieldValue": {
-                                      "newFieldValue": "AWS EBS"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Opportunity generator",
-                                    "newFieldValue": {
-                                      "newFieldValue": "AWS Compute Optimizer"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Opportunity details",
-                                    "newFieldValue": {
-                                      "newFieldValue": "Migrate this volume to GP3 type."
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Opportunity Type",
-                                    "newFieldValue": {
-                                      "newFieldValue": "Workflow optimization"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Complexity",
-                                    "newFieldValue": {
-                                      "newFieldValue": "S"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Risk",
-                                    "newFieldValue": {
-                                      "newFieldValue": "Low"
-                                    }
-                                  },
-                                  {
-                                    "fieldName": "Estimated savings USD per month",
-                                    "newFieldValue": {
-                                      "newFieldValue": "{{step_4['item']['recommendation']['options'][0]['monthlyPotentialSavings']['value']}}"
-                                    }
-                                  }
-                                ]
-                              },
-                              "roundToFieldPrecision": true
-                            },
-                            "blockName": "@openops/block-openops-tables",
-                            "blockType": "OFFICIAL",
-                            "actionName": "update_record",
-                            "inputUiInfo": {
-                              "customizedInputs": {}
-                            },
-                            "packageType": "REGISTRY",
-                            "blockVersion": "0.0.1",
-                            "errorHandlingOptions": {
-                              "retryOnFailure": {
-                                "value": false
-                              },
-                              "continueOnFailure": {
-                                "value": false
-                              }
-                            }
+                        "displayName": "Create opportunity",
+                        "stepIndex": 11
+                      },
+                      "displayName": "Opportunity doesn't exist or snooze expired",
+                      "onFailureAction": {
+                        "id": "e3tECzIPpArnnRAdWbHfu",
+                        "name": "step_23",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {},
+                          "blockName": "@openops/block-end-flow",
+                          "blockType": "OFFICIAL",
+                          "actionName": "end_workflow",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
                           },
-                          "displayName": "Create opportunity",
-                          "stepIndex": 12
-                        },
-                        "displayName": "Opportunity doesn't exist or snooze expired",
-                        "onFailureAction": {
-                          "id": "e3tECzIPpArnnRAdWbHfu",
-                          "name": "step_23",
-                          "type": "BLOCK",
-                          "valid": true,
-                          "settings": {
-                            "input": {},
-                            "blockName": "@openops/block-end-flow",
-                            "blockType": "OFFICIAL",
-                            "actionName": "end_workflow",
-                            "inputUiInfo": {
-                              "customizedInputs": {}
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
                             },
-                            "packageType": "REGISTRY",
-                            "blockVersion": "0.0.1",
-                            "errorHandlingOptions": {
-                              "retryOnFailure": {
-                                "value": false
-                              },
-                              "continueOnFailure": {
-                                "value": false
-                              }
+                            "continueOnFailure": {
+                              "value": false
                             }
-                          },
-                          "displayName": "Skip recommendation",
-                          "stepIndex": 11
+                          }
                         },
+                        "displayName": "Skip recommendation",
                         "stepIndex": 10
                       },
-                      "displayName": "Get existing opportunity",
                       "stepIndex": 9
                     },
-                    "displayName": "Retrieve volume details",
+                    "displayName": "Get existing opportunity",
                     "stepIndex": 8
                   },
                   "displayName": "Parse ARN",
