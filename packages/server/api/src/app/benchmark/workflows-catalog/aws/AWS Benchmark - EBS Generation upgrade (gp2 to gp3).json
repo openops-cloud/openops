@@ -131,7 +131,7 @@
                   "value": false
                 },
                 "continueOnFailure": {
-                  "value": false
+                  "value": true
                 }
               }
             },
