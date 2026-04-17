@@ -594,7 +594,7 @@ function resolveAppConnectionSorting({
     [AppConnectionSortBy.NAME]: {
       columnPath: 'name',
       columnName: 'app_connection.name',
-      columnType: 'character varying',
+      columnType: 'string',
     },
     [AppConnectionSortBy.CREATED]: {
       columnPath: 'created',

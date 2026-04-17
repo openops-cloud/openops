@@ -29,8 +29,7 @@ export function encodeByType(type: string, value: unknown): string | null {
     case 'number': {
       return `${value}`;
     }
-    case 'string':
-    case 'character varying': {
+    case 'string': {
       return encodeURIComponent(value as string);
     }
     case 'object': {
@@ -77,8 +76,7 @@ export function decodeByType(
       return num;
     }
 
-    case 'string':
-    case 'character varying': {
+    case 'string': {
       return decodeURIComponent(value);
     }
 
