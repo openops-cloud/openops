@@ -448,7 +448,11 @@ describe('batchTableAggregations', () => {
       tokenOrResolver: 'token',
       tableIds: [1],
       filters: [
-        { field: 'Status', type: 'not_in', value: ['Resolved', 'Dismissed'] },
+        {
+          fieldName: 'Status',
+          type: 'not_in',
+          value: ['Resolved', 'Dismissed'],
+        },
       ],
       aggregations: [{ type: 'count' }],
     });
@@ -497,7 +501,7 @@ describe('batchTableAggregations', () => {
     ).rejects.toThrow('network error');
 
     expect(logger.error).toHaveBeenCalledWith(
-      'Error while getting batch table aggregations:',
+      'Error while posting batch table aggregations:',
       expect.objectContaining({ error, tableIds: [1] }),
     );
   });

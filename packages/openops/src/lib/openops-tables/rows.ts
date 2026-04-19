@@ -263,7 +263,7 @@ export type AggregationSpec =
   | { type: 'distinct_values'; field: string };
 
 export interface TableFilter {
-  field: string;
+  fieldName: string;
   type: 'not_in';
   value: string[];
 }
@@ -297,14 +297,18 @@ export async function batchTableAggregations(
         url,
         {
           table_ids: params.tableIds,
-          filters: params.filters ?? [],
+          filters: (params.filters ?? []).map((filter) => ({
+            field: filter.fieldName,
+            type: filter.type,
+            value: filter.value,
+          })),
           aggregations: params.aggregations,
         },
         authenticationHeader,
       );
     },
     (error) => {
-      logger.error('Error while getting batch table aggregations:', {
+      logger.error('Error while posting batch table aggregations:', {
         error,
         url,
         tableIds: params.tableIds,
