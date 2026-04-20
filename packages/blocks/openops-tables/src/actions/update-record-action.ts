@@ -150,6 +150,10 @@ export const updateRecordAction = createAction({
       { roundToFieldPrecision },
     );
 
+    if (Object.keys(fieldsToUpdate).length === 0) {
+      return null;
+    }
+
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
     const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
     fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
@@ -229,14 +233,13 @@ function mapFieldsToObject(
 
     const value = newFieldValue['newFieldValue'];
 
-    const decimalPlaces = getFieldDecimalPlaces(field);
-
-    if (decimalPlaces === undefined) {
-      fieldsToUpdate[fieldName] = value;
+    if (value == null || (typeof value === 'string' && value.trim() === '')) {
       continue;
     }
 
-    if (value == null || (typeof value === 'string' && value.trim() === '')) {
+    const decimalPlaces = getFieldDecimalPlaces(field);
+
+    if (decimalPlaces === undefined) {
       fieldsToUpdate[fieldName] = value;
       continue;
     }
