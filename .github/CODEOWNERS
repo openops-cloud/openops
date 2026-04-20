@@ -1,4 +1,4 @@
-# Reviewers will be added automatically to PRs accoding to the files they own
+# Reviewers will be added automatically to PRs according to the files they own
 
 /.devcontainer @MarceloRGonc
 /.github @MarceloRGonc
