@@ -2,7 +2,10 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from '@openops/common';
 import { chatExists } from '../common/chat-exists';
 import { chatId } from '../common/chat-id';
-import { createOrGetUserChat } from '../common/create-or-get-user-chat';
+import {
+  createOrGetUserChat,
+  isEmail,
+} from '../common/create-or-get-user-chat';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 
 export const sendChatMessageAction = createAction({
@@ -41,12 +44,19 @@ export const sendChatMessageAction = createAction({
 
     let finalChatId = chatId;
 
-    const exists = await chatExists(context.auth.access_token, chatId);
-    if (!exists) {
+    if (isEmail(chatId)) {
       finalChatId = await createOrGetUserChat(
         context.auth.access_token,
         chatId,
       );
+    } else {
+      const exists = await chatExists(context.auth.access_token, chatId);
+      if (!exists) {
+        finalChatId = await createOrGetUserChat(
+          context.auth.access_token,
+          chatId,
+        );
+      }
     }
 
     const client = getMicrosoftGraphClient(context.auth.access_token);

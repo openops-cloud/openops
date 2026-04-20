@@ -199,4 +199,54 @@ describe('createOrGetUserChat', () => {
 
     expect(result).toBe('existing-chat-with-resolved-user');
   });
+
+  test('should treat Teams chat IDs with @ as IDs not emails', async () => {
+    mockGraphClient.api.mockImplementation((endpoint: string) => {
+      if (endpoint === '/me') {
+        return {
+          get: jest.fn().mockResolvedValue({ id: 'my-user-id' }),
+        };
+      }
+      if (endpoint === '/me/chats') {
+        return {
+          filter: jest.fn().mockReturnThis(),
+          expand: jest.fn().mockReturnThis(),
+          get: jest.fn().mockResolvedValue({
+            value: [
+              {
+                id: '19:abc123@thread.v2',
+                members: [
+                  { userId: 'my-user-id' },
+                  { userId: '19:abc123@thread.v2' },
+                ],
+              },
+            ],
+          }),
+        };
+      }
+      return { get: jest.fn(), post: jest.fn() };
+    });
+
+    const result = await createOrGetUserChat(
+      mockAccessToken,
+      '19:abc123@thread.v2',
+    );
+
+    expect(result).toBe('19:abc123@thread.v2');
+  });
+
+  test('should throw error when trying to create chat with yourself', async () => {
+    mockGraphClient.api.mockImplementation((endpoint: string) => {
+      if (endpoint === '/me') {
+        return {
+          get: jest.fn().mockResolvedValue({ id: 'my-user-id' }),
+        };
+      }
+      return { get: jest.fn(), post: jest.fn() };
+    });
+
+    await expect(
+      createOrGetUserChat(mockAccessToken, 'my-user-id'),
+    ).rejects.toThrow('Cannot create a one-on-one chat with yourself');
+  });
 });

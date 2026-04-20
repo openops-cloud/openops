@@ -1,5 +1,17 @@
 import { getMicrosoftGraphClient } from '@openops/common';
 
+export function isEmail(value: string): boolean {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const teamsThreadPattern = /@thread\.(v2|tacv2|skype)$/;
+  const teamsChatIdPattern = /^19:[a-zA-Z0-9_-]+@/;
+
+  if (teamsThreadPattern.test(value) || teamsChatIdPattern.test(value)) {
+    return false;
+  }
+
+  return emailPattern.test(value);
+}
+
 export async function createOrGetUserChat(
   accessToken: string,
   userIdOrEmail: string,
@@ -10,11 +22,12 @@ export async function createOrGetUserChat(
   const myUserId = me.id;
 
   let targetUserId = userIdOrEmail;
-  if (userIdOrEmail.includes('@')) {
+  if (isEmail(userIdOrEmail)) {
+    const escapedEmail = userIdOrEmail.replace(/'/g, "''");
     const userResponse = await client
       .api('/users')
       .filter(
-        `mail eq '${userIdOrEmail}' or userPrincipalName eq '${userIdOrEmail}'`,
+        `mail eq '${escapedEmail}' or userPrincipalName eq '${escapedEmail}'`,
       )
       .get();
 
@@ -23,6 +36,10 @@ export async function createOrGetUserChat(
     }
 
     targetUserId = userResponse.value[0].id;
+  }
+
+  if (targetUserId === myUserId) {
+    throw new Error('Cannot create a one-on-one chat with yourself');
   }
 
   const chatsResponse = await client

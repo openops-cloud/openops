@@ -17,6 +17,8 @@ jest.mock('../src/lib/common/create-or-get-user-chat', () => ({
   createOrGetUserChat: jest.fn((...args: unknown[]) =>
     mockCreateOrGetUserChat(...args),
   ),
+  isEmail: jest.requireActual('../src/lib/common/create-or-get-user-chat')
+    .isEmail,
 }));
 
 jest.mock('../src/lib/common/chat-exists', () => ({
@@ -90,15 +92,12 @@ describe('sendChatMessageAction', () => {
     expect(mockCreateOrGetUserChat).not.toHaveBeenCalled();
   });
 
-  test('should create/get chat when chat does not exist', async () => {
+  test('should skip chatExists check for emails and directly create/get chat', async () => {
     mockPost.mockResolvedValue({ id: 'message-id-890' });
-    mockChatExists.mockResolvedValue(false);
+    mockCreateOrGetUserChat.mockResolvedValue('user-chat-id-123');
     const response = await sendChatMessageAction.run(mockContextWithEmail);
 
-    expect(mockChatExists).toHaveBeenCalledWith(
-      'fake_token',
-      'user@example.com',
-    );
+    expect(mockChatExists).not.toHaveBeenCalled();
     expect(mockCreateOrGetUserChat).toHaveBeenCalledWith(
       'fake_token',
       'user@example.com',
@@ -109,6 +108,34 @@ describe('sendChatMessageAction', () => {
         contentType: 'text',
       },
     });
+    expect(response).toEqual({ id: 'message-id-890' });
+  });
+
+  test('should create/get chat when chat ID does not exist', async () => {
+    mockPost.mockResolvedValue({ id: 'message-id-890' });
+    mockChatExists.mockResolvedValue(false);
+    mockCreateOrGetUserChat.mockResolvedValue('new-chat-id-456');
+
+    const mockContext = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: { access_token: 'fake_token' },
+      propsValue: {
+        chatId: 'non-existent-chat-id',
+        contentType: 'text',
+        content: 'Hello!',
+      },
+    };
+
+    const response = await sendChatMessageAction.run(mockContext);
+
+    expect(mockChatExists).toHaveBeenCalledWith(
+      'fake_token',
+      'non-existent-chat-id',
+    );
+    expect(mockCreateOrGetUserChat).toHaveBeenCalledWith(
+      'fake_token',
+      'non-existent-chat-id',
+    );
     expect(response).toEqual({ id: 'message-id-890' });
   });
 

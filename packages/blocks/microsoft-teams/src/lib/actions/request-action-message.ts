@@ -9,7 +9,10 @@ import { ExecutionType } from '@openops/shared';
 import { chatExists } from '../common/chat-exists';
 import { ChannelOption, ChatOption, ChatTypes } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
-import { createOrGetUserChat } from '../common/create-or-get-user-chat';
+import {
+  createOrGetUserChat,
+  isEmail,
+} from '../common/create-or-get-user-chat';
 import {
   TeamsMessageAction,
   TeamsMessageButton,
@@ -89,15 +92,26 @@ export const requestActionMessageAction = createAction({
       | ChannelOption;
 
     if (typeof chatOrChannel === 'string') {
-      const exists = await chatExists(context.auth.access_token, chatOrChannel);
-      if (!exists) {
+      if (isEmail(chatOrChannel)) {
         const chatId = await createOrGetUserChat(
           context.auth.access_token,
           chatOrChannel,
         );
         finalChatOrChannel = { id: chatId, type: ChatTypes.CHAT };
       } else {
-        finalChatOrChannel = { id: chatOrChannel, type: ChatTypes.CHAT };
+        const exists = await chatExists(
+          context.auth.access_token,
+          chatOrChannel,
+        );
+        if (!exists) {
+          const chatId = await createOrGetUserChat(
+            context.auth.access_token,
+            chatOrChannel,
+          );
+          finalChatOrChannel = { id: chatId, type: ChatTypes.CHAT };
+        } else {
+          finalChatOrChannel = { id: chatOrChannel, type: ChatTypes.CHAT };
+        }
       }
     }
 

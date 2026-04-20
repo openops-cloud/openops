@@ -26,8 +26,10 @@ describe('chatExists', () => {
     expect(mockGet).toHaveBeenCalled();
   });
 
-  test('should return false on any error', async () => {
-    const mockGet = jest.fn().mockRejectedValue(new Error('Not found'));
+  test('should return false for 404 errors', async () => {
+    const mockGet = jest
+      .fn()
+      .mockRejectedValue({ statusCode: 404, code: 'NotFound' });
     mockGraphClient.api.mockReturnValue({ get: mockGet });
 
     const result = await chatExists(mockAccessToken, 'non-existent-chat');
@@ -37,5 +39,19 @@ describe('chatExists', () => {
       '/chats/non-existent-chat',
     );
     expect(mockGet).toHaveBeenCalled();
+  });
+
+  test('should rethrow non-404 errors', async () => {
+    const authError = {
+      statusCode: 401,
+      code: 'Unauthorized',
+      message: 'Invalid token',
+    };
+    const mockGet = jest.fn().mockRejectedValue(authError);
+    mockGraphClient.api.mockReturnValue({ get: mockGet });
+
+    await expect(chatExists(mockAccessToken, 'chat-123')).rejects.toEqual(
+      authError,
+    );
   });
 });
