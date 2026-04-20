@@ -150,12 +150,13 @@ export const updateRecordAction = createAction({
       { roundToFieldPrecision },
     );
 
+    const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
+
     if (Object.keys(fieldsToUpdate).length === 0) {
       return null;
     }
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
-    const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
     fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
 
     return await upsertRow({
