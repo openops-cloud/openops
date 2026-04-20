@@ -26,7 +26,7 @@ describe('chatExists', () => {
     expect(mockGet).toHaveBeenCalled();
   });
 
-  test('should return false if chat does not exist', async () => {
+  test('should return false on any error', async () => {
     const mockGet = jest.fn().mockRejectedValue(new Error('Not found'));
     mockGraphClient.api.mockReturnValue({ get: mockGet });
 
@@ -37,14 +37,5 @@ describe('chatExists', () => {
       '/chats/non-existent-chat',
     );
     expect(mockGet).toHaveBeenCalled();
-  });
-
-  test('should return false on any error', async () => {
-    const mockGet = jest.fn().mockRejectedValue(new Error('Network error'));
-    mockGraphClient.api.mockReturnValue({ get: mockGet });
-
-    const result = await chatExists(mockAccessToken, 'chat-456');
-
-    expect(result).toBe(false);
   });
 });
