@@ -1,7 +1,7 @@
 # Reviewers will be added automatically to PRs accoding to the files they own
 
 /.devcontainer @MarceloRGonc
-/.github @maor-rozenfeld
-/assets @maor-rozenfeld
-/deploy @maor-rozenfeld
+/.github @MarceloRGonc
+/assets @MarceloRGonc
+/deploy @MarceloRGonc
 
