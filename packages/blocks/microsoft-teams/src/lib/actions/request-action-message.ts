@@ -6,8 +6,10 @@ import {
 } from '@openops/blocks-framework';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
-import { ChannelOption, ChatOption } from '../common/chat-types';
+import { chatExists } from '../common/chat-exists';
+import { ChannelOption, ChatOption, ChatTypes } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
+import { createOrGetUserChat } from '../common/create-or-get-user-chat';
 import {
   TeamsMessageAction,
   TeamsMessageButton,
@@ -76,11 +78,29 @@ export const requestActionMessageAction = createAction({
   async run(context) {
     const { chatOrChannel, header, message, actions } =
       context.propsValue as unknown as {
-        chatOrChannel: ChatOption | ChannelOption;
+        chatOrChannel: ChatOption | ChannelOption | string;
         header: string;
         message: string;
         actions: TeamsMessageAction[];
       };
+
+    let finalChatOrChannel: ChatOption | ChannelOption = chatOrChannel as
+      | ChatOption
+      | ChannelOption;
+
+    if (typeof chatOrChannel === 'string') {
+      const exists = await chatExists(context.auth.access_token, chatOrChannel);
+      if (!exists) {
+        const chatId = await createOrGetUserChat(
+          context.auth.access_token,
+          chatOrChannel,
+        );
+        finalChatOrChannel = { id: chatId, type: ChatTypes.CHAT };
+      } else {
+        finalChatOrChannel = { id: chatOrChannel, type: ChatTypes.CHAT };
+      }
+    }
+
     if (context.executionType === ExecutionType.BEGIN) {
       const apiUrl = await networkUtls.getPublicUrl();
       const frontendUrl = system
@@ -107,7 +127,7 @@ export const requestActionMessageAction = createAction({
 
       const result = await sendChatOrChannelMessage({
         accessToken: context.auth.access_token,
-        chatOrChannel,
+        chatOrChannel: finalChatOrChannel,
         header,
         message,
         actions: preparedActions,
