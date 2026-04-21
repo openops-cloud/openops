@@ -56,6 +56,8 @@ const fetchData = async (
   });
 };
 
+const REFRESH_INTERVAL_MS = 10000;
+
 const FlowRunsPage = () => {
   const navigate = useNavigate();
   const [refresh, setRefresh] = useState(false);
@@ -125,6 +127,13 @@ const FlowRunsPage = () => {
       setRefresh((prev) => !prev);
     }
   }, [isFetching]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefresh((prev) => !prev);
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex-col w-full">
