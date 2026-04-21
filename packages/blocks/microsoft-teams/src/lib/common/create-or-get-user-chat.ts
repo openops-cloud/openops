@@ -1,15 +1,22 @@
 import { getMicrosoftGraphClient } from '@openops/common';
 
 export function isEmail(value: string): boolean {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const teamsThreadPattern = /@thread\.(v2|tacv2|skype)$/;
-  const teamsChatIdPattern = /^19:[a-zA-Z0-9_-]+@/;
-
-  if (teamsThreadPattern.test(value) || teamsChatIdPattern.test(value)) {
+  if (
+    value.endsWith('@thread.v2') ||
+    value.endsWith('@thread.tacv2') ||
+    value.endsWith('@thread.skype')
+  ) {
     return false;
   }
 
-  return emailPattern.test(value);
+  if (value.startsWith('19:') && value.includes('@')) {
+    return false;
+  }
+
+  const atIndex = value.indexOf('@');
+  const dotAfterAt = value.indexOf('.', atIndex);
+
+  return atIndex > 0 && dotAfterAt > atIndex;
 }
 
 export async function createOrGetUserChat(
