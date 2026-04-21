@@ -24,22 +24,28 @@ export async function createOrGetUserChat(
   let targetUserId = userIdOrEmail;
   if (isEmail(userIdOrEmail)) {
     const escapedEmail = userIdOrEmail.replace(/'/g, "''");
-    const userResponse = await client
-      .api('/users')
-      .filter(
-        `mail eq '${escapedEmail}' or userPrincipalName eq '${escapedEmail}'`,
-      )
-      .get();
+    try {
+      const userResponse = await client
+        .api('/users')
+        .filter(
+          `mail eq '${escapedEmail}' or userPrincipalName eq '${escapedEmail}'`,
+        )
+        .get();
 
-    if (!userResponse.value || userResponse.value.length === 0) {
-      throw new Error(`User not found: ${userIdOrEmail}`);
+      if (!userResponse.value || userResponse.value.length === 0) {
+        throw new Error(`User not found: ${userIdOrEmail}`);
+      }
+
+      targetUserId = userResponse.value[0].id;
+    } catch (error: unknown) {
+      const graphError = error as { statusCode?: number; message?: string };
+      if (graphError.statusCode === 403) {
+        throw new Error(
+          `Insufficient permissions to resolve email. Please add 'User.ReadBasic.All' scope and re-authenticate.`,
+        );
+      }
+      throw error;
     }
-
-    targetUserId = userResponse.value[0].id;
-  }
-
-  if (targetUserId === myUserId) {
-    throw new Error('Cannot create a one-on-one chat with yourself');
   }
 
   const chatsResponse = await client
@@ -77,7 +83,16 @@ export async function createOrGetUserChat(
     ],
   };
 
-  const chat = await client.api('/chats').post(chatPayload);
-
-  return chat.id;
+  try {
+    const chat = await client.api('/chats').post(chatPayload);
+    return chat.id;
+  } catch (error: unknown) {
+    const graphError = error as { statusCode?: number; message?: string };
+    if (graphError.statusCode === 403) {
+      throw new Error(
+        `Insufficient permissions to create chat. Please add 'Chat.Create' scope and re-authenticate.`,
+      );
+    }
+    throw error;
+  }
 }

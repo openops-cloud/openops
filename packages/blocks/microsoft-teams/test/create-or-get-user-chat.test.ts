@@ -234,19 +234,4 @@ describe('createOrGetUserChat', () => {
 
     expect(result).toBe('19:abc123@thread.v2');
   });
-
-  test('should throw error when trying to create chat with yourself', async () => {
-    mockGraphClient.api.mockImplementation((endpoint: string) => {
-      if (endpoint === '/me') {
-        return {
-          get: jest.fn().mockResolvedValue({ id: 'my-user-id' }),
-        };
-      }
-      return { get: jest.fn(), post: jest.fn() };
-    });
-
-    await expect(
-      createOrGetUserChat(mockAccessToken, 'my-user-id'),
-    ).rejects.toThrow('Cannot create a one-on-one chat with yourself');
-  });
 });
