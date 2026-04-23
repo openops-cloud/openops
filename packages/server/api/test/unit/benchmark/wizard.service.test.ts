@@ -481,4 +481,105 @@ describe('resolveWizardNavigation', () => {
       adapters.delete('no-condition-fn');
     }
   });
+
+  it('preserves nested items field in static options', async () => {
+    const nestedConfig = {
+      provider: 'nested',
+      steps: [
+        {
+          id: 'step1',
+          title: 'Select providers',
+          selectionType: 'nested-multi-select' as const,
+          optionsSource: {
+            type: 'static' as const,
+            values: [
+              {
+                id: 'cloudability',
+                displayName: 'Cloudability',
+                items: [
+                  { id: 'aws', displayName: 'AWS' },
+                  { id: 'azure', displayName: 'Azure' },
+                  { id: 'gcp', displayName: 'GCP' },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const nestedAdapter: ProviderAdapter = {
+      config: nestedConfig,
+      resolveOptions: mockResolveOptions,
+      evaluateCondition: mockEvaluateCondition,
+    };
+    adapters.set('nested', nestedAdapter);
+
+    try {
+      const result = await resolveWizardNavigation(
+        'nested',
+        getProvider('nested'),
+        {},
+        TEST_PROJECT_ID,
+      );
+      expect(result.options).toEqual([
+        {
+          id: 'cloudability',
+          displayName: 'Cloudability',
+          items: [
+            { id: 'aws', displayName: 'AWS' },
+            { id: 'azure', displayName: 'Azure' },
+            { id: 'gcp', displayName: 'GCP' },
+          ],
+        },
+      ]);
+    } finally {
+      adapters.delete('nested');
+    }
+  });
+
+  it('supports nested-multi-select selection type', async () => {
+    const nestedMultiSelectConfig = {
+      provider: 'nested-multi',
+      steps: [
+        {
+          id: 'step1',
+          title: 'Select nested options',
+          selectionType: 'nested-multi-select' as const,
+          optionsSource: {
+            type: 'static' as const,
+            values: [
+              {
+                id: 'parent1',
+                displayName: 'Parent 1',
+                items: [
+                  { id: 'child1', displayName: 'Child 1' },
+                  { id: 'child2', displayName: 'Child 2' },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const nestedMultiAdapter: ProviderAdapter = {
+      config: nestedMultiSelectConfig,
+      resolveOptions: mockResolveOptions,
+      evaluateCondition: mockEvaluateCondition,
+    };
+    adapters.set('nested-multi', nestedMultiAdapter);
+
+    try {
+      const result = await resolveWizardNavigation(
+        'nested-multi',
+        getProvider('nested-multi'),
+        {},
+        TEST_PROJECT_ID,
+      );
+      expect(result.selectionType).toBe('nested-multi-select');
+      expect(result.options[0].items).toBeDefined();
+      expect(result.options[0].items).toHaveLength(2);
+    } finally {
+      adapters.delete('nested-multi');
+    }
+  });
 });
