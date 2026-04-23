@@ -1,4 +1,4 @@
-import { CAMPAIGN_PROVIDER_METADATA } from '@openops/shared';
+import { CLOUD_PROVIDER_METADATA } from '@openops/shared';
 
 export type CloudProviderValue = 'aws' | 'azure' | 'gcp';
 
@@ -13,17 +13,17 @@ export type CloudProvider = {
 export const CLOUD_PROVIDERS: CloudProvider[] = [
   {
     value: 'aws',
-    ...CAMPAIGN_PROVIDER_METADATA.aws,
+    ...CLOUD_PROVIDER_METADATA.aws,
     enabled: true,
   },
   {
     value: 'azure',
-    ...CAMPAIGN_PROVIDER_METADATA.azure,
+    ...CLOUD_PROVIDER_METADATA.azure,
     enabled: true,
   },
   {
     value: 'gcp',
-    ...CAMPAIGN_PROVIDER_METADATA.gcp,
+    ...CLOUD_PROVIDER_METADATA.gcp,
     enabled: false,
   },
 ];

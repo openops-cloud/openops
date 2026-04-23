@@ -2,7 +2,7 @@ export type ProviderType = 'direct-cloud' | 'multi-cloud-finops';
 
 export type SupportedCloudVendor = 'aws' | 'azure' | 'gcp';
 
-export type CampaignProviderMetadata = {
+export type CloudProviderMetadata = {
   name: string;
   icon: string;
   authProviderKey: string;
@@ -10,10 +10,7 @@ export type CampaignProviderMetadata = {
   supportedVendors?: SupportedCloudVendor[];
 };
 
-export const CAMPAIGN_PROVIDER_METADATA: Record<
-  string,
-  CampaignProviderMetadata
-> = {
+export const CLOUD_PROVIDER_METADATA: Record<string, CloudProviderMetadata> = {
   aws: {
     name: 'AWS',
     icon: '/blocks/aws.png',
@@ -41,11 +38,9 @@ export const CAMPAIGN_PROVIDER_METADATA: Record<
   },
 };
 
-export function getProviderMetadata(
-  provider: string,
-): CampaignProviderMetadata {
+export function getProviderMetadata(provider: string): CloudProviderMetadata {
   return (
-    CAMPAIGN_PROVIDER_METADATA[provider] || {
+    CLOUD_PROVIDER_METADATA[provider] || {
       name: 'Unknown',
       icon: '',
       authProviderKey: '',
