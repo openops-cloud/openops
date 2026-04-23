@@ -1,13 +1,24 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const WizardOption = Type.Object({
-  id: Type.String(),
-  displayName: Type.String(),
-  imageLogoUrl: Type.Optional(Type.String()),
-  metadata: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-});
+export type WizardOption = {
+  id: string;
+  displayName: string;
+  imageLogoUrl?: string;
+  metadata?: Record<string, unknown>;
+  items?: WizardOption[];
+};
 
-export type WizardOption = Static<typeof WizardOption>;
+export const WizardOption = Type.Recursive(
+  (This) =>
+    Type.Object({
+      id: Type.String(),
+      displayName: Type.String(),
+      imageLogoUrl: Type.Optional(Type.String()),
+      metadata: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+      items: Type.Optional(Type.Array(This)),
+    }),
+  { $id: 'WizardOption' },
+);
 
 export const WizardStepResponse = Type.Object({
   currentStep: Type.String(),
@@ -17,6 +28,7 @@ export const WizardStepResponse = Type.Object({
   selectionType: Type.Union([
     Type.Literal('single'),
     Type.Literal('multi-select'),
+    Type.Literal('nested-multi-select'),
   ]),
   options: Type.Array(WizardOption),
   stepIndex: Type.Number(),
