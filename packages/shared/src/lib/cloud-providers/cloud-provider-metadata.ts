@@ -26,7 +26,7 @@ export const CLOUD_PROVIDER_METADATA: Record<string, CloudProviderMetadata> = {
   gcp: {
     name: 'GCP',
     icon: '/blocks/google-cloud.svg',
-    authProviderKey: 'GoogleCloud',
+    authProviderKey: 'GCloud',
     type: 'direct-cloud',
   },
   cloudability: {
