@@ -1,4 +1,4 @@
-import { isEmail } from '../src/lib/common/create-or-get-user-chat';
+import { isEmail } from '../src/lib/common/get-or-create-user-chat';
 
 describe('isEmail', () => {
   test('should return true for valid emails', () => {

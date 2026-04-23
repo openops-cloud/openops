@@ -13,11 +13,11 @@ jest.mock('@openops/common', () => ({
   })),
 }));
 
-jest.mock('../src/lib/common/create-or-get-user-chat', () => ({
-  createOrGetUserChat: jest.fn((...args: unknown[]) =>
+jest.mock('../src/lib/common/get-or-create-user-chat', () => ({
+  getOrCreateUserChat: jest.fn((...args: unknown[]) =>
     mockCreateOrGetUserChat(...args),
   ),
-  isEmail: jest.requireActual('../src/lib/common/create-or-get-user-chat')
+  isEmail: jest.requireActual('../src/lib/common/get-or-create-user-chat')
     .isEmail,
 }));
 

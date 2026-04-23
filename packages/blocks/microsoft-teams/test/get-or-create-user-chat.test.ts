@@ -1,5 +1,5 @@
 import { getMicrosoftGraphClient } from '@openops/common';
-import { createOrGetUserChat } from '../src/lib/common/create-or-get-user-chat';
+import { getOrCreateUserChat } from '../src/lib/common/get-or-create-user-chat';
 
 jest.mock('@openops/common');
 
@@ -9,7 +9,7 @@ const mockGraphClient = {
   api: jest.fn(),
 };
 
-describe('createOrGetUserChat', () => {
+describe('getOrCreateUserChat', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getMicrosoftGraphClient as jest.Mock).mockReturnValue(mockGraphClient);
@@ -44,7 +44,7 @@ describe('createOrGetUserChat', () => {
       return { get: mockGet, post: jest.fn() };
     });
 
-    const result = await createOrGetUserChat(mockAccessToken, 'target-user-id');
+    const result = await getOrCreateUserChat(mockAccessToken, 'target-user-id');
 
     expect(result).toBe('existing-chat-id');
     expect(getMicrosoftGraphClient).toHaveBeenCalledWith(mockAccessToken);
@@ -72,7 +72,7 @@ describe('createOrGetUserChat', () => {
       return { get: jest.fn(), post: jest.fn() };
     });
 
-    const result = await createOrGetUserChat(
+    const result = await getOrCreateUserChat(
       mockAccessToken,
       'new-target-user-id',
     );
@@ -127,7 +127,7 @@ describe('createOrGetUserChat', () => {
       return { get: jest.fn(), post: jest.fn() };
     });
 
-    const result = await createOrGetUserChat(
+    const result = await getOrCreateUserChat(
       mockAccessToken,
       'user@example.com',
     );
@@ -153,7 +153,7 @@ describe('createOrGetUserChat', () => {
     });
 
     await expect(
-      createOrGetUserChat(mockAccessToken, 'nonexistent@example.com'),
+      getOrCreateUserChat(mockAccessToken, 'nonexistent@example.com'),
     ).rejects.toThrow('User not found: nonexistent@example.com');
   });
 
@@ -192,7 +192,7 @@ describe('createOrGetUserChat', () => {
       return { get: jest.fn(), post: jest.fn() };
     });
 
-    const result = await createOrGetUserChat(
+    const result = await getOrCreateUserChat(
       mockAccessToken,
       'existing@example.com',
     );
@@ -227,7 +227,7 @@ describe('createOrGetUserChat', () => {
       return { get: jest.fn(), post: jest.fn() };
     });
 
-    const result = await createOrGetUserChat(
+    const result = await getOrCreateUserChat(
       mockAccessToken,
       '19:abc123@thread.v2',
     );

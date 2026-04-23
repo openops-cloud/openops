@@ -10,13 +10,13 @@ import { chatExists } from '../common/chat-exists';
 import { ChannelOption, ChatOption, ChatTypes } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
 import {
-  createOrGetUserChat,
-  isEmail,
-} from '../common/create-or-get-user-chat';
-import {
   TeamsMessageAction,
   TeamsMessageButton,
 } from '../common/generate-message-with-buttons';
+import {
+  getOrCreateUserChat,
+  isEmail,
+} from '../common/get-or-create-user-chat';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 import { onActionReceived } from '../common/on-action-received';
 import { sendChatOrChannelMessage } from '../common/send-chat-or-channel-message';
@@ -93,7 +93,7 @@ export const requestActionMessageAction = createAction({
 
     if (typeof chatOrChannel === 'string') {
       if (isEmail(chatOrChannel)) {
-        const chatId = await createOrGetUserChat(
+        const chatId = await getOrCreateUserChat(
           context.auth.access_token,
           chatOrChannel,
         );
@@ -104,7 +104,7 @@ export const requestActionMessageAction = createAction({
           chatOrChannel,
         );
         if (!exists) {
-          const chatId = await createOrGetUserChat(
+          const chatId = await getOrCreateUserChat(
             context.auth.access_token,
             chatOrChannel,
           );

@@ -19,7 +19,7 @@ export function isEmail(value: string): boolean {
   return atIndex > 0 && dotAfterAt > atIndex;
 }
 
-export async function createOrGetUserChat(
+export async function getOrCreateUserChat(
   accessToken: string,
   userIdOrEmail: string,
 ): Promise<string> {

@@ -3,9 +3,9 @@ import { getMicrosoftGraphClient } from '@openops/common';
 import { chatExists } from '../common/chat-exists';
 import { chatId } from '../common/chat-id';
 import {
-  createOrGetUserChat,
+  getOrCreateUserChat,
   isEmail,
-} from '../common/create-or-get-user-chat';
+} from '../common/get-or-create-user-chat';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 
 export const sendChatMessageAction = createAction({
@@ -45,14 +45,14 @@ export const sendChatMessageAction = createAction({
     let finalChatId = chatId;
 
     if (isEmail(chatId)) {
-      finalChatId = await createOrGetUserChat(
+      finalChatId = await getOrCreateUserChat(
         context.auth.access_token,
         chatId,
       );
     } else {
       const exists = await chatExists(context.auth.access_token, chatId);
       if (!exists) {
-        finalChatId = await createOrGetUserChat(
+        finalChatId = await getOrCreateUserChat(
           context.auth.access_token,
           chatId,
         );
