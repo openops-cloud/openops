@@ -154,7 +154,7 @@ const NestedMultiSelect = React.forwardRef<
                       />
                       <Label
                         htmlFor={`item-${option.id}-${item.id}`}
-                        className="cursor-pointer text-sm"
+                        className="cursor-pointer text-sm font-normal"
                       >
                         {item.displayName}
                       </Label>
