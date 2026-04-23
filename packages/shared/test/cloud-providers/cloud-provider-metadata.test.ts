@@ -6,8 +6,8 @@ import {
 
 describe('cloud-provider-metadata', () => {
   describe('getProviderMetadata', () => {
-    it('should return metadata for known provider', () => {
-      expect(getProviderMetadata('aws').name).toBe('AWS');
+    it('should return metadata or known provider', () => {
+      expect(getProviderMetadataf('aws').name).toBe('AWS');
     });
 
     it('should return default metadata for unknown provider', () => {
