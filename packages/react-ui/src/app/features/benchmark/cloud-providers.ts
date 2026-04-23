@@ -13,17 +13,23 @@ export type CloudProvider = {
 export const CLOUD_PROVIDERS: CloudProvider[] = [
   {
     value: 'aws',
-    ...CLOUD_PROVIDER_METADATA.aws,
+    name: CLOUD_PROVIDER_METADATA.aws.name,
+    icon: CLOUD_PROVIDER_METADATA.aws.icon,
+    authProviderKey: CLOUD_PROVIDER_METADATA.aws.authProviderKey,
     enabled: true,
   },
   {
     value: 'azure',
-    ...CLOUD_PROVIDER_METADATA.azure,
+    name: CLOUD_PROVIDER_METADATA.azure.name,
+    icon: CLOUD_PROVIDER_METADATA.azure.icon,
+    authProviderKey: CLOUD_PROVIDER_METADATA.azure.authProviderKey,
     enabled: true,
   },
   {
     value: 'gcp',
-    ...CLOUD_PROVIDER_METADATA.gcp,
+    name: CLOUD_PROVIDER_METADATA.gcp.name,
+    icon: CLOUD_PROVIDER_METADATA.gcp.icon,
+    authProviderKey: CLOUD_PROVIDER_METADATA.gcp.authProviderKey,
     enabled: false,
   },
 ];
