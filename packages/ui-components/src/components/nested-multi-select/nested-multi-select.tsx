@@ -73,8 +73,12 @@ const NestedMultiSelect = React.forwardRef<
   const handleGroupToggle = (groupId: string, items: NestedOption['items']) => {
     const currentItems = value[groupId] || [];
     const allItemIds = items?.map((i) => i.id) || [];
+    const currentItemsSet = new Set(currentItems);
+    const allSelected =
+      allItemIds.length > 0 &&
+      allItemIds.every((id) => currentItemsSet.has(id));
 
-    if (currentItems.length === allItemIds.length) {
+    if (allSelected) {
       const newValue = { ...value };
       delete newValue[groupId];
       onValueChange(newValue);
@@ -108,9 +112,12 @@ const NestedMultiSelect = React.forwardRef<
     <div ref={ref} className="p-4 space-y-2 max-h-[45vh] overflow-y-auto">
       {options.map((option) => {
         const selectedItems = value[option.id] || [];
-        const itemCount = option.items?.length || 0;
-        const allSelected = itemCount > 0 && selectedItems.length === itemCount;
-        const someSelected = selectedItems.length > 0 && !allSelected;
+        const itemIds = option.items?.map((i) => i.id) || [];
+        const selectedItemsSet = new Set(selectedItems);
+        const allSelected =
+          itemIds.length > 0 && itemIds.every((id) => selectedItemsSet.has(id));
+        const someSelected =
+          itemIds.some((id) => selectedItemsSet.has(id)) && !allSelected;
         const isOpen = openGroups.has(option.id);
 
         return (

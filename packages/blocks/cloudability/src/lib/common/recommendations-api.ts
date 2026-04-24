@@ -1,4 +1,5 @@
 import { HttpMethod } from '@openops/blocks-common';
+import { Vendor } from '@openops/common';
 import { isEmpty } from '@openops/shared';
 import { format } from 'date-fns';
 import { CloudabilityAuth } from '../auth';
@@ -107,13 +108,6 @@ export async function unsnoozeRecommendations({
   });
 
   return response;
-}
-
-export enum Vendor {
-  AWS = 'AWS',
-  Azure = 'Azure',
-  GCP = 'GCP',
-  Containers = 'Containers',
 }
 
 export enum Duration {

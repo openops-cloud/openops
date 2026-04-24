@@ -6,9 +6,6 @@ import { snoozeRecommendationAction } from './lib/actions/snooze-recommendations
 import { unsnoozeRecommendationAction } from './lib/actions/unsnooze-recommendations-action';
 import { cloudabilityAuth } from './lib/auth';
 
-export { getRecommendationTypesByVendor } from './lib/common/common-properties';
-export { Vendor } from './lib/common/recommendations-api';
-
 const markdown = `
 For more information, visit the [Cloudability API documentation](https://www.ibm.com/docs/en/cloudability-commercial/cloudability-standard/saas?topic=api-getting-started-cloudability-v3).
 `;

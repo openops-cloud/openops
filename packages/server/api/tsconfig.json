@@ -22,7 +22,6 @@
         "packages/server/api/src/app/ai/mcp/tool-approval-wrapper"
       ],
       "server-worker": ["packages/server/worker/src/index"],
-      "@openops/block-cloudability": ["packages/blocks/cloudability/src/index"],
       "@openops/block-slack": ["packages/blocks/slack/src/index"],
       "@openops/blocks-common": ["packages/blocks/common/src/index"],
       "@openops/blocks-framework": ["packages/blocks/framework/src/index"],
