@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { NestedMultiSelect, type NestedOption } from '../nested-multi-select';
 
@@ -173,8 +173,7 @@ describe('NestedMultiSelect', () => {
 
       expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
 
-      const group1 = screen.getByText('Group 1').closest('div')?.parentElement;
-      const chevron = within(group1!).getByRole('button');
+      const chevron = screen.getByLabelText('Toggle Group 1');
       fireEvent.click(chevron);
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
@@ -194,8 +193,7 @@ describe('NestedMultiSelect', () => {
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
 
-      const group1 = screen.getByText('Group 1').closest('div')?.parentElement;
-      const chevron = within(group1!).getByRole('button');
+      const chevron = screen.getByLabelText('Toggle Group 1');
       fireEvent.click(chevron);
 
       expect(screen.queryByText('Item 1')).not.toBeInTheDocument();

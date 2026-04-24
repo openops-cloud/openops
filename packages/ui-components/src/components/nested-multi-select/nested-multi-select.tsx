@@ -43,6 +43,21 @@ const NestedMultiSelect = React.forwardRef<
     return initial;
   });
 
+  React.useEffect(() => {
+    setOpenGroups((prev) => {
+      const validGroupIds = new Set(options.map((option) => option.id));
+      const next = new Set(
+        [...prev].filter((groupId) => validGroupIds.has(groupId)),
+      );
+      options.forEach((option) => {
+        if (value[option.id]?.length > 0) {
+          next.add(option.id);
+        }
+      });
+      return next;
+    });
+  }, [options, value]);
+
   const toggleGroup = (groupId: string) => {
     setOpenGroups((prev) => {
       const next = new Set(prev);
@@ -93,8 +108,8 @@ const NestedMultiSelect = React.forwardRef<
     <div ref={ref} className="p-4 space-y-2 max-h-[45vh] overflow-y-auto">
       {options.map((option) => {
         const selectedItems = value[option.id] || [];
-        const allSelected =
-          selectedItems.length === (option.items?.length || 0);
+        const itemCount = option.items?.length || 0;
+        const allSelected = itemCount > 0 && selectedItems.length === itemCount;
         const someSelected = selectedItems.length > 0 && !allSelected;
         const isOpen = openGroups.has(option.id);
 
@@ -109,13 +124,20 @@ const NestedMultiSelect = React.forwardRef<
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id={`group-${option.id}`}
-                    checked={allSelected}
+                    checked={
+                      allSelected
+                        ? true
+                        : someSelected
+                        ? 'indeterminate'
+                        : false
+                    }
                     disabled={!option.items || option.items.length === 0}
                     onCheckedChange={() =>
                       handleGroupToggle(option.id, option.items)
                     }
                     className={cn({
-                      'data-[state=checked]:bg-blueAccent-500': someSelected,
+                      'data-[state=indeterminate]:bg-blueAccent-500':
+                        someSelected,
                     })}
                   />
                   {option.imageLogoUrl && (
@@ -132,7 +154,10 @@ const NestedMultiSelect = React.forwardRef<
                     {option.displayName}
                   </Label>
                 </div>
-                <CollapsibleTrigger className="cursor-pointer hover:opacity-70 transition-opacity">
+                <CollapsibleTrigger
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                  aria-label={`Toggle ${option.displayName}`}
+                >
                   <ChevronDown
                     className={cn(
                       'h-4 w-4 text-muted-foreground transition-transform',
