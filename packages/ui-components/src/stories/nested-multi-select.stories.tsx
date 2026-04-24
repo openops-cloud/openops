@@ -11,7 +11,6 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof NestedMultiSelect>;
 
 export default meta;
@@ -73,7 +72,9 @@ const simpleOptions: NestedOption[] = [
   },
 ];
 
-function NestedMultiSelectWithState({ options }: { options: NestedOption[] }) {
+function NestedMultiSelectWithState({
+  options,
+}: Readonly<{ options: NestedOption[] }>) {
   const [value, setValue] = useState<Record<string, string[]>>({});
 
   return (

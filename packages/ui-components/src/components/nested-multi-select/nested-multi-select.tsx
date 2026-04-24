@@ -126,11 +126,12 @@ const NestedMultiSelect = React.forwardRef<
           itemIds.some((id) => selectedItemsSet.has(id)) && !allSelected;
         const isOpen = openGroups.has(option.id);
 
-        const checkboxState = allSelected
-          ? true
-          : someSelected
-          ? 'indeterminate'
-          : false;
+        let checkboxState: boolean | 'indeterminate' = false;
+        if (allSelected) {
+          checkboxState = true;
+        } else if (someSelected) {
+          checkboxState = 'indeterminate';
+        }
 
         return (
           <Collapsible
@@ -148,10 +149,6 @@ const NestedMultiSelect = React.forwardRef<
                     onCheckedChange={() =>
                       handleGroupToggle(option.id, option.items)
                     }
-                    className={cn({
-                      'data-[state=indeterminate]:bg-blueAccent-500':
-                        someSelected,
-                    })}
                   />
                   {option.imageLogoUrl && (
                     <img
@@ -181,23 +178,29 @@ const NestedMultiSelect = React.forwardRef<
               </div>
               <CollapsibleContent>
                 <div className="ml-8 space-y-2">
-                  {option.items?.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`item-${option.id}-${item.id}`}
-                        checked={selectedItems.includes(item.id)}
-                        onCheckedChange={() =>
-                          handleItemToggle(option.id, item.id)
-                        }
-                      />
-                      <Label
-                        htmlFor={`item-${option.id}-${item.id}`}
-                        className="cursor-pointer text-sm font-normal"
+                  {option.items?.map((item) => {
+                    const isChecked = Boolean(selectedItemsSet.has(item.id));
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex items-center space-x-2"
                       >
-                        {item.displayName}
-                      </Label>
-                    </div>
-                  ))}
+                        <Checkbox
+                          id={`item-${option.id}-${item.id}`}
+                          checked={isChecked}
+                          onCheckedChange={() =>
+                            handleItemToggle(option.id, item.id)
+                          }
+                        />
+                        <Label
+                          htmlFor={`item-${option.id}-${item.id}`}
+                          className="cursor-pointer text-sm font-normal"
+                        >
+                          {item.displayName}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </div>
               </CollapsibleContent>
             </div>
