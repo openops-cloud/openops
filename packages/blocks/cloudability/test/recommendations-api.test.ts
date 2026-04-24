@@ -1,4 +1,5 @@
 import { HttpMethod } from '@openops/blocks-common';
+import { Vendor } from '@openops/common';
 import { CloudabilityAuth } from '../src/lib/auth';
 import { makeRequest } from '../src/lib/common/make-request';
 import {
@@ -8,7 +9,6 @@ import {
   SnoozedFilter,
   snoozeRecommendations,
   unsnoozeRecommendations,
-  Vendor,
 } from '../src/lib/common/recommendations-api';
 
 jest.mock('../src/lib/common/make-request');

@@ -58,7 +58,7 @@ const NestedMultiSelect = React.forwardRef<
     });
   }, [options, value]);
 
-  const toggleGroup = (groupId: string) => {
+  const toggleGroup = React.useCallback((groupId: string) => {
     setOpenGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupId)) {
@@ -68,45 +68,51 @@ const NestedMultiSelect = React.forwardRef<
       }
       return next;
     });
-  };
+  }, []);
 
-  const handleGroupToggle = (groupId: string, items: NestedOption['items']) => {
-    const currentItems = value[groupId] || [];
-    const allItemIds = items?.map((i) => i.id) || [];
-    const currentItemsSet = new Set(currentItems);
-    const allSelected =
-      allItemIds.length > 0 &&
-      allItemIds.every((id) => currentItemsSet.has(id));
+  const handleGroupToggle = React.useCallback(
+    (groupId: string, items: NestedOption['items']) => {
+      const currentItems = value[groupId] || [];
+      const allItemIds = items?.map((i) => i.id) || [];
+      const currentItemsSet = new Set(currentItems);
+      const allSelected =
+        allItemIds.length > 0 &&
+        allItemIds.every((id) => currentItemsSet.has(id));
 
-    if (allSelected) {
-      const newValue = { ...value };
-      delete newValue[groupId];
-      onValueChange(newValue);
-    } else {
-      onValueChange({
-        ...value,
-        [groupId]: allItemIds,
-      });
-    }
-  };
+      if (allSelected) {
+        const newValue = { ...value };
+        delete newValue[groupId];
+        onValueChange(newValue);
+      } else {
+        onValueChange({
+          ...value,
+          [groupId]: allItemIds,
+        });
+      }
+    },
+    [value, onValueChange],
+  );
 
-  const handleItemToggle = (groupId: string, itemId: string) => {
-    const currentItems = value[groupId] || [];
-    const newItems = currentItems.includes(itemId)
-      ? currentItems.filter((id) => id !== itemId)
-      : [...currentItems, itemId];
+  const handleItemToggle = React.useCallback(
+    (groupId: string, itemId: string) => {
+      const currentItems = value[groupId] || [];
+      const newItems = currentItems.includes(itemId)
+        ? currentItems.filter((id) => id !== itemId)
+        : [...currentItems, itemId];
 
-    if (newItems.length === 0) {
-      const newValue = { ...value };
-      delete newValue[groupId];
-      onValueChange(newValue);
-    } else {
-      onValueChange({
-        ...value,
-        [groupId]: newItems,
-      });
-    }
-  };
+      if (newItems.length === 0) {
+        const newValue = { ...value };
+        delete newValue[groupId];
+        onValueChange(newValue);
+      } else {
+        onValueChange({
+          ...value,
+          [groupId]: newItems,
+        });
+      }
+    },
+    [value, onValueChange],
+  );
 
   return (
     <div ref={ref} className="p-4 space-y-2 max-h-[45vh] overflow-y-auto">
@@ -120,6 +126,12 @@ const NestedMultiSelect = React.forwardRef<
           itemIds.some((id) => selectedItemsSet.has(id)) && !allSelected;
         const isOpen = openGroups.has(option.id);
 
+        const checkboxState = allSelected
+          ? true
+          : someSelected
+          ? 'indeterminate'
+          : false;
+
         return (
           <Collapsible
             key={option.id}
@@ -131,13 +143,7 @@ const NestedMultiSelect = React.forwardRef<
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id={`group-${option.id}`}
-                    checked={
-                      allSelected
-                        ? true
-                        : someSelected
-                        ? 'indeterminate'
-                        : false
-                    }
+                    checked={checkboxState}
                     disabled={!option.items || option.items.length === 0}
                     onCheckedChange={() =>
                       handleGroupToggle(option.id, option.items)

@@ -124,6 +124,32 @@ export const WithPreselection: Story = {
   render: () => <PreselectedExample />,
 };
 
+function AllSelectedExample() {
+  const [value, setValue] = useState<Record<string, string[]>>({
+    aws: ['ec2', 'ec2-asg', 'ebs', 's3', 'rds', 'lambda'],
+    azure: ['vm', 'disk', 'sql'],
+    gcp: ['compute', 'storage', 'sql'],
+  });
+
+  return (
+    <div className="w-[600px]">
+      <NestedMultiSelect
+        options={cloudProviderOptions}
+        value={value}
+        onValueChange={setValue}
+      />
+      <div className="mt-4 p-4 bg-gray-100 rounded">
+        <p className="text-sm font-semibold mb-2">Selected:</p>
+        <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
+      </div>
+    </div>
+  );
+}
+
+export const AllSelected: Story = {
+  render: () => <AllSelectedExample />,
+};
+
 export const EmptyOptions: Story = {
   render: () => <NestedMultiSelectWithState options={[]} />,
 };
