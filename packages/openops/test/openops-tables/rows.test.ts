@@ -423,14 +423,17 @@ describe('truncateTable', () => {
     );
   });
 
-  test('uses concurrency limit with lock', async () => {
-    makeOpenOpsTablesPostMock.mockResolvedValue({ count: 10 });
+  test('releases lock even when request fails', async () => {
+    const error = new Error('database error');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    await truncateTable({
-      tableId: 5,
-      tokenOrResolver: 'token',
-    });
+    await expect(
+      truncateTable({
+        tableId: 5,
+        tokenOrResolver: 'token',
+      }),
+    ).rejects.toThrow('database error');
 
     expect(acquireMock).toBeCalledTimes(1);
     expect(releaseMock).toBeCalledTimes(1);
