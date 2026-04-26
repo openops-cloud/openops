@@ -49,7 +49,7 @@ services:
     depends_on:
       - openops-app
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.2.18
+    image: public.ecr.aws/openops/openops-tables:0.2.19
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
