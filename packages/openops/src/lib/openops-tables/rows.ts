@@ -345,3 +345,27 @@ export async function batchDeleteRows(
     },
   );
 }
+
+export async function truncateTable(
+  params: RowParams,
+): Promise<{ count: number }> {
+  const url = `api/database/rows/table/${params.tableId}/truncate/`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost<{ count: number }>(
+        url,
+        {},
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while truncating table:', {
+        error,
+        url,
+        tableId: params.tableId,
+      });
+    },
+  );
+}

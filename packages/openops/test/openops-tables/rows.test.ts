@@ -60,6 +60,7 @@ import {
   getRowByPrimaryKeyValue,
   getRows,
   OpenOpsRow,
+  truncateTable,
   updateRow,
 } from '../../src/lib/openops-tables/rows';
 
@@ -354,6 +355,88 @@ describe('batchDeleteRows', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+});
+
+describe('truncateTable', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('posts to truncate endpoint with correct url and returns count', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ count: 42 });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await truncateTable({
+      tableId: 158,
+      tokenOrResolver: 'token',
+    });
+
+    expect(result).toStrictEqual({ count: 42 });
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/table/158/truncate/',
+      {},
+      'some header',
+    );
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+
+  test('returns zero count when table is already empty', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ count: 0 });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await truncateTable({
+      tableId: 1,
+      tokenOrResolver: 'token',
+    });
+
+    expect(result).toStrictEqual({ count: 0 });
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/table/1/truncate/',
+      {},
+      'some header',
+    );
+  });
+
+  test('logs error and rethrows when post fails', async () => {
+    const error = new Error('permission denied');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await expect(
+      truncateTable({
+        tableId: 123,
+        tokenOrResolver: 'token',
+      }),
+    ).rejects.toThrow('permission denied');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error while truncating table:',
+      expect.objectContaining({
+        error,
+        url: 'api/database/rows/table/123/truncate/',
+        tableId: 123,
+      }),
+    );
+  });
+
+  test('releases lock even when request fails', async () => {
+    const error = new Error('database error');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await expect(
+      truncateTable({
+        tableId: 5,
+        tokenOrResolver: 'token',
+      }),
+    ).rejects.toThrow('database error');
+
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
   });
 });
 
