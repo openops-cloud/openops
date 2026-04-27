@@ -91,8 +91,7 @@ export function getCostBasisProperty() {
   return {
     basis: Property.Dropdown({
       displayName: 'Cost Basis',
-      description:
-        'The cost basis for the recommendations. Not applicable for AWS Redshift.',
+      description: 'The cost basis for the recommendations.',
       required: true,
       defaultValue: CostBasis.OnDemand,
       refreshers: ['vendor', 'recommendationType'],
