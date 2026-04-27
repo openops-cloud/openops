@@ -1,5 +1,6 @@
 import { Property } from '@openops/blocks-framework';
 import { Vendor, getRecommendationTypesByVendor } from '@openops/common';
+import { Duration } from './recommendations-api';
 
 export function getVendorsProperty() {
   return {
@@ -43,6 +44,43 @@ export function getRecommendationTypesProperty() {
             label: type.label,
             value: type.value,
           })),
+        };
+      },
+    }),
+  };
+}
+
+export function getRecommendationDurationProperty() {
+  return {
+    duration: Property.Dropdown({
+      displayName: 'Look-Back Period',
+      description:
+        'The look back period in days, used for calculating the recommendations.',
+      required: true,
+      defaultValue: Duration.TenDay,
+      refreshers: ['vendor', 'recommendationType'],
+      options: async ({ vendor, recommendationType }) => {
+        if (!vendor || !recommendationType) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Select a vendor and recommendation type first',
+          };
+        }
+
+        if (vendor === Vendor.AWS && recommendationType === 's3') {
+          return {
+            disabled: false,
+            options: [{ label: 'Last 30 Days', value: Duration.ThirtyDay }],
+          };
+        }
+
+        return {
+          disabled: false,
+          options: [
+            { label: 'Last 10 Days', value: Duration.TenDay },
+            { label: 'Last 30 Days', value: Duration.ThirtyDay },
+          ],
         };
       },
     }),
