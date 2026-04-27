@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Lookup node_modules cache
         id: node-modules-cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -49,13 +49,13 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -132,13 +132,13 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: .nx/cache
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
@@ -165,13 +165,13 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
@@ -184,7 +184,7 @@ jobs:
           npx nx run-many --target=build
           ./tools/truncate-nx-cache.sh
       - name: Save build cache
-        uses: actions/cache/save@v5.0.4
+        uses: actions/cache/save@v5.0.5
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -205,7 +205,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
       - name: Restore build cache
-        uses: actions/cache/restore@v5.0.4
+        uses: actions/cache/restore@v5.0.5
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -214,7 +214,7 @@ jobs:
         uses: docker/setup-buildx-action@v4.0.0
       - name: Configure AWS credentials
         if: vars.ECR_REGION
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
@@ -222,7 +222,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         if: vars.ECR_REGION
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.4
       - name: Format image tag parts
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -234,7 +234,7 @@ jobs:
           echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
       - name: Build image
         if: vars.ECR_REGION
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: ./${{ matrix.target.file }}
@@ -252,7 +252,7 @@ jobs:
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}-cache
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: ./${{ matrix.target.file }}
@@ -271,14 +271,14 @@ jobs:
     needs: build-images
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.4
       - name: Format image tag components
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
