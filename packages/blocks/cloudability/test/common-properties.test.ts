@@ -2,11 +2,22 @@ import { Vendor } from '@openops/common';
 import { getRecommendationDurationProperty } from '../src/lib/common/common-properties';
 import { Duration } from '../src/lib/common/recommendations-api';
 
-describe('getRecommendationDurationProperty', () => {
-  test('disabled until vendor and recommendationType selected', async () => {
-    const { duration } = getRecommendationDurationProperty();
-    const context = createContext();
+function createContext(propsValue?: any) {
+  return {
+    ...jest.requireActual('@openops/blocks-framework'),
+    propsValue: propsValue,
+  };
+}
 
+describe('getRecommendationDurationProperty', () => {
+  let duration: any;
+  let context: any;
+  beforeEach(() => {
+    duration = getRecommendationDurationProperty().duration;
+    context = createContext();
+  });
+
+  test('disabled until vendor and recommendationType selected', async () => {
     const resultMissingVendor = await duration.options(
       {
         recommendationType: 'ec2',
@@ -33,9 +44,6 @@ describe('getRecommendationDurationProperty', () => {
   });
 
   test('AWS + s3 only allows 30 days', async () => {
-    const { duration } = getRecommendationDurationProperty();
-    const context = createContext();
-
     const result = await duration.options(
       {
         vendor: Vendor.AWS,
@@ -51,9 +59,6 @@ describe('getRecommendationDurationProperty', () => {
   });
 
   test('other types allow 10 and 30 days', async () => {
-    const { duration } = getRecommendationDurationProperty();
-    const context = createContext();
-
     const result = await duration.options(
       {
         vendor: Vendor.AWS,
@@ -71,10 +76,3 @@ describe('getRecommendationDurationProperty', () => {
     });
   });
 });
-
-function createContext(propsValue?: any) {
-  return {
-    ...jest.requireActual('@openops/blocks-framework'),
-    propsValue: propsValue,
-  };
-}
