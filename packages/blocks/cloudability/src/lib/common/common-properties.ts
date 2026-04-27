@@ -1,6 +1,6 @@
 import { Property } from '@openops/blocks-framework';
 import { Vendor, getRecommendationTypesByVendor } from '@openops/common';
-import { Duration } from './recommendations-api';
+import { CostBasis, Duration } from './recommendations-api';
 
 export function getVendorsProperty() {
   return {
@@ -80,6 +80,44 @@ export function getRecommendationDurationProperty() {
           options: [
             { label: 'Last 10 Days', value: Duration.TenDay },
             { label: 'Last 30 Days', value: Duration.ThirtyDay },
+          ],
+        };
+      },
+    }),
+  };
+}
+
+export function getCostBasisProperty() {
+  return {
+    basis: Property.Dropdown({
+      displayName: 'Cost Basis',
+      description:
+        'The cost basis for the recommendations. Not applicable for AWS Redshift.',
+      required: true,
+      defaultValue: CostBasis.OnDemand,
+      refreshers: ['vendor', 'recommendationType'],
+      options: async ({ vendor, recommendationType }) => {
+        if (!vendor || !recommendationType) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Select a vendor and recommendation type first',
+          };
+        }
+
+        if (vendor === Vendor.AWS && recommendationType === 'redshift') {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Cost basis is not available for AWS Redshift',
+          };
+        }
+
+        return {
+          disabled: false,
+          options: [
+            { label: 'On-Demand', value: CostBasis.OnDemand },
+            { label: 'Effective', value: CostBasis.Effective },
           ],
         };
       },

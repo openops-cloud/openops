@@ -54,6 +54,42 @@ describe('recommendations-api', () => {
       expect(result).toEqual(['rec1', 'rec2']);
     });
 
+    test('uses underutilized endpoint and omits basis for AWS Redshift', async () => {
+      (makeRequest as jest.Mock).mockResolvedValue(['rec1']);
+      const result = await getRecommendations({
+        auth: mockAuth,
+        vendor: Vendor.AWS,
+        recommendationType: 'redshift',
+        duration: Duration.TenDay,
+        limit: '10',
+        filters: ['foo'],
+        basis: CostBasis.Effective,
+        snoozedFilter: SnoozedFilter.NO_SNOOZED,
+      });
+
+      expect(makeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          auth: mockAuth,
+          endpoint: '/rightsizing/AWS/underutilized/redshift',
+          method: HttpMethod.GET,
+          queryParams: expect.objectContaining({
+            duration: Duration.TenDay,
+            filters: 'foo',
+            limit: '10',
+            offset: '0',
+          }),
+        }),
+      );
+      expect(makeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryParams: expect.not.objectContaining({
+            basis: expect.anything(),
+          }),
+        }),
+      );
+      expect(result).toEqual(['rec1']);
+    });
+
     test.each([undefined, null, '', 0, 'not-a-number'])(
       'omits limit if value is %s',
       async (limitValue) => {

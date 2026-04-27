@@ -1,12 +1,12 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudabilityAuth } from '../auth';
 import {
+  getCostBasisProperty,
   getRecommendationDurationProperty,
   getRecommendationTypesProperty,
   getVendorsProperty,
 } from '../common/common-properties';
 import {
-  CostBasis,
   getRecommendations,
   SnoozedFilter,
 } from '../common/recommendations-api';
@@ -21,18 +21,7 @@ export const getRecommendationsAction = createAction({
     ...getVendorsProperty(),
     ...getRecommendationTypesProperty(),
     ...getRecommendationDurationProperty(),
-    basis: Property.StaticDropdown({
-      displayName: 'Cost Basis',
-      description: 'The cost basis for the recommendations.',
-      required: true,
-      defaultValue: CostBasis.OnDemand,
-      options: {
-        options: [
-          { label: 'On-Demand', value: CostBasis.OnDemand },
-          { label: 'Effective', value: CostBasis.Effective },
-        ],
-      },
-    }),
+    ...getCostBasisProperty(),
     snoozedFilter: Property.StaticDropdown({
       displayName: 'Recommendations Status',
       description: 'Whether to include recommendations that have been snoozed.',

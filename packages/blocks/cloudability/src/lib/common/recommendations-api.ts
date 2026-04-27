@@ -24,7 +24,11 @@ export async function getRecommendations({
   basis: CostBasis;
   snoozedFilter: SnoozedFilter;
 }): Promise<any[]> {
-  const url = `/rightsizing/${vendor}/recommendations/${recommendationType}`;
+  const isAwsRedshift =
+    vendor === Vendor.AWS && recommendationType === 'redshift';
+  const url = isAwsRedshift
+    ? `/rightsizing/${vendor}/underutilized/redshift`
+    : `/rightsizing/${vendor}/recommendations/${recommendationType}`;
 
   const response = await makeRequest({
     auth,
@@ -32,7 +36,7 @@ export async function getRecommendations({
     method: HttpMethod.GET,
     queryParams: {
       duration,
-      basis,
+      ...(isAwsRedshift ? {} : { basis }),
       filters: filters.join(','),
       ...(snoozedFilter === 'NO_SNOOZED' ? {} : { options: snoozedFilter }),
       ...(!limit || isEmpty(limit) || isNaN(Number(limit))
