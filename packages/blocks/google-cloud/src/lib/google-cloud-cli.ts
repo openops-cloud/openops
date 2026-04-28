@@ -38,6 +38,10 @@ export async function runCommands(
     CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
   };
 
+  if (process.env['HOME']) {
+    envVars['HOME'] = process.env['HOME'];
+  }
+
   const processGoogleCloudConfigDir = process.env['CLOUDSDK_CONFIG'];
   if (processGoogleCloudConfigDir) {
     envVars['CLOUDSDK_CONFIG'] = processGoogleCloudConfigDir;

@@ -11,6 +11,10 @@ export async function runCommand(
     PATH: process.env['PATH'] ?? '',
   };
 
+  if (process.env['HOME']) {
+    envVars.HOME = process.env['HOME'];
+  }
+
   if (
     typeof credentials.accessKeyId === 'string' &&
     credentials.accessKeyId.trim() &&

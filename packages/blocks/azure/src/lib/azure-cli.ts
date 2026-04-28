@@ -22,6 +22,7 @@ export async function runCommand(
 
   setEnvIfExists(envVars, 'AZURE_CONFIG_DIR');
   setEnvIfExists(envVars, 'AZURE_EXTENSION_DIR');
+  setEnvIfExists(envVars, 'HOME');
 
   if (!shouldUseHostCredentials) {
     const azureConfigDir = mkdtempSync(join(tmpdir(), 'azure-cli'));
