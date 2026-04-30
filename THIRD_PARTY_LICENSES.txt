@@ -18284,6 +18284,34 @@ THE SOFTWARE.
 
 -----------
 
+The following npm package may be included in this product:
+
+ - cytoscape@3.33.1
+
+This package contains the following license:
+
+Copyright (c) 2016-2025, The Cytoscape Consortium.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the “Software”), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
 The following npm packages may be included in this product:
 
  - set-blocking@2.0.0
@@ -25125,47 +25153,6 @@ https://github.com/mscdex/cpu-features/raw/master/LICENSE
 
 -----------
 
-The following npm package may be included in this product:
-
- - cytoscape@3.33.1
-
-This package contains the following license:
-
-import fs from 'fs';
-import path from 'path';
-
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const year = (new Date()).getFullYear();
-
-const license = `Copyright (c) 2016-${year}, The Cytoscape Consortium.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the “Software”), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.`;
-
-fs.writeFileSync(path.join(__dirname, 'LICENSE'), license);
-
------------
-
 The following npm packages may be included in this product:
 
  - @npmcli/agent@2.2.2
@@ -26280,17 +26267,18 @@ The following npm packages may be included in this product:
  - @bull-board/api@5.9.1
  - @bull-board/fastify@5.9.1
  - @bull-board/ui@5.9.1
- - @esbuild/linux-x64@0.21.5
+ - @esbuild/darwin-arm64@0.21.5
+ - @esbuild/darwin-arm64@0.25.0
  - @frontegg/js@7.92.0
  - @frontegg/redux-store@7.92.0
  - @frontegg/rest-api@7.92.0
  - @frontegg/types@7.92.0
  - @linear/sdk@7.0.1
- - @msgpackr-extract/msgpackr-extract-linux-x64@3.0.3
- - @nx/nx-linux-x64-gnu@19.8.8
- - @nx/nx-linux-x64-musl@19.8.8
+ - @msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3
+ - @nx/nx-darwin-arm64@19.8.8
  - @polka/url@1.0.0-next.29
  - @radix-ui/number@1.1.0
+ - @radix-ui/number@1.1.1
  - @radix-ui/primitive@1.0.0
  - @radix-ui/primitive@1.1.0
  - @radix-ui/primitive@1.1.1
@@ -26374,6 +26362,7 @@ The following npm packages may be included in this product:
  - @radix-ui/react-use-layout-effect@1.1.0
  - @radix-ui/react-use-layout-effect@1.1.1
  - @radix-ui/react-use-previous@1.1.0
+ - @radix-ui/react-use-previous@1.1.1
  - @radix-ui/react-use-rect@1.1.0
  - @radix-ui/react-use-rect@1.1.1
  - @radix-ui/react-use-size@1.1.0
@@ -26381,8 +26370,8 @@ The following npm packages may be included in this product:
  - @radix-ui/react-visually-hidden@1.1.0
  - @radix-ui/rect@1.1.0
  - @radix-ui/rect@1.1.1
- - @rollup/rollup-linux-x64-gnu@4.59.0
- - @rollup/rollup-linux-x64-musl@4.59.0
+ - @rollup/rollup-darwin-arm64@4.20.0
+ - @rollup/rollup-darwin-arm64@4.59.0
  - @tiptap/core@2.27.2
  - @tiptap/extension-blockquote@2.27.2
  - @tiptap/extension-bold@2.27.2
@@ -26460,8 +26449,7 @@ The following npm packages may be included in this product:
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1
- - sass-embedded-linux-musl-x64@1.98.0
- - sass-embedded-linux-x64@1.98.0
+ - sass-embedded-darwin-arm64@1.98.0
  - select@1.1.2
  - sirv@2.0.4
  - socks-proxy-agent@6.2.1
@@ -28451,8 +28439,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @parcel/watcher-linux-x64-glibc@2.5.6
- - @parcel/watcher-linux-x64-musl@2.5.6
+ - @parcel/watcher-darwin-arm64@2.5.6
  - @parcel/watcher@2.5.6
 
 These packages each contain the following license:
@@ -31586,6 +31573,7 @@ The following npm packages may be included in this product:
  - @radix-ui/react-primitive@2.1.3
  - @radix-ui/react-primitive@2.1.4
  - @radix-ui/react-roving-focus@1.1.11
+ - @radix-ui/react-slider@1.3.6
  - @radix-ui/react-slot@1.2.3
  - @radix-ui/react-slot@1.2.4
  - @radix-ui/react-use-controllable-state@1.2.2
@@ -33977,6 +33965,38 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-----------
+
+The following npm packages may be included in this product:
+
+ - fsevents@2.3.2
+ - fsevents@2.3.3
+
+These packages each contain the following license:
+
+MIT License
+-----------
+
+Copyright (C) 2010-2020 by Philipp Dunkel, Ben Noordhuis, Elan Shankar, Paul Miller
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 -----------
 
