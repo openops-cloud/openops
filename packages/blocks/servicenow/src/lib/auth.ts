@@ -1,6 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property } from '@openops/blocks-framework';
-import { generateAuthHeader, ServiceNowAuth } from '@openops/common';
+import { generateAuthHeader } from '@openops/common';
 
 export const servicenowAuth = BlockAuth.CustomAuth({
   authProviderKey: 'servicenow',
