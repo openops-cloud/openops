@@ -24388,12 +24388,12 @@ permission of its copyright owner.
 
 The following npm package may be included in this product:
 
- - dompurify@3.3.3
+ - dompurify@3.4.2
 
 This package contains the following license:
 
 DOMPurify
-Copyright 2025 Dr.-Ing. Mario Heiderich, Cure53
+Copyright 2025-2026 Dr.-Ing. Mario Heiderich, Cure53
 
 DOMPurify is free software; you can redistribute it and/or modify it under the
 terms of either:
@@ -24591,7 +24591,7 @@ b) the Mozilla Public License Version 2.0
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+Copyright 2025-2026 Dr.-Ing. Mario Heiderich, Cure53
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
