@@ -1,5 +1,6 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
+import { generateAuthHeader } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
 import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordAction } from './actions/get-record-action';
@@ -8,7 +9,6 @@ import { getRequestsAction, upsertRequestAction } from './actions/requests';
 import { deleteRequestAction } from './actions/requests/delete-request-action';
 import { upsertRecordAction } from './actions/upsert-record-action';
 import { servicenowAuth } from './lib/auth';
-import { generateAuthHeader } from './lib/generate-auth-header';
 
 export const servicenow = createBlock({
   displayName: 'ServiceNow',
@@ -39,6 +39,7 @@ export const servicenow = createBlock({
         return generateAuthHeader({
           username: context.auth.username,
           password: context.auth.password,
+          instanceName: context.auth.instanceName,
         });
       },
     }),

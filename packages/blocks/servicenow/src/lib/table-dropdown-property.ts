@@ -1,6 +1,5 @@
 import { DropdownProperty, Property } from '@openops/blocks-framework';
-import { ServiceNowAuth } from './auth';
-import { getServiceNowTables } from './get-tables';
+import { getServiceNowTables, ServiceNowAuth } from '@openops/common';
 
 export function servicenowTableDropdownProperty(): DropdownProperty<
   string,

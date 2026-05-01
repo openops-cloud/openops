@@ -1,33 +1,38 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { ServiceNowAuth } from './auth';
-import { buildServiceNowApiUrl } from './build-api-url';
-import { generateAuthHeader } from './generate-auth-header';
+import {
+  buildServiceNowApiUrl,
+  generateAuthHeader,
+  ServiceNowAuth,
+} from './auth';
 
-export interface ServiceNowTable {
+export type ServiceNowTable = {
   name: string;
   label: string;
-}
+};
 
 export async function getServiceNowTables(
   auth: ServiceNowAuth,
+  search?: string,
 ): Promise<ServiceNowTable[]> {
+  const queryParams: Record<string, string> = {
+    sysparm_fields: 'name,label',
+    sysparm_limit: '10000',
+  };
+
+  if (search) {
+    queryParams['sysparm_query'] = `nameLIKE${search}^ORlabelLIKE${search}`;
+  }
+
   const response = await httpClient.sendRequest<{
     result: ServiceNowTable[];
   }>({
     method: HttpMethod.GET,
     url: buildServiceNowApiUrl(auth, 'sys_db_object'),
     headers: {
-      ...generateAuthHeader({
-        username: auth.username,
-        password: auth.password,
-      }),
+      ...generateAuthHeader(auth),
       Accept: 'application/json',
     },
-    queryParams: {
-      sysparm_fields: 'name,label',
-      sysparm_limit: '10000',
-      sysparm_query: 'nameSTARTSWITHx_',
-    },
+    queryParams,
   });
 
   return response.body.result || [];
