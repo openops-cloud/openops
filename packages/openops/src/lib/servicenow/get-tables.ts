@@ -12,15 +12,19 @@ export type ServiceNowTable = {
 
 export async function getServiceNowTables(
   auth: ServiceNowAuth,
-  search?: string,
+  options?: { search?: string; query?: string; limit?: number },
 ): Promise<ServiceNowTable[]> {
   const queryParams: Record<string, string> = {
     sysparm_fields: 'name,label',
-    sysparm_limit: '10000',
+    sysparm_limit: String(options?.limit ?? 10000),
   };
 
-  if (search) {
-    queryParams['sysparm_query'] = `nameLIKE${search}^ORlabelLIKE${search}`;
+  if (options?.search) {
+    queryParams[
+      'sysparm_query'
+    ] = `nameLIKE${options.search}^ORlabelLIKE${options.search}`;
+  } else if (options?.query) {
+    queryParams['sysparm_query'] = options.query;
   }
 
   const response = await httpClient.sendRequest<{
