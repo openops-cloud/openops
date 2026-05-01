@@ -24388,7 +24388,7 @@ permission of its copyright owner.
 
 The following npm package may be included in this product:
 
- - dompurify@3.3.3
+ - dompurify@3.4.0
 
 This package contains the following license:
 
