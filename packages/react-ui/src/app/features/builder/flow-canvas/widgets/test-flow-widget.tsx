@@ -27,9 +27,14 @@ import { stepTestOutputHooks } from '../../test-step/step-test-output-hooks';
 type TestFlowWidgetProps = {
   flowVersion: FlowVersion;
   setRun: (run: FlowRun, flowVersion: FlowVersion) => void;
+  saving: boolean;
 };
 
-const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
+const TestFlowWidget = ({
+  flowVersion,
+  setRun,
+  saving,
+}: TestFlowWidgetProps) => {
   const socket = useSocket();
   const isMac = isMacUserAgent();
 
@@ -79,7 +84,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
         event.preventDefault();
         event.stopPropagation();
 
-        if (!isPending && triggerHasSampleData) {
+        if (!isPending && !saving && triggerHasSampleData) {
           handleExecuting();
         }
       }
@@ -90,7 +95,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
     return () => {
       window.removeEventListener('keydown', keydownHandler, { capture: true });
     };
-  }, [isMac, isPending, triggerHasSampleData]);
+  }, [isMac, isPending, saving, triggerHasSampleData]);
 
   return (
     flowVersion.valid && (
@@ -101,7 +106,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
               <Button
                 variant="ghost"
                 className="h-8 !bg-primary-200/20 dark:!bg-primary-200 text-primary-300 disabled:pointer-events-auto enabled:hover:!border-primary-200 enabled:hover:!text-primary-300 border-primary-200/70 border-r-primary-200/35 border-[1px] rounded-l-full animate-fade z-10"
-                disabled={!triggerHasSampleData}
+                disabled={!triggerHasSampleData || saving}
                 loading={isPending || isLoading}
                 onClick={() => handleExecuting()}
               >
