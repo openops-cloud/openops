@@ -23,12 +23,12 @@ export function getAwsClient<T>(
       throw new Error(
         'AWS credentials are required, please provide accessKeyId and secretAccessKey',
       );
+    } else {
+      // 👇 Lazy async provider (THIS is the trick)
+      config.credentials = async () => {
+        return assumeRoleFromAzureManagedIdentity(region);
+      };
     }
-
-    // 👇 Lazy async provider (THIS is the trick)
-    config.credentials = async () => {
-      return assumeRoleFromAzureManagedIdentity(region);
-    };
 
     if (credentials.endpoint) {
       config.endpoint = credentials.endpoint;
