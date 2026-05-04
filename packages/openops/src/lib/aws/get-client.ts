@@ -1,5 +1,6 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { AwsCredentials } from './auth';
+import { assumeRoleFromAzureManagedIdentity } from './sts-common';
 
 export function getAwsClient<T>(
   ClientConstructor: new (config: {
@@ -22,6 +23,11 @@ export function getAwsClient<T>(
       'AWS credentials are required, please provide accessKeyId and secretAccessKey',
     );
   }
+
+  // 👇 Lazy async provider (THIS is the trick)
+  config.credentials = async () => {
+    return assumeRoleFromAzureManagedIdentity(region);
+  };
 
   if (credentials.endpoint) {
     config.endpoint = credentials.endpoint;
