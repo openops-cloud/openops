@@ -36,7 +36,7 @@ export async function assumeRole(
     try {
       const x = await assumeRoleFromAzureManagedIdentity(defaultRegion);
 
-      logger.error('getAwsClient 2');
+      logger.error('getAwsClient 2', x);
 
       const client = getAwsClient(
         STSClient,
@@ -90,10 +90,6 @@ export async function assumeRoleFromAzureManagedIdentity(
     region: defaultRegion,
   });
 
-  logger.info('AssumeRoleWithWebIdentityCommand', {
-    check: webIdentityToken,
-  });
-
   const arn = system.get(SharedSystemProp.AWS_IMPLICIT_ROLE_ARN)!;
 
   const command = new AssumeRoleWithWebIdentityCommand({
@@ -103,8 +99,6 @@ export async function assumeRoleFromAzureManagedIdentity(
   });
 
   const response = await client.send(command);
-
-  logger.info('Assumed role from Azure Managed Identity');
 
   return response.Credentials;
 }
