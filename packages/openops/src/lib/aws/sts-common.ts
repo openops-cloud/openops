@@ -5,7 +5,7 @@ import {
   GetCallerIdentityCommand,
   STSClient,
 } from '@aws-sdk/client-sts';
-import { SharedSystemProp, system } from '@openops/server-shared';
+import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { v4 as uuidv4 } from 'uuid';
 import { getAwsClient } from './get-client';
 
@@ -33,28 +33,33 @@ export async function assumeRole(
     system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)
     // && Azure deployment)
   ) {
-    const x = await assumeRoleFromAzureManagedIdentity(defaultRegion);
+    try {
+      const x = await assumeRoleFromAzureManagedIdentity(defaultRegion);
 
-    const client = getAwsClient(
-      STSClient,
-      {
-        accessKeyId: x!.AccessKeyId!,
-        secretAccessKey: x!.SecretAccessKey!,
-        sessionToken: x!.SessionToken,
-        endpoint,
-      },
-      defaultRegion,
-    );
+      const client = getAwsClient(
+        STSClient,
+        {
+          accessKeyId: x!.AccessKeyId!,
+          secretAccessKey: x!.SecretAccessKey!,
+          sessionToken: x!.SessionToken,
+          endpoint,
+        },
+        defaultRegion,
+      );
 
-    const command = new AssumeRoleCommand({
-      RoleArn: roleArn,
-      ExternalId: externalId || undefined,
-      RoleSessionName: 'openops-' + uuidv4(),
-    });
+      const command = new AssumeRoleCommand({
+        RoleArn: roleArn,
+        ExternalId: externalId || undefined,
+        RoleSessionName: 'openops-' + uuidv4(),
+      });
 
-    const response = await client.send(command);
+      const response = await client.send(command);
 
-    return response.Credentials;
+      return response.Credentials;
+    } catch (error) {
+      logger.error('Failed to assume role from Azure Managed Identity:', error);
+      throw error;
+    }
   }
 
   const client = getAwsClient(
@@ -100,6 +105,7 @@ export async function assumeRoleFromAzureManagedIdentity(
 
   const response = await client.send(command);
 
+  logger.info('Assumed role from Azure Managed Identity');
   return response.Credentials;
 }
 
