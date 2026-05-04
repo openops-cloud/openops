@@ -25,7 +25,7 @@ jobs:
     - name: Get next version
       if: inputs.version == ''
       id: semver
-      uses: flatherskevin/semver-action@7ce18d3c29fa36251f492a5121013455741c072c
+      uses: flatherskevin/semver-action@34b3c537da75de940b75d92ee4c374eaaae2df67
       with:
         incrementLevel: patch
         source: tags
@@ -46,16 +46,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.0.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to private ECR
         id: login-private-ecr
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.4
       - name: Login to public ECR
-        uses: aws-actions/amazon-ecr-login@v2.1.0
+        uses: aws-actions/amazon-ecr-login@v2.1.4
         env:
           AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
@@ -94,7 +94,7 @@ jobs:
       - name: Create a GitHub release
         id: create-github-release
         if: inputs.github_release
-        uses: softprops/action-gh-release@v2.6.1
+        uses: softprops/action-gh-release@v3.0.0
         with:
           target_commitish: ${{ github.sha }}
           tag_name: ${{ env.VERSION }}
@@ -109,7 +109,7 @@ jobs:
           echo "The release was created as a draft." >> $GITHUB_STEP_SUMMARY
           echo "Please [review and publish it](${RELEASE_URL/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.0.0
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
@@ -133,7 +133,7 @@ jobs:
     steps:
       - name: Get GitHub App token
         id: app_token
-        uses: actions/create-github-app-token@v3.0.0
+        uses: actions/create-github-app-token@v3.1.1
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
@@ -154,7 +154,7 @@ jobs:
     steps:
       - name: Get token from Github App
         id: app_token
-        uses: actions/create-github-app-token@v3.0.0
+        uses: actions/create-github-app-token@v3.1.1
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: Get GitHub App token
         id: app_token
-        uses: actions/create-github-app-token@v3.0.0
+        uses: actions/create-github-app-token@v3.1.1
         with:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
