@@ -36,12 +36,12 @@ describe('azure-aws-federation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (uuidv4 as jest.Mock).mockReturnValue(mockUuid);
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
   });
 
   describe('getAwsCredentialsFromAzureIdentity', () => {
     it('should return credentials when successful', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ access_token: mockAccessToken }),
       });
@@ -64,7 +64,7 @@ describe('azure-aws-federation', () => {
       const result = await getAwsCredentialsFromAzureIdentity(mockRegion);
 
       expect(result).toEqual(mockCredentials);
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('resource=api%3A%2F%2FAzureADTokenExchange'),
         expect.objectContaining({
           headers: { Metadata: 'true' },
@@ -79,7 +79,7 @@ describe('azure-aws-federation', () => {
     });
 
     it('should throw error when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -99,7 +99,7 @@ describe('azure-aws-federation', () => {
         SessionToken: 'TOKEN-SOURCE',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ access_token: mockAccessToken }),
       });
@@ -146,7 +146,7 @@ describe('azure-aws-federation', () => {
     });
 
     it('should throw error if source credentials are missing required fields', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ access_token: mockAccessToken }),
       });
