@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { BlockAuth, Property } from '@openops/blocks-framework';
-import { logger, SharedSystemProp, system } from '@openops/server-shared';
+import { SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
 import { assumeRole, getAccountId } from './sts-common';
 
@@ -242,8 +242,6 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
     return { valid: true };
   } catch (error) {
     const errorMessage = extractErrorMessage(error);
-    logger.info('validateBaseCredentials Fail', errorMessage);
-
     return {
       valid: false,
       error: errorMessage,
@@ -342,23 +340,23 @@ For large or complex setups, enhanced features are available, including:
   },
   required: true,
   validate: async ({ auth }) => {
-    // logger.info('validateRequiredFields');
-    // const fieldValidation = await validateRequiredFields(auth);
-    // if (!fieldValidation.valid) {
-    //   return fieldValidation;
-    // }
-    //
-    // logger.info('validateBaseCredentials');
-    // const baseCredentialsValidation = await validateBaseCredentials(auth);
-    // if (!baseCredentialsValidation.valid) {
-    //   return baseCredentialsValidation;
-    // }
-    //
-    // logger.info('validateRoleAssumptions');
-    // const roleValidation = await validateRoleAssumptions(auth);
-    // if (!roleValidation.valid) {
-    //   return roleValidation;
-    // }
+    const fieldValidation = await validateRequiredFields(auth);
+    if (!fieldValidation.valid) {
+      return fieldValidation;
+    }
+
+    const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
+    if (!isImplicitRoleEnabled || hasCredentials) {
+      const baseCredentialsValidation = await validateBaseCredentials(auth);
+      if (!baseCredentialsValidation.valid) {
+        return baseCredentialsValidation;
+      }
+    }
+
+    const roleValidation = await validateRoleAssumptions(auth);
+    if (!roleValidation.valid) {
+      return roleValidation;
+    }
 
     return { valid: true };
   },
