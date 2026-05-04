@@ -36,6 +36,8 @@ export async function assumeRole(
     try {
       const x = await assumeRoleFromAzureManagedIdentity(defaultRegion);
 
+      logger.error('getAwsClient 2');
+
       const client = getAwsClient(
         STSClient,
         {
@@ -81,18 +83,15 @@ export async function assumeRole(
 
 export async function assumeRoleFromAzureManagedIdentity(
   defaultRegion: string,
-  // roleArn: string,
-  // azureTokenAudience?: string,
-  // endpoint?: string | undefined | null,
 ): Promise<Credentials | undefined> {
-  // if (!azureTokenAudience) {
-  //   throw new Error('Azure deployment is not supported yet');
-  // }
-
   const webIdentityToken = await getAzureManagedIdentityToken();
 
   const client = new STSClient({
     region: defaultRegion,
+  });
+
+  logger.info('AssumeRoleWithWebIdentityCommand', {
+    check: webIdentityToken,
   });
 
   const arn = system.get(SharedSystemProp.AWS_IMPLICIT_ROLE_ARN)!;
@@ -106,6 +105,7 @@ export async function assumeRoleFromAzureManagedIdentity(
   const response = await client.send(command);
 
   logger.info('Assumed role from Azure Managed Identity');
+
   return response.Credentials;
 }
 
