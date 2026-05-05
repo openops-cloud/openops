@@ -8,6 +8,15 @@ import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { v4 as uuidv4 } from 'uuid';
 import { getAwsClient } from './get-client';
 
+let cachedCredentials: {
+  credentials: Credentials;
+  expiresAt: number;
+} | null = null;
+
+export function clearAzureFederationCache() {
+  cachedCredentials = null;
+}
+
 export async function assumeTargetRoleViaAzureFederation(
   defaultRegion: string,
   roleArn: string,
@@ -47,6 +56,13 @@ export async function assumeTargetRoleViaAzureFederation(
 export async function getAwsCredentialsFromAzureIdentity(
   defaultRegion: string,
 ): Promise<Credentials | undefined> {
+  const now = Date.now();
+  const buffer = 5 * 60 * 1000;
+
+  if (cachedCredentials && cachedCredentials.expiresAt > now + buffer) {
+    return cachedCredentials.credentials;
+  }
+
   const webIdentityToken = await getAzureOidcTokenForAws();
   const client = new STSClient({
     region: defaultRegion,
@@ -63,6 +79,15 @@ export async function getAwsCredentialsFromAzureIdentity(
   });
 
   const response = await client.send(command);
+
+  if (response.Credentials) {
+    cachedCredentials = {
+      credentials: response.Credentials,
+      expiresAt: response.Credentials.Expiration
+        ? new Date(response.Credentials.Expiration).getTime()
+        : now + 3600 * 1000,
+    };
+  }
 
   return response.Credentials;
 }

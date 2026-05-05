@@ -255,12 +255,12 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
 async function validateManagedIdentityRoles(
   auth: any,
 ): Promise<ValidationResult> {
-  if (!auth.roles || auth.roles.length === 0) {
-    return {
-      valid: false,
-      error: 'Either credentials or at least one role must be provided',
-    };
-  }
+  // if (!auth.roles || auth.roles.length === 0) {
+  //   return {
+  //     valid: false,
+  //     error: 'Either credentials or at least one role must be provided',
+  //   };
+  // }
 
   return validateRoleAssumptions(auth);
 }

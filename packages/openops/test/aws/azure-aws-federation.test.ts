@@ -7,6 +7,7 @@ import { logger, system } from '@openops/server-shared';
 import { v4 as uuidv4 } from 'uuid';
 import {
   assumeTargetRoleViaAzureFederation,
+  clearAzureFederationCache,
   getAwsCredentialsFromAzureIdentity,
 } from '../../src/lib/aws/azure-aws-federation';
 import { getAwsClient } from '../../src/lib/aws/get-client';
@@ -35,6 +36,7 @@ describe('azure-aws-federation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearAzureFederationCache();
     (uuidv4 as jest.Mock).mockReturnValue(mockUuid);
     globalThis.fetch = jest.fn();
   });

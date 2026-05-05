@@ -25,18 +25,28 @@ export function getAwsClient<T>(
   } else if (
     system.getBoolean(SharedSystemProp.AWS_USE_AZURE_MANAGED_IDENTITY)
   ) {
+    let clientCredentials: any = null;
     config.credentials = async () => {
+      if (
+        clientCredentials &&
+        (!clientCredentials.expiration ||
+          clientCredentials.expiration > new Date())
+      ) {
+        return clientCredentials;
+      }
       const stsCredentials = await getAwsCredentialsFromAzureIdentity(region);
       if (!stsCredentials?.AccessKeyId || !stsCredentials?.SecretAccessKey) {
         throw new Error(
           'Failed to obtain AWS credentials from Azure managed identity',
         );
       }
-      return {
+      clientCredentials = {
         accessKeyId: stsCredentials.AccessKeyId,
         secretAccessKey: stsCredentials.SecretAccessKey,
         sessionToken: stsCredentials.SessionToken,
+        expiration: stsCredentials.Expiration,
       };
+      return clientCredentials;
     };
   }
 
