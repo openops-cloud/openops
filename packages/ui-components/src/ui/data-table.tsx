@@ -1,10 +1,12 @@
 'use client';
 
 import {
+  CellContext,
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  HeaderContext,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -91,6 +93,50 @@ type DataTableAction<TData extends DataWithId> = (
   row: RowDataWithActions<TData>,
 ) => JSX.Element;
 
+function DataTableSelectAllHeader<TData extends DataWithId, TValue>({
+  table,
+}: HeaderContext<RowDataWithActions<TData>, TValue>) {
+  return (
+    <Checkbox
+      checked={table.getIsAllPageRowsSelected()}
+      onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    />
+  );
+}
+
+function DataTableSelectRowCell<TData extends DataWithId, TValue>({
+  row,
+}: CellContext<RowDataWithActions<TData>, TValue>) {
+  return (
+    <Checkbox
+      checked={row.getIsSelected()}
+      onCheckedChange={(value) => row.toggleSelected(!!value)}
+    />
+  );
+}
+
+function DataTableActionsColumnHeader<TData extends DataWithId, TValue>({
+  column,
+}: HeaderContext<RowDataWithActions<TData>, TValue>) {
+  return <DataTableColumnHeader column={column} title="" />;
+}
+
+function DataTableActionsCell<TData extends DataWithId>({
+  rowOriginal,
+  actions,
+}: {
+  rowOriginal: RowDataWithActions<TData>;
+  actions: DataTableAction<TData>[];
+}) {
+  return (
+    <div className="flex items-end justify-end gap-4">
+      {actions.map((action, index) => (
+        <React.Fragment key={index}>{action(rowOriginal)}</React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 export type DataTableBulkAction<TData extends DataWithId> = {
   render: (
     selectedRows: RowDataWithActions<TData>[],
@@ -169,61 +215,28 @@ export function DataTable<
   enableSelection = false,
   bulkActions = [],
 }: DataTableProps<TData, TValue, Keys, F>) {
-  const selectionColumn = {
+  const selectionColumn: ColumnDef<RowDataWithActions<TData>, TValue> = {
     id: '__select',
     accessorKey: '__select',
     enableSorting: false,
     enableHiding: false,
     meta: { className: 'w-10' },
-    header: ({
-      table,
-    }: {
-      table: {
-        getIsAllPageRowsSelected: () => boolean;
-        toggleAllPageRowsSelected: (value: boolean) => void;
-      };
-    }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-      />
-    ),
-    cell: ({
-      row,
-    }: {
-      row: {
-        getIsSelected: () => boolean;
-        toggleSelected: (value: boolean) => void;
-      };
-    }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-      />
-    ),
+    header: DataTableSelectAllHeader,
+    cell: DataTableSelectRowCell,
   };
-  const columns = [
+  const columns: ColumnDef<RowDataWithActions<TData>, TValue>[] = [
     ...(enableSelection ? [selectionColumn] : []),
     ...columnsInitial,
     {
       accessorKey: '__actions',
       enableSorting: false,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="" />
+      header: DataTableActionsColumnHeader,
+      cell: ({ row }) => (
+        <DataTableActionsCell<TData>
+          rowOriginal={row.original}
+          actions={actions}
+        />
       ),
-      cell: ({ row }: { row: any }) => {
-        return (
-          <div className="flex items-end justify-end gap-4">
-            {actions.map((action, index) => {
-              return (
-                <React.Fragment key={index}>
-                  {action(row.original)}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        );
-      },
     },
   ];
 
