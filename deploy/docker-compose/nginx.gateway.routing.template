@@ -4,7 +4,6 @@ client_max_body_size 10m;
 client_body_buffer_size 1K;
 client_header_buffer_size 1k;
 large_client_header_buffers 4 16k;
-add_header X-XSS-Protection "1; mode=block";
 add_header Referrer-Policy "no-referrer-when-downgrade";
 ssi off;
 server_tokens off;

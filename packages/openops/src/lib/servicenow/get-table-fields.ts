@@ -1,9 +1,11 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { ServiceNowAuth } from './auth';
-import { buildServiceNowApiUrl } from './build-api-url';
-import { generateAuthHeader } from './generate-auth-header';
+import {
+  buildServiceNowApiUrl,
+  generateAuthHeader,
+  ServiceNowAuth,
+} from './auth';
 
-export interface ServiceNowTableField {
+export type ServiceNowTableField = {
   column_label: string;
   element: string;
   internal_type?: {
@@ -15,7 +17,7 @@ export interface ServiceNowTableField {
   primary?: string;
   choice?: string;
   reference?: string;
-}
+};
 
 export async function getServiceNowTableFields(
   auth: ServiceNowAuth,
@@ -27,10 +29,7 @@ export async function getServiceNowTableFields(
     method: HttpMethod.GET,
     url: buildServiceNowApiUrl(auth, 'sys_dictionary'),
     headers: {
-      ...generateAuthHeader({
-        username: auth.username,
-        password: auth.password,
-      }),
+      ...generateAuthHeader(auth),
       Accept: 'application/json',
     },
     queryParams: {

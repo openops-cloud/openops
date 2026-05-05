@@ -727,6 +727,9 @@ async function update({
           },
         });
 
+        lastVersion.testRunActionLimits =
+          lastVersionWithArtifacts.testRunActionLimits;
+
         await flowStepTestOutputService.copyFromVersion({
           fromVersionId: lastVersionWithArtifacts.id,
           toVersionId: lastVersion.id,

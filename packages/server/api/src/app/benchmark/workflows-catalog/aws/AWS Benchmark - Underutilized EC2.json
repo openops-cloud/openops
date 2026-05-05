@@ -98,6 +98,7 @@
                   "accounts": "{{step_b['accounts']}}"
                 },
                 "filterByARNs": false,
+                "allowPartialResults": true,
                 "filterProperty": {
                   "regions": "{{step_b['regions']}}"
                 },
@@ -111,6 +112,7 @@
                   "settings": {
                     "input": {
                       "auth": true,
+                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       },
@@ -138,7 +140,7 @@
               "type": "LOOP_ON_ITEMS",
               "valid": true,
               "settings": {
-                "items": "{{step_1}}",
+                "items": "{{step_1['results']}}",
                 "inputUiInfo": {
                   "customizedInputs": {}
                 }
@@ -150,7 +152,6 @@
                 "valid": true,
                 "settings": {
                   "input": {
-                    "auth": null,
                     "body": {
                       "data": {
                         "status": "ok"
@@ -178,7 +179,7 @@
                   }
                 },
                 "displayName": "Return Response",
-                "stepIndex": 12
+                "stepIndex": 11
               },
               "displayName": "Loop on Items",
               "firstLoopAction": {
@@ -292,48 +293,132 @@
                       }
                     },
                     "nextAction": {
-                      "id": "5dFWvRVUorS8v3EDaOWcw",
-                      "name": "step_14",
+                      "id": "Am1I3397DgkiX1IDYZMhb",
+                      "name": "step_8",
                       "type": "BLOCK",
                       "valid": true,
                       "settings": {
                         "input": {
-                          "auth": "{{connections['AWS']}}",
-                          "tags": [],
-                          "dryRun": false,
-                          "accounts": {
-                            "accounts": "{{step_5['accountId']}}"
+                          "tableName": "Opportunities",
+                          "rowPrimaryKey": {
+                            "rowPrimaryKey": null
                           },
-                          "condition": "AND",
-                          "filterByARNs": true,
-                          "instanceTypes": [],
-                          "filterProperty": {
-                            "arns": [
-                              "{{step_2['item']['arn']}}"
+                          "fieldsProperties": {
+                            "fieldsProperties": [
+                              {
+                                "fieldName": "Status",
+                                "newFieldValue": {
+                                  "newFieldValue": "Created"
+                                }
+                              },
+                              {
+                                "fieldName": "Estimated savings USD per month",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_2['item']['recommendation']['options'][0]['monthlyPotentialSavings']['value']}}"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Workflow",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_c}}"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Resource Id",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_2['item']['arn']}}"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Account",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_5['accountId']}}"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Region",
+                                "newFieldValue": {
+                                  "newFieldValue": "{{step_5['region']}}"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Service",
+                                "newFieldValue": {
+                                  "newFieldValue": "AWS EC2"
+                                }
+                              },
+                              {
+                                "fieldName": "Opportunity generator",
+                                "newFieldValue": {
+                                  "newFieldValue": "AWS Compute Optimizer"
+                                }
+                              },
+                              {
+                                "fieldName": "Opportunity Type",
+                                "newFieldValue": {
+                                  "newFieldValue": "Workflow optimization"
+                                }
+                              },
+                              {
+                                "fieldName": "Opportunity details",
+                                "newFieldValue": {
+                                  "newFieldValue": "Replace current {{step_2['item']['recommendation']['options'][0]['details']['currentInstanceType']}} with {{step_2['item']['recommendation']['options'][0]['details']['suggestedInstanceType']}} instance type."
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": true
+                                }
+                              },
+                              {
+                                "fieldName": "Complexity",
+                                "newFieldValue": {
+                                  "newFieldValue": "S"
+                                }
+                              },
+                              {
+                                "fieldName": "Risk",
+                                "newFieldValue": {
+                                  "newFieldValue": "Low"
+                                },
+                                "dynamicViewToggled": {
+                                  "newFieldValue": false
+                                }
+                              }
                             ]
                           },
-                          "instanceStates": []
+                          "roundToFieldPrecision": true
                         },
-                        "blockName": "@openops/block-aws",
+                        "blockName": "@openops/block-openops-tables",
                         "blockType": "OFFICIAL",
-                        "pieceName": "@openops/piece-aws",
+                        "pieceName": "@openops/piece-openops-tables",
                         "pieceType": "OFFICIAL",
-                        "actionName": "ec2_get_instances",
+                        "actionName": "update_record",
                         "inputUiInfo": {
                           "customizedInputs": {
                             "settings": {
                               "input": {
-                                "auth": true,
-                                "accounts": {
-                                  "accounts": true
-                                }
+                                "fieldsProperties": {}
                               }
                             }
                           }
                         },
                         "packageType": "REGISTRY",
-                        "blockVersion": "0.0.3",
-                        "pieceVersion": "~0.0.3",
+                        "blockVersion": "0.0.1",
+                        "pieceVersion": "~0.0.1",
                         "errorHandlingOptions": {
                           "retryOnFailure": {
                             "value": false
@@ -343,146 +428,7 @@
                           }
                         }
                       },
-                      "nextAction": {
-                        "id": "Am1I3397DgkiX1IDYZMhb",
-                        "name": "step_8",
-                        "type": "BLOCK",
-                        "valid": true,
-                        "settings": {
-                          "input": {
-                            "tableName": "Opportunities",
-                            "rowPrimaryKey": {
-                              "rowPrimaryKey": null
-                            },
-                            "fieldsProperties": {
-                              "fieldsProperties": [
-                                {
-                                  "fieldName": "Status",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Created"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Estimated savings USD per month",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_2['item']['recommendation']['options'][0]['monthlyPotentialSavings']['value']}}"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Workflow",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_c}}"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Resource Id",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_2['item']['arn']}}"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Account",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_14[0]['account_id']}}"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Region",
-                                  "newFieldValue": {
-                                    "newFieldValue": "{{step_14[0]['region']}}"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Service",
-                                  "newFieldValue": {
-                                    "newFieldValue": "AWS EC2"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity generator",
-                                  "newFieldValue": {
-                                    "newFieldValue": "AWS Compute Optimizer"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity Type",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Workflow optimization"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Opportunity details",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Replace current {{step_2['item']['recommendation']['options'][0]['details']['currentInstanceType']}} with {{step_2['item']['recommendation']['options'][0]['details']['suggestedInstanceType']}} instance type."
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": true
-                                  }
-                                },
-                                {
-                                  "fieldName": "Complexity",
-                                  "newFieldValue": {
-                                    "newFieldValue": "S"
-                                  }
-                                },
-                                {
-                                  "fieldName": "Risk",
-                                  "newFieldValue": {
-                                    "newFieldValue": "Low"
-                                  },
-                                  "dynamicViewToggled": {
-                                    "newFieldValue": false
-                                  }
-                                }
-                              ]
-                            },
-                            "roundToFieldPrecision": true
-                          },
-                          "blockName": "@openops/block-openops-tables",
-                          "blockType": "OFFICIAL",
-                          "pieceName": "@openops/piece-openops-tables",
-                          "pieceType": "OFFICIAL",
-                          "actionName": "update_record",
-                          "inputUiInfo": {
-                            "customizedInputs": {
-                              "settings": {
-                                "input": {
-                                  "fieldsProperties": {}
-                                }
-                              }
-                            }
-                          },
-                          "packageType": "REGISTRY",
-                          "blockVersion": "0.0.1",
-                          "pieceVersion": "~0.0.1",
-                          "errorHandlingOptions": {
-                            "retryOnFailure": {
-                              "value": false
-                            },
-                            "continueOnFailure": {
-                              "value": false
-                            }
-                          }
-                        },
-                        "displayName": "Create OpenOps opportunity",
-                        "stepIndex": 11
-                      },
-                      "displayName": "EC2 Get Instances",
+                      "displayName": "Create OpenOps opportunity",
                       "stepIndex": 10
                     },
                     "displayName": "Parse ARN",

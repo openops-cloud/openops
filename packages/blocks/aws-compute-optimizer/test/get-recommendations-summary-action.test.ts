@@ -7,7 +7,6 @@ const openopsCommonMock = {
       type: 'STATIC_MULTI_SELECT_DROPDOWN',
     },
   }),
-  getRecommendationSummaries: jest.fn(),
   getCredentialsListFromAuth: jest.fn(),
 };
 
@@ -15,6 +14,7 @@ jest.mock('@openops/common', () => openopsCommonMock);
 
 const computeOptimizerMock = {
   getRecommendationSummaries: jest.fn(),
+  getRecommendationSummariesAllowPartial: jest.fn(),
 };
 
 jest.mock(
@@ -48,6 +48,10 @@ describe('getRecommendationsSummaryAction', () => {
       accounts: {
         required: true,
         type: 'STATIC_MULTI_SELECT_DROPDOWN',
+      },
+      allowPartialResults: {
+        type: 'CHECKBOX',
+        required: false,
       },
     });
   });
@@ -122,6 +126,52 @@ describe('getRecommendationsSummaryAction', () => {
     expect(
       computeOptimizerMock.getRecommendationSummaries,
     ).toHaveBeenNthCalledWith(2, 'some new creds 2', ['us-east-2']);
+  });
+
+  test('when allowPartialResults, uses partial helper and merges outcomes', async () => {
+    openopsCommonMock.getCredentialsListFromAuth.mockResolvedValue([
+      'creds-a',
+      'creds-b',
+    ]);
+    computeOptimizerMock.getRecommendationSummariesAllowPartial
+      .mockResolvedValueOnce({
+        results: [{ recommendationResourceType: 'EBS_VOLUME', region: 'r1' }],
+        failedRegions: [
+          { region: 'us-west-2', accountId: '111', error: 'boom' },
+        ],
+      })
+      .mockResolvedValueOnce({
+        results: [
+          { recommendationResourceType: 'LAMBDA_FUNCTION', region: 'r2' },
+        ],
+        failedRegions: [],
+      });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        accounts: { accounts: ['1', '2'] },
+        regions: ['us-east-2'],
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await getRecommendationsSummaryAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [
+        { recommendationResourceType: 'EBS_VOLUME', region: 'r1' },
+        { recommendationResourceType: 'LAMBDA_FUNCTION', region: 'r2' },
+      ],
+      failedRegions: [{ region: 'us-west-2', accountId: '111', error: 'boom' }],
+    });
+    expect(
+      computeOptimizerMock.getRecommendationSummariesAllowPartial,
+    ).toHaveBeenCalledTimes(2);
+    expect(
+      computeOptimizerMock.getRecommendationSummaries,
+    ).not.toHaveBeenCalled();
   });
 
   test('should throw error when getRecommendationSummaries throws error', async () => {

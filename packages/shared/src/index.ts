@@ -16,6 +16,7 @@ export * from './lib/authentication/model/principal';
 export * from './lib/authentication/model/principal-type';
 export * from './lib/benchmark';
 export * from './lib/blocks';
+export * from './lib/cloud-providers';
 export * from './lib/code/dto/code-request';
 export * from './lib/common';
 export * from './lib/common/application-error';

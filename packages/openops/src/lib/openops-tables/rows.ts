@@ -257,6 +257,66 @@ function getEqualityFilterType(
   return ViewFilterTypesEnum.equal;
 }
 
+export type AggregationSpec =
+  | { type: 'count' }
+  | { type: 'sum'; field: string }
+  | { type: 'distinct_values'; field: string };
+
+export interface TableFilter {
+  fieldName: string;
+  type: 'not_in';
+  value: string[];
+}
+
+export interface BatchTableAggregationsParams {
+  tokenOrResolver: TokenOrResolver;
+  tableIds: number[];
+  filters?: TableFilter[];
+  aggregations: AggregationSpec[];
+}
+
+export type TableAggregationResult = {
+  count?: number;
+  [key: string]: number | string[] | undefined;
+};
+
+export type BatchTableAggregationsResult = Record<
+  string,
+  TableAggregationResult
+>;
+
+export async function batchTableAggregations(
+  params: BatchTableAggregationsParams,
+): Promise<BatchTableAggregationsResult> {
+  const url = 'api/database/rows/batch-aggregations/';
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost<BatchTableAggregationsResult>(
+        url,
+        {
+          table_ids: params.tableIds,
+          filters: (params.filters ?? []).map((filter) => ({
+            field: filter.fieldName,
+            type: filter.type,
+            value: filter.value,
+          })),
+          aggregations: params.aggregations,
+        },
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while posting batch table aggregations:', {
+        error,
+        url,
+        tableIds: params.tableIds,
+      });
+    },
+  );
+}
+
 export async function batchDeleteRows(
   params: BatchDeleteRowsParams,
 ): Promise<void> {
@@ -281,6 +341,30 @@ export async function batchDeleteRows(
         url,
         rowIdsCount: params.rowIds.length,
         rowIdsSample: params.rowIds.slice(0, 10),
+      });
+    },
+  );
+}
+
+export async function truncateTable(
+  params: RowParams,
+): Promise<{ count: number }> {
+  const url = `api/database/rows/table/${params.tableId}/truncate/`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost<{ count: number }>(
+        url,
+        {},
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while truncating table:', {
+        error,
+        url,
+        tableId: params.tableId,
       });
     },
   );

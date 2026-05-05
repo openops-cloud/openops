@@ -208,7 +208,7 @@ export function DataTable<
     {
       accessorKey: '__actions',
       enableSorting: false,
-      header: ({ column }: { column: any }) => (
+      header: ({ column }) => (
         <DataTableColumnHeader column={column} title="" />
       ),
       cell: ({ row }: { row: any }) => {
