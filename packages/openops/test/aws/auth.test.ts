@@ -216,7 +216,7 @@ describe('AWS Auth Validation', () => {
       expect(mockGetAccountId).toHaveBeenCalled();
     });
 
-    test('should fail when azure federation and implicit role enabled, no credentials and no roles', async () => {
+    test('should succeed when azure federation and implicit role enabled, no credentials and no roles', async () => {
       const freshAmazonAuth = await reimportAuthWithAzureFederation();
 
       const result = await freshAmazonAuth.validate!({
@@ -226,8 +226,7 @@ describe('AWS Auth Validation', () => {
       });
 
       expect(result).toEqual({
-        valid: false,
-        error: 'Either credentials or at least one role must be provided',
+        valid: true,
       });
     });
 
@@ -532,6 +531,15 @@ describe('AWS Auth Validation', () => {
         undefined,
       );
     });
+
+    test('should throw error if assumeRole fails', async () => {
+      mockAssumeRole.mockRejectedValue(new Error('STS Error'));
+      const auth = createAuthObject({
+        assumeRoleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      });
+
+      await expect(getCredentialsFromAuth(auth)).rejects.toThrow('STS Error');
+    });
   });
 
   describe('getCredentialsListFromAuth', () => {
@@ -627,6 +635,23 @@ describe('AWS Auth Validation', () => {
       expect(result[0].accessKeyId).toBe('AK1');
       expect(result[1].accessKeyId).toBe('AK2');
     });
+
+    test('should throw error if any assumeRole fails', async () => {
+      mockAssumeRole
+        .mockResolvedValueOnce({ AccessKeyId: 'AK1', SecretAccessKey: 'SK1' })
+        .mockRejectedValueOnce(new Error('STS Error'));
+
+      const auth = createAuthObject({
+        roles: [
+          createRole('111111111111', 'Prod'),
+          createRole('222222222222', 'Dev'),
+        ],
+      });
+
+      await expect(
+        getCredentialsListFromAuth(auth, ['111111111111', '222222222222']),
+      ).rejects.toThrow('STS Error');
+    });
   });
 
   describe('getCredentialsForAccount', () => {
@@ -647,6 +672,16 @@ describe('AWS Auth Validation', () => {
         undefined,
         undefined,
       );
+    });
+
+    test('should throw error if no matching role is found for the account', async () => {
+      const auth = createAuthObject({
+        roles: [createRole('111111111111', 'Prod')],
+      });
+
+      await expect(
+        getCredentialsForAccount(auth, '222222222222'),
+      ).rejects.toThrow('No credentials found for accounts');
     });
   });
 

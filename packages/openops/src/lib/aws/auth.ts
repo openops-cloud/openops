@@ -252,18 +252,6 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
     };
   }
 }
-async function validateManagedIdentityRoles(
-  auth: any,
-): Promise<ValidationResult> {
-  // if (!auth.roles || auth.roles.length === 0) {
-  //   return {
-  //     valid: false,
-  //     error: 'Either credentials or at least one role must be provided',
-  //   };
-  // }
-
-  return validateRoleAssumptions(auth);
-}
 
 async function validateRoleAssumptions(auth: any): Promise<ValidationResult> {
   if (!auth.roles || auth.roles.length === 0) {
@@ -366,7 +354,7 @@ For large or complex setups, enhanced features are available, including:
       !hasCredentials && isImplicitRoleEnabled && isAzureManagedIdentityEnabled;
 
     if (shouldValidateWithAzureManagedIdentity) {
-      return validateManagedIdentityRoles(auth);
+      return validateRoleAssumptions(auth);
     }
 
     const baseCredentialsValidation = await validateBaseCredentials(auth);
