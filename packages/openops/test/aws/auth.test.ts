@@ -17,7 +17,7 @@ jest.mock('@openops/server-shared', () => ({
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
     ENABLE_HOST_SESSION: 'ENABLE_HOST_SESSION',
-    AWS_AZURE_FEDERATION_ROLE_ARN: 'AWS_AZURE_FEDERATION_ROLE_ARN',
+    AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
   },
 }));
 
@@ -82,7 +82,7 @@ async function reimportAuthWithImplicitRole() {
 async function reimportAuthWithAzureFederation() {
   mockSystem.getBoolean.mockImplementation((prop) => {
     if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') return true;
-    if (prop === 'AWS_AZURE_FEDERATION_ROLE_ARN') return true;
+    if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') return true;
     return false;
   });
   jest.resetModules();

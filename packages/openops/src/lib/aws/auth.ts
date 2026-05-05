@@ -8,8 +8,8 @@ const isImplicitRoleEnabled = system.getBoolean(
   SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
 );
 
-const isAzureFederationEnabled = system.getBoolean(
-  SharedSystemProp.AWS_AZURE_FEDERATION_ROLE_ARN,
+const isAzureManagedIdentityEnabled = system.getBoolean(
+  SharedSystemProp.AWS_USE_AZURE_MANAGED_IDENTITY,
 );
 
 export interface AwsCredentials {
@@ -252,19 +252,17 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
     };
   }
 }
+async function validateManagedIdentityRoles(
+  auth: any,
+): Promise<ValidationResult> {
+  if (!auth.roles || auth.roles.length === 0) {
+    return {
+      valid: false,
+      error: 'Either credentials or at least one role must be provided',
+    };
+  }
 
-function isMissingAuthConfiguration(auth: any): boolean {
-  const hasRoles = Boolean(auth?.roles?.length);
-  const implicitRoleEnabled = Boolean(isImplicitRoleEnabled);
-  const azureFederationEnabled = Boolean(isAzureFederationEnabled);
-  const hasCredentials = Boolean(auth?.accessKeyId && auth?.secretAccessKey);
-
-  return (
-    implicitRoleEnabled &&
-    azureFederationEnabled &&
-    !hasCredentials &&
-    !hasRoles
-  );
+  return validateRoleAssumptions(auth);
 }
 
 async function validateRoleAssumptions(auth: any): Promise<ValidationResult> {
@@ -363,22 +361,25 @@ For large or complex setups, enhanced features are available, including:
       return fieldValidation;
     }
 
-    if (isMissingAuthConfiguration(auth)) {
-      return {
-        valid: false,
-        error: 'Either credentials or at least one role must be provided',
-      };
-    }
-
     const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
-    if (!isImplicitRoleEnabled || hasCredentials) {
-      const baseCredentialsValidation = await validateBaseCredentials(auth);
-      if (!baseCredentialsValidation.valid) {
-        return baseCredentialsValidation;
-      }
+    const shouldValidateWithAzureManagedIdentity =
+      !hasCredentials && isImplicitRoleEnabled && isAzureManagedIdentityEnabled;
+
+    if (shouldValidateWithAzureManagedIdentity) {
+      return validateManagedIdentityRoles(auth);
     }
 
-    return validateRoleAssumptions(auth);
+    const baseCredentialsValidation = await validateBaseCredentials(auth);
+    if (!baseCredentialsValidation.valid) {
+      return baseCredentialsValidation;
+    }
+
+    const roleValidation = await validateRoleAssumptions(auth);
+    if (!roleValidation.valid) {
+      return roleValidation;
+    }
+
+    return { valid: true };
   },
 });
 
