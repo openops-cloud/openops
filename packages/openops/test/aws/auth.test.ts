@@ -70,9 +70,11 @@ function mockSuccessfulAccountId() {
 }
 
 async function reimportAuthWithImplicitRole() {
-  mockSystem.getBoolean.mockReturnValue(true);
+  mockSystem.getBoolean.mockImplementation((prop) => {
+    if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') return true;
+    return false;
+  });
   jest.resetModules();
-  mockSystem.getBoolean.mockReturnValue(true);
   const { amazonAuth: freshAmazonAuth } = await import(
     '../../src/lib/aws/auth'
   );
@@ -198,8 +200,9 @@ describe('AWS Auth Validation', () => {
   });
 
   describe('Implicit role validation', () => {
-    test('should fail when implicit role enabled, no credentials and no roles', async () => {
+    test('should succeed when implicit role enabled, no credentials and no roles', async () => {
       const freshAmazonAuth = await reimportAuthWithImplicitRole();
+      mockSuccessfulAccountId();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
@@ -208,10 +211,9 @@ describe('AWS Auth Validation', () => {
       });
 
       expect(result).toEqual({
-        valid: false,
-        error: 'Either credentials or at least one role must be provided',
+        valid: true,
       });
-      expect(mockGetAccountId).not.toHaveBeenCalled();
+      expect(mockGetAccountId).toHaveBeenCalled();
     });
 
     test('should fail when azure federation and implicit role enabled, no credentials and no roles', async () => {
@@ -229,8 +231,9 @@ describe('AWS Auth Validation', () => {
       });
     });
 
-    test('should skip base credentials validation when implicit role enabled and no credentials provided', async () => {
+    test('should NOT skip base credentials validation when implicit role enabled and no credentials provided', async () => {
       const freshAmazonAuth = await reimportAuthWithImplicitRole();
+      mockSuccessfulAccountId();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
@@ -240,7 +243,7 @@ describe('AWS Auth Validation', () => {
       });
 
       expect(result.valid).toBe(true);
-      expect(mockGetAccountId).not.toHaveBeenCalled();
+      expect(mockGetAccountId).toHaveBeenCalled();
     });
 
     test('should validate base credentials when implicit role enabled but credentials provided', async () => {
