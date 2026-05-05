@@ -852,8 +852,8 @@
                               [
                                 {
                                   "operator": "BOOLEAN_IS_TRUE",
-                                  "firstValue": "{{step_am}}",
-                                  "secondValue": "5",
+                                  "firstValue": "{{step_s}}",
+                                  "secondValue": "",
                                   "caseSensitive": false
                                 }
                               ]

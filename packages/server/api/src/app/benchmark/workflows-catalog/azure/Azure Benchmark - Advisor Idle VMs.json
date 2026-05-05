@@ -695,7 +695,7 @@
                                               "displayName": "Truncate",
                                               "stepIndex": 40
                                             },
-                                            "displayName": "Calculate monthly average Copy Copy",
+                                            "displayName": "Calculate monthly average",
                                             "stepIndex": 39
                                           },
                                           "displayName": "Get average day price",
@@ -999,7 +999,7 @@
                                           {
                                             "operator": "BOOLEAN_IS_TRUE",
                                             "firstValue": "{{step_b}}",
-                                            "secondValue": "5",
+                                            "secondValue": "",
                                             "caseSensitive": false
                                           }
                                         ]

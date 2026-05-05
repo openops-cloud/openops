@@ -366,7 +366,7 @@
                                       {
                                         "operator": "BOOLEAN_IS_TRUE",
                                         "firstValue": "{{step_am}}",
-                                        "secondValue": "5",
+                                        "secondValue": "",
                                         "caseSensitive": false
                                       }
                                     ]
@@ -853,7 +853,7 @@
                                 {
                                   "operator": "BOOLEAN_IS_TRUE",
                                   "firstValue": "{{step_am}}",
-                                  "secondValue": "5",
+                                  "secondValue": "",
                                   "caseSensitive": false
                                 }
                               ]
@@ -1126,7 +1126,7 @@
                                                   {
                                                     "operator": "BOOLEAN_IS_TRUE",
                                                     "firstValue": "{{step_am}}",
-                                                    "secondValue": "5",
+                                                    "secondValue": "",
                                                     "caseSensitive": false
                                                   }
                                                 ]
