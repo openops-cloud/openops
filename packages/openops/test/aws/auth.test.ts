@@ -184,8 +184,7 @@ describe('AWS Auth Validation', () => {
   });
 
   describe('Implicit role validation', () => {
-    test('should validate without calling getAccountId when implicit role enabled and no credentials', async () => {
-      mockSuccessfulAccountId();
+    test('should fail when implicit role enabled, no credentials and no roles', async () => {
       const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       const result = await freshAmazonAuth.validate!({
@@ -194,23 +193,10 @@ describe('AWS Auth Validation', () => {
         } as any,
       });
 
-      expect(result).toEqual({ valid: true });
-      expect(mockGetAccountId).not.toHaveBeenCalled();
-    });
-
-    test('should validate without error even if getAccountId would fail (because it is not called)', async () => {
-      mockGetAccountId.mockRejectedValue(
-        new Error('Unable to locate credentials'),
-      );
-      const freshAmazonAuth = await reimportAuthWithImplicitRole();
-
-      const result = await freshAmazonAuth.validate!({
-        auth: {
-          defaultRegion: DEFAULT_REGION,
-        } as any,
+      expect(result).toEqual({
+        valid: false,
+        error: 'Either credentials or at least one role must be provided',
       });
-
-      expect(result).toEqual({ valid: true });
       expect(mockGetAccountId).not.toHaveBeenCalled();
     });
   });

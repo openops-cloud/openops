@@ -346,6 +346,15 @@ For large or complex setups, enhanced features are available, including:
     }
 
     const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
+    const hasRoles = auth.roles && auth.roles.length > 0;
+
+    if (isImplicitRoleEnabled && !hasCredentials && !hasRoles) {
+      return {
+        valid: false,
+        error: 'Either credentials or at least one role must be provided',
+      };
+    }
+
     if (!isImplicitRoleEnabled || hasCredentials) {
       const baseCredentialsValidation = await validateBaseCredentials(auth);
       if (!baseCredentialsValidation.valid) {
@@ -353,12 +362,7 @@ For large or complex setups, enhanced features are available, including:
       }
     }
 
-    const roleValidation = await validateRoleAssumptions(auth);
-    if (!roleValidation.valid) {
-      return roleValidation;
-    }
-
-    return { valid: true };
+    return validateRoleAssumptions(auth);
   },
 });
 

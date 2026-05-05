@@ -28,9 +28,9 @@ export function getAwsClient<T>(
     config.credentials = async () => {
       const stsCredentials = await getAwsCredentialsFromAzureIdentity(region);
       return {
-        accessKeyId: stsCredentials.AccessKeyId,
-        secretAccessKey: stsCredentials.SecretAccessKey,
-        sessionToken: stsCredentials.SessionToken,
+        accessKeyId: stsCredentials?.AccessKeyId,
+        secretAccessKey: stsCredentials?.SecretAccessKey,
+        sessionToken: stsCredentials?.SessionToken,
       };
     };
   }
