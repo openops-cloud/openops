@@ -44,6 +44,10 @@ const isFlowSortBy = (sortBy?: string): sortBy is FlowSortBy => {
   return !!sortBy && Object.values(FlowSortBy).includes(sortBy as FlowSortBy);
 };
 
+const getFlowIds = (rows: PopulatedFlow[]): string[] => {
+  return rows.map((flow) => flow.id);
+};
+
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');
   const hasAccess = useCheckAccessAndRedirect(Permission.READ_FLOW);
@@ -114,6 +118,38 @@ const FlowsPage = () => {
     [onTableRefresh],
   );
 
+  const resetSelectedRows = useCallback(() => {
+    setSelectedRows([]);
+  }, []);
+
+  const completeBulkAction = useCallback(
+    (resetSelection: () => void) => {
+      resetSelection();
+      resetSelectedRows();
+      onTableRefresh();
+    },
+    [onTableRefresh, resetSelectedRows],
+  );
+
+  const moveSelectedFlows = useCallback(
+    async (folderId: string) => {
+      await flowsApi.moveMany({
+        flowIds: getFlowIds(selectedRows),
+        folderId,
+      });
+    },
+    [selectedRows],
+  );
+
+  const deleteSelectedFlows = useCallback(async () => {
+    await deleteFlows(getFlowIds(selectedRows));
+    await refetchFolderTree();
+  }, [deleteFlows, refetchFolderTree, selectedRows]);
+
+  const exportSelectedFlows = useCallback(async () => {
+    await exportFlows(selectedRows);
+  }, [exportFlows, selectedRows]);
+
   const bulkActions = useMemo<DataTableBulkAction<PopulatedFlow>[]>(
     () => [
       {
@@ -123,17 +159,10 @@ const FlowsPage = () => {
               count: selectedRows.length,
             })}
             apiMutateFn={async (data: MoveToFolderFormSchema) => {
-              await flowsApi.moveMany({
-                flowIds: selectedRows.map((flow) => flow.id),
-                folderId: data.folder,
-              });
+              await moveSelectedFlows(data.folder);
               return { success: true };
             }}
-            onMoveTo={() => {
-              resetSelection();
-              setSelectedRows([]);
-              onTableRefresh();
-            }}
+            onMoveTo={() => completeBulkAction(resetSelection)}
           >
             <Button variant="outline" size="sm" className="gap-2">
               <CornerUpLeft className="h-4 w-4" />
@@ -149,7 +178,7 @@ const FlowsPage = () => {
             size="sm"
             className="gap-2"
             loading={isExportFlowsPending}
-            onClick={() => exportFlows(selectedRows)}
+            onClick={exportSelectedFlows}
           >
             <Download className="h-4 w-4" />
             {isExportFlowsPending ? t('Exporting') : t('Export')}
@@ -173,11 +202,8 @@ const FlowsPage = () => {
               </span>
             }
             mutationFn={async () => {
-              await deleteFlows(selectedRows.map((flow) => flow.id));
-              await refetchFolderTree();
-              resetSelection();
-              setSelectedRows([]);
-              onTableRefresh();
+              await deleteSelectedFlows();
+              completeBulkAction(resetSelection);
             }}
             entityName={t('workflows')}
             content={
@@ -206,7 +232,10 @@ const FlowsPage = () => {
       isDeleteFlowsPending,
       isExportFlowsPending,
       onTableRefresh,
-      exportFlows,
+      exportSelectedFlows,
+      completeBulkAction,
+      deleteSelectedFlows,
+      moveSelectedFlows,
       refetchFolderTree,
       selectedRows,
     ],
