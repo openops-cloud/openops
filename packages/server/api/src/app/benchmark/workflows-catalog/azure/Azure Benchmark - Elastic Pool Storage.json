@@ -1,6 +1,6 @@
 {
-  "created": "1774257731387",
-  "updated": "1774257731387",
+  "created": "1777973589291",
+  "updated": "1777973589291",
   "name": "Azure Benchmark - Elastic Pool Storage",
   "tags": [],
   "services": [],
@@ -526,10 +526,7 @@
                                           "valid": true,
                                           "settings": {
                                             "input": {
-                                              "numbers": [
-                                                "{{step_af}}",
-                                                "1"
-                                              ]
+                                              "numbers": ["{{step_af}}", "1"]
                                             },
                                             "blockName": "@openops/block-math-helper",
                                             "blockType": "OFFICIAL",
@@ -677,21 +674,13 @@
                                                       "blockType": "OFFICIAL",
                                                       "actionName": "azure_cli",
                                                       "inputUiInfo": {
-                                                        "customizedInputs": {
-                                                          "settings": {
-                                                            "input": {
-                                                              "subscriptions": {
-                                                                "subDropdown": true
-                                                              }
-                                                            }
-                                                          }
-                                                        }
+                                                        "customizedInputs": {}
                                                       },
                                                       "packageType": "REGISTRY",
                                                       "blockVersion": "0.0.1",
                                                       "errorHandlingOptions": {
                                                         "retryOnFailure": {
-                                                          "value": false
+                                                          "value": true
                                                         },
                                                         "continueOnFailure": {
                                                           "value": false
@@ -845,7 +834,7 @@
                                                                       {
                                                                         "fieldName": "Service",
                                                                         "newFieldValue": {
-                                                                          "newFieldValue": "Azure Elastic Pools"
+                                                                          "newFieldValue": "Elastic Pool Storage"
                                                                         }
                                                                       },
                                                                       {
