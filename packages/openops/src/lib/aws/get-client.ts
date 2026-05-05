@@ -27,10 +27,15 @@ export function getAwsClient<T>(
   ) {
     config.credentials = async () => {
       const stsCredentials = await getAwsCredentialsFromAzureIdentity(region);
+      if (!stsCredentials?.AccessKeyId || !stsCredentials?.SecretAccessKey) {
+        throw new Error(
+          'Failed to obtain AWS credentials from Azure managed identity',
+        );
+      }
       return {
-        accessKeyId: stsCredentials?.AccessKeyId,
-        secretAccessKey: stsCredentials?.SecretAccessKey,
-        sessionToken: stsCredentials?.SessionToken,
+        accessKeyId: stsCredentials.AccessKeyId,
+        secretAccessKey: stsCredentials.SecretAccessKey,
+        sessionToken: stsCredentials.SessionToken,
       };
     };
   }
