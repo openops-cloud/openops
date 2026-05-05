@@ -49,6 +49,7 @@ export * from './ui/select-form';
 export * from './ui/seperator';
 export * from './ui/shortcut';
 export * from './ui/skeleton';
+export * from './ui/slider';
 export * from './ui/sortable';
 export * from './ui/spinner';
 export * from './ui/status-icon-with-text';

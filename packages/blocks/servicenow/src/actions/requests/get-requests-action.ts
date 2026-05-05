@@ -1,6 +1,6 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { FilterType } from '@openops/common';
-import { servicenowAuth, ServiceNowAuth } from '../../lib/auth';
+import { FilterType, ServiceNowAuth } from '@openops/common';
+import { servicenowAuth } from '../../lib/auth';
 import { servicenowFieldsDropdownProperty } from '../../lib/fields-dropdown-property';
 import {
   extractFiltersFromProps,

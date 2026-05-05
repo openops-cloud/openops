@@ -1,12 +1,13 @@
 import { Property } from '@openops/blocks-framework';
-import { isSingleValueFilter, ViewFilterTypesEnum } from '@openops/common';
-import { logger } from '@openops/server-shared';
-import { ServiceNowAuth } from '../lib/auth';
-import { createFieldValueProperty } from '../lib/create-field-value-property';
 import {
   getServiceNowTableFields,
+  isSingleValueFilter,
+  ServiceNowAuth,
   ServiceNowTableField,
-} from '../lib/get-table-fields';
+  ViewFilterTypesEnum,
+} from '@openops/common';
+import { logger } from '@openops/server-shared';
+import { createFieldValueProperty } from '../lib/create-field-value-property';
 
 export async function createFiltersProperties(
   auth: ServiceNowAuth,
