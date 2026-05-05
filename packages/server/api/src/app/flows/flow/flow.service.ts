@@ -453,6 +453,60 @@ export const flowService = {
     }
   },
 
+  async deleteMany({
+    flowIds,
+    projectId,
+    userId,
+  }: DeleteManyParams): Promise<void> {
+    await Promise.all(
+      flowIds.map((id) =>
+        this.delete({
+          id,
+          projectId,
+          userId,
+        }),
+      ),
+    );
+  },
+
+  async moveMany({
+    flowIds,
+    folderId,
+    projectId,
+  }: MoveManyParams): Promise<void> {
+    await ensureFolderContentTypeMatches({
+      projectId,
+      folderId,
+      contentType: ContentType.WORKFLOW,
+    });
+
+    const flows = await flowRepo().findBy({
+      id: In(flowIds),
+      projectId,
+    });
+
+    if (flows.length !== flowIds.length) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {},
+      });
+    }
+
+    for (const flow of flows) {
+      await assertThatFlowIsNotInternal(flow);
+    }
+
+    await flowRepo().update(
+      {
+        id: In(flowIds),
+        projectId,
+      },
+      {
+        folderId,
+      },
+    );
+  },
+
   async getAllEnabled(): Promise<Flow[]> {
     return flowRepo().findBy({
       status: FlowStatus.ENABLED,
@@ -859,6 +913,18 @@ type UpdatePublishedVersionIdParams = {
 type DeleteParams = {
   id: FlowId;
   userId: UserId;
+  projectId: ProjectId;
+};
+
+type DeleteManyParams = {
+  flowIds: FlowId[];
+  userId: UserId;
+  projectId: ProjectId;
+};
+
+type MoveManyParams = {
+  flowIds: FlowId[];
+  folderId: string | null;
   projectId: ProjectId;
 };
 

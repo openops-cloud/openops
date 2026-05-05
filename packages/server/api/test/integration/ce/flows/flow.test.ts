@@ -1516,6 +1516,149 @@ describe('Flow API', () => {
         .findOneBy({ id: mockInternalFlow.id });
       expect(flowStillExists).toBeTruthy();
     });
+
+    it('Successfully deletes multiple non-internal flows', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockFlow1 = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+      });
+      const mockFlow2 = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+      });
+      await databaseConnection()
+        .getRepository('flow')
+        .save([mockFlow1, mockFlow2]);
+
+      const mockFlowVersion1 = createMockFlowVersion({
+        flowId: mockFlow1.id,
+      });
+      const mockFlowVersion2 = createMockFlowVersion({
+        flowId: mockFlow2.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion1, mockFlowVersion2]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'DELETE',
+        url: '/v1/flows',
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+        query: {
+          flowIds: [mockFlow1.id, mockFlow2.id],
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.NO_CONTENT);
+
+      const deletedFlow1 = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockFlow1.id });
+      const deletedFlow2 = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockFlow2.id });
+
+      expect(deletedFlow1).toBeNull();
+      expect(deletedFlow2).toBeNull();
+    });
+  });
+
+  describe('Move Flow endpoint', () => {
+    it('Successfully moves multiple non-internal flows', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const sourceFolder = createMockFolder(mockProject.id);
+      const targetFolder = createMockFolder(mockProject.id);
+      await databaseConnection()
+        .getRepository('folder')
+        .save([sourceFolder, targetFolder]);
+
+      const mockFlow1 = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+        folderId: sourceFolder.id,
+      });
+      const mockFlow2 = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+        folderId: sourceFolder.id,
+      });
+      await databaseConnection()
+        .getRepository('flow')
+        .save([mockFlow1, mockFlow2]);
+
+      const mockFlowVersion1 = createMockFlowVersion({
+        flowId: mockFlow1.id,
+      });
+      const mockFlowVersion2 = createMockFlowVersion({
+        flowId: mockFlow2.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion1, mockFlowVersion2]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: '/v1/flows/move',
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+        body: {
+          flowIds: [mockFlow1.id, mockFlow2.id],
+          folderId: targetFolder.id,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.NO_CONTENT);
+
+      const movedFlow1 = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockFlow1.id });
+      const movedFlow2 = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockFlow2.id });
+
+      expect(movedFlow1?.folderId).toBe(targetFolder.id);
+      expect(movedFlow2?.folderId).toBe(targetFolder.id);
+    });
   });
 });
 
