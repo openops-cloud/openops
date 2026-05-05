@@ -112,8 +112,8 @@ describe('getClient', () => {
     });
 
     const mockCreds = {
-      accessKeyId: 'azure-key',
-      secretAccessKey: 'azure-secret',
+      AccessKeyId: 'azure-key',
+      SecretAccessKey: 'azure-secret',
     };
     (getAwsCredentialsFromAzureIdentity as jest.Mock).mockResolvedValue(
       mockCreds,
@@ -130,7 +130,10 @@ describe('getClient', () => {
       expect(typeof client.config.credentials).toBe('function');
 
       const result = await client.config.credentials();
-      expect(result).toEqual(mockCreds);
+      expect(result).toEqual({
+        accessKeyId: 'azure-key',
+        secretAccessKey: 'azure-secret',
+      });
       expect(getAwsCredentialsFromAzureIdentity).toHaveBeenCalledWith(region);
     } finally {
       mockSystem.getBoolean.mockReturnValue(false);

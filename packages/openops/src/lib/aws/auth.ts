@@ -8,6 +8,10 @@ const isImplicitRoleEnabled = system.getBoolean(
   SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
 );
 
+const isAzureFederationEnabled = system.getBoolean(
+  SharedSystemProp.AWS_AZURE_FEDERATION_ROLE_ARN,
+);
+
 export interface AwsCredentials {
   accessKeyId: string;
   secretAccessKey: string;
@@ -249,6 +253,20 @@ async function validateBaseCredentials(auth: any): Promise<ValidationResult> {
   }
 }
 
+function isMissingAuthConfiguration(auth: any): boolean {
+  const hasRoles = Boolean(auth?.roles?.length);
+  const implicitRoleEnabled = Boolean(isImplicitRoleEnabled);
+  const azureFederationEnabled = Boolean(isAzureFederationEnabled);
+  const hasCredentials = Boolean(auth?.accessKeyId && auth?.secretAccessKey);
+
+  return (
+    implicitRoleEnabled &&
+    azureFederationEnabled &&
+    !hasCredentials &&
+    !hasRoles
+  );
+}
+
 async function validateRoleAssumptions(auth: any): Promise<ValidationResult> {
   if (!auth.roles || auth.roles.length === 0) {
     return { valid: true };
@@ -345,16 +363,14 @@ For large or complex setups, enhanced features are available, including:
       return fieldValidation;
     }
 
-    const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
-    const hasRoles = auth.roles && auth.roles.length > 0;
-
-    if (isImplicitRoleEnabled && !hasCredentials && !hasRoles) {
+    if (isMissingAuthConfiguration(auth)) {
       return {
         valid: false,
         error: 'Either credentials or at least one role must be provided',
       };
     }
 
+    const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
     if (!isImplicitRoleEnabled || hasCredentials) {
       const baseCredentialsValidation = await validateBaseCredentials(auth);
       if (!baseCredentialsValidation.valid) {
