@@ -26,7 +26,12 @@ export function getAwsClient<T>(
     system.getBoolean(SharedSystemProp.AWS_USE_AZURE_MANAGED_IDENTITY)
   ) {
     config.credentials = async () => {
-      return getAwsCredentialsFromAzureIdentity(region);
+      const stsCredentials = await getAwsCredentialsFromAzureIdentity(region);
+      return {
+        accessKeyId: stsCredentials.AccessKeyId,
+        secretAccessKey: stsCredentials.SecretAccessKey,
+        sessionToken: stsCredentials.SessionToken,
+      };
     };
   }
 
