@@ -349,13 +349,13 @@ For large or complex setups, enhanced features are available, including:
       return fieldValidation;
     }
 
-    const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
-    const shouldValidateWithAzureManagedIdentity =
-      !hasCredentials && isImplicitRoleEnabled && isAzureManagedIdentityEnabled;
-
-    if (shouldValidateWithAzureManagedIdentity) {
-      return validateRoleAssumptions(auth);
-    }
+    // const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
+    // const shouldValidateWithAzureManagedIdentity =
+    //   !hasCredentials && isImplicitRoleEnabled && isAzureManagedIdentityEnabled;
+    //
+    // if (shouldValidateWithAzureManagedIdentity) {
+    //   return validateRoleAssumptions(auth);
+    // }
 
     const baseCredentialsValidation = await validateBaseCredentials(auth);
     if (!baseCredentialsValidation.valid) {
