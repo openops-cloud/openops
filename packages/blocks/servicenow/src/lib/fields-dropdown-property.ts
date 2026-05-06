@@ -1,7 +1,6 @@
 import { DynamicPropsValue, Property } from '@openops/blocks-framework';
+import { getServiceNowTableFields, ServiceNowAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { ServiceNowAuth } from './auth';
-import { getServiceNowTableFields } from './get-table-fields';
 
 export function servicenowFieldsDropdownProperty() {
   return Property.DynamicProperties({

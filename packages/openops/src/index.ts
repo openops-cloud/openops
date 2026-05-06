@@ -84,3 +84,7 @@ export * from './lib/json-utils';
 export * from './lib/microsoft/get-microsoft-graph-client';
 
 export * from './lib/cloudability/recommendation-types';
+
+export * from './lib/servicenow/auth';
+export * from './lib/servicenow/get-table-fields';
+export * from './lib/servicenow/get-tables';

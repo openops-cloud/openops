@@ -1,6 +1,6 @@
 {
-  "created": "1774008907390",
-  "updated": "1774008907390",
+  "created": "1777973581150",
+  "updated": "1777973581150",
   "name": "Azure Benchmark - Unused App Services Plans",
   "tags": [],
   "services": [],
@@ -111,24 +111,21 @@
               }
             },
             "nextAction": {
-              "id": "YMLkxklyLsj7rrrwsLugX",
-              "name": "step_26",
-              "type": "BLOCK",
+              "id": "fweiioEIhVHE1VbjUohP5",
+              "name": "step_y",
+              "type": "CODE",
               "valid": true,
               "settings": {
                 "input": {
-                  "key": "wfName",
-                  "store_scope": "RUN",
-                  "defaultValue": "Azure Benchmark - Unused App Services Plans"
+                  "subscriptions": "{{step_g['subscriptions']}}"
                 },
-                "blockName": "@openops/block-store",
-                "blockType": "OFFICIAL",
-                "actionName": "get",
+                "sourceCode": {
+                  "code": "export const code = async (inputs) => {\n  return inputs.subscriptions && inputs.subscriptions.length > 5;\n};",
+                  "packageJson": "{}"
+                },
                 "inputUiInfo": {
                   "customizedInputs": {}
                 },
-                "packageType": "REGISTRY",
-                "blockVersion": "0.5.1",
                 "errorHandlingOptions": {
                   "retryOnFailure": {
                     "value": false
@@ -139,96 +136,99 @@
                 }
               },
               "nextAction": {
-                "id": "VT0cBElTnCZ4fm2Wo0wet",
-                "name": "step_1",
-                "type": "LOOP_ON_ITEMS",
+                "id": "YMLkxklyLsj7rrrwsLugX",
+                "name": "step_26",
+                "type": "BLOCK",
                 "valid": true,
                 "settings": {
-                  "items": "{{step_g['subscriptions']}}",
+                  "input": {
+                    "key": "wfName",
+                    "store_scope": "RUN",
+                    "defaultValue": "Azure Benchmark - Unused App Services Plans"
+                  },
+                  "blockName": "@openops/block-store",
+                  "blockType": "OFFICIAL",
+                  "actionName": "get",
                   "inputUiInfo": {
                     "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.5.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
                   }
                 },
                 "nextAction": {
-                  "id": "wYhOoAQSqg2UXkOuIblN4",
-                  "name": "step_a",
-                  "type": "BLOCK",
-                  "valid": true,
-                  "settings": {
-                    "input": {
-                      "body": {
-                        "data": {
-                          "status": "ok"
-                        }
-                      },
-                      "status": 200,
-                      "headers": {},
-                      "body_type": "json"
-                    },
-                    "blockName": "@openops/block-http",
-                    "blockType": "OFFICIAL",
-                    "actionName": "return_response",
-                    "inputUiInfo": {
-                      "customizedInputs": {}
-                    },
-                    "packageType": "REGISTRY",
-                    "blockVersion": "0.5.1",
-                    "errorHandlingOptions": {
-                      "retryOnFailure": {
-                        "value": false
-                      },
-                      "continueOnFailure": {
-                        "value": false
-                      }
-                    }
-                  },
-                  "displayName": "Return Response",
-                  "stepIndex": 30
-                },
-                "displayName": "SUBSCRIPTIONS",
-                "firstLoopAction": {
-                  "id": "NDgm98QXqt7CREZzeGPMa",
-                  "name": "step_32",
+                  "id": "VT0cBElTnCZ4fm2Wo0wet",
+                  "name": "step_1",
                   "type": "LOOP_ON_ITEMS",
                   "valid": true,
                   "settings": {
-                    "items": "{{step_g['regions']}}",
+                    "items": "{{step_g['subscriptions']}}",
                     "inputUiInfo": {
                       "customizedInputs": {}
                     }
                   },
-                  "displayName": "REGION",
-                  "firstLoopAction": {
-                    "id": "fipuiKII3VCuWrlPaaL8H",
-                    "name": "step_e",
+                  "nextAction": {
+                    "id": "wYhOoAQSqg2UXkOuIblN4",
+                    "name": "step_a",
                     "type": "BLOCK",
                     "valid": true,
                     "settings": {
                       "input": {
-                        "auth": "{{connections['Azure']}}",
-                        "dryRun": false,
-                        "commandToRun": "az graph query -q \"Resources\n| where type =~ 'microsoft.web/sites'\n| where location == '{{step_32['item']}}'\"",
-                        "subscriptions": {
-                          "subDropdown": "{{step_1['item']}}"
-                        },
-                        "useHostSession": {}
-                      },
-                      "blockName": "@openops/block-azure",
-                      "blockType": "OFFICIAL",
-                      "actionName": "azure_cli",
-                      "inputUiInfo": {
-                        "customizedInputs": {
-                          "settings": {
-                            "input": {
-                              "subscriptions": {
-                                "subDropdown": true
-                              }
-                            }
+                        "body": {
+                          "data": {
+                            "status": "ok"
                           }
-                        }
+                        },
+                        "status": 200,
+                        "headers": {},
+                        "body_type": "json"
+                      },
+                      "blockName": "@openops/block-http",
+                      "blockType": "OFFICIAL",
+                      "actionName": "return_response",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
                       },
                       "packageType": "REGISTRY",
-                      "blockVersion": "0.0.1",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Return Response",
+                    "stepIndex": 53
+                  },
+                  "displayName": "SUBSCRIPTIONS",
+                  "firstLoopAction": {
+                    "id": "i3y7a25VwSax60Rj3hJcu",
+                    "name": "step_z",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "candidates_with_prices",
+                        "store_scope": "RUN"
+                      },
+                      "blockName": "@openops/block-store",
+                      "blockType": "OFFICIAL",
+                      "actionName": "remove_value",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
                       "errorHandlingOptions": {
                         "retryOnFailure": {
                           "value": false
@@ -239,60 +239,63 @@
                       }
                     },
                     "nextAction": {
-                      "id": "LHAbqJkJRFWC7dgbsm72Z",
-                      "name": "step_d",
-                      "type": "LOOP_ON_ITEMS",
+                      "id": "Thn6Mg365HTofJ5JsBVHl",
+                      "name": "step_k",
+                      "type": "BLOCK",
                       "valid": true,
                       "settings": {
-                        "items": "{{step_e['data']}}",
+                        "input": {
+                          "key": "candidates",
+                          "store_scope": "RUN"
+                        },
+                        "blockName": "@openops/block-store",
+                        "blockType": "OFFICIAL",
+                        "actionName": "remove_value",
                         "inputUiInfo": {
                           "customizedInputs": {}
+                        },
+                        "packageType": "REGISTRY",
+                        "blockVersion": "0.5.1",
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
                         }
                       },
                       "nextAction": {
-                        "id": "4BJxa3BsRjC3gwx2mltAN",
-                        "name": "step_s",
-                        "type": "BLOCK",
+                        "id": "NDgm98QXqt7CREZzeGPMa",
+                        "name": "step_32",
+                        "type": "LOOP_ON_ITEMS",
                         "valid": true,
                         "settings": {
-                          "input": {
-                            "key": "servicePlans",
-                            "store_scope": "RUN",
-                            "defaultValue": null
-                          },
-                          "blockName": "@openops/block-store",
-                          "blockType": "OFFICIAL",
-                          "actionName": "get",
+                          "items": "{{step_g['regions']}}",
                           "inputUiInfo": {
                             "customizedInputs": {}
-                          },
-                          "packageType": "REGISTRY",
-                          "blockVersion": "0.5.1",
-                          "errorHandlingOptions": {
-                            "retryOnFailure": {
-                              "value": false
-                            },
-                            "continueOnFailure": {
-                              "value": false
-                            }
                           }
                         },
                         "nextAction": {
-                          "id": "zVPXY4FBlqa45azRv94uZ",
-                          "name": "step_u",
-                          "type": "CODE",
+                          "id": "hL2klupVajJUYuCvVbtAo",
+                          "name": "step_l",
+                          "type": "BLOCK",
                           "valid": true,
                           "settings": {
                             "input": {
-                              "servicePlans": "{{step_s}}"
+                              "key": "candidates",
+                              "parseJSON": false,
+                              "store_scope": "RUN",
+                              "defaultValue": null
                             },
-                            "sourceCode": {
-                              "code": "export const code = async (inputs) => {\n  const plans = Array.isArray(inputs.servicePlans) ? inputs.servicePlans : [];\n\n  const counts = plans.reduce((acc, id) => {\n    if (typeof id !== \"string\" || !id.trim()) return acc;\n    const key = id.trim();\n    acc[key] = (acc[key] || 0) + 1;\n    return acc;\n  }, {});\n\n  return Object.entries(counts).map(([appServicePlanId, unusedApps]) => ({\n    appServicePlanId,\n    unusedApps,\n  }));\n};",
-                              "packageJson": "{}"
-                            },
+                            "blockName": "@openops/block-store",
+                            "blockType": "OFFICIAL",
+                            "actionName": "get",
                             "inputUiInfo": {
                               "customizedInputs": {}
                             },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.5.1",
                             "errorHandlingOptions": {
                               "retryOnFailure": {
                                 "value": false
@@ -303,69 +306,67 @@
                             }
                           },
                           "nextAction": {
-                            "id": "SBQsDutJX1B2FpkeQXdvG",
-                            "name": "step_w",
-                            "type": "LOOP_ON_ITEMS",
+                            "id": "zZCK2RdNZVVeINtm2tTLO",
+                            "name": "step_ao",
+                            "type": "BLOCK",
                             "valid": true,
                             "settings": {
-                              "items": "{{step_u}}",
+                              "input": {
+                                "key": "candidates_with_prices",
+                                "parseJSON": false,
+                                "store_scope": "RUN",
+                                "defaultValue": "\"\""
+                              },
+                              "blockName": "@openops/block-store",
+                              "blockType": "OFFICIAL",
+                              "actionName": "get",
                               "inputUiInfo": {
                                 "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.5.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
                               }
                             },
-                            "displayName": "Loop on Items",
-                            "firstLoopAction": {
-                              "id": "C41PrfrPdJb2DbnU27kdJ",
-                              "name": "step_i",
-                              "type": "BLOCK",
+                            "nextAction": {
+                              "id": "BWvVb5pfKMpfEVnHda1rw",
+                              "name": "step_r",
+                              "type": "BRANCH",
                               "valid": true,
                               "settings": {
-                                "input": {
-                                  "auth": "{{connections['Azure']}}",
-                                  "dryRun": false,
-                                  "commandToRun": "az graph query -q \"\nResources\n| where type =~ 'microsoft.web/sites'\n| where properties.serverFarmId == '{{step_w['item']['appServicePlanId']}}'\n| summarize count()\n\"",
-                                  "subscriptions": {
-                                    "subDropdown": "{{step_1['item']}}"
-                                  },
-                                  "useHostSession": {}
-                                },
-                                "blockName": "@openops/block-azure",
-                                "blockType": "OFFICIAL",
-                                "actionName": "azure_cli",
-                                "inputUiInfo": {
-                                  "customizedInputs": {
-                                    "settings": {
-                                      "input": {
-                                        "subscriptions": {
-                                          "subDropdown": true
-                                        }
-                                      }
+                                "conditions": [
+                                  [
+                                    {
+                                      "operator": "EXISTS",
+                                      "firstValue": "{{step_l}}",
+                                      "secondValue": "",
+                                      "caseSensitive": false
                                     }
-                                  }
-                                },
-                                "packageType": "REGISTRY",
-                                "blockVersion": "0.0.1",
-                                "errorHandlingOptions": {
-                                  "retryOnFailure": {
-                                    "value": false
-                                  },
-                                  "continueOnFailure": {
-                                    "value": false
-                                  }
+                                  ]
+                                ],
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
                                 }
                               },
-                              "nextAction": {
-                                "id": "c3uHThR9GJrnYNPM5gHMY",
-                                "name": "step_x",
+                              "displayName": "Is not empty?",
+                              "onSuccessAction": {
+                                "id": "uesRXIMJXMdWlJ6pGKHy8",
+                                "name": "step_ap",
                                 "type": "BRANCH",
                                 "valid": true,
                                 "settings": {
                                   "conditions": [
                                     [
                                       {
-                                        "operator": "NUMBER_IS_EQUAL_TO",
-                                        "firstValue": "{{step_w['item']['unusedApps']}}",
-                                        "secondValue": "{{step_i['data'][0]['count_']}}",
+                                        "operator": "BOOLEAN_IS_TRUE",
+                                        "firstValue": "{{step_y}}",
+                                        "secondValue": "",
                                         "caseSensitive": false
                                       }
                                     ]
@@ -374,17 +375,311 @@
                                     "customizedInputs": {}
                                   }
                                 },
-                                "displayName": "All webapps unused?",
-                                "onSuccessAction": {
-                                  "id": "CT1XDrXLYkQOVh9O1yp97",
-                                  "name": "step_y",
+                                "nextAction": {
+                                  "id": "TYB2t7AQHqlRUJeJPmXmJ",
+                                  "name": "step_as",
+                                  "type": "BLOCK",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "key": "resources_with_costs",
+                                      "parseJSON": true,
+                                      "store_scope": "RUN",
+                                      "defaultValue": null
+                                    },
+                                    "blockName": "@openops/block-store",
+                                    "blockType": "OFFICIAL",
+                                    "actionName": "get",
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "packageType": "REGISTRY",
+                                    "blockVersion": "0.5.1",
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "TYiJIi4aLaZ3aCTG51ACb",
+                                    "name": "step_ad",
+                                    "type": "LOOP_ON_ITEMS",
+                                    "valid": true,
+                                    "settings": {
+                                      "items": "{{step_as}}",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      }
+                                    },
+                                    "displayName": "Loop on Items",
+                                    "firstLoopAction": {
+                                      "id": "HRXCoXn5LCRsDtpaYwHY6",
+                                      "name": "step_ae",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "auth": "{{connections['Azure']}}",
+                                          "dryRun": false,
+                                          "commandToRun": "az resource show --ids \"{{step_ad['item']['resourceId']}}\" --query location -o tsv",
+                                          "subscriptions": {
+                                            "subDropdown": "{{step_1['item']}}"
+                                          },
+                                          "useHostSession": {}
+                                        },
+                                        "blockName": "@openops/block-azure",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "azure_cli",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {
+                                            "settings": {
+                                              "input": {
+                                                "subscriptions": {
+                                                  "subDropdown": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.1",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "X1Affoxmq7pKHR8V6NxTw",
+                                        "name": "step_af",
+                                        "type": "CODE",
+                                        "valid": true,
+                                        "settings": {
+                                          "input": {
+                                            "lastDaysPrices": "{{step_ad['item']['datesWithCosts']}}"
+                                          },
+                                          "sourceCode": {
+                                            "code": "export const code = async (inputs) => {\n  const prices = inputs.lastDaysPrices;\n\n  if (!prices || prices.length === 0) {\n    return { average: 0, currency: null };\n  }\n\n  const total = prices.reduce((sum, [price]) => sum + price, 0);\n  const average = total / prices.length;\n\n  return {\n    average,\n  };\n};\n",
+                                            "packageJson": "{}"
+                                          },
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          },
+                                          "errorHandlingOptions": {
+                                            "retryOnFailure": {
+                                              "value": false
+                                            },
+                                            "continueOnFailure": {
+                                              "value": false
+                                            }
+                                          }
+                                        },
+                                        "nextAction": {
+                                          "id": "ZfQhy1lwH3Wl6qB9QEBoh",
+                                          "name": "step_ag",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "first_number": "{{step_af['average']}}",
+                                              "second_number": "30.4"
+                                            },
+                                            "blockName": "@openops/block-math-helper",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "multiplication_math",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.8",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "VVuDsn4qo6Q4CzY5NLqg6",
+                                            "name": "step_ah",
+                                            "type": "BLOCK",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "number": "{{step_ag}}",
+                                                "numberOfDecimalPlaces": "2"
+                                              },
+                                              "blockName": "@openops/block-math-helper",
+                                              "blockType": "OFFICIAL",
+                                              "actionName": "truncate_math",
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "packageType": "REGISTRY",
+                                              "blockVersion": "0.0.8",
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "id": "dTWmilJ64DtN5uJgGh3yv",
+                                              "name": "step_ai",
+                                              "type": "BLOCK",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {
+                                                  "tableName": "Opportunities",
+                                                  "rowPrimaryKey": {
+                                                    "rowPrimaryKey": null
+                                                  },
+                                                  "fieldsProperties": {
+                                                    "fieldsProperties": [
+                                                      {
+                                                        "fieldName": "Estimated savings USD per month",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "{{step_ah}}"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Opportunity Type",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "Workflow optimization"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Resource Id",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "{{step_ad['item']['resourceId']}}"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Service",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "App Service Plans"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Region",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "{{step_ae}}"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Complexity",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "M"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Risk",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "Medium"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Account",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "{{step_1['item']}}"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Opportunity generator",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "OpenOps"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Status",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "Created"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Workflow",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "{{step_26}}"
+                                                        }
+                                                      },
+                                                      {
+                                                        "fieldName": "Opportunity details",
+                                                        "newFieldValue": {
+                                                          "newFieldValue": "OpenOps detected the following App Service Plan instance could be deleted."
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  "roundToFieldPrecision": false
+                                                },
+                                                "blockName": "@openops/block-openops-tables",
+                                                "blockType": "OFFICIAL",
+                                                "actionName": "update_record",
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {
+                                                    "settings": {
+                                                      "input": {
+                                                        "rowPrimaryKey": {
+                                                          "rowPrimaryKey": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "packageType": "REGISTRY",
+                                                "blockVersion": "0.0.1",
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "displayName": "Create OpenOps opportunity Copy",
+                                              "stepIndex": 52
+                                            },
+                                            "displayName": "Truncate",
+                                            "stepIndex": 51
+                                          },
+                                          "displayName": "Calculate monthly average",
+                                          "stepIndex": 50
+                                        },
+                                        "displayName": "Get average day price",
+                                        "stepIndex": 49
+                                      },
+                                      "displayName": "Get region",
+                                      "stepIndex": 48
+                                    },
+                                    "stepIndex": 47
+                                  },
+                                  "displayName": "Get resources with costs",
+                                  "stepIndex": 46
+                                },
+                                "displayName": "Prices based on price list?",
+                                "onFailureAction": {
+                                  "id": "KAecq0PDxnoYBYae1zIR1",
+                                  "name": "step_t",
                                   "type": "BLOCK",
                                   "valid": true,
                                   "settings": {
                                     "input": {
                                       "auth": "{{connections['Azure']}}",
                                       "dryRun": false,
-                                      "commandToRun": "az rest --method POST \\\n  --url \"https://management.azure.com/subscriptions/{{step_1['item']}}/providers/Microsoft.CostManagement/query?api-version=2023-11-01\" \\\n  --headers \"Content-Type=application/json\" \\\n  --body '{\n    \"type\": \"ActualCost\",\n    \"timeframe\": \"Custom\",\n    \"timePeriod\": { \"from\": \"{{step_h}}T00:00:00Z\", \"to\": \"{{step_c}}T23:00:00Z\" },\n    \"dataset\": {\n      \"granularity\": \"Daily\",\n      \"aggregation\": { \"totalCost\": { \"name\": \"PreTaxCost\", \"function\": \"Sum\" } },\n      \"filter\": {\n        \"dimensions\": {\n          \"name\": \"ResourceId\",\n          \"operator\": \"In\",\n          \"values\": [\n            \"{{step_w['item']['appServicePlanId']}}\"\n          ]\n        }\n      }\n    }\n  }'",
+                                      "commandToRun": "az rest --method POST \\\n  --url \"https://management.azure.com/subscriptions/{{step_1['item']}}/providers/Microsoft.CostManagement/query?api-version=2023-11-01\" \\\n  --headers \"Content-Type=application/json\" \\\n  --body '{\n    \"type\": \"ActualCost\",\n    \"timeframe\": \"Custom\",\n    \"timePeriod\": { \"from\": \"{{step_h}}T00:00:00Z\", \"to\": \"{{step_c}}T23:00:00Z\" },\n    \"dataset\": {\n      \"granularity\": \"Daily\",\n      \"aggregation\": { \"totalCost\": { \"name\": \"PreTaxCost\", \"function\": \"Sum\" } },\n      \"grouping\": [ { \"type\": \"Dimension\", \"name\": \"ResourceId\"}],\n      \"filter\": {\n        \"dimensions\": {\n          \"name\": \"ResourceId\",\n          \"operator\": \"In\",\n          \"values\": [\n            {{step_l}}\n          ]\n        }\n      }\n    }\n  }'",
                                       "subscriptions": {
                                         "subDropdown": "{{step_1['item']}}"
                                       },
@@ -408,7 +703,7 @@
                                     "blockVersion": "0.0.1",
                                     "errorHandlingOptions": {
                                       "retryOnFailure": {
-                                        "value": false
+                                        "value": true
                                       },
                                       "continueOnFailure": {
                                         "value": false
@@ -416,16 +711,16 @@
                                     }
                                   },
                                   "nextAction": {
-                                    "id": "ZgqV63ln0IzhZ9YlekjGw",
-                                    "name": "step_z",
+                                    "id": "SreN3VtWkPKP8J6ee8A0l",
+                                    "name": "step_v",
                                     "type": "CODE",
                                     "valid": true,
                                     "settings": {
                                       "input": {
-                                        "lastDaysPrices": "{{step_y['properties']['rows']}}"
+                                        "costs": "{{step_t['properties']['rows']}}"
                                       },
                                       "sourceCode": {
-                                        "code": "export const code = async (inputs) => {\n  const prices = inputs.lastDaysPrices;\n\n  if (!prices || prices.length === 0) {\n    return { average: 0, currency: null };\n  }\n\n  const total = prices.reduce((sum, [price]) => sum + price, 0);\n  const average = total / prices.length;\n  const currency = prices[0][2];\n\n  return {\n    average,\n    currency,\n  };\n};\n",
+                                        "code": "export const code = async (inputs) => {\n  const grouped = {};\n\n  for (const [cost, date, resourceId, currency] of inputs.costs) {\n    if (!grouped[resourceId]) {\n      grouped[resourceId] = {\n        resourceId,\n        currency,\n        datesWithCosts: []\n      };\n    }\n\n    grouped[resourceId].datesWithCosts.push([cost, date]);\n  }\n\n  return Object.values(grouped);\n};",
                                         "packageJson": "{}"
                                       },
                                       "inputUiInfo": {
@@ -441,23 +736,24 @@
                                       }
                                     },
                                     "nextAction": {
-                                      "id": "ahMY65FkTSaiewQ0MXfoI",
-                                      "name": "step_ab",
+                                      "id": "JjKcfNfoPyHEeMvj3FHPj",
+                                      "name": "step_au",
                                       "type": "BLOCK",
                                       "valid": true,
                                       "settings": {
                                         "input": {
-                                          "first_number": "{{step_z['average']}}",
-                                          "second_number": "30.4"
+                                          "key": "resources_with_costs",
+                                          "value": "{{step_v}}",
+                                          "store_scope": "RUN"
                                         },
-                                        "blockName": "@openops/block-math-helper",
+                                        "blockName": "@openops/block-store",
                                         "blockType": "OFFICIAL",
-                                        "actionName": "multiplication_math",
+                                        "actionName": "put",
                                         "inputUiInfo": {
                                           "customizedInputs": {}
                                         },
                                         "packageType": "REGISTRY",
-                                        "blockVersion": "0.0.8",
+                                        "blockVersion": "0.5.1",
                                         "errorHandlingOptions": {
                                           "retryOnFailure": {
                                             "value": false
@@ -467,233 +763,97 @@
                                           }
                                         }
                                       },
-                                      "nextAction": {
-                                        "id": "9gADYXllzdLPcMy6CdE9h",
-                                        "name": "step_aa",
-                                        "type": "BLOCK",
-                                        "valid": true,
-                                        "settings": {
-                                          "input": {
-                                            "number": "{{step_ab}}",
-                                            "numberOfDecimalPlaces": "2"
-                                          },
-                                          "blockName": "@openops/block-math-helper",
-                                          "blockType": "OFFICIAL",
-                                          "actionName": "truncate_math",
-                                          "inputUiInfo": {
-                                            "customizedInputs": {}
-                                          },
-                                          "packageType": "REGISTRY",
-                                          "blockVersion": "0.0.8",
-                                          "errorHandlingOptions": {
-                                            "retryOnFailure": {
-                                              "value": false
-                                            },
-                                            "continueOnFailure": {
-                                              "value": false
-                                            }
-                                          }
-                                        },
-                                        "nextAction": {
-                                          "id": "L6I8Fm5AtqrbJNFIZowrN",
-                                          "name": "step_ac",
-                                          "type": "BLOCK",
-                                          "valid": true,
-                                          "settings": {
-                                            "input": {
-                                              "tableName": "Opportunities",
-                                              "rowPrimaryKey": {
-                                                "rowPrimaryKey": null
-                                              },
-                                              "fieldsProperties": {
-                                                "fieldsProperties": [
-                                                  {
-                                                    "fieldName": "Estimated savings USD per month",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "{{step_aa}}"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Opportunity Type",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "Workflow optimization"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Resource Id",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "{{step_w['item']['appServicePlanId']}}"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Service",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "App Service Plans"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Region",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "{{step_32['item']}}"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Complexity",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "M"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Risk",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "Medium"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Account",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "{{step_1['item']}}"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Opportunity generator",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "OpenOps"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Status",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "Created"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Workflow",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "{{step_26}}"
-                                                    }
-                                                  },
-                                                  {
-                                                    "fieldName": "Opportunity details",
-                                                    "newFieldValue": {
-                                                      "newFieldValue": "OpenOps detected the following App Service Plan instance could be deleted."
-                                                    }
-                                                  }
-                                                ]
-                                              },
-                                              "roundToFieldPrecision": false
-                                            },
-                                            "blockName": "@openops/block-openops-tables",
-                                            "blockType": "OFFICIAL",
-                                            "actionName": "update_record",
-                                            "inputUiInfo": {
-                                              "customizedInputs": {
-                                                "settings": {
-                                                  "input": {
-                                                    "rowPrimaryKey": {
-                                                      "rowPrimaryKey": true
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            },
-                                            "packageType": "REGISTRY",
-                                            "blockVersion": "0.0.1",
-                                            "errorHandlingOptions": {
-                                              "retryOnFailure": {
-                                                "value": false
-                                              },
-                                              "continueOnFailure": {
-                                                "value": false
-                                              }
-                                            }
-                                          },
-                                          "displayName": "Create OpenOps opportunity",
-                                          "stepIndex": 29
-                                        },
-                                        "displayName": "Truncate",
-                                        "stepIndex": 28
-                                      },
-                                      "displayName": "Calculate monthly average",
-                                      "stepIndex": 27
+                                      "displayName": "Resources with costs",
+                                      "stepIndex": 45
                                     },
-                                    "displayName": "Get average day price",
-                                    "stepIndex": 26
+                                    "displayName": "Custom costs per resource",
+                                    "stepIndex": 44
                                   },
-                                  "displayName": "Get current cost of App Service Plan",
-                                  "stepIndex": 25
+                                  "displayName": "Get current cost of candidates",
+                                  "stepIndex": 43
                                 },
-                                "stepIndex": 24
+                                "onSuccessAction": {
+                                  "id": "ULwkeJoQsdrcBTfAOG95X",
+                                  "name": "step_aq",
+                                  "type": "CODE",
+                                  "valid": true,
+                                  "settings": {
+                                    "input": {
+                                      "pricingItems": "{{step_ao}}"
+                                    },
+                                    "sourceCode": {
+                                      "code": "export const code = async (inputs) => {\n  const items = inputs.pricingItems || [];\n\n  const today = new Date();\n  const dateKey = Number(\n    `${today.getUTCFullYear()}${String(today.getUTCMonth() + 1).padStart(2, \"0\")}${String(today.getUTCDate()).padStart(2, \"0\")}`\n  );\n\n  return items\n    .map(item => {\n      const parsedItem = typeof item === \"string\" ? JSON.parse(item) : item;\n\n      return {\n        resourceId: parsedItem.resourceId,\n        currency: parsedItem.currency || \"USD\",\n        datesWithCosts: [\n          [\n            parsedItem.dailyPricing || 0,\n            dateKey\n          ]\n        ]\n      };\n    })\n    .filter(item => item.resourceId);\n};",
+                                      "packageJson": "{}"
+                                    },
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    },
+                                    "errorHandlingOptions": {
+                                      "retryOnFailure": {
+                                        "value": false
+                                      },
+                                      "continueOnFailure": {
+                                        "value": false
+                                      }
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "85LGAYAOAsZNzdA8zxEW3",
+                                    "name": "step_ar",
+                                    "type": "BLOCK",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {
+                                        "key": "resources_with_costs",
+                                        "value": "{{step_aq}}",
+                                        "store_scope": "RUN"
+                                      },
+                                      "blockName": "@openops/block-store",
+                                      "blockType": "OFFICIAL",
+                                      "actionName": "put",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "blockVersion": "0.5.1",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "displayName": "Resources with costs",
+                                    "stepIndex": 42
+                                  },
+                                  "displayName": "Custom costs per resource",
+                                  "stepIndex": 41
+                                },
+                                "stepIndex": 40
                               },
-                              "displayName": "Get all webapps which are hosted on service plan",
-                              "stepIndex": 23
+                              "stepIndex": 39
                             },
-                            "stepIndex": 22
+                            "displayName": "Get candidates with prices",
+                            "stepIndex": 38
                           },
-                          "displayName": "Custom TypeScript Code",
-                          "stepIndex": 21
+                          "displayName": "Get Candidates",
+                          "stepIndex": 37
                         },
-                        "displayName": "Get servicePlans",
-                        "stepIndex": 20
-                      },
-                      "displayName": "RESOURCE",
-                      "firstLoopAction": {
-                        "id": "3j132XCJpe98LLdcMlvMt",
-                        "name": "step_27",
-                        "type": "BLOCK",
-                        "valid": true,
-                        "settings": {
-                          "input": {
-                            "filters": {
-                              "filters": [
-                                {
-                                  "value": {
-                                    "value": "{{step_26}}"
-                                  },
-                                  "fieldName": "Workflow",
-                                  "filterType": "Is equal"
-                                },
-                                {
-                                  "value": {
-                                    "value": "{{step_d['item']['properties']['serverFarmId']}}"
-                                  },
-                                  "fieldName": "Resource Id",
-                                  "filterType": "Is equal"
-                                }
-                              ]
-                            },
-                            "tableName": "Opportunities",
-                            "filterType": "AND"
-                          },
-                          "blockName": "@openops/block-openops-tables",
-                          "blockType": "OFFICIAL",
-                          "actionName": "get_records",
-                          "inputUiInfo": {
-                            "customizedInputs": {}
-                          },
-                          "packageType": "REGISTRY",
-                          "blockVersion": "0.0.1",
-                          "errorHandlingOptions": {
-                            "retryOnFailure": {
-                              "value": false
-                            },
-                            "continueOnFailure": {
-                              "value": false
-                            }
-                          }
-                        },
-                        "nextAction": {
-                          "id": "okWpniHSkhqSVTTqr2F5c",
-                          "name": "step_28",
+                        "displayName": "REGION",
+                        "firstLoopAction": {
+                          "id": "4RDl8db66SBHU0D2t35O9",
+                          "name": "step_aa",
                           "type": "BRANCH",
                           "valid": true,
                           "settings": {
                             "conditions": [
                               [
                                 {
-                                  "operator": "NUMBER_IS_EQUAL_TO",
-                                  "firstValue": "{{step_27['count']}}",
-                                  "secondValue": "0",
+                                  "operator": "BOOLEAN_IS_TRUE",
+                                  "firstValue": "{{step_y}}",
+                                  "secondValue": "5",
                                   "caseSensitive": false
                                 }
                               ]
@@ -703,15 +863,15 @@
                             }
                           },
                           "nextAction": {
-                            "id": "s20B3Gvo73jGeme567KBt",
-                            "name": "step_f",
+                            "id": "fipuiKII3VCuWrlPaaL8H",
+                            "name": "step_e",
                             "type": "BLOCK",
                             "valid": true,
                             "settings": {
                               "input": {
                                 "auth": "{{connections['Azure']}}",
                                 "dryRun": false,
-                                "commandToRun": "az monitor metrics list --resource \"{{step_d['item']['id']}}\" --metric \"Requests\" --interval P1D --aggregation Total --start-time {{step_h}} --end-time {{step_c}}",
+                                "commandToRun": "az graph query -q \"Resources\n| where type =~ 'microsoft.web/sites'\n| where location == '{{step_32['item']}}'\"",
                                 "subscriptions": {
                                   "subDropdown": "{{step_1['item']}}"
                                 },
@@ -743,81 +903,60 @@
                               }
                             },
                             "nextAction": {
-                              "id": "AiP2ProTXk3wIWn6MepmR",
-                              "name": "step_b",
-                              "type": "CODE",
+                              "id": "LHAbqJkJRFWC7dgbsm72Z",
+                              "name": "step_d",
+                              "type": "LOOP_ON_ITEMS",
                               "valid": true,
                               "settings": {
-                                "input": {
-                                  "requests": "{{step_f['value'][0]}}"
-                                },
-                                "sourceCode": {
-                                  "code": "export const code = async (inputs) => {\n  const timeseries = inputs?.requests?.timeseries;\n  if (!Array.isArray(timeseries)) return 0;\n\n  return timeseries.reduce((sum, series) => {\n    if (!Array.isArray(series?.data)) return sum;\n\n    return sum + series.data.reduce((innerSum, point) => {\n      return innerSum + (typeof point?.total === \"number\" ? point.total : 0);\n    }, 0);\n  }, 0);\n};",
-                                  "packageJson": "{}"
-                                },
+                                "items": "{{step_e['data']}}",
                                 "inputUiInfo": {
                                   "customizedInputs": {}
-                                },
-                                "errorHandlingOptions": {
-                                  "retryOnFailure": {
-                                    "value": false
-                                  },
-                                  "continueOnFailure": {
-                                    "value": false
-                                  }
                                 }
                               },
                               "nextAction": {
-                                "id": "4SKlW5XklegN9AonYMCfH",
-                                "name": "step_m",
-                                "type": "BRANCH",
+                                "id": "4BJxa3BsRjC3gwx2mltAN",
+                                "name": "step_s",
+                                "type": "BLOCK",
                                 "valid": true,
                                 "settings": {
-                                  "conditions": [
-                                    [
-                                      {
-                                        "operator": "NUMBER_IS_EQUAL_TO",
-                                        "firstValue": "{{step_b}}",
-                                        "secondValue": "0"
-                                      }
-                                    ]
-                                  ],
+                                  "input": {
+                                    "key": "servicePlans",
+                                    "store_scope": "RUN",
+                                    "defaultValue": null
+                                  },
+                                  "blockName": "@openops/block-store",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "get",
                                   "inputUiInfo": {
                                     "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.5.1",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
                                   }
                                 },
-                                "displayName": "No requests?",
-                                "onSuccessAction": {
-                                  "id": "HCkEXeb4uShFZ7DnfVBTF",
-                                  "name": "step_o",
-                                  "type": "BLOCK",
+                                "nextAction": {
+                                  "id": "zVPXY4FBlqa45azRv94uZ",
+                                  "name": "step_u",
+                                  "type": "CODE",
                                   "valid": true,
                                   "settings": {
                                     "input": {
-                                      "auth": "{{connections['Azure']}}",
-                                      "dryRun": false,
-                                      "commandToRun": "az monitor metrics list --resource \"{{step_d['item']['id']}}\" --metric \"CpuTime\" --interval P1D --aggregation Total --start-time {{step_h}} --end-time {{step_c}}",
-                                      "subscriptions": {
-                                        "subDropdown": "{{step_1['item']}}"
-                                      },
-                                      "useHostSession": {}
+                                      "servicePlans": "{{step_s}}"
                                     },
-                                    "blockName": "@openops/block-azure",
-                                    "blockType": "OFFICIAL",
-                                    "actionName": "azure_cli",
+                                    "sourceCode": {
+                                      "code": "export const code = async (inputs) => {\n  const plans = Array.isArray(inputs.servicePlans) ? inputs.servicePlans : [];\n\n  const counts = plans.reduce((acc, id) => {\n    if (typeof id !== \"string\" || !id.trim()) return acc;\n    const key = id.trim();\n    acc[key] = (acc[key] || 0) + 1;\n    return acc;\n  }, {});\n\n  return Object.entries(counts).map(([appServicePlanId, unusedApps]) => ({\n    appServicePlanId,\n    unusedApps,\n  }));\n};",
+                                      "packageJson": "{}"
+                                    },
                                     "inputUiInfo": {
-                                      "customizedInputs": {
-                                        "settings": {
-                                          "input": {
-                                            "subscriptions": {
-                                              "subDropdown": true
-                                            }
-                                          }
-                                        }
-                                      }
+                                      "customizedInputs": {}
                                     },
-                                    "packageType": "REGISTRY",
-                                    "blockVersion": "0.0.1",
                                     "errorHandlingOptions": {
                                       "retryOnFailure": {
                                         "value": false
@@ -828,21 +967,379 @@
                                     }
                                   },
                                   "nextAction": {
-                                    "id": "ECSnvv793D7YWYwTErGin",
-                                    "name": "step_p",
-                                    "type": "CODE",
+                                    "id": "SBQsDutJX1B2FpkeQXdvG",
+                                    "name": "step_w",
+                                    "type": "LOOP_ON_ITEMS",
+                                    "valid": true,
+                                    "settings": {
+                                      "items": "{{step_u}}",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      }
+                                    },
+                                    "displayName": "Loop on Items",
+                                    "firstLoopAction": {
+                                      "id": "C41PrfrPdJb2DbnU27kdJ",
+                                      "name": "step_i",
+                                      "type": "BLOCK",
+                                      "valid": true,
+                                      "settings": {
+                                        "input": {
+                                          "auth": "{{connections['Azure']}}",
+                                          "dryRun": false,
+                                          "commandToRun": "az graph query -q \"\nResources\n| where type =~ 'microsoft.web/sites'\n| where properties.serverFarmId == '{{step_w['item']['appServicePlanId']}}'\n| summarize count()\n\"",
+                                          "subscriptions": {
+                                            "subDropdown": "{{step_1['item']}}"
+                                          },
+                                          "useHostSession": {}
+                                        },
+                                        "blockName": "@openops/block-azure",
+                                        "blockType": "OFFICIAL",
+                                        "actionName": "azure_cli",
+                                        "inputUiInfo": {
+                                          "customizedInputs": {
+                                            "settings": {
+                                              "input": {
+                                                "subscriptions": {
+                                                  "subDropdown": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "packageType": "REGISTRY",
+                                        "blockVersion": "0.0.1",
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
+                                        }
+                                      },
+                                      "nextAction": {
+                                        "id": "c3uHThR9GJrnYNPM5gHMY",
+                                        "name": "step_x",
+                                        "type": "BRANCH",
+                                        "valid": true,
+                                        "settings": {
+                                          "conditions": [
+                                            [
+                                              {
+                                                "operator": "NUMBER_IS_EQUAL_TO",
+                                                "firstValue": "{{step_w['item']['unusedApps']}}",
+                                                "secondValue": "{{step_i['data'][0]['count_']}}",
+                                                "caseSensitive": false
+                                              }
+                                            ]
+                                          ],
+                                          "inputUiInfo": {
+                                            "customizedInputs": {}
+                                          }
+                                        },
+                                        "displayName": "All webapps unused?",
+                                        "onSuccessAction": {
+                                          "id": "EsbNpYBItvGYkQWC14Fcf",
+                                          "name": "step_j",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "key": "candidates",
+                                              "value": "\"{{step_w['item']['appServicePlanId']}}\"",
+                                              "separator": ",",
+                                              "store_scope": "RUN"
+                                            },
+                                            "blockName": "@openops/block-store",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "append",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {}
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.5.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "8hCgFbpyfhpdxyvvLIO0Y",
+                                            "name": "step_aj",
+                                            "type": "BRANCH",
+                                            "valid": true,
+                                            "settings": {
+                                              "conditions": [
+                                                [
+                                                  {
+                                                    "operator": "BOOLEAN_IS_TRUE",
+                                                    "firstValue": "{{step_y}}",
+                                                    "secondValue": "5",
+                                                    "caseSensitive": false
+                                                  }
+                                                ]
+                                              ],
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              }
+                                            },
+                                            "displayName": "Prices based on price list?",
+                                            "onSuccessAction": {
+                                              "id": "jpOzQLhAkIISg6WvHML72",
+                                              "name": "step_ak",
+                                              "type": "BLOCK",
+                                              "valid": true,
+                                              "settings": {
+                                                "input": {
+                                                  "key": "priceList",
+                                                  "parseJSON": true,
+                                                  "store_scope": "RUN",
+                                                  "defaultValue": null
+                                                },
+                                                "blockName": "@openops/block-store",
+                                                "blockType": "OFFICIAL",
+                                                "actionName": "get",
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                },
+                                                "packageType": "REGISTRY",
+                                                "blockVersion": "0.5.1",
+                                                "errorHandlingOptions": {
+                                                  "retryOnFailure": {
+                                                    "value": false
+                                                  },
+                                                  "continueOnFailure": {
+                                                    "value": false
+                                                  }
+                                                }
+                                              },
+                                              "nextAction": {
+                                                "id": "kSUlMy8gH2H6HXEy4QLQM",
+                                                "name": "step_al",
+                                                "type": "BLOCK",
+                                                "valid": true,
+                                                "settings": {
+                                                  "input": {
+                                                    "auth": "{{connections['Azure']}}",
+                                                    "dryRun": false,
+                                                    "commandToRun": "az appservice plan show \\\n  --ids {{step_w['item']['appServicePlanId']}}",
+                                                    "subscriptions": {
+                                                      "subDropdown": "{{step_1['item']}}"
+                                                    },
+                                                    "useHostSession": {}
+                                                  },
+                                                  "blockName": "@openops/block-azure",
+                                                  "blockType": "OFFICIAL",
+                                                  "actionName": "azure_cli",
+                                                  "inputUiInfo": {
+                                                    "customizedInputs": {
+                                                      "settings": {
+                                                        "input": {
+                                                          "subscriptions": {
+                                                            "subDropdown": true
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  "packageType": "REGISTRY",
+                                                  "blockVersion": "0.0.1",
+                                                  "errorHandlingOptions": {
+                                                    "retryOnFailure": {
+                                                      "value": false
+                                                    },
+                                                    "continueOnFailure": {
+                                                      "value": false
+                                                    }
+                                                  }
+                                                },
+                                                "nextAction": {
+                                                  "id": "aiSzRYJYyJzD8OSwZ4aTE",
+                                                  "name": "step_am",
+                                                  "type": "CODE",
+                                                  "valid": true,
+                                                  "settings": {
+                                                    "input": {
+                                                      "priceList": "{{step_ak}}",
+                                                      "appServicePlan": "{{step_al}}"
+                                                    },
+                                                    "sourceCode": {
+                                                      "code": "export const code = async (inputs) => {\n  const { appServicePlan, priceList } = inputs;\n\n  const items = Array.isArray(priceList)\n    ? priceList\n    : Array.isArray(priceList?.Items)\n      ? priceList.Items\n      : [];\n\n  const resourceId =\n    appServicePlan?.id ||\n    appServicePlan?.resourceMetadata?.resourceId ||\n    null;\n\n  const sku = appServicePlan?.sku || {};\n  const skuName = sku.name || sku.size || null;\n\n  const isLinux =\n    appServicePlan?.kind?.toLowerCase().includes(\"linux\") ||\n    appServicePlan?.reserved === true;\n\n  const normalize = (value) =>\n    String(value || \"\")\n      .toLowerCase()\n      .replace(/[_-]/g, \"\")\n      .replace(/\\s+/g, \"\")\n      .trim();\n\n  const normalizeSku = (value) =>\n    normalize(value)\n      .replace(\"v\", \"\")\n      .replace(\"app\", \"\");\n\n  const expectedSku = normalizeSku(skuName);\n\n  if (!skuName) {\n    return {\n      resourceId,\n      dailyPricing: 0,\n      currency: \"USD\"\n    };\n  }\n\n  const priceItem = items.find((p) => {\n    if (p.type !== \"Consumption\") return false;\n    if (p.serviceName !== \"Azure App Service\") return false;\n    if (p.unitOfMeasure !== \"1 Hour\") return false;\n\n    const priceSku = normalizeSku(p.skuName);\n    const meterName = normalizeSku(p.meterName);\n    const productName = String(p.productName || \"\").toLowerCase();\n\n    if (priceSku !== expectedSku && !meterName.includes(expectedSku)) {\n      return false;\n    }\n\n    if (isLinux && !productName.includes(\"linux\")) {\n      return false;\n    }\n\n    if (!isLinux && productName.includes(\"linux\")) {\n      return false;\n    }\n\n    if (\n      productName.includes(\"ssl\") ||\n      productName.includes(\"domain\") ||\n      productName.includes(\"stamp\") ||\n      productName.includes(\"isolated\") ||\n      p.skuName === \"ASIP\" ||\n      p.skuName === \"Front End\"\n    ) {\n      return false;\n    }\n\n    return true;\n  });\n\n  if (!priceItem || typeof priceItem.retailPrice !== \"number\") {\n    return {\n      resourceId,\n      dailyPricing: 0,\n      currency: \"USD\"\n    };\n  }\n\n  const workerCount = Number(\n    appServicePlan?.sku?.capacity ||\n    appServicePlan?.properties?.numberOfWorkers ||\n    appServicePlan?.numberOfWorkers ||\n    1\n  );\n\n  return {\n    resourceId,\n    dailyPricing: priceItem.retailPrice * 24 * workerCount,\n    currency: priceItem.currencyCode || \"USD\"\n  };\n};",
+                                                      "packageJson": "{}"
+                                                    },
+                                                    "inputUiInfo": {
+                                                      "customizedInputs": {}
+                                                    },
+                                                    "errorHandlingOptions": {
+                                                      "retryOnFailure": {
+                                                        "value": false
+                                                      },
+                                                      "continueOnFailure": {
+                                                        "value": false
+                                                      }
+                                                    }
+                                                  },
+                                                  "nextAction": {
+                                                    "id": "1DH9XMuLsDDAYSSkM7ksS",
+                                                    "name": "step_an",
+                                                    "type": "BLOCK",
+                                                    "valid": true,
+                                                    "settings": {
+                                                      "input": {
+                                                        "key": "candidates_with_prices",
+                                                        "value": "{{step_am}}",
+                                                        "store_scope": "RUN",
+                                                        "ignore_if_exists": false
+                                                      },
+                                                      "blockName": "@openops/block-store",
+                                                      "blockType": "OFFICIAL",
+                                                      "actionName": "add_to_list",
+                                                      "inputUiInfo": {
+                                                        "customizedInputs": {}
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "blockVersion": "0.5.1",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
+                                                      }
+                                                    },
+                                                    "displayName": "Add To List",
+                                                    "stepIndex": 36
+                                                  },
+                                                  "displayName": "Get daily price from price list",
+                                                  "stepIndex": 35
+                                                },
+                                                "displayName": "Get app service plan details",
+                                                "stepIndex": 34
+                                              },
+                                              "displayName": "Get price list",
+                                              "stepIndex": 33
+                                            },
+                                            "stepIndex": 32
+                                          },
+                                          "displayName": "Append",
+                                          "stepIndex": 31
+                                        },
+                                        "stepIndex": 30
+                                      },
+                                      "displayName": "Get all webapps which are hosted on service plan",
+                                      "stepIndex": 29
+                                    },
+                                    "stepIndex": 28
+                                  },
+                                  "displayName": "Custom TypeScript Code",
+                                  "stepIndex": 27
+                                },
+                                "displayName": "Get servicePlans",
+                                "stepIndex": 26
+                              },
+                              "displayName": "RESOURCE",
+                              "firstLoopAction": {
+                                "id": "3j132XCJpe98LLdcMlvMt",
+                                "name": "step_27",
+                                "type": "BLOCK",
+                                "valid": true,
+                                "settings": {
+                                  "input": {
+                                    "filters": {
+                                      "filters": [
+                                        {
+                                          "value": {
+                                            "value": "{{step_26}}"
+                                          },
+                                          "fieldName": "Workflow",
+                                          "filterType": "Is equal"
+                                        },
+                                        {
+                                          "value": {
+                                            "value": "{{step_d['item']['properties']['serverFarmId']}}"
+                                          },
+                                          "fieldName": "Resource Id",
+                                          "filterType": "Is equal"
+                                        }
+                                      ]
+                                    },
+                                    "tableName": "Opportunities",
+                                    "filterType": "AND"
+                                  },
+                                  "blockName": "@openops/block-openops-tables",
+                                  "blockType": "OFFICIAL",
+                                  "actionName": "get_records",
+                                  "inputUiInfo": {
+                                    "customizedInputs": {}
+                                  },
+                                  "packageType": "REGISTRY",
+                                  "blockVersion": "0.0.1",
+                                  "errorHandlingOptions": {
+                                    "retryOnFailure": {
+                                      "value": false
+                                    },
+                                    "continueOnFailure": {
+                                      "value": false
+                                    }
+                                  }
+                                },
+                                "nextAction": {
+                                  "id": "okWpniHSkhqSVTTqr2F5c",
+                                  "name": "step_28",
+                                  "type": "BRANCH",
+                                  "valid": true,
+                                  "settings": {
+                                    "conditions": [
+                                      [
+                                        {
+                                          "operator": "NUMBER_IS_EQUAL_TO",
+                                          "firstValue": "{{step_27['count']}}",
+                                          "secondValue": "0",
+                                          "caseSensitive": false
+                                        }
+                                      ]
+                                    ],
+                                    "inputUiInfo": {
+                                      "customizedInputs": {}
+                                    }
+                                  },
+                                  "nextAction": {
+                                    "id": "s20B3Gvo73jGeme567KBt",
+                                    "name": "step_f",
+                                    "type": "BLOCK",
                                     "valid": true,
                                     "settings": {
                                       "input": {
-                                        "cpuTime": "{{step_o['value'][0]}}"
+                                        "auth": "{{connections['Azure']}}",
+                                        "dryRun": false,
+                                        "commandToRun": "az monitor metrics list --resource \"{{step_d['item']['id']}}\" --metric \"Requests\" --interval P1D --aggregation Total --start-time {{step_h}} --end-time {{step_c}}",
+                                        "subscriptions": {
+                                          "subDropdown": "{{step_1['item']}}"
+                                        },
+                                        "useHostSession": {}
                                       },
-                                      "sourceCode": {
-                                        "code": "export const code = async (inputs) => {\n  const timeseries = inputs?.cpuTime?.timeseries;\n  if (!Array.isArray(timeseries)) return 0;\n\n  return timeseries.reduce((sum, series) => {\n    if (!Array.isArray(series?.data)) return sum;\n\n    return sum + series.data.reduce((innerSum, point) => {\n      return innerSum + (typeof point?.total === \"number\" ? point.total : 0);\n    }, 0);\n  }, 0);\n};",
-                                        "packageJson": "{}"
-                                      },
+                                      "blockName": "@openops/block-azure",
+                                      "blockType": "OFFICIAL",
+                                      "actionName": "azure_cli",
                                       "inputUiInfo": {
-                                        "customizedInputs": {}
+                                        "customizedInputs": {
+                                          "settings": {
+                                            "input": {
+                                              "subscriptions": {
+                                                "subDropdown": true
+                                              }
+                                            }
+                                          }
+                                        }
                                       },
+                                      "packageType": "REGISTRY",
+                                      "blockVersion": "0.0.1",
                                       "errorHandlingOptions": {
                                         "retryOnFailure": {
                                           "value": false
@@ -853,116 +1350,312 @@
                                       }
                                     },
                                     "nextAction": {
-                                      "id": "KyMgvyEDq9Qxup4fh6wg2",
-                                      "name": "step_q",
-                                      "type": "BRANCH",
+                                      "id": "AiP2ProTXk3wIWn6MepmR",
+                                      "name": "step_b",
+                                      "type": "CODE",
                                       "valid": true,
                                       "settings": {
-                                        "conditions": [
-                                          [
-                                            {
-                                              "operator": "NUMBER_IS_EQUAL_TO",
-                                              "firstValue": "{{step_p}}",
-                                              "secondValue": "0"
-                                            }
-                                          ]
-                                        ],
+                                        "input": {
+                                          "requests": "{{step_f['value'][0]}}"
+                                        },
+                                        "sourceCode": {
+                                          "code": "export const code = async (inputs) => {\n  const timeseries = inputs?.requests?.timeseries;\n  if (!Array.isArray(timeseries)) return 0;\n\n  return timeseries.reduce((sum, series) => {\n    if (!Array.isArray(series?.data)) return sum;\n\n    return sum + series.data.reduce((innerSum, point) => {\n      return innerSum + (typeof point?.total === \"number\" ? point.total : 0);\n    }, 0);\n  }, 0);\n};",
+                                          "packageJson": "{}"
+                                        },
                                         "inputUiInfo": {
                                           "customizedInputs": {}
+                                        },
+                                        "errorHandlingOptions": {
+                                          "retryOnFailure": {
+                                            "value": false
+                                          },
+                                          "continueOnFailure": {
+                                            "value": false
+                                          }
                                         }
                                       },
-                                      "displayName": "No cpu usage?",
-                                      "onSuccessAction": {
-                                        "id": "wW2bZ1x3UOEjCSS2xTHdQ",
-                                        "name": "step_n",
-                                        "type": "BLOCK",
+                                      "nextAction": {
+                                        "id": "4SKlW5XklegN9AonYMCfH",
+                                        "name": "step_m",
+                                        "type": "BRANCH",
                                         "valid": true,
                                         "settings": {
-                                          "input": {
-                                            "key": "servicePlans",
-                                            "value": "{{step_d['item']['properties']['serverFarmId']}}",
-                                            "store_scope": "RUN",
-                                            "ignore_if_exists": false
-                                          },
-                                          "blockName": "@openops/block-store",
-                                          "blockType": "OFFICIAL",
-                                          "actionName": "add_to_list",
+                                          "conditions": [
+                                            [
+                                              {
+                                                "operator": "NUMBER_IS_EQUAL_TO",
+                                                "firstValue": "{{step_b}}",
+                                                "secondValue": "0"
+                                              }
+                                            ]
+                                          ],
                                           "inputUiInfo": {
                                             "customizedInputs": {}
-                                          },
-                                          "packageType": "REGISTRY",
-                                          "blockVersion": "0.5.1",
-                                          "errorHandlingOptions": {
-                                            "retryOnFailure": {
-                                              "value": false
-                                            },
-                                            "continueOnFailure": {
-                                              "value": false
-                                            }
                                           }
                                         },
-                                        "displayName": "Add To List",
-                                        "stepIndex": 19
+                                        "displayName": "No requests?",
+                                        "onSuccessAction": {
+                                          "id": "HCkEXeb4uShFZ7DnfVBTF",
+                                          "name": "step_o",
+                                          "type": "BLOCK",
+                                          "valid": true,
+                                          "settings": {
+                                            "input": {
+                                              "auth": "{{connections['Azure']}}",
+                                              "dryRun": false,
+                                              "commandToRun": "az monitor metrics list --resource \"{{step_d['item']['id']}}\" --metric \"CpuTime\" --interval P1D --aggregation Total --start-time {{step_h}} --end-time {{step_c}}",
+                                              "subscriptions": {
+                                                "subDropdown": "{{step_1['item']}}"
+                                              },
+                                              "useHostSession": {}
+                                            },
+                                            "blockName": "@openops/block-azure",
+                                            "blockType": "OFFICIAL",
+                                            "actionName": "azure_cli",
+                                            "inputUiInfo": {
+                                              "customizedInputs": {
+                                                "settings": {
+                                                  "input": {
+                                                    "subscriptions": {
+                                                      "subDropdown": true
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "packageType": "REGISTRY",
+                                            "blockVersion": "0.0.1",
+                                            "errorHandlingOptions": {
+                                              "retryOnFailure": {
+                                                "value": false
+                                              },
+                                              "continueOnFailure": {
+                                                "value": false
+                                              }
+                                            }
+                                          },
+                                          "nextAction": {
+                                            "id": "ECSnvv793D7YWYwTErGin",
+                                            "name": "step_p",
+                                            "type": "CODE",
+                                            "valid": true,
+                                            "settings": {
+                                              "input": {
+                                                "cpuTime": "{{step_o['value'][0]}}"
+                                              },
+                                              "sourceCode": {
+                                                "code": "export const code = async (inputs) => {\n  const timeseries = inputs?.cpuTime?.timeseries;\n  if (!Array.isArray(timeseries)) return 0;\n\n  return timeseries.reduce((sum, series) => {\n    if (!Array.isArray(series?.data)) return sum;\n\n    return sum + series.data.reduce((innerSum, point) => {\n      return innerSum + (typeof point?.total === \"number\" ? point.total : 0);\n    }, 0);\n  }, 0);\n};",
+                                                "packageJson": "{}"
+                                              },
+                                              "inputUiInfo": {
+                                                "customizedInputs": {}
+                                              },
+                                              "errorHandlingOptions": {
+                                                "retryOnFailure": {
+                                                  "value": false
+                                                },
+                                                "continueOnFailure": {
+                                                  "value": false
+                                                }
+                                              }
+                                            },
+                                            "nextAction": {
+                                              "id": "KyMgvyEDq9Qxup4fh6wg2",
+                                              "name": "step_q",
+                                              "type": "BRANCH",
+                                              "valid": true,
+                                              "settings": {
+                                                "conditions": [
+                                                  [
+                                                    {
+                                                      "operator": "NUMBER_IS_EQUAL_TO",
+                                                      "firstValue": "{{step_p}}",
+                                                      "secondValue": "0"
+                                                    }
+                                                  ]
+                                                ],
+                                                "inputUiInfo": {
+                                                  "customizedInputs": {}
+                                                }
+                                              },
+                                              "displayName": "No cpu usage?",
+                                              "onSuccessAction": {
+                                                "id": "wW2bZ1x3UOEjCSS2xTHdQ",
+                                                "name": "step_n",
+                                                "type": "BLOCK",
+                                                "valid": true,
+                                                "settings": {
+                                                  "input": {
+                                                    "key": "servicePlans",
+                                                    "value": "{{step_d['item']['properties']['serverFarmId']}}",
+                                                    "store_scope": "RUN",
+                                                    "ignore_if_exists": false
+                                                  },
+                                                  "blockName": "@openops/block-store",
+                                                  "blockType": "OFFICIAL",
+                                                  "actionName": "add_to_list",
+                                                  "inputUiInfo": {
+                                                    "customizedInputs": {}
+                                                  },
+                                                  "packageType": "REGISTRY",
+                                                  "blockVersion": "0.5.1",
+                                                  "errorHandlingOptions": {
+                                                    "retryOnFailure": {
+                                                      "value": false
+                                                    },
+                                                    "continueOnFailure": {
+                                                      "value": false
+                                                    }
+                                                  }
+                                                },
+                                                "displayName": "Add To List",
+                                                "stepIndex": 25
+                                              },
+                                              "stepIndex": 24
+                                            },
+                                            "displayName": "Get total cpu",
+                                            "stepIndex": 23
+                                          },
+                                          "displayName": "Get cpu time statistics",
+                                          "stepIndex": 22
+                                        },
+                                        "stepIndex": 21
                                       },
-                                      "stepIndex": 18
+                                      "displayName": "Get total requests",
+                                      "stepIndex": 20
                                     },
-                                    "displayName": "Get total cpu",
-                                    "stepIndex": 17
+                                    "displayName": "Get requests statistics",
+                                    "stepIndex": 19
                                   },
-                                  "displayName": "Get cpu time statistics",
-                                  "stepIndex": 16
+                                  "displayName": "Opportunity doesn't exist or snooze expired",
+                                  "onFailureAction": {
+                                    "id": "jfm1wnIuecN7fTPC86A16",
+                                    "name": "step_30",
+                                    "type": "BLOCK",
+                                    "valid": true,
+                                    "settings": {
+                                      "input": {},
+                                      "blockName": "@openops/block-end-flow",
+                                      "blockType": "OFFICIAL",
+                                      "actionName": "end_workflow",
+                                      "inputUiInfo": {
+                                        "customizedInputs": {}
+                                      },
+                                      "packageType": "REGISTRY",
+                                      "blockVersion": "0.0.1",
+                                      "errorHandlingOptions": {
+                                        "retryOnFailure": {
+                                          "value": false
+                                        },
+                                        "continueOnFailure": {
+                                          "value": false
+                                        }
+                                      }
+                                    },
+                                    "displayName": "Skip recommendation",
+                                    "stepIndex": 18
+                                  },
+                                  "stepIndex": 17
                                 },
-                                "stepIndex": 15
+                                "displayName": "Get existing opportunity",
+                                "stepIndex": 16
                               },
-                              "displayName": "Get total requests",
-                              "stepIndex": 14
+                              "stepIndex": 15
                             },
-                            "displayName": "Get requests statistics",
-                            "stepIndex": 13
+                            "displayName": "Get all web apps",
+                            "stepIndex": 14
                           },
-                          "displayName": "Opportunity doesn't exist or snooze expired",
-                          "onFailureAction": {
-                            "id": "jfm1wnIuecN7fTPC86A16",
-                            "name": "step_30",
+                          "displayName": "Prices based on price list?",
+                          "onSuccessAction": {
+                            "id": "vXdCvUrrCMN0RmW618Ahp",
+                            "name": "step_ab",
                             "type": "BLOCK",
                             "valid": true,
                             "settings": {
-                              "input": {},
-                              "blockName": "@openops/block-end-flow",
+                              "input": {
+                                "auth": "{{connections['Azure']}}",
+                                "dryRun": false,
+                                "commandToRun": "az rest --method get \\\n  --url \"https://prices.azure.com/api/retail/prices?\\$filter=armRegionName eq '{{step_32['item']}}' and serviceName eq 'Azure App Service'\"",
+                                "subscriptions": {
+                                  "subDropdown": "{{step_1['item']}}"
+                                },
+                                "useHostSession": {}
+                              },
+                              "blockName": "@openops/block-azure",
                               "blockType": "OFFICIAL",
-                              "actionName": "end_workflow",
+                              "actionName": "azure_cli",
                               "inputUiInfo": {
-                                "customizedInputs": {}
+                                "customizedInputs": {
+                                  "settings": {
+                                    "input": {
+                                      "subscriptions": {
+                                        "subDropdown": true
+                                      }
+                                    }
+                                  }
+                                }
                               },
                               "packageType": "REGISTRY",
                               "blockVersion": "0.0.1",
                               "errorHandlingOptions": {
                                 "retryOnFailure": {
-                                  "value": false
+                                  "value": true
                                 },
                                 "continueOnFailure": {
                                   "value": false
                                 }
                               }
                             },
-                            "displayName": "Skip recommendation",
+                            "nextAction": {
+                              "id": "1N5OGUd2hWr3dbXgN2FZb",
+                              "name": "step_ac",
+                              "type": "BLOCK",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "priceList",
+                                  "value": "{{step_ab['Items']}}",
+                                  "store_scope": "RUN"
+                                },
+                                "blockName": "@openops/block-store",
+                                "blockType": "OFFICIAL",
+                                "actionName": "put",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "blockVersion": "0.5.1",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Set region price list",
+                              "stepIndex": 13
+                            },
+                            "displayName": "Get current region price list",
                             "stepIndex": 12
                           },
                           "stepIndex": 11
                         },
-                        "displayName": "Get existing opportunity",
                         "stepIndex": 10
                       },
+                      "displayName": "Remove",
                       "stepIndex": 9
                     },
-                    "displayName": "Get all web apps",
+                    "displayName": "Remove candidates with prices",
                     "stepIndex": 8
                   },
                   "stepIndex": 7
                 },
+                "displayName": "This Workflow Name",
                 "stepIndex": 6
               },
-              "displayName": "This Workflow Name",
+              "displayName": "Are prices based on price list?",
               "stepIndex": 5
             },
             "displayName": "Format regions and accounts",
