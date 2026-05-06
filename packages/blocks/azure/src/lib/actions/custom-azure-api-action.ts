@@ -10,7 +10,6 @@ import { azureAuth, getUseHostSessionProperty } from '@openops/common';
 import { getAzureAccessToken } from '../auth/get-azure-access-token';
 import { getSubscriptionsDropdownForHostSession } from '../common-properties';
 
-const DEFAULT_BASE_URL = 'https://management.azure.com/?api-version=2025-04-01';
 const DEFAULT_RETRY_DELAY_MS = 60000;
 const MAX_RETRY_ATTEMPTS = 4;
 const COST_MANAGEMENT_RETRY_AFTER_HEADER_PATTERN =
@@ -23,7 +22,7 @@ const RETRY_AFTER_HEADERS = [
 
 export const customAzureApiCallAction = createCustomApiCallAction({
   auth: azureAuth,
-  baseUrl: () => DEFAULT_BASE_URL,
+  baseUrl: () => 'https://management.azure.com/?api-version=2025-04-01',
   name: 'custom_azure_api_call',
   description: 'Make a custom REST API call to Azure.',
   displayName: 'Custom Azure API Call',
@@ -54,27 +53,25 @@ export const customAzureApiCallAction = createCustomApiCallAction({
       },
     }),
   },
-  authMapping: getAuthHeaders,
+  authMapping: async (context: any) => {
+    const shouldUseHostCredentials =
+      context.propsValue.useHostSession?.['useHostSessionCheckbox'];
+    const selectedSubscription =
+      context.propsValue?.subscriptions?.['subDropdown'];
+
+    const token = await getAzureAccessToken(
+      context.auth,
+      !!shouldUseHostCredentials,
+      selectedSubscription,
+    );
+
+    return {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  },
   requestHandler: sendWithRetry,
 });
-
-async function getAuthHeaders(context: any): Promise<HttpHeaders> {
-  const shouldUseHostCredentials =
-    context.propsValue.useHostSession?.['useHostSessionCheckbox'];
-  const selectedSubscription =
-    context.propsValue?.subscriptions?.['subDropdown'];
-
-  const token = await getAzureAccessToken(
-    context.auth,
-    !!shouldUseHostCredentials,
-    selectedSubscription,
-  );
-
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
-}
 
 async function sendWithRetry(
   request: HttpRequest<Record<string, unknown>>,
