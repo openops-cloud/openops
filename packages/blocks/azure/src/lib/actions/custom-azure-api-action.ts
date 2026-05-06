@@ -14,11 +14,10 @@ const DEFAULT_RETRY_DELAY_MS = 60000;
 const MAX_RETRY_ATTEMPTS = 4;
 const COST_MANAGEMENT_RETRY_AFTER_HEADER_PATTERN =
   /^x-ms-ratelimit-microsoft\.costmanagement.*-retry-after$/i;
-const RETRY_AFTER_HEADERS = [
+const AZURE_RETRY_AFTER_HEADERS = new Set([
   'x-ms-ratelimit-microsoft.consumption-retry-after',
   'x-ms-ratelimit-retailprices-retry-after',
-  'retry-after',
-];
+]);
 
 export const customAzureApiCallAction = createCustomApiCallAction({
   auth: azureAuth,
@@ -118,7 +117,7 @@ function getHeaderRetryDelayMs(
 
   for (const [headerName, headerValue] of Object.entries(headers)) {
     if (
-      RETRY_AFTER_HEADERS.includes(headerName.toLowerCase()) ||
+      AZURE_RETRY_AFTER_HEADERS.has(headerName.toLowerCase()) ||
       COST_MANAGEMENT_RETRY_AFTER_HEADER_PATTERN.test(headerName)
     ) {
       retryValues.push(...normalizeHeaderValues(headerValue));
@@ -156,17 +155,12 @@ function parseRetryDelayMs(headerValue: string): number | null {
     return null;
   }
 
-  const retryAfterSeconds = Number.parseInt(trimmedValue, 10);
-  if (Number.isFinite(retryAfterSeconds)) {
-    return retryAfterSeconds * 1000;
-  }
-
-  const retryDate = Date.parse(trimmedValue);
-  if (Number.isNaN(retryDate)) {
+  const retryAfterSeconds = Number(trimmedValue);
+  if (!Number.isFinite(retryAfterSeconds)) {
     return null;
   }
 
-  return Math.max(retryDate - Date.now(), DEFAULT_RETRY_DELAY_MS);
+  return retryAfterSeconds * 1000;
 }
 
 function sleep(delayMs: number): Promise<void> {
