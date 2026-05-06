@@ -1,5 +1,9 @@
 import { DataTable, PaginationParams } from '@openops/components/ui';
-import { FlowRunStatus, FlowRunTriggerSource } from '@openops/shared';
+import {
+  FlowRunSortBy,
+  FlowRunStatus,
+  FlowRunTriggerSource,
+} from '@openops/shared';
 import { t } from 'i18next';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -11,7 +15,21 @@ import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTable
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
+import { isSortDirection } from '@/app/lib/sort-direction';
 import { formatUtils } from '@/app/lib/utils';
+
+const isFlowRunSortBy = (sortBy?: string): sortBy is FlowRunSortBy => {
+  return (
+    !!sortBy && Object.values(FlowRunSortBy).includes(sortBy as FlowRunSortBy)
+  );
+};
+
+const toFlowRunSortBy = (sortBy?: string): FlowRunSortBy | undefined => {
+  if (sortBy === 'flowId') {
+    return FlowRunSortBy.FLOW_NAME;
+  }
+  return isFlowRunSortBy(sortBy) ? sortBy : undefined;
+};
 
 const fetchData = async (
   params: {
@@ -31,8 +49,14 @@ const fetchData = async (
     limit: pagination.limit ?? 10,
     createdAfter: pagination.createdAfter,
     createdBefore: pagination.createdBefore,
+    sortBy: toFlowRunSortBy(pagination.sortBy),
+    sortDirection: isSortDirection(pagination.sortDirection)
+      ? pagination.sortDirection
+      : undefined,
   });
 };
+
+const REFRESH_INTERVAL_MS = 10000;
 
 const FlowRunsPage = () => {
   const navigate = useNavigate();
@@ -104,12 +128,20 @@ const FlowRunsPage = () => {
     }
   }, [isFetching]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefresh((prev) => !prev);
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex-col w-full">
       <div className="px-7 mt-1">
         <DataTable
           columns={columns}
           fetchData={fetchData}
+          enableSorting={true}
           navigationExcludedColumns={['actions']}
           filters={filters}
           refresh={refresh}

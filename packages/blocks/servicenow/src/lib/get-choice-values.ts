@@ -1,7 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
+import { generateAuthHeader, ServiceNowAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { ServiceNowAuth } from './auth';
-import { generateAuthHeader } from './generate-auth-header';
 
 export interface ServiceNowChoice {
   label: string;
@@ -23,10 +22,7 @@ export async function getServiceNowChoiceValues(
       method: HttpMethod.GET,
       url: `https://${auth.instanceName}.service-now.com/api/now/table/sys_choice`,
       headers: {
-        ...generateAuthHeader({
-          username: auth.username,
-          password: auth.password,
-        }),
+        ...generateAuthHeader(auth),
         Accept: 'application/json',
       },
       queryParams: {

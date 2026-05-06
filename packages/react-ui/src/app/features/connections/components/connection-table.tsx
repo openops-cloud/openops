@@ -1,6 +1,7 @@
 import { PermissionGuard } from '@/app/common/components/permission-guard';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { handleMutationError } from '@/app/interceptors/interceptor-utils';
+import { isSortDirection } from '@/app/lib/sort-direction';
 import { formatUtils } from '@/app/lib/utils';
 import {
   BlockIcon,
@@ -16,6 +17,7 @@ import {
 } from '@openops/components/ui';
 import {
   AppConnection,
+  AppConnectionSortBy,
   AppConnectionStatus,
   MinimalFlow,
   Permission,
@@ -33,6 +35,15 @@ import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import { useConnectionsContext } from './connections-context';
 import { DeleteConnectionDialog } from './delete-connection-dialog';
 import { EditConnectionDialog } from './edit-connection-dialog';
+
+const isAppConnectionSortBy = (
+  sortBy?: string,
+): sortBy is AppConnectionSortBy => {
+  return (
+    !!sortBy &&
+    Object.values(AppConnectionSortBy).includes(sortBy as AppConnectionSortBy)
+  );
+};
 
 type BlockIconWithBlockNameProps = {
   authProviderKey: string;
@@ -160,6 +171,7 @@ const columns: (
   return [
     {
       accessorKey: 'authProviderKey',
+      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('App')} />
       ),
@@ -230,6 +242,7 @@ const columns: (
     },
     {
       accessorKey: 'actions',
+      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="" />
       ),
@@ -264,6 +277,12 @@ const fetchData = async (
     cursor: pagination.cursor,
     limit: pagination.limit ?? 10,
     status: params.status,
+    sortBy: isAppConnectionSortBy(pagination.sortBy)
+      ? pagination.sortBy
+      : undefined,
+    sortDirection: isSortDirection(pagination.sortDirection)
+      ? pagination.sortDirection
+      : undefined,
   });
 };
 
@@ -278,6 +297,7 @@ function AppConnectionsTable() {
           fetchData={fetchData}
           refresh={refresh}
           filters={filters}
+          enableSorting={true}
         />
       </div>
     </div>

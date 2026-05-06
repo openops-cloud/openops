@@ -1,10 +1,12 @@
 import { aiChatApi } from '@/app/features/builder/ai-chat/lib/chat-api';
 import { PromiseQueue } from '@/app/lib/promise-queue';
 import {
+  findTestRunLimit,
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
   FlowVersion,
+  TestRunLimitSettings,
 } from '@openops/shared';
 import { flowsApi } from '../flows/lib/flows-api';
 import { BuilderState, RightSideBarType } from './builder-types';
@@ -65,7 +67,13 @@ export const updateFlowVersion = (
             id: updatedFlowVersion.version.id,
             state: updatedFlowVersion.version.state,
             updated: updatedFlowVersion.version.updated,
-            testRunActionLimits: updatedFlowVersion.version.testRunActionLimits,
+            testRunActionLimits:
+              operation.type === FlowOperationType.UPDATE_TEST_RUN_ACTION_LIMITS
+                ? updatedFlowVersion.version.testRunActionLimits
+                : mergeLocalWithServerLimits(
+                    state.flowVersion.testRunActionLimits,
+                    updatedFlowVersion.version.testRunActionLimits,
+                  ),
           },
           saving: flowUpdatesQueue.size() !== 0,
         };
@@ -79,6 +87,25 @@ export const updateFlowVersion = (
   flowUpdatesQueue.add(updateRequest);
   return { flowVersion: newFlowVersion };
 };
+
+function mergeLocalWithServerLimits(
+  local: TestRunLimitSettings,
+  server: TestRunLimitSettings,
+): TestRunLimitSettings {
+  const mergedLimits = server.limits.map((serverLimit) => {
+    const localLimit = findTestRunLimit(
+      local.limits,
+      serverLimit.blockName,
+      serverLimit.actionName,
+    );
+    return localLimit ?? serverLimit;
+  });
+
+  return {
+    isEnabled: local.isEnabled,
+    limits: mergedLimits,
+  };
+}
 
 async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
   try {

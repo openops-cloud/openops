@@ -140,10 +140,6 @@ export const setupApp = async (
     }),
   });
 
-  app.addHook('onSend', async (_, reply) => {
-    void reply.headers({ 'X-Version': system.get(SharedSystemProp.VERSION) });
-  });
-
   await app.register(rateLimitModule);
 
   await app.register(cors, {
