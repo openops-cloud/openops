@@ -1,12 +1,11 @@
 import {
+  createCustomApiCallAction,
+  httpClient,
   HttpError,
   HttpHeaders,
-  HttpMethod,
   HttpRequest,
-  QueryParams,
-  httpClient,
 } from '@openops/blocks-common';
-import { Property, createAction } from '@openops/blocks-framework';
+import { Property } from '@openops/blocks-framework';
 import { azureAuth, getUseHostSessionProperty } from '@openops/common';
 import { getAzureAccessToken } from '../auth/get-azure-access-token';
 import { getSubscriptionsDropdownForHostSession } from '../common-properties';
@@ -22,13 +21,13 @@ const RETRY_AFTER_HEADERS = [
   'retry-after',
 ];
 
-export const customAzureApiCallAction = createAction({
+export const customAzureApiCallAction = createCustomApiCallAction({
   auth: azureAuth,
+  baseUrl: () => DEFAULT_BASE_URL,
   name: 'custom_azure_api_call',
   description: 'Make a custom REST API call to Azure.',
   displayName: 'Custom Azure API Call',
-  isWriteAction: true,
-  props: {
+  additionalProps: {
     documentation: Property.MarkDown({
       value:
         'For more information, visit the [Azure API documentation](https://learn.microsoft.com/rest/api/azure/).',
@@ -54,88 +53,9 @@ export const customAzureApiCallAction = createAction({
         return {};
       },
     }),
-    url: Property.DynamicProperties({
-      displayName: '',
-      required: true,
-      refreshers: ['auth'],
-      props: async () => {
-        return {
-          url: Property.ShortText({
-            displayName: 'URL',
-            description: 'The full URL to use, including the base URL',
-            required: true,
-            defaultValue: DEFAULT_BASE_URL,
-          }),
-        };
-      },
-    }),
-    method: Property.StaticDropdown({
-      displayName: 'Method',
-      required: true,
-      options: {
-        options: Object.values(HttpMethod).map((value) => ({
-          label: value,
-          value,
-        })),
-      },
-    }),
-    headers: Property.Object({
-      displayName: 'Headers',
-      description:
-        'Authorization headers are injected automatically from your connection.',
-      required: false,
-    }),
-    queryParams: Property.Object({
-      displayName: 'Query Parameters',
-      required: false,
-    }),
-    body: Property.Json({
-      displayName: 'Body',
-      required: false,
-    }),
-    failsafe: Property.Checkbox({
-      displayName: 'No Error on Failure',
-      required: false,
-    }),
-    timeout: Property.Number({
-      displayName: 'Timeout (in seconds)',
-      required: false,
-    }),
   },
-  run: async (context) => {
-    const { method, url, headers, queryParams, body, failsafe, timeout } =
-      context.propsValue;
-
-    const urlValue = url?.['url'];
-    if (!method || !urlValue) {
-      throw new Error('Method and URL are required.');
-    }
-
-    let headersValue = (headers as HttpHeaders | undefined) ?? {};
-    const authHeaders = await getAuthHeaders(context);
-    headersValue = {
-      ...headersValue,
-      ...authHeaders,
-    };
-
-    const request: HttpRequest<Record<string, unknown>> = {
-      method,
-      url: urlValue,
-      headers: headersValue,
-      queryParams: (queryParams as QueryParams | undefined) ?? {},
-      timeout: timeout ? timeout * 1000 : 0,
-      ...(body ? { body } : {}),
-    };
-
-    try {
-      return await sendWithRetry(request);
-    } catch (error) {
-      if (failsafe && error instanceof HttpError) {
-        return error.errorMessage();
-      }
-      throw error;
-    }
-  },
+  authMapping: getAuthHeaders,
+  requestHandler: sendWithRetry,
 });
 
 async function getAuthHeaders(context: any): Promise<HttpHeaders> {

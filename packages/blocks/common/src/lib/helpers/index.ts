@@ -26,6 +26,10 @@ export const getAccessTokenOrThrow = (
   return accessToken;
 };
 
+type CustomApiCallRequestHandler = (
+  request: HttpRequest<Record<string, unknown>>,
+) => Promise<unknown>;
+
 export function createCustomApiCallAction({
   auth,
   baseUrl,
@@ -34,6 +38,7 @@ export function createCustomApiCallAction({
   displayName,
   name,
   additionalProps,
+  requestHandler,
 }: {
   auth?: BlockAuthProperty;
   baseUrl: (auth?: unknown) => string;
@@ -45,6 +50,7 @@ export function createCustomApiCallAction({
   displayName?: string | null;
   name?: string | null;
   additionalProps?: Record<string, any>;
+  requestHandler?: CustomApiCallRequestHandler;
 }) {
   return createAction({
     name: name ? name : 'custom_api_call',
@@ -139,6 +145,10 @@ export function createCustomApiCallAction({
       }
 
       try {
+        if (requestHandler) {
+          return await requestHandler(request);
+        }
+
         return await httpClient.sendRequest(request);
       } catch (error) {
         if (failsafe) {
