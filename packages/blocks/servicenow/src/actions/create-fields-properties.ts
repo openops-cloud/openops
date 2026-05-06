@@ -1,10 +1,10 @@
 import { Property } from '@openops/blocks-framework';
-import { ServiceNowAuth } from '../lib/auth';
-import { createFieldValueProperty } from '../lib/create-field-value-property';
 import {
   getServiceNowTableFields,
+  ServiceNowAuth,
   ServiceNowTableField,
-} from '../lib/get-table-fields';
+} from '@openops/common';
+import { createFieldValueProperty } from '../lib/create-field-value-property';
 
 function filterWritableFields(tableFields: ServiceNowTableField[]) {
   return tableFields.filter(

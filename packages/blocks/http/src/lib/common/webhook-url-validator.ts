@@ -47,36 +47,33 @@ export async function validateAndRewritePublicWebhookUrl(
     return userUrl;
   }
 
-  try {
+  const publicUrl = await networkUtls.getPublicUrl();
+  const internalApiUrl = networkUtls.getInternalApiUrl();
+
+  const publicUrlObj = new URL(publicUrl);
+  const internalUrlObj = new URL(internalApiUrl);
+  const userUrlObj = new URL(userUrl);
+
+  if (userUrlObj.host !== publicUrlObj.host) {
     await validateHost(userUrl);
     return userUrl;
-  } catch (originalError) {
-    const publicUrl = await networkUtls.getPublicUrl();
-    const internalApiUrl = networkUtls.getInternalApiUrl();
-
-    const publicUrlObj = new URL(publicUrl);
-    const internalUrlObj = new URL(internalApiUrl);
-    const userUrlObj = new URL(userUrl);
-
-    if (userUrlObj.host !== publicUrlObj.host) {
-      throw originalError;
-    }
-
-    const publicBasePath = normalizeBasePath(publicUrlObj.pathname);
-    const internalBasePath = normalizeBasePath(internalUrlObj.pathname);
-
-    const webhookPath = extractWebhookPath(
-      userUrlObj.pathname,
-      publicBasePath,
-      internalBasePath,
-    );
-
-    if (!webhookPath) {
-      throw originalError;
-    }
-
-    const rewrittenPath = normalizePath(`${internalBasePath}${webhookPath}`);
-
-    return `${internalUrlObj.origin}${rewrittenPath}${userUrlObj.search}${userUrlObj.hash}`;
   }
+
+  const publicBasePath = normalizeBasePath(publicUrlObj.pathname);
+  const internalBasePath = normalizeBasePath(internalUrlObj.pathname);
+
+  const webhookPath = extractWebhookPath(
+    userUrlObj.pathname,
+    publicBasePath,
+    internalBasePath,
+  );
+
+  if (!webhookPath) {
+    await validateHost(userUrl);
+    return userUrl;
+  }
+
+  const rewrittenPath = normalizePath(`${internalBasePath}${webhookPath}`);
+
+  return `${internalUrlObj.origin}${rewrittenPath}${userUrlObj.search}${userUrlObj.hash}`;
 }

@@ -9,11 +9,13 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
   required: true,
   scope: [
     'User.Read',
+    'User.ReadBasic.All',
     'ChannelMessage.Send',
     'Channel.ReadBasic.All',
     'Chat.ReadBasic',
     'Chat.Read',
     'Chat.ReadWrite',
+    'Chat.Create',
     'ChatMessage.Send',
     'ChatMessage.Read',
     'Team.ReadBasic.All',

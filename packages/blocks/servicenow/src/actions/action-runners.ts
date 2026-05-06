@@ -1,11 +1,14 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { Property, Validators } from '@openops/blocks-framework';
-import { FilterType, ViewFilterTypesEnum } from '@openops/common';
+import {
+  buildServiceNowApiUrl,
+  FilterType,
+  generateAuthHeader,
+  ServiceNowAuth,
+  ViewFilterTypesEnum,
+} from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { ServiceNowAuth } from '../lib/auth';
-import { buildServiceNowApiUrl } from '../lib/build-api-url';
 import { buildServiceNowQuery } from '../lib/filter-to-query';
-import { generateAuthHeader } from '../lib/generate-auth-header';
 
 type RecordType = 'record' | 'request';
 
@@ -53,10 +56,7 @@ interface UpsertRecordParams {
 
 function buildAuthHeaders(auth: ServiceNowAuth) {
   return {
-    ...generateAuthHeader({
-      username: auth.username,
-      password: auth.password,
-    }),
+    ...generateAuthHeader(auth),
     Accept: 'application/json',
   };
 }

@@ -94,6 +94,7 @@
                 "domainIds": [],
                 "clusterIds": [],
                 "filterByARNs": false,
+                "allowPartialResults": true,
                 "filterProperty": {
                   "regions": "{{step_b['regions']}}"
                 }
@@ -106,6 +107,7 @@
                   "settings": {
                     "input": {
                       "auth": true,
+                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       },
@@ -143,6 +145,7 @@
                   "instanceIds": [],
                   "filterByARNs": false,
                   "snapshotType": [],
+                  "allowPartialResults": true,
                   "filterProperty": {
                     "regions": "{{step_b['regions']}}"
                   },
@@ -159,6 +162,7 @@
                     "settings": {
                       "input": {
                         "auth": true,
+                        "allowPartialResults": true,
                         "accounts": {
                           "accounts": true
                         },
@@ -189,7 +193,7 @@
                 "settings": {
                   "input": {
                     "keyName": "DBInstanceIdentifier",
-                    "listItems": "{{step_2}}"
+                    "listItems": "{{step_2['results']}}"
                   },
                   "blockName": "@openops/block-list-operations",
                   "blockType": "OFFICIAL",
@@ -253,7 +257,7 @@
                     "type": "LOOP_ON_ITEMS",
                     "valid": true,
                     "settings": {
-                      "items": "{{step_1}}",
+                      "items": "{{step_1['results']}}",
                       "inputUiInfo": {
                         "customizedInputs": {}
                       }
@@ -631,9 +635,7 @@
                                       "endDate": "{{step_15}}",
                                       "startDate": "{{step_8[0].EventTime}}",
                                       "endDateFormat": "YYYY-MM-DDTHH:mm:ss",
-                                      "unitDifference": [
-                                        "day"
-                                      ],
+                                      "unitDifference": ["day"],
                                       "startDateFormat": "YYYY-MM-DDTHH:mm:ss"
                                     },
                                     "blockName": "@openops/block-date-helper",

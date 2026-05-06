@@ -1,10 +1,11 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { Vendor } from '@openops/common';
 import { cloudabilityAuth } from '../auth';
 import {
   getRecommendationTypesProperty,
   getVendorsProperty,
 } from '../common/common-properties';
-import { snoozeRecommendations, Vendor } from '../common/recommendations-api';
+import { snoozeRecommendations } from '../common/recommendations-api';
 
 export const snoozeRecommendationAction = createAction({
   name: `cloudability_snooze_recommendations`,
