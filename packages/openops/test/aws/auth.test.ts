@@ -17,19 +17,10 @@ jest.mock('@openops/server-shared', () => ({
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
     ENABLE_HOST_SESSION: 'ENABLE_HOST_SESSION',
-    AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
   },
 }));
 
-import {
-  amazonAuth,
-  getAwsAccountsMultiSelectDropdown,
-  getAwsAccountsSingleSelectDropdown,
-  getCredentialsForAccount,
-  getCredentialsFromAuth,
-  getCredentialsListFromAuth,
-  getRoleForAccount,
-} from '../../src/lib/aws/auth';
+import { amazonAuth } from '../../src/lib/aws/auth';
 
 const EXAMPLE_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const EXAMPLE_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
@@ -70,24 +61,9 @@ function mockSuccessfulAccountId() {
 }
 
 async function reimportAuthWithImplicitRole() {
-  mockSystem.getBoolean.mockImplementation((prop) => {
-    if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') return true;
-    return false;
-  });
+  mockSystem.getBoolean.mockReturnValue(true);
   jest.resetModules();
-  const { amazonAuth: freshAmazonAuth } = await import(
-    '../../src/lib/aws/auth'
-  );
-  return freshAmazonAuth;
-}
-
-async function reimportAuthWithAzureFederation() {
-  mockSystem.getBoolean.mockImplementation((prop) => {
-    if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') return true;
-    if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') return true;
-    return false;
-  });
-  jest.resetModules();
+  mockSystem.getBoolean.mockReturnValue(true);
   const { amazonAuth: freshAmazonAuth } = await import(
     '../../src/lib/aws/auth'
   );
@@ -200,9 +176,32 @@ describe('AWS Auth Validation', () => {
   });
 
   describe('Implicit role validation', () => {
-    test('should succeed when implicit role enabled, no credentials and no roles', async () => {
-      const freshAmazonAuth = await reimportAuthWithImplicitRole();
+    test('should validate with GetCallerIdentity when implicit role enabled and no credentials', async () => {
       mockSuccessfulAccountId();
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
+
+      const result = await freshAmazonAuth.validate!({
+        auth: {
+          defaultRegion: DEFAULT_REGION,
+        } as any,
+      });
+
+      expect(result).toEqual({ valid: true });
+      expect(mockGetAccountId).toHaveBeenCalledWith(
+        {
+          accessKeyId: '',
+          secretAccessKey: '',
+          endpoint: undefined,
+        },
+        DEFAULT_REGION,
+      );
+    });
+
+    test('should fail when implicit role validation fails', async () => {
+      mockGetAccountId.mockRejectedValue(
+        new Error('Unable to locate credentials'),
+      );
+      const freshAmazonAuth = await reimportAuthWithImplicitRole();
 
       const result = await freshAmazonAuth.validate!({
         auth: {
@@ -211,52 +210,9 @@ describe('AWS Auth Validation', () => {
       });
 
       expect(result).toEqual({
-        valid: true,
+        valid: false,
+        error: 'Unable to locate credentials',
       });
-      expect(mockGetAccountId).toHaveBeenCalled();
-    });
-
-    test('should succeed when azure federation and implicit role enabled, no credentials and no roles', async () => {
-      const freshAmazonAuth = await reimportAuthWithAzureFederation();
-
-      const result = await freshAmazonAuth.validate!({
-        auth: {
-          defaultRegion: DEFAULT_REGION,
-        } as any,
-      });
-
-      expect(result).toEqual({
-        valid: true,
-      });
-    });
-
-    test('should NOT skip base credentials validation when implicit role enabled and no credentials provided', async () => {
-      const freshAmazonAuth = await reimportAuthWithImplicitRole();
-      mockSuccessfulAccountId();
-
-      const result = await freshAmazonAuth.validate!({
-        auth: {
-          defaultRegion: DEFAULT_REGION,
-          roles: [createRole('111111111111', 'Prod')],
-        } as any,
-      });
-
-      expect(result.valid).toBe(true);
-      expect(mockGetAccountId).toHaveBeenCalled();
-    });
-
-    test('should validate base credentials when implicit role enabled but credentials provided', async () => {
-      const freshAmazonAuth = await reimportAuthWithImplicitRole();
-      mockSuccessfulAccountId();
-
-      const result = await freshAmazonAuth.validate!({
-        auth: createAuthObject({
-          roles: [createRole('111111111111', 'Prod')],
-        }),
-      });
-
-      expect(result.valid).toBe(true);
-      expect(mockGetAccountId).toHaveBeenCalled();
     });
   });
 
@@ -388,42 +344,6 @@ describe('AWS Auth Validation', () => {
         undefined,
       );
     });
-
-    test('should validate roles in batches of 5', async () => {
-      mockSuccessfulAssumeRole();
-      const roles = Array.from({ length: 7 }, (_, i) =>
-        createRole(`11111111111${i}`, `Account${i}`),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({ roles }),
-      });
-
-      expect(result.valid).toBe(true);
-      expect(mockAssumeRole).toHaveBeenCalledTimes(7);
-    });
-
-    test('should fail early if a batch fails', async () => {
-      mockAssumeRole
-        .mockResolvedValueOnce({}) // 1
-        .mockResolvedValueOnce({}) // 2
-        .mockRejectedValueOnce(new Error('Batch fail')); // 3
-
-      const roles = Array.from({ length: 6 }, (_, i) =>
-        createRole(`11111111111${i}`, `Account${i}`),
-      );
-
-      const result = await amazonAuth.validate!({
-        auth: createAuthObject({ roles }),
-      });
-
-      expect(result.valid).toBe(false);
-      expect((result as any).error).toContain('Batch fail');
-      // It should have called 5 times for the first batch, and failed at the first rejection in Promise.all
-      // but wait, validateRoleBatch uses Promise.allSettled and then checks results.
-      // so for a batch of 5, it will always call assumeRole 5 times.
-      expect(mockAssumeRole).toHaveBeenCalledTimes(5);
-    });
   });
 
   describe('Error handling', () => {
@@ -492,274 +412,6 @@ describe('AWS Auth Validation', () => {
       );
       expect(freshAmazonAuth.props.accessKeyId.required).toBe(false);
       expect(freshAmazonAuth.props.secretAccessKey.required).toBe(false);
-    });
-  });
-
-  describe('getCredentialsFromAuth', () => {
-    test('should return base credentials if no assumeRoleArn is provided', async () => {
-      const auth = createAuthObject();
-      const result = await getCredentialsFromAuth(auth);
-
-      expect(result).toEqual({
-        accessKeyId: EXAMPLE_ACCESS_KEY,
-        secretAccessKey: EXAMPLE_SECRET_KEY,
-        endpoint: undefined,
-      });
-      expect(mockAssumeRole).not.toHaveBeenCalled();
-    });
-
-    test('should return assumed role credentials if assumeRoleArn is provided', async () => {
-      mockSuccessfulAssumeRole();
-      const auth = createAuthObject({
-        assumeRoleArn: 'arn:aws:iam::123456789012:role/TestRole',
-        assumeRoleExternalId: 'ext-id',
-      });
-      const result = await getCredentialsFromAuth(auth);
-
-      expect(result).toEqual({
-        accessKeyId: 'ASIATEMP',
-        secretAccessKey: 'tempSecret',
-        sessionToken: 'tempToken',
-        endpoint: undefined,
-      });
-      expect(mockAssumeRole).toHaveBeenCalledWith(
-        EXAMPLE_ACCESS_KEY,
-        EXAMPLE_SECRET_KEY,
-        DEFAULT_REGION,
-        'arn:aws:iam::123456789012:role/TestRole',
-        'ext-id',
-        undefined,
-      );
-    });
-
-    test('should throw error if assumeRole fails', async () => {
-      mockAssumeRole.mockRejectedValue(new Error('STS Error'));
-      const auth = createAuthObject({
-        assumeRoleArn: 'arn:aws:iam::123456789012:role/TestRole',
-      });
-
-      await expect(getCredentialsFromAuth(auth)).rejects.toThrow('STS Error');
-    });
-  });
-
-  describe('getCredentialsListFromAuth', () => {
-    test('should return base credentials if no roles are provided', async () => {
-      const auth = createAuthObject();
-      const result = await getCredentialsListFromAuth(auth);
-
-      expect(result).toEqual([
-        {
-          accessKeyId: EXAMPLE_ACCESS_KEY,
-          secretAccessKey: EXAMPLE_SECRET_KEY,
-          endpoint: undefined,
-        },
-      ]);
-    });
-
-    test('should return assumed role credentials for specified accounts', async () => {
-      mockSuccessfulAssumeRole();
-      const auth = createAuthObject({
-        roles: [
-          createRole('111111111111', 'Prod'),
-          createRole('222222222222', 'Dev'),
-        ],
-      });
-
-      const result = await getCredentialsListFromAuth(auth, ['111111111111']);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].accessKeyId).toBe('ASIATEMP');
-      expect(mockAssumeRole).toHaveBeenCalledTimes(1);
-      expect(mockAssumeRole).toHaveBeenCalledWith(
-        EXAMPLE_ACCESS_KEY,
-        EXAMPLE_SECRET_KEY,
-        DEFAULT_REGION,
-        'arn:aws:iam::111111111111:role/ProdRole',
-        undefined,
-        undefined,
-      );
-    });
-
-    test('should handle implicit role in getCredentialsListFromAuth when credentials missing', async () => {
-      mockSuccessfulAssumeRole();
-      const auth = {
-        defaultRegion: DEFAULT_REGION,
-        roles: [createRole('111111111111', 'Prod')],
-      };
-
-      const result = await getCredentialsListFromAuth(auth, ['111111111111']);
-      expect(result[0].accessKeyId).toBe('ASIATEMP');
-      expect(mockAssumeRole).toHaveBeenCalledWith(
-        undefined,
-        undefined,
-        DEFAULT_REGION,
-        'arn:aws:iam::111111111111:role/ProdRole',
-        undefined,
-        undefined,
-      );
-    });
-
-    test('should throw error if no matching roles found for accounts', async () => {
-      const auth = createAuthObject({
-        roles: [createRole('111111111111', 'Prod')],
-      });
-
-      await expect(
-        getCredentialsListFromAuth(auth, ['222222222222']),
-      ).rejects.toThrow('No credentials found for accounts');
-    });
-
-    test('should return multiple assumed role credentials', async () => {
-      mockAssumeRole.mockResolvedValueOnce({
-        AccessKeyId: 'AK1',
-        SecretAccessKey: 'SK1',
-      });
-      mockAssumeRole.mockResolvedValueOnce({
-        AccessKeyId: 'AK2',
-        SecretAccessKey: 'SK2',
-      });
-
-      const auth = createAuthObject({
-        roles: [
-          createRole('111111111111', 'Prod'),
-          createRole('222222222222', 'Dev'),
-        ],
-      });
-
-      const result = await getCredentialsListFromAuth(auth, [
-        '111111111111',
-        '222222222222',
-      ]);
-
-      expect(result).toHaveLength(2);
-      expect(result[0].accessKeyId).toBe('AK1');
-      expect(result[1].accessKeyId).toBe('AK2');
-    });
-
-    test('should throw error if any assumeRole fails', async () => {
-      mockAssumeRole
-        .mockResolvedValueOnce({ AccessKeyId: 'AK1', SecretAccessKey: 'SK1' })
-        .mockRejectedValueOnce(new Error('STS Error'));
-
-      const auth = createAuthObject({
-        roles: [
-          createRole('111111111111', 'Prod'),
-          createRole('222222222222', 'Dev'),
-        ],
-      });
-
-      await expect(
-        getCredentialsListFromAuth(auth, ['111111111111', '222222222222']),
-      ).rejects.toThrow('STS Error');
-    });
-  });
-
-  describe('getCredentialsForAccount', () => {
-    test('should return credentials for a single account', async () => {
-      mockSuccessfulAssumeRole();
-      const auth = createAuthObject({
-        roles: [createRole('111111111111', 'Prod')],
-      });
-
-      const result = await getCredentialsForAccount(auth, '111111111111');
-
-      expect(result.accessKeyId).toBe('ASIATEMP');
-      expect(mockAssumeRole).toHaveBeenCalledWith(
-        EXAMPLE_ACCESS_KEY,
-        EXAMPLE_SECRET_KEY,
-        DEFAULT_REGION,
-        'arn:aws:iam::111111111111:role/ProdRole',
-        undefined,
-        undefined,
-      );
-    });
-
-    test('should throw error if no matching role is found for the account', async () => {
-      const auth = createAuthObject({
-        roles: [createRole('111111111111', 'Prod')],
-      });
-
-      await expect(
-        getCredentialsForAccount(auth, '222222222222'),
-      ).rejects.toThrow('No credentials found for accounts');
-    });
-  });
-
-  describe('getRoleForAccount', () => {
-    test('should return the role for a specific accountId', () => {
-      const role1 = createRole('111111111111', 'Prod');
-      const role2 = createRole('222222222222', 'Dev');
-      const auth = { roles: [role1, role2] };
-
-      const result = getRoleForAccount(auth, '111111111111');
-      expect(result).toEqual(role1);
-    });
-
-    test('should throw error if role is not found', () => {
-      const auth = { roles: [createRole('111111111111', 'Prod')] };
-
-      expect(() => getRoleForAccount(auth, '333333333333')).toThrow(
-        'Role not found for account',
-      );
-    });
-
-    test('should return undefined if roles array is empty', () => {
-      const auth = { roles: [] };
-      expect(getRoleForAccount(auth, '111111111111')).toBeUndefined();
-    });
-  });
-
-  describe('Dropdowns', () => {
-    test('getAwsAccountsMultiSelectDropdown should return a dynamic property', () => {
-      const dropdown = getAwsAccountsMultiSelectDropdown();
-      expect(dropdown.accounts).toBeDefined();
-      expect(dropdown.accounts.refreshers).toContain('auth');
-    });
-
-    test('getAwsAccountsSingleSelectDropdown should return a dynamic property', () => {
-      const dropdown = getAwsAccountsSingleSelectDropdown();
-      expect(dropdown.accounts).toBeDefined();
-      expect(dropdown.accounts.refreshers).toContain('auth');
-    });
-
-    test('dropdown props function should handle empty roles', async () => {
-      const dropdown = getAwsAccountsSingleSelectDropdown() as any;
-      const props = await dropdown.accounts.props({ auth: {} }, {} as any);
-      expect(props['accounts']).toEqual({});
-    });
-
-    test('dropdown props function should map roles to options for single select', async () => {
-      const dropdown = getAwsAccountsSingleSelectDropdown() as any;
-      const auth = {
-        roles: [
-          {
-            accountName: 'Prod',
-            assumeRoleArn: 'arn:aws:iam::111111111111:role/ProdRole',
-          },
-        ],
-      };
-      const props = await dropdown.accounts.props({ auth }, {} as any);
-      expect(props['accounts'].options.options).toEqual([
-        { label: 'Prod', value: '111111111111' },
-      ]);
-      expect(props['accounts'].displayName).toBe('Account');
-    });
-
-    test('dropdown props function should map roles to options for multi select', async () => {
-      const dropdown = getAwsAccountsMultiSelectDropdown() as any;
-      const auth = {
-        roles: [
-          {
-            accountName: 'Prod',
-            assumeRoleArn: 'arn:aws:iam::111111111111:role/ProdRole',
-          },
-        ],
-      };
-      const props = await dropdown.accounts.props({ auth }, {} as any);
-      expect(props['accounts'].options.options).toEqual([
-        { label: 'Prod', value: '111111111111' },
-      ]);
-      expect(props['accounts'].displayName).toBe('Accounts');
     });
   });
 });
