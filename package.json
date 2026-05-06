@@ -213,7 +213,6 @@
     "isolated-vm": "5.0.1",
     "js-yaml": "4.1.0",
     "jsdom": "23.0.1",
-    "jshint": "0.5.9",
     "json-server": "1.0.0-beta.0",
     "json-to-pretty-yaml": "1.2.2",
     "jsoneditor": "10.0.3",
