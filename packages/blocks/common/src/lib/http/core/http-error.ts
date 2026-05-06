@@ -10,7 +10,6 @@ export class HttpError extends Error {
       JSON.stringify({
         response: {
           status: _err?.response?.status || 500,
-          headers: (_err?.response?.headers as HttpHeaders | undefined) ?? {},
           body: _err?.response?.data,
         },
         request: {
@@ -24,8 +23,6 @@ export class HttpError extends Error {
     return {
       response: {
         status: this._err?.response?.status || 500,
-        headers:
-          (this._err?.response?.headers as HttpHeaders | undefined) ?? {},
         body: this._err?.response?.data,
       },
       request: {
