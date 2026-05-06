@@ -8,10 +8,6 @@ const isImplicitRoleEnabled = system.getBoolean(
   SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
 );
 
-const isAzureManagedIdentityEnabled = system.getBoolean(
-  SharedSystemProp.AWS_USE_AZURE_MANAGED_IDENTITY,
-);
-
 export interface AwsCredentials {
   accessKeyId: string;
   secretAccessKey: string;
@@ -348,14 +344,6 @@ For large or complex setups, enhanced features are available, including:
     if (!fieldValidation.valid) {
       return fieldValidation;
     }
-
-    // const hasCredentials = auth.accessKeyId && auth.secretAccessKey;
-    // const shouldValidateWithAzureManagedIdentity =
-    //   !hasCredentials && isImplicitRoleEnabled && isAzureManagedIdentityEnabled;
-    //
-    // if (shouldValidateWithAzureManagedIdentity) {
-    //   return validateRoleAssumptions(auth);
-    // }
 
     const baseCredentialsValidation = await validateBaseCredentials(auth);
     if (!baseCredentialsValidation.valid) {
