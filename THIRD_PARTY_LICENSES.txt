@@ -24127,17 +24127,6 @@ http://sjs.mit-license.org
 
 -----------
 
-The following npm packages may be included in this product:
-
- - argsparser@0.0.7
- - jshint@0.5.9
-
-These packages each contain the following license:
-
-http://www.opensource.org/licenses/mit-license.php
-
------------
-
 The following npm package may be included in this product:
 
  - simple-lru-cache@0.0.2
