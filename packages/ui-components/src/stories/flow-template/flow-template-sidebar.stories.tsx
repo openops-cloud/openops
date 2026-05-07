@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent } from 'storybook/test';
 import { FlowTemplateFilterSidebar } from '../../components/flow-template/flow-template-filter-sidebar';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 import { TooltipProvider } from '../../ui/tooltip';

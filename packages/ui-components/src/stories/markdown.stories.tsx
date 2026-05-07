@@ -1,9 +1,7 @@
-import { action } from '@storybook/addon-actions';
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
-import { fireEvent, waitFor } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { action } from 'storybook/actions';
+import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 import { Markdown, MarkdownCodeVariations } from '../components';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
 import { Toaster } from '../ui/toaster';
