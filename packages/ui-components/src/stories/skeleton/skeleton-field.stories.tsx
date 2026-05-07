@@ -1,6 +1,6 @@
-import { expect } from '@storybook/jest';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
+import { expect } from 'storybook/test';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { SkeletonField } from '../../components/skeleton/skeleton-field';
 import { SkeletonFieldProvider } from '../../components/skeleton/skeleton-field-context';
