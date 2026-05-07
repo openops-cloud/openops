@@ -25,7 +25,7 @@
     "push-i18n": "crowdin upload sources",
     "i18n:extract": "i18next --config packages/react-ui/i18next-parser.config.js && jq 'to_entries | map({(.key): .key}) | add' packages/react-ui/public/locales/en/translation.json > packages/react-ui/public/locales/en/translation.tmp.json && mv packages/react-ui/public/locales/en/translation.tmp.json packages/react-ui/public/locales/en/translation.json",
     "storybook": "nx run ui-components:storybook",
-    "build-storybook": "nx run ui-components:build-storybook --",
+    "build-storybook": "cd packages/ui-components && storybook build",
     "chromatic": "npx chromatic --",
     "build:blocks": "npx nx run-many -t build -p blocks-*",
     "build:server-worker": "npx nx run server-worker:build",
