@@ -1,6 +1,6 @@
 # .github/workflows/chromatic.yml
 
-name: "Chromatic"
+name: 'Chromatic'
 
 on:
   push:
@@ -8,7 +8,9 @@ on:
       - 'packages/ui-components/**'
       - 'packages/shared/**'
       - 'packages/blocks/framework/**'
+      - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/chromatic.yml'
 
 jobs:
   chromatic:
