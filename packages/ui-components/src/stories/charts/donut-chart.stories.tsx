@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { DonutChart } from '@/ui/chart';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';

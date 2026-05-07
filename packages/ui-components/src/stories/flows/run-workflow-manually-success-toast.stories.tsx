@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { RunWorkflowManuallySuccessToastContent } from '../../components/run-workflow-manually-success-toast/run-workflow-manually-success-toast';
 
