@@ -1,11 +1,9 @@
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { Decorator } from '@storybook/react';
-import { fn } from '@storybook/test';
-import { fireEvent, userEvent, waitFor } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Decorator } from '@storybook/react-vite';
 import { Ellipsis } from 'lucide-react';
 import { useState } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { expect, fireEvent, fn, userEvent, waitFor } from 'storybook/test';
 import { FileAddons } from '../../components/folder-tree/file-addons';
 import { FolderAddons } from '../../components/folder-tree/folder-addons';
 import { FolderTree } from '../../components/folder-tree/folder-tree';

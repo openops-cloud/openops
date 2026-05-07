@@ -1,5 +1,5 @@
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 import { ExploreTemplatesCarousel } from '../../components/flow-template/explore-templates-carousel/explore-templates-carousel';
 import { FlowTemplateMetadataWithIntegrations } from '../../components/flow-template/types';
 import { TooltipProvider } from '../../ui/tooltip';

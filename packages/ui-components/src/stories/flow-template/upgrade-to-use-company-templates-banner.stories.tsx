@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { UpgradeToUseCompanyTemplatesBanner } from '../../components/flow-template/upgrade-to-use-company-templates-banner';
 

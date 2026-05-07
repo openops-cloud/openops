@@ -1,6 +1,5 @@
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, userEvent } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent } from 'storybook/test';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
 import { NewFlowButton } from '../..//components';

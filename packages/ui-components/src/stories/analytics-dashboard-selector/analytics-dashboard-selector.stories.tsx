@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { AnalyticsDashboardSelector } from '../../components/analytics-dashboard-selector/analytics-dashboard-selector';
 
 const sampleDashboards = [

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BlockIcon } from '../../components';
 import { TooltipProvider } from '../../ui/tooltip';
 
