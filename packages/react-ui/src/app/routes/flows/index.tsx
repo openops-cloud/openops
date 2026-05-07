@@ -38,6 +38,7 @@ import {
   FlowVersionState,
   Permission,
   PopulatedFlow,
+  UNCATEGORIZED_FOLDER_ID,
 } from '@openops/shared';
 
 const isFlowSortBy = (sortBy?: string): sortBy is FlowSortBy => {
@@ -158,6 +159,7 @@ const FlowsPage = () => {
             displayName={t('{count} selected workflows', {
               count: selectedRows.length,
             })}
+            excludeFolderIds={[UNCATEGORIZED_FOLDER_ID]}
             apiMutateFn={async (data: MoveToFolderFormSchema) => {
               await moveSelectedFlows(data.folder);
               return { success: true };
