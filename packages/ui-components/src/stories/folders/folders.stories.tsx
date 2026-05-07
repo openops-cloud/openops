@@ -1,5 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Decorator } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { Ellipsis } from 'lucide-react';
 import { useState } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';

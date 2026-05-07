@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent } from 'storybook/test';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
-import { NewFlowButton } from '../..//components';
+import { NewFlowButton } from '../../components';
 
 const meta = {
   title: 'components/Flows/NewFlowButton',
