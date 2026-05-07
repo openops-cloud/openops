@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CloudLoggedInBrief } from '../../components/cloud-connection/cloud-logged-in-brief';
 import { cn } from '../../lib/cn';
 

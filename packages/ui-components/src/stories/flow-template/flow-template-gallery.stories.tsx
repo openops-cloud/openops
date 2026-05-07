@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, screen, userEvent, waitFor } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import { expect, fn, screen, userEvent, waitFor } from 'storybook/test';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import {
   FlowTemplateGallery,

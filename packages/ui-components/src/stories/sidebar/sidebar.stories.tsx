@@ -1,9 +1,9 @@
 import { OrganizationRole, UserStatus } from '@openops/shared';
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
-import { userEvent } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bot, Home, LucideBarChart2, Workflow, Wrench } from 'lucide-react';
 import { BrowserRouter } from 'react-router-dom';
+import { action } from 'storybook/actions';
+import { userEvent } from 'storybook/test';
 import {
   MenuFooter,
   SideMenu,

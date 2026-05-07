@@ -1,6 +1,6 @@
 import { DasbhoardOverview } from '@/components';
-import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent } from 'storybook/test';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
 const meta = {
