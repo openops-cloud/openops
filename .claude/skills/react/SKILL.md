@@ -70,40 +70,19 @@ export function useCampaignCharts(campaignId: string) {
 **Prefer extraction when logic is non-trivial or stability matters**:
 
 ```tsx
-<Input
-  onChange={(e) => {
-    const num = Number.parseInt(e.target.value, 10);
-    onMaxChange?.(Number.isNaN(num) ? 0 : Math.max(1, num));
-  }}
-  onBlur={(e) => {
-    if (!e.target.value || Number.parseInt(e.target.value, 10) < 1) {
-      onMaxChange?.(1);
-    }
-  }}
-/>
-```
+// ✅ Simple inline callback — fine when the handler is trivial and local
+<Button onClick={() => setOpen(true)}>Open</Button>;
 
-**GOOD** — Extracted memoized handlers:
-
-```tsx
-const handleMaxChange = useCallback(
-  (e: React.ChangeEvent<HTMLInputElement>) => {
-    const num = Number.parseInt(e.target.value, 10);
-    onMaxChange?.(Number.isNaN(num) ? 0 : Math.max(1, num));
+// ✅ Extracted handler — preferred when logic is non-trivial or passed to memoized children
+const handleSubmit = useCallback(
+  (values: FormValues) => {
+    const sanitized = sanitizeInput(values);
+    onSubmit?.(sanitized);
   },
-  [onMaxChange],
+  [onSubmit],
 );
 
-const handleMaxBlur = useCallback(
-  (e: React.FocusEvent<HTMLInputElement>) => {
-    if (!e.target.value || Number.parseInt(e.target.value, 10) < 1) {
-      onMaxChange?.(1);
-    }
-  },
-  [onMaxChange],
-);
-
-return <Input onChange={handleMaxChange} onBlur={handleMaxBlur} />;
+return <Form onSubmit={handleSubmit} />;
 ```
 
 ---
