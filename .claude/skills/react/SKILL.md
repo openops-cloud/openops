@@ -151,7 +151,6 @@ return <Input onChange={handleMaxChange} onBlur={handleMaxBlur} />;
 
 ## 7. Code Quality Constraints
 
-- **TDD** — red-green-refactor. No production code without a failing test first.
 - **SOLID, DRY, Clean Code** — small functions, clear names, no dead code.
 - **Pattern consistency** — read existing code in the target area before writing new code.
 - Run build, test, lint, type-check iteratively:

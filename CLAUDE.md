@@ -95,9 +95,12 @@ export function getUserProfile(userId: string): UserProfile {
 
 ## Testing
 
+- **TDD** — red-green-refactor. No production code without a failing test first.
 - Use Jest for testing
 - Place unit tests in a `tests` folder alongside the code
 - Run tests using Nx commands:
+
+Examples:
 
 ```bash
 npx nx test react-ui
