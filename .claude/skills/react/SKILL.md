@@ -61,22 +61,22 @@ export function useCampaignCharts(campaignId: string) {
 
 ## 4. React Hooks & Performance
 
-- **Always extract event handlers** to memoized callbacks using `useCallback` at component scope.
-- **Never define inline callbacks** in JSX (`onChange`, `onBlur`, `onClick`, etc.).
+- **Prefer extracted event handlers** at component scope when they are passed to memoized children, reused across multiple elements, used in dependency arrays, or contain non-trivial logic.
+- **Inline JSX callbacks are acceptable** for simple, local interactions when they keep the code clearer and are not causing avoidable re-renders in hot paths.
 - **Use `useMemo`** for expensive computations or derived state.
-- **Use `useCallback`** for all event handlers passed as props or used in dependency arrays.
-- Place all hooks and memoized functions at the top of the component, after state declarations.
+- **Use `useCallback`** selectively for handlers where referential stability matters (for example, props to memoized children or values used in hook dependency arrays).
+- Place hooks and any memoized values/functions near the top of the component, after state declarations, following existing file conventions.
 
-**BAD** — Inline callbacks:
+**Prefer extraction when logic is non-trivial or stability matters**:
 
 ```tsx
 <Input
   onChange={(e) => {
-    const num = Number.parseInt(e.target.value);
+    const num = Number.parseInt(e.target.value, 10);
     onMaxChange?.(Number.isNaN(num) ? 0 : Math.max(1, num));
   }}
   onBlur={(e) => {
-    if (!e.target.value || Number.parseInt(e.target.value) < 1) {
+    if (!e.target.value || Number.parseInt(e.target.value, 10) < 1) {
       onMaxChange?.(1);
     }
   }}
@@ -88,7 +88,7 @@ export function useCampaignCharts(campaignId: string) {
 ```tsx
 const handleMaxChange = useCallback(
   (e: React.ChangeEvent<HTMLInputElement>) => {
-    const num = Number.parseInt(e.target.value);
+    const num = Number.parseInt(e.target.value, 10);
     onMaxChange?.(Number.isNaN(num) ? 0 : Math.max(1, num));
   },
   [onMaxChange],
@@ -96,7 +96,7 @@ const handleMaxChange = useCallback(
 
 const handleMaxBlur = useCallback(
   (e: React.FocusEvent<HTMLInputElement>) => {
-    if (!e.target.value || Number.parseInt(e.target.value) < 1) {
+    if (!e.target.value || Number.parseInt(e.target.value, 10) < 1) {
       onMaxChange?.(1);
     }
   },
@@ -110,14 +110,14 @@ return <Input onChange={handleMaxChange} onBlur={handleMaxBlur} />;
 
 ## 5. Anti-Patterns Checklist
 
-❌ **Inline arrow functions in JSX** (creates new function on every render)
+❌ **Inline arrow functions in JSX for non-trivial logic or props to memoized children** (can cause avoidable re-renders)
 ❌ **Inline object/array literals in JSX props** (breaks reference equality)
 ❌ **Complex logic inside render** (hard to test, poor separation of concerns)
 ❌ **Missing dependency arrays** in `useEffect`/`useCallback`/`useMemo`
 ❌ **Unnecessary state** (derive from props when possible)
 ❌ **Hardcoded query key strings** (use `QueryKeys` constants)
 
-✅ **Extract and memoize** all callbacks with `useCallback`
+✅ **Extract and memoize** callbacks with `useCallback` when referential stability matters
 ✅ **Extract complex JSX logic** into separate memoized functions or sub-components
 ✅ **Derive state** with `useMemo` instead of storing duplicated state
 ✅ **Keep component functions focused** — one clear responsibility per function
@@ -172,4 +172,4 @@ npx nx lint ui-components
 - **shadcn** for UI components
 - **Axios** via existing wrapper in `api.ts`; use `qs` package for query strings
 - Tests go in `tests/` folders alongside code (Jest)
-- Use `qa-agent` subagent for browser testing
+- Perform browser testing with the available project tooling before finalizing UI changes
