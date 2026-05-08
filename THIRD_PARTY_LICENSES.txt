@@ -9047,7 +9047,7 @@ The following npm packages may be included in this product:
 
  - axios@1.13.6
  - axios@1.15.0
- - axios@1.15.2
+ - axios@1.16.0
 
 These packages each contain the following license:
 
