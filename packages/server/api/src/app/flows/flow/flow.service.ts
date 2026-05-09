@@ -53,6 +53,9 @@ import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
 import {
+  assertAllRequestedFlowsExistInProject,
+  assertNoFlowsAreEnabledForDeletion,
+  assertNoFlowsAreInternal,
   assertThatFlowIsInCorrectFolderContentType,
   assertThatFlowIsNotInternal,
 } from './flow-validations';
@@ -458,6 +461,15 @@ export const flowService = {
     projectId,
     userId,
   }: DeleteManyParams): Promise<void> {
+    const flows = await flowRepo().findBy({
+      id: In(flowIds),
+      projectId,
+    });
+
+    assertAllRequestedFlowsExistInProject(flowIds, flows);
+    await assertNoFlowsAreInternal(flows);
+    assertNoFlowsAreEnabledForDeletion(flows);
+
     await Promise.all(
       flowIds.map((id) =>
         this.delete({
@@ -485,16 +497,8 @@ export const flowService = {
       projectId,
     });
 
-    if (flows.length !== flowIds.length) {
-      throw new ApplicationError({
-        code: ErrorCode.ENTITY_NOT_FOUND,
-        params: {},
-      });
-    }
-
-    for (const flow of flows) {
-      await assertThatFlowIsNotInternal(flow);
-    }
+    assertAllRequestedFlowsExistInProject(flowIds, flows);
+    await assertNoFlowsAreInternal(flows);
 
     await flowRepo().update(
       {

@@ -5,13 +5,14 @@ import {
   FOLDER_ID_PARAM_NAME,
   PaginationParams,
   toast,
+  TooltipWrapper,
   WarningWithIcon,
 } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { CornerUpLeft, Download, Trash2 } from 'lucide-react';
 import qs from 'qs';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
@@ -147,6 +148,25 @@ const FlowsPage = () => {
     await refetchFolderTree();
   }, [deleteFlows, refetchFolderTree, selectedRows]);
 
+  const bulkDeleteBlockedByEnabled = useMemo(
+    () => selectedRows.some((flow) => flow.status === FlowStatus.ENABLED),
+    [selectedRows],
+  );
+
+  const prevBulkDeleteBlockedByEnabled = useRef(false);
+  useEffect(() => {
+    if (bulkDeleteBlockedByEnabled && !prevBulkDeleteBlockedByEnabled.current) {
+      toast({
+        title: t('Enabled workflows cannot be deleted'),
+        description: t(
+          'Disable the selected workflows first, then you can delete them.',
+        ),
+        duration: 5000,
+      });
+    }
+    prevBulkDeleteBlockedByEnabled.current = bulkDeleteBlockedByEnabled;
+  }, [bulkDeleteBlockedByEnabled]);
+
   const exportSelectedFlows = useCallback(async () => {
     await exportFlows(selectedRows);
   }, [exportFlows, selectedRows]);
@@ -189,43 +209,56 @@ const FlowsPage = () => {
       },
       {
         render: (_selectedRows, resetSelection) => (
-          <ConfirmationDeleteDialog
-            title={
-              <span className="text-primary text-[22px]">
-                {t('Delete workflows')}
-              </span>
-            }
-            className="max-w-[700px]"
-            message={
-              <span className="max-w-[652px] block text-primary text-base font-medium">
-                {t('Are you sure you want to delete {count} workflows?', {
-                  count: selectedRows.length,
-                })}
-              </span>
-            }
-            mutationFn={async () => {
-              await deleteSelectedFlows();
-              completeBulkAction(resetSelection);
-            }}
-            entityName={t('workflows')}
-            content={
-              <WarningWithIcon
-                message={t(
-                  'Deleting workflows will permanently remove all data and stop any ongoing runs.',
-                )}
-              />
+          <TooltipWrapper
+            tooltipText={
+              bulkDeleteBlockedByEnabled
+                ? t(
+                    'Disable all selected workflows before you can delete them.',
+                  )
+                : undefined
             }
           >
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-2"
-              loading={isDeleteFlowsPending}
-            >
-              <Trash2 className="h-4 w-4" />
-              {t('Delete')}
-            </Button>
-          </ConfirmationDeleteDialog>
+            <span className="inline-flex">
+              <ConfirmationDeleteDialog
+                title={
+                  <span className="text-primary text-[22px]">
+                    {t('Delete workflows')}
+                  </span>
+                }
+                className="max-w-[700px]"
+                message={
+                  <span className="max-w-[652px] block text-primary text-base font-medium">
+                    {t('Are you sure you want to delete {count} workflows?', {
+                      count: selectedRows.length,
+                    })}
+                  </span>
+                }
+                mutationFn={async () => {
+                  await deleteSelectedFlows();
+                  completeBulkAction(resetSelection);
+                }}
+                entityName={t('workflows')}
+                content={
+                  <WarningWithIcon
+                    message={t(
+                      'Deleting workflows will permanently remove all data and stop any ongoing runs.',
+                    )}
+                  />
+                }
+              >
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2"
+                  loading={isDeleteFlowsPending}
+                  disabled={bulkDeleteBlockedByEnabled}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {t('Delete')}
+                </Button>
+              </ConfirmationDeleteDialog>
+            </span>
+          </TooltipWrapper>
         ),
       },
     ],
@@ -240,6 +273,7 @@ const FlowsPage = () => {
       moveSelectedFlows,
       refetchFolderTree,
       selectedRows,
+      bulkDeleteBlockedByEnabled,
     ],
   );
 
