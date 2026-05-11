@@ -1,6 +1,6 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import type { StepRetryMetadata } from '@openops/shared';
-import { ActionType, BlockAction, CodeAction } from '@openops/shared';
+import { ActionType, BlockAction, CodeAction, isObject } from '@openops/shared';
 import { ExecutionMode } from '../core/code/execution-mode';
 import { wasExecutionLimitReached } from '../execution-limit-reached';
 import { EngineConstants } from '../handler/context/engine-constants';
@@ -211,10 +211,6 @@ function isHttpErrorLike(error: unknown): error is HttpErrorLike {
 
   const response = error.response;
   return isObject(response) && typeof response.status === 'number';
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 function sanitizeRetryAfterMs(retryAfterMs: unknown): number | undefined {
