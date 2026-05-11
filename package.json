@@ -401,7 +401,7 @@
     "jsonc-eslint-parser": "2.4.2",
     "lint-staged": "15.5.2",
     "pino-pretty": "9.4.1",
-    "postcss": "8.5.10",
+    "postcss": "8.5.11",
     "postcss-import": "14.1.0",
     "postcss-preset-env": "7.5.0",
     "postcss-url": "8.0.0",
