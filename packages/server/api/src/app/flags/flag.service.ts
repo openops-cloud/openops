@@ -308,6 +308,7 @@ export const flagService = {
     return `${backendUrl}redirect`;
   },
   async getCurrentRelease(): Promise<string> {
+    // eslint-disable-next-line @nx/enforce-module-boundaries
     const packageJson = await import('package.json');
     return packageJson.version;
   },
