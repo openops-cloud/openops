@@ -481,4 +481,4 @@ export function addSubtractTime(date: Date, expression: string) {
   return dayjsDate.toDate();
 }
 
-export { timezoneOptions as timeZoneOptions } from '@openops/shared/timezones';
+export { timezoneOptions as timeZoneOptions } from '@openops/shared';

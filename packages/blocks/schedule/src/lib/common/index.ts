@@ -37,4 +37,4 @@ export function validateMonthDays(days: number) {
   return dayofTheMonth;
 }
 
-export { timezoneOptions } from '@openops/shared/timezones';
+export { timezoneOptions } from '@openops/shared';
