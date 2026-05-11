@@ -43,7 +43,11 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   jest.clearAllMocks();
-  await databaseConnection().getRepository('flag').delete({});
+  await databaseConnection()
+    .getRepository('flag')
+    .createQueryBuilder()
+    .delete()
+    .execute();
 });
 
 afterAll(async () => {

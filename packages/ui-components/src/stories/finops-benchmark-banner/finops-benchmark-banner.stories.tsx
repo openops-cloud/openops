@@ -1,6 +1,6 @@
 import { BenchmarkProviders } from '@openops/shared';
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { FinOpsBenchmarkBanner } from '../../components/finops-benchmark-banner/finops-benchmark-banner';
 
