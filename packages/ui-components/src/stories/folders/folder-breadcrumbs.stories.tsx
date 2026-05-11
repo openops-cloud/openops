@@ -1,6 +1,6 @@
 import { UNCATEGORIZED_FOLDER_ID } from '@openops/shared';
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { FolderBreadcrumbs } from '../../components/folder-breadcrumbs/folder-breadcrumbs';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 import { generateDeeplyNestedFolder } from './sample-data';

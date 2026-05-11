@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { ComposingCard } from '@/ui/composing-card';
 import { ThemeAwareDecorator } from '../../.storybook/decorators';
