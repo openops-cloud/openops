@@ -288,9 +288,8 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
     const failedStepOutput = stepOutput
       .setStatus(stepStatus)
-      .setErrorMessage(handledError.message);
-
-    failedStepOutput.retryMetadata = retryMetadata;
+      .setErrorMessage(handledError.message)
+      .setRetryMetadata(retryMetadata);
 
     return executionState
       .upsertStep(action.name, failedStepOutput)

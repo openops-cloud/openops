@@ -69,7 +69,7 @@ describe('runWithExponentialBackoff', () => {
             stepName: codeAction.name,
             actionType: ActionType.CODE,
         })
-        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED, undefined)
+        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED)
 
         requestFunction
             .mockResolvedValueOnce(failedExecutionState)
@@ -99,7 +99,7 @@ describe('runWithExponentialBackoff', () => {
                 retryAfterMs: 3000,
             },
         })
-        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED, undefined)
+        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED)
 
         requestFunction
             .mockResolvedValueOnce(failedExecutionState)
@@ -128,7 +128,37 @@ describe('runWithExponentialBackoff', () => {
                 type: AZURE_429_RETRY_TYPE,
             },
         })
-        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED, undefined)
+        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED)
+
+        requestFunction
+            .mockResolvedValueOnce(failedExecutionState)
+            .mockResolvedValueOnce(successfulExecutionState)
+
+        const outputPromise = runWithExponentialBackoff(
+            executionState,
+            azureAction,
+            constants,
+            requestFunction,
+        )
+
+        await jest.runOnlyPendingTimersAsync()
+        const output = await outputPromise
+
+        expect(output).toEqual(successfulExecutionState)
+        expect(requestFunction).toHaveBeenCalledTimes(2)
+        expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 60000)
+    })
+
+    it('should fall back to 60 seconds for invalid Azure retry metadata values', async () => {
+        const failedExecutionState = createFailedExecutionState({
+            stepName: azureAction.name,
+            actionType: ActionType.BLOCK,
+            retryMetadata: {
+                type: AZURE_429_RETRY_TYPE,
+                retryAfterMs: Number.POSITIVE_INFINITY,
+            },
+        })
+        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED)
 
         requestFunction
             .mockResolvedValueOnce(failedExecutionState)
@@ -274,8 +304,7 @@ function createFailedExecutionState({
                 type: ActionType.BLOCK,
                 status: StepOutputStatus.FAILED,
             })
-    )
-    failedStepOutput.retryMetadata = retryMetadata
+    ).setRetryMetadata(retryMetadata)
 
     return FlowExecutorContext.empty()
         .upsertStep(stepName, failedStepOutput)

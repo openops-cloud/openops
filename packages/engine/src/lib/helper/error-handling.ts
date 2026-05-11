@@ -20,6 +20,7 @@ const executionMode = system.get<ExecutionMode>(
   SharedSystemProp.EXECUTION_MODE,
 );
 const DEFAULT_AZURE_429_RETRY_DELAY_MS = 60000;
+const MAX_AZURE_429_RETRY_DELAY_MS = 10 * 60 * 1000;
 const AZURE_BLOCK_NAME = '@openops/block-azure';
 const CUSTOM_AZURE_API_ACTION_NAME = 'custom_azure_api_call';
 const AZURE_429_RETRY_TYPE = 'AZURE_429';
@@ -161,8 +162,7 @@ export function getBlockRetryMetadata(
 
   return {
     type: AZURE_429_RETRY_TYPE,
-    retryAfterMs:
-      typeof error.retryAfterMs === 'number' ? error.retryAfterMs : undefined,
+    retryAfterMs: sanitizeRetryAfterMs(error.retryAfterMs),
   };
 }
 
@@ -174,7 +174,10 @@ function getRetryDelayMs<T extends CodeAction | BlockAction>(
 ): number {
   const retryMetadata = getRetryMetadata(executionState, action);
   if (retryMetadata?.type === AZURE_429_RETRY_TYPE) {
-    return retryMetadata.retryAfterMs ?? DEFAULT_AZURE_429_RETRY_DELAY_MS;
+    return (
+      sanitizeRetryAfterMs(retryMetadata.retryAfterMs) ??
+      DEFAULT_AZURE_429_RETRY_DELAY_MS
+    );
   }
 
   return (
@@ -212,6 +215,18 @@ function isHttpErrorLike(error: unknown): error is HttpErrorLike {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function sanitizeRetryAfterMs(retryAfterMs: unknown): number | undefined {
+  if (typeof retryAfterMs !== 'number' || !Number.isFinite(retryAfterMs)) {
+    return undefined;
+  }
+
+  if (retryAfterMs <= 0) {
+    return undefined;
+  }
+
+  return Math.min(retryAfterMs, MAX_AZURE_429_RETRY_DELAY_MS);
 }
 
 type Request<T extends CodeAction | BlockAction> = {
