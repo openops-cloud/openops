@@ -28,6 +28,7 @@ import {
 import { blockLoader } from '../helper/block-loader';
 import {
   continueIfFailureHandler,
+  getBlockRetryMetadata,
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
@@ -277,6 +278,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
       .setVerdict(ExecutionVerdict.RUNNING, undefined);
   } catch (e) {
     const handledError = handleExecutionError(e);
+    const retryMetadata = getBlockRetryMetadata(action, e);
 
     const stepStatus =
       handledError.verdictResponse?.reason ===
@@ -287,6 +289,8 @@ const executeAction: ActionHandler<BlockAction> = async ({
     const failedStepOutput = stepOutput
       .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
+
+    failedStepOutput.retryMetadata = retryMetadata;
 
     return executionState
       .upsertStep(action.name, failedStepOutput)
