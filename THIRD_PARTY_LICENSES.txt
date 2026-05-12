@@ -17582,7 +17582,7 @@ The following npm packages may be included in this product:
  - @protobufjs/inquire@1.1.0
  - @protobufjs/path@1.1.2
  - @protobufjs/pool@1.1.0
- - @protobufjs/utf8@1.1.0
+ - @protobufjs/utf8@1.1.1
 
 These packages each contain the following license:
 
