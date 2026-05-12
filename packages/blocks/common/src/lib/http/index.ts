@@ -1,4 +1,5 @@
 export * from './axios/axios-http-client';
+export * from './core/azure-retry-delay';
 export * from './core/base-http-client';
 export * from './core/delegating-authentication-converter';
 export * from './core/http-client';
