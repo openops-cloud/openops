@@ -1,5 +1,5 @@
 import { FlowTemplateMetadata } from '@openops/shared';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FlowTemplateCard } from '../../components/flow-template/flow-template-card';
 import { TooltipProvider } from '../../ui/tooltip';
 

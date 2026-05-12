@@ -51,11 +51,13 @@ async function handleUrlFile(path: string): Promise<WorkflowFile | null> {
     responseType: 'arraybuffer',
   });
 
+  const contentDisposition = fileResponse.headers['content-disposition'];
+  const contentType = fileResponse.headers['content-type'];
   const filename =
     getFileName(
       path,
-      fileResponse.headers['content-disposition'],
-      fileResponse.headers['content-type'],
+      typeof contentDisposition === 'string' ? contentDisposition : null,
+      typeof contentType === 'string' ? contentType : undefined,
     ) ?? 'unknown';
   const extension =
     filename.split('.').length > 1 ? filename.split('.').pop() : undefined;
