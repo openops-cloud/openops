@@ -1,6 +1,6 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import type { StepRetryMetadata } from '@openops/shared';
-import { ActionType, BlockAction, CodeAction, isObject } from '@openops/shared';
+import { ActionType, BlockAction, CodeAction } from '@openops/shared';
 import { ExecutionMode } from '../core/code/execution-mode';
 import { wasExecutionLimitReached } from '../execution-limit-reached';
 import { EngineConstants } from '../handler/context/engine-constants';
@@ -205,12 +205,16 @@ function isAzureCustomApiAction(action: BlockAction): boolean {
 }
 
 function isHttpErrorLike(error: unknown): error is HttpErrorLike {
-  if (!isObject(error) || !('response' in error)) {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
     return false;
   }
-
   const response = error.response;
-  return isObject(response) && typeof response.status === 'number';
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'status' in response &&
+    typeof response.status === 'number'
+  );
 }
 
 function sanitizeRetryAfterMs(retryAfterMs: unknown): number | undefined {
