@@ -19,12 +19,17 @@ RUN <<-```
     fi
     chmod +x /usr/bin/yq
 
-    # Install hcledit (note: arm64 version might not be available, defaulting to amd64)
-    curl -L https://github.com/minamijoyo/hcledit/releases/download/v0.2.15/hcledit_0.2.15_linux_amd64.tar.gz -o /tmp/hcledit_0.2.15_linux_amd64.tar.gz
-    tar -C /usr/bin -xf /tmp/hcledit_0.2.15_linux_amd64.tar.gz
-    chmod +x /usr/bin/hcledit
-    rm /tmp/hcledit_0.2.15_linux_amd64.tar.gz
+   # Install hcledit with architecture-specific binary
+    if [ "$TARGETARCH" = "arm64" ]; then
+        curl -L https://github.com/minamijoyo/hcledit/releases/download/v0.2.18/hcledit_0.2.18_linux_arm64.tar.gz -o /tmp/hcledit_0.2.18.tar.gz
+    else
+        curl -L https://github.com/minamijoyo/hcledit/releases/download/v0.2.18/hcledit_0.2.18_linux_amd64.tar.gz -o /tmp/hcledit_0.2.18.tar.gz
+    fi
 
+    tar -C /usr/bin -xf /tmp/hcledit_0.2.18.tar.gz
+    chmod +x /usr/bin/hcledit
+    rm /tmp/hcledit_0.2.18.tar.gz
+    
     # Install AWS CLI with architecture-specific package
     if [ "$TARGETARCH" = "arm64" ]; then
         curl -L https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip -o awscliv2.zip

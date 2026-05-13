@@ -57,10 +57,6 @@ async function runAuthCommand(keyObject: string): Promise<string> {
     CLOUDSDK_CONFIG: gcpConfigDir,
   };
 
-  if (process.env['HOME']) {
-    envVars['HOME'] = process.env['HOME'];
-  }
-
   return await loginGCPWithKeyObject(keyObject, envVars);
 }
 
