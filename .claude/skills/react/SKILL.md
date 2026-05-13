@@ -133,7 +133,7 @@ return <Form onSubmit={handleSubmit} />;
 When a component renders a **variable-length list** (`.map()` over connections, options, templates, search results, etc.), you MUST verify overflow behavior:
 
 - **Constrain container height** — lists must not push sibling content (buttons, footers, navigation) off-screen. Use a scroll wrapper with bounded height.
-- **Use existing scroll components** — prefer `FixedHeightScrollArea` from `@openops/components/ui` over ad-hoc `overflow-y-auto` + `max-h` classes. This keeps behavior consistent and responsive breakpoints (`@media(max-height:700px)`) centralized.
+- **Use existing scroll components** — prefer the project's `ScrollArea` (from `@openops/components/ui`) or a dedicated scroll wrapper over ad-hoc `overflow-y-auto` + `max-h` classes. This keeps behavior consistent and responsive breakpoints centralized.
 - **Test with realistic data volume** — when adding mock/test data for lists, use enough items (20+) to trigger overflow, then verify the scroll behavior works.
 - **Check the full viewport** — after adding scroll constraints, confirm that the component works on both tall (1080p+) and short (laptop, 700px height) viewports.
 
@@ -144,7 +144,7 @@ When a component renders a **variable-length list** (`.map()` over connections, 
 - Fixed-height containers that truncate without scroll
 - Buttons or footers pushed below the viewport fold
 
-**When in doubt:** render 20+ items and visually inspect (or use `qa-agent`) before considering the work done.
+**When in doubt:** render 20+ items and visually inspect before considering the work done.
 
 ---
 
