@@ -1,4 +1,4 @@
-import { within } from '@storybook/test';
+import { within } from 'storybook/test';
 
 export function selectLightOrDarkCanvas(canvasElement: HTMLElement) {
   return within(

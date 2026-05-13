@@ -21,10 +21,18 @@ describe('webhook-url-validator', () => {
 
   it('should return the original URL if validateHost passes', async () => {
     (validateHost as jest.Mock).mockResolvedValue(undefined);
+    (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(
+      'https://app.openops.com/api',
+    );
+    (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
+      'http://127.0.0.1:3000/',
+    );
     const userUrl = 'https://example.com/webhook';
     const result = await validateAndRewritePublicWebhookUrl(userUrl);
     expect(result).toBe(userUrl);
     expect(validateHost).toHaveBeenCalledWith(userUrl);
+    expect(networkUtls.getPublicUrl).toHaveBeenCalledTimes(1);
+    expect(networkUtls.getInternalApiUrl).toHaveBeenCalledTimes(1);
   });
 
   test.each([
@@ -100,9 +108,7 @@ describe('webhook-url-validator', () => {
       userUrl: string,
       expectedUrl: string,
     ) => {
-      const originalError = new Error('Host must not be an internal address');
-
-      (validateHost as jest.Mock).mockRejectedValue(originalError);
+      (validateHost as jest.Mock).mockResolvedValue(undefined);
       (networkUtls.getPublicUrl as jest.Mock).mockResolvedValue(publicUrl);
       (networkUtls.getInternalApiUrl as jest.Mock).mockReturnValue(
         internalApiUrl,
@@ -112,7 +118,7 @@ describe('webhook-url-validator', () => {
         expectedUrl,
       );
 
-      expect(validateHost).toHaveBeenCalledWith(userUrl);
+      expect(validateHost).not.toHaveBeenCalled();
       expect(networkUtls.getPublicUrl).toHaveBeenCalledTimes(1);
       expect(networkUtls.getInternalApiUrl).toHaveBeenCalledTimes(1);
     },

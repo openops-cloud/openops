@@ -1,6 +1,5 @@
 import { DropdownProperty, Property } from '@openops/blocks-framework';
-import { ServiceNowAuth } from './auth';
-import { getServiceNowTables } from './get-tables';
+import { getServiceNowTables, ServiceNowAuth } from '@openops/common';
 
 export function servicenowTableDropdownProperty(): DropdownProperty<
   string,
@@ -21,7 +20,9 @@ export function servicenowTableDropdownProperty(): DropdownProperty<
       }
 
       try {
-        const tables = await getServiceNowTables(auth as ServiceNowAuth);
+        const tables = await getServiceNowTables(auth as ServiceNowAuth, {
+          query: 'nameSTARTSWITHx_',
+        });
 
         if (tables.length === 0) {
           return {

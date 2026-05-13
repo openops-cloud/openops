@@ -16,6 +16,7 @@ export * from './lib/authentication/model/principal';
 export * from './lib/authentication/model/principal-type';
 export * from './lib/benchmark';
 export * from './lib/blocks';
+export * from './lib/cloud-providers';
 export * from './lib/code/dto/code-request';
 export * from './lib/common';
 export * from './lib/common/application-error';
@@ -69,6 +70,8 @@ export * from './lib/websocket';
 export * from './lib/wizard';
 export * from './lib/workers';
 export * from './lib/workflow-stats';
+// Export timezoneOptions separately (named export allows tree-shaking in ESM)
+export { timezoneOptions } from './lib/common/timezones';
 // Look at https://github.com/sinclairzx81/typebox/issues/350
 import { TypeSystemPolicy } from '@sinclair/typebox/system';
 TypeSystemPolicy.ExactOptionalPropertyTypes = false;

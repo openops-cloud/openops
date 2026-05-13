@@ -1,7 +1,5 @@
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, userEvent, waitFor } from '@storybook/test';
-import { fireEvent } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fireEvent, fn, userEvent, waitFor } from 'storybook/test';
 import { Redo, Undo, UndoRedoContainer, UndoRedoDevider } from '../components';
 import { isMacUserAgent } from '../lib/user-agent-utils';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';

@@ -1,6 +1,6 @@
+import { ServiceNowTableField } from '@openops/common';
 import { createFieldValueProperty } from '../../src/lib/create-field-value-property';
 import { getServiceNowChoiceValues } from '../../src/lib/get-choice-values';
-import { ServiceNowTableField } from '../../src/lib/get-table-fields';
 
 jest.mock('../../src/lib/get-choice-values');
 

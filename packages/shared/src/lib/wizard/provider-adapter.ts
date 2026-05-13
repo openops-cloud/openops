@@ -11,6 +11,7 @@ export type StaticOptionValue = {
   id: string;
   displayName: string;
   imageLogoUrl?: string;
+  items?: WizardOption[];
 };
 
 export type WizardStepOptionsSource =
@@ -31,7 +32,7 @@ export type WizardConfigStep = {
   id: string;
   title: string;
   description?: string;
-  selectionType: 'single' | 'multi-select';
+  selectionType: 'single' | 'multi-select' | 'nested-multi-select';
   optionsSource?: WizardStepOptionsSource;
   nextStep?: string;
   conditional?: WizardStepConditional;
