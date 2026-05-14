@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "This library was generated with [Nx](https://nx.dev).",
   "main": "tailwind.base.config.js",
+  "sideEffects": [
+    "*.css",
+    "*.scss"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC"
