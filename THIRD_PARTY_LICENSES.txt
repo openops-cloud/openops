@@ -5987,7 +5987,6 @@ The following npm packages may be included in this product:
  - @types/unist@2.0.11
  - @types/unist@3.0.3
  - @types/use-sync-external-store@0.0.6
- - @types/uuid@10.0.0
  - @types/validator@13.12.2
  - @types/ws@8.18.1
 
