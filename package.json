@@ -324,7 +324,7 @@
     "@nx/web": "22.6.5",
     "@nx/webpack": "22.6.5",
     "@nx/workspace": "22.6.5",
-    "@playwright/test": "1.37.1",
+    "@playwright/test": "1.52.0",
     "@storybook/addon-docs": "10.3.6",
     "@storybook/react-vite": "10.3.6",
     "@storybook/test-runner": "0.24.3",
