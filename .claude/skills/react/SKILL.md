@@ -128,7 +128,27 @@ return <Form onSubmit={handleSubmit} />;
 
 ---
 
-## 7. Code Quality Constraints
+## 7. Dynamic Lists & Overflow
+
+When a component renders a **variable-length list** (`.map()` over connections, options, templates, search results, etc.), you MUST verify overflow behavior:
+
+- **Constrain container height** — lists must not push sibling content (buttons, footers, navigation) off-screen. Use a scroll wrapper with bounded height.
+- **Use existing scroll components** — prefer the project's `ScrollArea` (from `@openops/components/ui`) or a dedicated scroll wrapper over ad-hoc `overflow-y-auto` + `max-h` classes. This keeps behavior consistent and responsive breakpoints centralized.
+- **Test with realistic data volume** — when adding mock/test data for lists, use enough items (20+) to trigger overflow, then verify the scroll behavior works.
+- **Check the full viewport** — after adding scroll constraints, confirm that the component works on both tall (1080p+) and short (laptop, 700px height) viewports.
+
+**Red flags to catch:**
+
+- A `.map()` rendering inside a flex/grid container with no height constraint
+- `overflow-clip` or `overflow-hidden` on a parent that hides scrollable content
+- Fixed-height containers that truncate without scroll
+- Buttons or footers pushed below the viewport fold
+
+**When in doubt:** render 20+ items and visually inspect before considering the work done.
+
+---
+
+## 8. Code Quality Constraints
 
 - **SOLID, DRY, Clean Code** — small functions, clear names, no dead code.
 - **Pattern consistency** — read existing code in the target area before writing new code.
@@ -143,7 +163,7 @@ npx nx lint ui-components
 
 ---
 
-## 8. Project-Specific Context
+## 9. Project-Specific Context
 
 - **React 18** with functional components
 - **Zustand** for state management
