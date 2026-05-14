@@ -5987,6 +5987,7 @@ The following npm packages may be included in this product:
  - @types/unist@2.0.11
  - @types/unist@3.0.3
  - @types/use-sync-external-store@0.0.6
+ - @types/uuid@10.0.0
  - @types/validator@13.12.2
  - @types/ws@8.18.1
 
@@ -40079,11 +40080,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - nanoid@3.3.11
  - nanoid@3.3.12
 
-This package contains the following license:
+These packages each contain the following license:
 
 The MIT License (MIT)
 
