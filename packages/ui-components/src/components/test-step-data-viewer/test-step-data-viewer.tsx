@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Theme } from '../../lib/theme';
 import { JsonViewer } from '../json-viewer/json-viewer';
 import { ToggleSwitch } from '../toggle-switch/toggle-switch';
@@ -19,19 +19,6 @@ const JsonViewType = {
   Output: 'Output',
 };
 
-const VIEW_INPUT_OPTIONS = [
-  {
-    value: JsonViewType.Input,
-    label: t('Input'),
-    tooltipText: t('View input data'),
-  },
-  {
-    value: JsonViewType.Output,
-    label: t('Output'),
-    tooltipText: t('View output data'),
-  },
-];
-
 const TestStepDataViewer = ({
   inputJson,
   outputJson,
@@ -41,6 +28,19 @@ const TestStepDataViewer = ({
   editorClassName,
   containerClassName,
 }: TestStepDataViewerProps) => {
+  const { t } = useTranslation();
+  const VIEW_INPUT_OPTIONS = [
+    {
+      value: JsonViewType.Input,
+      label: t('Input'),
+      tooltipText: t('View input data'),
+    },
+    {
+      value: JsonViewType.Output,
+      label: t('Output'),
+      tooltipText: t('View output data'),
+    },
+  ];
   const [selectedViewType, setSelectedViewType] = useState<string>(
     JsonViewType.Output,
   );
