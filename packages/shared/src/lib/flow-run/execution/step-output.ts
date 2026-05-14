@@ -11,6 +11,13 @@ export enum StepOutputStatus {
   EXECUTION_LIMIT_REACHED = 'EXECUTION_LIMIT_REACHED',
 }
 
+export type StepRetryMetadataType = 'AZURE_429';
+
+export type StepRetryMetadata = {
+  type: StepRetryMetadataType;
+  retryAfterMs?: number;
+};
+
 type BaseStepOutputParams<T extends ActionType | TriggerType, OUTPUT> = {
   type: T;
   status: StepOutputStatus;
@@ -18,6 +25,7 @@ type BaseStepOutputParams<T extends ActionType | TriggerType, OUTPUT> = {
   output?: OUTPUT;
   duration?: number;
   errorMessage?: string;
+  retryMetadata?: StepRetryMetadata;
 };
 
 export class GenericStepOutput<T extends ActionType | TriggerType, OUTPUT> {
@@ -27,6 +35,7 @@ export class GenericStepOutput<T extends ActionType | TriggerType, OUTPUT> {
   output?: OUTPUT;
   duration?: number;
   errorMessage?: string;
+  retryMetadata?: StepRetryMetadata;
 
   constructor(step: BaseStepOutputParams<T, OUTPUT>) {
     this.type = step.type;
@@ -35,6 +44,7 @@ export class GenericStepOutput<T extends ActionType | TriggerType, OUTPUT> {
     this.output = step.output;
     this.duration = step.duration;
     this.errorMessage = step.errorMessage;
+    this.retryMetadata = step.retryMetadata;
   }
 
   setOutput(output: OUTPUT): GenericStepOutput<T, OUTPUT> {
@@ -55,6 +65,15 @@ export class GenericStepOutput<T extends ActionType | TriggerType, OUTPUT> {
     return new GenericStepOutput<T, OUTPUT>({
       ...this,
       errorMessage,
+    });
+  }
+
+  setRetryMetadata(
+    retryMetadata: StepRetryMetadata | undefined,
+  ): GenericStepOutput<T, OUTPUT> {
+    return new GenericStepOutput<T, OUTPUT>({
+      ...this,
+      retryMetadata,
     });
   }
 

@@ -4,12 +4,17 @@ client_max_body_size 10m;
 client_body_buffer_size 1K;
 client_header_buffer_size 1k;
 large_client_header_buffers 4 16k;
+
+add_header X-Frame-Options "SAMEORIGIN";
+add_header X-Content-Type-Options "nosniff" always;
 add_header Referrer-Policy "no-referrer-when-downgrade";
+add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://*.openops.com https://fonts.cdnfonts.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.github.com https://cdn.jsdelivr.net" always;
+
 ssi off;
 server_tokens off;
 
 location / {
-    add_header X-Frame-Options DENY;
     proxy_pass http://openops-app;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -62,7 +67,6 @@ location /openops-tables {
 }
 
 location ~ ^/api/v1/webhooks/[^/]+/sync$ {
-    add_header X-Frame-Options DENY;
     proxy_pass http://openops-app;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

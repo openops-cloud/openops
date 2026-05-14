@@ -19,8 +19,15 @@ jest.mock('node:child_process', () => {
 
 import { executeCommand, executeFile } from '../src/lib/command-wrapper';
 
+const originalEnv = process.env;
+
 describe('Execute Command', () => {
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+  });
+
   afterEach(() => {
+    process.env = originalEnv;
     jest.clearAllMocks();
   });
 
@@ -91,10 +98,44 @@ describe('Execute Command', () => {
       ]);
     },
   );
+
+  it('should handle missing stdout or stderr gracefully', async () => {
+    mockSpawn.mockImplementation(() => ({
+      stdout: null,
+      stderr: null,
+      on: jest.fn((event, callback) => {
+        if (event === 'close') {
+          callback(0);
+        }
+      }),
+    }));
+
+    const result = await executeCommand('command', []);
+
+    expect(result).toEqual({
+      stdOut: '',
+      stdError: '',
+      exitCode: 0,
+    });
+  });
+
+  it('should not add HOME to env if it is not in process.env', async () => {
+    delete process.env['HOME'];
+    mockMockSpawn('ok', '', 0);
+
+    await executeCommand('command', []);
+
+    expect(mockSpawn).toHaveBeenCalledWith('command', []);
+  });
 });
 
 describe('Execute File', () => {
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+  });
+
   afterEach(() => {
+    process.env = originalEnv;
     jest.clearAllMocks();
   });
 
@@ -116,7 +157,11 @@ describe('Execute File', () => {
     expect(mockExecFile).toHaveBeenCalledWith(
       'command',
       ['parameter 1', 'parameter 2'],
-      { env: { VAR1: 'var1' } },
+      {
+        env: expect.objectContaining({
+          VAR1: 'var1',
+        }),
+      },
     );
   });
 
@@ -138,7 +183,11 @@ describe('Execute File', () => {
     expect(mockExecFile).toHaveBeenCalledWith(
       'command',
       ['parameter 1', 'parameter 2'],
-      { env: { VAR1: 'var1' } },
+      {
+        env: expect.objectContaining({
+          VAR1: 'var1',
+        }),
+      },
     );
   });
 
@@ -167,7 +216,11 @@ describe('Execute File', () => {
       expect(mockExecFile).toHaveBeenCalledWith(
         'command',
         ['parameter 1', 'parameter 2'],
-        { env: { VAR1: 'var1' } },
+        {
+          env: expect.objectContaining({
+            VAR1: 'var1',
+          }),
+        },
       );
     },
   );
@@ -182,7 +235,7 @@ describe('Execute File', () => {
       'command',
       ['--arg'],
       expect.objectContaining({
-        env: { VAR: 'value' },
+        env: expect.objectContaining({ VAR: 'value' }),
         maxBuffer: 5 * 1024 * 1024,
       }),
     );
@@ -197,8 +250,33 @@ describe('Execute File', () => {
     expect(mockExecFile).toHaveBeenCalledWith(
       'command',
       ['--arg'],
-      expect.not.objectContaining({ maxBuffer: expect.any(Number) }),
+      expect.not.objectContaining({ maxBuffer: expect.anything() }),
     );
+  });
+
+  it('should use provided HOME if it exists in envVariables', async () => {
+    mockMockExecFile('ok', '', 0);
+
+    await executeFile('command', [], { HOME: '/custom/home' });
+
+    expect(mockExecFile).toHaveBeenCalledWith(
+      'command',
+      [],
+      expect.objectContaining({
+        env: { HOME: '/custom/home' },
+      }),
+    );
+  });
+
+  it('should not add HOME to env if it is not in process.env and not provided in envVariables', async () => {
+    delete process.env['HOME'];
+    mockMockExecFile('ok', '', 0);
+
+    await executeFile('command', [], { VAR1: 'var1' });
+
+    expect(mockExecFile).toHaveBeenCalledWith('command', [], {
+      env: { VAR1: 'var1' },
+    });
   });
 });
 
