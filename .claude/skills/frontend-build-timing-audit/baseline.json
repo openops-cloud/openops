@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "capturedAt": "2026-05-15T08:19:44.786Z",
+  "capturedFromSha": "e8d858ed89",
+  "thresholds": {
+    "chunkCount": {
+      "warnPct": 5,
+      "failPct": 15
+    },
+    "entryChunkSize": {
+      "warnPct": 5,
+      "failPct": 15
+    },
+    "criticalPathRaw": {
+      "warnPct": 3,
+      "failPct": 7
+    },
+    "criticalPathGzipped": {
+      "warnPct": 3,
+      "failPct": 7
+    },
+    "criticalPathBrotli": {
+      "warnPct": 3,
+      "failPct": 7
+    },
+    "totalJsRaw": {
+      "warnPct": 3,
+      "failPct": 7
+    },
+    "totalJsGzipped": {
+      "warnPct": 3,
+      "failPct": 7
+    },
+    "staticImportCount": {
+      "warnPct": 0,
+      "failPct": 50
+    },
+    "antiPatternCounts.i18next-t-call": {
+      "warnPct": 0,
+      "failPct": 50
+    }
+  },
+  "metrics": {
+    "chunkCount": 120,
+    "entryChunkSize": 1779713,
+    "criticalPathRaw": 4308407,
+    "criticalPathGzipped": 1253412,
+    "criticalPathBrotli": 1004569,
+    "totalJsRaw": 7373246,
+    "totalJsGzipped": 2124659,
+    "staticImportCount": 13,
+    "antiPatternCounts": {
+      "i18next-t-call": 85
+    },
+    "markers": [
+      {
+        "name": "View input data",
+        "chunk": "cloud-user-api-imKp9g4N.js",
+        "risk": "danger"
+      },
+      {
+        "name": "View output data",
+        "chunk": "cloud-user-api-imKp9g4N.js",
+        "risk": "danger"
+      }
+    ]
+  }
+}
