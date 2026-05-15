@@ -45,8 +45,8 @@ export function servicenowFieldsDropdownProperty() {
         });
       } catch (error) {
         logger.warn(
-          'Fetching ServiceNow table fields is not possible, omit field selector. Error:',
-          { error },
+          'Fetching ServiceNow table fields is not possible, omit field selector.',
+          error,
         );
       }
 
