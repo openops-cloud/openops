@@ -1,4 +1,5 @@
 import { MentionNodeAttrs } from '@tiptap/extension-mention';
+import { DOMOutputSpec } from '@tiptap/pm/model';
 import { JSONContent } from '@tiptap/react';
 
 import { StepMetadata } from '@openops/components/ui';
@@ -190,39 +191,40 @@ function convertTiptapJsonToText(nodes: JSONContent[]): string {
   return res.join('');
 }
 
-const generateMentionHtmlElement = (mentionAttrs: MentionNodeAttrs) => {
-  const mentionElement = document.createElement('span');
+const generateMentionHtmlElement = (
+  mentionAttrs: MentionNodeAttrs,
+): DOMOutputSpec => {
   const apMentionNodeAttrs: MentionNodeAttrs = JSON.parse(
     mentionAttrs.label || '{}',
   );
-  mentionElement.className =
-    'inline-flex bg-muted/10 break-all my-1 mx-[1px] border border-[#9e9e9e] border-solid items-center gap-2 py-1 px-2 rounded-[3px] text-muted-foreground ';
   assertNotNullOrUndefined(mentionAttrs.label, 'mentionAttrs.label');
   assertNotNullOrUndefined(mentionAttrs.id, 'mentionAttrs.id');
   assertNotNullOrUndefined(
     apMentionNodeAttrs.displayText,
     'apMentionNodeAttrs.displayText',
   );
-  mentionElement.dataset.id = mentionAttrs.id;
-  mentionElement.dataset.label = mentionAttrs.label;
-  mentionElement.dataset.displayText = apMentionNodeAttrs.displayText;
-  mentionElement.dataset.type = TipTapNodeTypes.mention;
-  mentionElement.contentEditable = 'false';
 
+  const attrs: Record<string, string> = {
+    class:
+      'inline-flex bg-muted/10 break-all my-1 mx-[1px] border border-[#9e9e9e] border-solid items-center gap-2 py-1 px-2 rounded-[3px] text-muted-foreground',
+    'data-id': mentionAttrs.id,
+    'data-label': mentionAttrs.label,
+    'data-display-text': apMentionNodeAttrs.displayText,
+    'data-type': TipTapNodeTypes.mention,
+    contenteditable: 'false',
+    servervalue: apMentionNodeAttrs.serverValue,
+  };
+
+  const children: DOMOutputSpec[] = [];
   if (apMentionNodeAttrs.logoUrl) {
-    const imgElement = document.createElement('img');
-    imgElement.src = apMentionNodeAttrs.logoUrl;
-    imgElement.className = 'object-fit w-4 h-4';
-    mentionElement.appendChild(imgElement);
+    children.push([
+      'img',
+      { src: apMentionNodeAttrs.logoUrl, class: 'object-fit w-4 h-4' },
+    ]);
   }
+  children.push(apMentionNodeAttrs.displayText);
 
-  const mentiontextDiv = document.createTextNode(
-    apMentionNodeAttrs.displayText,
-  );
-  mentionElement.setAttribute('serverValue', apMentionNodeAttrs.serverValue);
-
-  mentionElement.appendChild(mentiontextDiv);
-  return mentionElement;
+  return ['span', attrs, ...children];
 };
 
 const inputThatUsesMentionClass = 'ap-text-with-mentions';
