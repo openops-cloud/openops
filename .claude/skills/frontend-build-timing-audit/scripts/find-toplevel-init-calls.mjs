@@ -18,7 +18,7 @@
 //   0 — always (this is a report, not a gate). Use --json + jq to gate.
 
 import { readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -109,20 +109,26 @@ function fileMatchesRule(src, rule) {
   return false;
 }
 
-// Collect candidates: any file that imports any rule's module.
+// Collect candidates: any file that imports any rule's module. Use multiple
+// `-e` fixed-string patterns to stay quote-agnostic (both `from '...'` and
+// `from "..."` forms are accepted) without touching shell quoting.
 let candidates;
-try {
+{
   const modules = [...new Set(config.map((r) => r.module))];
-  const orPat = modules.map((m) => `from '${m}'`).join('\\|');
-  candidates = execSync(`git grep -l "${orPat}" -- '*.ts' '*.tsx'`, {
-    encoding: 'utf8',
-    cwd,
-  })
-    .split('\n')
-    .filter(Boolean);
-} catch {
-  console.error('git grep failed — make sure you are inside a git repo.');
-  process.exit(1);
+  const grepArgs = ['grep', '-lF'];
+  for (const m of modules) {
+    grepArgs.push('-e', `from '${m}'`);
+    grepArgs.push('-e', `from "${m}"`);
+  }
+  grepArgs.push('--', '*.ts', '*.tsx');
+  const res = spawnSync('git', grepArgs, { cwd, encoding: 'utf8' });
+  // git grep exits 1 when nothing matches; that's fine — only treat other
+  // non-zero exit codes as an error.
+  if (res.status !== 0 && res.status !== 1) {
+    console.error(`git grep failed (exit ${res.status}): ${res.stderr}`);
+    process.exit(1);
+  }
+  candidates = (res.stdout || '').split('\n').filter(Boolean);
 }
 
 const offenders = []; // { rule, file, hits: [line] }

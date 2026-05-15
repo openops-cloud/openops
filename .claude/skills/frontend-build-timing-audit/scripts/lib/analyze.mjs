@@ -34,9 +34,13 @@ export function findEntry(buildDir) {
 
 export function getStaticImports(buf) {
   const text = typeof buf === 'string' ? buf : buf.toString('utf8');
+  // Accept both `import ... from "./x.js"` (named / default / namespace) and
+  // bare side-effect `import "./x.js"`, single or double quoted. Rolldown
+  // emits double-quoted today, but tolerate variation so this also works
+  // against vendor-rolled chunks or future bundler changes.
   const m = [
     ...text.matchAll(
-      /import\s*(?:\*\s+as\s+\w+|\{[^}]*\}|\w+)?\s*from\s*"(\.\/[^"]+\.js)"/g,
+      /import\s*(?:(?:\*\s+as\s+\w+|\{[^}]*\}|\w+)\s*from\s*)?["'](\.\/[^"']+\.js)["']/g,
     ),
   ];
   return [...new Set(m.map((x) => x[1].replace(/^\.\//, '')))].sort();

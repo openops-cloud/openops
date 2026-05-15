@@ -126,9 +126,16 @@ if (previous) {
     const before = previous.metrics[k];
     const after = fresh.metrics[k];
     if (before === undefined) continue;
-    const delta = before ? (100 * (after - before)) / before : 0;
-    const sign = delta >= 0 ? '+' : '';
-    console.error(`  ${k.padEnd(24)} ${String(before).padStart(12)} → ${String(after).padStart(12)}  (${sign}${delta.toFixed(2)}%)`);
+    let deltaStr;
+    if (!before) {
+      deltaStr = after === 0 ? '+0.00%' : 'new';
+    } else {
+      const delta = (100 * (after - before)) / before;
+      deltaStr = `${delta >= 0 ? '+' : ''}${delta.toFixed(2)}%`;
+    }
+    console.error(
+      `  ${k.padEnd(24)} ${String(before).padStart(12)} → ${String(after).padStart(12)}  (${deltaStr})`,
+    );
   }
   const ruleNames = new Set([
     ...Object.keys(previous.metrics.antiPatternCounts || {}),

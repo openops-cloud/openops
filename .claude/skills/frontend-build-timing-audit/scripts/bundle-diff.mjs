@@ -105,9 +105,12 @@ function build(variant) {
   console.error(`\n=== Building variant '${label}' (ref=${ref || 'HEAD'}, patch=${patch || '-'}) ===`);
 
   if (ref) {
-    // Restore the entire tree to the target ref but keep .git/HEAD pointing
-    // where it was (avoids detached-HEAD churn).
-    sh(`git restore --source=${ref} -- packages`, { silent: true });
+    // Restore the entire tracked tree to the target ref but keep .git/HEAD
+    // pointing where it was (avoids detached-HEAD churn). Restoring the full
+    // tree (not just `packages/`) so root configs (vite.config.ts edge
+    // cases, lockfile, tsconfig, etc.) and any patch files outside
+    // `packages/` are picked up too.
+    sh(`git restore --source=${ref} -- .`, { silent: true });
   }
   if (patch) {
     sh(`git apply --whitespace=nowarn ${patch}`);
@@ -124,8 +127,10 @@ function build(variant) {
 }
 
 function restore() {
-  // Wipe variant changes and restore the original HEAD state.
-  sh('git checkout -- packages', { silent: true });
+  // Wipe variant changes across the full tracked tree (paired with the
+  // wider `git restore -- .` in build()). Required so a patch that touches
+  // files outside `packages/` cannot leak past the script.
+  sh('git checkout -- .', { silent: true });
 }
 
 let dirA, dirB;
