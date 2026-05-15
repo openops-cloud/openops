@@ -1,5 +1,6 @@
 import { BlockAuth, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { createRecordsBatchAction } from './actions/create-records-batch-action';
 import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordsAction } from './actions/get-records-action';
 import { getTableUrlAction } from './actions/get-table-url-action';
@@ -14,6 +15,7 @@ export const openopsTables = createBlock({
   categories: [BlockCategory.DATA_SOURCES],
   actions: [
     getRecordsAction,
+    createRecordsBatchAction,
     updateRecordAction,
     deleteRecordAction,
     getTableUrlAction,

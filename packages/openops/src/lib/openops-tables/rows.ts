@@ -38,6 +38,10 @@ export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
+export interface BatchCreateRowsParams extends RowParams {
+  items: { [key: string]: any }[];
+}
+
 export interface UpsertRowParams extends RowParams {
   fields: { [key: string]: any };
 }
@@ -197,6 +201,36 @@ export async function addRow(addRowParams: AddRowParams) {
         error,
         url,
         fields: addRowParams.fields,
+      });
+    },
+  );
+}
+
+export async function createRowsBatch(
+  batchCreateRowsParams: BatchCreateRowsParams,
+) {
+  if (batchCreateRowsParams.items.length === 0) {
+    return [];
+  }
+
+  const url = `api/database/rows/table/${batchCreateRowsParams.tableId}/batch/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(
+        batchCreateRowsParams.tokenOrResolver,
+      );
+      return await makeOpenOpsTablesPost(
+        url,
+        { items: batchCreateRowsParams.items },
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while batch creating rows:', {
+        error,
+        url,
+        itemsCount: batchCreateRowsParams.items.length,
       });
     },
   );
