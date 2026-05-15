@@ -1,10 +1,12 @@
 'use client';
 
 import {
+  CellContext,
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  HeaderContext,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -18,8 +20,10 @@ import { SeekPage, SortDirection } from '@openops/shared';
 
 import { cn } from '../lib/cn';
 import { Button } from './button';
+import { Checkbox } from './checkbox';
 import { DataTableColumnHeader } from './data-table-column-header';
 import { DataTableFacetedFilter } from './data-table-options-filter';
+import { DataTableSelectionBar } from './data-table-selection-bar';
 import { DataTableSkeleton } from './data-table-skeleton';
 import { DataTableToolbar } from './data-table-toolbar';
 import {
@@ -89,6 +93,57 @@ type DataTableAction<TData extends DataWithId> = (
   row: RowDataWithActions<TData>,
 ) => JSX.Element;
 
+function DataTableSelectAllHeader<TData extends DataWithId, TValue>({
+  table,
+}: HeaderContext<RowDataWithActions<TData>, TValue>) {
+  return (
+    <Checkbox
+      checked={table.getIsAllPageRowsSelected()}
+      onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    />
+  );
+}
+
+function DataTableSelectRowCell<TData extends DataWithId, TValue>({
+  row,
+}: CellContext<RowDataWithActions<TData>, TValue>) {
+  return (
+    <Checkbox
+      checked={row.getIsSelected()}
+      onCheckedChange={(value) => row.toggleSelected(!!value)}
+    />
+  );
+}
+
+function DataTableActionsColumnHeader<TData extends DataWithId, TValue>({
+  column,
+}: HeaderContext<RowDataWithActions<TData>, TValue>) {
+  return <DataTableColumnHeader column={column} title="" />;
+}
+
+function DataTableActionsCell<TData extends DataWithId>({
+  rowOriginal,
+  actions,
+}: {
+  rowOriginal: RowDataWithActions<TData>;
+  actions: DataTableAction<TData>[];
+}) {
+  return (
+    <div className="flex items-end justify-end gap-4">
+      {actions.map((action, index) => (
+        <React.Fragment key={index}>{action(rowOriginal)}</React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+export type DataTableBulkAction<TData extends DataWithId> = {
+  render: (
+    selectedRows: RowDataWithActions<TData>[],
+    resetSelection: () => void,
+  ) => React.ReactNode;
+};
+
 export type PaginationParams = {
   cursor?: string;
   limit?: number;
@@ -129,6 +184,8 @@ interface DataTableProps<
   navigationExcludedColumns?: string[];
   enableSorting?: boolean;
   syncWithSearchParams?: boolean;
+  enableSelection?: boolean;
+  bulkActions?: DataTableBulkAction<TData>[];
 }
 
 export function DataTable<
@@ -155,29 +212,33 @@ export function DataTable<
   navigationExcludedColumns,
   enableSorting = false,
   syncWithSearchParams = true,
+  enableSelection = false,
+  bulkActions = [],
 }: DataTableProps<TData, TValue, Keys, F>) {
-  const columns = columnsInitial.concat([
+  const selectionColumn: ColumnDef<RowDataWithActions<TData>, TValue> = {
+    id: '__select',
+    accessorKey: '__select',
+    enableSorting: false,
+    enableHiding: false,
+    meta: { className: 'w-10' },
+    header: DataTableSelectAllHeader,
+    cell: DataTableSelectRowCell,
+  };
+  const columns: ColumnDef<RowDataWithActions<TData>, TValue>[] = [
+    ...(enableSelection ? [selectionColumn] : []),
+    ...columnsInitial,
     {
       accessorKey: '__actions',
       enableSorting: false,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="" />
+      header: DataTableActionsColumnHeader,
+      cell: ({ row }) => (
+        <DataTableActionsCell<TData>
+          rowOriginal={row.original}
+          actions={actions}
+        />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-end justify-end gap-4">
-            {actions.map((action, index) => {
-              return (
-                <React.Fragment key={index}>
-                  {action(row.original)}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        );
-      },
     },
-  ]);
+  ];
 
   const [searchParams, setSearchParams] = useSearchParams();
   const startingCursor = syncWithSearchParams
@@ -294,6 +355,7 @@ export function DataTable<
     data: tableData,
     columns,
     manualPagination: true,
+    enableRowSelection: enableSelection,
     enableSorting,
     manualSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -303,6 +365,7 @@ export function DataTable<
       columnVisibility,
       sorting,
     },
+    getRowId: (row, index) => row.id ?? `${index}`,
     initialState: {
       pagination: {
         pageSize: parseInt(startingLimit),
@@ -330,7 +393,15 @@ export function DataTable<
     onSelectedRowsChange?.(
       table.getSelectedRowModel().rows.map((row) => row.original),
     );
-  }, [table.getSelectedRowModel().rows]);
+  }, [table.getState().rowSelection]);
+
+  const selectedRows = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
+
+  const resetSelection = () => {
+    table.toggleAllRowsSelected(false);
+  };
 
   useEffect(() => {
     if (!syncWithSearchParams) {
@@ -475,8 +546,14 @@ export function DataTable<
                         <TableCell
                           key={cell.id}
                           className={cn(meta?.className, cellClassName)}
+                          onClick={(e) => {
+                            if (cell.column.id === '__select') {
+                              e.stopPropagation();
+                            }
+                          }}
                         >
                           {rowHref &&
+                          cell.column.id !== '__select' &&
                           !navigationExcludedColumns?.includes(
                             cell.column.id,
                           ) ? (
@@ -549,6 +626,18 @@ export function DataTable<
             {t('Next')}
           </Button>
         </div>
+      )}
+      {bulkActions.length > 0 && selectedRows.length > 0 && (
+        <DataTableSelectionBar
+          selectedCount={selectedRows.length}
+          onClearSelection={resetSelection}
+        >
+          {bulkActions.map((action, index) => (
+            <React.Fragment key={index}>
+              {action.render(selectedRows, resetSelection)}
+            </React.Fragment>
+          ))}
+        </DataTableSelectionBar>
       )}
     </div>
   );

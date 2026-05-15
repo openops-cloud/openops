@@ -53,6 +53,9 @@ import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
 import {
+  assertAllRequestedFlowsExistInProject,
+  assertNoFlowsAreEnabledForDeletion,
+  assertNoFlowsAreInternal,
   assertThatFlowIsInCorrectFolderContentType,
   assertThatFlowIsNotInternal,
 } from './flow-validations';
@@ -451,6 +454,61 @@ export const flowService = {
     } finally {
       await lock.release();
     }
+  },
+
+  async deleteMany({
+    flowIds,
+    projectId,
+    userId,
+  }: DeleteManyParams): Promise<void> {
+    const flows = await flowRepo().findBy({
+      id: In(flowIds),
+      projectId,
+    });
+
+    assertAllRequestedFlowsExistInProject(flowIds, flows);
+    await assertNoFlowsAreInternal(flows);
+    assertNoFlowsAreEnabledForDeletion(flows);
+
+    await Promise.all(
+      flowIds.map((id) =>
+        this.delete({
+          id,
+          projectId,
+          userId,
+        }),
+      ),
+    );
+  },
+
+  async moveMany({
+    flowIds,
+    folderId,
+    projectId,
+  }: MoveManyParams): Promise<void> {
+    await ensureFolderContentTypeMatches({
+      projectId,
+      folderId,
+      contentType: ContentType.WORKFLOW,
+    });
+
+    const flows = await flowRepo().findBy({
+      id: In(flowIds),
+      projectId,
+    });
+
+    assertAllRequestedFlowsExistInProject(flowIds, flows);
+    await assertNoFlowsAreInternal(flows);
+
+    await flowRepo().update(
+      {
+        id: In(flowIds),
+        projectId,
+      },
+      {
+        folderId,
+      },
+    );
   },
 
   async getAllEnabled(): Promise<Flow[]> {
@@ -862,6 +920,18 @@ type UpdatePublishedVersionIdParams = {
 type DeleteParams = {
   id: FlowId;
   userId: UserId;
+  projectId: ProjectId;
+};
+
+type DeleteManyParams = {
+  flowIds: FlowId[];
+  userId: UserId;
+  projectId: ProjectId;
+};
+
+type MoveManyParams = {
+  flowIds: FlowId[];
+  folderId: string | null;
   projectId: ProjectId;
 };
 

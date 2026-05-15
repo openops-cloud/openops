@@ -21,6 +21,7 @@ export * from './ui/data-table';
 export * from './ui/data-table-column-header';
 export * from './ui/data-table-options-filter';
 export * from './ui/data-table-select-popover';
+export * from './ui/data-table-selection-bar';
 export * from './ui/data-table-skeleton';
 export * from './ui/data-table-toolbar';
 export * from './ui/date-picker-range';
