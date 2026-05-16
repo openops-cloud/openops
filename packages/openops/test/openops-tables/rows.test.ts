@@ -56,6 +56,7 @@ import {
   addRow,
   batchDeleteRows,
   batchTableAggregations,
+  createRowsBatch,
   deleteRow,
   getRowByPrimaryKeyValue,
   getRows,
@@ -278,6 +279,54 @@ describe('add row', () => {
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+});
+
+describe('createRowsBatch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should split batch create requests into chunks of 200', async () => {
+    const items = Array.from({ length: 450 }, (_, index) => ({
+      Name: `row-${index + 1}`,
+    }));
+
+    makeOpenOpsTablesPostMock
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }])
+      .mockResolvedValueOnce([{ id: 4 }]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await createRowsBatch({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      items,
+    });
+
+    expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(0, 200) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(200, 400) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(400, 450) },
+      'some header',
+    );
   });
 });
 

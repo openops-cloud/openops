@@ -69,6 +69,7 @@ class TablesAccessSemaphore {
 }
 
 const semaphore = TablesAccessSemaphore.getInstance();
+const MAX_BATCH_CREATE_ROWS = 200;
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
@@ -220,11 +221,31 @@ export async function createRowsBatch(
       const authenticationHeader = createAxiosHeaders(
         batchCreateRowsParams.tokenOrResolver,
       );
-      return await makeOpenOpsTablesPost(
-        url,
-        { items: batchCreateRowsParams.items },
-        authenticationHeader,
-      );
+      const results = [];
+
+      for (
+        let index = 0;
+        index < batchCreateRowsParams.items.length;
+        index += MAX_BATCH_CREATE_ROWS
+      ) {
+        const items = batchCreateRowsParams.items.slice(
+          index,
+          index + MAX_BATCH_CREATE_ROWS,
+        );
+
+        const response = await makeOpenOpsTablesPost<unknown>(
+          url,
+          { items },
+          authenticationHeader,
+        );
+        if (Array.isArray(response)) {
+          results.push(...response);
+        } else if (response != null) {
+          results.push(response);
+        }
+      }
+
+      return results;
     },
     (error) => {
       logger.error('Error while batch creating rows:', {

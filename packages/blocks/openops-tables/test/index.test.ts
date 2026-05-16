@@ -2,7 +2,7 @@ import { openopsTables } from '../src/index';
 
 describe('block declaration tests', () => {
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(openopsTables.actions()).length).toBe(4);
+    expect(Object.keys(openopsTables.actions()).length).toBe(6);
     expect(openopsTables.actions()).toMatchObject({
       update_record: {
         name: 'update_record',
@@ -10,6 +10,10 @@ describe('block declaration tests', () => {
       },
       get_records: {
         name: 'get_records',
+        requireAuth: true,
+      },
+      create_records_batch: {
+        name: 'create_records_batch',
         requireAuth: true,
       },
       delete_record: {
