@@ -207,7 +207,7 @@ export async function addRow(addRowParams: AddRowParams) {
   );
 }
 
-export async function createRowsBatch(
+export async function batchCreateRows(
   batchCreateRowsParams: BatchCreateRowsParams,
 ) {
   if (batchCreateRowsParams.items.length === 0) {

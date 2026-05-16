@@ -54,9 +54,9 @@ import {
 import { axiosTablesRetryConfig } from '../../src/lib/openops-tables/requests-helpers';
 import {
   addRow,
+  batchCreateRows,
   batchDeleteRows,
   batchTableAggregations,
-  createRowsBatch,
   deleteRow,
   getRowByPrimaryKeyValue,
   getRows,
@@ -282,7 +282,7 @@ describe('add row', () => {
   });
 });
 
-describe('createRowsBatch', () => {
+describe('batchCreateRows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -298,7 +298,7 @@ describe('createRowsBatch', () => {
       .mockResolvedValueOnce([{ id: 4 }]);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await createRowsBatch({
+    const result = await batchCreateRows({
       tableId: 1,
       tokenOrResolver: 'token',
       items,

@@ -11,7 +11,7 @@ jest.mock('@openops/server-shared', () => ({
 
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
-  createRowsBatch: jest.fn(),
+  batchCreateRows: jest.fn(),
   getTableIdByTableName: jest.fn(),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
@@ -52,7 +52,7 @@ describe('createRecordsBatchAction', () => {
 
   test('should resolve table and batch create rows', async () => {
     cacheWrapperMock.getOrAdd.mockResolvedValue(1);
-    openopsCommonMock.createRowsBatch.mockResolvedValue([{ id: 101 }]);
+    openopsCommonMock.batchCreateRows.mockResolvedValue([{ id: 101 }]);
 
     const context = createContext({
       items: [{ field1: 'row one' }, { field1: 'row two' }],
@@ -66,7 +66,7 @@ describe('createRecordsBatchAction', () => {
       tablesDatabaseId: 1,
       tablesDatabaseToken: 'token',
     });
-    expect(openopsCommonMock.createRowsBatch).toHaveBeenCalledWith({
+    expect(openopsCommonMock.batchCreateRows).toHaveBeenCalledWith({
       tableId: 1,
       tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
@@ -86,7 +86,7 @@ describe('createRecordsBatchAction', () => {
     );
 
     expect(cacheWrapperMock.getOrAdd).not.toHaveBeenCalled();
-    expect(openopsCommonMock.createRowsBatch).not.toHaveBeenCalled();
+    expect(openopsCommonMock.batchCreateRows).not.toHaveBeenCalled();
   });
 
   test('should reject non-object array items', async () => {
@@ -99,7 +99,7 @@ describe('createRecordsBatchAction', () => {
     );
 
     expect(cacheWrapperMock.getOrAdd).not.toHaveBeenCalled();
-    expect(openopsCommonMock.createRowsBatch).not.toHaveBeenCalled();
+    expect(openopsCommonMock.batchCreateRows).not.toHaveBeenCalled();
   });
 });
 

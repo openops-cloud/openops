@@ -1,6 +1,6 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  createRowsBatch,
+  batchCreateRows,
   getTableIdByTableName,
   openopsTablesDropdownProperty,
   resolveTokenProvider,
@@ -49,7 +49,7 @@ export const createRecordsBatchAction = createAction({
 
     const tokenOrResolver = await resolveTokenProvider(context.server);
 
-    return await createRowsBatch({
+    return await batchCreateRows({
       tableId,
       tokenOrResolver,
       items: items as { [key: string]: any }[],
