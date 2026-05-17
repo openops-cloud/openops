@@ -340,7 +340,7 @@ describe('batchUpdateRows', () => {
 
   test('Should split batch update requests into chunks of 200', async () => {
     const items = Array.from({ length: 450 }, (_, index) => ({
-      rowPrimaryKey: `row-${index + 1}`,
+      rowId: index + 1,
       fields: {
         Owner: `owner-${index + 1}@openops.com`,
       },
@@ -355,7 +355,6 @@ describe('batchUpdateRows', () => {
     const result = await batchUpdateRows({
       tableId: 1,
       tokenOrResolver: 'token',
-      primaryKeyFieldName: 'ID',
       items,
     });
 
@@ -369,7 +368,7 @@ describe('batchUpdateRows', () => {
       'api/database/rows/table/1/batch/?user_field_names=true',
       {
         items: items.slice(0, 200).map((item) => ({
-          ID: item.rowPrimaryKey,
+          id: item.rowId,
           ...item.fields,
         })),
       },
@@ -380,7 +379,7 @@ describe('batchUpdateRows', () => {
       'api/database/rows/table/1/batch/?user_field_names=true',
       {
         items: items.slice(200, 400).map((item) => ({
-          ID: item.rowPrimaryKey,
+          id: item.rowId,
           ...item.fields,
         })),
       },
@@ -391,7 +390,7 @@ describe('batchUpdateRows', () => {
       'api/database/rows/table/1/batch/?user_field_names=true',
       {
         items: items.slice(400, 450).map((item) => ({
-          ID: item.rowPrimaryKey,
+          id: item.rowId,
           ...item.fields,
         })),
       },
@@ -403,7 +402,6 @@ describe('batchUpdateRows', () => {
     const result = await batchUpdateRows({
       tableId: 1,
       tokenOrResolver: 'token',
-      primaryKeyFieldName: 'ID',
       items: [],
     });
 

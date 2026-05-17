@@ -43,9 +43,8 @@ export interface BatchCreateRowsParams extends RowParams {
 }
 
 export interface BatchUpdateRowsParams extends RowParams {
-  primaryKeyFieldName: string;
   items: {
-    rowPrimaryKey: string;
+    rowId: number;
     fields: { [key: string]: any };
   }[];
 }
@@ -288,9 +287,9 @@ export async function batchUpdateRows(
       ) {
         const items = batchUpdateRowsParams.items
           .slice(index, index + MAX_BATCH_ROWS)
-          .map(({ rowPrimaryKey, fields }) => ({
+          .map(({ rowId, fields }) => ({
+            id: rowId,
             ...fields,
-            [batchUpdateRowsParams.primaryKeyFieldName]: rowPrimaryKey,
           }));
 
         const response = await makeOpenOpsTablesPatch<unknown>(

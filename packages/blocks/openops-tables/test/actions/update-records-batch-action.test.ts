@@ -13,7 +13,6 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   batchUpdateRows: jest.fn(),
   getFields: jest.fn(),
-  getPrimaryKeyFieldFromFields: jest.fn(),
   getTableIdByTableName: jest.fn(),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
@@ -56,16 +55,12 @@ describe('updateRecordsBatchAction', () => {
     cacheWrapperMock.getOrAdd
       .mockResolvedValueOnce(1)
       .mockResolvedValueOnce([{ name: 'ID', primary: true }]);
-    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
-      name: 'ID',
-      primary: true,
-    });
     openopsCommonMock.batchUpdateRows.mockResolvedValue([{ id: 101 }]);
 
     const context = createContext({
       items: [
         {
-          rowPrimaryKey: 'row-1',
+          rowId: 1,
           fields: { Owner: 'leyla@openops.com' },
         },
       ],
@@ -93,18 +88,14 @@ describe('updateRecordsBatchAction', () => {
     expect(openopsCommonMock.resolveTokenProvider).toHaveBeenCalledWith(
       context.server,
     );
-    expect(openopsCommonMock.getPrimaryKeyFieldFromFields).toHaveBeenCalledWith(
-      [{ name: 'ID', primary: true }],
-    );
     expect(openopsCommonMock.batchUpdateRows).toHaveBeenCalledWith({
       tableId: 1,
       tokenOrResolver: expect.objectContaining({
         getToken: expect.any(Function),
       }),
-      primaryKeyFieldName: 'ID',
       items: [
         {
-          rowPrimaryKey: 'row-1',
+          rowId: 1,
           fields: { Owner: 'leyla@openops.com' },
         },
       ],
@@ -114,11 +105,11 @@ describe('updateRecordsBatchAction', () => {
 
   test('should reject non-array items', async () => {
     const context = createContext({
-      items: { rowPrimaryKey: 'row-1', fields: { Owner: 'a@b.com' } },
+      items: { rowId: 1, fields: { Owner: 'a@b.com' } },
     });
 
     await expect(updateRecordsBatchAction.run(context)).rejects.toThrow(
-      'Items must be an array of objects with rowPrimaryKey and fields.',
+      'Items must be an array of objects with rowId and fields.',
     );
 
     expect(cacheWrapperMock.getOrAdd).not.toHaveBeenCalled();
@@ -129,14 +120,14 @@ describe('updateRecordsBatchAction', () => {
     const context = createContext({
       items: [
         {
-          rowPrimaryKey: '',
+          rowId: '1',
           fields: { Owner: 'a@b.com' },
         },
       ],
     });
 
     await expect(updateRecordsBatchAction.run(context)).rejects.toThrow(
-      'Each item must include a non-empty string rowPrimaryKey and an object fields value.',
+      'Each item must include an integer rowId and an object fields value.',
     );
 
     expect(cacheWrapperMock.getOrAdd).not.toHaveBeenCalled();
