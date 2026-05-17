@@ -1,6 +1,7 @@
 const makeOpenOpsTablesGetMock = jest.fn();
 const makeOpenOpsTablesPatchMock = jest.fn();
 const makeOpenOpsTablesPostMock = jest.fn();
+const makeOpenOpsTablesPutMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
@@ -13,6 +14,7 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => {
     makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
     makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
     makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
+    makeOpenOpsTablesPut: makeOpenOpsTablesPutMock,
     makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
   };
 });
@@ -57,6 +59,7 @@ import {
   batchCreateRows,
   batchDeleteRows,
   batchTableAggregations,
+  batchUpdateRows,
   deleteRow,
   getRowByPrimaryKeyValue,
   getRows,
@@ -327,6 +330,85 @@ describe('batchCreateRows', () => {
       { items: items.slice(400, 450) },
       'some header',
     );
+  });
+});
+
+describe('batchUpdateRows', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should split batch update requests into chunks of 200', async () => {
+    const items = Array.from({ length: 450 }, (_, index) => ({
+      rowPrimaryKey: `row-${index + 1}`,
+      fields: {
+        Owner: `owner-${index + 1}@openops.com`,
+      },
+    }));
+
+    makeOpenOpsTablesPatchMock
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }])
+      .mockResolvedValueOnce([{ id: 4 }]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchUpdateRows({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      primaryKeyFieldName: 'ID',
+      items,
+    });
+
+    expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledTimes(3);
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(0, 200).map((item) => ({
+          ID: item.rowPrimaryKey,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(200, 400).map((item) => ({
+          ID: item.rowPrimaryKey,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(400, 450).map((item) => ({
+          ID: item.rowPrimaryKey,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+  });
+
+  test('Should short-circuit empty batch updates', async () => {
+    const result = await batchUpdateRows({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      primaryKeyFieldName: 'ID',
+      items: [],
+    });
+
+    expect(result).toStrictEqual([]);
+    expect(makeOpenOpsTablesPatchMock).not.toHaveBeenCalled();
   });
 });
 

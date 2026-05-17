@@ -42,6 +42,14 @@ export interface BatchCreateRowsParams extends RowParams {
   items: { [key: string]: any }[];
 }
 
+export interface BatchUpdateRowsParams extends RowParams {
+  primaryKeyFieldName: string;
+  items: {
+    rowPrimaryKey: string;
+    fields: { [key: string]: any };
+  }[];
+}
+
 export interface UpsertRowParams extends RowParams {
   fields: { [key: string]: any };
 }
@@ -69,7 +77,7 @@ class TablesAccessSemaphore {
 }
 
 const semaphore = TablesAccessSemaphore.getInstance();
-const MAX_BATCH_CREATE_ROWS = 200;
+const MAX_BATCH_ROWS = 200;
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
@@ -226,11 +234,11 @@ export async function batchCreateRows(
       for (
         let index = 0;
         index < batchCreateRowsParams.items.length;
-        index += MAX_BATCH_CREATE_ROWS
+        index += MAX_BATCH_ROWS
       ) {
         const items = batchCreateRowsParams.items.slice(
           index,
-          index + MAX_BATCH_CREATE_ROWS,
+          index + MAX_BATCH_ROWS,
         );
 
         const response = await makeOpenOpsTablesPost<unknown>(
@@ -252,6 +260,58 @@ export async function batchCreateRows(
         error,
         url,
         itemsCount: batchCreateRowsParams.items.length,
+      });
+    },
+  );
+}
+
+export async function batchUpdateRows(
+  batchUpdateRowsParams: BatchUpdateRowsParams,
+) {
+  if (batchUpdateRowsParams.items.length === 0) {
+    return [];
+  }
+
+  const url = `api/database/rows/table/${batchUpdateRowsParams.tableId}/batch/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(
+        batchUpdateRowsParams.tokenOrResolver,
+      );
+      const results = [];
+
+      for (
+        let index = 0;
+        index < batchUpdateRowsParams.items.length;
+        index += MAX_BATCH_ROWS
+      ) {
+        const items = batchUpdateRowsParams.items
+          .slice(index, index + MAX_BATCH_ROWS)
+          .map(({ rowPrimaryKey, fields }) => ({
+            ...fields,
+            [batchUpdateRowsParams.primaryKeyFieldName]: rowPrimaryKey,
+          }));
+
+        const response = await makeOpenOpsTablesPatch<unknown>(
+          url,
+          { items },
+          authenticationHeader,
+        );
+        if (Array.isArray(response)) {
+          results.push(...response);
+        } else if (response != null) {
+          results.push(response);
+        }
+      }
+
+      return results;
+    },
+    (error) => {
+      logger.error('Error while batch updating rows:', {
+        error,
+        url,
+        itemsCount: batchUpdateRowsParams.items.length,
       });
     },
   );
