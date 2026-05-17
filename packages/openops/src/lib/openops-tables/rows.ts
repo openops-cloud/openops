@@ -38,6 +38,10 @@ export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
+export interface BatchCreateRowsParams extends RowParams {
+  items: { [key: string]: any }[];
+}
+
 export interface UpsertRowParams extends RowParams {
   fields: { [key: string]: any };
 }
@@ -65,6 +69,7 @@ class TablesAccessSemaphore {
 }
 
 const semaphore = TablesAccessSemaphore.getInstance();
+const MAX_BATCH_CREATE_ROWS = 200;
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
@@ -197,6 +202,56 @@ export async function addRow(addRowParams: AddRowParams) {
         error,
         url,
         fields: addRowParams.fields,
+      });
+    },
+  );
+}
+
+export async function batchCreateRows(
+  batchCreateRowsParams: BatchCreateRowsParams,
+) {
+  if (batchCreateRowsParams.items.length === 0) {
+    return [];
+  }
+
+  const url = `api/database/rows/table/${batchCreateRowsParams.tableId}/batch/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(
+        batchCreateRowsParams.tokenOrResolver,
+      );
+      const results = [];
+
+      for (
+        let index = 0;
+        index < batchCreateRowsParams.items.length;
+        index += MAX_BATCH_CREATE_ROWS
+      ) {
+        const items = batchCreateRowsParams.items.slice(
+          index,
+          index + MAX_BATCH_CREATE_ROWS,
+        );
+
+        const response = await makeOpenOpsTablesPost<unknown>(
+          url,
+          { items },
+          authenticationHeader,
+        );
+        if (Array.isArray(response)) {
+          results.push(...response);
+        } else if (response != null) {
+          results.push(response);
+        }
+      }
+
+      return results;
+    },
+    (error) => {
+      logger.error('Error while batch creating rows:', {
+        error,
+        url,
+        itemsCount: batchCreateRowsParams.items.length,
       });
     },
   );
