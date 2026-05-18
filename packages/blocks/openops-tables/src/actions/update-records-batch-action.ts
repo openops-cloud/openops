@@ -13,8 +13,7 @@ import { cacheWrapper } from '@openops/server-shared';
 export const updateRecordsBatchAction = createAction({
   auth: BlockAuth.None(),
   name: 'update_records_batch',
-  description:
-    'Update multiple existing records in an OpenOps table. Note: rowId must be the internal Baserow row ID (integer from the "ID" field), not a custom primary key.',
+  description: 'Update multiple existing records in an OpenOps table.',
   displayName: 'Update Records Batch',
   isWriteAction: true,
   props: {
