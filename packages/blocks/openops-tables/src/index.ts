@@ -5,6 +5,7 @@ import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordsAction } from './actions/get-records-action';
 import { getTableUrlAction } from './actions/get-table-url-action';
 import { updateRecordAction } from './actions/update-record-action';
+import { updateRecordsBatchAction } from './actions/update-records-batch-action';
 
 export const openopsTables = createBlock({
   displayName: 'OpenOps Tables',
@@ -17,6 +18,7 @@ export const openopsTables = createBlock({
     getRecordsAction,
     createRecordsBatchAction,
     updateRecordAction,
+    updateRecordsBatchAction,
     deleteRecordAction,
     getTableUrlAction,
   ],
