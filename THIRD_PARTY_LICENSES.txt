@@ -15219,7 +15219,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm package may be included in this product:
 
- - qs@6.14.2
+ - qs@6.15.2
 
 This package contains the following license:
 
@@ -39933,7 +39933,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - postcss@8.5.14
+ - postcss@8.5.15
 
 This package contains the following license:
 
@@ -40135,11 +40135,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
  - nanoid@3.3.11
+ - nanoid@3.3.12
 
-This package contains the following license:
+These packages each contain the following license:
 
 The MIT License (MIT)
 
