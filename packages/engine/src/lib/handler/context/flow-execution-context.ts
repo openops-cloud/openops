@@ -213,9 +213,6 @@ export class FlowExecutorContext {
     if (isNil(stepOutput)) {
       logger.error(
         `Failed to update step duration: step "${stepName}" was not found.`,
-        {
-          stepName,
-        },
       );
       return this;
     }
