@@ -15219,7 +15219,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm package may be included in this product:
 
- - qs@6.14.2
+ - qs@6.15.2
 
 This package contains the following license:
 
