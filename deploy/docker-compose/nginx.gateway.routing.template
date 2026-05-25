@@ -40,6 +40,9 @@ location /api/socket.io {
 
 location /openops-analytics {
     proxy_pass http://openops-analytics:8088;
+
+    proxy_hide_header X-Frame-Options;
+    
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
