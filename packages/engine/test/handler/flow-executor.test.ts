@@ -222,7 +222,7 @@ describe('flowExecutor.triggerFlowExecutor', () => {
   });
 
   it('should not send final progress when executionCorrelationId is nil', async () => {
-    const trigger = buildTrigger(undefined);
+    const trigger = buildTrigger();
     const baseConstants = generateMockEngineConstants();
 
     const constantsWithNullCorrelation = new EngineConstants(
@@ -259,7 +259,7 @@ describe('flowExecutor.triggerFlowExecutor', () => {
   });
 
   it('should return SUCCEEDED with empty steps when trigger has no nextAction', async () => {
-    const trigger = buildTrigger(undefined);
+    const trigger = buildTrigger();
 
     const result = await flowExecutor.triggerFlowExecutor({
       trigger,
