@@ -80,7 +80,6 @@ export const flowExecutor = {
     executionState: FlowExecutorContext;
     constants: EngineConstants;
   }): Promise<FlowExecutorContext> {
-    const flowStartTime = performance.now();
     let flowExecutionContext = executionState;
     let currentAction: Action | undefined = action;
 
@@ -132,9 +131,7 @@ export const flowExecutor = {
       currentAction = currentAction.nextAction;
     }
 
-    const flowEndTime = performance.now();
-
-    return flowExecutionContext.updateDuration(flowEndTime - flowStartTime);
+    return flowExecutionContext;
   },
 };
 

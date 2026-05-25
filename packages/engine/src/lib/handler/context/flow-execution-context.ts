@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import {
   ActionType,
   assertEqual,
@@ -210,13 +211,17 @@ export class FlowExecutorContext {
     const stepOutput = targetMap[stepName];
 
     if (isNil(stepOutput)) {
-      console.error(
-        `[FlowExecutorContext#setStepDuration] Step ${stepName} not found in current path`,
+      logger.error(
+        `Failed to update step duration: step "${stepName}" was not found.`,
+        {
+          stepName,
+        },
       );
       return this;
     }
 
-    targetMap[stepName].duration = duration;
+    targetMap[stepName].duration =
+      (targetMap[stepName].duration ?? 0) + duration;
 
     return new FlowExecutorContext({
       ...this,
