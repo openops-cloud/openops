@@ -4,7 +4,8 @@
     "outDir": "../dist/out-tsc",
     "module": "commonjs",
     "types": ["jest", "node"],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
   },
   "include": [
     "jest.config.ts",

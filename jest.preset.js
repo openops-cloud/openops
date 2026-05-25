@@ -14,4 +14,5 @@ module.exports = {
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   transformIgnorePatterns: ['^.+\\.js$', 'node_modules/(?!(lodash-es)/)'],
   setupFilesAfterEnv: [__dirname + '/jest.setup.js'],
+  maxWorkers: '50%',
 };

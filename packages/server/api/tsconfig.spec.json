@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "../../../dist/out-tsc",
     "module": "commonjs",
-    "types": ["jest", "node", "@fastify/cookie"]
+    "types": ["jest", "node", "@fastify/cookie"],
+    "isolatedModules": true
   },
   "include": [
     "types/**/*.d.ts",
