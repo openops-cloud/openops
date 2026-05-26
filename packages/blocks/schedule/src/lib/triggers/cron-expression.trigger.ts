@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { isValidCron } from 'cron-validator';
 import { timezoneOptions } from '../common';
 
@@ -52,6 +53,6 @@ export const cronExpressionTrigger = createTrigger({
     ];
   },
   onDisable: async () => {
-    console.log('onDisable');
+    logger.debug('Trigger disabled');
   },
 });

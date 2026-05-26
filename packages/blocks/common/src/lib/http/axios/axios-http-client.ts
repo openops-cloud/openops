@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import axios, { AxiosRequestConfig } from 'axios';
 import { BaseHttpClient } from '../core/base-http-client';
 import { DelegatingAuthenticationConverter } from '../core/delegating-authentication-converter';
@@ -47,22 +48,14 @@ export class AxiosHttpClient extends BaseHttpClient {
         headers: response.headers as HttpHeaders,
         body: response.data,
       };
-    } catch (e) {
-      console.error('[HttpClient#sendRequest] error:', e);
-      if (axios.isAxiosError(e)) {
-        console.error(
-          '[HttpClient#sendRequest] error, responseStatus:',
-          e.response?.status,
-        );
-        console.error(
-          '[HttpClient#sendRequest] error, responseBody:',
-          e.response?.data,
-        );
+    } catch (error) {
+      logger.error('Failed to execute HTTP request.', error);
 
-        throw new HttpError(request.body, e);
+      if (axios.isAxiosError(error)) {
+        throw new HttpError(request.body, error);
       }
 
-      throw e;
+      throw error;
     }
   }
 

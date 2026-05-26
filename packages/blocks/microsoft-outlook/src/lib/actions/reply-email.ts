@@ -7,6 +7,7 @@ import {
   WorkflowFile,
 } from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { microsoftOutlookAuth } from '../common/auth';
 
 export const replyEmailAction = createAction({
@@ -148,7 +149,8 @@ export const replyEmailAction = createAction({
         draftLink: `https://outlook.office.com/mail/drafts/id/${draftId}`,
       };
     } catch (error) {
-      console.error('Reply Email Error:', error);
+      logger.error('Failed to send Email reply.', error);
+
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       throw new Error(errorMessage);
