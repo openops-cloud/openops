@@ -37,7 +37,6 @@ export async function executeEngine(
     operationType,
   });
 
-  throw new Error();
   return key;
 }
 
