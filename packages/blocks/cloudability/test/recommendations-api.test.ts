@@ -137,6 +137,102 @@ describe('recommendations-api', () => {
         }),
       );
     });
+
+    test('includes vendorAccountIds as comma-joined query param when provided', async () => {
+      (makeRequest as jest.Mock).mockResolvedValue([]);
+      await getRecommendations({
+        auth: mockAuth,
+        vendor: Vendor.AWS,
+        recommendationType: 'ec2',
+        duration: Duration.ThirtyDay,
+        limit: '1',
+        filters: [],
+        basis: CostBasis.OnDemand,
+        snoozedFilter: SnoozedFilter.NO_SNOOZED,
+        vendorAccountIds: ['058264385171', '160153085320'],
+      });
+
+      expect(makeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryParams: expect.objectContaining({
+            vendorAccountIds: '058264385171,160153085320',
+          }),
+        }),
+      );
+    });
+
+    test('preserves leading zeros in vendorAccountIds (no numeric coercion)', async () => {
+      (makeRequest as jest.Mock).mockResolvedValue([]);
+      await getRecommendations({
+        auth: mockAuth,
+        vendor: Vendor.AWS,
+        recommendationType: 'ec2',
+        duration: Duration.ThirtyDay,
+        limit: '1',
+        filters: [],
+        basis: CostBasis.OnDemand,
+        snoozedFilter: SnoozedFilter.NO_SNOOZED,
+        vendorAccountIds: ['058264385171'],
+      });
+
+      expect(makeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryParams: expect.objectContaining({
+            vendorAccountIds: '058264385171',
+          }),
+        }),
+      );
+    });
+
+    test.each([undefined, []])(
+      'omits vendorAccountIds query param when value is %p',
+      async (value) => {
+        (makeRequest as jest.Mock).mockResolvedValue([]);
+        await getRecommendations({
+          auth: mockAuth,
+          vendor: Vendor.AWS,
+          recommendationType: 'ec2',
+          duration: Duration.ThirtyDay,
+          limit: '1',
+          filters: [],
+          basis: CostBasis.OnDemand,
+          snoozedFilter: SnoozedFilter.NO_SNOOZED,
+          vendorAccountIds: value as string[] | undefined,
+        });
+
+        expect(makeRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            queryParams: expect.not.objectContaining({
+              vendorAccountIds: expect.anything(),
+            }),
+          }),
+        );
+      },
+    );
+
+    test('includes vendorAccountIds for AWS redshift underutilized endpoint', async () => {
+      (makeRequest as jest.Mock).mockResolvedValue([]);
+      await getRecommendations({
+        auth: mockAuth,
+        vendor: Vendor.AWS,
+        recommendationType: 'redshift',
+        duration: Duration.ThirtyDay,
+        limit: '1',
+        filters: [],
+        basis: CostBasis.OnDemand,
+        snoozedFilter: SnoozedFilter.NO_SNOOZED,
+        vendorAccountIds: ['058264385171'],
+      });
+
+      expect(makeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: '/rightsizing/AWS/underutilized/redshift',
+          queryParams: expect.objectContaining({
+            vendorAccountIds: '058264385171',
+          }),
+        }),
+      );
+    });
   });
 
   describe('snoozeRecommendations', () => {

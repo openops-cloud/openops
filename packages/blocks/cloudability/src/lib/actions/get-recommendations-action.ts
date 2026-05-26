@@ -43,6 +43,12 @@ export const getRecommendationsAction = createAction({
       description: 'The maximum number of recommendations to return.',
       required: false,
     }),
+    vendorAccountIds: Property.Array({
+      displayName: 'Vendor Account IDs',
+      description:
+        'Optional list of cloud account IDs to scope recommendations to.',
+      required: false,
+    }),
     additionalFilters: Property.Array({
       displayName: 'Additional Filters',
       description:
@@ -59,6 +65,7 @@ export const getRecommendationsAction = createAction({
       additionalFilters,
       basis,
       snoozedFilter,
+      vendorAccountIds,
     } = context.propsValue;
     const { auth } = context;
 
@@ -71,6 +78,7 @@ export const getRecommendationsAction = createAction({
       filters: additionalFilters as string[],
       basis: basis,
       snoozedFilter: snoozedFilter,
+      vendorAccountIds: vendorAccountIds as string[] | undefined,
     });
 
     return result;
