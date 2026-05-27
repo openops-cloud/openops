@@ -161,7 +161,7 @@ export async function getServiceNowTableFields(
       sysparm_query: dictionaryQuery,
       sysparm_fields:
         'name,column_label,element,internal_type,max_length,mandatory,read_only,primary,choice,reference',
-      sysparm_limit: '5000',
+      sysparm_limit: '1000',
     },
   });
 
