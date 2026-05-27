@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
   BranchAction,
@@ -61,11 +62,13 @@ export const branchExecutor: BaseExecutor<BranchAction> = {
       }
 
       return branchExecutionContext;
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      logger.warn('Failed to execute branch action.', error);
+
       const failedStepOutput = stepOutput
-        .setErrorMessage((e as Error).message)
+        .setErrorMessage((error as Error).message)
         .setStatus(StepOutputStatus.FAILED);
+
       return executionState
         .upsertStep(action.name, failedStepOutput)
         .setVerdict(ExecutionVerdict.FAILED, undefined);
