@@ -6,7 +6,7 @@ import {
 } from './auth';
 
 export type ServiceNowTableField = {
-  name: string;
+  name?: string;
   column_label: string;
   element: string;
   internal_type?: {
@@ -113,7 +113,7 @@ function mergeDictionaryFields(
       continue;
     }
 
-    if (field.internal_type?.value === 'collection') {
+    if (!field.name) {
       continue;
     }
 
@@ -125,6 +125,10 @@ function mergeDictionaryFields(
     const existing = byElement.get(field.element);
     if (!existing) {
       byElement.set(field.element, field);
+      continue;
+    }
+
+    if (!existing.name) {
       continue;
     }
 
