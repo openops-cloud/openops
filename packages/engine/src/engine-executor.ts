@@ -28,8 +28,8 @@ export async function executeEngine(
   const key = await saveRequestBody(result);
 
   logger.info(`Finished engine operation [${operationType}] in ${duration}ms`, {
+    flowDisplayName: engineInput.flowVersion?.displayName ?? undefined,
     runEnvironment: engineInput.runEnvironment ?? undefined,
-    flowDisplayName: engineInput.flowVersion.displayName,
     operationStatus: hasOperationStatus(result.response)
       ? result.response.status
       : undefined,

@@ -43,9 +43,9 @@ export async function lambdaHandler(
   return runWithLogContext<APIGatewayProxyResult | undefined>(
     {
       deadlineTimestamp: requestBody.deadlineTimestamp.toString(),
+      executionCorrelationId: requestBody.requestId,
       operationType: requestBody.operationType,
       awsRequestId: context.awsRequestId,
-      requestId: requestBody.requestId,
     },
     () => handleEvent(requestBody),
   );
