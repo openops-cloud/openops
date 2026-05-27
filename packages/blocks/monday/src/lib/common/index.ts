@@ -1,4 +1,5 @@
 import { DynamicPropsValue, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { mondayClient } from './client';
 import { MondayColumnType, MondayNotWritableColumnType } from './constants';
 import { convertMondayColumnToOpenOpsProp } from './helper';
@@ -202,8 +203,8 @@ export const mondayCommon = {
             }
           }
         }
-      } catch (e) {
-        console.debug(e);
+      } catch (error) {
+        logger.debug('Failed to load Monday board columns', error);
       }
       return fields;
     },

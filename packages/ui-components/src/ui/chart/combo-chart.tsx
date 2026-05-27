@@ -107,6 +107,7 @@ export function ComboChart({
           tick={{
             fill: 'hsl(var(--foreground))',
           }}
+          padding={{ top: 4, bottom: 10 }}
         />
         <YAxis
           yAxisId="right"
@@ -121,6 +122,7 @@ export function ComboChart({
           tick={{
             fill: 'hsl(var(--foreground))',
           }}
+          padding={{ top: 4, bottom: 10 }}
         />
         {showTooltip && (
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />

@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 
 function calculateEveryHourCron(runOnWeekends: boolean) {
   return runOnWeekends ? `0 * * * *` : `0 * * * 1-5`;
@@ -48,6 +49,6 @@ export const everyHourTrigger = createTrigger({
     return getEveryHourData(ctx.propsValue.run_on_weekends);
   },
   onDisable: async () => {
-    console.log('onDisable');
+    logger.debug('Trigger disabled');
   },
 });

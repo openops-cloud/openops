@@ -3,6 +3,7 @@ import {
   StaticPropsValue,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import {
   assertEqual,
   assertNotNullOrUndefined,
@@ -150,12 +151,12 @@ export const triggerHelper = {
             success: true,
             response,
           };
-        } catch (e) {
-          console.error(e);
+        } catch (error) {
+          logger.warn('Trigger handshake failed', error);
 
           return {
             success: false,
-            message: JSON.stringify(e),
+            message: JSON.stringify(error),
           };
         }
       }
@@ -175,12 +176,12 @@ export const triggerHelper = {
               }),
             }),
           };
-        } catch (e) {
-          console.error(e);
+        } catch (error) {
+          logger.warn('Trigger test failed', error);
 
           return {
             success: false,
-            message: JSON.stringify(e),
+            message: JSON.stringify(error),
             output: [],
             input: censoredInput,
           };
@@ -206,7 +207,8 @@ export const triggerHelper = {
             });
 
             if (verified === false) {
-              console.info('Webhook is not verified');
+              logger.debug('Webhook is not verified');
+
               return {
                 success: false,
                 message: 'Webhook is not verified',
@@ -214,8 +216,9 @@ export const triggerHelper = {
                 input: resolvedInput,
               };
             }
-          } catch (e) {
-            console.error('Error while verifying webhook', e);
+          } catch (error) {
+            logger.info('Error verifying the webhook.', error);
+
             return {
               success: false,
               message: 'Error while verifying webhook',
