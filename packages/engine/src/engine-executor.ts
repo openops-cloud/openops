@@ -29,6 +29,7 @@ export async function executeEngine(
 
   logger.info(`Finished engine operation [${operationType}] in ${duration}ms`, {
     runEnvironment: engineInput.runEnvironment ?? undefined,
+    flowDisplayName: engineInput.flowVersion.displayName,
     operationStatus: hasOperationStatus(result.response)
       ? result.response.status
       : undefined,
