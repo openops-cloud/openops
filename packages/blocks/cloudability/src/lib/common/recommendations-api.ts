@@ -14,6 +14,7 @@ export async function getRecommendations({
   filters,
   basis,
   snoozedFilter,
+  vendorAccountIds,
 }: {
   auth: CloudabilityAuth;
   vendor: Vendor;
@@ -23,6 +24,7 @@ export async function getRecommendations({
   filters: string[];
   basis: CostBasis;
   snoozedFilter: SnoozedFilter;
+  vendorAccountIds?: string[];
 }): Promise<any[]> {
   const isAwsRedshift =
     vendor === Vendor.AWS && recommendationType === 'redshift';
@@ -42,6 +44,9 @@ export async function getRecommendations({
       ...(!limit || isEmpty(limit) || isNaN(Number(limit))
         ? {}
         : { limit: limit, offset: '0' }),
+      ...(vendorAccountIds && vendorAccountIds.length > 0
+        ? { vendorAccountIds: vendorAccountIds.join(',') }
+        : {}),
     },
   });
 
