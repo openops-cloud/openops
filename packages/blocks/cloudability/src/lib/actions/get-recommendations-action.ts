@@ -75,7 +75,7 @@ export const getRecommendationsAction = createAction({
       recommendationType: recommendationType,
       duration: duration,
       limit,
-      filters: additionalFilters as string[],
+      filters: (additionalFilters as string[] | undefined) ?? [],
       basis: basis,
       snoozedFilter: snoozedFilter,
       vendorAccountIds: vendorAccountIds as string[] | undefined,
