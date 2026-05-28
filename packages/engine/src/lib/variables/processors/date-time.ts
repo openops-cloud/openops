@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
@@ -11,7 +12,7 @@ export const dateTimeProcessor: ProcessorFn = (_property, value) => {
     if (!dateTimeString) throw Error('Undefined input');
     return dayjs.tz(dateTimeString, 'UTC').toISOString();
   } catch (error) {
-    console.error(error);
+    logger.warn('Failed to process date-time value:', error);
     return undefined;
   }
 };

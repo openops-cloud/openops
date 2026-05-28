@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { isNil } from '@openops/shared';
 import { ProcessorFn } from './types';
 
@@ -11,7 +12,7 @@ export const jsonProcessor: ProcessorFn = (_property, value) => {
     }
     return JSON.parse(value);
   } catch (error) {
-    console.error(error);
+    logger.warn('Failed to read or decode JSON file.', error);
     return undefined;
   }
 };

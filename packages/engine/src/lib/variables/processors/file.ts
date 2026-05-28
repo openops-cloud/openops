@@ -1,5 +1,5 @@
 import { WorkflowFile } from '@openops/blocks-framework';
-import { validateHost } from '@openops/server-shared';
+import { logger, validateHost } from '@openops/server-shared';
 import { isNil, isString } from '@openops/shared';
 import axios from 'axios';
 import isBase64 from 'is-base64';
@@ -21,8 +21,8 @@ export const fileProcessor: ProcessorFn = async (_property, urlOrBase64) => {
       return file;
     }
     return await handleUrlFile(urlOrBase64);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    logger.warn('Failed to read or decode file.', error);
     return null;
   }
 };

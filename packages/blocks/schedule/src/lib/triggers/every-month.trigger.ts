@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import {
   DAY_HOURS,
   MONTH_DAYS,
@@ -101,6 +102,6 @@ export const everyMonthTrigger = createTrigger({
     );
   },
   onDisable: async () => {
-    console.log('onDisable');
+    logger.debug('Trigger disabled');
   },
 });

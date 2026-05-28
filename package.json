@@ -243,7 +243,6 @@
     "node-cron": "3.0.3",
     "node-emoji": "2.2.0",
     "nodemailer": "8.0.5",
-    "npm": "10.9.8",
     "nx-cloud": "19.1.3",
     "object-sizeof": "2.6.3",
     "pdf-parse": "1.1.1",
@@ -300,7 +299,7 @@
     "use-debounce": "10.0.1",
     "use-ripple-hook": "1.0.24",
     "usehooks-ts": "3.1.0",
-    "uuid": "10.0.0",
+    "uuid": "11.1.1",
     "validator": "13.15.35",
     "vaul": "0.9.1",
     "vite-plugin-dts": "4.5.4",
@@ -324,7 +323,7 @@
     "@nx/web": "22.6.5",
     "@nx/webpack": "22.6.5",
     "@nx/workspace": "22.6.5",
-    "@playwright/test": "1.52.0",
+    "@playwright/test": "1.60.0",
     "@storybook/addon-docs": "10.3.6",
     "@storybook/react-vite": "10.3.6",
     "@storybook/test-runner": "0.24.3",
@@ -404,7 +403,7 @@
     "postcss": "8.5.15",
     "postcss-import": "14.1.0",
     "postcss-preset-env": "7.5.0",
-    "postcss-url": "8.0.0",
+    "postcss-url": "10.1.4",
     "prettier": "2.8.4",
     "prettier-plugin-organize-imports": "4.1.0",
     "storybook": "10.3.6",
@@ -454,6 +453,10 @@
     },
     "vite": {
       "rollup": "npm:@rollup/wasm-node"
-    }
+    },
+    "js-cookie": "3.0.7",
+    "ws": "8.20.1",
+    "axios": "$axios",
+    "uuid": "$uuid"
   }
 }

@@ -32,8 +32,8 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
       await runWithLogContext(
         {
           deadlineTimestamp: request.body.deadlineTimestamp.toString(),
+          executionCorrelationId: requestBody.requestId,
           operationType: requestBody.operationType,
-          requestId: requestBody.requestId,
         },
         () => handleRequest(reply, requestBody),
       );
@@ -61,7 +61,7 @@ async function handleRequest(
       bodyAccessKey,
     } as BodyAccessKeyRequest);
   } catch (error) {
-    logger.error('Engine execution failed.', { error });
+    logger.error('Engine execution failed.', error);
 
     await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send(
       JSON.stringify({

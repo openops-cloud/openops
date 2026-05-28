@@ -1,4 +1,5 @@
 import { createTrigger, TriggerStrategy } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { linearAuth } from '../..';
 import { makeClient } from '../common/client';
 import { props } from '../common/props';
@@ -75,7 +76,10 @@ export const linearNewIssue = createTrigger({
         webhookId: (await webhook.webhook).id,
       });
     } else {
-      console.error('Failed to create the webhook');
+      logger.error(
+        'Failed to create webhook for Linear new issue events',
+        webhook,
+      );
     }
   },
   async onDisable(context) {
