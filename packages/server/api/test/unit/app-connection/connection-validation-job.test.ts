@@ -52,20 +52,20 @@ jest.mock(
 import { AppConnectionStatus } from '@openops/shared';
 import { SystemJobName } from '../../../src/app/helper/system-jobs/common';
 
+function loadModule(): {
+  registerConnectionValidationJob: () => Promise<void>;
+} {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require('../../../src/app/app-connection/connection-validation-job') as {
+    registerConnectionValidationJob: () => Promise<void>;
+  };
+}
+
 describe('registerConnectionValidationJob', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
   });
-
-  function loadModule(): {
-    registerConnectionValidationJob: () => Promise<void>;
-  } {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('../../../src/app/app-connection/connection-validation-job') as {
-      registerConnectionValidationJob: () => Promise<void>;
-    };
-  }
 
   describe('registration', () => {
     it('should register the job handler', async () => {

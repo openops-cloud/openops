@@ -282,6 +282,7 @@ export const appConnectionService = {
       status: [AppConnectionStatus.ACTIVE],
       authProviders: undefined,
     });
+
     return page.data.map(removeSensitiveData);
   },
 
