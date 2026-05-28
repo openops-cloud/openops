@@ -256,22 +256,9 @@ describe('registerConnectionValidationJob', () => {
     });
 
     it('should log error and not throw when the job fails', async () => {
+      mockFind.mockReset();
+      mockLogger.error.mockClear();
       mockFind.mockRejectedValueOnce(new Error('db error'));
-
-      const connections = [
-        {
-          id: 'conn-1',
-          name: 'connection-1',
-          projectId: 'project-1',
-          status: AppConnectionStatus.ACTIVE,
-        },
-      ];
-
-      const projects = [{ id: 'project-1', displayName: 'Project 1' }];
-
-      mockFind
-        .mockResolvedValueOnce(connections)
-        .mockResolvedValueOnce(projects);
 
       await jobHandler();
 
