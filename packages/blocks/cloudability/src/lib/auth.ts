@@ -47,7 +47,7 @@ APAC: https://api-au.cloudability.com/v3`,
           Authorization: `Basic ${encoded}`,
         },
       });
-    } catch (e) {
+    } catch {
       return {
         valid: false,
         error:

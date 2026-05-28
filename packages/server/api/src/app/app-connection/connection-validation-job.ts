@@ -24,11 +24,10 @@ export const registerConnectionValidationJob = async (): Promise<void> => {
 
       try {
         await validateConnections();
+        logger.info('Connection validation job completed successfully');
       } catch (error) {
         logger.error('Connection validation job failed', error);
       }
-
-      logger.info("Connection validation job completed successfully'");
     },
   );
 
@@ -58,6 +57,10 @@ async function validateConnections(): Promise<void> {
       status: AppConnectionStatus.ACTIVE,
     },
   });
+
+  if (activeConnections.length === 0) {
+    return;
+  }
 
   const projectIds = [...new Set(activeConnections.map((c) => c.projectId))];
 

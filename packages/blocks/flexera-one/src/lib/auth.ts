@@ -51,7 +51,7 @@ export const flexeraAuth = BlockAuth.CustomAuth({
         refreshToken,
         appRegion,
       });
-    } catch (e) {
+    } catch {
       return {
         valid: false,
         error:
