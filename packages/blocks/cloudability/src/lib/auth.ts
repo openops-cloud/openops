@@ -1,3 +1,4 @@
+import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
 
 const markdown = `
@@ -33,6 +34,30 @@ APAC: https://api-au.cloudability.com/v3`,
       displayName: 'API Key',
       description: 'The API key to use to connect to Cloudability',
     }),
+  },
+  validate: async ({ auth }) => {
+    try {
+      const { apiKey } = auth;
+      const encoded = Buffer.from(`${apiKey}:`).toString('base64');
+
+      await httpClient.sendRequest({
+        method: HttpMethod.GET,
+        url: `${auth.apiUrl}/views`,
+        headers: {
+          Authorization: `Basic ${encoded}`,
+        },
+      });
+    } catch (e) {
+      return {
+        valid: false,
+        error:
+          'Failed to authenticate with Cloudability. Please check your credentials and try again.',
+      };
+    }
+
+    return {
+      valid: true,
+    };
   },
 });
 
