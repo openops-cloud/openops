@@ -14,6 +14,7 @@ export enum SystemJobName {
   LOGS_CLEANUP_TRIGGER = 'logs-cleanup-trigger',
   CREATE_TEMPLATE_TABLES = 'create-template-tables',
   CAMPAIGN_COMPLETION = 'campaign-completion',
+  CONNECTION_VALIDATION = 'connection-validation',
 }
 
 type HardDeleteProjectSystemJobData = {
@@ -42,6 +43,7 @@ type SystemJobDataMap = {
   [SystemJobName.TRIGGER_DATA_CLEANER]: Record<string, never>;
   [SystemJobName.LOGS_CLEANUP_TRIGGER]: Record<string, never>;
   [SystemJobName.CREATE_TEMPLATE_TABLES]: TablesServerContext;
+  [SystemJobName.CONNECTION_VALIDATION]: undefined;
 };
 
 export type SystemJobData<T extends SystemJobName = SystemJobName> =

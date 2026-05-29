@@ -1,4 +1,5 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
+import { generateAccessToken } from './common/make-request';
 
 const markdown = `
 Authenticate with your Flexera Refresh Token to access Flexera services.
@@ -41,5 +42,25 @@ export const flexeraAuth = BlockAuth.CustomAuth({
       description: 'The project ID to use for Flexera API calls.',
       required: true,
     }),
+  },
+  validate: async ({ auth }) => {
+    try {
+      const { refreshToken, appRegion } = auth;
+
+      await generateAccessToken({
+        refreshToken,
+        appRegion,
+      });
+    } catch {
+      return {
+        valid: false,
+        error:
+          'Failed to authenticate with Flexera. Please check your credentials and try again.',
+      };
+    }
+
+    return {
+      valid: true,
+    };
   },
 });
