@@ -33,12 +33,10 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
     systemJobWorker = new Worker(
       SYSTEM_JOB_QUEUE,
       async (job) => {
-        logger.debug(
-          { name: 'RedisSystemJob#systemJobWorker' },
-          `Executing job (${job.name})`,
-        );
+        logger.debug(`Executing system job (${job.name})`);
 
         const jobHandler = systemJobHandlers.getJobHandler(job.name);
+
         await jobHandler(job.data);
       },
       {
@@ -54,27 +52,24 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
   },
 
   async upsertJob({ job, schedule }): Promise<void> {
-    logger.info(
-      { name: 'RedisSystemJob#upsertJob', jobName: job.name },
-      'Upserting job',
-    );
-    const job2 = await getJobByNameAndJobId(job.name, job.jobId);
-
-    if (job2 && job2.id) {
-      logger.info('Remove job before upsert');
-      await this.removeJob(job2.id);
-    }
-
-    if (await jobNotInQueue(job.name, job.jobId)) {
-      logger.info(
-        { name: 'RedisSystemJob#upsertJob', jobName: job.name },
-        'Adding job to queue',
-      );
-      await addJobToQueue({
-        job,
-        schedule,
+    const previousJob = await getJobByNameAndJobId(job.name, job.jobId);
+    if (previousJob && previousJob.id) {
+      logger.info('Remove old system job before upsert', {
+        jobId: previousJob.id,
+        jobName: previousJob.name,
       });
+
+      await this.removeJob(previousJob.id);
     }
+
+    logger.info('Adding system job to queue', {
+      jobName: job.name,
+    });
+
+    await addJobToQueue({
+      job,
+      schedule,
+    });
   },
 
   async removeJob(jobId: string): Promise<void> {
@@ -127,14 +122,6 @@ const configureJobOptions = ({
     ...config,
     ...spreadIfDefined('jobId', jobId),
   };
-};
-
-const jobNotInQueue = async (
-  name: SystemJobName,
-  jobId?: string,
-): Promise<boolean> => {
-  const job = await getJobByNameAndJobId(name, jobId);
-  return isNil(job);
 };
 
 const getJobByNameAndJobId = async <T extends SystemJobName>(
