@@ -56,7 +56,7 @@ describe('getServiceNowTableFields', () => {
   describe('with table hierarchy permissions', () => {
     it('should return fields from both parent and child tables', async () => {
       mockTableHierarchy('incident', 'task');
-      mockTableHierarchy('task', undefined);
+      mockTableHierarchy('task');
 
       mockTableFields([
         createField('incident', 'impact', 'Impact', 'integer'),
@@ -82,7 +82,7 @@ describe('getServiceNowTableFields', () => {
 
     it('should deduplicate fields, prioritizing child table definitions', async () => {
       mockTableHierarchy('incident', 'task');
-      mockTableHierarchy('task', undefined);
+      mockTableHierarchy('task');
 
       mockTableFields([
         createField('incident', 'state', 'Incident State', 'integer'),
@@ -102,7 +102,7 @@ describe('getServiceNowTableFields', () => {
     });
 
     it('should filter out fields with empty elements', async () => {
-      mockTableHierarchy('incident', undefined);
+      mockTableHierarchy('incident');
 
       mockTableFields([
         createField('incident', 'valid_field', 'Valid Field'),
@@ -117,14 +117,15 @@ describe('getServiceNowTableFields', () => {
     });
 
     it('should handle fields without name property', async () => {
-      mockTableHierarchy('incident', undefined);
+      mockTableHierarchy('incident');
 
       mockTableFields([
         createField('incident', 'field_with_name', 'Field With Name'),
         {
           element: 'field_without_name',
           column_label: 'Field Without Name',
-        } as ServiceNowTableField,
+          internal_type: { value: 'string' },
+        },
       ]);
 
       const result = await getServiceNowTableFields(mockAuth, 'incident');
@@ -159,7 +160,7 @@ describe('getServiceNowTableFields', () => {
   });
 
   it('should handle empty results from sys_dictionary', async () => {
-    mockTableHierarchy('incident', undefined);
+    mockTableHierarchy('incident');
     mockTableFields([]);
 
     const result = await getServiceNowTableFields(mockAuth, 'incident');
@@ -168,7 +169,7 @@ describe('getServiceNowTableFields', () => {
   });
 
   it('should handle null result from sys_dictionary', async () => {
-    mockTableHierarchy('incident', undefined);
+    mockTableHierarchy('incident');
 
     mockHttpClient.sendRequest.mockResolvedValueOnce({
       body: {
@@ -184,7 +185,7 @@ describe('getServiceNowTableFields', () => {
   it('should handle deep table hierarchies', async () => {
     mockTableHierarchy('custom_incident', 'incident');
     mockTableHierarchy('incident', 'task');
-    mockTableHierarchy('task', undefined);
+    mockTableHierarchy('task');
 
     mockTableFields([
       createField('custom_incident', 'custom_field', 'Custom Field'),
