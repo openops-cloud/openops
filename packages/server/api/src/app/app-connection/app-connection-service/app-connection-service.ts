@@ -19,12 +19,10 @@ import {
   OAuth2GrantType,
   openOpsId,
   PatchAppConnectionRequestBody,
-  PatchAppConnectionRequestBody as PatchAppConnectionRequestBodySchema,
   ProjectId,
   SeekPage,
   SortDirection,
   UpsertAppConnectionRequestBody,
-  UpsertAppConnectionRequestBody as UpsertAppConnectionRequestBodySchema,
   UserId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
@@ -50,14 +48,14 @@ import { oauth2Util } from './oauth2/oauth2-util';
 import { engineValidateAuth } from './validate-auth';
 
 const repo = repoFactory(AppConnectionEntity);
-const DEFAULT_APP_CONNECTION_SORT_BY = AppConnectionSortBy.UPDATED;
-const DEFAULT_APP_CONNECTION_SORT_DIRECTION = SortDirection.DESC;
+const DEFAULT_SORT_BY = AppConnectionSortBy.UPDATED;
+const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
 
 export const appConnectionService = {
   async upsert(params: UpsertParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
-    parseAndVerify(UpsertAppConnectionRequestBodySchema, request);
+    parseAndVerify(UpsertAppConnectionRequestBody, request);
 
     const validatedConnectionValue = await validateConnectionValue({
       connection: request,
@@ -90,19 +88,10 @@ export const appConnectionService = {
       projectId,
     });
 
-    if (existingConnection) {
-      sendConnectionUpdatedEvent(
-        params.userId,
-        projectId,
-        request.authProviderKey,
-      );
-    } else {
-      sendConnectionCreatedEvent(
-        params.userId,
-        projectId,
-        request.authProviderKey,
-      );
-    }
+    const telemetryEvent = existingConnection
+      ? sendConnectionUpdatedEvent
+      : sendConnectionCreatedEvent;
+    telemetryEvent(params.userId, projectId, request.authProviderKey);
 
     return decryptConnection(updatedConnection);
   },
@@ -110,7 +99,7 @@ export const appConnectionService = {
   async patch(params: PatchParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
-    parseAndVerify(PatchAppConnectionRequestBodySchema, request);
+    parseAndVerify(PatchAppConnectionRequestBody, request);
 
     const existingConnection = await repo().findOneBy({
       id: request.id,
@@ -153,7 +142,7 @@ export const appConnectionService = {
       ...request,
       status: AppConnectionStatus.ACTIVE,
       value: encryptedConnectionValue,
-      id: existingConnection?.id,
+      id: existingConnection.id,
       projectId,
     });
 
@@ -186,30 +175,19 @@ export const appConnectionService = {
     });
 
     if (isNil(encryptedAppConnection)) {
-      return encryptedAppConnection;
-    }
-
-    const appConnection = decryptConnection(encryptedAppConnection);
-    if (!needRefresh(appConnection)) {
-      return oauth2Util.removeRefreshTokenAndClientSecret(appConnection);
-    }
-
-    const refreshedConnection = await lockAndRefreshConnection({
-      projectId,
-      name,
-    });
-    if (isNil(refreshedConnection)) {
       return null;
     }
-    return oauth2Util.removeRefreshTokenAndClientSecret(refreshedConnection);
+
+    return decryptAndRefresh(encryptedAppConnection);
   },
 
   async getOneOrThrow(params: GetOneParams): Promise<AppConnection> {
-    const connectionById = await repo().findOneBy({
+    const encryptedAppConnection = await repo().findOneBy({
       id: params.id,
       projectId: params.projectId,
     });
-    if (isNil(connectionById)) {
+
+    if (isNil(encryptedAppConnection)) {
       throw new ApplicationError({
         code: ErrorCode.ENTITY_NOT_FOUND,
         params: {
@@ -218,27 +196,38 @@ export const appConnectionService = {
         },
       });
     }
-    return (await this.getOne({
-      projectId: params.projectId,
-      name: connectionById.name,
-    }))!;
+
+    const connection = await decryptAndRefresh(encryptedAppConnection);
+    if (isNil(connection)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: params.id,
+        },
+      });
+    }
+
+    return connection;
   },
 
   async delete(params: DeleteParams): Promise<void> {
     await repo().delete(params);
   },
 
-  async list({
-    projectId,
-    cursorRequest,
-    name,
-    status,
-    limit,
-    connectionsIds,
-    authProviders,
-    sortBy,
-    sortDirection,
-  }: ListParams): Promise<SeekPage<AppConnection>> {
+  async list(params: ListParams): Promise<SeekPage<AppConnection>> {
+    const {
+      projectId,
+      cursorRequest,
+      name,
+      status,
+      limit,
+      connectionsIds,
+      authProviders,
+      sortBy,
+      sortDirection,
+    } = params;
+
     const sortingConfig = resolveAppConnectionSorting({
       sortBy,
       sortDirection,
@@ -260,22 +249,9 @@ export const appConnectionService = {
       },
     });
 
-    const querySelector: Record<string, string | FindOperator<string>> = {
-      projectId,
-    };
-    if (!isNil(name)) {
-      querySelector.name = ILike(`%${name}%`);
-    }
-    if (!isNil(status)) {
-      querySelector.status = In(status);
-    }
-    if (!isNil(connectionsIds)) {
-      querySelector.id = In(connectionsIds);
-    }
-
     const queryBuilder = repo()
       .createQueryBuilder('app_connection')
-      .where(querySelector);
+      .where(buildWhereClause({ projectId, name, status, connectionsIds }));
 
     if (!isNil(authProviders) && authProviders.length > 0) {
       queryBuilder.andWhere(
@@ -283,23 +259,12 @@ export const appConnectionService = {
         { authProviders: authProviders.map((p) => p.toLowerCase()) },
       );
     }
+
     const { data, cursor } = await paginator.paginate(queryBuilder);
-    const promises: Promise<AppConnection>[] = [];
-
-    data.forEach((encryptedConnection) => {
-      const apConnection: AppConnection =
-        decryptConnection(encryptedConnection);
-      promises.push(
-        new Promise((resolve) => {
-          return resolve(apConnection);
-        }),
-      );
-    });
-
-    const refreshConnections = await Promise.all(promises);
+    const decryptedConnections = data.map(decryptConnection);
 
     return paginationHelper.createPage<AppConnection>(
-      refreshConnections,
+      decryptedConnections,
       cursor,
     );
   },
@@ -308,21 +273,51 @@ export const appConnectionService = {
     projectId: string,
     connectionsIds: string[],
   ): Promise<AppConnectionWithoutSensitiveData[]> {
-    return (
-      await this.list({
-        limit: 1000,
-        projectId,
-        connectionsIds,
-        cursorRequest: null,
-        name: undefined,
-        status: [AppConnectionStatus.ACTIVE],
-        authProviders: undefined,
-      })
-    ).data.map(removeSensitiveData);
+    const page = await this.list({
+      limit: 1000,
+      projectId,
+      connectionsIds,
+      cursorRequest: null,
+      name: undefined,
+      status: [AppConnectionStatus.ACTIVE],
+      authProviders: undefined,
+    });
+
+    return page.data.map(removeSensitiveData);
   },
 
-  async countByProject({ projectId }: CountByProjectParams): Promise<number> {
-    return repo().countBy({ projectId });
+  async validateConnections(connection: AppConnectionSchema): Promise<void> {
+    const decryptedConnection = decryptConnection(connection);
+
+    const isOAuthConnection = [
+      AppConnectionType.PLATFORM_OAUTH2,
+      AppConnectionType.CLOUD_OAUTH2,
+      AppConnectionType.OAUTH2,
+    ].includes(decryptedConnection.value.type);
+
+    if (isOAuthConnection) {
+      const refreshedConnection = await lockAndRefreshConnection({
+        projectId: decryptedConnection.projectId,
+        name: decryptedConnection.name,
+        forceRefresh: true,
+      });
+
+      if (isNil(refreshedConnection)) {
+        throw new Error(
+          `Failed to refresh connection: ${decryptedConnection.name}`,
+        );
+      }
+
+      return;
+    }
+
+    await validateConnectionValue({
+      connection: {
+        ...connection,
+        value: decryptedConnection.value,
+      } as UpsertAppConnectionRequestBody,
+      projectId: decryptedConnection.projectId,
+    });
   },
 };
 
@@ -385,6 +380,11 @@ const validateConnectionValue = async (
         authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
+
+      if (!connection.value.grant_type) {
+        throw new Error('Grant type is required for OAuth2 connections');
+      }
+
       return oauth2Handler[connection.value.type].claim({
         projectId,
         authProviderKey: connection.authProviderKey,
@@ -393,7 +393,7 @@ const validateConnectionValue = async (
           code: connection.value.code,
           clientId: connection.value.client_id,
           props: connection.value.props,
-          grantType: connection.value.grant_type!,
+          grantType: connection.value.grant_type,
           redirectUrl: connection.value.redirect_url,
           clientSecret: connection.value.client_secret,
           authorizationMethod: connection.value.authorization_method,
@@ -409,9 +409,10 @@ const validateConnectionValue = async (
         projectId,
         auth: connection.value,
       });
+      return connection.value;
+    default:
+      return connection.value;
   }
-
-  return connection.value;
 };
 
 function decryptConnection(
@@ -420,43 +421,76 @@ function decryptConnection(
   const value = encryptUtils.decryptObject<AppConnectionValue>(
     encryptedConnection.value,
   );
-  const connection: AppConnection = {
+
+  return {
     ...encryptedConnection,
     value,
   };
-  return connection;
+}
+
+async function decryptAndRefresh(
+  encryptedAppConnection: AppConnectionSchema,
+): Promise<AppConnection | null> {
+  const appConnection = decryptConnection(encryptedAppConnection);
+
+  if (!needRefresh(appConnection)) {
+    return oauth2Util.removeRefreshTokenAndClientSecret(appConnection);
+  }
+
+  const refreshedConnection = await lockAndRefreshConnection({
+    projectId: appConnection.projectId,
+    name: appConnection.name,
+  });
+
+  if (isNil(refreshedConnection)) {
+    return null;
+  }
+  return oauth2Util.removeRefreshTokenAndClientSecret(refreshedConnection);
 }
 
 /**
- * We should make sure this is accessed only once, as a race condition could occur where the token needs to be
- * refreshed and it gets accessed at the same time, which could result in the wrong request saving incorrect data.
+ * Acquires a distributed lock before refreshing to prevent race conditions
+ * where concurrent access could save incorrect token data.
  */
 async function lockAndRefreshConnection({
+  forceRefresh = false,
   projectId,
   name,
 }: {
+  forceRefresh?: boolean;
   projectId: ProjectId;
   name: string;
-}) {
+}): Promise<AppConnection | null> {
   const refreshLock = await distributedLock.acquireLock({
     key: `${projectId}_${name}`,
     timeout: 20000,
   });
-
-  let appConnection: AppConnection | null = null;
 
   try {
     const encryptedAppConnection = await repo().findOneBy({
       projectId,
       name,
     });
+
     if (isNil(encryptedAppConnection)) {
-      return encryptedAppConnection;
+      return null;
     }
-    appConnection = decryptConnection(encryptedAppConnection);
-    if (!needRefresh(appConnection)) {
+
+    const appConnection = decryptConnection(encryptedAppConnection);
+    if (!forceRefresh && !needRefresh(appConnection)) {
       return appConnection;
     }
+
+    return await refreshAndPersist(appConnection);
+  } finally {
+    await refreshLock.release();
+  }
+}
+
+async function refreshAndPersist(
+  appConnection: AppConnection,
+): Promise<AppConnection> {
+  try {
     const refreshedAppConnection = await refresh(appConnection);
 
     await repo().update(refreshedAppConnection.id, {
@@ -466,17 +500,17 @@ async function lockAndRefreshConnection({
     return refreshedAppConnection;
   } catch (e) {
     exceptionHandler.handle(e);
-    if (!isNil(appConnection) && oauth2Util.isUserError(e)) {
-      appConnection.status = AppConnectionStatus.ERROR;
+    if (oauth2Util.isUserError(e)) {
       await repo().update(appConnection.id, {
-        status: appConnection.status,
+        status: AppConnectionStatus.ERROR,
         updated: dayjs().toISOString(),
       });
+
+      return { ...appConnection, status: AppConnectionStatus.ERROR };
     }
-  } finally {
-    await refreshLock.release();
+
+    return appConnection;
   }
-  return appConnection;
 }
 
 function needRefresh(connection: AppConnection): boolean {
@@ -495,31 +529,33 @@ function needRefresh(connection: AppConnection): boolean {
 
 async function refresh(connection: AppConnection): Promise<AppConnection> {
   switch (connection.value.type) {
-    case AppConnectionType.PLATFORM_OAUTH2:
-      connection.value = await oauth2Handler[connection.value.type].refresh({
+    case AppConnectionType.PLATFORM_OAUTH2: {
+      const value = await oauth2Handler[connection.value.type].refresh({
         authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
-      break;
-    case AppConnectionType.CLOUD_OAUTH2:
-      connection.value = await oauth2Handler[connection.value.type].refresh({
+      return { ...connection, value };
+    }
+    case AppConnectionType.CLOUD_OAUTH2: {
+      const value = await oauth2Handler[connection.value.type].refresh({
         authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
-      break;
-    case AppConnectionType.OAUTH2:
-      connection.value = await oauth2Handler[connection.value.type].refresh({
+      return { ...connection, value };
+    }
+    case AppConnectionType.OAUTH2: {
+      const value = await oauth2Handler[connection.value.type].refresh({
         authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
-      break;
+      return { ...connection, value };
+    }
     default:
-      break;
+      return connection;
   }
-  return connection;
 }
 
 type UpsertParams = {
@@ -562,14 +598,36 @@ type ListParams = {
   sortDirection?: SortDirection;
 };
 
-type CountByProjectParams = {
-  projectId: ProjectId;
-};
-
 type ValidateConnectionValueParams = {
   connection: UpsertAppConnectionRequestBody;
   projectId: ProjectId;
 };
+
+function buildWhereClause({
+  projectId,
+  name,
+  status,
+  connectionsIds,
+}: {
+  projectId: ProjectId;
+  name?: string;
+  status?: AppConnectionStatus[];
+  connectionsIds?: string[];
+}): Record<string, string | FindOperator<string>> {
+  const where: Record<string, string | FindOperator<string>> = { projectId };
+
+  if (!isNil(name)) {
+    where.name = ILike(`%${name}%`);
+  }
+  if (!isNil(status)) {
+    where.status = In(status);
+  }
+  if (!isNil(connectionsIds)) {
+    where.id = In(connectionsIds);
+  }
+
+  return where;
+}
 
 function resolveAppConnectionSorting({
   sortBy,
@@ -583,9 +641,8 @@ function resolveAppConnectionSorting({
   columnType?: string;
   order: 'ASC' | 'DESC';
 } {
-  const resolvedSortBy = sortBy ?? DEFAULT_APP_CONNECTION_SORT_BY;
-  const resolvedSortDirection =
-    sortDirection ?? DEFAULT_APP_CONNECTION_SORT_DIRECTION;
+  const resolvedSortBy = sortBy ?? DEFAULT_SORT_BY;
+  const resolvedSortDirection = sortDirection ?? DEFAULT_SORT_DIRECTION;
 
   const sortByToColumnMap: Record<
     AppConnectionSortBy,
