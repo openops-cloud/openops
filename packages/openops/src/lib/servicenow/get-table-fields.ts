@@ -145,7 +145,14 @@ export async function getServiceNowTableFields(
   auth: ServiceNowAuth,
   tableName: string,
 ): Promise<ServiceNowTableField[]> {
-  const tableNames = await getServiceNowTableHierarchy(auth, tableName);
+  let tableNames: string[];
+
+  try {
+    tableNames = await getServiceNowTableHierarchy(auth, tableName);
+  } catch (error) {
+    tableNames = [tableName];
+  }
+
   const dictionaryQuery = tableNames.map((name) => `name=${name}`).join('^OR');
 
   const response = await httpClient.sendRequest<{
