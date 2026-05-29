@@ -1,4 +1,5 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
+import { logger } from '@openops/server-shared';
 import {
   buildServiceNowApiUrl,
   generateAuthHeader,
@@ -150,6 +151,10 @@ export async function getServiceNowTableFields(
   try {
     tableNames = await getServiceNowTableHierarchy(auth, tableName);
   } catch (error) {
+    logger.debug(
+      `Unable to fetch table hierarchy for ${tableName}. Falling back to direct table query.`,
+      { error },
+    );
     tableNames = [tableName];
   }
 
