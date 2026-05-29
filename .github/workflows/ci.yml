@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Lookup node_modules cache
         id: node-modules-cache
         uses: actions/cache@v5.0.5
@@ -32,6 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v5.0.5
@@ -47,6 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v5.0.5
@@ -83,6 +92,9 @@ jobs:
       - name: Checkout for others
         if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
         uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v5.0.5
@@ -104,32 +116,35 @@ jobs:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
     strategy:
-        matrix:
-            test-suits:
-              - name: UI
-                include: ui-*,*-ui
-              - name: Blocks Shard 1
-                include: blocks-a*,blocks-c*,blocks-d*,
-              - name: Blocks Shard 2
-                include: blocks-f*,blocks-g*,blocks-m*,
-              - name: Blocks Shard 3
-                include: blocks-*
-                exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
-              - name: Server API Unit Tests
-                key: server-api-unit
-                target: test-unit
-                include: server-api
-              - name: Server API Integration Tests
-                key: server-api-integration
-                include: server-api
-              - name: Engine and Libraries
-                key: others
-                exclude: ui-*,*-ui,blocks-*,server-api
+      matrix:
+        test-suits:
+          - name: UI
+            include: ui-*,*-ui
+          - name: Blocks Shard 1
+            include: blocks-a*,blocks-c*,blocks-d*,
+          - name: Blocks Shard 2
+            include: blocks-f*,blocks-g*,blocks-m*,
+          - name: Blocks Shard 3
+            include: blocks-*
+            exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
+          - name: Server API Unit Tests
+            key: server-api-unit
+            target: test-unit
+            include: server-api
+          - name: Server API Integration Tests
+            key: server-api-integration
+            include: server-api
+          - name: Engine and Libraries
+            key: others
+            exclude: ui-*,*-ui,blocks-*,server-api
     name: Test ${{ matrix.test-suits.name }}
     needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v5.0.5
@@ -163,6 +178,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v5.0.5
@@ -190,15 +208,15 @@ jobs:
           key: dist-${{ github.sha }}
   build-images:
     strategy:
-        matrix:
-            target:
-            - name: App
-              file: Dockerfile
-              repository: openops-app
-            - name: Engine
-              file: engine.Dockerfile
-              repository: openops-engine
-            platform: [amd64, arm64]
+      matrix:
+        target:
+          - name: App
+            file: Dockerfile
+            repository: openops-app
+          - name: Engine
+            file: engine.Dockerfile
+            repository: openops-engine
+        platform: [amd64, arm64]
     name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
@@ -304,5 +322,3 @@ jobs:
           docker manifest push $BASE_REPOSITORY_URI:$SANITIZED_BRANCH
 
           echo "✅ Successfully pushed image $BASE_REPOSITORY_URI:$SANITIZED_BRANCH" >> $GITHUB_STEP_SUMMARY
-
-

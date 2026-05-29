@@ -210,7 +210,7 @@
     "ioredis": "5.4.1",
     "ip-range-check": "0.2.0",
     "is-base64": "1.1.0",
-    "isolated-vm": "5.0.1",
+    "isolated-vm": "6.1.2",
     "js-yaml": "4.1.1",
     "jsdom": "23.0.1",
     "json-server": "1.0.0-beta.0",
