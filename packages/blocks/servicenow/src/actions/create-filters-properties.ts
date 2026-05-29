@@ -34,7 +34,7 @@ export async function createFiltersProperties(
     : Property.StaticDropdown<string>({
         displayName: 'Field name',
         description:
-          'Includes inherited fields from parent tables if your account has read access to sys_db_object.',
+          'Includes inherited fields from parent tables if user has read access to sys_db_object.',
         required: true,
         options: {
           options: tableFields.map((f) => ({

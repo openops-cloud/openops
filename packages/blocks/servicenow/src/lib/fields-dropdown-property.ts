@@ -36,7 +36,7 @@ export function servicenowFieldsDropdownProperty() {
         props['selected'] = Property.StaticMultiSelectDropdown<string>({
           displayName: 'Fields',
           description:
-            'Select the fields to return. Includes inherited fields from parent tables if your account has read access to sys_db_object.',
+            'Select the fields to return. Includes inherited fields from parent tables if user has read access to sys_db_object.',
           required: true,
           options: {
             disabled: false,
