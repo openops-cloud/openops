@@ -1,6 +1,9 @@
 import { Property } from '@openops/blocks-framework';
-import { ServiceNowAuth, ServiceNowTableField } from '@openops/common';
-import { getServiceNowChoiceValues } from './get-choice-values';
+import {
+  getServiceNowChoiceValues,
+  ServiceNowAuth,
+  ServiceNowTableField,
+} from '@openops/common';
 
 export async function createFieldValueProperty(
   field: ServiceNowTableField,

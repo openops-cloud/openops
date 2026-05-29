@@ -1,6 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { generateAuthHeader, ServiceNowAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
+import { generateAuthHeader, ServiceNowAuth } from './auth';
 
 export interface ServiceNowChoice {
   label: string;

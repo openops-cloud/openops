@@ -1,5 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { getServiceNowChoiceValues } from '../../src/lib/get-choice-values';
+import { ServiceNowAuth } from '../src/lib/servicenow/auth';
+import { getServiceNowChoiceValues } from '../src/lib/servicenow/get-choice-values';
 
 jest.mock('@openops/blocks-common', () => ({
   httpClient: {
@@ -11,7 +12,7 @@ jest.mock('@openops/blocks-common', () => ({
 }));
 
 describe('getServiceNowChoiceValues', () => {
-  const mockAuth = {
+  const mockAuth: ServiceNowAuth = {
     username: 'testuser',
     password: 'testpass',
     instanceName: 'dev12345',
@@ -22,7 +23,7 @@ describe('getServiceNowChoiceValues', () => {
   });
 
   test('should fetch choice values for a field', async () => {
-    const mockResponse = {
+    (httpClient.sendRequest as jest.Mock).mockResolvedValue({
       body: {
         result: [
           { label: 'Option A', value: 'a' },
@@ -30,9 +31,7 @@ describe('getServiceNowChoiceValues', () => {
           { label: 'Option C', value: 'c' },
         ],
       },
-    };
-
-    (httpClient.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
+    });
 
     const choices = await getServiceNowChoiceValues(
       mockAuth,
@@ -62,17 +61,15 @@ describe('getServiceNowChoiceValues', () => {
     ]);
   });
 
-  test('should handle choices without labels', async () => {
-    const mockResponse = {
+  test('should fall back to value when label is missing', async () => {
+    (httpClient.sendRequest as jest.Mock).mockResolvedValue({
       body: {
         result: [
           { label: '', value: 'a' },
           { label: null, value: 'b' },
         ],
       },
-    };
-
-    (httpClient.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
+    });
 
     const choices = await getServiceNowChoiceValues(
       mockAuth,
@@ -86,7 +83,7 @@ describe('getServiceNowChoiceValues', () => {
     ]);
   });
 
-  test('should return empty array on API error', async () => {
+  test('should return an empty array on API error', async () => {
     (httpClient.sendRequest as jest.Mock).mockRejectedValue(
       new Error('API Error'),
     );
@@ -100,14 +97,10 @@ describe('getServiceNowChoiceValues', () => {
     expect(choices).toEqual([]);
   });
 
-  test('should return empty array when no choices found', async () => {
-    const mockResponse = {
-      body: {
-        result: [],
-      },
-    };
-
-    (httpClient.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
+  test('should return an empty array when no choices are found', async () => {
+    (httpClient.sendRequest as jest.Mock).mockResolvedValue({
+      body: { result: [] },
+    });
 
     const choices = await getServiceNowChoiceValues(
       mockAuth,
