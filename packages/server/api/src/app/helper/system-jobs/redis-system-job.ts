@@ -58,6 +58,13 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
       { name: 'RedisSystemJob#upsertJob', jobName: job.name },
       'Upserting job',
     );
+    const job2 = await getJobByNameAndJobId(job.name, job.jobId);
+
+    if (job2 && job2.id) {
+      logger.info('Remove job before upsert');
+      await this.removeJob(job2.id);
+    }
+
     if (await jobNotInQueue(job.name, job.jobId)) {
       logger.info(
         { name: 'RedisSystemJob#upsertJob', jobName: job.name },
