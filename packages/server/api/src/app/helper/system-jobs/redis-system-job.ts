@@ -59,7 +59,11 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
         jobName: previousJob.name,
       });
 
-      await this.removeJob(previousJob.id);
+      if (schedule.type === 'repeated' && previousJob.repeatJobKey) {
+        await systemJobsQueue.removeRepeatableByKey(previousJob.repeatJobKey);
+      } else {
+        await this.removeJob(previousJob.id);
+      }
     }
 
     logger.info('Adding system job to queue', {
