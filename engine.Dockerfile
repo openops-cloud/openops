@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/nodejs:20
+FROM public.ecr.aws/lambda/nodejs:24
 
 # Architecture will be set automatically by Docker buildx
 ARG TARGETARCH

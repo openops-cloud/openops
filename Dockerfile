@@ -1,4 +1,4 @@
-FROM node:20.19-alpine3.20
+FROM node:24.16.0-alpine3.23
 
 # Set the locale
 ENV LANG=en_US.UTF-8
