@@ -20,9 +20,7 @@ export function servicenowTableDropdownProperty(): DropdownProperty<
       }
 
       try {
-        const tables = await getServiceNowTables(auth as ServiceNowAuth, {
-          query: 'nameSTARTSWITHx_',
-        });
+        const tables = await getServiceNowTables(auth as ServiceNowAuth);
 
         if (tables.length === 0) {
           return {
