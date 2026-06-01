@@ -187,14 +187,7 @@ const FlowVersionDetailsCard = React.memo(
     return (
       <CardListItem interactive={false} className="gap-[10px]">
         {flowVersion.updatedByUser && (
-          <AvatarLetter
-            name={
-              flowVersion.updatedByUser.firstName +
-              ' ' +
-              flowVersion.updatedByUser.lastName
-            }
-            email={flowVersion.updatedByUser.email}
-          />
+          <AvatarLetter email={flowVersion.updatedByUser.email} />
         )}
         <div className="grid gap-2">
           <p className="text-sm font-medium leading-none select-none pointer-events-none">

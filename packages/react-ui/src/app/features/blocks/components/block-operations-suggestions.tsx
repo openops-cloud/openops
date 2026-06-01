@@ -1,5 +1,6 @@
 import {
   BlockSelectorOperation,
+  BlockStepMetadataWithSuggestions,
   CardListItem,
   ItemListMetadata,
   StepMetadata,
@@ -24,15 +25,16 @@ const BlockOperationSuggestions = ({
   handleSelectOperationSuggestion,
   operation,
 }: BlockOperationSuggestionsProps) => {
+  const blockSuggestions = blockMetadata as BlockStepMetadataWithSuggestions;
   const suggestions =
     operation.type === FlowOperationType.UPDATE_TRIGGER
-      ? blockMetadata.suggestedTriggers
-      : blockMetadata.suggestedActions;
+      ? blockSuggestions.suggestedTriggers
+      : blockSuggestions.suggestedActions;
 
   return (
     <>
       <div className="mt-0.5" />
-      {suggestions?.map((suggestion) => (
+      {suggestions?.map((suggestion: ItemListMetadata) => (
         <CardListItem
           className="p-2 px-0 text-sm gap-2 items-start transition-transform duration-200 ease-in-out hover:scale-105 hover:font-bold"
           key={suggestion.name}

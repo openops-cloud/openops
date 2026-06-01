@@ -50,7 +50,9 @@ export default defineConfig({
     react(),
     nxViteTsPaths(),
     checker({
-      typescript: true,
+      typescript: {
+        tsconfigPath: 'tsconfig.app.json',
+      },
     }),
     circleDependency({
       exclude: ['**/node_modules/**', '**/auto-properties-form.tsx'],

@@ -158,7 +158,10 @@ const StepSettingsContainer = React.memo(() => {
   });
 
   useUpdateEffect(() => {
-    form.setValue('valid', form.formState.isValid);
+    (form.setValue as (name: 'valid', value: boolean) => void)(
+      'valid',
+      form.formState.isValid,
+    );
   }, [form.formState.isValid]);
 
   const inputChanges = useWatch({

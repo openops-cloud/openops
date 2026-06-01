@@ -12,7 +12,12 @@ import {
 import { Edge, UNSAVED_CHANGES_TOAST, useToast } from '@openops/components/ui';
 import { t } from 'i18next';
 
-import { flowHelper, FlowOperationType } from '@openops/shared';
+import {
+  Action,
+  flowHelper,
+  FlowOperationType,
+  Trigger,
+} from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -92,7 +97,7 @@ const FlowDragLayer = ({ children, cursorPosition }: FlowDragLayerProps) => {
       const edgeData: Edge['data'] = e.over.data.current as Edge['data'];
       if (edgeData && edgeData.parentStep && draggedStep) {
         const isPartOfInnerFlow = flowHelper.isPartOfInnerFlow({
-          parentStep: draggedStep,
+          parentStep: draggedStep as Action | Trigger,
           childName: edgeData.parentStep,
         });
         if (isPartOfInnerFlow) {
@@ -143,7 +148,7 @@ const FlowDragLayer = ({ children, cursorPosition }: FlowDragLayerProps) => {
       </DndContext>
       {draggedStep && (
         <StepDragOverlay
-          step={draggedStep}
+          step={draggedStep as Action | Trigger}
           cursorPosition={cursorPosition}
         ></StepDragOverlay>
       )}

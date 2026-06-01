@@ -6,6 +6,7 @@ import {
   StepOutputWithData,
   StepWithIndex,
   Trigger,
+  TriggerWithOptionalId,
 } from '@openops/shared';
 
 export type MentionTreeNode = {
@@ -189,7 +190,9 @@ const getAllStepsMentions = (
   });
 };
 
-const hasStepSampleData = (step: Action | Trigger | undefined) => {
+const hasStepSampleData = (
+  step: Action | Trigger | TriggerWithOptionalId | undefined,
+) => {
   const sampleData = step?.settings?.inputUiInfo?.sampleData;
   return (
     !isNil(sampleData) &&

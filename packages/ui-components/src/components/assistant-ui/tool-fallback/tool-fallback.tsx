@@ -72,7 +72,7 @@ const extractResultStatus = (
       return {
         type: TOOL_STATUS_TYPES.REQUIRES_ACTION,
         reason: 'tool-calls',
-      };
+      } as unknown as MessagePartStatus;
     }
 
     if (hasDirectError(result) || hasContentError(result)) {

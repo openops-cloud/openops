@@ -1,13 +1,15 @@
-import { MentionNodeAttrs } from '@tiptap/extension-mention';
 import { JSONContent } from '@tiptap/react';
 
 import { StepMetadata } from '@openops/components/ui';
 import {
   Action,
   Trigger,
+  TriggerWithOptionalId,
   assertNotNullOrUndefined,
   isNil,
 } from '@openops/shared';
+
+type FlowStep = Action | Trigger | TriggerWithOptionalId;
 
 const removeIntroplationBrackets = (text: string) => {
   return text.slice(2, text.length - 2);
@@ -30,7 +32,9 @@ const keysWithinPath = (path: string) => {
     .map((key) => removeQuotes(key));
 };
 
-type MentionNodeAttrs = {
+export type MentionNodeAttrs = {
+  id?: string;
+  label?: string;
   logoUrl?: string;
   displayText: string;
   serverValue: string;
@@ -91,7 +95,7 @@ function parseMentionNodeFromText(request: ParseMentionNodeFromText) {
 type StepMetadataWithDisplayName = StepMetadata & { stepDisplayName: string };
 const getStepMetadataFromPath = (
   path: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) => {
   const stepPath = removeIntroplationBrackets(path);
@@ -105,7 +109,7 @@ const getStepMetadataFromPath = (
 
 function convertTextToTipTapJsonContent(
   userInputText: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ): {
   type: TipTapNodeTypes.paragraph;
@@ -149,7 +153,7 @@ function convertTextToTipTapJsonContent(
 
 function createMentionNodeFromText(
   mention: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) {
   const { stepMetadata, dfsIndex } = getStepMetadataFromPath(
