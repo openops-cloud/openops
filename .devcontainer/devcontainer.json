@@ -1,70 +1,70 @@
 // Update the VARIANT arg in docker-compose.yml to pick a Node.js version
 {
-    "name": "OpenOps Dev",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "context": ".",
-        "args": {
-            "VARIANT": "1.1.12-20-bullseye"
-        }
+  "name": "OpenOps Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "VARIANT": "4.0.11-24-bullseye"
+    }
+  },
+  "containerEnv": {
+    "OPS_OPENOPS_TABLES_PUBLIC_URL": "https://${env:CODESPACE_NAME}-3001.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "OPS_FRONTEND_URL": "https://${env:CODESPACE_NAME}-4200.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "OPS_ENGINE_URL": "https://${env:CODESPACE_NAME}-3005.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/execute"
+  },
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "huizhou.githd",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "Orta.vscode-jest",
+        "EditorConfig.EditorConfig"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker": {}
+  },
+  "forwardPorts": [
+    4200, // App frontend
+    3000, // App backend
+    3001, // Tables frontend and backend
+    3005, // Engine
+    5432, // Postgres
+    6379 // Redis
+  ],
+  "portsAttributes": {
+    "4200": {
+      "label": "App Frontend"
     },
-    "containerEnv": {
-        "OPS_OPENOPS_TABLES_PUBLIC_URL": "https://${env:CODESPACE_NAME}-3001.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
-        "OPS_FRONTEND_URL": "https://${env:CODESPACE_NAME}-4200.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
-        "OPS_ENGINE_URL": "https://${env:CODESPACE_NAME}-3005.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/execute"
+    "3000": {
+      "label": "App Backend"
     },
-    // Configure tool-specific properties.
-    "customizations": {
-        // Configure properties specific to VS Code.
-        "vscode": {
-            // Add the IDs of extensions you want installed when the container is created.
-            "extensions": [
-                "dbaeumer.vscode-eslint",
-                "huizhou.githd",
-                "GitHub.copilot",
-                "GitHub.copilot-chat",
-                "Orta.vscode-jest",
-                "EditorConfig.EditorConfig"
-            ]
-        }
+    "3001": {
+      "label": "Tables"
     },
-    "features": {
-        "ghcr.io/devcontainers/features/docker-outside-of-docker": {}
+    "3005": {
+      "label": "Engine"
     },
-    "forwardPorts": [
-        4200, // App frontend
-        3000, // App backend
-        3001, // Tables frontend and backend
-        3005, // Engine
-        5432, // Postgres
-        6379 // Redis
-    ],
-    "portsAttributes": {
-        "4200": {
-            "label": "App Frontend"
-        },
-        "3000": {
-            "label": "App Backend"
-        },
-        "3001": {
-            "label": "Tables"
-        },
-        "3005": {
-            "label": "Engine"
-        },
-        "5432": {
-            "label": "Postgres"
-        },
-        "6379": {
-            "label": "Redis"
-        }
+    "5432": {
+      "label": "Postgres"
     },
-    "hostRequirements": {
-        "cpus": 4,
-        "memory": "8gb"
-    },
-    "remoteUser": "root",
-    "postCreateCommand": "git pull origin $(git branch --show-current) && /bin/bash .devcontainer/setup.sh && npm ci",
-    "postStartCommand": "docker compose pull",
-    "postAttachCommand": "npm start"
+    "6379": {
+      "label": "Redis"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb"
+  },
+  "remoteUser": "root",
+  "postCreateCommand": "git pull origin $(git branch --show-current) && /bin/bash .devcontainer/setup.sh && npm ci",
+  "postStartCommand": "docker compose pull",
+  "postAttachCommand": "npm start"
 }
