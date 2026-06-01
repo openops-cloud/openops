@@ -1,5 +1,5 @@
 import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
-import type { StoryObj } from '@storybook/react';
+import type { StoryObj } from '@storybook/react-vite';
 import { getNodesBounds } from '@xyflow/react';
 import React, { useMemo } from 'react';
 import { ReadonlyCanvasProvider } from '../../components/flow-canvas/canvas-context';

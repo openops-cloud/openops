@@ -7,6 +7,7 @@ import {
   CountFlowsRequest,
   CreateEmptyFlowRequest,
   CreateFlowFromTemplateRequest,
+  DeleteFlowsRequest,
   ErrorCode,
   ExecutionType,
   FlowOperationRequest,
@@ -17,6 +18,7 @@ import {
   GetFlowTemplateRequestQuery,
   ListFlowsRequest,
   ListFlowVersionRequest,
+  MoveFlowsRequest,
   OpenOpsId,
   openOpsId,
   Permission,
@@ -94,6 +96,16 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
     return updatedFlow;
   });
 
+  app.post('/move', MoveFlowsRequestOptions, async (request, reply) => {
+    await flowService.moveMany({
+      flowIds: request.body.flowIds,
+      folderId: request.body.folderId ?? null,
+      projectId: request.principal.projectId,
+    });
+
+    return reply.status(StatusCodes.NO_CONTENT).send();
+  });
+
   app.get('/', ListFlowsRequestOptions, async (request) => {
     // TODO: use ListFlowsRequest.versionState to filter flows by version state
     return flowService.list({
@@ -136,6 +148,16 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
   app.delete('/:id', DeleteFlowRequestOptions, async (request, reply) => {
     await flowService.delete({
       id: request.params.id,
+      userId: request.principal.id,
+      projectId: request.principal.projectId,
+    });
+
+    return reply.status(StatusCodes.NO_CONTENT).send();
+  });
+
+  app.delete('/', DeleteFlowsRequestOptions, async (request, reply) => {
+    await flowService.deleteMany({
+      flowIds: request.query.flowIds,
       userId: request.principal.id,
       projectId: request.principal.projectId,
     });
@@ -306,6 +328,24 @@ const UpdateFlowRequestOptions = {
   },
 };
 
+const MoveFlowsRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.WRITE_FLOW,
+    }),
+  },
+  schema: {
+    tags: ['flows'],
+    description: 'Move multiple flows to another folder in a single request.',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    body: MoveFlowsRequest,
+    response: {
+      [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
 const ListFlowsRequestOptions = {
   config: {
     security: getProjectScopedRoutePolicy({
@@ -423,6 +463,25 @@ const DeleteFlowRequestOptions = {
     params: Type.Object({
       id: OpenOpsId,
     }),
+    response: {
+      [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
+const DeleteFlowsRequestOptions = {
+  config: {
+    security: getProjectScopedRoutePolicy({
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+      permission: Permission.DELETE_FLOW,
+    }),
+  },
+  schema: {
+    tags: ['flows'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description:
+      'Permanently delete multiple flows and all associated versions. This operation cannot be undone.',
+    querystring: DeleteFlowsRequest,
     response: {
       [StatusCodes.NO_CONTENT]: Type.Never(),
     },

@@ -18,7 +18,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await databaseConnection().getRepository('block_metadata').delete({});
+  await databaseConnection()
+    .getRepository('block_metadata')
+    .createQueryBuilder()
+    .delete()
+    .execute();
 });
 
 afterAll(async () => {

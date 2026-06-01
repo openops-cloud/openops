@@ -1,8 +1,7 @@
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { action } from '@storybook/addon-actions';
-import { expect } from '@storybook/jest';
-import { Meta, StoryObj } from '@storybook/react';
-import { userEvent, waitFor } from '@storybook/testing-library';
+import { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
+import { expect, userEvent, waitFor } from 'storybook/test';
 import { ToggleSwitch } from '../../components/toggle-switch/toggle-switch';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 

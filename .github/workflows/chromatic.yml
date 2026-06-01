@@ -1,6 +1,6 @@
 # .github/workflows/chromatic.yml
 
-name: "Chromatic"
+name: 'Chromatic'
 
 on:
   push:
@@ -22,9 +22,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Cache node_modules
         id: node-modules-cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -36,7 +40,7 @@ jobs:
 
       - name: Run Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN
-        uses: chromaui/action@v16.0.0
+        uses: chromaui/action@8ad69a40dea06755a3c6db290f300a39e011433b # v17
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true # 👈 Required option to enable TurboSnap

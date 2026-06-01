@@ -9,6 +9,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { CircleHelp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HomeHelpDropdown = () => {
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
@@ -33,6 +34,15 @@ const HomeHelpDropdown = () => {
           }}
         >
           {t('Get started')}
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            to="https://docs.openops.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('Documentation')}
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

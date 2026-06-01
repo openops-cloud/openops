@@ -16,6 +16,7 @@ import {
   FlowRunStatus,
   FlowVersion,
   GetFlowVersionForWorkerRequestType,
+  isFlowStateTerminal,
   isNil,
   ResumeExecuteFlowOperation,
   ResumePayload,
@@ -127,6 +128,14 @@ async function executeFlow(
     );
 
     if (engineSucceeded) {
+      return;
+    }
+
+    const flowRun = await engineApiService(engineToken).getRun({
+      runId: jobData.runId,
+    });
+
+    if (isFlowStateTerminal(flowRun.status)) {
       return;
     }
 

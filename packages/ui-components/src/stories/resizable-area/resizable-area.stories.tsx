@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useArgs, useCallback, useState } from '@storybook/preview-api';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useArgs, useCallback, useState } from 'storybook/preview-api';
+import { fn } from 'storybook/test';
 import { BoxSize, ResizableArea } from '../../components';
 
 const INITIAL_VALUES = {

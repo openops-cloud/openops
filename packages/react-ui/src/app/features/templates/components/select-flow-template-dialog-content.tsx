@@ -148,7 +148,6 @@ const SelectFlowTemplateDialogContent = ({
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
             showDomains={isFullCatalog}
-            newDomains={['Policy & Governance']}
           />
         ) : (
           <PrivateFlowTemplateFilterSidebarWrapper />

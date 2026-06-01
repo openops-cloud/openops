@@ -1,9 +1,11 @@
 import { BlockAuth, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { createRecordsBatchAction } from './actions/create-records-batch-action';
 import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordsAction } from './actions/get-records-action';
 import { getTableUrlAction } from './actions/get-table-url-action';
 import { updateRecordAction } from './actions/update-record-action';
+import { updateRecordsBatchAction } from './actions/update-records-batch-action';
 
 export const openopsTables = createBlock({
   displayName: 'OpenOps Tables',
@@ -14,7 +16,9 @@ export const openopsTables = createBlock({
   categories: [BlockCategory.DATA_SOURCES],
   actions: [
     getRecordsAction,
+    createRecordsBatchAction,
     updateRecordAction,
+    updateRecordsBatchAction,
     deleteRecordAction,
     getTableUrlAction,
   ],

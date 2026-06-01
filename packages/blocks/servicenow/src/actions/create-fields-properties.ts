@@ -39,6 +39,8 @@ async function createFieldsProperties(
       properties: {
         fieldName: Property.StaticDropdown<string>({
           displayName: 'Field name',
+          description:
+            'Includes inherited fields from parent tables if user has read access to sys_db_object.',
           required: true,
           options: {
             options: mapFieldsToOptions(writableFields),

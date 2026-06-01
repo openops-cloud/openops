@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, screen, userEvent, waitFor } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, screen, userEvent, waitFor } from 'storybook/test';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import {

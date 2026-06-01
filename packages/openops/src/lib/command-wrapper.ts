@@ -15,6 +15,11 @@ export async function executeCommand(
   const fullCommand = `${command} ${args.join(' ')}`;
   logger.debug('Execute command', { command: fullCommand });
 
+  const env: NodeJS.ProcessEnv = {};
+  if (process.env['HOME']) {
+    env['HOME'] = process.env['HOME'];
+  }
+
   const childProcess = spawn(command, args);
 
   return await getResult(childProcess, fullCommand);
@@ -25,6 +30,10 @@ export async function executeFile(
   args: string[],
   envVariables: any,
 ): Promise<CommandResult> {
+  if (!envVariables['HOME'] && process.env['HOME']) {
+    envVariables.HOME = process.env['HOME'];
+  }
+
   const options: ExecFileOptions = {
     env: envVariables,
   };

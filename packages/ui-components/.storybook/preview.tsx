@@ -41,10 +41,6 @@ export const globalTypes = {
   },
 };
 
-export const globals = {
-  theme: ThemeSwitcherValue.LIGHT,
-};
-
 export const parameters = {
   chromatic: {
     diffThreshold: 0.2,
@@ -76,3 +72,7 @@ export const loaders =
   isChromatic() && typeof document !== 'undefined' && document.fonts
     ? [fontLoader]
     : [];
+
+export const initialGlobals = {
+  theme: ThemeSwitcherValue.LIGHT,
+};

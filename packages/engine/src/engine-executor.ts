@@ -27,10 +27,24 @@ export async function executeEngine(
 
   const key = await saveRequestBody(result);
 
-  logger.info(`Finished operation [${operationType}] in ${duration}ms`, {
+  logger.info(`Finished engine operation [${operationType}] in ${duration}ms`, {
+    flowDisplayName: engineInput.flowVersion?.displayName ?? undefined,
+    runEnvironment: engineInput.runEnvironment ?? undefined,
+    operationStatus: hasOperationStatus(result.response)
+      ? result.response.status
+      : undefined,
     engineStatus: result.status,
     durationMs: duration,
+    operationType,
   });
 
   return key;
+}
+
+function hasOperationStatus(
+  response: unknown,
+): response is { status?: number } {
+  return (
+    typeof response === 'object' && response !== null && 'status' in response
+  );
 }

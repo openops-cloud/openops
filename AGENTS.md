@@ -7,14 +7,24 @@
 - Update documentation for user-facing changes
 - Do not introduce new dependencies without discussion
 
-
 ## Structure
 
 The repository is using nx, with the source code under the "packages" directory.
-Use nx to run tests (e.g. npx nx test server-shared).
-Run "npx nx lint" before committing. 
+Notable packages (nx projects) include:
+
+- **packages/server/api** - Main Fastify-based API server (port 3000)
+- **packages/server/shared** - Shared server utilities (logging, caching, encryption)
+- **packages/engine** - Workflow execution engine (runs as separate service or AWS Lambda)
+- **packages/react-ui** - React frontend application (Vite + TailwindCSS)
+- **packages/shared** - Shared types and utilities across frontend/backend
+- **packages/blocks/** - 50+ integration blocks (AWS, Azure, GCP, Slack, etc.)
+- **packages/blocks/framework** - Base framework for creating blocks/actions/triggers
+- **packages/ui-components** - Reusable UI component library (documented in Storybook)
+- **packages/ui-kit** - UI kit with frontend tools, socket context, and API utilities
 
 ## Code Style
+
+Run "npx nx lint" to verify code style before committing.
 
 ### Formatting
 
@@ -81,62 +91,30 @@ export function getUserProfile(userId: string): UserProfile {
 
 ### Best Practices
 
-- Follow best practices for React hooks
-- Prefer small, composable components
-- Extract helper functions where possible
-- Do not make breaking changes to existing code interfaces (component props, names) without discussion
-- Ensure compliance with strict linter setups (including Sonar)
-- Use `cn` utility to group Tailwind classnames:
-
-```tsx
-<div
-  className={cn(
-    'absolute bottom-[-20px] left-1/2 -translate-x-1/2',
-    'w-[118px] h-[24px] flex items-center justify-center',
-    'font-satoshi font-medium text-xs text-blueAccent-500',
-    'border border-solid border-blueAccent-500 rounded-[4px]',
-    'bg-background-800',
-    {
-      'pt-2': !someVar
-    }
-  )}
->
-  {t('Sample output data')}
-</div>
-```
+**Always use the `react` skill** when creating or editing frontend code in `react-ui` or `ui-components`. The skill covers component organization, hooks/performance, data fetching, styling, TDD, and anti-patterns.
 
 ## Testing
 
+- **TDD** — red-green-refactor. No production code without a failing test first.
 - Use Jest for testing
 - Place unit tests in a `tests` folder alongside the code
 - Run tests using Nx commands:
 
 ```bash
-nx test react-ui
-nx test ui-components
-nx test-unit server-api
-nx test engine
-nx lint react-ui
+npx nx test react-ui
+npx nx test ui-components
+npx nx test-unit server-api
+npx nx test engine
+npx nx lint react-ui
 ```
 
-## Git Workflow
+## Git and Pull Request Guidelines
 
 ### Commits
 
 - Use imperative mood (e.g., "Fix bug" not "Fixed bug" or "Fixing bug")
 - Keep commits small and focused on a single change
 - Write descriptive commit messages that explain what and why, not how
-
-**Commit message format:**
-
-```
-Short summary in imperative mood (under 50 chars)
-
-More detailed explanation if necessary. Wrap at around 72
-characters. Explain what and why, not how (the code shows that).
-
-Fixes #issue_number
-```
 
 ### Pull Requests
 
@@ -156,7 +134,8 @@ Fixes #issue_number
 
 All PRs must reference a linear issue in their body.
 
-Examples: 
+Examples:
+
 - Fixes OPS-100.
 - Resolves OPS-101.
 - Part of CI-102.

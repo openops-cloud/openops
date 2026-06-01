@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { CommunityBadge } from '../../components/community-badge/community-badge';

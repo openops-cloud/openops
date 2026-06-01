@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BookOpenIcon } from 'lucide-react';
 import { KnowledgeBaseCard } from '../../components/knowledge-base-card/knowledge-base-card';
 
