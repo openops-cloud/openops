@@ -226,9 +226,14 @@ const generateMentionHtmlElement = (
       { src: apMentionNodeAttrs.logoUrl, class: 'object-fit w-4 h-4' },
     ]);
   }
-  children.push(apMentionNodeAttrs.displayText);
 
-  return ['span', attrs, ...children];
+  // Text nodes are valid DOMOutputSpec children; newer @tiptap/pm types omit `string`.
+  return [
+    'span',
+    attrs,
+    ...children,
+    apMentionNodeAttrs.displayText,
+  ] as DOMOutputSpec;
 };
 
 const inputThatUsesMentionClass = 'ap-text-with-mentions';
