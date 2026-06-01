@@ -1,4 +1,4 @@
-ARG VARIANT=1.1.12-20-bullseye
+ARG VARIANT=4.0.11-24-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 RUN <<-```
