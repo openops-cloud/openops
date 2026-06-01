@@ -16,7 +16,6 @@ import {
   StatusIconWithText,
 } from '@openops/components/ui';
 import {
-  AppConnection,
   AppConnectionSortBy,
   AppConnectionStatus,
   AppConnectionWithoutSensitiveData,
