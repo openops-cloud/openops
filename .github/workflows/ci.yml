@@ -73,6 +73,9 @@ jobs:
         if: steps.nx-lint-cache.outputs.cache-hit != 'true'
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          # server-api is large enough that type-aware ESLint exceeds Node's
+          # default heap; match the headroom already used in chromatic.yml.
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           npx nx run-many --target=lint --quiet
       - name: Truncate NX cache
