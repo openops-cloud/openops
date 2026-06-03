@@ -34,14 +34,14 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-  openops-engine:
-    image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
+  openops-worker:
+    image: public.ecr.aws/openops/openops-worker:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
-    command: ['cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?']
     environment:
+      OPS_COMPONENT: worker
+      OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
-      OPS_COMPONENT: engine
       OPS_SERVER_API_URL: http://openops-app/api/
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
