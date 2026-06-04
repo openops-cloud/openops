@@ -6,55 +6,21 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "defaultConfiguration": "production",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["{workspaceRoot}/dist/packages/engine"],
       "options": {
-        "target": "node",
-        "compiler": "tsc",
         "outputPath": "dist/packages/engine",
         "main": "packages/engine/src/main.ts",
         "tsConfig": "packages/engine/tsconfig.app.json",
         "webpackConfig": "packages/engine/webpack.config.js",
-        "babelUpwardRootMode": true,
-        "generatePackageJson": false,
-        "sourceMap": true
+        "target": "node",
+        "compiler": "tsc"
       },
       "configurations": {
-        "development": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": true
-        },
-        "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false
+        "watch": {
+          "watch": true
         }
-      }
-    },
-    "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "production",
-      "options": {
-        "buildTarget": "engine:build",
-        "host": "0.0.0.0",
-        "port": 9230
       },
-      "configurations": {
-        "development": {
-          "buildTarget": "engine:build:development"
-        },
-        "production": {
-          "buildTarget": "engine:build:production"
-        }
-      }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs engine {args.ver} {args.tag}"
-      },
-      "dependsOn": ["build"]
+      "dependsOn": ["^build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
