@@ -15,7 +15,7 @@ import {
   TriggerHookType,
 } from '@openops/shared';
 import { webhookUtils } from '../utils/webhook-utils';
-import { callEngineLambda } from './call-engine';
+import { callEngine } from './call-engine';
 import { EngineRunner } from './engine-runner';
 import { blockEngineUtil } from './flow-enginer-util';
 
@@ -28,14 +28,11 @@ export const engineRunner: EngineRunner = {
       internalApiUrl: networkUtls.getInternalApiUrl(),
     };
 
-    return callEngineLambda(EngineOperationType.EXECUTE_FLOW, input);
+    return callEngine(EngineOperationType.EXECUTE_FLOW, input);
   },
 
   async extractBlockMetadata(operation: ExecuteExtractBlockMetadata) {
-    return callEngineLambda(
-      EngineOperationType.EXTRACT_BLOCK_METADATA,
-      operation,
-    );
+    return callEngine(EngineOperationType.EXTRACT_BLOCK_METADATA, operation);
   },
 
   async executeTrigger(engineToken, operation) {
@@ -70,7 +67,7 @@ export const engineRunner: EngineRunner = {
       engineToken,
     };
 
-    return callEngineLambda(EngineOperationType.EXECUTE_TRIGGER_HOOK, input);
+    return callEngine(EngineOperationType.EXECUTE_TRIGGER_HOOK, input);
   },
 
   async executeProp(engineToken, operation) {
@@ -81,7 +78,7 @@ export const engineRunner: EngineRunner = {
       engineToken,
     };
 
-    return callEngineLambda(EngineOperationType.EXECUTE_PROPERTY, input);
+    return callEngine(EngineOperationType.EXECUTE_PROPERTY, input);
   },
 
   async executeValidateAuth(engineToken, operation) {
@@ -92,7 +89,7 @@ export const engineRunner: EngineRunner = {
       engineToken,
     };
 
-    return callEngineLambda(EngineOperationType.EXECUTE_VALIDATE_AUTH, input);
+    return callEngine(EngineOperationType.EXECUTE_VALIDATE_AUTH, input);
   },
 
   async executeAction(engineToken, operation) {
@@ -112,7 +109,7 @@ export const engineRunner: EngineRunner = {
       stepTestOutputs: operation.stepTestOutputs,
     };
 
-    return callEngineLambda(EngineOperationType.EXECUTE_STEP, input);
+    return callEngine(EngineOperationType.EXECUTE_STEP, input);
   },
 
   async executeVariable(engineToken, operation) {
@@ -123,6 +120,6 @@ export const engineRunner: EngineRunner = {
       engineToken,
     };
 
-    return callEngineLambda(EngineOperationType.RESOLVE_VARIABLE, input);
+    return callEngine(EngineOperationType.RESOLVE_VARIABLE, input);
   },
 };

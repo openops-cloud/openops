@@ -5,16 +5,18 @@ const fs = require('fs');
 
 // Check Node.js version
 const nodeVersion = execSync('node --version').toString().trim();
-const requiredVersions = ['v18', 'v20'];
+const requiredVersions = ['v24'];
 
 // Check operating system
 const os = process.platform;
-console.log(`Running on ${os} operating system.`)
+console.log(`Running on ${os} operating system.`);
 
-if (requiredVersions.some(version => nodeVersion.startsWith(version))) {
+if (requiredVersions.some((version) => nodeVersion.startsWith(version))) {
   console.log(`Node.js version is compatible ${nodeVersion}.`);
 } else {
-  console.log(`Node.js version is not compatible. Required version: ${requiredVersions.toString()}`);
+  console.log(
+    `Node.js version is not compatible. Required version: ${requiredVersions.toString()}`,
+  );
   process.exit(1);
 }
 
@@ -23,8 +25,7 @@ if (os === 'win32') {
   if (fs.existsSync('node_modules')) {
     execSync('rmdir node_modules /s /q');
   }
-}
-else {
+} else {
   execSync('rm -rf node_modules');
 }
 

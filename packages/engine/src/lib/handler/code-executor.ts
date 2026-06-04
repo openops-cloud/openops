@@ -7,7 +7,7 @@ import {
   StepOutputStatus,
 } from '@openops/shared';
 import path from 'path';
-import { CodeArtifact } from 'server-worker';
+import { CodeArtifact } from '../code-block/code-artifact';
 import { prepareCodeBlock } from '../code-block/prepare-code-block';
 import { initCodeSandbox } from '../core/code/code-sandbox';
 import {
