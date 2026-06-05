@@ -542,7 +542,7 @@ export async function shutdownEnginePool(): Promise<void> {
   }
 
   // Kill all idle and spawning processes
-  for (const entry of [...pool]) {
+  for (const entry of pool) {
     if (entry.startupTimer) {
       clearTimeout(entry.startupTimer);
     }

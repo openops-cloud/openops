@@ -213,8 +213,8 @@ describe('engine-pool', () => {
         mockFork.mock.results[mockFork.mock.results.length - 1].value;
       coldChild.emit('message', { type: 'ready' });
 
-      for (let i = 0; i < mockFork.mock.results.length; i++) {
-        const c = mockFork.mock.results[i].value;
+      for (const result of mockFork.mock.results) {
+        const c = result.value;
         c.emit('message', { type: 'ready' });
       }
 

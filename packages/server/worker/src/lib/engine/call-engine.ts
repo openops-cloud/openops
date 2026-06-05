@@ -57,10 +57,9 @@ export async function callEngine<Result extends EngineHelperResult>(
   }
 
   const deadlineTimestamp = Date.now() + timeout * 1000;
-  const requestId =
-    getContext()['executionCorrelationId'] ??
-    requestContext.get('requestId' as never) ??
-    nanoid();
+  const correlationId = getContext()['executionCorrelationId'];
+  const contextRequestId = requestContext.get('requestId' as never);
+  const requestId = correlationId ?? contextRequestId ?? nanoid();
 
   try {
     if (shouldUseCache(operation) && requestKey) {
@@ -118,17 +117,7 @@ export async function callEngine<Result extends EngineHelperResult>(
 
     return parseEngineResponse(responseData);
   } catch (error) {
-    const errorMessage =
-      error instanceof EngineTimeoutError
-        ? 'Engine execution timed out.'
-        : error instanceof EngineOOMError
-        ? 'Engine ran out of memory.'
-        : 'An unexpected error occurred while executing engine operation.';
-
-    const status =
-      error instanceof EngineTimeoutError
-        ? EngineResponseStatus.TIMEOUT
-        : EngineResponseStatus.ERROR;
+    const { errorMessage, status } = classifyEngineError(error);
 
     if (error instanceof EngineTimeoutError) {
       logger.info(errorMessage, { requestId, operation });
@@ -184,4 +173,29 @@ function replaceVolatileValues(key: string, value: unknown): unknown {
   }
 
   return value;
+}
+
+function classifyEngineError(error: unknown): {
+  errorMessage: string;
+  status: EngineResponseStatus;
+} {
+  if (error instanceof EngineTimeoutError) {
+    return {
+      errorMessage: 'Engine execution timed out.',
+      status: EngineResponseStatus.TIMEOUT,
+    };
+  }
+
+  if (error instanceof EngineOOMError) {
+    return {
+      errorMessage: 'Engine ran out of memory.',
+      status: EngineResponseStatus.ERROR,
+    };
+  }
+
+  return {
+    errorMessage:
+      'An unexpected error occurred while executing engine operation.',
+    status: EngineResponseStatus.ERROR,
+  };
 }
