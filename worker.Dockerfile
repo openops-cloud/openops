@@ -172,7 +172,9 @@ ENV OPS_VERSION=$VERSION
 ENV NODE_OPTIONS=--no-node-snapshot
 
 # Create engine user for restricted engine child processes.
-# Grant CAP_SETUID/CAP_SETGID to node so it can fork as engine user without running as root.
+# CAP_SETUID/CAP_SETGID on node allows forking as the engine user.
+# This is safe because no user code executes in the worker process itself —
+# user code only runs in engine children which are already uid-switched.
 RUN <<-```
     set -ex
     groupadd -g 1001 engine
@@ -182,7 +184,6 @@ RUN <<-```
     chown -R engine:engine /var/tmp-base
     chmod -R o+rX /opt/azure /opt/google-cloud-sdk 2>/dev/null || true
     setcap cap_setuid,cap_setgid+ep /usr/local/bin/node
-    # Populate /tmp with code sandbox deps, make writable for engine user
     cp -r /var/tmp-base/. /tmp/
     mkdir -p /tmp/azure /tmp/gcloud
     chmod -R 1777 /tmp

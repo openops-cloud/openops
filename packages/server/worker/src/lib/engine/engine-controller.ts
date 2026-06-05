@@ -9,15 +9,15 @@ import { FastifyPluginAsync } from 'fastify';
 import { engineRunner } from './index';
 
 const ExecuteBody = Type.Object({
-  operation: Type.String(),
+  operation: Type.Enum(EngineOperationType),
   engineToken: Type.Optional(Type.String()),
   input: Type.Record(Type.String(), Type.Unknown()),
 });
 
 type ExecuteRequest = {
   operation: EngineOperationType;
-  engineToken: string;
   input: Record<string, unknown>;
+  engineToken?: string;
 };
 
 export const engineExecutionController: FastifyPluginAsync = async (app) => {
@@ -35,7 +35,11 @@ export const engineExecutionController: FastifyPluginAsync = async (app) => {
       body: ExecuteBody,
     },
     handler: async (request, reply) => {
-      const { operation, engineToken, input } = request.body as ExecuteRequest;
+      const {
+        operation,
+        engineToken = '',
+        input,
+      } = request.body as ExecuteRequest;
 
       const result = await dispatchToLocalRunner(operation, engineToken, input);
 

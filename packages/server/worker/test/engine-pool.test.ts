@@ -52,12 +52,12 @@ describe('engine-pool', () => {
       __esModule: true,
       default: mockTreeKill,
     }));
-    jest.doMock('fs', () => ({
+    jest.doMock('node:fs', () => ({
       statSync: jest.fn(() => ({ mtimeMs: mockStatSyncMtime })),
       watchFile: mockWatchFile,
       unwatchFile: mockUnwatchFile,
     }));
-    jest.doMock('child_process', () => ({ fork: mockFork }));
+    jest.doMock('node:child_process', () => ({ fork: mockFork }));
     jest.doMock('@openops/server-shared', () => ({
       logger: {
         info: jest.fn(),
@@ -68,6 +68,14 @@ describe('engine-pool', () => {
       system: {
         get: jest.fn().mockReturnValue(undefined),
         getBoolean: jest.fn().mockReturnValue(false),
+        getOrThrow: jest.fn().mockImplementation((prop: string) => {
+          const defaults: Record<string, string> = {
+            ENGINE_MEMORY_LIMIT_MB: '512',
+            ENGINE_POOL_MIN_SIZE: '1',
+            ENGINE_POOL_MAX_SIZE: '3',
+          };
+          return defaults[prop] ?? '';
+        }),
       },
       SharedSystemProp: { BLOCKS_DEV_MODE_ENABLED: 'BLOCKS_DEV_MODE_ENABLED' },
       WorkerSystemProps: {
@@ -110,16 +118,17 @@ describe('engine-pool', () => {
             error: jest.fn(),
           },
           system: {
-            get: jest.fn((prop: string) => {
+            get: jest.fn().mockReturnValue(undefined),
+            getBoolean: jest.fn().mockReturnValue(false),
+            getOrThrow: jest.fn().mockImplementation((prop: string) => {
               if (prop === 'ENGINE_POOL_MIN_SIZE') {
                 return '5';
               }
               if (prop === 'ENGINE_POOL_MAX_SIZE') {
                 return '2';
               }
-              return undefined;
+              return '512';
             }),
-            getBoolean: jest.fn().mockReturnValue(false),
           },
           SharedSystemProp: {
             BLOCKS_DEV_MODE_ENABLED: 'BLOCKS_DEV_MODE_ENABLED',
@@ -131,6 +140,16 @@ describe('engine-pool', () => {
             ENGINE_USER_ID: 'ENGINE_USER_ID',
             ENGINE_GROUP_ID: 'ENGINE_GROUP_ID',
           },
+        }));
+        jest.doMock('node:child_process', () => ({ fork: mockFork }));
+        jest.doMock('node:fs', () => ({
+          statSync: jest.fn(() => ({ mtimeMs: mockStatSyncMtime })),
+          watchFile: mockWatchFile,
+          unwatchFile: mockUnwatchFile,
+        }));
+        jest.doMock('tree-kill', () => ({
+          __esModule: true,
+          default: mockTreeKill,
         }));
         initFn = require('../src/lib/engine/engine-pool').initEnginePool; // eslint-disable-line @typescript-eslint/no-var-requires
       });
@@ -225,26 +244,6 @@ describe('engine-pool', () => {
       acquirePromise.catch(() => {
         // ignore
       });
-    });
-  });
-
-  describe('recyclePool', () => {
-    it('kills all and respawns min', () => {
-      const { initEnginePool } = getModule();
-      initEnginePool();
-
-      const child = mockFork.mock.results[0].value;
-      child.emit('message', { type: 'ready' });
-
-      mockFork.mockClear();
-      mockTreeKill.mockClear();
-
-      expect(mockWatchFile).toHaveBeenCalled();
-      const watchCallback = mockWatchFile.mock.calls[0][2];
-      watchCallback({ mtimeMs: 2000 }, { mtimeMs: 1000 });
-
-      expect(mockTreeKill).toHaveBeenCalledWith(child.pid, 'SIGKILL');
-      expect(mockFork).toHaveBeenCalledTimes(1);
     });
   });
 

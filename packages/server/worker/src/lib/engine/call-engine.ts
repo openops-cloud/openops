@@ -91,7 +91,7 @@ export async function callEngine<Result extends EngineHelperResult>(
       engine = await acquireEngine();
     } catch (acquireError) {
       // Clean up stored input since no engine will consume it
-      await getRequestBody(inputKey).catch(() => undefined);
+      await cacheWrapper.deleteKey(inputKey).catch(() => undefined);
       throw acquireError;
     }
 

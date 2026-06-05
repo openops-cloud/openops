@@ -20,7 +20,7 @@ function getClient(timeout: number): AxiosInstance {
   return axios.create({
     baseURL: WORKER_URL,
     headers: { 'Content-Type': 'application/json' },
-    timeout: timeout * 30,
+    timeout: timeout + 30,
   });
 }
 

@@ -28,7 +28,6 @@ const POOL_MAX_SIZE = Math.max(
 
 // Run engine processes as a restricted user (uid/gid).
 // Requires CAP_SETUID/CAP_SETGID on the node binary (set in worker.Dockerfile).
-// If not set or not permitted, engine runs as the same user as the worker.
 const ENGINE_UID = system.get(WorkerSystemProps.ENGINE_USER_ID)
   ? Number(system.get(WorkerSystemProps.ENGINE_USER_ID))
   : undefined;
