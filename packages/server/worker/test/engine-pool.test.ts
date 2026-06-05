@@ -82,8 +82,6 @@ describe('engine-pool', () => {
         ENGINE_MEMORY_LIMIT_MB: 'ENGINE_MEMORY_LIMIT_MB',
         ENGINE_POOL_MIN_SIZE: 'ENGINE_POOL_MIN_SIZE',
         ENGINE_POOL_MAX_SIZE: 'ENGINE_POOL_MAX_SIZE',
-        ENGINE_USER_ID: 'ENGINE_USER_ID',
-        ENGINE_GROUP_ID: 'ENGINE_GROUP_ID',
       },
     }));
 
@@ -137,8 +135,6 @@ describe('engine-pool', () => {
             ENGINE_MEMORY_LIMIT_MB: 'ENGINE_MEMORY_LIMIT_MB',
             ENGINE_POOL_MIN_SIZE: 'ENGINE_POOL_MIN_SIZE',
             ENGINE_POOL_MAX_SIZE: 'ENGINE_POOL_MAX_SIZE',
-            ENGINE_USER_ID: 'ENGINE_USER_ID',
-            ENGINE_GROUP_ID: 'ENGINE_GROUP_ID',
           },
         }));
         jest.doMock('node:child_process', () => ({ fork: mockFork }));

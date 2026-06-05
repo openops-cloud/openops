@@ -55,7 +55,7 @@ RUN <<-```
     apt-get update && apt-get install -y --no-install-recommends \
       bash findutils python3 procps \
       libffi8 libssl3 libstdc++6 \
-      git curl tar gzip ca-certificates libcap2-bin
+      git curl tar gzip ca-certificates
     rm -rf /var/lib/apt/lists/*
 ```
 
@@ -171,34 +171,16 @@ ENV OPS_VERSION=$VERSION
 # Required for isolated-vm (code block sandbox) on arm64
 ENV NODE_OPTIONS=--no-node-snapshot
 
-# Create engine user for restricted engine child processes.
-# CAP_SETUID/CAP_SETGID on the main node binary allows the worker to fork as engine user.
-# A separate copy without caps (/usr/local/bin/node-engine) is used for engine child
-# processes, preventing user code from exploiting CAP_SETUID.
 RUN <<-```
     set -ex
-    groupadd -g 1001 engine
-    useradd -u 1001 -g engine -d /home/engine -s /bin/sh -m engine
     chown -R node:node /usr/src/app
     chmod -R o+rX /usr/src/app
-    chown -R engine:engine /var/tmp-base
     chmod -R o+rX /opt/azure /opt/google-cloud-sdk 2>/dev/null || true
-    # Worker uses node with caps for uid/gid switching (only executable by node user)
-    setcap cap_setuid,cap_setgid+ep /usr/local/bin/node
-    chown root:node /usr/local/bin/node
-    chmod 750 /usr/local/bin/node
-    # Engine uses a separate binary without caps (no privilege escalation)
-    cp /usr/local/bin/node /usr/local/bin/node-engine
-    chmod 755 /usr/local/bin/node-engine
     cp -r /var/tmp-base/. /tmp/
     mkdir -p /tmp/azure /tmp/gcloud
     chmod -R 1777 /tmp
 ```
 
 USER node
-
-# Engine processes run as restricted 'engine' user (uid=1001, gid=1001)
-ENV OPS_ENGINE_USER_ID=1001
-ENV OPS_ENGINE_GROUP_ID=1001
 
 ENTRYPOINT ["node", "--enable-source-maps", "dist/packages/server/api/main.js"]

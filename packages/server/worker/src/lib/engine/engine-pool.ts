@@ -5,7 +5,7 @@ import {
   WorkerSystemProps,
 } from '@openops/server-shared';
 import { ChildProcess, fork } from 'node:child_process';
-import { existsSync, statSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import treeKill from 'tree-kill';
 
@@ -25,16 +25,6 @@ const POOL_MAX_SIZE = Math.max(
   1,
   Number(system.getOrThrow(WorkerSystemProps.ENGINE_POOL_MAX_SIZE)),
 );
-
-// Run engine processes as a restricted user (uid/gid).
-// Requires CAP_SETUID/CAP_SETGID on the node binary (set in worker.Dockerfile).
-const ENGINE_UID = system.get(WorkerSystemProps.ENGINE_USER_ID)
-  ? Number(system.get(WorkerSystemProps.ENGINE_USER_ID))
-  : undefined;
-
-const ENGINE_GID = system.get(WorkerSystemProps.ENGINE_GROUP_ID)
-  ? Number(system.get(WorkerSystemProps.ENGINE_GROUP_ID))
-  : undefined;
 
 const ENGINE_DEBUG_BASE_PORT = 9231;
 const STARTUP_TIMEOUT_MS = 10_000;
@@ -294,19 +284,10 @@ function forkEngine(index: number): ChildProcess {
     execArgv.push(`--inspect=0.0.0.0:${ENGINE_DEBUG_BASE_PORT + index}`);
   }
 
-  // Use node-engine binary (without CAP_SETUID) for engine child processes
-  // to prevent user code from escalating privileges via exec.
-  const engineNodePath = '/usr/local/bin/node-engine';
-  const useEngineNode =
-    ENGINE_UID !== undefined && !DEV_MODE && existsSync(engineNodePath);
-
   return fork(ENGINE_PATH, [], {
     execArgv,
-    execPath: useEngineNode ? engineNodePath : undefined,
     env: buildEngineEnv(),
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-    ...(ENGINE_UID !== undefined && { uid: ENGINE_UID }),
-    ...(ENGINE_GID !== undefined && { gid: ENGINE_GID }),
   });
 }
 
