@@ -177,72 +177,74 @@ export const httpSendRequestAction = createAction({
     logger.info(`- Used URL: ${newUrl}`, newUrl);
     logger.info(`- Used URL: ${newUrl}`, newUrl);
 
-    const headersArray =
-      (context.auth?.headers as
-        | Array<{ key?: string; value?: string }>
-        | undefined) ?? [];
-    const authHeaders: HttpHeaders = {};
-    for (const item of headersArray) {
-      if (item.key && item.value) {
-        authHeaders[item.key] = item.value;
-      }
-    }
+    return newUrl;
 
-    const mergedHeaders = {
-      ...toLowerCaseKeys(authHeaders),
-      ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
-    };
+    // const headersArray =
+    //   (context.auth?.headers as
+    //     | Array<{ key?: string; value?: string }>
+    //     | undefined) ?? [];
+    // const authHeaders: HttpHeaders = {};
+    // for (const item of headersArray) {
+    //   if (item.key && item.value) {
+    //     authHeaders[item.key] = item.value;
+    //   }
+    // }
 
-    const request: HttpRequest = {
-      method,
-      url: newUrl,
-      headers: mergedHeaders,
-      queryParams: (queryParams ?? {}) as QueryParams,
-      timeout: timeout ? timeout * 1000 : 0,
-    };
-    if (body) {
-      const bodyInput = body['data'];
-      if (body_type === 'form_data') {
-        const formData = new FormData();
-        for (const key in bodyInput) {
-          formData.append(key, bodyInput[key]);
-        }
-        request.body = formData;
-        request.headers = { ...request.headers, ...formData.getHeaders() };
-      } else {
-        request.body = bodyInput;
-      }
-    }
+    // const mergedHeaders = {
+    //   ...toLowerCaseKeys(authHeaders),
+    //   ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
+    // };
 
-    try {
-      if (use_proxy) {
-        const proxySettings = context.propsValue.proxy_settings;
-        assertNotNullOrUndefined(proxySettings, 'Proxy Settings');
-        assertNotNullOrUndefined(proxySettings['proxy_host'], 'Proxy Host');
-        assertNotNullOrUndefined(proxySettings['proxy_port'], 'Proxy Port');
-        let proxyUrl;
+    // const request: HttpRequest = {
+    //   method,
+    //   url: newUrl,
+    //   headers: mergedHeaders,
+    //   queryParams: (queryParams ?? {}) as QueryParams,
+    //   timeout: timeout ? timeout * 1000 : 0,
+    // };
+    // if (body) {
+    //   const bodyInput = body['data'];
+    //   if (body_type === 'form_data') {
+    //     const formData = new FormData();
+    //     for (const key in bodyInput) {
+    //       formData.append(key, bodyInput[key]);
+    //     }
+    //     request.body = formData;
+    //     request.headers = { ...request.headers, ...formData.getHeaders() };
+    //   } else {
+    //     request.body = bodyInput;
+    //   }
+    // }
 
-        if (proxySettings.proxy_username && proxySettings.proxy_password) {
-          proxyUrl = `http://${proxySettings.proxy_username}:${proxySettings.proxy_password}@${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
-        } else {
-          proxyUrl = `http://${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
-        }
+    // try {
+    //   if (use_proxy) {
+    //     const proxySettings = context.propsValue.proxy_settings;
+    //     assertNotNullOrUndefined(proxySettings, 'Proxy Settings');
+    //     assertNotNullOrUndefined(proxySettings['proxy_host'], 'Proxy Host');
+    //     assertNotNullOrUndefined(proxySettings['proxy_port'], 'Proxy Port');
+    //     let proxyUrl;
 
-        const httpsAgent = new HttpsProxyAgent(proxyUrl);
-        const axiosClient = axios.create({
-          httpsAgent,
-        });
+    //     if (proxySettings.proxy_username && proxySettings.proxy_password) {
+    //       proxyUrl = `http://${proxySettings.proxy_username}:${proxySettings.proxy_password}@${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
+    //     } else {
+    //       proxyUrl = `http://${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
+    //     }
 
-        const proxied_response = await axiosClient.request(request);
-        return proxied_response.data;
-      }
-      return await httpClient.sendRequest(request);
-    } catch (error) {
-      if (failsafe) {
-        return (error as HttpError).errorMessage();
-      }
+    //     const httpsAgent = new HttpsProxyAgent(proxyUrl);
+    //     const axiosClient = axios.create({
+    //       httpsAgent,
+    //     });
 
-      throw error;
-    }
+    //     const proxied_response = await axiosClient.request(request);
+    //     return proxied_response.data;
+    //   }
+    //   return await httpClient.sendRequest(request);
+    // } catch (error) {
+    //   if (failsafe) {
+    //     return (error as HttpError).errorMessage();
+    //   }
+
+    //   throw error;
+    // }
   },
 });
