@@ -172,9 +172,9 @@ ENV OPS_VERSION=$VERSION
 ENV NODE_OPTIONS=--no-node-snapshot
 
 # Create engine user for restricted engine child processes.
-# CAP_SETUID/CAP_SETGID on node allows forking as the engine user.
-# This is safe because no user code executes in the worker process itself —
-# user code only runs in engine children which are already uid-switched.
+# CAP_SETUID/CAP_SETGID on the main node binary allows the worker to fork as engine user.
+# A separate copy without caps (/usr/local/bin/node-engine) is used for engine child
+# processes, preventing user code from exploiting CAP_SETUID.
 RUN <<-```
     set -ex
     groupadd -g 1001 engine
@@ -183,7 +183,13 @@ RUN <<-```
     chmod -R o+rX /usr/src/app
     chown -R engine:engine /var/tmp-base
     chmod -R o+rX /opt/azure /opt/google-cloud-sdk 2>/dev/null || true
+    # Worker uses node with caps for uid/gid switching (only executable by node user)
     setcap cap_setuid,cap_setgid+ep /usr/local/bin/node
+    chown root:node /usr/local/bin/node
+    chmod 750 /usr/local/bin/node
+    # Engine uses a separate binary without caps (no privilege escalation)
+    cp /usr/local/bin/node /usr/local/bin/node-engine
+    chmod 755 /usr/local/bin/node-engine
     cp -r /var/tmp-base/. /tmp/
     mkdir -p /tmp/azure /tmp/gcloud
     chmod -R 1777 /tmp

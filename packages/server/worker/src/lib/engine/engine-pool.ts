@@ -5,7 +5,7 @@ import {
   WorkerSystemProps,
 } from '@openops/server-shared';
 import { ChildProcess, fork } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import treeKill from 'tree-kill';
 
@@ -294,8 +294,15 @@ function forkEngine(index: number): ChildProcess {
     execArgv.push(`--inspect=0.0.0.0:${ENGINE_DEBUG_BASE_PORT + index}`);
   }
 
+  // Use node-engine binary (without CAP_SETUID) for engine child processes
+  // to prevent user code from escalating privileges via exec.
+  const engineNodePath = '/usr/local/bin/node-engine';
+  const useEngineNode =
+    ENGINE_UID !== undefined && !DEV_MODE && existsSync(engineNodePath);
+
   return fork(ENGINE_PATH, [], {
     execArgv,
+    execPath: useEngineNode ? engineNodePath : undefined,
     env: buildEngineEnv(),
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     ...(ENGINE_UID !== undefined && { uid: ENGINE_UID }),
