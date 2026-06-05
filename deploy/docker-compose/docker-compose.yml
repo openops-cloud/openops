@@ -25,6 +25,7 @@ services:
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.2.20
       OPS_ANALYTICS_VERSION: 0.14.7
+      OPS_WORKER_URL: http://openops-worker:3000
     depends_on:
       openops-tables:
         condition: service_healthy
