@@ -173,78 +173,75 @@ export const httpSendRequestAction = createAction({
 
     const newUrl = await validateAndRewritePublicWebhookUrl(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
-    logger.info(`- Used URL: ${newUrl}`, newUrl);
-    logger.info(`- Used URL: ${newUrl}`, newUrl);
-    logger.info(`- Used URL: ${newUrl}`, newUrl);
+    logger.info(`Used URL`, newUrl);
+    logger.info('test');
 
-    return newUrl;
+    const headersArray =
+      (context.auth?.headers as
+        | Array<{ key?: string; value?: string }>
+        | undefined) ?? [];
+    const authHeaders: HttpHeaders = {};
+    for (const item of headersArray) {
+      if (item.key && item.value) {
+        authHeaders[item.key] = item.value;
+      }
+    }
 
-    // const headersArray =
-    //   (context.auth?.headers as
-    //     | Array<{ key?: string; value?: string }>
-    //     | undefined) ?? [];
-    // const authHeaders: HttpHeaders = {};
-    // for (const item of headersArray) {
-    //   if (item.key && item.value) {
-    //     authHeaders[item.key] = item.value;
-    //   }
-    // }
+    const mergedHeaders = {
+      ...toLowerCaseKeys(authHeaders),
+      ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
+    };
 
-    // const mergedHeaders = {
-    //   ...toLowerCaseKeys(authHeaders),
-    //   ...toLowerCaseKeys((headers ?? {}) as HttpHeaders),
-    // };
+    const request: HttpRequest = {
+      method,
+      url: newUrl,
+      headers: mergedHeaders,
+      queryParams: (queryParams ?? {}) as QueryParams,
+      timeout: timeout ? timeout * 1000 : 0,
+    };
+    if (body) {
+      const bodyInput = body['data'];
+      if (body_type === 'form_data') {
+        const formData = new FormData();
+        for (const key in bodyInput) {
+          formData.append(key, bodyInput[key]);
+        }
+        request.body = formData;
+        request.headers = { ...request.headers, ...formData.getHeaders() };
+      } else {
+        request.body = bodyInput;
+      }
+    }
 
-    // const request: HttpRequest = {
-    //   method,
-    //   url: newUrl,
-    //   headers: mergedHeaders,
-    //   queryParams: (queryParams ?? {}) as QueryParams,
-    //   timeout: timeout ? timeout * 1000 : 0,
-    // };
-    // if (body) {
-    //   const bodyInput = body['data'];
-    //   if (body_type === 'form_data') {
-    //     const formData = new FormData();
-    //     for (const key in bodyInput) {
-    //       formData.append(key, bodyInput[key]);
-    //     }
-    //     request.body = formData;
-    //     request.headers = { ...request.headers, ...formData.getHeaders() };
-    //   } else {
-    //     request.body = bodyInput;
-    //   }
-    // }
+    try {
+      if (use_proxy) {
+        const proxySettings = context.propsValue.proxy_settings;
+        assertNotNullOrUndefined(proxySettings, 'Proxy Settings');
+        assertNotNullOrUndefined(proxySettings['proxy_host'], 'Proxy Host');
+        assertNotNullOrUndefined(proxySettings['proxy_port'], 'Proxy Port');
+        let proxyUrl;
 
-    // try {
-    //   if (use_proxy) {
-    //     const proxySettings = context.propsValue.proxy_settings;
-    //     assertNotNullOrUndefined(proxySettings, 'Proxy Settings');
-    //     assertNotNullOrUndefined(proxySettings['proxy_host'], 'Proxy Host');
-    //     assertNotNullOrUndefined(proxySettings['proxy_port'], 'Proxy Port');
-    //     let proxyUrl;
+        if (proxySettings.proxy_username && proxySettings.proxy_password) {
+          proxyUrl = `http://${proxySettings.proxy_username}:${proxySettings.proxy_password}@${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
+        } else {
+          proxyUrl = `http://${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
+        }
 
-    //     if (proxySettings.proxy_username && proxySettings.proxy_password) {
-    //       proxyUrl = `http://${proxySettings.proxy_username}:${proxySettings.proxy_password}@${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
-    //     } else {
-    //       proxyUrl = `http://${proxySettings.proxy_host}:${proxySettings.proxy_port}`;
-    //     }
+        const httpsAgent = new HttpsProxyAgent(proxyUrl);
+        const axiosClient = axios.create({
+          httpsAgent,
+        });
 
-    //     const httpsAgent = new HttpsProxyAgent(proxyUrl);
-    //     const axiosClient = axios.create({
-    //       httpsAgent,
-    //     });
+        const proxied_response = await axiosClient.request(request);
+        return proxied_response.data;
+      }
+      return await httpClient.sendRequest(request);
+    } catch (error) {
+      if (failsafe) {
+        return (error as HttpError).errorMessage();
+      }
 
-    //     const proxied_response = await axiosClient.request(request);
-    //     return proxied_response.data;
-    //   }
-    //   return await httpClient.sendRequest(request);
-    // } catch (error) {
-    //   if (failsafe) {
-    //     return (error as HttpError).errorMessage();
-    //   }
-
-    //   throw error;
-    // }
+      throw error;
+    }
   },
 });
