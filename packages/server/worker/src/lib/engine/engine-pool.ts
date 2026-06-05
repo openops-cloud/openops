@@ -418,13 +418,8 @@ export function initEnginePool(): void {
 export async function acquireEngine(): Promise<PooledEngine> {
   const currentMtime = getBundleMtime();
   // Discard stale processes until we find a valid one or exhaust the pool
-  while (true) {
-    const readyIdx = pool.findIndex((e) => e.state === 'ready');
-
-    if (readyIdx === -1) {
-      break;
-    }
-
+  let readyIdx = pool.findIndex((e) => e.state === 'ready');
+  while (readyIdx !== -1) {
     const entry = pool[readyIdx];
     pool.splice(readyIdx, 1);
     if (entry.startupTimer) {
@@ -437,6 +432,7 @@ export async function acquireEngine(): Promise<PooledEngine> {
       });
       entry.child.removeAllListeners('exit');
       killProcess(entry.child);
+      readyIdx = pool.findIndex((e) => e.state === 'ready');
       continue;
     }
 

@@ -19,6 +19,7 @@ async function executeFromRedis(inputKey: string): Promise<string> {
   logger.info(`Engine executing [${input.operationType}]`, {
     executionCorrelationId: input.requestId,
     operation: input.operationType,
+    env: process.env,
   });
 
   return runWithLogContext(
@@ -43,6 +44,7 @@ if (process.send) {
             process.send({ type: 'result', resultKey });
           }
 
+          logger.info('Sent logs');
           await sendLogs();
           process.exit(0);
         } catch (error) {
