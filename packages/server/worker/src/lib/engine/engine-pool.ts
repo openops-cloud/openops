@@ -417,32 +417,36 @@ export function initEnginePool(): void {
 
 export async function acquireEngine(): Promise<PooledEngine> {
   const currentMtime = getBundleMtime();
-  const readyIdx = pool.findIndex((e) => e.state === 'ready');
+  // Discard stale processes until we find a valid one or exhaust the pool
+  while (true) {
+    const readyIdx = pool.findIndex((e) => e.state === 'ready');
 
-  if (readyIdx !== -1) {
+    if (readyIdx === -1) {
+      break;
+    }
+
     const entry = pool[readyIdx];
     pool.splice(readyIdx, 1);
     if (entry.startupTimer) {
       clearTimeout(entry.startupTimer);
     }
 
-    // If bundle has changed since this process was spawned, discard it
     if (entry.bundleMtime < currentMtime) {
       logger.info('Discarding stale engine process', {
         pid: entry.child.pid,
       });
-
       entry.child.removeAllListeners('exit');
       killProcess(entry.child);
-    } else {
-      entry.child.removeAllListeners('exit');
-      inFlightCount++;
-      greedyRefill();
-      logger.debug('Acquired warm engine', {
-        pid: entry.child.pid,
-      });
-      return new PooledEngine(entry.child);
+      continue;
     }
+
+    entry.child.removeAllListeners('exit');
+    inFlightCount++;
+    greedyRefill();
+    logger.debug('Acquired warm engine', {
+      pid: entry.child.pid,
+    });
+    return new PooledEngine(entry.child);
   }
 
   logger.debug('No warm engine available, cold-forking');

@@ -173,7 +173,7 @@ export const httpSendRequestAction = createAction({
 
     const newUrl = await validateAndRewritePublicWebhookUrl(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
-    logger.debug(`Used URL: ${newUrl}`);
+    logger.info(`Used URL: ${newUrl}`);
 
     const headersArray =
       (context.auth?.headers as
