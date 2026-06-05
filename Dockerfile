@@ -12,9 +12,10 @@ RUN wget -qO- https://astral.sh/uv/install.sh | sh
 
 # Build MCP: openops-mcp
 WORKDIR /root/.mcp/openops-mcp
-COPY --link mcp-server/ .
 RUN <<-```
     set -ex
+    git clone https://github.com/openops-cloud/openops-mcp .
+    git checkout 5d6d9e515ad27bf1237d7e4df84b9ba9832214fb
     source $HOME/.local/bin/env
     uv venv && . .venv/bin/activate && uv pip install --no-cache-dir -r requirements.txt
 ```
@@ -50,7 +51,7 @@ ENV OPS_CONTAINER_TYPE=APP
 # Runtime dependencies only (no compilers)
 RUN <<-```
     set -ex
-    apk add --no-cache openssh-client python3 git nginx gettext bash findutils docker-cli
+    apk add --no-cache openssh-client python3 git nginx gettext bash findutils
 ```
 
 # Copy MCP environments from builder
@@ -70,7 +71,6 @@ RUN ./tools/link-packages.sh
 # Copy Output files to appropriate directory from build stage
 COPY --link packages packages
 COPY --link ai-prompts ai-prompts
-COPY --link knowledge-base knowledge-base
 
 LABEL service=openops
 
