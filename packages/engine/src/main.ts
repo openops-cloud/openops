@@ -39,14 +39,17 @@ if (process.send) {
       void (async () => {
         try {
           const resultKey = await executeFromRedis(msg.inputKey!);
+
+          await sendLogs();
           if (process.send) {
             process.send({ type: 'result', resultKey });
           }
 
-          await sendLogs();
           process.exit(0);
         } catch (error) {
           logger.error('Engine pool process failed', { error });
+          await sendLogs();
+
           if (process.send) {
             process.send({
               type: 'error',
@@ -54,7 +57,6 @@ if (process.send) {
             });
           }
 
-          await sendLogs();
           process.exit(1);
         }
       })();

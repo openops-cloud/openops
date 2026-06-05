@@ -116,9 +116,8 @@ const main = async (): Promise<void> => {
   const app = await setupServer();
 
   setStopHandlers(app, async () => {
-    logger.info('Flushing telemetry...');
-
     if (system.isApp()) {
+      logger.info('Flushing telemetry...');
       await telemetry.flush();
     }
   });
