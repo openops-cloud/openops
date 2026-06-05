@@ -1,4 +1,3 @@
-// import { getAiTelemetrySDK } from '@openops/common';
 import {
   getRequestBody,
   logger,
@@ -6,19 +5,7 @@ import {
   sendLogs,
 } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
-// import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { executeEngine } from './lib/engine-executor';
-
-// let telemetrySDK: NodeTracerProvider | undefined;
-
-// export function initTelemetry(): void {
-//   telemetrySDK = getAiTelemetrySDK();
-//   telemetrySDK?.register();
-// }
-//
-// export async function shutdownTelemetry(): Promise<void> {
-//   return telemetrySDK?.shutdown();
-// }
 
 type EngineInput = {
   operationType: EngineOperationType;
@@ -43,8 +30,6 @@ async function executeFromRedis(inputKey: string): Promise<string> {
     () => executeEngine(input.engineInput, input.operationType),
   );
 }
-
-// initTelemetry();
 
 if (process.send) {
   process.send({ type: 'ready' });
