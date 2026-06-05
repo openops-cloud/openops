@@ -1,5 +1,6 @@
 import { BlockAuth, BlockPropValueSchema } from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from '@openops/common';
+import { OAuth2GrantType } from '@openops/shared';
 
 export const microsoftTeamsAuth = BlockAuth.OAuth2({
   authProviderKey: 'Microsoft_Teams',
@@ -23,6 +24,7 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
   ],
   authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
   tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+  grantType: OAuth2GrantType.AUTHORIZATION_CODE,
   validate: async ({ auth }) => {
     try {
       const authValue = auth as BlockPropValueSchema<typeof microsoftTeamsAuth>;
