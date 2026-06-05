@@ -113,8 +113,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [WorkerSystemProps.ENGINE_MEMORY_LIMIT_MB]: '512',
   [WorkerSystemProps.ENGINE_POOL_MIN_SIZE]: '1',
   [WorkerSystemProps.ENGINE_POOL_MAX_SIZE]: '4',
-  // [WorkerSystemProps.ENGINE_GROUP_ID]: '4',
-  // [WorkerSystemProps.ENGINE_USER_ID]: '4',
 };
 
 export const system = {

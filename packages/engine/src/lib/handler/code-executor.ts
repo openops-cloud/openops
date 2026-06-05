@@ -82,7 +82,7 @@ const executeAction: ActionHandler<CodeAction> = async ({
 
   try {
     const artifactPath = path.resolve(
-      `${constants.baseCodeDirectory}/${constants.flowVersionId}/${action.name}/index.js`,
+      `${constants.baseCodeDirectory}/${constants.flowVersionId}/${constants.flowRunId}/${action.name}/index.js`,
     );
     const codeSandbox = await initCodeSandbox();
 
@@ -117,6 +117,7 @@ async function getExecutionResult(
     await prepareCodeBlock([
       {
         name: action.name,
+        flowRunId: constants.flowRunId,
         flowVersionId: constants.flowVersionId,
         flowVersionState: constants.flowVersionState,
         sourceCode: action.settings.sourceCode,

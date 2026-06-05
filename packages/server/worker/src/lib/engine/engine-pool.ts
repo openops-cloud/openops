@@ -6,7 +6,7 @@ import {
 } from '@openops/server-shared';
 import { ChildProcess, fork } from 'node:child_process';
 import { statSync } from 'node:fs';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import treeKill from 'tree-kill';
 
 const DEV_MODE = system.getBoolean(SharedSystemProp.BLOCKS_DEV_MODE_ENABLED);
