@@ -318,10 +318,6 @@ function getExecutionState(
     return null;
   }
 
-  // if (!flowRunResponse.steps) {
-  //   return null;
-  // }
-
   return {
     steps: flowRunResponse.steps as Record<string, StepOutput>,
   };

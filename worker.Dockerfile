@@ -163,7 +163,6 @@ RUN ./tools/link-packages.sh
 
 COPY --link packages packages
 COPY --link ai-prompts ai-prompts
-COPY --link knowledge-base knowledge-base
 
 LABEL service=openops-worker
 
