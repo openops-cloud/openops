@@ -5,7 +5,7 @@ import {
   WorkerSystemProps,
 } from '@openops/server-shared';
 import { ChildProcess, fork } from 'node:child_process';
-import { statSync, unwatchFile } from 'node:fs';
+import { statSync } from 'node:fs';
 import { resolve } from 'path';
 import treeKill from 'tree-kill';
 
@@ -541,11 +541,6 @@ export async function shutdownEnginePool(): Promise<void> {
     idleScalerInterval = undefined;
   }
 
-  if (bundleWatchActive) {
-    unwatchFile(ENGINE_PATH);
-    bundleWatchActive = false;
-  }
-
   // Kill all idle and spawning processes
   for (const entry of [...pool]) {
     if (entry.startupTimer) {
@@ -564,9 +559,7 @@ export async function shutdownEnginePool(): Promise<void> {
   logger.info('Engine pool shut down');
 }
 
-let bundleWatchActive = false;
 let idleScalerInterval: ReturnType<typeof setInterval> | undefined;
-
 function startIdleScaler(): void {
   idleScalerInterval = setInterval(() => {
     if (draining || pool.length <= POOL_MIN_SIZE) {

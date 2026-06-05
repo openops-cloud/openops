@@ -55,6 +55,11 @@ const flowWorkerMock = {
 jest.mock('server-worker', () => ({
   engineRunner: engineRunnerMock,
   flowWorker: flowWorkerMock,
+  initEnginePool: jest.fn(),
+  shutdownEnginePool: jest.fn(),
+  installCodeBlockDependencies: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  engineExecutionController: async () => {},
 }));
 
 const triggerUtilsMock = {
