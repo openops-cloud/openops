@@ -242,6 +242,7 @@ const ENGINE_ALLOWED_ENV_KEYS = new Set([
   'OPS_CODE_BLOCK_MEMORY_LIMIT_IN_MB',
   'OPS_EXEC_FILE_MAX_BUFFER_SIZE_MB',
   'OPS_BASE_CODE_DIRECTORY',
+  'OPS_SERVER_API_URL',
 ]);
 
 function buildEngineEnv(): Record<string, string> {
