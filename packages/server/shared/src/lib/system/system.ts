@@ -110,8 +110,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.SMTP_ALLOWED_PORTS]: '25,465,587,2525',
   [AppSystemProp.CONNECTION_VALIDATION_CRON]: '0 5 * * *',
   [WorkerSystemProps.ENGINE_MEMORY_LIMIT_MB]: '1024',
-  [WorkerSystemProps.ENGINE_POOL_MIN_SIZE]: '3',
-  [WorkerSystemProps.ENGINE_POOL_MAX_SIZE]: '5',
+  [WorkerSystemProps.ENGINE_POOL_MIN_SIZE]: '4',
+  [WorkerSystemProps.ENGINE_POOL_MAX_SIZE]: '10',
 };
 
 export const system = {
