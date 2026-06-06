@@ -42,8 +42,6 @@ if (process.send) {
 
           await sendLogs();
 
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
           if (process.send) {
             process.send({ type: 'result', resultKey });
           }
@@ -52,8 +50,6 @@ if (process.send) {
         } catch (error) {
           logger.error('Engine pool process failed', { error });
           await sendLogs();
-
-          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           if (process.send) {
             process.send({
