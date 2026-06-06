@@ -10,7 +10,7 @@ import {
   DynamicPropsValue,
   Property,
 } from '@openops/blocks-framework';
-import { logger, validateHost } from '@openops/server-shared';
+import { validateHost } from '@openops/server-shared';
 import { assertNotNullOrUndefined } from '@openops/shared';
 import axios from 'axios';
 import FormData from 'form-data';
@@ -173,10 +173,6 @@ export const httpSendRequestAction = createAction({
 
     const newUrl = await validateAndRewritePublicWebhookUrl(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
-    console.log('test');
-    console.log(`Used URL ${newUrl}`);
-    logger.info(`Used URL`, newUrl);
-    logger.info('What is happening?');
 
     const headersArray =
       (context.auth?.headers as

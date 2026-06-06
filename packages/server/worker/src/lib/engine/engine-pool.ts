@@ -34,9 +34,9 @@ let engineForkCounter = 0;
 
 function pipeWithPrefix(child: ChildProcess): void {
   child.stdout?.on('data', (data: Buffer) => {
-    // if (!DEV_MODE) {
-    //   return;
-    // }
+    if (!DEV_MODE) {
+      return;
+    }
 
     const lines = data.toString().trimEnd().split('\n');
     for (const line of lines) {
