@@ -28,6 +28,7 @@ module.exports = composePlugins(withNx(), (config) => {
     'rollup',
     /^@rollup\//,
     'isolated-vm',
+    /^@openops\//,
   ];
 
   config.plugins.push({
