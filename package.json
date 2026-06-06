@@ -15,7 +15,6 @@
     "watch:engine": "nx run engine:build:watch",
     "dev": "npm run build:server-worker && npm run build:blocks && npm run link:packages && cross-env-shell FORCE_COLOR=true concurrently -n \"GUI,WORKER,ENG,APP\" -c \"bgBlue.bold,bgMagenta.bold,bgYellow.bold,bgGreen.bold\" \"npm:serve:frontend\" \"npm:serve:worker\" \"npm:watch:engine\" \"npm:serve:app\"",
     "start": "npm i --no-save && docker compose up -d --wait && npm run dev",
-    "start:subagents": "npm i --no-save && docker compose up -d --wait && docker compose --profile subagents up -d && npm run dev",
     "cli": "npx ts-node packages/cli/src/index.ts",
     "create-block": "npx ts-node packages/cli/src/index.ts blocks create",
     "create-action": "npx ts-node packages/cli/src/index.ts actions create",
@@ -29,8 +28,7 @@
     "build-storybook": "cd packages/ui-components && storybook build",
     "chromatic": "npx chromatic --",
     "build:blocks": "npx nx run-many -t build -p blocks-*",
-    "link:packages": "./tools/link-packages.sh",
-    "test:e2e": "npx playwright test packages/tests-e2e/tests/ --reporter=list --workers=1"
+    "link:packages": "./tools/link-packages.sh"
   },
   "private": true,
   "dependencies": {
@@ -57,7 +55,6 @@
     "@aws-sdk/client-cloudformation": "3.995.0",
     "@aws-sdk/client-compute-optimizer": "3.995.0",
     "@aws-sdk/client-ec2": "3.995.0",
-    "@aws-sdk/client-ecs": "3.995.0",
     "@aws-sdk/client-organizations": "3.995.0",
     "@aws-sdk/client-pricing": "3.995.0",
     "@aws-sdk/client-rds": "3.995.0",
@@ -65,7 +62,6 @@
     "@aws-sdk/client-s3": "3.995.0",
     "@aws-sdk/client-ssm": "3.995.0",
     "@aws-sdk/client-sts": "3.995.0",
-    "@aws-sdk/s3-request-presigner": "3.995.0",
     "@aws-sdk/util-arn-parser": "3.972.2",
     "@babel/core": "7.29.0",
     "@babel/preset-react": "7.28.5",
@@ -94,7 +90,6 @@
     "@frontegg/js": "7.92.0",
     "@hookform/resolvers": "3.9.0",
     "@isaacs/brace-expansion": "5.0.1",
-    "@kubernetes/client-node": "1.4.0",
     "@langfuse/otel": "4.2.0",
     "@langfuse/tracing": "4.5.1",
     "@linear/sdk": "7.0.1",
