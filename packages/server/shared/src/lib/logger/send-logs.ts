@@ -6,7 +6,6 @@ export async function sendLogs(): Promise<void> {
     try {
       if (logzioLogger) {
         logzioLogger.flush(() => {
-          console.log('Logs sent');
           resolve();
         });
       } else {
