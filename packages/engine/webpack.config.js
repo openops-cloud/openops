@@ -20,6 +20,8 @@ module.exports = composePlugins(withNx(), (config) => {
   // - rollup: internal module system breaks when bundled by webpack
   // - isolated-vm: native C++ addon (node-gyp-build)
   // - fsevents: native macOS binary
+  // - @openops/*: resolved at runtime via NODE_PATH so engine and blocks share
+  //   the same module instances (logger, cache, etc.)
   config.externals = [
     'fsevents',
     'pino',
