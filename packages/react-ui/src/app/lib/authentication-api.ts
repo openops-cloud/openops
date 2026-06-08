@@ -35,12 +35,18 @@ export const authenticationApi = {
     );
   },
   resetPassword(request: { otp: string; userId: string; newPassword: string }) {
-    return api.post<void>('/v1/authentication/reset-password', request);
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
   },
   sendOtpEmail(request: { email: string; type: string }) {
-    return api.post<void>('/v1/authentication/send-otp', request);
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
   },
   verifyEmail(request: { otp: string; userId: string }) {
-    return api.post<void>('/v1/authentication/verify-email', request);
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
   },
 };
