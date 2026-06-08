@@ -55,9 +55,9 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.BLOCKS_SYNC_MODE]: BlockSyncMode.NONE,
   [AppSystemProp.TRIGGER_FAILURES_THRESHOLD]: '576',
   [AppSystemProp.RUN_DB_MIGRATIONS]: 'true',
-  [WorkerSystemProps.FLOW_WORKER_CONCURRENCY]: '4',
-  [WorkerSystemProps.POLLING_POOL_SIZE]: '4',
-  [WorkerSystemProps.SCHEDULED_WORKER_CONCURRENCY]: '4',
+  [WorkerSystemProps.FLOW_WORKER_CONCURRENCY]: '3',
+  [WorkerSystemProps.POLLING_POOL_SIZE]: '3',
+  [WorkerSystemProps.SCHEDULED_WORKER_CONCURRENCY]: '3',
   [SharedSystemProp.LOG_LEVEL]: 'info',
   [SharedSystemProp.LOG_PRETTY]: 'false',
   [SharedSystemProp.LOG_REDACTION]: 'true',
@@ -110,8 +110,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.SMTP_ALLOWED_PORTS]: '25,465,587,2525',
   [AppSystemProp.CONNECTION_VALIDATION_CRON]: '0 5 * * *',
   [WorkerSystemProps.ENGINE_MEMORY_LIMIT_MB]: '1024',
-  [WorkerSystemProps.ENGINE_POOL_MIN_SIZE]: '4',
-  [WorkerSystemProps.ENGINE_POOL_MAX_SIZE]: '10',
+  [WorkerSystemProps.ENGINE_POOL_MIN_SIZE]: '3',
+  [WorkerSystemProps.ENGINE_POOL_MAX_SIZE]: '6',
 };
 
 export const system = {
