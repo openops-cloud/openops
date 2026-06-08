@@ -14,8 +14,8 @@ jobs:
     name: Install Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Lookup node_modules cache
@@ -34,8 +34,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
@@ -52,8 +52,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
@@ -73,6 +73,9 @@ jobs:
         if: steps.nx-lint-cache.outputs.cache-hit != 'true'
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          # server-api is large enough that type-aware ESLint exceeds Node's
+          # default heap; match the headroom already used in chromatic.yml.
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           npx nx run-many --target=lint --quiet
       - name: Truncate NX cache
@@ -86,13 +89,13 @@ jobs:
     steps:
       - name: Checkout for Dependabot PR
         if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           ref: ${{ github.head_ref }}
       - name: Checkout for others
         if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
-        uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+        uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
@@ -141,8 +144,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
@@ -177,8 +180,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
@@ -221,7 +224,7 @@ jobs:
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - name: Restore build cache
         uses: actions/cache/restore@v5.0.5
         with:
@@ -232,7 +235,7 @@ jobs:
         uses: docker/setup-buildx-action@v4.1.0
       - name: Configure AWS credentials
         if: vars.ECR_REGION
-        uses: aws-actions/configure-aws-credentials@v6.1.1
+        uses: aws-actions/configure-aws-credentials@v6.2.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
@@ -289,7 +292,7 @@ jobs:
     needs: build-images
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.1.1
+        uses: aws-actions/configure-aws-credentials@v6.2.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
