@@ -1,9 +1,5 @@
 import { BlockAuthProperty } from '@openops/blocks-framework';
-import {
-  distributedLock,
-  encryptUtils,
-  exceptionHandler,
-} from '@openops/server-shared';
+import { distributedLock, encryptUtils, logger } from '@openops/server-shared';
 import {
   AppConnection,
   AppConnectionId,
@@ -489,7 +485,7 @@ async function lockAndRefreshConnection({
 
 async function refreshAndPersist(
   appConnection: AppConnection,
-): Promise<AppConnection> {
+): Promise<AppConnection | null> {
   try {
     const refreshedAppConnection = await refresh(appConnection);
 
@@ -497,19 +493,19 @@ async function refreshAndPersist(
       status: AppConnectionStatus.ACTIVE,
       value: encryptUtils.encryptObject(refreshedAppConnection.value),
     });
+
     return refreshedAppConnection;
-  } catch (e) {
-    exceptionHandler.handle(e);
-    if (oauth2Util.isUserError(e)) {
+  } catch (error) {
+    logger.info('Failed to refresh connection.', error);
+
+    if (oauth2Util.isUserError(error)) {
       await repo().update(appConnection.id, {
         status: AppConnectionStatus.ERROR,
         updated: dayjs().toISOString(),
       });
-
-      return { ...appConnection, status: AppConnectionStatus.ERROR };
     }
 
-    return appConnection;
+    return null;
   }
 }
 
