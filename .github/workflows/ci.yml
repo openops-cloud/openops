@@ -216,9 +216,9 @@ jobs:
           - name: App
             file: Dockerfile
             repository: openops-app
-          - name: Engine
-            file: engine.Dockerfile
-            repository: openops-engine
+          - name: Worker
+            file: worker.Dockerfile
+            repository: openops-worker
         platform: [amd64, arm64]
     name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
@@ -286,7 +286,7 @@ jobs:
     if: ${{ vars.ECR_REGION }}
     strategy:
       matrix:
-        repository: [openops-app, openops-engine]
+        repository: [openops-app, openops-worker]
     name: Create and Push Manifest for ${{ matrix.repository }}
     runs-on: ubuntu-latest
     needs: build-images

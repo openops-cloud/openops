@@ -13,6 +13,7 @@
     "build": {
       "executor": "@nx/webpack:webpack",
       "defaultConfiguration": "production",
+      "dependsOn": ["engine:build"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "target": "node",
@@ -25,6 +26,11 @@
           {
             "input": "packages/server/api/src/app/benchmark",
             "glob": "workflows-catalog/**/*",
+            "output": "."
+          },
+          {
+            "input": "packages/server/api/src/app/campaigns",
+            "glob": "templates/**/*",
             "output": "."
           }
         ],
@@ -57,6 +63,10 @@
       "configurations": {
         "development": {
           "buildTarget": "server-api:build:development"
+        },
+        "app": {
+          "buildTarget": "server-api:build:development",
+          "port": 9230
         },
         "production": {
           "buildTarget": "server-api:build:production"

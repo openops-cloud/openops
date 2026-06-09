@@ -1,4 +1,4 @@
-import { logger } from '@openops/server-shared';
+import { cacheWrapper, fileCompressor, logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
@@ -49,6 +49,60 @@ import { flowRunSideEffects } from './flow-run-side-effects';
 import { logSerializer } from './log-serializer';
 
 export const flowRunRepo = repoFactory<FlowRun>(FlowRunEntity);
+
+// Cache TTL for in-flight execution state (1 hour auto-expiry as safety net)
+const RUN_STATE_CACHE_TTL_SECONDS = 60 * 60;
+const RUN_STATE_KEY_PREFIX = 'run-state:';
+
+export const inFlightRunStateCache = {
+  async set(runId: string, state: ExecutionState): Promise<void> {
+    try {
+      const key = `${RUN_STATE_KEY_PREFIX}${runId}`;
+      const compressed = await fileCompressor.compress({
+        data: Buffer.from(JSON.stringify(state)),
+        compression: FileCompression.PACK_BROTLI,
+      });
+
+      await cacheWrapper.setBuffer(
+        key,
+        compressed,
+        RUN_STATE_CACHE_TTL_SECONDS,
+      );
+    } catch (error) {
+      logger.warn('Failed to cache run state, continuing without cache.', {
+        runId,
+        error,
+      });
+    }
+  },
+  async get(runId: string): Promise<ExecutionState | undefined> {
+    try {
+      const key = `${RUN_STATE_KEY_PREFIX}${runId}`;
+      const compressed = await cacheWrapper.getBuffer(key);
+      if (!compressed) {
+        return undefined;
+      }
+
+      const decompressed = await fileCompressor.decompress({
+        data: compressed,
+        compression: FileCompression.PACK_BROTLI,
+      });
+
+      return JSON.parse(decompressed.toString()) as ExecutionState;
+    } catch (error) {
+      logger.warn('Failed to read run state from cache.', { runId, error });
+      return undefined;
+    }
+  },
+  async delete(runId: string): Promise<void> {
+    try {
+      const key = `${RUN_STATE_KEY_PREFIX}${runId}`;
+      await cacheWrapper.deleteKey(key);
+    } catch (error) {
+      logger.warn('Failed to delete run state from cache.', { runId, error });
+    }
+  },
+};
 
 const getFlowRunOrCreate = async (
   params: GetOrCreateParams,
@@ -401,11 +455,62 @@ export const flowRunService = {
       return undefined;
     }
 
-    const logFileId = await updateLogs({
-      logsFileId: flowRun.logsFileId || null,
-      projectId,
-      executionState,
-    });
+    const shouldPersistLogs =
+      isFlowStateTerminal(status) || status === FlowRunStatus.PAUSED;
+
+    if (shouldPersistLogs) {
+      const hasSteps =
+        executionState && Object.keys(executionState.steps ?? {}).length > 0;
+
+      const stateToPersist = hasSteps
+        ? executionState
+        : (await inFlightRunStateCache.get(flowRunId)) ??
+          executionState ??
+          null;
+
+      const logFileId = await updateLogs({
+        logsFileId: flowRun.logsFileId || null,
+        projectId,
+        executionState: stateToPersist,
+      });
+
+      await flowRunRepo()
+        .createQueryBuilder()
+        .update()
+        .set({
+          status,
+          tasks,
+          ...spreadIfDefined(
+            'duration',
+            duration ? Math.floor(Number(duration)) : undefined,
+          ),
+          ...spreadIfDefined('logsFileId', logFileId),
+          ...spreadIfDefined('terminationReason', terminationReason),
+          tags,
+          finishTime: new Date().toISOString(),
+        })
+        .where('id = :id', { id: flowRunId })
+        .andWhere('status NOT IN (:...terminalStatuses)', {
+          terminalStatuses: TERMINAL_STATUSES,
+        })
+        .execute();
+
+      await inFlightRunStateCache.delete(flowRunId);
+
+      flowRun = await this.getOnePopulatedOrThrow({
+        id: flowRunId,
+        projectId: undefined,
+      });
+
+      if (isFlowStateTerminal(status)) {
+        await flowRunSideEffects.finish({ flowRun });
+      }
+      return flowRun;
+    }
+
+    if (executionState) {
+      await inFlightRunStateCache.set(flowRunId, executionState);
+    }
 
     await flowRunRepo()
       .createQueryBuilder()
@@ -417,10 +522,8 @@ export const flowRunService = {
           'duration',
           duration ? Math.floor(Number(duration)) : undefined,
         ),
-        ...spreadIfDefined('logsFileId', logFileId),
         ...spreadIfDefined('terminationReason', terminationReason),
         tags,
-        finishTime: new Date().toISOString(),
       })
       .where('id = :id', { id: flowRunId })
       .andWhere('status NOT IN (:...terminalStatuses)', {
@@ -428,13 +531,7 @@ export const flowRunService = {
       })
       .execute();
 
-    flowRun = await this.getOnePopulatedOrThrow({
-      id: flowRunId,
-      projectId: undefined,
-    });
-
-    await flowRunSideEffects.finish({ flowRun });
-    return flowRun;
+    return { ...flowRun, status, tasks: tasks ?? flowRun.tasks, duration };
   },
 
   async start({
@@ -557,6 +654,15 @@ export const flowRunService = {
   },
   async getOnePopulatedOrThrow(params: GetOneParams): Promise<FlowRun> {
     const flowRun = await this.getOneOrThrow(params);
+
+    const cachedState = await inFlightRunStateCache.get(flowRun.id);
+    if (cachedState) {
+      return {
+        ...flowRun,
+        steps: cachedState.steps,
+      };
+    }
+
     let steps = {};
     if (!isNil(flowRun.logsFileId)) {
       const logFile = await fileService.getOneOrThrow({
