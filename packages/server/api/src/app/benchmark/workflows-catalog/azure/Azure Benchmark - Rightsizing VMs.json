@@ -1,6 +1,6 @@
 {
-  "created": "1777973573404",
-  "updated": "1777973573404",
+  "created": "1781000089264",
+  "updated": "1781000089264",
   "name": "Azure Benchmark - Rightsizing VMs",
   "tags": [],
   "services": [],
@@ -111,109 +111,95 @@
               }
             },
             "nextAction": {
-              "id": "VT0cBElTnCZ4fm2Wo0wet",
-              "name": "step_1",
+              "id": "oE4hM93zF5WaWI8z4WoSK",
+              "name": "step_j",
               "type": "LOOP_ON_ITEMS",
               "valid": true,
               "settings": {
-                "items": "{{step_g['subscriptions']}}",
+                "items": "{{step_g['regions']}}",
                 "inputUiInfo": {
                   "customizedInputs": {}
                 }
               },
               "nextAction": {
-                "id": "wYhOoAQSqg2UXkOuIblN4",
-                "name": "step_a",
-                "type": "BLOCK",
+                "id": "VT0cBElTnCZ4fm2Wo0wet",
+                "name": "step_1",
+                "type": "LOOP_ON_ITEMS",
                 "valid": true,
                 "settings": {
-                  "input": {
-                    "body": {
-                      "data": {
-                        "status": "ok"
-                      }
-                    },
-                    "status": 200,
-                    "headers": {},
-                    "body_type": "json"
-                  },
-                  "blockName": "@openops/block-http",
-                  "blockType": "OFFICIAL",
-                  "actionName": "return_response",
+                  "items": "{{step_g['subscriptions']}}",
                   "inputUiInfo": {
                     "customizedInputs": {}
-                  },
-                  "packageType": "REGISTRY",
-                  "blockVersion": "0.5.1",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {
-                      "value": false
-                    },
-                    "continueOnFailure": {
-                      "value": false
-                    }
-                  }
-                },
-                "displayName": "Return Response",
-                "stepIndex": 30
-              },
-              "displayName": "SUBSCRIPTIONS",
-              "firstLoopAction": {
-                "id": "UwLWRAtsOg2xYeqyvpyQ4",
-                "name": "step_f",
-                "type": "BLOCK",
-                "valid": true,
-                "settings": {
-                  "input": {
-                    "auth": "{{connections['Azure']}}",
-                    "dryRun": false,
-                    "commandToRun": "az rest --method get \\\n  --url \"https://management.azure.com/subscriptions/{{step_1['item']}}/providers/Microsoft.Billing/billingProperty/default?api-version=2024-04-01\"",
-                    "subscriptions": {
-                      "subDropdown": "{{step_1['item']}}"
-                    },
-                    "useHostSession": {}
-                  },
-                  "blockName": "@openops/block-azure",
-                  "blockType": "OFFICIAL",
-                  "actionName": "azure_cli",
-                  "inputUiInfo": {
-                    "customizedInputs": {
-                      "settings": {
-                        "input": {
-                          "subscriptions": {
-                            "subDropdown": true
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "packageType": "REGISTRY",
-                  "blockVersion": "0.0.1",
-                  "errorHandlingOptions": {
-                    "retryOnFailure": {
-                      "value": true
-                    },
-                    "continueOnFailure": {
-                      "value": false
-                    }
                   }
                 },
                 "nextAction": {
-                  "id": "3TTlSSSDOFpdFhbgQIdYc",
-                  "name": "step_h",
-                  "type": "CODE",
+                  "id": "wYhOoAQSqg2UXkOuIblN4",
+                  "name": "step_a",
+                  "type": "BLOCK",
                   "valid": true,
                   "settings": {
                     "input": {
-                      "billingResponse": "{{step_f}}"
+                      "body": {
+                        "data": {
+                          "status": "ok"
+                        }
+                      },
+                      "status": 200,
+                      "headers": {},
+                      "body_type": "json"
                     },
-                    "sourceCode": {
-                      "code": "export const code = async (inputs) => {\n  const res = inputs.billingResponse || {};\n\n  const currency =\n    res?.properties?.billingCurrency ||\n    res?.properties?.currency ||\n    null;\n\n  return currency;\n};",
-                      "packageJson": "{}"
-                    },
+                    "blockName": "@openops/block-http",
+                    "blockType": "OFFICIAL",
+                    "actionName": "return_response",
                     "inputUiInfo": {
                       "customizedInputs": {}
                     },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.5.1",
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "displayName": "Return Response",
+                  "stepIndex": 41
+                },
+                "displayName": "SUBSCRIPTIONS",
+                "firstLoopAction": {
+                  "id": "pE7Re2tPcoBaqhhbGxP1E",
+                  "name": "step_e",
+                  "type": "BLOCK",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "auth": "{{connections['Azure']}}",
+                      "dryRun": false,
+                      "commandToRun": "az vm list -d --query \"[?powerState=='VM running']\"\n",
+                      "subscriptions": {
+                        "subDropdown": "{{step_1['item']}}"
+                      },
+                      "useHostSession": {}
+                    },
+                    "blockName": "@openops/block-azure",
+                    "blockType": "OFFICIAL",
+                    "actionName": "azure_cli",
+                    "inputUiInfo": {
+                      "customizedInputs": {
+                        "settings": {
+                          "input": {
+                            "subscriptions": {
+                              "subDropdown": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "packageType": "REGISTRY",
+                    "blockVersion": "0.0.1",
                     "errorHandlingOptions": {
                       "retryOnFailure": {
                         "value": false
@@ -236,36 +222,22 @@
                     },
                     "displayName": "REGION",
                     "firstLoopAction": {
-                      "id": "pE7Re2tPcoBaqhhbGxP1E",
-                      "name": "step_e",
-                      "type": "BLOCK",
+                      "id": "4heiSas7v3Hj3AoPBuQzy",
+                      "name": "step_f",
+                      "type": "CODE",
                       "valid": true,
                       "settings": {
                         "input": {
-                          "auth": "{{connections['Azure']}}",
-                          "dryRun": false,
-                          "commandToRun": "az vm list -d --query \"[?powerState=='VM running' && location=='{{step_32['item']}}']\"\n",
-                          "subscriptions": {
-                            "subDropdown": "{{step_1['item']}}"
-                          },
-                          "useHostSession": {}
+                          "items": "{{step_e}}",
+                          "region": "{{step_32['item']}}"
                         },
-                        "blockName": "@openops/block-azure",
-                        "blockType": "OFFICIAL",
-                        "actionName": "azure_cli",
+                        "sourceCode": {
+                          "code": "export const code = async (inputs) => {\n  const normalize = (value) =>\n    String(value || \"\")\n      .toLowerCase()\n      .replace(/\\s+/g, \"\")\n      .trim();\n\n  const parseItem = (item) => {\n    if (typeof item !== \"string\") return item;\n\n    try {\n      return JSON.parse(item);\n    } catch {\n      return null;\n    }\n  };\n\n  const items = Array.isArray(inputs?.items)\n    ? inputs.items\n    : inputs?.items\n      ? [inputs.items]\n      : [];\n\n  const region =\n    inputs?.region?.serverValue ??\n    inputs?.region?.value ??\n    inputs?.region;\n\n  const normalizedRegion = normalize(region);\n\n  return items\n    .map(parseItem)\n    .filter(Boolean)\n    .filter((item) => normalize(item?.location) === normalizedRegion);\n};",
+                          "packageJson": "{}"
+                        },
                         "inputUiInfo": {
-                          "customizedInputs": {
-                            "settings": {
-                              "input": {
-                                "subscriptions": {
-                                  "subDropdown": true
-                                }
-                              }
-                            }
-                          }
+                          "customizedInputs": {}
                         },
-                        "packageType": "REGISTRY",
-                        "blockVersion": "0.0.1",
                         "errorHandlingOptions": {
                           "retryOnFailure": {
                             "value": false
@@ -281,7 +253,7 @@
                         "type": "LOOP_ON_ITEMS",
                         "valid": true,
                         "settings": {
-                          "items": "{{step_e}}",
+                          "items": "{{step_f}}",
                           "inputUiInfo": {
                             "customizedInputs": {}
                           }
@@ -508,36 +480,25 @@
                                       },
                                       "displayName": "Is it a potentially incorrect SKU?",
                                       "onSuccessAction": {
-                                        "id": "D2vGZyptNz3W5pjz8uCWL",
-                                        "name": "step_q",
+                                        "id": "Is33oclsMp7ZrpKrL11b3",
+                                        "name": "step_ac",
                                         "type": "BLOCK",
                                         "valid": true,
                                         "settings": {
                                           "input": {
-                                            "auth": "{{connections['Azure']}}",
-                                            "dryRun": false,
-                                            "commandToRun": "az vm list-skus --location {{step_d['item']['location']}} --size {{step_d['item']['hardwareProfile']['vmSize']}}",
-                                            "subscriptions": {
-                                              "subDropdown": "{{step_1['item']}}"
-                                            },
-                                            "useHostSession": {}
+                                            "key": "vmSizes_{{step_32['item']}}",
+                                            "parseJSON": true,
+                                            "store_scope": "RUN",
+                                            "defaultValue": null
                                           },
-                                          "blockName": "@openops/block-azure",
+                                          "blockName": "@openops/block-store",
                                           "blockType": "OFFICIAL",
-                                          "actionName": "azure_cli",
+                                          "actionName": "get",
                                           "inputUiInfo": {
-                                            "customizedInputs": {
-                                              "settings": {
-                                                "input": {
-                                                  "subscriptions": {
-                                                    "subDropdown": true
-                                                  }
-                                                }
-                                              }
-                                            }
+                                            "customizedInputs": {}
                                           },
                                           "packageType": "REGISTRY",
-                                          "blockVersion": "0.0.1",
+                                          "blockVersion": "0.5.1",
                                           "errorHandlingOptions": {
                                             "retryOnFailure": {
                                               "value": false
@@ -548,16 +509,17 @@
                                           }
                                         },
                                         "nextAction": {
-                                          "id": "FKuBiNnPsSLA9KxlvYN07",
-                                          "name": "step_r",
+                                          "id": "wrH8zfH4CX3xktU1rv2l5",
+                                          "name": "step_ad",
                                           "type": "CODE",
                                           "valid": true,
                                           "settings": {
                                             "input": {
-                                              "sku": "{{step_q[0]}}"
+                                              "items": "{{step_ac}}",
+                                              "vmSize": "{{step_d['item']['hardwareProfile']['vmSize']}}"
                                             },
                                             "sourceCode": {
-                                              "code": "export const code = async (inputs) => {\n  const caps = inputs?.sku?.capabilities ?? [];\n  const get = (name) => caps.find((c) => c.name === name)?.value;\n\n  return {\n    vCPUs: Number(get('vCPUs')),\n    PremiumIO: get('PremiumIO') ?? 'False',\n    MemoryGB: Number(get('MemoryGB')),\n    AcceleratedNetworkingEnabled: get('AcceleratedNetworkingEnabled') ?? 'False',\n  };\n};",
+                                              "code": "export const code = async (inputs) => {\n  const items = Array.isArray(inputs?.items)\n    ? inputs.items\n    : inputs?.items\n      ? [inputs.items]\n      : [];\n\n  const vmSize = String(inputs?.vmSize || \"\").toLowerCase();\n\n  const matchedItem = items.find(\n    (item) => String(item?.name || \"\").toLowerCase() === vmSize\n  );\n\n  if (!matchedItem) return null;\n\n  return {\n    ...matchedItem,\n    vCPUs: Number(\n      matchedItem?.vCPUs ??\n      matchedItem?.vcpus ??\n      matchedItem?.numberOfCores ??\n      0\n    ),\n    MemoryGB: Number(\n      matchedItem?.MemoryGB ??\n      matchedItem?.memoryGB ??\n      (\n        matchedItem?.memoryInMB !== undefined\n          ? Number(matchedItem.memoryInMB) / 1024\n          : 0\n      )\n    ),\n  };\n};",
                                               "packageJson": "{}"
                                             },
                                             "inputUiInfo": {
@@ -579,7 +541,7 @@
                                             "valid": true,
                                             "settings": {
                                               "input": {
-                                                "first_number": "{{step_r['vCPUs']}}",
+                                                "first_number": "{{step_ad['vCPUs']}}",
                                                 "second_number": "2"
                                               },
                                               "blockName": "@openops/block-math-helper",
@@ -606,7 +568,7 @@
                                               "valid": true,
                                               "settings": {
                                                 "input": {
-                                                  "first_number": "{{step_r['MemoryGB']}}",
+                                                  "first_number": "{{step_ad['MemoryGB']}}",
                                                   "second_number": "2"
                                                 },
                                                 "blockName": "@openops/block-math-helper",
@@ -627,39 +589,28 @@
                                                 }
                                               },
                                               "nextAction": {
-                                                "id": "uutMetFmrSddmZPczPMid",
-                                                "name": "step_ad",
-                                                "type": "BLOCK",
+                                                "id": "apeYXJ0TIbWuiItJqcIuA",
+                                                "name": "step_ag",
+                                                "type": "CODE",
                                                 "valid": true,
                                                 "settings": {
                                                   "input": {
-                                                    "auth": "{{connections['Azure']}}",
-                                                    "dryRun": false,
-                                                    "commandToRun": "az rest --method get \\\n  --url \"https://management.azure.com/subscriptions/{{step_1['item']}}/providers/Microsoft.Compute/locations/{{step_d['item']['location']}}/vmSizes?api-version=2023-09-01\"",
-                                                    "subscriptions": {
-                                                      "subDropdown": "{{step_1['item']}}"
-                                                    },
-                                                    "useHostSession": {}
+                                                    "skus": "{{step_ac}}",
+                                                    "currentSku": "{{step_d['item']['hardwareProfile']['vmSize']}}",
+                                                    "minSuggestedCPU": "{{step_s}}",
+                                                    "currentSkuProperties": "{{step_ad}}",
+                                                    "minSuggestedMemoryInGB": "{{step_t}}"
                                                   },
-                                                  "blockName": "@openops/block-azure",
-                                                  "blockType": "OFFICIAL",
-                                                  "actionName": "azure_cli",
+                                                  "sourceCode": {
+                                                    "code": "export const code = async (inputs) => {\n  const skus = Array.isArray(inputs.skus) ? inputs.skus : [];\n  const currentSku = String(inputs.currentSku ?? \"\");\n  const cur = inputs.currentSkuProperties ?? {};\n  const minCPU = Number(inputs.minSuggestedCPU ?? 0);\n  const minMemGB = Number(inputs.minSuggestedMemoryInGB ?? 0);\n\n  const curCPU = Number(cur.vCPUs ?? cur.vcpus ?? cur.numberOfCores ?? 0);\n  const curMemGB = Number(cur.MemoryGB ?? cur.memoryGB ?? 0);\n\n  const parseVmName = (name) => {\n    const s = String(name || \"\");\n    const m = s.match(/^Standard_([A-Za-z]+)(\\d+)([^_]*)_v(\\d+)$/); // e.g. Standard_D4s_v3, Standard_E4-2s_v6\n    if (!m) return { prefix: \"\", family: \"\", size: NaN, suffix: \"\", version: NaN };\n    return {\n      prefix: \"Standard_\",\n      family: m[1],\n      size: Number(m[2]),\n      suffix: m[3] || \"\",\n      version: Number(m[4]),\n    };\n  };\n\n  const curParsed = parseVmName(currentSku);\n  const currentFamilyToken = curParsed.prefix ? `${curParsed.prefix}${curParsed.family}` : \"\";\n\n  const memMbToGb = (mb) => (Number(mb) || 0) / 1024;\n\n  // candidates must be strictly smaller than current (downsize)\n  const candidatesAll = skus\n    .map((s) => ({\n      name: String(s.name ?? \"\"),\n      cpu: Number(s.numberOfCores ?? s.vCPUs ?? s.vcpus ?? 0),\n      memGB: memMbToGb(s.memoryInMB ?? s.memoryInMb ?? s.memoryMb),\n      raw: s,\n      parsed: parseVmName(s.name),\n    }))\n    .filter((c) => c.name && Number.isFinite(c.cpu) && Number.isFinite(c.memGB))\n    .filter((c) => c.cpu < curCPU || c.memGB < curMemGB);\n\n  // if already at/below suggested mins, don't suggest anything\n  if ((curCPU <= minCPU && curMemGB <= minMemGB) || candidatesAll.length === 0) {\n    return { proposedSku: \"\" };\n  }\n\n  const sameFamily = candidatesAll.filter((c) => currentFamilyToken && c.name.startsWith(currentFamilyToken));\n  const pool = sameFamily.length ? sameFamily : candidatesAll;\n\n  const score = (c) => {\n    const cpuDiff = Math.abs(c.cpu - minCPU);\n    const memDiff = Math.abs(c.memGB - minMemGB);\n\n    // penalize under-shooting mins more than overshooting\n    const cpuUnder = c.cpu < minCPU ? (minCPU - c.cpu) * 10 : 0;\n    const memUnder = c.memGB < minMemGB ? (minMemGB - c.memGB) * 10 : 0;\n\n    // prefer closer but also prefer smaller-than-current (extra tie-breaker)\n    const cpuDown = curCPU - c.cpu;\n    const memDown = curMemGB - c.memGB;\n\n    // prefer same major version when possible\n    const verPenalty =\n      Number.isFinite(curParsed.version) && Number.isFinite(c.parsed.version)\n        ? Math.abs(curParsed.version - c.parsed.version) * 0.25\n        : 0;\n\n    return (\n      cpuDiff * 1 +\n      memDiff * 1 +\n      cpuUnder +\n      memUnder +\n      verPenalty +\n      (cpuDown >= 0 ? cpuDown * 0.05 : 1000) +\n      (memDown >= 0 ? memDown * 0.01 : 1000)\n    );\n  };\n\n  let best = null;\n  let bestScore = Infinity;\n\n  for (const c of pool) {\n    const sc = score(c);\n    if (sc < bestScore) {\n      bestScore = sc;\n      best = c;\n    } else if (sc === bestScore && best) {\n      // tie-breakers: same family > higher cpu > higher mem (closer to mins) > lexicographic\n      const bestSameFam = currentFamilyToken && best.name.startsWith(currentFamilyToken);\n      const cSameFam = currentFamilyToken && c.name.startsWith(currentFamilyToken);\n      if (cSameFam && !bestSameFam) best = c;\n      else if (cSameFam === bestSameFam) {\n        if (c.cpu > best.cpu) best = c;\n        else if (c.cpu === best.cpu) {\n          if (c.memGB > best.memGB) best = c;\n          else if (c.memGB === best.memGB) {\n            if (c.name < best.name) best = c;\n          }\n        }\n      }\n    }\n  }\n\n  return { proposedSku: best?.name ?? \"nosku\" };\n};",
+                                                    "packageJson": "{}"
+                                                  },
                                                   "inputUiInfo": {
-                                                    "customizedInputs": {
-                                                      "settings": {
-                                                        "input": {
-                                                          "subscriptions": {
-                                                            "subDropdown": true
-                                                          }
-                                                        }
-                                                      }
-                                                    }
+                                                    "customizedInputs": {}
                                                   },
-                                                  "packageType": "REGISTRY",
-                                                  "blockVersion": "0.0.1",
                                                   "errorHandlingOptions": {
                                                     "retryOnFailure": {
-                                                      "value": true
+                                                      "value": false
                                                     },
                                                     "continueOnFailure": {
                                                       "value": false
@@ -667,80 +618,75 @@
                                                   }
                                                 },
                                                 "nextAction": {
-                                                  "id": "apeYXJ0TIbWuiItJqcIuA",
-                                                  "name": "step_ag",
-                                                  "type": "CODE",
+                                                  "id": "6XceH8sLPfZyKQsiCTVyh",
+                                                  "name": "step_v",
+                                                  "type": "BRANCH",
                                                   "valid": true,
                                                   "settings": {
-                                                    "input": {
-                                                      "skus": "{{step_ad['value']}}",
-                                                      "currentSku": "{{step_d['item']['hardwareProfile']['vmSize']}}",
-                                                      "minSuggestedCPU": "{{step_s}}",
-                                                      "currentSkuProperties": "{{step_r}}",
-                                                      "minSuggestedMemoryInGB": "{{step_t}}"
-                                                    },
-                                                    "sourceCode": {
-                                                      "code": "export const code = async (inputs) => {\n  const skus = Array.isArray(inputs.skus) ? inputs.skus : [];\n  const currentSku = String(inputs.currentSku ?? \"\");\n  const cur = inputs.currentSkuProperties ?? {};\n  const minCPU = Number(inputs.minSuggestedCPU ?? 0);\n  const minMemGB = Number(inputs.minSuggestedMemoryInGB ?? 0);\n\n  const curCPU = Number(cur.vCPUs ?? cur.vcpus ?? cur.numberOfCores ?? 0);\n  const curMemGB = Number(cur.MemoryGB ?? cur.memoryGB ?? 0);\n\n  const parseVmName = (name) => {\n    const s = String(name || \"\");\n    const m = s.match(/^Standard_([A-Za-z]+)(\\d+)([^_]*)_v(\\d+)$/); // e.g. Standard_D4s_v3, Standard_E4-2s_v6\n    if (!m) return { prefix: \"\", family: \"\", size: NaN, suffix: \"\", version: NaN };\n    return {\n      prefix: \"Standard_\",\n      family: m[1],\n      size: Number(m[2]),\n      suffix: m[3] || \"\",\n      version: Number(m[4]),\n    };\n  };\n\n  const curParsed = parseVmName(currentSku);\n  const currentFamilyToken = curParsed.prefix ? `${curParsed.prefix}${curParsed.family}` : \"\";\n\n  const memMbToGb = (mb) => (Number(mb) || 0) / 1024;\n\n  // candidates must be strictly smaller than current (downsize)\n  const candidatesAll = skus\n    .map((s) => ({\n      name: String(s.name ?? \"\"),\n      cpu: Number(s.numberOfCores ?? s.vCPUs ?? s.vcpus ?? 0),\n      memGB: memMbToGb(s.memoryInMB ?? s.memoryInMb ?? s.memoryMb),\n      raw: s,\n      parsed: parseVmName(s.name),\n    }))\n    .filter((c) => c.name && Number.isFinite(c.cpu) && Number.isFinite(c.memGB))\n    .filter((c) => c.cpu < curCPU || c.memGB < curMemGB);\n\n  // if already at/below suggested mins, don't suggest anything\n  if ((curCPU <= minCPU && curMemGB <= minMemGB) || candidatesAll.length === 0) {\n    return { proposedSku: \"\" };\n  }\n\n  const sameFamily = candidatesAll.filter((c) => currentFamilyToken && c.name.startsWith(currentFamilyToken));\n  const pool = sameFamily.length ? sameFamily : candidatesAll;\n\n  const score = (c) => {\n    const cpuDiff = Math.abs(c.cpu - minCPU);\n    const memDiff = Math.abs(c.memGB - minMemGB);\n\n    // penalize under-shooting mins more than overshooting\n    const cpuUnder = c.cpu < minCPU ? (minCPU - c.cpu) * 10 : 0;\n    const memUnder = c.memGB < minMemGB ? (minMemGB - c.memGB) * 10 : 0;\n\n    // prefer closer but also prefer smaller-than-current (extra tie-breaker)\n    const cpuDown = curCPU - c.cpu;\n    const memDown = curMemGB - c.memGB;\n\n    // prefer same major version when possible\n    const verPenalty =\n      Number.isFinite(curParsed.version) && Number.isFinite(c.parsed.version)\n        ? Math.abs(curParsed.version - c.parsed.version) * 0.25\n        : 0;\n\n    return (\n      cpuDiff * 1 +\n      memDiff * 1 +\n      cpuUnder +\n      memUnder +\n      verPenalty +\n      (cpuDown >= 0 ? cpuDown * 0.05 : 1000) +\n      (memDown >= 0 ? memDown * 0.01 : 1000)\n    );\n  };\n\n  let best = null;\n  let bestScore = Infinity;\n\n  for (const c of pool) {\n    const sc = score(c);\n    if (sc < bestScore) {\n      bestScore = sc;\n      best = c;\n    } else if (sc === bestScore && best) {\n      // tie-breakers: same family > higher cpu > higher mem (closer to mins) > lexicographic\n      const bestSameFam = currentFamilyToken && best.name.startsWith(currentFamilyToken);\n      const cSameFam = currentFamilyToken && c.name.startsWith(currentFamilyToken);\n      if (cSameFam && !bestSameFam) best = c;\n      else if (cSameFam === bestSameFam) {\n        if (c.cpu > best.cpu) best = c;\n        else if (c.cpu === best.cpu) {\n          if (c.memGB > best.memGB) best = c;\n          else if (c.memGB === best.memGB) {\n            if (c.name < best.name) best = c;\n          }\n        }\n      }\n    }\n  }\n\n  return { proposedSku: best?.name ?? \"nosku\" };\n};",
-                                                      "packageJson": "{}"
-                                                    },
+                                                    "conditions": [
+                                                      [
+                                                        {
+                                                          "operator": "TEXT_DOES_NOT_EXACTLY_MATCH",
+                                                          "firstValue": "{{step_ag['proposedSku']}}",
+                                                          "secondValue": "nosku"
+                                                        }
+                                                      ]
+                                                    ],
                                                     "inputUiInfo": {
                                                       "customizedInputs": {}
-                                                    },
-                                                    "errorHandlingOptions": {
-                                                      "retryOnFailure": {
-                                                        "value": false
-                                                      },
-                                                      "continueOnFailure": {
-                                                        "value": false
-                                                      }
                                                     }
                                                   },
-                                                  "nextAction": {
-                                                    "id": "6XceH8sLPfZyKQsiCTVyh",
-                                                    "name": "step_v",
-                                                    "type": "BRANCH",
+                                                  "displayName": "Smaller SKUs exist",
+                                                  "onSuccessAction": {
+                                                    "id": "TVhh1Nu8KOSuhou07GFad",
+                                                    "name": "step_i",
+                                                    "type": "BLOCK",
                                                     "valid": true,
                                                     "settings": {
-                                                      "conditions": [
-                                                        [
-                                                          {
-                                                            "operator": "TEXT_DOES_NOT_EXACTLY_MATCH",
-                                                            "firstValue": "{{step_ag['proposedSku']}}",
-                                                            "secondValue": "nosku"
-                                                          }
-                                                        ]
-                                                      ],
+                                                      "input": {
+                                                        "key": "priceList_{{step_32['item']}}",
+                                                        "parseJSON": true,
+                                                        "store_scope": "RUN",
+                                                        "defaultValue": null
+                                                      },
+                                                      "blockName": "@openops/block-store",
+                                                      "blockType": "OFFICIAL",
+                                                      "actionName": "get",
                                                       "inputUiInfo": {
                                                         "customizedInputs": {}
+                                                      },
+                                                      "packageType": "REGISTRY",
+                                                      "blockVersion": "0.5.1",
+                                                      "errorHandlingOptions": {
+                                                        "retryOnFailure": {
+                                                          "value": false
+                                                        },
+                                                        "continueOnFailure": {
+                                                          "value": false
+                                                        }
                                                       }
                                                     },
-                                                    "displayName": "Smaller SKUs exist",
-                                                    "onSuccessAction": {
-                                                      "id": "w3U6Wjxxv4ikx3UjRxgr4",
-                                                      "name": "step_aa",
-                                                      "type": "BLOCK",
+                                                    "nextAction": {
+                                                      "id": "LC4HS5CuQLVvs3cIMEpmR",
+                                                      "name": "step_u",
+                                                      "type": "CODE",
                                                       "valid": true,
                                                       "settings": {
                                                         "input": {
-                                                          "auth": "{{connections['Azure']}}",
-                                                          "dryRun": false,
-                                                          "commandToRun": "az rest --method get \\\n  --url \"https://prices.azure.com/api/retail/prices?currencyCode={{step_h}}&\\$filter=armRegionName eq '{{step_d['item']['location']}}' and armSkuName eq '{{step_q[0]['name']}}' and type eq 'Consumption'\"",
-                                                          "subscriptions": {
-                                                            "subDropdown": "{{step_1['item']}}"
-                                                          },
-                                                          "useHostSession": {}
+                                                          "currentVmSystem": "{{step_d['item']['storageProfile']['osDisk']['osType']}}",
+                                                          "currentSkuPriceList": "{{step_i}}",
+                                                          "proposedSkuPriceList": "{{step_i}}"
                                                         },
-                                                        "blockName": "@openops/block-azure",
-                                                        "blockType": "OFFICIAL",
-                                                        "actionName": "azure_cli",
+                                                        "sourceCode": {
+                                                          "code": "export const code = async (inputs) => {\n  const system = String(inputs.currentVmSystem || \"\").toLowerCase();\n\n  const pickUnitPrice = (items, system) => {\n    const arr = Array.isArray(items) ? items : [];\n    const isWindows = system === \"windows\";\n\n    const candidates = arr\n      .filter((x) => String(x?.serviceName || \"\") === \"Virtual Machines\")\n      .filter((x) => String(x?.type || \"\") === \"Consumption\")\n      .filter((x) => {\n        const n = `${x?.meterName || \"\"} ${x?.skuName || \"\"} ${x?.productName || \"\"}`.toLowerCase();\n        return !n.includes(\"spot\") && !n.includes(\"low priority\");\n      })\n      .filter((x) => {\n        const pn = String(x?.productName || \"\").toLowerCase();\n        const hasWindows = pn.includes(\"windows\");\n        return isWindows ? hasWindows : !hasWindows;\n      });\n\n    if (!candidates.length) return null;\n\n    candidates.sort((a, b) => {\n      const aPrim = a?.isPrimaryMeterRegion ? 0 : 1;\n      const bPrim = b?.isPrimaryMeterRegion ? 0 : 1;\n      if (aPrim !== bPrim) return aPrim - bPrim;\n\n      const aDate = Date.parse(a?.effectiveStartDate || \"\") || 0;\n      const bDate = Date.parse(b?.effectiveStartDate || \"\") || 0;\n      if (aDate !== bDate) return bDate - aDate;\n\n      const aPrice = Number(a?.unitPrice ?? a?.retailPrice ?? Infinity);\n      const bPrice = Number(b?.unitPrice ?? b?.retailPrice ?? Infinity);\n      return aPrice - bPrice;\n    });\n\n    const best = candidates[0];\n    const price = Number(best?.unitPrice ?? best?.retailPrice);\n    return Number.isFinite(price) ? price : null;\n  };\n\n  const currentUnit = pickUnitPrice(inputs.currentSkuPriceList, system);\n  const proposedUnit = pickUnitPrice(inputs.proposedSkuPriceList, system);\n\n  if (!Number.isFinite(currentUnit) || !Number.isFinite(proposedUnit) || currentUnit <= 0) {\n    return { discount: \"0\", savings: \"0.00\" };\n  }\n\n  const hourlySavings = Math.max(0, currentUnit - proposedUnit);\n  const dailySavings = hourlySavings * 24;\n  const monthlySavings = dailySavings * 30.4;\n  const discountPct = Math.max(0, (hourlySavings / currentUnit) * 100);\n\n  return {\n    discount: String(Math.round(discountPct)),\n    savings: monthlySavings.toFixed(2),\n  };\n};",
+                                                          "packageJson": "{}"
+                                                        },
                                                         "inputUiInfo": {
                                                           "customizedInputs": {}
                                                         },
-                                                        "packageType": "REGISTRY",
-                                                        "blockVersion": "0.0.1",
                                                         "errorHandlingOptions": {
                                                           "retryOnFailure": {
-                                                            "value": true
+                                                            "value": false
                                                           },
                                                           "continueOnFailure": {
                                                             "value": false
@@ -748,223 +694,158 @@
                                                         }
                                                       },
                                                       "nextAction": {
-                                                        "id": "LBxu79qRq6DyTo7Za3Z0x",
-                                                        "name": "step_ac",
+                                                        "id": "lgsaIm9qnKFz2YvXkd41B",
+                                                        "name": "step_w",
                                                         "type": "BLOCK",
                                                         "valid": true,
                                                         "settings": {
                                                           "input": {
-                                                            "auth": "{{connections['Azure']}}",
-                                                            "dryRun": false,
-                                                            "commandToRun": "az rest --method get \\\n  --url \"https://prices.azure.com/api/retail/prices?currencyCode={{step_h}}&\\$filter=armRegionName eq '{{step_d['item']['location']}}' and armSkuName eq '{{step_ag['proposedSku']}}' and type eq 'Consumption'\"",
-                                                            "subscriptions": {
-                                                              "subDropdown": "{{step_1['item']}}"
+                                                            "tableName": "Opportunities",
+                                                            "rowPrimaryKey": {
+                                                              "rowPrimaryKey": null
                                                             },
-                                                            "useHostSession": {}
+                                                            "fieldsProperties": {
+                                                              "fieldsProperties": [
+                                                                {
+                                                                  "fieldName": "Estimated savings USD per month",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "{{step_u['savings']}}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Opportunity Type",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "Workflow optimization"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Resource Id",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "{{step_d['item']['id']}}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Service",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "Virtual Machines"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Region",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "{{step_32['item']}}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Complexity",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "M"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Risk",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "Medium"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Account",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "{{step_1['item']}}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Opportunity generator",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "OpenOps"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Status",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "Created"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Workflow",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "{{step_26}}"
+                                                                  }
+                                                                },
+                                                                {
+                                                                  "fieldName": "Opportunity details",
+                                                                  "newFieldValue": {
+                                                                    "newFieldValue": "OpenOps detected the following VM instance could be downsized to {{step_ag['proposedSku']}}"
+                                                                  }
+                                                                }
+                                                              ]
+                                                            },
+                                                            "roundToFieldPrecision": false
                                                           },
-                                                          "blockName": "@openops/block-azure",
+                                                          "blockName": "@openops/block-openops-tables",
                                                           "blockType": "OFFICIAL",
-                                                          "actionName": "azure_cli",
+                                                          "actionName": "update_record",
                                                           "inputUiInfo": {
-                                                            "customizedInputs": {}
+                                                            "customizedInputs": {
+                                                              "settings": {
+                                                                "input": {
+                                                                  "rowPrimaryKey": {
+                                                                    "rowPrimaryKey": true
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
                                                           },
                                                           "packageType": "REGISTRY",
                                                           "blockVersion": "0.0.1",
                                                           "errorHandlingOptions": {
                                                             "retryOnFailure": {
-                                                              "value": true
+                                                              "value": false
                                                             },
                                                             "continueOnFailure": {
                                                               "value": false
                                                             }
                                                           }
                                                         },
-                                                        "nextAction": {
-                                                          "id": "LC4HS5CuQLVvs3cIMEpmR",
-                                                          "name": "step_u",
-                                                          "type": "CODE",
-                                                          "valid": true,
-                                                          "settings": {
-                                                            "input": {
-                                                              "currentVmSystem": "{{step_d['item']['storageProfile']['osDisk']['osType']}}",
-                                                              "currentSkuPriceList": "{{step_aa['Items']}}",
-                                                              "proposedSkuPriceList": "{{step_ac['Items']}}"
-                                                            },
-                                                            "sourceCode": {
-                                                              "code": "export const code = async (inputs) => {\n  const system = String(inputs.currentVmSystem || \"\").toLowerCase();\n\n  const pickUnitPrice = (items, system) => {\n    const arr = Array.isArray(items) ? items : [];\n    const isWindows = system === \"windows\";\n\n    const candidates = arr\n      .filter((x) => String(x?.serviceName || \"\") === \"Virtual Machines\")\n      .filter((x) => String(x?.type || \"\") === \"Consumption\")\n      .filter((x) => {\n        const n = `${x?.meterName || \"\"} ${x?.skuName || \"\"} ${x?.productName || \"\"}`.toLowerCase();\n        return !n.includes(\"spot\") && !n.includes(\"low priority\");\n      })\n      .filter((x) => {\n        const pn = String(x?.productName || \"\").toLowerCase();\n        const hasWindows = pn.includes(\"windows\");\n        return isWindows ? hasWindows : !hasWindows;\n      });\n\n    if (!candidates.length) return null;\n\n    candidates.sort((a, b) => {\n      const aPrim = a?.isPrimaryMeterRegion ? 0 : 1;\n      const bPrim = b?.isPrimaryMeterRegion ? 0 : 1;\n      if (aPrim !== bPrim) return aPrim - bPrim;\n\n      const aDate = Date.parse(a?.effectiveStartDate || \"\") || 0;\n      const bDate = Date.parse(b?.effectiveStartDate || \"\") || 0;\n      if (aDate !== bDate) return bDate - aDate;\n\n      const aPrice = Number(a?.unitPrice ?? a?.retailPrice ?? Infinity);\n      const bPrice = Number(b?.unitPrice ?? b?.retailPrice ?? Infinity);\n      return aPrice - bPrice;\n    });\n\n    const best = candidates[0];\n    const price = Number(best?.unitPrice ?? best?.retailPrice);\n    return Number.isFinite(price) ? price : null;\n  };\n\n  const currentUnit = pickUnitPrice(inputs.currentSkuPriceList, system);\n  const proposedUnit = pickUnitPrice(inputs.proposedSkuPriceList, system);\n\n  if (!Number.isFinite(currentUnit) || !Number.isFinite(proposedUnit) || currentUnit <= 0) {\n    return { discount: \"0\", savings: \"0.00\" };\n  }\n\n  const hourlySavings = Math.max(0, currentUnit - proposedUnit);\n  const dailySavings = hourlySavings * 24;\n  const monthlySavings = dailySavings * 30.4;\n  const discountPct = Math.max(0, (hourlySavings / currentUnit) * 100);\n\n  return {\n    discount: String(Math.round(discountPct)),\n    savings: monthlySavings.toFixed(2),\n  };\n};",
-                                                              "packageJson": "{}"
-                                                            },
-                                                            "inputUiInfo": {
-                                                              "customizedInputs": {}
-                                                            },
-                                                            "errorHandlingOptions": {
-                                                              "retryOnFailure": {
-                                                                "value": false
-                                                              },
-                                                              "continueOnFailure": {
-                                                                "value": false
-                                                              }
-                                                            }
-                                                          },
-                                                          "nextAction": {
-                                                            "id": "lgsaIm9qnKFz2YvXkd41B",
-                                                            "name": "step_w",
-                                                            "type": "BLOCK",
-                                                            "valid": true,
-                                                            "settings": {
-                                                              "input": {
-                                                                "tableName": "Opportunities",
-                                                                "rowPrimaryKey": {
-                                                                  "rowPrimaryKey": null
-                                                                },
-                                                                "fieldsProperties": {
-                                                                  "fieldsProperties": [
-                                                                    {
-                                                                      "fieldName": "Estimated savings USD per month",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "{{step_u['savings']}}"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Opportunity Type",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "Workflow optimization"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Resource Id",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "{{step_d['item']['id']}}"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Service",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "Virtual Machines"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Region",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "{{step_32['item']}}"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Complexity",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "M"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Risk",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "Medium"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Account",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "{{step_1['item']}}"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Opportunity generator",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "OpenOps"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Status",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "Created"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Workflow",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "{{step_26}}"
-                                                                      }
-                                                                    },
-                                                                    {
-                                                                      "fieldName": "Opportunity details",
-                                                                      "newFieldValue": {
-                                                                        "newFieldValue": "OpenOps detected the following VM instance could be downsized to {{step_ag['proposedSku']}}"
-                                                                      }
-                                                                    }
-                                                                  ]
-                                                                },
-                                                                "roundToFieldPrecision": false
-                                                              },
-                                                              "blockName": "@openops/block-openops-tables",
-                                                              "blockType": "OFFICIAL",
-                                                              "actionName": "update_record",
-                                                              "inputUiInfo": {
-                                                                "customizedInputs": {
-                                                                  "settings": {
-                                                                    "input": {
-                                                                      "rowPrimaryKey": {
-                                                                        "rowPrimaryKey": true
-                                                                      }
-                                                                    }
-                                                                  }
-                                                                }
-                                                              },
-                                                              "packageType": "REGISTRY",
-                                                              "blockVersion": "0.0.1",
-                                                              "errorHandlingOptions": {
-                                                                "retryOnFailure": {
-                                                                  "value": false
-                                                                },
-                                                                "continueOnFailure": {
-                                                                  "value": false
-                                                                }
-                                                              }
-                                                            },
-                                                            "displayName": "Create OpenOps opportunity",
-                                                            "stepIndex": 29
-                                                          },
-                                                          "displayName": "Calculate savings",
-                                                          "stepIndex": 28
-                                                        },
-                                                        "displayName": "Get price of the suggested SKU based on pricing list",
-                                                        "stepIndex": 27
+                                                        "displayName": "Create OpenOps opportunity",
+                                                        "stepIndex": 40
                                                       },
-                                                      "displayName": "Get price of the current SKU based on pricing list",
-                                                      "stepIndex": 26
+                                                      "displayName": "Calculate savings",
+                                                      "stepIndex": 39
                                                     },
-                                                    "stepIndex": 25
+                                                    "displayName": "Get region pricelist",
+                                                    "stepIndex": 38
                                                   },
-                                                  "displayName": "Get proposed SKU",
-                                                  "stepIndex": 24
+                                                  "stepIndex": 37
                                                 },
-                                                "displayName": "Get suggested SKUs",
-                                                "stepIndex": 23
+                                                "displayName": "Get proposed SKU",
+                                                "stepIndex": 36
                                               },
                                               "displayName": "Minimal suggested Memory GB",
-                                              "stepIndex": 22
+                                              "stepIndex": 35
                                             },
                                             "displayName": "Minimal suggested vCPUs",
-                                            "stepIndex": 21
+                                            "stepIndex": 34
                                           },
-                                          "displayName": "Extract properties",
-                                          "stepIndex": 20
+                                          "displayName": "Get current SKU details",
+                                          "stepIndex": 33
                                         },
-                                        "displayName": "Get current SKU",
-                                        "stepIndex": 19
+                                        "displayName": "Get vmSizes",
+                                        "stepIndex": 32
                                       },
-                                      "stepIndex": 18
+                                      "stepIndex": 31
                                     },
                                     "displayName": "Get peak memory usage (%)",
-                                    "stepIndex": 17
+                                    "stepIndex": 30
                                   },
                                   "displayName": "Get Percentage Memory metrics",
-                                  "stepIndex": 16
+                                  "stepIndex": 29
                                 },
                                 "displayName": "Get P95 of the average CPU metric",
-                                "stepIndex": 15
+                                "stepIndex": 28
                               },
                               "displayName": "Get CPU metrics",
-                              "stepIndex": 14
+                              "stepIndex": 27
                             },
                             "displayName": "Opportunity doesn't exist or snooze expired",
                             "onFailureAction": {
@@ -992,24 +873,416 @@
                                 }
                               },
                               "displayName": "Skip recommendation",
+                              "stepIndex": 26
+                            },
+                            "stepIndex": 25
+                          },
+                          "displayName": "Get existing opportunity",
+                          "stepIndex": 24
+                        },
+                        "stepIndex": 23
+                      },
+                      "displayName": "Filter by region",
+                      "stepIndex": 22
+                    },
+                    "stepIndex": 21
+                  },
+                  "displayName": "Get running VMs",
+                  "stepIndex": 20
+                },
+                "stepIndex": 19
+              },
+              "displayName": "Loop on regions",
+              "firstLoopAction": {
+                "id": "e0JkzGvXVq09ljCcC7kPU",
+                "name": "step_n",
+                "type": "BLOCK",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "key": "fetchContinue",
+                    "value": "true",
+                    "store_scope": "RUN"
+                  },
+                  "blockName": "@openops/block-store",
+                  "blockType": "OFFICIAL",
+                  "actionName": "put",
+                  "inputUiInfo": {
+                    "customizedInputs": {}
+                  },
+                  "packageType": "REGISTRY",
+                  "blockVersion": "0.5.1",
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "id": "PXR4bns5HE4ez930ht1XZ",
+                  "name": "step_p",
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]",
+                    "inputUiInfo": {
+                      "customizedInputs": {}
+                    }
+                  },
+                  "nextAction": {
+                    "id": "sT6zl1dg0LME8RmYvt646",
+                    "name": "step_ah",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "priceListRaw_{{step_j['item']}}",
+                        "parseJSON": false,
+                        "store_scope": "RUN",
+                        "defaultValue": null
+                      },
+                      "blockName": "@openops/block-store",
+                      "blockType": "OFFICIAL",
+                      "actionName": "get",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "DyKVK6sc8uroBRewUHHXD",
+                      "name": "step_ai",
+                      "type": "CODE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "rawPriceList": "{{step_ah}}"
+                        },
+                        "sourceCode": {
+                          "code": "export const code = async (inputs) => {\n  const rawPriceList = inputs.rawPriceList || [];\n\n  const flattened = [];\n\n  for (const item of rawPriceList) {\n    if (!item) continue;\n\n    if (Array.isArray(item)) {\n      flattened.push(...item);\n      continue;\n    }\n\n    if (typeof item === \"string\") {\n      try {\n        const parsed = JSON.parse(item);\n\n        if (Array.isArray(parsed)) {\n          flattened.push(...parsed);\n        } else if (parsed && typeof parsed === \"object\") {\n          flattened.push(parsed);\n        }\n      } catch (e) {\n        // skip invalid JSON strings\n      }\n\n      continue;\n    }\n\n    if (typeof item === \"object\") {\n      flattened.push(item);\n    }\n  }\n\n  return flattened;\n};",
+                          "packageJson": "{}"
+                        },
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        },
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "nextAction": {
+                        "id": "hDlu19kMdn9d6YRyXLdqv",
+                        "name": "step_aj",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "key": "priceList_{{step_j['item']}}",
+                            "value": "{{step_ai}}",
+                            "store_scope": "RUN"
+                          },
+                          "blockName": "@openops/block-store",
+                          "blockType": "OFFICIAL",
+                          "actionName": "put",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.5.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": false
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "OMHHa46bKwf7Y8GeLalpw",
+                          "name": "step_h",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "auth": "{{connections['Azure']}}",
+                              "dryRun": false,
+                              "commandToRun": "az rest --method get \\\n  --url \"https://management.azure.com/subscriptions/{{step_g['subscriptions'][0]}}/providers/Microsoft.Compute/locations/{{step_j['item']}}/vmSizes?api-version=2023-09-01\"",
+                              "subscriptions": {
+                                "subDropdown": "{{step_g['subscriptions'][0]}}"
+                              },
+                              "useHostSession": {}
+                            },
+                            "blockName": "@openops/block-azure",
+                            "blockType": "OFFICIAL",
+                            "actionName": "azure_cli",
+                            "inputUiInfo": {
+                              "customizedInputs": {
+                                "settings": {
+                                  "input": {
+                                    "subscriptions": {
+                                      "subDropdown": true
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.0.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": true
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "UyexDBCJi1VOCZ1pQOyoz",
+                            "name": "step_z",
+                            "type": "BLOCK",
+                            "valid": true,
+                            "settings": {
+                              "input": {
+                                "key": "vmSizes_{{step_j['item']}}",
+                                "value": "{{step_h['value']}}",
+                                "store_scope": "RUN"
+                              },
+                              "blockName": "@openops/block-store",
+                              "blockType": "OFFICIAL",
+                              "actionName": "put",
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              },
+                              "packageType": "REGISTRY",
+                              "blockVersion": "0.5.1",
+                              "errorHandlingOptions": {
+                                "retryOnFailure": {
+                                  "value": false
+                                },
+                                "continueOnFailure": {
+                                  "value": false
+                                }
+                              }
+                            },
+                            "displayName": "Set vmSizes",
+                            "stepIndex": 18
+                          },
+                          "displayName": "Get available SKUs",
+                          "stepIndex": 17
+                        },
+                        "displayName": "Set price list",
+                        "stepIndex": 16
+                      },
+                      "displayName": "Custom TypeScript Code",
+                      "stepIndex": 15
+                    },
+                    "displayName": "Get priceListRaw",
+                    "stepIndex": 14
+                  },
+                  "displayName": "Loop on Items",
+                  "firstLoopAction": {
+                    "id": "O3RO9Kl9waTkTE5rs5GSb",
+                    "name": "step_x",
+                    "type": "BLOCK",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "key": "fetchContinue",
+                        "parseJSON": true,
+                        "store_scope": "RUN",
+                        "defaultValue": "true"
+                      },
+                      "blockName": "@openops/block-store",
+                      "blockType": "OFFICIAL",
+                      "actionName": "get",
+                      "inputUiInfo": {
+                        "customizedInputs": {}
+                      },
+                      "packageType": "REGISTRY",
+                      "blockVersion": "0.5.1",
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "id": "F585RjZK2BGHld8frTMeR",
+                      "name": "step_y",
+                      "type": "BRANCH",
+                      "valid": true,
+                      "settings": {
+                        "conditions": [
+                          [
+                            {
+                              "operator": "BOOLEAN_IS_TRUE",
+                              "firstValue": "{{step_x}}",
+                              "secondValue": "",
+                              "caseSensitive": false
+                            }
+                          ]
+                        ],
+                        "inputUiInfo": {
+                          "customizedInputs": {}
+                        }
+                      },
+                      "displayName": "Should continue",
+                      "onSuccessAction": {
+                        "id": "b80rN3W7GJEm8CoguJ5F4",
+                        "name": "step_aa",
+                        "type": "BLOCK",
+                        "valid": true,
+                        "settings": {
+                          "input": {
+                            "url": {
+                              "url": "https://prices.azure.com/api/retail/prices?$filter=armRegionName eq '{{step_j['item']}}' and serviceName eq 'Virtual Machines' and priceType eq 'Consumption'&$skip={{step_p['item']}}"
+                            },
+                            "auth": "{{connections['Azure']}}",
+                            "body": null,
+                            "method": "GET",
+                            "headers": {},
+                            "timeout": null,
+                            "failsafe": false,
+                            "queryParams": {},
+                            "documentation": null,
+                            "subscriptions": {},
+                            "useHostSession": {}
+                          },
+                          "blockName": "@openops/block-azure",
+                          "blockType": "OFFICIAL",
+                          "actionName": "custom_azure_api_call",
+                          "inputUiInfo": {
+                            "customizedInputs": {}
+                          },
+                          "packageType": "REGISTRY",
+                          "blockVersion": "0.0.1",
+                          "errorHandlingOptions": {
+                            "retryOnFailure": {
+                              "value": true
+                            },
+                            "continueOnFailure": {
+                              "value": false
+                            }
+                          }
+                        },
+                        "nextAction": {
+                          "id": "Z6ibSkW5e7yODUMrZbhYV",
+                          "name": "step_ab",
+                          "type": "BLOCK",
+                          "valid": true,
+                          "settings": {
+                            "input": {
+                              "key": "priceListRaw_{{step_j['item']}}",
+                              "value": "{{step_aa['body']['Items']}}",
+                              "store_scope": "RUN",
+                              "ignore_if_exists": false
+                            },
+                            "blockName": "@openops/block-store",
+                            "blockType": "OFFICIAL",
+                            "actionName": "add_to_list",
+                            "inputUiInfo": {
+                              "customizedInputs": {}
+                            },
+                            "packageType": "REGISTRY",
+                            "blockVersion": "0.5.1",
+                            "errorHandlingOptions": {
+                              "retryOnFailure": {
+                                "value": false
+                              },
+                              "continueOnFailure": {
+                                "value": false
+                              }
+                            }
+                          },
+                          "nextAction": {
+                            "id": "MT1vN8tKknsMqlqdvVofP",
+                            "name": "step_ae",
+                            "type": "BRANCH",
+                            "valid": true,
+                            "settings": {
+                              "conditions": [
+                                [
+                                  {
+                                    "operator": "NUMBER_IS_EQUAL_TO",
+                                    "firstValue": "{{step_aa['body']['Count']}}",
+                                    "secondValue": "1000",
+                                    "caseSensitive": false
+                                  }
+                                ]
+                              ],
+                              "inputUiInfo": {
+                                "customizedInputs": {}
+                              }
+                            },
+                            "displayName": "Should continue",
+                            "onFailureAction": {
+                              "id": "BCVY55d7TEmUrwRtTAc70",
+                              "name": "step_af",
+                              "type": "BLOCK",
+                              "valid": true,
+                              "settings": {
+                                "input": {
+                                  "key": "fetchContinue",
+                                  "value": "false",
+                                  "store_scope": "RUN"
+                                },
+                                "blockName": "@openops/block-store",
+                                "blockType": "OFFICIAL",
+                                "actionName": "put",
+                                "inputUiInfo": {
+                                  "customizedInputs": {}
+                                },
+                                "packageType": "REGISTRY",
+                                "blockVersion": "0.5.1",
+                                "errorHandlingOptions": {
+                                  "retryOnFailure": {
+                                    "value": false
+                                  },
+                                  "continueOnFailure": {
+                                    "value": false
+                                  }
+                                }
+                              },
+                              "displayName": "Put",
                               "stepIndex": 13
                             },
                             "stepIndex": 12
                           },
-                          "displayName": "Get existing opportunity",
+                          "displayName": "Add To List",
                           "stepIndex": 11
                         },
+                        "displayName": "Get current region price list",
                         "stepIndex": 10
                       },
-                      "displayName": "Get running VMs",
                       "stepIndex": 9
                     },
+                    "displayName": "Get fetchContinue",
                     "stepIndex": 8
                   },
-                  "displayName": "Get currency",
                   "stepIndex": 7
                 },
-                "displayName": "Subscription billing",
+                "displayName": "Reset fetchContinue",
                 "stepIndex": 6
               },
               "stepIndex": 5
