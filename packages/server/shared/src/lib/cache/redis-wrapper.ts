@@ -122,6 +122,11 @@ const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
   return redis.getdelBuffer(key);
 };
 
+const getBuffer = async (key: string): Promise<Buffer | null> => {
+  const redis = getRedisClient();
+  return redis.getBuffer(key);
+};
+
 const getRedisClient = (): Redis => {
   if (!client) {
     client = createRedisClient();
@@ -145,6 +150,7 @@ export const redisWrapper = {
   deleteKey,
   keyExists,
   setBuffer,
+  getBuffer,
   getBufferAndDelete,
   setSerializedObject,
   getSerializedObject,

@@ -73,6 +73,7 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         socket.emit(WebsocketClientEvent.TEST_FLOW_RUN_STARTED, flowRun);
       } catch (err) {
         if (isAuthorizationError(err)) {
+          logger.debug('Authorization error', { err });
           sendAuthorizationError(socket, err);
           return;
         }
@@ -125,6 +126,7 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         socket.emit(WebsocketClientEvent.TEST_STEP_FINISHED, response);
       } catch (err) {
         if (isAuthorizationError(err)) {
+          logger.debug('Authorization error', { err });
           sendAuthorizationError(socket, err);
           return;
         }
@@ -165,7 +167,6 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
 };
 
 function isAuthorizationError(error: unknown): boolean {
-  logger.debug('isAuthorizationError', error);
   return (
     error instanceof ApplicationError &&
     error.error.code === ErrorCode.AUTHORIZATION

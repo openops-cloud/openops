@@ -10,8 +10,7 @@
   },
   "containerEnv": {
     "OPS_OPENOPS_TABLES_PUBLIC_URL": "https://${env:CODESPACE_NAME}-3001.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
-    "OPS_FRONTEND_URL": "https://${env:CODESPACE_NAME}-4200.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
-    "OPS_ENGINE_URL": "https://${env:CODESPACE_NAME}-3005.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/execute"
+    "OPS_FRONTEND_URL": "https://${env:CODESPACE_NAME}-4200.${env:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
   },
   // Configure tool-specific properties.
   "customizations": {

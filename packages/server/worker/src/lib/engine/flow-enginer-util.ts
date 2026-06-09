@@ -6,7 +6,6 @@ import {
   BlockPackage,
   BlockTriggerSettings,
   BlockType,
-  CodeAction,
   EXACT_VERSION_REGEX,
   flowHelper,
   FlowVersion,
@@ -15,7 +14,6 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { engineApiService } from '../api/server-api.service';
-import { CodeArtifact } from './engine-runner';
 
 type ExtractFlowBlocksParams = {
   flowVersion: FlowVersion;
@@ -23,20 +21,6 @@ type ExtractFlowBlocksParams = {
 };
 
 export const blockEngineUtil = {
-  getCodeSteps(flowVersion: FlowVersion): CodeArtifact[] {
-    const steps = flowHelper.getAllSteps(flowVersion.trigger);
-    return steps
-      .filter((step) => step.type === ActionType.CODE)
-      .map((step) => {
-        const codeAction = step as CodeAction;
-        return {
-          name: codeAction.name,
-          flowVersionId: flowVersion.id,
-          flowVersionState: flowVersion.state,
-          sourceCode: codeAction.settings.sourceCode,
-        };
-      });
-  },
   async extractFlowBlocks({
     flowVersion,
     engineToken,

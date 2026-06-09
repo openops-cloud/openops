@@ -7,6 +7,32 @@ const chalk = require('chalk');
 module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(new IgnoreDynamicRequire());
 
+  config.entry = path.resolve(__dirname, 'src/main.ts');
+  config.output = {
+    path: path.resolve(__dirname, '../../dist/packages/engine'),
+    filename: 'main.js',
+    libraryTarget: 'commonjs2',
+  };
+  config.target = 'node';
+
+  // Externalize modules that need their real file structure:
+  // - pino/thread-stream: use worker_threads with __dirname-relative paths
+  // - rollup: internal module system breaks when bundled by webpack
+  // - isolated-vm: native C++ addon (node-gyp-build)
+  // - fsevents: native macOS binary
+  // - @openops/*: resolved at runtime via NODE_PATH so engine and blocks share
+  //   the same module instances (logger, cache, etc.)
+  config.externals = [
+    'fsevents',
+    'pino',
+    'pino-pretty',
+    'thread-stream',
+    'rollup',
+    /^@rollup\//,
+    'isolated-vm',
+    /^@openops\//,
+  ];
+
   config.plugins.push({
     apply: (compiler) => {
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {

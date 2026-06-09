@@ -5,10 +5,9 @@ import {
   saveRequestBody,
 } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
-import { execute } from './lib/operations';
+import { execute } from './operations';
 
 export async function executeEngine(
-  requestId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   engineInput: any,
   operationType: EngineOperationType,
@@ -41,10 +40,11 @@ export async function executeEngine(
   return key;
 }
 
-function hasOperationStatus(
-  response: unknown,
-): response is { status?: number } {
+function hasOperationStatus(response: unknown): response is { status: string } {
   return (
-    typeof response === 'object' && response !== null && 'status' in response
+    typeof response === 'object' &&
+    response !== null &&
+    'status' in response &&
+    typeof response.status === 'string'
   );
 }
