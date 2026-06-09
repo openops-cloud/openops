@@ -1387,7 +1387,7 @@
                         "type": "LOOP_ON_ITEMS",
                         "valid": true,
                         "settings": {
-                          "items": "[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]",
+                          "items": "[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000]",
                           "inputUiInfo": {
                             "customizedInputs": {}
                           }
@@ -1610,9 +1610,9 @@
                                     "conditions": [
                                       [
                                         {
-                                          "operator": "NUMBER_IS_EQUAL_TO",
-                                          "firstValue": "{{step_i['body']['Count']}}",
-                                          "secondValue": "1000",
+                                          "operator": "EXISTS",
+                                          "firstValue": "{{step_i['body']['NextPageLink']}}",
+                                          "secondValue": "",
                                           "caseSensitive": false
                                         }
                                       ]

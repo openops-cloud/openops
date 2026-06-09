@@ -674,11 +674,13 @@
                                                       "settings": {
                                                         "input": {
                                                           "currentVmSystem": "{{step_d['item']['storageProfile']['osDisk']['osType']}}",
+                                                          "currentSku": "{{step_d['item']['hardwareProfile']['vmSize']}}",
+                                                          "proposedSku": "{{step_ag['proposedSku']}}",
                                                           "currentSkuPriceList": "{{step_i}}",
                                                           "proposedSkuPriceList": "{{step_i}}"
                                                         },
                                                         "sourceCode": {
-                                                          "code": "export const code = async (inputs) => {\n  const system = String(inputs.currentVmSystem || \"\").toLowerCase();\n\n  const pickUnitPrice = (items, system) => {\n    const arr = Array.isArray(items) ? items : [];\n    const isWindows = system === \"windows\";\n\n    const candidates = arr\n      .filter((x) => String(x?.serviceName || \"\") === \"Virtual Machines\")\n      .filter((x) => String(x?.type || \"\") === \"Consumption\")\n      .filter((x) => {\n        const n = `${x?.meterName || \"\"} ${x?.skuName || \"\"} ${x?.productName || \"\"}`.toLowerCase();\n        return !n.includes(\"spot\") && !n.includes(\"low priority\");\n      })\n      .filter((x) => {\n        const pn = String(x?.productName || \"\").toLowerCase();\n        const hasWindows = pn.includes(\"windows\");\n        return isWindows ? hasWindows : !hasWindows;\n      });\n\n    if (!candidates.length) return null;\n\n    candidates.sort((a, b) => {\n      const aPrim = a?.isPrimaryMeterRegion ? 0 : 1;\n      const bPrim = b?.isPrimaryMeterRegion ? 0 : 1;\n      if (aPrim !== bPrim) return aPrim - bPrim;\n\n      const aDate = Date.parse(a?.effectiveStartDate || \"\") || 0;\n      const bDate = Date.parse(b?.effectiveStartDate || \"\") || 0;\n      if (aDate !== bDate) return bDate - aDate;\n\n      const aPrice = Number(a?.unitPrice ?? a?.retailPrice ?? Infinity);\n      const bPrice = Number(b?.unitPrice ?? b?.retailPrice ?? Infinity);\n      return aPrice - bPrice;\n    });\n\n    const best = candidates[0];\n    const price = Number(best?.unitPrice ?? best?.retailPrice);\n    return Number.isFinite(price) ? price : null;\n  };\n\n  const currentUnit = pickUnitPrice(inputs.currentSkuPriceList, system);\n  const proposedUnit = pickUnitPrice(inputs.proposedSkuPriceList, system);\n\n  if (!Number.isFinite(currentUnit) || !Number.isFinite(proposedUnit) || currentUnit <= 0) {\n    return { discount: \"0\", savings: \"0.00\" };\n  }\n\n  const hourlySavings = Math.max(0, currentUnit - proposedUnit);\n  const dailySavings = hourlySavings * 24;\n  const monthlySavings = dailySavings * 30.4;\n  const discountPct = Math.max(0, (hourlySavings / currentUnit) * 100);\n\n  return {\n    discount: String(Math.round(discountPct)),\n    savings: monthlySavings.toFixed(2),\n  };\n};",
+                                                          "code": "export const code = async (inputs) => {\n  const system = String(inputs.currentVmSystem || \"\").toLowerCase();\n\n  const pickUnitPrice = (items, system, sku) => {\n    const arr = Array.isArray(items) ? items : [];\n    const isWindows = system === \"windows\";\n    const skuNorm = String(sku || \"\").toLowerCase();\n\n    const candidates = arr\n      .filter((x) => String(x?.serviceName || \"\") === \"Virtual Machines\")\n      .filter((x) => String(x?.type || \"\") === \"Consumption\")\n      .filter((x) => {\n        if (!skuNorm) return true;\n        return String(x?.armSkuName || \"\").toLowerCase() === skuNorm;\n      })\n      .filter((x) => {\n        const n = `${x?.meterName || \"\"} ${x?.skuName || \"\"} ${x?.productName || \"\"}`.toLowerCase();\n        return !n.includes(\"spot\") && !n.includes(\"low priority\");\n      })\n      .filter((x) => {\n        const pn = String(x?.productName || \"\").toLowerCase();\n        const hasWindows = pn.includes(\"windows\");\n        return isWindows ? hasWindows : !hasWindows;\n      });\n\n    if (!candidates.length) return null;\n\n    candidates.sort((a, b) => {\n      const aPrim = a?.isPrimaryMeterRegion ? 0 : 1;\n      const bPrim = b?.isPrimaryMeterRegion ? 0 : 1;\n      if (aPrim !== bPrim) return aPrim - bPrim;\n\n      const aDate = Date.parse(a?.effectiveStartDate || \"\") || 0;\n      const bDate = Date.parse(b?.effectiveStartDate || \"\") || 0;\n      if (aDate !== bDate) return bDate - aDate;\n\n      const aPrice = Number(a?.unitPrice ?? a?.retailPrice ?? Infinity);\n      const bPrice = Number(b?.unitPrice ?? b?.retailPrice ?? Infinity);\n      return aPrice - bPrice;\n    });\n\n    const best = candidates[0];\n    const price = Number(best?.unitPrice ?? best?.retailPrice);\n    return Number.isFinite(price) ? price : null;\n  };\n\n  const currentUnit = pickUnitPrice(inputs.currentSkuPriceList, system, inputs.currentSku);\n  const proposedUnit = pickUnitPrice(inputs.proposedSkuPriceList, system, inputs.proposedSku);\n\n  if (!Number.isFinite(currentUnit) || !Number.isFinite(proposedUnit) || currentUnit <= 0) {\n    return { discount: \"0\", savings: \"0.00\" };\n  }\n\n  const hourlySavings = Math.max(0, currentUnit - proposedUnit);\n  const dailySavings = hourlySavings * 24;\n  const monthlySavings = dailySavings * 30.4;\n  const discountPct = Math.max(0, (hourlySavings / currentUnit) * 100);\n\n  return {\n    discount: String(Math.round(discountPct)),\n    savings: monthlySavings.toFixed(2),\n  };\n};",
                                                           "packageJson": "{}"
                                                         },
                                                         "inputUiInfo": {
@@ -927,7 +929,7 @@
                   "type": "LOOP_ON_ITEMS",
                   "valid": true,
                   "settings": {
-                    "items": "[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]",
+                    "items": "[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000]",
                     "inputUiInfo": {
                       "customizedInputs": {}
                     }
@@ -1224,9 +1226,9 @@
                               "conditions": [
                                 [
                                   {
-                                    "operator": "NUMBER_IS_EQUAL_TO",
-                                    "firstValue": "{{step_aa['body']['Count']}}",
-                                    "secondValue": "1000",
+                                    "operator": "EXISTS",
+                                    "firstValue": "{{step_aa['body']['NextPageLink']}}",
+                                    "secondValue": "",
                                     "caseSensitive": false
                                   }
                                 ]
