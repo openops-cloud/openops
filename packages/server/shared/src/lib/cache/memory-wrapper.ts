@@ -61,16 +61,28 @@ async function getOrAdd<T, Args extends unknown[]>(
   throw new Error('Not implemented');
 }
 
+const bufferCache = new LRUCache<string, Buffer>({
+  max: 100,
+  ttl: DEFAULT_EXPIRE_TIME,
+  updateAgeOnGet: true,
+});
+
 const setBuffer = async (
   key: string,
   value: Buffer,
-  expireInSeconds: number = DEFAULT_EXPIRE_TIME,
+  expireInSeconds: number = DEFAULT_EXPIRE_TIME / 1000,
 ): Promise<void> => {
-  throw new Error('Not implemented');
+  bufferCache.set(key, value, { ttl: expireInSeconds * 1000 });
+};
+
+const getBuffer = async (key: string): Promise<Buffer | null> => {
+  return bufferCache.get(key) || null;
 };
 
 const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
-  throw new Error('Not implemented');
+  const value = bufferCache.get(key) || null;
+  bufferCache.delete(key);
+  return value;
 };
 
 const addToSet = async (key: string, member: string): Promise<void> => {
@@ -98,6 +110,7 @@ export const memoryWrapper = {
   deleteKey,
   keyExists,
   setBuffer,
+  getBuffer,
   getBufferAndDelete,
   setSerializedObject,
   getSerializedObject,

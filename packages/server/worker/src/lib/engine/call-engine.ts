@@ -1,7 +1,5 @@
 import { requestContext } from '@fastify/request-context';
 import {
-  AppSystemProp,
-  BodyAccessKeyRequest,
   cacheWrapper,
   getContext,
   getEngineTimeout,
@@ -13,21 +11,19 @@ import {
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
-import {
-  EngineOperationType,
-  EngineResponse,
-  EngineResponseStatus,
-  extractPropertyString,
-} from '@openops/shared';
-import axios, { AxiosError } from 'axios';
+import { EngineOperationType, EngineResponseStatus } from '@openops/shared';
 import { nanoid } from 'nanoid';
+import {
+  acquireEngine,
+  disposeEngine,
+  EngineOOMError,
+  EngineTimeoutError,
+} from './engine-pool';
 import {
   EngineHelperFlowResult,
   EngineHelperResponse,
   EngineHelperResult,
 } from './engine-runner';
-
-const ENGINE_URL = system.getOrThrow(AppSystemProp.ENGINE_URL);
 
 const engineMetadataCacheEnabled =
   system.getBoolean(SharedSystemProp.ENGINE_METADATA_CACHE_ENABLED) ?? true;
@@ -35,7 +31,7 @@ const cacheEnabledOperations: EngineOperationType[] = engineMetadataCacheEnabled
   ? [EngineOperationType.EXTRACT_BLOCK_METADATA]
   : [];
 
-export async function callEngineLambda<Result extends EngineHelperResult>(
+export async function callEngine<Result extends EngineHelperResult>(
   operation: EngineOperationType,
   input: unknown,
 ): Promise<EngineHelperResponse<Result>> {
@@ -61,10 +57,10 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
   }
 
   const deadlineTimestamp = Date.now() + timeout * 1000;
-  const requestId =
-    getContext()['executionCorrelationId'] ??
-    requestContext.get('requestId' as never) ??
-    nanoid();
+  const correlationId = getContext()['executionCorrelationId'];
+  const contextRequestId = requestContext.get('requestId' as never);
+  const requestId = correlationId ?? contextRequestId ?? nanoid();
+
   try {
     if (shouldUseCache(operation) && requestKey) {
       engineResult = await cacheWrapper.getSerializedObject<unknown>(
@@ -76,37 +72,44 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       }
     }
 
-    logger.debug(`Requesting the engine to run [${operation}]`, {
+    logger.debug(`Dispatching engine operation [${operation}]`, {
       requestId,
       operation,
       timeoutSeconds: timeout,
     });
 
-    const bodyAccessKey = await saveRequestBody({
+    const inputKey = await saveRequestBody({
       operationType: operation,
       engineInput: input,
       deadlineTimestamp,
       requestId,
     });
-    const requestResponse = await axios.post(
-      `${ENGINE_URL}`,
-      {
-        bodyAccessKey,
-      } as BodyAccessKeyRequest,
-      {
-        timeout: timeout * 1000,
-      },
-    );
 
-    const response = (requestResponse.data.body ||
-      requestResponse.data) as BodyAccessKeyRequest;
-    const responseData = await getRequestBody(response.bodyAccessKey);
+    const startTime = performance.now();
+    let engine;
+    try {
+      engine = await acquireEngine();
+    } catch (acquireError) {
+      // Clean up stored input since no engine will consume it
+      await cacheWrapper.deleteKey(inputKey).catch(() => undefined);
+      throw acquireError;
+    }
 
-    logger.debug('Received engine response', {
-      status: extractPropertyString(responseData, ['status']),
+    let resultKey: string;
+    try {
+      resultKey = await engine.execute(inputKey, timeout);
+    } finally {
+      disposeEngine(engine);
+    }
+
+    const duration = Math.floor(performance.now() - startTime);
+    logger.info(`Engine operation completed [${operation}] in ${duration}ms`, {
       operation,
       requestId,
+      durationMs: duration,
     });
+
+    const responseData = await getRequestBody<unknown>(resultKey);
 
     if (shouldUseCache(operation) && requestKey) {
       await cacheWrapper.setSerializedObject(requestKey, responseData, 600);
@@ -114,11 +117,13 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
 
     return parseEngineResponse(responseData);
   } catch (error) {
-    const { status, errorMessage } = logEngineError(
-      deadlineTimestamp,
-      requestId,
-      error,
-    );
+    const { errorMessage, status } = classifyEngineError(error);
+
+    if (error instanceof EngineTimeoutError) {
+      logger.info(errorMessage, { requestId, operation });
+    } else {
+      logger.error(errorMessage, { error, requestId, operation });
+    }
 
     return {
       status,
@@ -135,7 +140,10 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
 function parseEngineResponse<Result extends EngineHelperResult>(
   responseData: unknown,
 ): { status: EngineResponseStatus; result: Result } {
-  const executionResult = tryParseJson(responseData) as EngineResponse<unknown>;
+  const executionResult = tryParseJson(responseData) as {
+    status: string;
+    response: unknown;
+  };
 
   const output = tryParseJson(
     executionResult.response,
@@ -167,40 +175,27 @@ function replaceVolatileValues(key: string, value: unknown): unknown {
   return value;
 }
 
-function logEngineError(
-  deadlineTimestamp: number,
-  requestId: string,
-  error: unknown,
-): { status: EngineResponseStatus; errorMessage: string } {
-  const errorTimestamp = Date.now();
-  let status = EngineResponseStatus.ERROR;
-  let errorMessage =
-    'An unexpected error occurred while making a request to the engine.';
-  if (
-    errorTimestamp > deadlineTimestamp ||
-    (axios.isAxiosError(error) &&
-      (error as AxiosError).response?.status === 504)
-  ) {
-    status = EngineResponseStatus.TIMEOUT;
-    errorMessage = 'Engine execution timed out.';
+function classifyEngineError(error: unknown): {
+  errorMessage: string;
+  status: EngineResponseStatus;
+} {
+  if (error instanceof EngineTimeoutError) {
+    return {
+      errorMessage: 'Engine execution timed out.',
+      status: EngineResponseStatus.TIMEOUT,
+    };
+  }
 
-    logger.info(errorMessage, {
-      error,
-      requestId,
-      errorTimestamp,
-      deadlineTimestamp,
-    });
-  } else {
-    logger.error(errorMessage, {
-      error,
-      requestId,
-      errorTimestamp,
-      deadlineTimestamp,
-    });
+  if (error instanceof EngineOOMError) {
+    return {
+      errorMessage: 'Engine ran out of memory.',
+      status: EngineResponseStatus.ERROR,
+    };
   }
 
   return {
-    status,
-    errorMessage,
+    errorMessage:
+      'An unexpected error occurred while executing engine operation.',
+    status: EngineResponseStatus.ERROR,
   };
 }

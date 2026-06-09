@@ -1,57 +1,69 @@
-import { getAiTelemetrySDK } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import {
+  getRequestBody,
+  logger,
+  runWithLogContext,
+  sendLogs,
+} from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { Static, Type } from '@sinclair/typebox';
-import { execSync } from 'child_process';
-import { existsSync, mkdirSync } from 'fs';
-import * as process from 'node:process';
-import { start } from './api-handler';
-import { lambdaHandler } from './lambda-handler';
-import { EngineConstants } from './lib/handler/context/engine-constants';
+import { executeEngine } from './lib/engine-executor';
 
-export const EngineRequest = Type.Object({
-  requestId: Type.String(),
-  engineInput: Type.Unknown(),
-  deadlineTimestamp: Type.Number(),
-  operationType: Type.Enum(EngineOperationType),
-});
+type EngineInput = {
+  operationType: EngineOperationType;
+  engineInput: Record<string, unknown>;
+  deadlineTimestamp: number;
+  requestId: string;
+};
 
-export type EngineRequest = Static<typeof EngineRequest>;
+async function executeFromRedis(inputKey: string): Promise<string> {
+  const input = await getRequestBody<EngineInput>(inputKey);
+  logger.info(`Engine executing [${input.operationType}]`, {
+    executionCorrelationId: input.requestId,
+    operation: input.operationType,
+  });
 
-function installCodeBlockDependencies(): void {
-  logger.info('Installing code block dependencies...');
-  if (!existsSync(EngineConstants.BASE_CODE_DIRECTORY)) {
-    mkdirSync(EngineConstants.BASE_CODE_DIRECTORY, { recursive: true });
-  }
-
-  execSync(
-    'npm init -y && npm i @tsconfig/node20@20.1.4 @types/node@20.14.8 typescript@5.6.3',
-    { cwd: EngineConstants.BASE_CODE_DIRECTORY },
+  return runWithLogContext(
+    {
+      deadlineTimestamp: input.deadlineTimestamp.toString(),
+      executionCorrelationId: input.requestId,
+      operationType: input.operationType,
+    },
+    () => executeEngine(input.engineInput, input.operationType),
   );
 }
 
-let telemetrySDK: NodeTracerProvider | undefined;
+if (process.send) {
+  process.send({ type: 'ready' });
 
-function initTelemetry(): void {
-  telemetrySDK = getAiTelemetrySDK();
-  telemetrySDK?.register();
-}
+  process.on('message', (msg: { type: string; inputKey?: string }) => {
+    if (msg.type === 'execute' && msg.inputKey) {
+      void (async () => {
+        try {
+          const resultKey = await executeFromRedis(msg.inputKey!);
 
-initTelemetry();
+          await sendLogs();
 
-async function cleanup(): Promise<void> {
-  return telemetrySDK?.shutdown();
-}
+          if (process.send) {
+            process.send({ type: 'result', resultKey });
+          }
 
-if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  logger.info('Running in a lambda environment, calling lambdaHandler...');
-  exports.handler = lambdaHandler;
-} else {
-  installCodeBlockDependencies();
-  start({ cleanup }).catch((err) => {
-    // eslint-disable-next-line no-console
-    console.log(`Failed to start the engine ${err}`, err);
-    process.exit(1);
+          process.exit(0);
+        } catch (error) {
+          logger.error('Engine pool process failed', { error });
+          await sendLogs();
+
+          if (process.send) {
+            process.send({
+              type: 'error',
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+
+          process.exit(1);
+        }
+      })();
+    }
   });
+} else {
+  logger.error('Engine started without IPC channel — exiting');
+  process.exit(1);
 }

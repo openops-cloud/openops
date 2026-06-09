@@ -8,7 +8,6 @@ import {
   system,
   threadSafeMkdir,
 } from '@openops/server-shared';
-import { FlowVersionState } from '@openops/shared';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import nodeResolver from '@rollup/plugin-node-resolve';
@@ -51,35 +50,40 @@ export const codeBuilder = {
   getCodesFolder({
     codesFolderPath,
     flowVersionId,
+    flowRunId,
   }: {
     codesFolderPath: string;
     flowVersionId: string;
+    flowRunId: string;
   }): string {
-    return path.join(codesFolderPath, flowVersionId);
+    return path.join(codesFolderPath, flowVersionId, flowRunId);
   },
   async processCodeStep({
     artifact,
     codesFolderPath,
   }: ProcessCodeStepParams): Promise<void> {
-    const { sourceCode, flowVersionId, name } = artifact;
+    const { sourceCode, flowRunId, flowVersionId, name } = artifact;
     const flowVersionPath = codeBuilder.getCodesFolder({
       codesFolderPath,
       flowVersionId,
+      flowRunId,
     });
     const codePath = path.join(flowVersionPath, name);
 
-    logger.debug('Preparing the code block.', { name, codePath, sourceCode });
+    logger.debug('Preparing the code block.', {
+      stepName: name,
+      codePath,
+      sourceCode,
+      flowRunId,
+    });
 
     const lock = await memoryLock.acquire(
-      `code-builder-${flowVersionId}-${name}`,
+      `code-builder-${flowVersionId}-${flowRunId}-${name}`,
     );
     try {
       const cache = cacheHandler(codePath);
       const fState = await cache.cacheCheckState(codePath);
-      if (
-        fState === CacheState.READY &&
-        artifact.flowVersionState === FlowVersionState.LOCKED
-      ) {
+      if (fState === CacheState.READY) {
         logger.debug('The code is already ready in the system.');
         return;
       }

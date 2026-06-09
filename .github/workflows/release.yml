@@ -36,8 +36,8 @@ jobs:
         target:
           - name: App
             repository: openops-app
-          - name: Engine
-            repository: openops-engine
+          - name: Worker
+            repository: openops-worker
     name: Tag ${{ matrix.target.name }} for release ${{ needs.get-version.outputs.version }}
     runs-on: ubuntu-latest
     env:

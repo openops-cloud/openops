@@ -317,6 +317,7 @@ function getExecutionState(
   ) {
     return null;
   }
+
   return {
     steps: flowRunResponse.steps as Record<string, StepOutput>,
   };
