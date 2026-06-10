@@ -38,18 +38,35 @@ describe('runWithExponentialBackoff', () => {
             },
         },
     })
+    const cloudabilityAction = buildBlockAction({
+        name: 'cloudability_step',
+        input: {},
+        blockName: '@openops/block-cloudability',
+        actionName: 'cloudability_get_recommendations',
+        errorHandlingOptions: {
+            continueOnFailure: {
+                value: false,
+            },
+            retryOnFailure: {
+                value: true,
+            },
+        },
+    })
     const constants = generateMockEngineConstants()
     const requestFunction = jest.fn()
     let setTimeoutSpy: jest.SpyInstance
+    let randomSpy: jest.SpyInstance
 
     beforeEach(() => {
         jest.clearAllMocks()
         jest.useFakeTimers()
         setTimeoutSpy = jest.spyOn(global, 'setTimeout')
+        randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0)
     })
 
     afterEach(() => {
         setTimeoutSpy.mockRestore()
+        randomSpy.mockRestore()
         jest.useRealTimers()
     })
 
@@ -217,6 +234,64 @@ describe('runWithExponentialBackoff', () => {
         expect(requestFunction).toHaveBeenCalledTimes(1)
         expect(setTimeoutSpy).not.toHaveBeenCalled()
     })
+
+    // [label, retryMetadata, Math.random() value, expected setTimeout delay (ms)]
+    // jitter = floor(base * 0.2 * random), added to base, then capped at 10 minutes.
+    it.each<[string, StepRetryMetadata, number, number]>([
+        ['the 60-second default when no Retry-After is provided', { type: 'HTTP_429' }, 0, 60000],
+        ['additive jitter (60000 + floor(60000 * 0.2 * 0.5))', { type: 'HTTP_429' }, 0.5, 66000],
+        ['the server-provided Retry-After delay', { type: 'HTTP_429', retryAfterMs: 5000 }, 0, 5000],
+        ['the base+jitter sum capped at 10 minutes', { type: 'HTTP_429', retryAfterMs: 599000 }, 1, 600000],
+    ])('should retry a Cloudability 429 with %s', async (_label, retryMetadata, randomValue, expectedDelayMs) => {
+        randomSpy.mockReturnValue(randomValue)
+        const failedExecutionState = createFailedExecutionState({
+            stepName: cloudabilityAction.name,
+            actionType: ActionType.BLOCK,
+            retryMetadata,
+        })
+        const successfulExecutionState = FlowExecutorContext.empty().setVerdict(ExecutionVerdict.SUCCEEDED)
+
+        requestFunction
+            .mockResolvedValueOnce(failedExecutionState)
+            .mockResolvedValueOnce(successfulExecutionState)
+
+        const outputPromise = runWithExponentialBackoff(
+            executionState,
+            cloudabilityAction,
+            constants,
+            requestFunction,
+        )
+
+        await jest.runOnlyPendingTimersAsync()
+        const output = await outputPromise
+
+        expect(output).toEqual(successfulExecutionState)
+        expect(requestFunction).toHaveBeenCalledTimes(2)
+        expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), expectedDelayMs)
+    })
+
+    it('should not retry Cloudability permanent client errors', async () => {
+        const resultExecutionState = createFailedExecutionState({
+            stepName: cloudabilityAction.name,
+            actionType: ActionType.BLOCK,
+            retryMetadata: {
+                type: 'HTTP_CLIENT_ERROR',
+            },
+        })
+
+        requestFunction.mockResolvedValue(resultExecutionState)
+
+        const output = await runWithExponentialBackoff(
+            executionState,
+            cloudabilityAction,
+            constants,
+            requestFunction,
+        )
+
+        expect(output).toEqual(resultExecutionState)
+        expect(requestFunction).toHaveBeenCalledTimes(1)
+        expect(setTimeoutSpy).not.toHaveBeenCalled()
+    })
 })
 
 describe('getBlockRetryMetadata', () => {
@@ -280,6 +355,34 @@ describe('getBlockRetryMetadata', () => {
                 retryAfterMs: 5000,
             }),
         ).toBeUndefined()
+    })
+
+    const cloudabilityAction = buildBlockAction({
+        name: 'cloudability_step',
+        input: {},
+        blockName: '@openops/block-cloudability',
+        actionName: 'cloudability_get_recommendations',
+        errorHandlingOptions: {
+            retryOnFailure: {
+                value: true,
+            },
+        },
+    })
+
+    // [label, error, expected metadata] — 429 retries with a long backoff,
+    // permanent 4xx (except 408) are non-retryable, everything else (408, 5xx)
+    // falls through to the generic exponential retry (undefined metadata).
+    it.each<
+        [string, { response: { status: number }; retryAfterMs?: number }, StepRetryMetadata | undefined]
+    >([
+        ['429 without a Retry-After', { response: { status: 429 } }, { type: 'HTTP_429', retryAfterMs: undefined }],
+        ['429 with a sanitized Retry-After', { response: { status: 429 }, retryAfterMs: 5000 }, { type: 'HTTP_429', retryAfterMs: 5000 }],
+        ['422 permanent client error', { response: { status: 422 } }, { type: 'HTTP_CLIENT_ERROR' }],
+        ['403 permanent client error', { response: { status: 403 } }, { type: 'HTTP_CLIENT_ERROR' }],
+        ['408 timeout', { response: { status: 408 } }, undefined],
+        ['503 server error', { response: { status: 503 } }, undefined],
+    ])('maps a Cloudability %s', (_label, error, expected) => {
+        expect(getBlockRetryMetadata(cloudabilityAction, error)).toEqual(expected)
     })
 })
 
