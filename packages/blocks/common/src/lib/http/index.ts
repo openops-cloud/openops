@@ -12,3 +12,4 @@ export * from './core/http-request';
 export * from './core/http-response';
 export * from './core/media-type';
 export * from './core/query-params';
+export * from './core/standard-retry-after';

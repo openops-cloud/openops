@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 import { getAzureRetryDelayMs } from './azure-retry-delay';
 import { HttpHeaders } from './http-headers';
+import { getStandardRetryAfterMs } from './standard-retry-after';
 
 export class HttpError extends Error {
   constructor(
@@ -45,7 +46,10 @@ export class HttpError extends Error {
       return undefined;
     }
 
-    return getAzureRetryDelayMs(this.response.headers);
+    return (
+      getStandardRetryAfterMs(this.response.headers) ??
+      getAzureRetryDelayMs(this.response.headers)
+    );
   }
 
   get request() {

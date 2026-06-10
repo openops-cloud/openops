@@ -11,7 +11,10 @@ export enum StepOutputStatus {
   EXECUTION_LIMIT_REACHED = 'EXECUTION_LIMIT_REACHED',
 }
 
-export type StepRetryMetadataType = 'AZURE_429';
+export type StepRetryMetadataType =
+  | 'AZURE_429'
+  | 'HTTP_429'
+  | 'HTTP_CLIENT_ERROR';
 
 export type StepRetryMetadata = {
   type: StepRetryMetadataType;
