@@ -2,6 +2,7 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { promises as fs } from 'fs';
 import { CodeSandbox } from '../../core/code/code-sandbox-common';
+import { BASE64_POLYFILL } from './polyfills/base64-polyfill';
 
 const BLOCK_MEMORY_LIMIT_IN_MB = system.getNumberOrThrow(
   AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB,
@@ -85,6 +86,10 @@ const initIsolateContext = async ({
       new ivm.ExternalCopy(value).copyInto(),
     );
   }
+
+  // Define web-standard globals (btoa/atob) on the context before user code runs.
+  const bootstrap = await isolate.compileScript(BASE64_POLYFILL);
+  await bootstrap.run(isolateContext);
 
   return isolateContext;
 };
