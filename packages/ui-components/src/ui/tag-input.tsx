@@ -76,7 +76,7 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
               onChange(value.filter((i) => i !== item));
             }}
           >
-            <XIcon className={'w-3'} />
+            <XIcon className={'h-3 w-3'} />
           </Button>
         </Badge>
       ))}

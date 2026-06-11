@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TagInput } from '../tag-input';
 
 const Harness = ({ initial = [] as string[] }) => {
