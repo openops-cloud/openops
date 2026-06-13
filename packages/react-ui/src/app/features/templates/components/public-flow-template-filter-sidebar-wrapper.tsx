@@ -56,7 +56,7 @@ const PublicFlowTemplateFilterSidebarWrapper = ({
   showDomains = true,
   newDomains = [],
 }: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const useCloudTemplates = !!flagsHooks.useShouldFetchCloudTemplates();
 
   const {
     domains,

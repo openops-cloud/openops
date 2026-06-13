@@ -16,9 +16,9 @@ import {
   StatusIconWithText,
 } from '@openops/components/ui';
 import {
-  AppConnection,
   AppConnectionSortBy,
   AppConnectionStatus,
+  AppConnectionWithoutSensitiveData,
   MinimalFlow,
   Permission,
 } from '@openops/shared';
@@ -74,7 +74,7 @@ const MenuConnectionColumn = ({
   row,
   setRefresh,
 }: {
-  row: RowDataWithActions<AppConnection>;
+  row: RowDataWithActions<AppConnectionWithoutSensitiveData>;
   setRefresh: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [linkedFlows, setLinkedFlows] = useState<MinimalFlow[]>([]);
@@ -167,7 +167,9 @@ const MenuConnectionColumn = ({
 };
 const columns: (
   setRefresh: Dispatch<SetStateAction<boolean>>,
-) => ColumnDef<RowDataWithActions<AppConnection>>[] = (setRefresh) => {
+) => ColumnDef<RowDataWithActions<AppConnectionWithoutSensitiveData>>[] = (
+  setRefresh,
+) => {
   return [
     {
       accessorKey: 'authProviderKey',

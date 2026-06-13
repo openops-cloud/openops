@@ -8,13 +8,17 @@ import {
   FlowTemplateMetadataWithIntegrations,
   Input,
 } from '@openops/components/ui';
-import { AppConnectionsWithSupportedBlocks, Trigger } from '@openops/shared';
+import {
+  AppConnectionsWithSupportedBlocks,
+  Trigger,
+  TriggerWithOptionalId,
+} from '@openops/shared';
 import { t } from 'i18next';
 import React, { useMemo, useRef, useState } from 'react';
 
 type ImportFlowDialogContentProps = {
   templateWithIntegrations: FlowTemplateMetadataWithIntegrations | null;
-  templateTrigger: Trigger | undefined;
+  templateTrigger: Trigger | TriggerWithOptionalId | undefined;
   resetDialog: () => void;
   isUseTemplateLoading: boolean;
   onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;

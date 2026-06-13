@@ -1,4 +1,3 @@
-import { Theme } from '@/lib/theme';
 import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
@@ -12,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 import { cn } from '../../lib/cn';
+import { Theme } from '../../lib/theme';
 import { convertToString, isSourceCodeObject } from './code-utils';
 import { MonacoLanguage } from './types';
 

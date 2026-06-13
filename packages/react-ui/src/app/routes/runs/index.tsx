@@ -32,19 +32,14 @@ const toFlowRunSortBy = (sortBy?: string): FlowRunSortBy | undefined => {
 };
 
 const fetchData = async (
-  params: {
-    flowId: string[];
-    triggerSource: FlowRunTriggerSource[];
-    status: FlowRunStatus[];
-    created: string;
-  },
+  filters: Record<string, string[]>,
   pagination: PaginationParams,
 ) => {
-  const status = params.status;
+  const status = filters.status as FlowRunStatus[];
   return flowRunsApi.list({
     status,
-    flowId: params.flowId,
-    triggerSource: params.triggerSource,
+    flowId: filters.flowId as string[],
+    triggerSource: filters.triggerSource as FlowRunTriggerSource[],
     cursor: pagination.cursor,
     limit: pagination.limit ?? 10,
     createdAfter: pagination.createdAfter,

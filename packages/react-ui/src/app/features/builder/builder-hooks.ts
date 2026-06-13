@@ -538,7 +538,7 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         showAiChat: true,
         aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
-        aiChatProperty: action.property,
+        aiChatProperty: action.property as MidpanelState['aiChatProperty'],
       };
       break;
     case 'ADD_CODE_TO_INJECT':

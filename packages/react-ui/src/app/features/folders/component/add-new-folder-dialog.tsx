@@ -102,10 +102,8 @@ const AddNewFolderDialog = ({ updateSearchParams }: Props) => {
 
   const errorMessages = [
     form?.formState?.errors?.root?.serverError?.message,
-    form.getValues().displayName.length
-      ? form?.formState?.errors?.displayName?.message?.pattern
-      : form?.formState?.errors?.displayName?.message?.minLength,
-  ];
+    form?.formState?.errors?.displayName?.message,
+  ].filter((message): message is string => Boolean(message));
 
   return (
     <div className="flex items-center justify-center">

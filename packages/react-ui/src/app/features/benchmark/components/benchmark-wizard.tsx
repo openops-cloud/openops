@@ -18,7 +18,11 @@ import { useNavigate } from 'react-router-dom';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 
-import { CloudProvider, getProviderByValue } from '../cloud-providers';
+import {
+  CloudProvider,
+  CloudProviderValue,
+  getProviderByValue,
+} from '../cloud-providers';
 import { useBenchmarkRun } from '../use-benchmark-run';
 import { useBenchmarkWizardNavigation } from '../use-benchmark-wizard-navigation';
 import { useProviderConnections } from '../use-provider-connections';
@@ -94,8 +98,12 @@ export const BenchmarkWizard = ({
     lastRunId,
   } = useBenchmarkRun(benchmarkCreateResult);
 
-  const connectingProviderConfig = getProviderByValue(connectingProvider);
-  const selectedProviderConfig = getProviderByValue(selectedProvider ?? null);
+  const connectingProviderConfig = getProviderByValue(
+    connectingProvider as CloudProviderValue | null,
+  );
+  const selectedProviderConfig = getProviderByValue(
+    (selectedProvider ?? null) as CloudProviderValue | null,
+  );
   const providerName = selectedProviderConfig?.name ?? '';
 
   const handleConnectionSaved = async () => {

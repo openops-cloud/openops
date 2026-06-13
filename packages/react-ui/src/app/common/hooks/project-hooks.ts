@@ -39,7 +39,7 @@ export const projectHooks = {
           cursor: undefined,
           limit: 100,
         });
-        return results.data;
+        return results.data as Project[];
       },
     });
   },

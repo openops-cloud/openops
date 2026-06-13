@@ -1,7 +1,7 @@
 import Document from '@tiptap/extension-document';
 import HardBreak from '@tiptap/extension-hard-break';
 import History from '@tiptap/extension-history';
-import Mention, { MentionNodeAttrs } from '@tiptap/extension-mention';
+import Mention from '@tiptap/extension-mention';
 import Paragraph from '@tiptap/extension-paragraph';
 import Placeholder from '@tiptap/extension-placeholder';
 import Text from '@tiptap/extension-text';
@@ -17,7 +17,7 @@ import { cn } from '@openops/components/ui';
 import { useBuilderStateContext } from '../../builder-hooks';
 
 import { useEffect } from 'react';
-import { textMentionUtils } from './text-input-utils';
+import { MentionNodeAttrs, textMentionUtils } from './text-input-utils';
 
 type TextInputWithMentionsProps = {
   className?: string;
