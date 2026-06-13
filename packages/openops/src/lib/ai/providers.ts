@@ -18,6 +18,7 @@ import { deepseekProvider } from './providers/deep-seek';
 import { googleProvider } from './providers/google';
 import { googleVertexProvider } from './providers/google-vertex';
 import { groqProvider } from './providers/groq';
+import { minimaxProvider } from './providers/minimax';
 import { mistralProvider } from './providers/mistral';
 import { openAiProvider } from './providers/openai';
 import { openaiCompatibleProvider } from './providers/openai-compatible';
@@ -44,6 +45,7 @@ const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.GOOGLE]: googleProvider,
   [AiProviderEnum.GOOGLE_VERTEX]: googleVertexProvider,
   [AiProviderEnum.GROQ]: groqProvider,
+  [AiProviderEnum.MINIMAX]: minimaxProvider,
   [AiProviderEnum.MISTRAL]: mistralProvider,
   [AiProviderEnum.OPENAI]: openAiProvider,
   [AiProviderEnum.OPENAI_COMPATIBLE]: openaiCompatibleProvider,
