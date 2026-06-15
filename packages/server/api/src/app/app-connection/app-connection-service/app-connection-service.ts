@@ -9,6 +9,7 @@ import {
   AppConnectionValue,
   AppConnectionWithoutSensitiveData,
   ApplicationError,
+  BaseOAuth2ConnectionValue,
   Cursor,
   ErrorCode,
   isNil,
@@ -284,14 +285,27 @@ export const appConnectionService = {
 
   async validateConnections(connection: AppConnectionSchema): Promise<void> {
     const decryptedConnection = decryptConnection(connection);
+    const connectionValue = decryptedConnection.value;
 
     const isOAuthConnection = [
       AppConnectionType.PLATFORM_OAUTH2,
       AppConnectionType.CLOUD_OAUTH2,
       AppConnectionType.OAUTH2,
-    ].includes(decryptedConnection.value.type);
+    ].includes(connectionValue.type);
 
     if (isOAuthConnection) {
+      if (shouldSkipValidation(connectionValue as BaseOAuth2ConnectionValue)) {
+        logger.info(
+          'Skipping connection validation because the OAuth connection does not have a refresh token',
+          {
+            connectionName: connection.name,
+            projectId: connection.projectId,
+            connectionId: connection.id,
+          },
+        );
+        return;
+      }
+
       const refreshedConnection = await lockAndRefreshConnection({
         projectId: decryptedConnection.projectId,
         name: decryptedConnection.name,
@@ -315,6 +329,17 @@ export const appConnectionService = {
       projectId: decryptedConnection.projectId,
     });
   },
+};
+
+const shouldSkipValidation = (
+  connection: BaseOAuth2ConnectionValue,
+): boolean => {
+  const grantType = connection.grant_type ?? OAuth2GrantType.AUTHORIZATION_CODE;
+
+  return (
+    grantType === OAuth2GrantType.AUTHORIZATION_CODE &&
+    !connection.refresh_token
+  );
 };
 
 const validateConnectionValue = async (
