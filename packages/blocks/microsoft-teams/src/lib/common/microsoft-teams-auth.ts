@@ -31,7 +31,7 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
       displayName: 'Tenant ID',
       description:
         'Leave as "common" to allow any Microsoft work or school account to connect. Enter a tenant ID to restrict connections to a specific organization.',
-      required: false,
+      required: true,
       defaultValue: 'common',
     }),
   },
