@@ -294,7 +294,8 @@ export const appConnectionService = {
     ].includes(connectionValue.type);
 
     if (isOAuthConnection) {
-      if (shouldSkipValidation(connectionValue as BaseOAuth2ConnectionValue)) {
+      const oauth2Connection = connectionValue as BaseOAuth2ConnectionValue;
+      if (oauth2Util.shouldSkipValidation(oauth2Connection)) {
         logger.info(
           'Skipping connection validation because the OAuth connection does not have a refresh token',
           {
@@ -329,17 +330,6 @@ export const appConnectionService = {
       projectId: decryptedConnection.projectId,
     });
   },
-};
-
-const shouldSkipValidation = (
-  connection: BaseOAuth2ConnectionValue,
-): boolean => {
-  const grantType = connection.grant_type ?? OAuth2GrantType.AUTHORIZATION_CODE;
-
-  return (
-    grantType === OAuth2GrantType.AUTHORIZATION_CODE &&
-    !connection.refresh_token
-  );
 };
 
 const validateConnectionValue = async (
