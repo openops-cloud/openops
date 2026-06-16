@@ -8,7 +8,13 @@ import {
   GetProvidersResponse,
 } from '@openops/shared';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { AISDKError, generateText, LanguageModel } from 'ai';
+import {
+  AISDKError,
+  extractReasoningMiddleware,
+  generateText,
+  LanguageModel,
+  wrapLanguageModel,
+} from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -83,12 +89,27 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   const aiProvider = getAiProvider(aiConfig.provider);
   const sanitizedSettings = sanitizeProviderSettings(aiConfig.providerSettings);
 
-  return aiProvider.createLanguageModel({
+  const baseModel = await aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
     providerSettings: {
       ...sanitizedSettings,
     },
+  });
+
+  // Reasoning models (e.g. MiniMax-M2.7, DeepSeek R1, QwQ) emit a
+  // `<think>...</think>` block before the actual response. This breaks
+  // `generateObject` calls because the JSON parser sees the leading reasoning
+  // text instead of valid JSON, and providers that ignore `response_format`
+  // (such as MiniMax's OpenAI-compatible endpoint) cannot suppress it.
+  //
+  // Wrap every model with `extractReasoningMiddleware` so the reasoning is
+  // moved to the dedicated `reasoning` channel and only the answer remains in
+  // the `text` channel. This is a no-op for models that do not emit `<think>`
+  // tags, so it is safe to apply unconditionally.
+  return wrapLanguageModel({
+    model: baseModel,
+    middleware: extractReasoningMiddleware({ tagName: 'think' }),
   });
 };
 
