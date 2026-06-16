@@ -1,14 +1,16 @@
-import { MentionNodeAttrs } from '@tiptap/extension-mention';
-import { DOMOutputSpec } from '@tiptap/pm/model';
 import { JSONContent } from '@tiptap/react';
 
 import { StepMetadata } from '@openops/components/ui';
 import {
   Action,
   Trigger,
+  TriggerWithOptionalId,
   assertNotNullOrUndefined,
   isNil,
 } from '@openops/shared';
+import { DOMOutputSpec } from '@tiptap/pm/model';
+
+type FlowStep = Action | Trigger | TriggerWithOptionalId;
 
 const removeIntroplationBrackets = (text: string) => {
   return text.slice(2, text.length - 2);
@@ -31,7 +33,9 @@ const keysWithinPath = (path: string) => {
     .map((key) => removeQuotes(key));
 };
 
-type MentionNodeAttrs = {
+export type MentionNodeAttrs = {
+  id?: string;
+  label?: string;
   logoUrl?: string;
   displayText: string;
   serverValue: string;
@@ -92,7 +96,7 @@ function parseMentionNodeFromText(request: ParseMentionNodeFromText) {
 type StepMetadataWithDisplayName = StepMetadata & { stepDisplayName: string };
 const getStepMetadataFromPath = (
   path: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) => {
   const stepPath = removeIntroplationBrackets(path);
@@ -106,7 +110,7 @@ const getStepMetadataFromPath = (
 
 function convertTextToTipTapJsonContent(
   userInputText: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ): {
   type: TipTapNodeTypes.paragraph;
@@ -150,7 +154,7 @@ function convertTextToTipTapJsonContent(
 
 function createMentionNodeFromText(
   mention: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) {
   const { stepMetadata, dfsIndex } = getStepMetadataFromPath(
@@ -222,9 +226,14 @@ const generateMentionHtmlElement = (
       { src: apMentionNodeAttrs.logoUrl, class: 'object-fit w-4 h-4' },
     ]);
   }
-  children.push(apMentionNodeAttrs.displayText);
 
-  return ['span', attrs, ...children];
+  // Text nodes are valid DOMOutputSpec children; newer @tiptap/pm types omit `string`.
+  return [
+    'span',
+    attrs,
+    ...children,
+    apMentionNodeAttrs.displayText,
+  ] as DOMOutputSpec;
 };
 
 const inputThatUsesMentionClass = 'ap-text-with-mentions';

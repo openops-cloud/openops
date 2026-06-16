@@ -86,7 +86,7 @@ const SelectFlowTemplateDialog = ({
     }
   }, [preselectedTab]);
 
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const useCloudTemplates = !!flagsHooks.useShouldFetchCloudTemplates();
 
   const [debouncedSearchText] = useDebounceValue(
     searchText,

@@ -215,6 +215,7 @@ const TestTriggerSection = React.memo(
       stepTestOutputCache.setStepData(formValues.id, {
         output: formatUtils.formatStepInputOrOutput(data.payload),
         lastTestDate: dayjs().toISOString(),
+        success: null,
       });
       setStepOutputCache({
         stepId: formValues.id,
@@ -222,6 +223,7 @@ const TestTriggerSection = React.memo(
         output: data.payload,
         input: data.input,
         queryClient,
+        success: true,
       });
     }
 

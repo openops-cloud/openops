@@ -20,6 +20,7 @@ export type AuthenticationResponse = {
   projectRole: string;
   organizationId: string | null;
   organizationRole: OrganizationRole;
+  verified?: boolean;
 };
 
 export const createAuthResponse = (
