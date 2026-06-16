@@ -9380,7 +9380,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm package may be included in this product:
 
- - vite@8.0.8
+ - vite@8.0.16
 
 This package contains the following license:
 
@@ -10603,7 +10603,7 @@ Repository: https://github.com/lydell/js-tokens
 ## launch-editor, launch-editor-middleware
 License: MIT
 By: Evan You
-Repositories: https://github.com/yyx990803/launch-editor, https://github.com/yyx990803/launch-editor
+Repositories: https://github.com/vitejs/launch-editor, https://github.com/vitejs/launch-editor
 
 > The MIT License (MIT)
 > 
@@ -10935,7 +10935,7 @@ Repository: https://github.com/jshttp/on-finished
 
 ## parse5
 License: MIT
-By: Ivan Nikulin, https://github.com/inikulin/parse5/graphs/contributors
+By: Ivan Nikulin, James Garbutt, Felix Boehm, Titus
 Repository: https://github.com/inikulin/parse5
 
 > Copyright (c) 2013-2019 Ivan Nikulin (ifaaan@gmail.com, https://github.com/inikulin)
@@ -24177,8 +24177,8 @@ The following npm packages may be included in this product:
  - @radix-ui/react-visually-hidden@1.1.0
  - @radix-ui/rect@1.1.0
  - @radix-ui/rect@1.1.1
- - @rolldown/binding-linux-x64-gnu@1.0.0-rc.15
- - @rolldown/binding-linux-x64-musl@1.0.0-rc.15
+ - @rolldown/binding-linux-x64-gnu@1.0.3
+ - @rolldown/binding-linux-x64-musl@1.0.3
  - @rollup/rollup-linux-x64-gnu@4.59.0
  - @rollup/rollup-linux-x64-musl@4.59.0
  - @tiptap/core@2.27.2
@@ -29990,7 +29990,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - tinyglobby@0.2.16
+ - tinyglobby@0.2.17
 
 This package contains the following license:
 
@@ -30112,12 +30112,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - @rolldown/pluginutils@1.0.0-rc.15
- - rolldown@1.0.0-rc.15
+ - rolldown@1.0.3
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -30149,7 +30148,7 @@ The licenses of externally maintained libraries from which parts of the Software
 
 The following npm package may be included in this product:
 
- - @oxc-project/types@0.124.0
+ - @oxc-project/types@0.133.0
 
 This package contains the following license:
 
@@ -30404,6 +30403,36 @@ This package contains the following license:
 MIT License
 
 Copyright (c) 2026 Natural Intelligence
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - @rolldown/pluginutils@1.0.1
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2026-present, rolldown/plugins repository contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
