@@ -54,7 +54,10 @@ const EditBranchName = ({
           })}
           value={name}
           onValueChange={(value) => {
-            form.setValue(formInputName, value);
+            (form.setValue as (name: string, value: string) => void)(
+              formInputName,
+              value,
+            );
           }}
           readonly={readonly}
           containerRef={containerRef}

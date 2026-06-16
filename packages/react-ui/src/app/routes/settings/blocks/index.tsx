@@ -110,7 +110,7 @@ const fetchData = async () => {
 };
 
 const ProjectBlocksPage = () => {
-  const [refresh, setRefresh] = useState(0);
+  const [refresh, setRefresh] = useState(false);
 
   const { data: installBlocksEnabled } = flagsHooks.useFlag<boolean>(
     FlagId.INSTALL_PROJECT_BLOCKS_ENABLED,
@@ -124,7 +124,7 @@ const ProjectBlocksPage = () => {
           <div className="ml-auto">
             {installBlocksEnabled && (
               <InstallBlockDialog
-                onInstallBlock={() => setRefresh(refresh + 1)}
+                onInstallBlock={() => setRefresh((prev) => !prev)}
                 scope={BlockScope.PROJECT}
               />
             )}

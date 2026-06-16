@@ -34,4 +34,19 @@ export const authenticationApi = {
       },
     );
   },
+  resetPassword(request: { otp: string; userId: string; newPassword: string }) {
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
+  },
+  sendOtpEmail(request: { email: string; type: string }) {
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
+  },
+  verifyEmail(request: { otp: string; userId: string }) {
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
+  },
 };

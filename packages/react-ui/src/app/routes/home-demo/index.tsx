@@ -25,6 +25,7 @@ const HomeDemoPage = () => {
     isLoadingFlows,
     existingFlowsResponse,
     refetchFlows,
+    refetchRuns,
   } = useDashboardData();
 
   const { overviewResponse, isOverviewLoading } = useAnalyticsOverview();
@@ -80,11 +81,13 @@ const HomeDemoPage = () => {
             flowsExist={flowsExist}
             loading={isLoadingFlows}
             refetch={refetchFlows}
+            onExploreTemplatesClick={() => navigate('/templates')}
           />
 
           <HomeRunsTable
             data={runsResponse?.data || []}
             loading={runsLoading}
+            refetch={refetchRuns}
           />
         </div>
       </div>

@@ -110,7 +110,7 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
                 email: cloudUser.email,
               }
             : undefined,
-        isCloudLoginEnabled: useCloudTemplates && shouldShowCloudUserInMenu,
+        isCloudLoginEnabled: !!useCloudTemplates && shouldShowCloudUserInMenu,
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}

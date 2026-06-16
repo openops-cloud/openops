@@ -15,6 +15,7 @@ import {
   SuggestionType,
   Trigger,
   TriggerType,
+  TriggerWithOptionalId,
 } from '@openops/shared';
 
 import {
@@ -31,7 +32,8 @@ type UseBlockProps = {
   version?: string;
   enabled?: boolean;
 };
-type Step = Action | Trigger;
+
+type Step = Action | Trigger | TriggerWithOptionalId;
 
 type UseStepsMetadata = Step[];
 
@@ -40,7 +42,7 @@ type UseMultipleBlocksProps = {
 };
 
 type UseBlockMetadata = {
-  step: Action | Trigger | undefined;
+  step: Step | undefined;
   enabled?: boolean;
 };
 
@@ -84,7 +86,7 @@ export const blocksHooks = {
     const blockVersion = step?.settings?.blockVersion;
     const query = useQuery<StepMetadata, Error>({
       queryKey: [QueryKeys.block, step?.type, blockName, blockVersion],
-      queryFn: () => blocksApi.getMetadata(step!),
+      queryFn: () => blocksApi.getMetadata(step! as Action | Trigger),
       staleTime: Infinity,
       enabled: enabled && !isNil(step),
     });
@@ -220,7 +222,7 @@ function stepMetadataQueryBuilder(step: Step) {
   const blockVersion = isBlockStep ? step.settings.blockVersion : undefined;
   return {
     queryKey: [QueryKeys.block, step.type, blockName, blockVersion],
-    queryFn: () => blocksApi.getMetadata(step),
+    queryFn: () => blocksApi.getMetadata(step as Action | Trigger),
     staleTime: Infinity,
   };
 }
