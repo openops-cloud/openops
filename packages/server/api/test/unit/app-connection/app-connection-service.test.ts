@@ -12,6 +12,13 @@ const mockExceptionHandler = {
   handle: jest.fn(),
 };
 
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+};
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   encryptUtils: {
@@ -20,6 +27,7 @@ jest.mock('@openops/server-shared', () => ({
   },
   distributedLock: mockDistributedLock,
   exceptionHandler: mockExceptionHandler,
+  logger: mockLogger,
 }));
 
 jest.mock(
@@ -34,6 +42,7 @@ const mockOAuth2Util = {
   isExpired: jest.fn().mockReturnValue(false),
   isUserError: jest.fn().mockReturnValue(false),
   getOAuth2TokenUrl: jest.fn().mockResolvedValue('https://token.url'),
+  shouldSkipValidation: jest.fn().mockReturnValue(false),
 };
 
 jest.mock(
@@ -110,6 +119,7 @@ import {
   ApplicationError,
   BlockType,
   ErrorCode,
+  OAuth2GrantType,
   PackageType,
   PatchAppConnectionRequestBody,
   SortDirection,
@@ -121,7 +131,10 @@ import {
   removeSensitiveData,
   restoreRedactedSecrets,
 } from '../../../src/app/app-connection/app-connection-utils';
-import { AppConnectionEntity } from '../../../src/app/app-connection/app-connection.entity';
+import {
+  AppConnectionEntity,
+  AppConnectionSchema,
+} from '../../../src/app/app-connection/app-connection.entity';
 import { buildPaginator } from '../../../src/app/helper/pagination/build-paginator';
 
 describe('appConnectionService', () => {
@@ -713,6 +726,162 @@ describe('appConnectionService', () => {
 
       expect(removeSensitiveData).toHaveBeenCalled();
       expect(result[0]).not.toHaveProperty('value');
+    });
+  });
+
+  describe('validateConnections', () => {
+    const baseConnection = {
+      id: 'conn-1',
+      name: connectionName,
+      projectId,
+      authProviderKey,
+      status: AppConnectionStatus.ACTIVE,
+    };
+
+    it('should skip validation for OAuth2 connection with authorization_code grant and no refresh token', async () => {
+      mockOAuth2Util.shouldSkipValidation.mockReturnValue(true);
+
+      const connectionValue = {
+        type: AppConnectionType.OAUTH2,
+        access_token: 'access',
+        grant_type: OAuth2GrantType.AUTHORIZATION_CODE,
+      };
+
+      const connection = {
+        ...baseConnection,
+        value: `encrypted-${JSON.stringify(connectionValue)}`,
+      };
+
+      await appConnectionService.validateConnections(
+        connection as unknown as AppConnectionSchema,
+      );
+
+      expect(mockOAuth2Util.shouldSkipValidation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: AppConnectionType.OAUTH2,
+          grant_type: OAuth2GrantType.AUTHORIZATION_CODE,
+        }),
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Skipping connection validation because the OAuth connection does not have a refresh token',
+        expect.objectContaining({
+          connectionName: connection.name,
+          projectId: connection.projectId,
+          connectionId: connection.id,
+        }),
+      );
+      expect(mockDistributedLock.acquireLock).not.toHaveBeenCalled();
+    });
+
+    it('should skip validation for CLOUD_OAUTH2 connection with no refresh token and no explicit grant_type', async () => {
+      mockOAuth2Util.shouldSkipValidation.mockReturnValue(true);
+
+      const connectionValue = {
+        type: AppConnectionType.CLOUD_OAUTH2,
+        access_token: 'access',
+      };
+
+      const connection = {
+        ...baseConnection,
+        value: `encrypted-${JSON.stringify(connectionValue)}`,
+      };
+
+      await appConnectionService.validateConnections(
+        connection as unknown as AppConnectionSchema,
+      );
+
+      expect(mockOAuth2Util.shouldSkipValidation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: AppConnectionType.CLOUD_OAUTH2,
+        }),
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Skipping connection validation because the OAuth connection does not have a refresh token',
+        expect.objectContaining({
+          connectionId: connection.id,
+        }),
+      );
+      expect(mockDistributedLock.acquireLock).not.toHaveBeenCalled();
+    });
+
+    it('should skip validation for PLATFORM_OAUTH2 connection with empty refresh token', async () => {
+      mockOAuth2Util.shouldSkipValidation.mockReturnValue(true);
+
+      const connectionValue = {
+        type: AppConnectionType.PLATFORM_OAUTH2,
+        access_token: 'access',
+        grant_type: OAuth2GrantType.AUTHORIZATION_CODE,
+        refresh_token: '',
+      };
+
+      const connection = {
+        ...baseConnection,
+        value: `encrypted-${JSON.stringify(connectionValue)}`,
+      };
+
+      await appConnectionService.validateConnections(
+        connection as unknown as AppConnectionSchema,
+      );
+
+      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockDistributedLock.acquireLock).not.toHaveBeenCalled();
+    });
+
+    it('should NOT skip validation for OAuth2 connection with a refresh token', async () => {
+      mockOAuth2Util.shouldSkipValidation.mockReturnValue(false);
+      mockDistributedLock.acquireLock.mockResolvedValue({
+        release: jest.fn(),
+      });
+      findOneByMock.mockResolvedValue(null);
+
+      const connectionValue = {
+        type: AppConnectionType.OAUTH2,
+        access_token: 'access',
+        grant_type: OAuth2GrantType.AUTHORIZATION_CODE,
+        refresh_token: 'valid-refresh-token',
+      };
+
+      const connection = {
+        ...baseConnection,
+        value: `encrypted-${JSON.stringify(connectionValue)}`,
+      };
+
+      await expect(
+        appConnectionService.validateConnections(
+          connection as unknown as AppConnectionSchema,
+        ),
+      ).rejects.toThrow('Failed to refresh connection');
+
+      expect(mockOAuth2Util.shouldSkipValidation).toHaveBeenCalled();
+      expect(mockDistributedLock.acquireLock).toHaveBeenCalled();
+    });
+
+    it('should NOT skip validation for OAuth2 connection with client_credentials grant type', async () => {
+      mockOAuth2Util.shouldSkipValidation.mockReturnValue(false);
+      mockDistributedLock.acquireLock.mockResolvedValue({
+        release: jest.fn(),
+      });
+      findOneByMock.mockResolvedValue(null);
+
+      const connectionValue = {
+        type: AppConnectionType.OAUTH2,
+        access_token: 'access',
+        grant_type: OAuth2GrantType.CLIENT_CREDENTIALS,
+      };
+
+      const connection = {
+        ...baseConnection,
+        value: `encrypted-${JSON.stringify(connectionValue)}`,
+      };
+
+      await expect(
+        appConnectionService.validateConnections(
+          connection as unknown as AppConnectionSchema,
+        ),
+      ).rejects.toThrow('Failed to refresh connection');
+
+      expect(mockOAuth2Util.shouldSkipValidation).toHaveBeenCalled();
+      expect(mockDistributedLock.acquireLock).toHaveBeenCalled();
     });
   });
 });

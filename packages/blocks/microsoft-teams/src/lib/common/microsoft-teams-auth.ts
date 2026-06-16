@@ -1,4 +1,8 @@
-import { BlockAuth, BlockPropValueSchema } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  BlockPropValueSchema,
+  Property,
+} from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from '@openops/common';
 import { OAuth2GrantType } from '@openops/shared';
 
@@ -22,8 +26,17 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
     'Team.ReadBasic.All',
     'offline_access',
   ],
-  authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-  tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+  props: {
+    tenantId: Property.ShortText({
+      displayName: 'Tenant ID',
+      description:
+        'Leave as "common" to allow any Microsoft work or school account to connect. Enter a tenant ID to restrict connections to a specific organization.',
+      required: true,
+      defaultValue: 'common',
+    }),
+  },
+  authUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize',
+  tokenUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token',
   grantType: OAuth2GrantType.AUTHORIZATION_CODE,
   validate: async ({ auth }) => {
     try {
