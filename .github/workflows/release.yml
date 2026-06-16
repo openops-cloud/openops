@@ -53,9 +53,9 @@ jobs:
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to private ECR
         id: login-private-ecr
-        uses: aws-actions/amazon-ecr-login@v2.1.5
+        uses: aws-actions/amazon-ecr-login@v2.1.6
       - name: Login to public ECR
-        uses: aws-actions/amazon-ecr-login@v2.1.5
+        uses: aws-actions/amazon-ecr-login@v2.1.6
         env:
           AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
