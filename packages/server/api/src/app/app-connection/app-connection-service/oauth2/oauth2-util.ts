@@ -14,6 +14,7 @@ import { getAuthProviderMetadata } from '../../connection-providers-resolver';
 
 export const oauth2Util = {
   formatOAuth2Response,
+  shouldSkipValidation,
   isExpired,
   isUserError,
   getOAuth2TokenUrl,
@@ -42,15 +43,21 @@ function removeRefreshTokenAndClientSecret(
   return connection;
 }
 
-function isExpired(connection: BaseOAuth2ConnectionValue): boolean {
-  const secondsSinceEpoch = Math.round(Date.now() / 1000);
+function shouldSkipValidation(connection: BaseOAuth2ConnectionValue): boolean {
   const grantType = connection.grant_type ?? OAuth2GrantType.AUTHORIZATION_CODE;
-  if (
+
+  return (
     grantType === OAuth2GrantType.AUTHORIZATION_CODE &&
     !connection.refresh_token
-  ) {
+  );
+}
+
+function isExpired(connection: BaseOAuth2ConnectionValue): boolean {
+  const secondsSinceEpoch = Math.round(Date.now() / 1000);
+  if (shouldSkipValidation(connection)) {
     return false;
   }
+
   // Salesforce doesn't provide an 'expires_in' field, as it is dynamic per organization; therefore, it's necessary for us to establish a low threshold and consistently refresh it.
   const expiresIn = connection.expires_in ?? 60 * 60;
   const refreshThreshold = 15 * 60; // Refresh if there is less than 15 minutes to expire
