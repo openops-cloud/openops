@@ -63,7 +63,7 @@
     "@aws-sdk/client-ssm": "3.995.0",
     "@aws-sdk/client-sts": "3.995.0",
     "@aws-sdk/util-arn-parser": "3.972.2",
-    "@babel/core": "7.29.0",
+    "@babel/core": "7.29.6",
     "@babel/preset-react": "7.28.5",
     "@babel/runtime": "7.29.2",
     "@bull-board/api": "5.9.1",
