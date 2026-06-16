@@ -99,7 +99,7 @@
     "@monaco-editor/react": "4.7.0",
     "@nx/devkit": "22.6.5",
     "@opentelemetry/api-logs": "0.203.0",
-    "@opentelemetry/core": "2.2.0",
+    "@opentelemetry/core": "2.8.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.207.0",
     "@opentelemetry/instrumentation": "0.203.0",
     "@opentelemetry/sdk-trace-node": "2.2.0",
