@@ -237,7 +237,7 @@ The Fastify error handler in `packages/server/api/src/app/helper/error-handler.t
 - Always write tests for new functionality and changes
 - Update documentation for user-facing changes
 - Do not introduce new dependencies without discussion
-- Data access uses the TypeORM repository pattern (`repoFactory`) — no raw queries
+- Prefer the TypeORM repository pattern (`repoFactory`) for data access; avoid raw SQL except in migrations or when there’s a clear performance need.
 - Every new API route needs an explicit RBAC policy via `getProjectScopedRoutePolicy()`
 - Use the shared pagination helper for cursor-based pagination — do not implement ad-hoc pagination
 - Workflow state is managed by `flow-run-service` via an in-flight cache backed by the database
