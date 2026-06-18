@@ -3,120 +3,114 @@ applyTo: '**'
 excludeAgent: 'coding-agent'
 ---
 
-Review every pull request from the five perspectives below.
+Review every pull request for correctness, security, performance, test coverage, maintainability, and user impact.
 
-General rules:
+## General review rules
 
-- Only comment on issues relevant to the current diff.
-- Do not manufacture findings just to cover every perspective.
-- Avoid repeating the same feedback across sections.
-- Prefer actionable comments with specific examples.
-- Distinguish between **required fixes** and **optional improvements**.
-- Avoid nitpicks unless they affect readability, correctness, security, or maintainability.
+- Only comment on issues introduced or affected by the current diff.
+- Do not manufacture findings to satisfy a checklist.
 - Prefer fewer, higher-signal comments over many low-value comments.
+- Avoid repeating the same feedback in multiple comments.
+- Prefer actionable comments with concrete examples.
+- Clearly distinguish **required fixes** from **optional improvements**.
+- Avoid nitpicks unless they affect readability, correctness, security, or maintainability.
+- Do not comment on unchanged code unless the current diff makes the existing code problematic.
+
+## Review focus areas
+
+### Correctness and maintainability
+
+Look for broken logic, fragile assumptions, edge cases, duplicated logic, unnecessary complexity, unclear naming, overly long functions, misleading comments, and non-idiomatic TypeScript/JavaScript patterns.
+
+### Security
+
+Look for unsafe input handling, injection risks, XSS vectors, hardcoded or logged secrets, missing authorization checks, user-controlled data reaching sensitive operations, insecure defaults, overly permissive CORS/CSP, and unsafe dependency usage.
+
+### Performance and reliability
+
+Look for meaningful performance or reliability concerns, such as N+1 queries, unnecessary database or API calls in loops, avoidable large in-memory processing, blocking operations in async contexts, and scalability risks.
+
+Do not suggest premature optimizations when the benefit is unclear.
+
+### Testing
+
+Look for missing tests around non-trivial logic, error paths, boundary conditions, permission checks, regressions, and product-critical behavior.
+
+Flag weak tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful behavior assertions.
+
+Prefer concrete missing test scenarios over vague requests for “more tests.”
+
+### Product and user impact
+
+Look for behavior changes that could break existing workflows, integrations, API contracts, stored data, configuration, or backwards compatibility.
+
+Flag unclear user-facing errors and changes that should be documented, communicated, or placed behind a feature flag.
 
 ---
 
-## 1. Experienced Software Developer
+## Pull request overview
 
-Review code readability, maintainability, naming, structure, and simplicity.
-
-- Identify duplicated logic, unnecessary complexity, and places where abstractions could be improved.
-- Suggest idiomatic TypeScript/JavaScript patterns where applicable.
-- Point out edge cases and assumptions that may make the code fragile.
-- Flag unclear variable or function names, overly long functions, and missing or misleading comments.
-
-## 2. Security Reviewer
-
-Look for security risks in the diff.
-
-- Unsafe input handling, injection risks such as SQL injection, shell injection, `eval`, and XSS vectors.
-- Secrets, tokens, credentials, or sensitive data hardcoded or logged.
-- Missing or insufficient authorization checks on new or changed API routes.
-- User-controlled data reaching sensitive operations.
-- Insecure defaults, overly permissive CORS/CSP, or unsafe dependency usage.
-- Suggest safer alternatives with concrete examples.
-
-## 3. Performance Reviewer
-
-Identify performance and reliability concerns only when meaningful, not as premature optimization.
-
-- Inefficient loops, unnecessary database or API calls within loops, and N+1 query patterns.
-- Avoidable memory allocations or large in-memory data processing.
-- Blocking operations in async contexts.
-- Scalability concerns for data or traffic growth.
-- Suggest improvements only when the gain is clear and the change is practical.
-
-## 4. Testing Reviewer
-
-Assess whether the change has sufficient test coverage.
-
-- Flag missing unit, integration, or edge-case tests for non-trivial logic.
-- Highlight untested error paths, boundary conditions, permission checks, and regression risks.
-- Flag tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful assertions.
-- Prefer concrete missing test scenarios, such as “no test covers the case where X is null,” over vague suggestions.
-
-## 5. Product / User Impact Reviewer
-
-Consider how the change affects users and existing behavior.
-
-- Behavior changes that could break existing workflows or integrations.
-- Backwards compatibility risks with stored data, API contracts, or configuration.
-- Error messages that are unclear or unhelpful to end users.
-- Changes that should be documented, communicated, or placed behind a feature flag.
-
----
-
-## Review Summary
-
-Add the review summary as a section in the pull request-level Copilot overview comment, not as an inline file comment.
-
-The summary must be placed under a heading named:
+When creating the pull request-level Copilot overview comment, include these sections:
 
 ```md
 ## Review Summary
-```
 
-The summary must include:
+### Blocking
 
-### Issues found
+- List required fixes that must be addressed before merge.
+- Use `None` if there are no blocking issues.
 
-Group all issues by severity:
+### Non-blocking
 
-- **Blocking** — must be fixed before merge, such as security issues, broken logic, missing authorization, or data loss risks.
-- **Non-blocking** — recommended improvements, such as readability issues, test gaps, or minor maintainability problems.
-
-If there are no issues in a severity group, explicitly write `None`.
+- List recommended improvements.
+- Use `None` if there are no non-blocking issues.
 
 ### Merge recommendation
 
-End the summary with exactly one of these recommendations:
+Use exactly one:
 
 - **Ready to merge**
 - **Merge after addressing non-blocking comments**
 - **Do not merge**
+```
 
 Use **Do not merge** only when blocking issues are present.
+
+The review summary belongs in the pull request-level overview comment, not in an inline file comment.
 
 ---
 
 ## Re-reviews
 
-If this is a re-review of a pull request that already has a Copilot pull request overview comment, do not create a duplicate summary comment and do not add the summary as an inline file comment.
+If this is a re-review, include a re-review update in the pull request-level overview when possible.
 
-Instead, update the existing pull request-level Copilot overview comment by adding an **Update** section above the previous review summary.
-
-The update section must be placed under a heading named:
+Use this format:
 
 ```md
-## Update
+## Re-review Update
+
+### Resolved
+
+- List previously reported issues that are now resolved.
+- Use `None` if no previous issues were resolved.
+
+### Still unresolved
+
+- List previously reported issues that still need attention.
+- Use `None` if no previous issues remain unresolved.
+
+### New issues
+
+- List any new issues found in this re-review.
+- Use `None` if no new issues were found.
+
+### Updated merge recommendation
+
+Use exactly one:
+
+- **Ready to merge**
+- **Merge after addressing non-blocking comments**
+- **Do not merge**
 ```
 
-The **Update** section should briefly state:
-
-- Which previously reported issues have been resolved.
-- Which issues remain unresolved.
-- Any new issues found during the re-review.
-- Whether the merge recommendation has changed.
-
-Keep the previous **Review Summary** section below the **Update** section unless it is no longer accurate. If the existing pull request overview comment cannot be edited, add one new pull request-level comment that clearly says it is a re-review update.
+Do not create duplicate summary content if the existing pull request overview can be updated. If the previous overview cannot be edited, add the re-review update to the new pull request-level overview comment.
