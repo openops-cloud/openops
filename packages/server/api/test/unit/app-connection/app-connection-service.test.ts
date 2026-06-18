@@ -503,6 +503,80 @@ describe('appConnectionService', () => {
     });
   });
 
+  describe('getMetadataOrThrow', () => {
+    it('should return id, projectId, and authProviderKey when connection exists', async () => {
+      findOneByMock.mockResolvedValue({
+        id: 'conn-1',
+        projectId,
+        authProviderKey,
+        value: 'encrypted-secret',
+      });
+
+      const result = await appConnectionService.getMetadataOrThrow({
+        projectId,
+        id: 'conn-1',
+      });
+
+      expect(findOneByMock).toHaveBeenCalledWith({
+        id: 'conn-1',
+        projectId,
+      });
+      expect(result).toEqual({
+        id: 'conn-1',
+        projectId,
+        authProviderKey,
+      });
+    });
+
+    it('should throw ENTITY_NOT_FOUND when connection does not exist', async () => {
+      findOneByMock.mockResolvedValue(null);
+
+      await expect(
+        appConnectionService.getMetadataOrThrow({
+          projectId,
+          id: 'non-existent',
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ErrorCode.ENTITY_NOT_FOUND,
+          }),
+        }),
+      );
+    });
+
+    it('should succeed even when the connection value cannot be decrypted', async () => {
+      const originalImpl = (
+        encryptUtils.decryptObject as jest.Mock
+      ).getMockImplementation();
+      (encryptUtils.decryptObject as jest.Mock).mockImplementation(() => {
+        throw new Error('decryption failed');
+      });
+
+      findOneByMock.mockResolvedValue({
+        id: 'conn-corrupt',
+        projectId,
+        authProviderKey,
+        value: 'corrupted-data',
+      });
+
+      const result = await appConnectionService.getMetadataOrThrow({
+        projectId,
+        id: 'conn-corrupt',
+      });
+
+      expect(result).toEqual({
+        id: 'conn-corrupt',
+        projectId,
+        authProviderKey,
+      });
+
+      (encryptUtils.decryptObject as jest.Mock).mockImplementation(
+        originalImpl,
+      );
+    });
+  });
+
   describe('list', () => {
     beforeEach(() => {
       whereMock.mockClear();
