@@ -3,13 +3,17 @@ applyTo: '**'
 excludeAgent: 'coding-agent'
 ---
 
-Review every pull request from the five perspectives below. For each perspective:
+Review every pull request from the five perspectives below.
 
-- Only comment on issues relevant to the current diff
-- Avoid repeating the same feedback across sections
-- Prefer actionable comments with specific examples
-- Distinguish between **required fixes** and **optional improvements**
-- Avoid nitpicks unless they affect readability, correctness, security, or maintainability
+General rules:
+
+- Only comment on issues relevant to the current diff.
+- Do not manufacture findings just to cover every perspective.
+- Avoid repeating the same feedback across sections.
+- Prefer actionable comments with specific examples.
+- Distinguish between **required fixes** and **optional improvements**.
+- Avoid nitpicks unless they affect readability, correctness, security, or maintainability.
+- Prefer fewer, higher-signal comments over many low-value comments.
 
 ---
 
@@ -17,60 +21,90 @@ Review every pull request from the five perspectives below. For each perspective
 
 Review code readability, maintainability, naming, structure, and simplicity.
 
-- Identify duplicated logic, unnecessary complexity, and places where abstractions could be improved
-- Suggest idiomatic TypeScript/JavaScript patterns where applicable
-- Point out edge cases and assumptions that may make the code fragile
-- Flag unclear variable or function names, overly long functions, and missing or misleading comments
+- Identify duplicated logic, unnecessary complexity, and places where abstractions could be improved.
+- Suggest idiomatic TypeScript/JavaScript patterns where applicable.
+- Point out edge cases and assumptions that may make the code fragile.
+- Flag unclear variable or function names, overly long functions, and missing or misleading comments.
 
 ## 2. Security Reviewer
 
 Look for security risks in the diff.
 
-- Unsafe input handling, injection risks (SQL, shell, eval), and XSS vectors
-- Secrets, tokens, or credentials hardcoded or logged
-- Missing or insufficient authorization checks on new API routes
-- User-controlled data reaching sensitive operations
-- Insecure defaults, overly permissive CORS/CSP, or unsafe dependency usage
-- Suggest safer alternatives with concrete examples
+- Unsafe input handling, injection risks such as SQL injection, shell injection, `eval`, and XSS vectors.
+- Secrets, tokens, credentials, or sensitive data hardcoded or logged.
+- Missing or insufficient authorization checks on new or changed API routes.
+- User-controlled data reaching sensitive operations.
+- Insecure defaults, overly permissive CORS/CSP, or unsafe dependency usage.
+- Suggest safer alternatives with concrete examples.
 
 ## 3. Performance Reviewer
 
-Identify performance and reliability concerns — only when meaningful, not as premature optimization.
+Identify performance and reliability concerns only when meaningful, not as premature optimization.
 
-- Inefficient loops, unnecessary database or API calls within loops, and N+1 query patterns
-- Avoidable memory allocations or large in-memory data processing
-- Blocking operations in async contexts
-- Scalability concerns for data or traffic growth
-- Suggest improvements only when the gain is clear and the change is practical
+- Inefficient loops, unnecessary database or API calls within loops, and N+1 query patterns.
+- Avoidable memory allocations or large in-memory data processing.
+- Blocking operations in async contexts.
+- Scalability concerns for data or traffic growth.
+- Suggest improvements only when the gain is clear and the change is practical.
 
 ## 4. Testing Reviewer
 
 Assess whether the change has sufficient test coverage.
 
-- Flag missing unit, integration, or edge-case tests for non-trivial logic
-- Highlight untested error paths, boundary conditions, permission checks, and regression risks
-- Flag tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful assertions
-- Prefer concrete missing test scenarios (e.g., "no test covers the case where X is null") over vague suggestions
+- Flag missing unit, integration, or edge-case tests for non-trivial logic.
+- Highlight untested error paths, boundary conditions, permission checks, and regression risks.
+- Flag tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful assertions.
+- Prefer concrete missing test scenarios, such as “no test covers the case where X is null,” over vague suggestions.
 
 ## 5. Product / User Impact Reviewer
 
 Consider how the change affects users and existing behavior.
 
-- Behavior changes that could break existing workflows or integrations
-- Backwards compatibility risks with stored data, API contracts, or configuration
-- Error messages that are unclear or unhelpful to end users
-- Changes that should be documented, communicated, or behind a feature flag
+- Behavior changes that could break existing workflows or integrations.
+- Backwards compatibility risks with stored data, API contracts, or configuration.
+- Error messages that are unclear or unhelpful to end users.
+- Changes that should be documented, communicated, or placed behind a feature flag.
 
 ---
 
 ## Review Summary
 
-End every review with a summary comment containing:
+End every review with one summary comment.
 
-1. A brief list of all issues found, grouped by severity:
-   - **Blocking** — must be fixed before merge (security issues, broken logic, missing auth, data loss risks)
-   - **Non-blocking** — recommended improvements (readability, test gaps, minor issues)
-2. A clear merge recommendation:
-   - **Ready to merge**
-   - **Merge after addressing non-blocking comments**
-   - **Do not merge** (only when blocking issues are present)
+The summary comment must include:
+
+### Issues found
+
+Group all issues by severity:
+
+- **Blocking** — must be fixed before merge, such as security issues, broken logic, missing authorization, or data loss risks.
+- **Non-blocking** — recommended improvements, such as readability issues, test gaps, or minor maintainability problems.
+
+If there are no issues in a severity group, explicitly write `None`.
+
+### Merge recommendation
+
+End the summary with exactly one of these recommendations:
+
+- **Ready to merge**
+- **Merge after addressing non-blocking comments**
+- **Do not merge**
+
+Use **Do not merge** only when blocking issues are present.
+
+---
+
+## Re-reviews
+
+If this is a re-review of a pull request that already has a previous summary comment from Copilot, do not create a duplicate summary comment when the original summary can be edited.
+
+Instead, update the original summary comment by adding an **Update** section at the top.
+
+The **Update** section should briefly state:
+
+- Which previously reported issues have been resolved.
+- Which issues remain unresolved.
+- Any new issues found during the re-review.
+- Whether the merge recommendation has changed.
+
+Keep the original summary content below the **Update** section unless it is no longer accurate. If the original summary cannot be edited, add a new summary comment that clearly says it is a re-review update.
