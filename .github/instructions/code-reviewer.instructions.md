@@ -1,15 +1,6 @@
-# GitHub Copilot Review Instructions
-
-This is an Nx monorepo. Source code lives under `packages/`. Key packages:
-
-- `packages/server/api` — Fastify API server
-- `packages/server/shared` — shared server utilities (logging, caching, encryption)
-- `packages/engine` — workflow execution engine
-- `packages/react-ui` — React 18 frontend (Vite + TailwindCSS)
-- `packages/shared` — shared types/utilities
-- `packages/blocks/` — 50+ integration blocks (AWS, Azure, Slack, etc.)
-- `packages/ui-components` — reusable component library
-
+---
+applyTo: '**'
+excludeAgent: 'coding-agent'
 ---
 
 Review every pull request from the five perspectives below. For each perspective:
