@@ -59,13 +59,13 @@ npm ci --no-audit --no-fund
 ### Starting the app
 
 ```bash
-npm start   # runs docker compose up + npm run dev in one step
+npm start   # installs deps, runs docker compose up --wait, then npm run dev
 ```
 
 Or manually:
 
 ```bash
-docker compose up -d   # start Postgres, Redis, OpenOps Tables, Analytics
+docker compose up -d --wait   # start Postgres, Redis, OpenOps Tables, Analytics
 npm run dev            # start all services concurrently
 ```
 
