@@ -178,6 +178,33 @@ export const appConnectionService = {
     return decryptAndRefresh(encryptedAppConnection);
   },
 
+  async getMetadataOrThrow(params: GetOneParams): Promise<{
+    id: string;
+    projectId: string;
+    authProviderKey: string;
+  }> {
+    const encryptedAppConnection = await repo().findOneBy({
+      id: params.id,
+      projectId: params.projectId,
+    });
+
+    if (isNil(encryptedAppConnection)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: params.id,
+        },
+      });
+    }
+
+    return {
+      id: encryptedAppConnection.id,
+      projectId: encryptedAppConnection.projectId,
+      authProviderKey: encryptedAppConnection.authProviderKey,
+    };
+  },
+
   async getOneOrThrow(params: GetOneParams): Promise<AppConnection> {
     const encryptedAppConnection = await repo().findOneBy({
       id: params.id,

@@ -122,21 +122,19 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/:id',
     DeleteAppConnectionRequest,
     async (request, reply): Promise<void> => {
-      const connection = await appConnectionService.getOneOrThrow({
-        id: request.params.id,
-        projectId: request.principal.projectId,
-      });
+      const { projectId, authProviderKey } =
+        await appConnectionService.getMetadataOrThrow({
+          id: request.params.id,
+          projectId: request.principal.projectId,
+        });
 
       await appConnectionService.delete({
         id: request.params.id,
         projectId: request.principal.projectId,
       });
 
-      sendConnectionDeletedEvent(
-        request.principal.id,
-        connection.projectId,
-        connection.authProviderKey,
-      );
+      const userId = request.principal.id;
+      sendConnectionDeletedEvent(userId, projectId, authProviderKey);
 
       await reply.status(StatusCodes.NO_CONTENT).send();
     },
