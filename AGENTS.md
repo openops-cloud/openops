@@ -12,11 +12,11 @@ This is an Nx monorepo. Source code lives under `packages/`. In production we bu
 
 Key packages:
 
-- `packages/server/api` — Fastify API server; handles auth, flow management, app connections, and all REST endpoints _(API container)_
+- `packages/server/api` — Fastify API server; handles auth, flow management, app connections, and all REST endpoints _(App container)_
 - `packages/server/worker` — workflow execution runtime; manages the engine process pool, job polling, and webhook handling _(Worker container)_
-- `packages/server/shared` — shared server utilities: logging, caching, AES-256-CBC encryption (`encrypt-compress.ts`)
+- `packages/server/shared` — shared server utilities: logging, caching, AES-256-CBC encryption (`packages/server/shared/src/lib/security/encrypt-compress.ts`)
 - `packages/engine` — workflow execution engine; runs as isolated child processes spawned by the worker
-- `packages/react-ui` — React 18 frontend (Vite + TailwindCSS) _(UI container)_
+- `packages/react-ui` — React 18 frontend (Vite + TailwindCSS) _(App container)_
 - `packages/shared` — shared types, error codes, and utilities across frontend and backend
 - `packages/blocks/` — 50+ composable integration blocks (AWS, Azure, GCP, Slack, etc.) built on `packages/blocks/framework`
 - `packages/ui-components` — reusable component library (Storybook)
