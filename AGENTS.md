@@ -8,7 +8,7 @@ Work from the repo root. Prefer small, scoped changes. Avoid unrelated refactors
 
 ## Repo Structure
 
-This is an Nx monorepo. Source code lives under `packages/`. The application runs as three separate containers: **UI**, **API**, and **Worker**.
+This is an Nx monorepo. Source code lives under `packages/`. In production we build two container images: **App** (UI + API) and **Worker**.
 
 Key packages:
 
