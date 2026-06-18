@@ -69,9 +69,15 @@ Consider how the change affects users and existing behavior.
 
 ## Review Summary
 
-End every review with one summary comment.
+Add the review summary as a section in the pull request-level Copilot overview comment, not as an inline file comment.
 
-The summary comment must include:
+The summary must be placed under a heading named:
+
+```md
+## Review Summary
+```
+
+The summary must include:
 
 ### Issues found
 
@@ -96,9 +102,15 @@ Use **Do not merge** only when blocking issues are present.
 
 ## Re-reviews
 
-If this is a re-review of a pull request that already has a previous summary comment from Copilot, do not create a duplicate summary comment when the original summary can be edited.
+If this is a re-review of a pull request that already has a Copilot pull request overview comment, do not create a duplicate summary comment and do not add the summary as an inline file comment.
 
-Instead, update the original summary comment by adding an **Update** section at the top.
+Instead, update the existing pull request-level Copilot overview comment by adding an **Update** section above the previous review summary.
+
+The update section must be placed under a heading named:
+
+```md
+## Update
+```
 
 The **Update** section should briefly state:
 
@@ -107,4 +119,4 @@ The **Update** section should briefly state:
 - Any new issues found during the re-review.
 - Whether the merge recommendation has changed.
 
-Keep the original summary content below the **Update** section unless it is no longer accurate. If the original summary cannot be edited, add a new summary comment that clearly says it is a re-review update.
+Keep the previous **Review Summary** section below the **Update** section unless it is no longer accurate. If the existing pull request overview comment cannot be edited, add one new pull request-level comment that clearly says it is a re-review update.
