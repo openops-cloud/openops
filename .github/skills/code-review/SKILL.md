@@ -1,6 +1,7 @@
 ---
-applyTo: '**'
-excludeAgent: 'coding-agent'
+name: code-review
+description: >
+  Use when doing a pull request review.
 ---
 
 Review every pull request for correctness, security, performance, test coverage, maintainability, and user impact.
