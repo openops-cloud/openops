@@ -45,7 +45,7 @@ Other important files:
 ### Prerequisites
 
 - Node v24.16.0 (pinned in `.nvmrc`)
-- Docker (for Postgres, Redis, OpenOps Tables)
+- Docker (for Postgres, Redis, OpenOps Tables, Analytics)
 
 ### First-time setup
 
@@ -65,7 +65,7 @@ npm start   # runs docker compose up + npm run dev in one step
 Or manually:
 
 ```bash
-docker compose up -d   # start Postgres, Redis, OpenOps Tables
+docker compose up -d   # start Postgres, Redis, OpenOps Tables, Analytics
 npm run dev            # start all services concurrently
 ```
 
@@ -114,7 +114,7 @@ npx nx run-many --target=build
 Routes use Fastify + TypeBox schemas + RBAC. Pattern from `packages/server/api/src/app/flows/`:
 
 ```typescript
-import { getProjectScopedRoutePolicy } from '../auth/route-policy';
+import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { Type } from '@sinclair/typebox';
 
 const CreateThingOptions = {
@@ -315,13 +315,13 @@ npx nx test engine             # tests only for engine
 
 ## CI Pipeline
 
-CI runs in this order:
+CI runs one `install` job first, then the following jobs execute in parallel:
 
-1. `npm ci`
-2. audit
-3. lint (`npx nx run-many --target=lint --quiet`)
-4. tests in shards
-5. build (`npx nx run-many --target=build`)
+- **audit** — `npm audit`
+- **lint** — `npx nx run-many --target=lint --quiet`
+- **check-licenses** — validates dependency licenses
+- **test** — runs tests in shards across packages
+- **build** — `npx nx run-many --target=build`
 
 Mirror this locally when validating a change end-to-end.
 
@@ -358,7 +358,7 @@ Mirror this locally when validating a change end-to-end.
 
 ### Reference an issue
 
-All PRs must reference a linear issue in their body.
+All PRs must reference a Linear issue in their body.
 
 Examples:
 
