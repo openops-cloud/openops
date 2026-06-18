@@ -1,4 +1,4 @@
----
+<!-- ---
 applyTo: '**'
 excludeAgent: 'cloud-agent'
 ---
@@ -70,4 +70,4 @@ Use exactly one:
 - **Merge after addressing non-blocking comments**
 - **Do not merge**
 
-Use **Do not merge** only when blocking issues are present.
+Use **Do not merge** only when blocking issues are present. -->
