@@ -2,7 +2,7 @@ The following instructions are only to be applied when performing a code review.
 
 # Pull Request Review Guidelines
 
-Review the current pull request diff for security, code quality/readability, and performance.
+Review the current pull request diff for security, code quality/readability, performance, test coverage, and user impact.
 
 Only comment when there is a concrete issue introduced or affected by the current diff. Do not manufacture findings just to satisfy these categories.
 
@@ -22,7 +22,7 @@ Prioritize security issues that could affect users, data, credentials, permissio
 
 Comment on:
 
-- Missing or insufficient authorization checks.
+- Missing or insufficient authorization checks (every new API route needs an explicit RBAC policy via).
 - User-controlled input reaching sensitive operations without validation or sanitization.
 - SQL injection, shell injection, command injection, `eval`, unsafe deserialization, or XSS risks.
 - Hardcoded, exposed, or logged secrets, tokens, credentials, API keys, or sensitive user data.
@@ -61,6 +61,29 @@ Comment on:
 - Missing cleanup for timers, streams, subscriptions, connections, or other resources.
 
 Do not suggest premature optimizations when the current implementation is clear and the performance impact is unlikely to matter.
+
+## Test coverage review
+
+Assess whether the change has sufficient test coverage.
+
+Comment on:
+
+- Missing unit, integration, or edge-case tests for non-trivial logic.
+- Untested error paths, boundary conditions, permission checks, and regression risks.
+- Tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful assertions.
+
+Prefer concrete missing scenarios (e.g., "no test covers the case where X is null") over vague suggestions.
+
+## Product and user impact review
+
+Consider how the change affects users and existing behavior.
+
+Comment on:
+
+- Behavior changes that could break existing workflows or integrations.
+- Backwards compatibility risks with stored data, API contracts, or configuration.
+- Error messages that are unclear or unhelpful to end users.
+- Changes that should be documented or communicated before rollout.
 
 ## Review summary
 
