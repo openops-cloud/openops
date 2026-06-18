@@ -1,6 +1,6 @@
 # GitHub Copilot Review Instructions
 
-This is an nx monorepo. Source code lives under `packages/`. Key packages:
+This is an Nx monorepo. Source code lives under `packages/`. Key packages:
 
 - `packages/server/api` — Fastify API server
 - `packages/server/shared` — shared server utilities (logging, caching, encryption)
