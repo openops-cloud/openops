@@ -3,79 +3,69 @@ applyTo: '**'
 excludeAgent: 'coding-agent'
 ---
 
-Review every pull request for correctness, security, performance, test coverage, maintainability, and user impact.
+Review every pull request from the five perspectives below, then post a mandatory PR-level summary comment.
 
 ## General review rules
 
 - Only comment on issues introduced or affected by the current diff.
 - Do not manufacture findings to satisfy a checklist.
 - Prefer fewer, higher-signal comments over many low-value comments.
-- Avoid repeating the same feedback in multiple comments.
+- Avoid repeating the same feedback across perspectives.
 - Prefer actionable comments with concrete examples.
 - Clearly distinguish **required fixes** from **optional improvements**.
 - Avoid nitpicks unless they affect readability, correctness, security, or maintainability.
 - Do not comment on unchanged code unless the current diff makes the existing code problematic.
 
-## Review focus areas
+---
 
-### Correctness and maintainability
+## Review perspectives
+
+### 1. Correctness and maintainability
 
 Look for broken logic, fragile assumptions, edge cases, duplicated logic, unnecessary complexity, unclear naming, overly long functions, misleading comments, and non-idiomatic TypeScript/JavaScript patterns.
 
-### Security
+### 2. Security
 
 Look for unsafe input handling, injection risks, XSS vectors, hardcoded or logged secrets, missing authorization checks, user-controlled data reaching sensitive operations, insecure defaults, overly permissive CORS/CSP, and unsafe dependency usage.
 
-### Performance and reliability
+### 3. Performance and reliability
 
-Look for meaningful performance or reliability concerns, such as N+1 queries, unnecessary database or API calls in loops, avoidable large in-memory processing, blocking operations in async contexts, and scalability risks.
+Look for N+1 queries, unnecessary database or API calls in loops, avoidable large in-memory processing, blocking operations in async contexts, and scalability risks. Do not suggest premature optimizations when the benefit is unclear.
 
-Do not suggest premature optimizations when the benefit is unclear.
+### 4. Testing
 
-### Testing
+Look for missing tests around non-trivial logic, error paths, boundary conditions, permission checks, regressions, and product-critical behavior. Flag weak tests that only assert `toBeTruthy()` or `toBeDefined()`. Prefer concrete missing test scenarios over vague requests for "more tests."
 
-Look for missing tests around non-trivial logic, error paths, boundary conditions, permission checks, regressions, and product-critical behavior.
+### 5. Product and user impact
 
-Flag weak tests that only assert `toBeTruthy()` or `toBeDefined()` without meaningful behavior assertions.
-
-Prefer concrete missing test scenarios over vague requests for “more tests.”
-
-### Product and user impact
-
-Look for behavior changes that could break existing workflows, integrations, API contracts, stored data, configuration, or backwards compatibility.
-
-Flag unclear user-facing errors and changes that should be documented, communicated, or placed behind a feature flag.
+Look for behavior changes that could break existing workflows, integrations, API contracts, stored data, or backwards compatibility. Flag unclear user-facing errors and changes that should be documented or placed behind a feature flag.
 
 ---
 
-## Pull request overview
+## Mandatory PR summary comment
 
-Always end a pull request review with a PR-level comment, not an inline file comment.
+**After all inline comments, you MUST post a single PR-level overview comment** (not an inline file comment). This comment is required on every review, even if there are no issues.
 
-The PR-level comment must include these sections:
+Use this exact format:
 
 ```md
 ## Review Summary
 
 ### Blocking
 
-- List required fixes that must be addressed before merge.
-- Use `None` if there are no blocking issues.
+<!-- Required fixes that must be addressed before merge. Use "None" if there are no blocking issues. -->
 
 ### Non-blocking
 
-- List recommended improvements.
-- Use `None` if there are no non-blocking issues.
+<!-- Recommended improvements. Use "None" if there are no non-blocking issues. -->
 
 ### Merge recommendation
 
-Use exactly one:
+<!-- Use exactly one of the following: -->
 
 - **Ready to merge**
 - **Merge after addressing non-blocking comments**
 - **Do not merge**
 ```
 
-Use **Do not merge** only when blocking issues are present.
-
-The review summary belongs in the pull request-level overview comment, not in an inline file comment.
+Use **Do not merge** only when blocking issues are present. The summary must be a PR-level comment — never an inline comment on a file.
