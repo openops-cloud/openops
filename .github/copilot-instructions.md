@@ -1,4 +1,4 @@
-When you start a code review always start with a general comment on the Pull request saying "Starting"
+The following instructions are only to be applied when performing a code review.
 
 # Pull Request Review Guidelines
 
@@ -64,7 +64,7 @@ Do not suggest premature optimizations when the current implementation is clear 
 
 ## Review summary
 
-When possible, include a concise pull request-level summary covering:
+Include a concise pull request-level summary covering:
 
 ### Blocking
 
