@@ -1,6 +1,6 @@
 ---
 applyTo: '**'
-excludeAgent: 'coding-agent'
+excludeAgent: 'cloud-agent'
 ---
 
 Review every pull request from the five perspectives below, then post a mandatory PR-level summary comment.
@@ -42,30 +42,32 @@ Look for behavior changes that could break existing workflows, integrations, API
 
 ---
 
-## Mandatory PR summary comment
+## Pull request overview
 
-**After all inline comments, you MUST post a single PR-level overview comment** (not an inline file comment). This comment is required on every review, even if there are no issues.
+When writing the pull request overview, you MUST include a `Review Summary` section.
 
-Use this exact format:
+The `Review Summary` section should use this structure:
 
-```md
-## Review Summary
+### Review Summary
 
-### Blocking
+#### Blocking
 
-<!-- Required fixes that must be addressed before merge. Use "None" if there are no blocking issues. -->
+List required fixes that must be addressed before merge.
 
-### Non-blocking
+Use `None` if there are no blocking issues.
 
-<!-- Recommended improvements. Use "None" if there are no non-blocking issues. -->
+#### Non-blocking
 
-### Merge recommendation
+List recommended improvements.
 
-<!-- Use exactly one of the following: -->
+Use `None` if there are no non-blocking issues.
+
+#### Merge recommendation
+
+Use exactly one:
 
 - **Ready to merge**
 - **Merge after addressing non-blocking comments**
 - **Do not merge**
-```
 
-Use **Do not merge** only when blocking issues are present. The summary must be a PR-level comment — never an inline comment on a file.
+Use **Do not merge** only when blocking issues are present.
