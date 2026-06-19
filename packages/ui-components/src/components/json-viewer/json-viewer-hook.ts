@@ -29,7 +29,7 @@ type UseJsonViewerProps = {
     isProductionFile: boolean;
     handleDownloadFile: (fileUrl: string, ext?: string) => void;
   }) => React.ReactNode;
-  form: UseFormReturn<JsonFormValues, any, undefined>;
+  form: UseFormReturn<JsonFormValues>;
   isEditModeEnabled?: boolean;
   onEditModeChange?: (isEditModeEnabled: boolean) => void;
 };

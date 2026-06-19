@@ -88,7 +88,8 @@ const FlowBuilderCanvas = React.memo(() => {
           ContextMenu={CanvasContextMenuWrapper}
           selectStepByName={setSelectedStep}
           onNodeDrag={(event) => {
-            onNodeDrag(event.clientX, event.clientY);
+            const mouseEvent = event as MouseEvent;
+            onNodeDrag(mouseEvent.clientX, mouseEvent.clientY);
           }}
         >
           <AboveFlowWidgets></AboveFlowWidgets>
