@@ -300,7 +300,7 @@ export const useAssistantChat = ({
 
   // Cast needed: root `ai` package version may differ from @assistant-ui/react-ai-sdk's nested copy.
   const runtime = useAISDKRuntime(
-    chat as Parameters<typeof useAISDKRuntime>[0],
+    chat as unknown as Parameters<typeof useAISDKRuntime>[0],
   );
   runtimeRef.current = runtime;
 
