@@ -80,6 +80,16 @@ describe('StepTestOutputCache', () => {
     expect(cache.getStepData('step1')).toBeUndefined();
     expect(cache.getExpanded('node1')).toBe(false);
   });
+
+  it('should clear child expanded nodes when clearing a step', () => {
+    cache.setExpanded("step1['foo']", true);
+    cache.setExpanded('step1[0]', true);
+    cache.setExpanded('step2', true);
+    cache.clearStep('step1');
+    expect(cache.getExpanded("step1['foo']")).toBe(false);
+    expect(cache.getExpanded('step1[0]')).toBe(false);
+    expect(cache.getExpanded('step2')).toBe(true);
+  });
 });
 
 describe('setStepOutputCache', () => {
@@ -135,6 +145,35 @@ describe('setStepOutputCache', () => {
         success: true,
         input: input,
       },
+    );
+  });
+
+  it('stores success=false correctly in both cache and query client', async () => {
+    const stepId = 'failing-step';
+    const flowVersionId = 'fv-fail';
+    const output = { error: 'timed out' };
+    const input = { param: 'value' };
+
+    queryClient.cancelQueries = jest.fn().mockResolvedValue(undefined);
+
+    await setStepOutputCache({
+      stepId,
+      flowVersionId,
+      output,
+      input,
+      queryClient,
+      success: false,
+    });
+
+    expect(stepTestOutputCache.getStepData(stepId)).toEqual({
+      output,
+      lastTestDate: '2024-01-01T00:00:00Z',
+      success: false,
+    });
+
+    expect(queryClient.setQueryData).toHaveBeenCalledWith(
+      [QueryKeys.stepTestOutput, flowVersionId, stepId],
+      expect.objectContaining({ success: false }),
     );
   });
 });

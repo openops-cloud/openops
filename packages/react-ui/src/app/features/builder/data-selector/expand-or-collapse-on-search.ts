@@ -15,10 +15,11 @@ export function expandOrCollapseNodesOnSearch(
   if (searchTerm) {
     // Expand all nodes at depth 0 and 1
     const expandNodes = (nodes: MentionTreeNode[], depth: number) => {
+      if (depth > 1) {
+        return;
+      }
       nodes.forEach((node) => {
-        if (depth <= 1) {
-          stepTestOutputCache.setExpanded(node.key, true);
-        }
+        stepTestOutputCache.setExpanded(node.key, true);
         if (node.children) {
           expandNodes(node.children, depth + 1);
         }
