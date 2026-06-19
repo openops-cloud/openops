@@ -22,7 +22,7 @@ Prioritize security issues that could affect users, data, credentials, permissio
 
 Comment on:
 
-- Missing or insufficient authorization checks (every new API route needs an explicit RBAC policy via).
+- Missing or insufficient authorization checks (every new API route needs an explicit RBAC policy).
 - User-controlled input reaching sensitive operations without validation or sanitization.
 - SQL injection, shell injection, command injection, `eval`, unsafe deserialization, or XSS risks.
 - Hardcoded, exposed, or logged secrets, tokens, credentials, API keys, or sensitive user data.
