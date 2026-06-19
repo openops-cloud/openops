@@ -1,4 +1,4 @@
-<!-- @AGENTS.md — Claude Code imports and inlines AGENTS.md automatically at runtime. See [AGENTS.md](./AGENTS.md) for the full onboarding guide. -->
+<!-- CLAUDE.md includes AGENTS.md via the @AGENTS.md directive below. See [AGENTS.md](./AGENTS.md) for the full onboarding guide. -->
 
 @AGENTS.md
 
