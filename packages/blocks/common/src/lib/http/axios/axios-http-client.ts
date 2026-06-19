@@ -1,4 +1,5 @@
 import { logger } from '@openops/server-shared';
+import { extractPropertyString } from '@openops/shared';
 import axios, { AxiosRequestConfig } from 'axios';
 import { BaseHttpClient } from '../core/base-http-client';
 import { DelegatingAuthenticationConverter } from '../core/delegating-authentication-converter';
@@ -49,7 +50,17 @@ export class AxiosHttpClient extends BaseHttpClient {
         body: response.data,
       };
     } catch (error) {
-      logger.error('Failed to execute HTTP request.', error);
+      logger.warn('Failed to execute HTTP request.', {
+        method: request.method,
+        url: request.url,
+        errorMessage: extractPropertyString(error, ['message']),
+        statusCode: axios.isAxiosError(error)
+          ? error.response?.status
+          : undefined,
+        responseData: axios.isAxiosError(error)
+          ? error.response?.data
+          : undefined,
+      });
 
       if (axios.isAxiosError(error)) {
         throw new HttpError(request.body, error);
