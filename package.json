@@ -240,7 +240,7 @@
     "nanoid": "3.3.12",
     "node-cron": "3.0.3",
     "node-emoji": "2.2.0",
-    "nodemailer": "8.0.11",
+    "nodemailer": "9.0.1",
     "nx-cloud": "19.1.3",
     "object-sizeof": "2.6.5",
     "pdf-parse": "1.1.4",
