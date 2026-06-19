@@ -3,17 +3,13 @@ import { MentionTreeNode } from './data-selector-utils';
 
 /**
  * Expands or collapses nodes in the mention tree based on the search term.
- * @param mentions The mention tree nodes to operate on
- * @param searchTerm The current search term
- * @param setForceRerender Function to force a rerender
+ * Cache subscribers (useSyncExternalStore) handle re-rendering automatically.
  */
 export function expandOrCollapseNodesOnSearch(
   mentions: MentionTreeNode[],
   searchTerm: string,
-  setForceRerender: (fn: (v: number) => number) => void,
 ) {
   if (searchTerm) {
-    // Expand all nodes at depth 0 and 1
     const expandNodes = (nodes: MentionTreeNode[], depth: number) => {
       if (depth > 1) {
         return;
@@ -27,7 +23,6 @@ export function expandOrCollapseNodesOnSearch(
     };
     expandNodes(mentions, 0);
   } else {
-    // Collapse all nodes
     const collapseNodes = (nodes: MentionTreeNode[]) => {
       nodes.forEach((node) => {
         stepTestOutputCache.setExpanded(node.key, false);
@@ -38,5 +33,4 @@ export function expandOrCollapseNodesOnSearch(
     };
     collapseNodes(mentions);
   }
-  setForceRerender((v) => v + 1);
 }

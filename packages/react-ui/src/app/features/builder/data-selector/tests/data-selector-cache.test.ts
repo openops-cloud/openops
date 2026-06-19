@@ -81,6 +81,56 @@ describe('StepTestOutputCache', () => {
     expect(cache.getExpanded('node1')).toBe(false);
   });
 
+  it('should notify subscriber when expanded state changes for a key', () => {
+    const callback = jest.fn();
+    cache.subscribe('node1', callback);
+    cache.setExpanded('node1', true);
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not notify subscriber for a different key', () => {
+    const callback = jest.fn();
+    cache.subscribe('node1', callback);
+    cache.setExpanded('node2', true);
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('should stop notifying after unsubscribe', () => {
+    const callback = jest.fn();
+    const unsubscribe = cache.subscribe('node1', callback);
+    unsubscribe();
+    cache.setExpanded('node1', true);
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('should notify subscriber when clearStep removes an expanded child key', () => {
+    const callback = jest.fn();
+    cache.setExpanded("step1['foo']", true);
+    cache.subscribe("step1['foo']", callback);
+    cache.clearStep('step1');
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  it('should notify all subscribers on clearAll', () => {
+    const cb1 = jest.fn();
+    const cb2 = jest.fn();
+    cache.subscribe('node1', cb1);
+    cache.subscribe('node2', cb2);
+    cache.clearAll();
+    expect(cb1).toHaveBeenCalledTimes(1);
+    expect(cb2).toHaveBeenCalledTimes(1);
+  });
+
+  it('should clear expandedNodes before notifying on clearAll so getExpanded returns false during notification', () => {
+    cache.setExpanded('node1', true);
+    let valueSeenDuringNotification: boolean | undefined;
+    cache.subscribe('node1', () => {
+      valueSeenDuringNotification = cache.getExpanded('node1');
+    });
+    cache.clearAll();
+    expect(valueSeenDuringNotification).toBe(false);
+  });
+
   it('should clear child expanded nodes when clearing a step', () => {
     cache.setExpanded("step1['foo']", true);
     cache.setExpanded('step1[0]', true);

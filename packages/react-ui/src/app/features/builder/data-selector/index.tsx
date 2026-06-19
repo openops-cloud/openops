@@ -71,11 +71,9 @@ const DataSelector = ({
   }, [pathToTargetStep]);
 
   // dataVersion increments when step output data changes — triggers tree rebuild.
-  // expandVersion increments when a node is expanded/collapsed — triggers re-render
-  // only, so DataSelectorNode components re-read expansion state from cache without
-  // rebuilding the (potentially huge) mention tree.
+  // Expand/collapse state is managed per-node via useSyncExternalStore in DataSelectorNode,
+  // so toggling a node re-renders only that node without touching this component.
   const [dataVersion, setDataVersion] = useState(0);
-  const [, setExpandVersion] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
 
   const { isLoading } = useSelectorData({
@@ -111,17 +109,8 @@ const DataSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathToTargetStep, stepIds, dataVersion, initialLoad]);
 
-  const getExpanded = useCallback(
-    (nodeKey: string) => stepTestOutputCache.getExpanded(nodeKey),
-    [],
-  );
-  const setExpanded = (nodeKey: string, expanded: boolean) => {
-    stepTestOutputCache.setExpanded(nodeKey, expanded);
-    setExpandVersion((v) => v + 1);
-  };
-
   useEffect(() => {
-    expandOrCollapseNodesOnSearch(mentions, searchTerm, setExpandVersion);
+    expandOrCollapseNodesOnSearch(mentions, searchTerm);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
@@ -219,8 +208,6 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
-                getExpanded={getExpanded}
-                setExpanded={setExpanded}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (

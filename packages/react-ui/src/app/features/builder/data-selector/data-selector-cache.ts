@@ -12,6 +12,7 @@ export type StepOutputData = Omit<StepOutputWithData, 'input'>;
 export class StepTestOutputCache {
   private stepData: Record<string, StepOutputData> = {};
   private expandedNodes: Record<string, boolean> = {};
+  private subscribers: Map<string, Set<() => void>> = new Map();
 
   /**
    * Get cached test output for a step.
@@ -32,10 +33,10 @@ export class StepTestOutputCache {
    */
   clearStep(stepId: string) {
     delete this.stepData[stepId];
-    // Remove expanded nodes for this step and its children
     Object.keys(this.expandedNodes).forEach((key) => {
       if (key.startsWith(stepId)) {
         delete this.expandedNodes[key];
+        this.notifySubscribers(key);
       }
     });
   }
@@ -48,29 +49,50 @@ export class StepTestOutputCache {
   }
 
   /**
-   * Set expanded state for a node.
+   * Set expanded state for a node and notify subscribers.
    */
   setExpanded(nodeKey: string, expanded: boolean) {
     this.expandedNodes[nodeKey] = expanded;
+    this.notifySubscribers(nodeKey);
   }
 
   /**
-   * Reset all expanded state
+   * Subscribe to expanded state changes for a specific node key.
+   * Returns an unsubscribe function.
+   */
+  subscribe(nodeKey: string, callback: () => void): () => void {
+    if (!this.subscribers.has(nodeKey)) {
+      this.subscribers.set(nodeKey, new Set());
+    }
+    this.subscribers.get(nodeKey)!.add(callback);
+    return () => {
+      this.subscribers.get(nodeKey)?.delete(callback);
+    };
+  }
+
+  /**
+   * Reset all expanded state for a step and notify affected subscribers.
    */
   resetExpandedForStep(stepId: string) {
     Object.keys(this.expandedNodes).forEach((key) => {
       if (key.startsWith(stepId)) {
         delete this.expandedNodes[key];
+        this.notifySubscribers(key);
       }
     });
   }
 
   /**
-   * Clear all cache and expanded state.
+   * Clear all cache and expanded state, notifying all subscribers.
    */
   clearAll() {
     this.stepData = {};
     this.expandedNodes = {};
+    this.subscribers.forEach((callbacks) => callbacks.forEach((cb) => cb()));
+  }
+
+  private notifySubscribers(nodeKey: string) {
+    this.subscribers.get(nodeKey)?.forEach((cb) => cb());
   }
 }
 

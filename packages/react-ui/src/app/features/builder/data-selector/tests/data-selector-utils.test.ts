@@ -489,6 +489,18 @@ describe('dataSelectorUtils', () => {
       expect(node.children?.every((c) => c.data.isSlice)).toBe(true);
     });
 
+    it('parent node of a large array has value undefined to avoid expensive serialization during search', () => {
+      const items = Array.from({ length: 150 }, (_, i) => i);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+
+      expect(node.data.value).toBeUndefined();
+    });
+
     it('arrays with exactly 100 items are not sliced', () => {
       const items = Array.from({ length: 100 }, (_, i) => `item-${i}`);
       const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({

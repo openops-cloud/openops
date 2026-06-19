@@ -3,11 +3,8 @@ import { MentionTreeNode } from '../data-selector-utils';
 import { expandOrCollapseNodesOnSearch } from '../expand-or-collapse-on-search';
 
 describe('expandOrCollapseNodesOnSearch', () => {
-  let setForceRerender: jest.Mock;
-
   beforeEach(() => {
     stepTestOutputCache.clearAll();
-    setForceRerender = jest.fn();
   });
 
   const tree: MentionTreeNode[] = [
@@ -39,20 +36,16 @@ describe('expandOrCollapseNodesOnSearch', () => {
   ];
 
   it('expands all nodes at depth 0 and 1 when searchTerm is present', () => {
-    expandOrCollapseNodesOnSearch(tree, 'search', setForceRerender);
+    expandOrCollapseNodesOnSearch(tree, 'search');
     expect(stepTestOutputCache.getExpanded('root')).toBe(true);
     expect(stepTestOutputCache.getExpanded('child1')).toBe(true);
     expect(stepTestOutputCache.getExpanded('child2')).toBe(true);
     // grandchild1 is at depth 2, should not be expanded
     expect(stepTestOutputCache.getExpanded('grandchild1')).toBe(false);
-    expect(setForceRerender).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('handles an empty mentions array without throwing', () => {
-    expect(() =>
-      expandOrCollapseNodesOnSearch([], 'search', setForceRerender),
-    ).not.toThrow();
-    expect(setForceRerender).toHaveBeenCalledWith(expect.any(Function));
+    expect(() => expandOrCollapseNodesOnSearch([], 'search')).not.toThrow();
   });
 
   it('handles a flat tree with no children without throwing', () => {
@@ -67,23 +60,21 @@ describe('expandOrCollapseNodesOnSearch', () => {
       },
     ];
     expect(() =>
-      expandOrCollapseNodesOnSearch(flatTree, 'search', setForceRerender),
+      expandOrCollapseNodesOnSearch(flatTree, 'search'),
     ).not.toThrow();
     expect(stepTestOutputCache.getExpanded('leaf1')).toBe(true);
     expect(stepTestOutputCache.getExpanded('leaf2')).toBe(true);
   });
 
   it('collapses all nodes when searchTerm is empty', () => {
-    // First, expand everything to simulate previous state
     stepTestOutputCache.setExpanded('root', true);
     stepTestOutputCache.setExpanded('child1', true);
     stepTestOutputCache.setExpanded('child2', true);
     stepTestOutputCache.setExpanded('grandchild1', true);
-    expandOrCollapseNodesOnSearch(tree, '', setForceRerender);
+    expandOrCollapseNodesOnSearch(tree, '');
     expect(stepTestOutputCache.getExpanded('root')).toBe(false);
     expect(stepTestOutputCache.getExpanded('child1')).toBe(false);
     expect(stepTestOutputCache.getExpanded('grandchild1')).toBe(false);
     expect(stepTestOutputCache.getExpanded('child2')).toBe(false);
-    expect(setForceRerender).toHaveBeenCalledWith(expect.any(Function));
   });
 });
