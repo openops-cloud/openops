@@ -319,6 +319,7 @@
     "@nx/react": "23.0.0",
     "@nx/storybook": "23.0.0",
     "@nx/vite": "23.0.0",
+    "@nx/vitest": "23.0.0",
     "@nx/web": "23.0.0",
     "@nx/webpack": "23.0.0",
     "@nx/workspace": "23.0.0",
