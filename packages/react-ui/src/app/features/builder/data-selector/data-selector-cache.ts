@@ -12,7 +12,7 @@ export type StepOutputData = Omit<StepOutputWithData, 'input'>;
 export class StepTestOutputCache {
   private stepData: Record<string, StepOutputData> = {};
   private expandedNodes: Record<string, boolean> = {};
-  private subscribers: Map<string, Set<() => void>> = new Map();
+  private readonly subscribers: Map<string, Set<() => void>> = new Map();
 
   /**
    * Get cached test output for a step.
@@ -30,11 +30,12 @@ export class StepTestOutputCache {
 
   /**
    * Clear all cached data and expanded state for a step.
+   * stepData is keyed by stepId (UUID); expanded nodes are keyed by stepName.
    */
-  clearStep(stepId: string) {
+  clearStep(stepId: string, stepName: string = stepId) {
     delete this.stepData[stepId];
     Object.keys(this.expandedNodes).forEach((key) => {
-      if (key.startsWith(stepId)) {
+      if (key.startsWith(stepName)) {
         delete this.expandedNodes[key];
         this.notifySubscribers(key);
       }
@@ -52,6 +53,7 @@ export class StepTestOutputCache {
    * Set expanded state for a node and notify subscribers.
    */
   setExpanded(nodeKey: string, expanded: boolean) {
+    if (this.getExpanded(nodeKey) === expanded) return;
     this.expandedNodes[nodeKey] = expanded;
     this.notifySubscribers(nodeKey);
   }
@@ -66,16 +68,22 @@ export class StepTestOutputCache {
     }
     this.subscribers.get(nodeKey)!.add(callback);
     return () => {
-      this.subscribers.get(nodeKey)?.delete(callback);
+      const callbacks = this.subscribers.get(nodeKey);
+      if (callbacks) {
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+          this.subscribers.delete(nodeKey);
+        }
+      }
     };
   }
 
   /**
    * Reset all expanded state for a step and notify affected subscribers.
    */
-  resetExpandedForStep(stepId: string) {
+  resetExpandedForStep(stepId: string, stepName: string = stepId) {
     Object.keys(this.expandedNodes).forEach((key) => {
-      if (key.startsWith(stepId)) {
+      if (key.startsWith(stepName)) {
         delete this.expandedNodes[key];
         this.notifySubscribers(key);
       }

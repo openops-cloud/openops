@@ -140,6 +140,46 @@ describe('StepTestOutputCache', () => {
     expect(cache.getExpanded('step1[0]')).toBe(false);
     expect(cache.getExpanded('step2')).toBe(true);
   });
+
+  it('should clear expanded nodes by stepName when stepId and stepName differ', () => {
+    const stepId = 'uuid-1234';
+    const stepName = 'step_1';
+    cache.setStepData(stepId, {
+      output: { x: 1 },
+      lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
+    });
+    cache.setExpanded(stepName, true);
+    cache.setExpanded(`${stepName}['child']`, true);
+    cache.clearStep(stepId, stepName);
+    expect(cache.getStepData(stepId)).toBeUndefined();
+    expect(cache.getExpanded(stepName)).toBe(false);
+    expect(cache.getExpanded(`${stepName}['child']`)).toBe(false);
+  });
+
+  it('should not notify subscriber when setting the same expanded value', () => {
+    const callback = jest.fn();
+    cache.setExpanded('node1', true);
+    cache.subscribe('node1', callback);
+    cache.setExpanded('node1', true);
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('should remove the subscriber set from the map after the last unsubscribe', () => {
+    const cb1 = jest.fn();
+    const cb2 = jest.fn();
+    const unsub1 = cache.subscribe('node1', cb1);
+    const unsub2 = cache.subscribe('node1', cb2);
+    unsub1();
+    unsub2();
+    // subscribing again should work correctly after map cleanup
+    const cb3 = jest.fn();
+    cache.subscribe('node1', cb3);
+    cache.setExpanded('node1', true);
+    expect(cb3).toHaveBeenCalledTimes(1);
+    expect(cb1).not.toHaveBeenCalled();
+    expect(cb2).not.toHaveBeenCalled();
+  });
 });
 
 describe('setStepOutputCache', () => {

@@ -37,7 +37,7 @@ export const useFlowUpdates = (flowId: string) => {
       }
 
       if ('stepId' in payload && payload.stepId) {
-        stepTestOutputCache.clearStep(payload.stepId);
+        stepTestOutputCache.clearStep(payload.stepId, payload.stepName);
         queryClient.invalidateQueries({
           queryKey: [
             QueryKeys.stepTestOutput,

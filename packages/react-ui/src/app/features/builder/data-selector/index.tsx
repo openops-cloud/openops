@@ -111,8 +111,7 @@ const DataSelector = ({
 
   useEffect(() => {
     expandOrCollapseNodesOnSearch(mentions, searchTerm);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm]);
+  }, [mentions, searchTerm]);
 
   const filteredMentions = useMemo(
     () => dataSelectorUtils.filterBy(mentions, searchTerm),
