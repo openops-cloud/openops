@@ -75,7 +75,7 @@ const config: StorybookConfig = {
         commonjsOptions: {
           transformMixedEsModules: true,
         },
-        rollupOptions: {
+        rolldownOptions: {
           output: {
             manualChunks(id: string) {
               if (id === resolvedVirtualModuleId) {
