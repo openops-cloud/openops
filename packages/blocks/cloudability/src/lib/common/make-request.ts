@@ -1,64 +1,19 @@
-import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { logger } from '@openops/server-shared';
+import {
+  createRetryConfig,
+  getStandardRetryAfterMs,
+  httpClient,
+  HttpMethod,
+} from '@openops/blocks-common';
 import { AxiosError } from 'axios';
-import { isRetryableError } from 'axios-retry';
 import { CloudabilityAuth } from '../auth';
 
-const retryConfig = {
-  retries: 3,
+const retryConfig = createRetryConfig({ retryDelay: cloudabilityRetryDelayMs });
 
-  retryCondition: (error: AxiosError) => {
-    return isRetryableError(error);
-  },
-
-  retryDelay: (retryCount: number, error: AxiosError) => {
-    return getCloudabilityRetryDelayMs(error, retryCount);
-  },
-
-  onRetry: (retryCount: number, error: AxiosError) => {
-    logger.info('Retrying HTTP request', {
-      retryCount,
-      message: error.message,
-      statusCode: error.response?.status,
-      retryAfter: error.response?.headers?.['retry-after'],
-      rateLimitLimit: error.response?.headers?.['x-ratelimit-limit'],
-      rateLimitReset: error.response?.headers?.['x-ratelimit-reset'],
-      rateLimitRemaining: error.response?.headers?.['x-ratelimit-remaining'],
-    });
-  },
-};
-
-function parseRetryAfterToMs(
-  value: string | string[] | undefined,
-): number | undefined {
-  const retryAfter = Array.isArray(value) ? value[0] : value;
-
-  if (!retryAfter) {
-    return undefined;
-  }
-
-  // Retry-After can be seconds
-  const seconds = Number(retryAfter);
-  if (!Number.isNaN(seconds)) {
-    return seconds * 1000;
-  }
-
-  // Or an HTTP date
-  const dateMs = Date.parse(retryAfter);
-  if (!Number.isNaN(dateMs)) {
-    return Math.max(dateMs - Date.now(), 0);
-  }
-
-  return undefined;
-}
-
-function getCloudabilityRetryDelayMs(
-  error: AxiosError,
+function cloudabilityRetryDelayMs(
   retryCount: number,
+  error: AxiosError,
 ): number {
-  const retryAfterMs = parseRetryAfterToMs(
-    error.response?.headers?.['retry-after'],
-  );
+  const retryAfterMs = getStandardRetryAfterMs(error.response?.headers as any);
 
   if (retryAfterMs !== undefined) {
     return retryAfterMs;
@@ -69,18 +24,14 @@ function getCloudabilityRetryDelayMs(
 
   if (statusCode === 429 && !isNaN(remaining) && remaining > 5) {
     const baseDelayMs = 100;
-
     const jitterMs = Math.floor(Math.random() * 100);
-
     return baseDelayMs + jitterMs;
   }
 
   if (statusCode === 429) {
     // Treat it as a per-minute quota and wait long enough to leave the current window.
     const baseDelayMs = 60_000;
-
     const jitterMs = Math.floor(Math.random() * 5_000);
-
     return baseDelayMs + jitterMs;
   }
 
@@ -88,7 +39,6 @@ function getCloudabilityRetryDelayMs(
   const baseDelayMs = 200;
   const exponentialDelayMs = baseDelayMs * 2 ** (retryCount - 1);
   const jitterMs = Math.floor(Math.random() * 100);
-
   return exponentialDelayMs + jitterMs;
 }
 

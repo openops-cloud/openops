@@ -5,8 +5,8 @@ import { IAxiosRetryConfig } from 'axios-retry';
 import { makeRequest } from '../src/lib/common/make-request';
 
 jest.mock('@openops/blocks-common', () => ({
+  ...jest.requireActual('@openops/blocks-common'),
   httpClient: { sendRequest: jest.fn() },
-  HttpMethod: { GET: 'GET', POST: 'POST' },
 }));
 
 jest.mock('@openops/server-shared', () => ({
@@ -24,10 +24,12 @@ function makeAxiosError(
   status?: number,
   headers: Record<string, string> = {},
   code?: string,
+  method = 'get',
 ): AxiosError {
   const error = new Error('request failed') as AxiosError;
   error.isAxiosError = true;
   error.code = code;
+  error.config = { method } as any;
   error.response = status ? ({ status, headers, data: {} } as any) : undefined;
   return error;
 }
@@ -118,7 +120,7 @@ describe('makeRequest', () => {
       expect(retryCondition!(makeAxiosError(404))).toBe(false);
     });
 
-    test('retries on network errors (no response)', async () => {
+    test('retries on network errors for idempotent methods', async () => {
       await makeRequest({
         auth: mockAuth,
         endpoint: '/test',
@@ -126,8 +128,34 @@ describe('makeRequest', () => {
       });
       const { retryCondition } = captureRetryConfig();
 
-      expect(retryCondition!(makeAxiosError(undefined, {}, 'ECONNRESET'))).toBe(
+      expect(
+        retryCondition!(makeAxiosError(undefined, {}, 'ECONNRESET', 'get')),
+      ).toBe(true);
+    });
+
+    test('retries 429 on POST (rate limited — request was never processed)', async () => {
+      await makeRequest({
+        auth: mockAuth,
+        endpoint: '/test',
+        method: HttpMethod.POST,
+      });
+      const { retryCondition } = captureRetryConfig();
+
+      expect(retryCondition!(makeAxiosError(429, {}, undefined, 'post'))).toBe(
         true,
+      );
+    });
+
+    test('does not retry 5xx on POST (non-idempotent side effect)', async () => {
+      await makeRequest({
+        auth: mockAuth,
+        endpoint: '/test',
+        method: HttpMethod.POST,
+      });
+      const { retryCondition } = captureRetryConfig();
+
+      expect(retryCondition!(makeAxiosError(500, {}, undefined, 'post'))).toBe(
+        false,
       );
     });
   });
