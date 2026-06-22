@@ -268,7 +268,7 @@ describe('recommendations-api', () => {
         await new Promise((resolve) => setImmediate(resolve));
 
         // pLimit(2) means exactly 2 requests are in-flight at this point, not all at once
-        expect(resolvers.length).toBe(2);
+        expect(resolvers).toHaveLength(2);
 
         // drain remaining batches: resolve each batch, flush so pLimit starts the next
         while (resolvers.length > 0) {

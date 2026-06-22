@@ -22,7 +22,7 @@ function cloudabilityRetryDelayMs(
   const statusCode = error.response?.status;
   const remaining = Number(error.response?.headers?.['x-ratelimit-remaining']);
 
-  if (statusCode === 429 && !isNaN(remaining) && remaining > 5) {
+  if (statusCode === 429 && !Number.isNaN(remaining) && remaining > 5) {
     const baseDelayMs = 100;
     const jitterMs = Math.floor(Math.random() * 100);
     return baseDelayMs + jitterMs;
