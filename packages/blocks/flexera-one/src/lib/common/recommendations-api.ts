@@ -10,11 +10,11 @@ export async function getActiveRecommendations({
   appRegion: string;
   refreshToken: string;
   orgId: string;
-}): Promise<any> {
+}): Promise<unknown[]> {
   const baseUrl = getRecommendationsBaseUrl(appRegion);
   const url = `${baseUrl}/recommendations/orgs/${orgId}/recommendations?statuses=active`;
 
-  return await makeGetRequest({
+  return await makeGetRequest<unknown[]>({
     refreshToken,
     appRegion,
     url,

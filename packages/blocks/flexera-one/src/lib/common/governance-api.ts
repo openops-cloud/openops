@@ -14,7 +14,7 @@ export async function getIncident({
   refreshToken: string;
   projectId: string;
   incidentId: string;
-}): Promise<any[]> {
+}): Promise<unknown> {
   const url = `${baseUrl}/projects/${projectId}/incidents/${incidentId}`;
 
   return makeGetRequest({
