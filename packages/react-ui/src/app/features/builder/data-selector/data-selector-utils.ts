@@ -102,7 +102,7 @@ function handlingArrayStepOutput(
       Math.min((idx + 1) * maxSliceLength, stepOutput.length) - 1;
     const displayName = `${parentDisplayName} ${startingIndex}-${endingIndex}`;
     const sliceOutput = handlingArrayStepOutput(
-      stepOutput.slice(startingIndex, endingIndex),
+      stepOutput.slice(startingIndex, endingIndex + 1),
       success,
       path,
       parentDisplayName,
@@ -124,7 +124,7 @@ function handlingArrayStepOutput(
     data: {
       propertyPath: path,
       displayName: parentDisplayName,
-      value: stepOutput,
+      value: undefined,
       isSlice: false,
     },
     children: children,

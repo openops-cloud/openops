@@ -91,10 +91,12 @@ describe('useSelectorData', () => {
     const stepAData = {
       output: { foo: 1 },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     };
     const stepBData = {
       output: { bar: 2 },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     };
 
     stepTestOutputCache.setStepData('a', stepAData);
@@ -148,6 +150,49 @@ describe('useSelectorData', () => {
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
     expect(forceRerender).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch or rerender when all steps are already cached on a subsequent load', async () => {
+    const stepIds = ['a', 'b'];
+    const flowVersionId = 'fv7';
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
+
+    stepTestOutputCache.setStepData('a', {
+      output: { x: 1 },
+      lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
+    });
+    stepTestOutputCache.setStepData('b', {
+      output: { y: 2 },
+      lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
+    });
+
+    const initialLoad = false;
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
+    await waitFor(() => !result.current.isLoading);
+
+    expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
+    expect(forceRerender).not.toHaveBeenCalled();
+  });
+
+  it('only caches step IDs present in the API response', async () => {
+    const stepIds = ['a', 'b', 'c'];
+    const flowVersionId = 'fv8';
+    // API returns data for 'a' and 'c' but not 'b'
+    const testData = {
+      a: { output: { foo: 1 }, lastTestDate: '2024-01-01T00:00:00Z' },
+      c: { output: { baz: 3 }, lastTestDate: '2024-01-01T00:00:00Z' },
+    };
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
+
+    const initialLoad = true;
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
+    await waitFor(() => !result.current.isLoading);
+
+    expect(stepTestOutputCache.getStepData('a')).toEqual(testData.a);
+    expect(stepTestOutputCache.getStepData('c')).toEqual(testData.c);
+    expect(stepTestOutputCache.getStepData('b')).toBeUndefined();
   });
 
   it('does not fetch if isDataSelectorVisible is false', async () => {

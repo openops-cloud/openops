@@ -1,7 +1,8 @@
 import { Collapsible, CollapsibleTrigger } from '@openops/components/ui';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
-import { memo } from 'react';
+import { memo, useCallback, useSyncExternalStore } from 'react';
 
+import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNodeContent } from './data-selector-node-content';
 import { MentionTreeNode } from './data-selector-utils';
 import { TestStepSection } from './test-step-section';
@@ -10,26 +11,33 @@ type DataSelectoNodeProps = {
   node: MentionTreeNode;
   depth: number;
   searchTerm: string;
-  getExpanded: (nodeKey: string) => boolean;
-  setExpanded: (nodeKey: string, expanded: boolean) => void;
 };
 
 const DataSelectorNode = memo(
-  ({
-    node,
-    depth,
-    searchTerm,
-    getExpanded,
-    setExpanded,
-  }: DataSelectoNodeProps) => {
+  ({ node, depth, searchTerm }: DataSelectoNodeProps) => {
+    const subscribe = useCallback(
+      (callback: () => void) =>
+        stepTestOutputCache.subscribe(node.key, callback),
+      [node.key],
+    );
+    const getSnapshot = useCallback(
+      () => stepTestOutputCache.getExpanded(node.key),
+      [node.key],
+    );
+    const expanded = useSyncExternalStore(subscribe, getSnapshot);
+
+    const handleSetExpanded = useCallback(
+      (newExpanded: boolean) =>
+        stepTestOutputCache.setExpanded(node.key, newExpanded),
+      [node.key],
+    );
+
     if (node.data.isTestStepNode) {
       return (
         <TestStepSection stepName={node.data.propertyPath}></TestStepSection>
       );
     }
-    const expanded = getExpanded(node.key);
-    const handleSetExpanded = (expanded: boolean) =>
-      setExpanded(node.key, expanded);
+
     return (
       <Collapsible
         className="w-full"
@@ -54,8 +62,6 @@ const DataSelectorNode = memo(
                     node={childNode}
                     key={childNode.key}
                     searchTerm={searchTerm}
-                    getExpanded={getExpanded}
-                    setExpanded={setExpanded}
                   ></DataSelectorNode>
                 ))}
               </div>

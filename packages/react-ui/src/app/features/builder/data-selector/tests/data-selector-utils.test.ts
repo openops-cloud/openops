@@ -475,6 +475,174 @@ describe('dataSelectorUtils', () => {
     });
   });
 
+  describe('traverseStepOutputAndReturnMentionTree — large arrays (>100 items)', () => {
+    it('slices arrays larger than 100 items into child slice nodes', () => {
+      const items = Array.from({ length: 150 }, (_, i) => `item-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: true,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+
+      expect(node.children).toHaveLength(2);
+      expect(node.children?.every((c) => c.data.isSlice)).toBe(true);
+    });
+
+    it('parent node of a large array has value undefined to avoid expensive serialization during search', () => {
+      const items = Array.from({ length: 150 }, (_, i) => i);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+
+      expect(node.data.value).toBeUndefined();
+    });
+
+    it('arrays with exactly 100 items are not sliced', () => {
+      const items = Array.from({ length: 100 }, (_, i) => `item-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: true,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+
+      expect(node.children).toHaveLength(100);
+      expect(node.children?.every((c) => !c.data.isSlice)).toBe(true);
+    });
+
+    it('slice display names reflect correct index ranges', () => {
+      const items = Array.from({ length: 250 }, (_, i) => i);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Results',
+      });
+
+      const sliceNames = node.children?.map((c) => c.data.displayName);
+      expect(sliceNames).toEqual([
+        'Results 0-99',
+        'Results 100-199',
+        'Results 200-249',
+      ]);
+    });
+
+    it('property paths in sliced items use correct global indices', () => {
+      const items = Array.from({ length: 150 }, (_, i) => `val-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Items',
+      });
+
+      // first item of first slice → index 0
+      const firstSlice = node.children?.[0];
+      expect(firstSlice?.children?.[0].data.propertyPath).toBe('step1[0]');
+
+      // first item of second slice → index 100
+      const secondSlice = node.children?.[1];
+      expect(secondSlice?.children?.[0].data.propertyPath).toBe('step1[100]');
+    });
+
+    it('leaf values inside slices are preserved', () => {
+      const items = Array.from({ length: 150 }, (_, i) => `val-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Items',
+      });
+
+      const firstSlice = node.children?.[0];
+      expect(firstSlice?.children?.[0].data.value).toBe('val-0');
+
+      const secondSlice = node.children?.[1];
+      expect(secondSlice?.children?.[0].data.value).toBe('val-100');
+    });
+
+    it('no items are lost across slices — total equals original array length', () => {
+      const items = Array.from({ length: 150 }, (_, i) => `val-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Items',
+      });
+
+      const totalItems = node.children?.reduce(
+        (sum, slice) => sum + (slice.children?.length ?? 0),
+        0,
+      );
+      expect(totalItems).toBe(150);
+    });
+
+    it('last item of the first slice has the correct value and property path', () => {
+      const items = Array.from({ length: 150 }, (_, i) => `val-${i}`);
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: items,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Items',
+      });
+
+      const firstSlice = node.children?.[0];
+      const lastItem = firstSlice?.children?.[firstSlice.children.length - 1];
+      expect(lastItem?.data.value).toBe('val-99');
+      expect(lastItem?.data.propertyPath).toBe('step1[99]');
+    });
+  });
+
+  describe('filterBy — output correctness and input stability', () => {
+    it('does not modify the input array or its nodes when a query is provided', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'parent',
+          data: { propertyPath: 'p', displayName: 'Parent' },
+          children: [
+            {
+              key: 'child-match',
+              data: {
+                propertyPath: 'p.c1',
+                displayName: 'Match',
+                value: 'found',
+              },
+            },
+            {
+              key: 'child-no-match',
+              data: {
+                propertyPath: 'p.c2',
+                displayName: 'Skip',
+                value: 'nope',
+              },
+            },
+          ],
+        },
+      ];
+
+      const snapshotBefore = JSON.stringify(nodes);
+      dataSelectorUtils.filterBy(nodes, 'found');
+
+      expect(JSON.stringify(nodes)).toBe(snapshotBefore);
+    });
+
+    it('returns the same reference when query is empty', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'n1',
+          data: { propertyPath: 'p1', displayName: 'N1', value: 'v1' },
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, '');
+      expect(result).toBe(nodes);
+    });
+  });
+
   describe('hasStepSampleData', () => {
     it('returns false when step is undefined', () => {
       const result = dataSelectorUtils.hasStepSampleData(undefined);
@@ -536,6 +704,282 @@ describe('dataSelectorUtils', () => {
       };
       const result = dataSelectorUtils.hasStepSampleData(step as any);
       expect(result).toBe(true);
+    });
+
+    it('returns true when sampleData is a non-empty array', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: [1, 2, 3] } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(true);
+    });
+
+    it('returns false when sampleData is an empty array', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: [] } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('traverseStepOutputAndReturnMentionTree — primitive and empty inputs', () => {
+    it('returns a leaf node for a string value', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: 'hello',
+        success: true,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBe('hello');
+      expect(node.data.propertyPath).toBe('step1');
+      expect(node.data.displayName).toBe('Step 1');
+      expect(node.children).toBeUndefined();
+    });
+
+    it('returns a leaf node for a number value', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: 42,
+        success: true,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBe(42);
+      expect(node.children).toBeUndefined();
+    });
+
+    it('returns a leaf node for a boolean value', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: false,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBe(false);
+      expect(node.children).toBeUndefined();
+    });
+
+    it('returns a leaf node for null', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: null,
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBeNull();
+      expect(node.children).toBeUndefined();
+    });
+
+    it('returns Empty List for an empty array', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: [],
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBe('Empty List');
+      expect(node.children).toEqual([]);
+    });
+
+    it('returns Empty List for an empty object', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: {},
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.data.value).toBe('Empty List');
+      expect(node.children).toEqual([]);
+    });
+  });
+
+  describe('traverseStepOutputAndReturnMentionTree — object key escaping', () => {
+    it('escapes single quotes in object keys', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: { "it's a key": 'value' },
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.children?.[0].data.propertyPath).toBe(
+        "step1['it\\'s a key']",
+      );
+    });
+
+    it('escapes double quotes in object keys', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: { 'say "hello"': 'value' },
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.children?.[0].data.propertyPath).toBe(
+        'step1[\'say \\"hello\\"\']',
+      );
+    });
+
+    it('escapes backslashes in object keys', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: { 'path\\to': 'value' },
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.children?.[0].data.propertyPath).toBe("step1['path\\\\to']");
+    });
+
+    it('escapes newline characters in object keys', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: { 'line1\nline2': 'value' },
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      // regex escapes `\n` to backslash + literal newline char
+      expect(node.children?.[0].data.propertyPath).toBe(
+        "step1['line1\\\nline2']",
+      );
+    });
+
+    it('does not escape plain alphanumeric keys', () => {
+      const node = dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+        stepOutput: { normalKey: 'value' },
+        success: null,
+        propertyPath: 'step1',
+        displayName: 'Step 1',
+      });
+      expect(node.children?.[0].data.propertyPath).toBe("step1['normalKey']");
+      expect(node.children?.[0].data.displayName).toBe('normalKey');
+    });
+  });
+
+  describe('filterBy — additional edge cases', () => {
+    it('includes parent with no matching children when parent displayName matches', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'parent',
+          data: {
+            propertyPath: 'p',
+            displayName: 'MatchParent',
+            value: 'parent-value',
+          },
+          children: [
+            {
+              key: 'child',
+              data: {
+                propertyPath: 'p.c',
+                displayName: 'NoMatch',
+                value: 'unrelated',
+              },
+            },
+          ],
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, 'MatchParent');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('parent');
+      expect(result[0].children).toBeUndefined();
+    });
+
+    it('matches nodes whose value is an object by JSON stringifying it', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: {
+            propertyPath: 'p1',
+            displayName: 'Node 1',
+            value: { nested: 'findme' },
+          },
+        },
+        {
+          key: 'node2',
+          data: {
+            propertyPath: 'p2',
+            displayName: 'Node 2',
+            value: { nested: 'other' },
+          },
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, 'findme');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('node1');
+    });
+
+    it('excludes nodes with no value and non-matching displayName', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: { propertyPath: 'p1', displayName: 'Alpha' },
+        },
+        {
+          key: 'node2',
+          data: { propertyPath: 'p2', displayName: 'Beta' },
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, 'gamma');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getAllStepsMentions — additional edge cases', () => {
+    it('returns a test node when step has no id', () => {
+      const stepWithNoId = {
+        name: 'step1',
+        displayName: 'Step 1',
+        type: TriggerType.BLOCK,
+        settings: {},
+        valid: true,
+        dfsIndex: 0,
+      } as StepWithIndex;
+
+      const result = dataSelectorUtils.getAllStepsMentions([stepWithNoId], {
+        step1: {
+          input: {},
+          output: { foo: 'bar' },
+          lastTestDate: '2024-01-01',
+          success: true,
+        },
+      });
+
+      expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
+    });
+
+    it('uses sample data when step needs testing but has sample data', () => {
+      const stepWithSampleData = {
+        id: 'step1',
+        name: 'step1',
+        displayName: 'Step 1',
+        type: TriggerType.BLOCK,
+        settings: {
+          inputUiInfo: {
+            sampleData: { account: 'aws-prod' },
+          },
+        },
+        valid: true,
+        dfsIndex: 0,
+      } as StepWithIndex;
+
+      const result = dataSelectorUtils.getAllStepsMentions(
+        [stepWithSampleData],
+        {
+          step1: {
+            input: {},
+            output: {},
+            lastTestDate: undefined as any,
+            success: null,
+          },
+        },
+      );
+
+      // Should use sample data tree, not a test node
+      expect(result[0].children?.[0].data.isTestStepNode).toBeUndefined();
+      expect(result[0].children?.[0].data.displayName).toBe('account');
+      expect(result[0].children?.[0].data.value).toBe('aws-prod');
     });
   });
 });
