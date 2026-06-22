@@ -2,6 +2,7 @@ import { HttpMethod } from '@openops/blocks-common';
 import { Vendor } from '@openops/common';
 import { isEmpty } from '@openops/shared';
 import { format } from 'date-fns';
+import pLimit from 'p-limit';
 import { CloudabilityAuth } from '../auth';
 import { makeRequest } from './make-request';
 
@@ -88,19 +89,24 @@ export async function getRecommendations({
         )
       : [undefined];
 
+  // Limit to 2 concurrent chunk requests to stay within Cloudability's rate limits.
+  const concurrencyLimit = pLimit(2);
+
   // Chunked requests run concurrently; Promise.all preserves chunk order so
   // the merged result stays deterministic.
   const responses = await Promise.all(
     accountIdChunks.map((chunk) =>
-      makeRequest({
-        auth,
-        endpoint: url,
-        method: HttpMethod.GET,
-        queryParams: {
-          ...baseQueryParams,
-          ...(chunk ? { vendorAccountIds: chunk.join(',') } : {}),
-        },
-      }),
+      concurrencyLimit(() =>
+        makeRequest({
+          auth,
+          endpoint: url,
+          method: HttpMethod.GET,
+          queryParams: {
+            ...baseQueryParams,
+            ...(chunk ? { vendorAccountIds: chunk.join(',') } : {}),
+          },
+        }),
+      ),
     ),
   );
 
