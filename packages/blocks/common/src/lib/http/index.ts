@@ -13,3 +13,4 @@ export * from './core/http-response';
 export * from './core/media-type';
 export * from './core/query-params';
 export * from './core/standard-retry-after';
+export * from './retry/create-retry-config';

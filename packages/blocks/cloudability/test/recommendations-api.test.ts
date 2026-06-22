@@ -246,7 +246,7 @@ describe('recommendations-api', () => {
         expect(requestedIds).toEqual(manyAccountIds);
       });
 
-      test('issues chunked requests concurrently rather than serially', async () => {
+      test('issues up to 2 chunked requests concurrently (pLimit(2))', async () => {
         const resolvers: Array<(value: unknown) => void> = [];
         (makeRequest as jest.Mock).mockImplementation(
           () => new Promise((resolve) => resolvers.push(resolve)),
@@ -264,13 +264,18 @@ describe('recommendations-api', () => {
           vendorAccountIds: manyAccountIds,
         });
 
-        // flush microtasks so the request fan-out settles without resolving any response
+        // flush microtasks so the initial fan-out settles without resolving any response
         await new Promise((resolve) => setImmediate(resolve));
 
-        // a serial loop would have issued only the first request at this point
-        expect(resolvers.length).toBeGreaterThan(1);
+        // pLimit(2) means exactly 2 requests are in-flight at this point, not all at once
+        expect(resolvers).toHaveLength(2);
 
-        resolvers.forEach((resolve) => resolve([]));
+        // drain remaining batches: resolve each batch, flush so pLimit starts the next
+        while (resolvers.length > 0) {
+          resolvers.splice(0).forEach((resolve) => resolve([]));
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+
         await promise;
       });
 
