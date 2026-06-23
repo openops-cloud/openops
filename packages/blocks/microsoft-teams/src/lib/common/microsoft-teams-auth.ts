@@ -38,6 +38,9 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
   authUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize',
   tokenUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token',
   grantType: OAuth2GrantType.AUTHORIZATION_CODE,
+  extra: {
+    prompt: 'select_account',
+  },
   validate: async ({ auth }) => {
     try {
       const authValue = auth as BlockPropValueSchema<typeof microsoftTeamsAuth>;
