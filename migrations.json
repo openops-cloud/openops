@@ -1,43 +1,214 @@
 {
   "migrations": [
     {
-      "cli": "nx",
-      "version": "19.6.0-beta.4",
-      "description": "Ensure Module Federation DTS is turned off by default.",
-      "factory": "./src/migrations/update-19-6-0/turn-off-dts-by-default",
-      "package": "@nx/react",
-      "name": "update-19-6-0-turn-module-federation-dts-off"
+      "version": "23.0.0-beta.16",
+      "description": "Consolidates any remaining legacy releaseTag* flat properties into the nested releaseTag object. The flat properties were removed in Nx 23.",
+      "implementation": "./dist/src/migrations/update-23-0-0/consolidate-release-tag-config",
+      "package": "nx",
+      "name": "23-0-0-consolidate-release-tag-config"
+    },
+    {
+      "version": "23.0.0-beta.18",
+      "description": "Adds .nx/migrate-runs to .gitignore",
+      "implementation": "./dist/src/migrations/update-23-0-0/add-migrate-runs-to-git-ignore",
+      "package": "nx",
+      "name": "23-0-0-add-migrate-runs-to-git-ignore"
+    },
+    {
+      "version": "23.0.0-beta.16",
+      "description": "Rewrites `@nx/jest/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/jest`'s exports map. Named imports/exports of public symbols are routed to `@nx/jest` and the rest to the new `@nx/jest/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/jest/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/jest",
+      "name": "rewrite-jest-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.16",
+      "description": "Replaces the removed `jestProjectGenerator` export from `@nx/jest` with its replacement `configurationGenerator`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-jest-project-generator",
+      "package": "@nx/jest",
+      "name": "rewrite-jest-project-generator"
+    },
+    {
+      "version": "23.0.0-beta.22",
+      "description": "Migrate the deprecated `setupFile` option of the `@nx/jest:jest` executor: push the file path into `setupFilesAfterEnv` in the project's Jest config and remove the option from `project.json` and `nx.json` target defaults.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-jest-executor-setup-file",
+      "package": "@nx/jest",
+      "name": "migrate-jest-executor-setup-file"
+    },
+    {
+      "version": "23.0.0-beta.22",
+      "description": "Migrate the deprecated `skipSetupFile` option of the `@nx/jest:configuration` generator stored as a default in `nx.json` or per-project `project.json` to `setupFile: 'none'` (when `true`) or remove it (when `false`).",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-jest-configuration-skip-setup-file",
+      "package": "@nx/jest",
+      "name": "migrate-jest-configuration-skip-setup-file"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/jest/plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/jest",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
+    },
+    {
+      "version": "23.0.0-beta.25",
+      "description": "Rewrites `@nx/web/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/web`'s exports map. Named imports/exports of public symbols are routed to `@nx/web` and the rest to the new `@nx/web/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/web/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/web",
+      "name": "rewrite-web-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.25",
+      "description": "Rewrites `@nx/node/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/node`'s exports map. Named imports/exports of public symbols are routed to `@nx/node` and the rest to the new `@nx/node/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/node/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/node",
+      "name": "rewrite-node-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.10",
+      "description": "Rewrites imports of `@nx/workspace/src/utilities/typescript/compilation` to `@nx/js/internal`, where the module now lives.",
+      "implementation": "./dist/src/migrations/update-23-0-0/move-typescript-compilation-import",
+      "package": "@nx/workspace",
+      "name": "23-0-0-move-typescript-compilation-import"
+    },
+    {
+      "version": "23.0.0-beta.17",
+      "description": "Rewrites `@nx/eslint/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/eslint`'s exports map. Named imports/exports of public symbols are routed to `@nx/eslint` and the rest to the new `@nx/eslint/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/eslint/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/eslint",
+      "name": "rewrite-eslint-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/eslint/plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/eslint",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
     },
     {
       "cli": "nx",
-      "version": "19.6.0-beta.4",
-      "description": "Update the server file for Module Federation SSR port value to be the same as the 'serve' target port value.",
-      "factory": "./src/migrations/update-19-6-0/update-ssr-server-port",
+      "version": "23.0.0-beta.10",
+      "description": "Rewrites imports of NxReactWebpackPlugin from '@nx/react' to the sub-path '@nx/react/webpack-plugin'.",
+      "factory": "./dist/src/migrations/update-23-0-0/remove-nx-react-webpack-plugin-import",
+      "documentation": "./dist/src/migrations/update-23-0-0/remove-nx-react-webpack-plugin-import.md",
       "package": "@nx/react",
-      "name": "update-module-federation-ssr-server-file"
+      "name": "update-23-0-0-remove-nx-react-webpack-plugin-import"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/react/router-plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/react",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
+    },
+    {
+      "version": "23.0.0-beta.25",
+      "description": "Rewrites `@nx/react/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/react`'s exports map. Named imports/exports of public symbols are routed to `@nx/react` and the rest to the new `@nx/react/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/react/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/react",
+      "name": "rewrite-react-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.14",
+      "description": "Rewrites `@nx/js/src/*` subpath imports to the new `@nx/js/internal` entry. The `./src/*` wildcard has been removed from `@nx/js`'s exports map; `@nx/js/src/release/version-actions` is preserved as a non-wildcard entry for back-compat with existing nx.json release configs. If a rewritten import resolves to a symbol that lives on the public `@nx/js` entry (e.g. `libraryGenerator`, `extractTsConfigBase`, `resolvePathsBaseUrl`), change the specifier to `@nx/js`.",
+      "factory": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/js",
+      "name": "23-0-0-rewrite-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/js/typescript` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/js",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
     },
     {
       "cli": "nx",
-      "version": "19.6.1-beta.0",
-      "description": "Ensure Target Defaults are set correctly for Module Federation.",
-      "factory": "./src/migrations/update-19-6-1/ensure-depends-on-for-mf",
-      "package": "@nx/react",
-      "name": "update-19-6-1-ensure-module-federation-target-defaults"
-    },
-    {
-      "cli": "nx",
-      "version": "19.6.3-beta.0",
-      "description": "Migrate proxy config files to match new format from webpack-dev-server v5.",
-      "implementation": "./src/migrations/update-19-6-3/proxy-config",
+      "version": "23.0.0-beta.10",
+      "description": "Rewrites imports of NxTsconfigPathsWebpackPlugin from '@nx/webpack' to the sub-path '@nx/webpack/tsconfig-paths-plugin'.",
+      "factory": "./dist/src/migrations/update-23-0-0/remove-nx-tsconfig-paths-webpack-plugin-import",
+      "documentation": "./dist/src/migrations/update-23-0-0/remove-nx-tsconfig-paths-webpack-plugin-import.md",
       "package": "@nx/webpack",
-      "name": "update-19-6-3-proxy-config"
+      "name": "update-23-0-0-remove-nx-tsconfig-paths-webpack-plugin-import"
     },
     {
-      "version": "19.6.0-beta.0",
-      "description": "Add dependsOn: [build] to preview targets using preview-server",
-      "implementation": "./src/migrations/update-19-6-0/add-depends-on-for-preview",
+      "version": "23.0.0-beta.24",
+      "description": "Rewrites `@nx/webpack/src/*` subpath imports now that the `./src/*` subpath is no longer exposed by `@nx/webpack`'s exports map. Named imports/exports of public symbols are routed to `@nx/webpack` and the rest to the new `@nx/webpack/internal` entry; `require`, dynamic `import` and `jest.mock` calls reference the whole module and are routed to `@nx/webpack/internal`.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rewrite-internal-subpath-imports",
+      "package": "@nx/webpack",
+      "name": "rewrite-webpack-internal-subpath-imports"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/webpack/plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/webpack",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
+    },
+    {
+      "version": "23.0.0-beta.10",
+      "description": "Safety net: ensure any remaining @nx/vite:test executor usages are swapped to @nx/vitest:test and @nx/vitest is installed.",
+      "implementation": "./dist/src/migrations/update-23-0-0/ensure-vitest-package-migration",
+      "documentation": "./dist/src/migrations/update-23-0-0/ensure-vitest-package-migration.md",
       "package": "@nx/vite",
-      "name": "update-19-6-0-add-depends-on-for-preview-server"
+      "name": "ensure-vitest-package-migration-23"
+    },
+    {
+      "version": "23.0.0-beta.10",
+      "requires": {
+        "vite": ">=8.0.0"
+      },
+      "description": "Rename `rollupOptions` to `rolldownOptions` in vite config files (top-level and inside `environments`). Vite 8 replaced Rollup with Rolldown.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rename-rollup-options-to-rolldown-options",
+      "documentation": "./dist/src/migrations/update-23-0-0/rename-rollup-options-to-rolldown-options.md",
+      "package": "@nx/vite",
+      "name": "rename-rollup-options-to-rolldown-options"
+    },
+    {
+      "version": "23.0.0-beta.10",
+      "requires": {
+        "vite": ">=8.0.0"
+      },
+      "description": "Create AI Instructions to help migrate users workspaces past breaking changes for Vite 8.",
+      "prompt": "tools/ai-migrations/@nx/vite/23.0.0/ai-instructions-for-vite-8.md",
+      "package": "@nx/vite",
+      "name": "create-ai-instructions-for-vite-8"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/vite/plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/vite",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename imports of `createNodesV2` from `@nx/storybook/plugin` to the canonical `createNodes` export.",
+      "implementation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes",
+      "documentation": "./dist/src/migrations/update-23-0-0/migrate-create-nodes-v2-to-create-nodes.md",
+      "package": "@nx/storybook",
+      "name": "update-23-0-0-migrate-create-nodes-v2-import"
+    },
+    {
+      "version": "23.0.0-beta.6",
+      "description": "Rewrite imports from `@nx/devkit/src/...` to `@nx/devkit` (for public symbols) or `@nx/devkit/internal` (for the rest), since deep imports are no longer reachable through the package's `exports` map.",
+      "implementation": "./dist/src/migrations/update-23-0-0/update-deep-imports",
+      "documentation": "./dist/src/migrations/update-23-0-0/update-deep-imports.md",
+      "package": "@nx/devkit",
+      "name": "update-devkit-deep-imports"
+    },
+    {
+      "version": "23.0.0-beta.24",
+      "description": "Rename deprecated CreateNodes `V2` type imports (CreateNodesV2, CreateNodesContextV2, CreateNodesResultV2, CreateNodesFunctionV2, NxPluginV2) from `@nx/devkit` to their canonical names.",
+      "implementation": "./dist/src/migrations/update-23-0-0/rename-create-nodes-v2-types",
+      "documentation": "./dist/src/migrations/update-23-0-0/rename-create-nodes-v2-types.md",
+      "package": "@nx/devkit",
+      "name": "update-23-0-0-rename-create-nodes-v2-types"
     }
   ]
 }
