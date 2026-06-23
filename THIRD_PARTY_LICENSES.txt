@@ -30177,7 +30177,7 @@ SOFTWARE
 The following npm packages may be included in this product:
 
  - jiti@1.21.7
- - jiti@2.4.2
+ - jiti@2.7.0
  - mlly@1.8.2
  - ufo@1.6.4
 
