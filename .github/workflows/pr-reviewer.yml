@@ -1,0 +1,16 @@
+name: PR Reviewer
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
+
+jobs:
+  review:
+    name: Review PR #${{ inputs.pr_number }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Trigger this workflow from the feature/pr-reviewer branch for the full implementation."
