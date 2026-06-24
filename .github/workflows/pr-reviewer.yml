@@ -6,7 +6,7 @@ on:
       pr_number:
         description: 'PR number to review'
         required: true
-        type: number
+        type: string
 
 permissions:
   contents: read
