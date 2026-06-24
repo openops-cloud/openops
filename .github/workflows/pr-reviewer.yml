@@ -28,7 +28,7 @@ jobs:
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
         run: |
-          echo "$PR_NUMBER" | grep -qE '^[0-9]+$' || {
+          echo "$PR_NUMBER" | grep -qE '^[1-9][0-9]*$' || {
             echo "ERROR: pr_number must be a positive integer, got: $PR_NUMBER"
             exit 1
           }
@@ -56,7 +56,9 @@ jobs:
           with open('.claude/commands/review-code.md') as f:
               content = f.read()
           content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
-          content = content.replace('$ARGUMENTS', os.environ['PR_NUMBER'])
+          pr_number = os.environ['PR_NUMBER']
+          content = content.replace('$ARGUMENTS', pr_number)
+          content = content.replace('{PR_NUMBER}', pr_number)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
               out.write('content<<__EOF__\n')
               out.write(content.strip())
