@@ -1,7 +1,7 @@
 import { createMCPClient } from '@ai-sdk/mcp';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { projectService } from '../../project/project-service';
-import { MCPTool, ToolSetWithProvider } from './types';
+import { MCPTool, ToolSetWithProvider, ToolWithProvider } from './types';
 
 export async function getTablesTools(projectId: string): Promise<MCPTool> {
   const mcpEndpoint = await projectService.getProjectMcpEndpoint(projectId);
@@ -33,7 +33,7 @@ export async function getTablesTools(projectId: string): Promise<MCPTool> {
       toolSet[name] = {
         ...tool,
         toolProvider: 'tables',
-      };
+      } as ToolWithProvider;
     }
   }
 

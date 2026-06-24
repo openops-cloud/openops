@@ -13,6 +13,7 @@
         "react": {
           "version": "detect"
         },
+        "import/ignore": ["@vitejs/plugin-react"],
         "import/resolver": {
           "alias": {
             "map": [["@", "./src"]],

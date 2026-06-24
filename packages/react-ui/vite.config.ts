@@ -66,7 +66,7 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    rollupOptions: {
+    rolldownOptions: {
       onLog(level, log, handler) {
         if (
           log.cause &&
