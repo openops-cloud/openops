@@ -208,7 +208,7 @@
     "ip-range-check": "0.2.0",
     "is-base64": "1.1.0",
     "isolated-vm": "6.1.2",
-    "js-yaml": "4.2.0",
+    "js-yaml": "5.0.0",
     "jsdom": "23.2.0",
     "json-server": "1.0.0-beta.15",
     "json-to-pretty-yaml": "1.2.2",
