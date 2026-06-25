@@ -103,4 +103,13 @@ export const PillDisabled: Story = {
   },
 };
 
+export const PillSmall: Story = {
+  args: {
+    options,
+    variant: 'pill',
+    size: 'sm',
+    onChange: action('onChange'),
+  },
+};
+
 export default meta;
