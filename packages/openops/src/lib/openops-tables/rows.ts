@@ -443,11 +443,16 @@ export async function batchDeleteRows(
   await executeWithConcurrencyLimit(
     async () => {
       const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
-      return await makeOpenOpsTablesPost(
-        url,
-        { items: params.rowIds },
-        authenticationHeader,
-      );
+
+      for (
+        let index = 0;
+        index < params.rowIds.length;
+        index += MAX_BATCH_ROWS
+      ) {
+        const items = params.rowIds.slice(index, index + MAX_BATCH_ROWS);
+
+        await makeOpenOpsTablesPost(url, { items }, authenticationHeader);
+      }
     },
     (error) => {
       logger.error('Error while batch deleting rows:', {
