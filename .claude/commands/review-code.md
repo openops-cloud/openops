@@ -3,17 +3,17 @@ name: review-code
 description: Review a GitHub pull request for the OpenOps codebase. Checks out the PR, analyzes changes through OpenOps-specific lenses, validates findings with confidence scoring, previews before posting, and supports inline comments.
 when_to_use: "Reviewing a PR; '/review-code <number>'; 'review PR', 'check PR #N', 'code review'."
 argument-hint: '[<pr-number>] [update]'
-allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Write, Agent, mcp__github__pull_request_read]
+allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Write, Agent]
 ---
 
 <!-- Tooling note: this `allowed-tools` list and the `--allowedTools` list in
 .github/workflows/pr-reviewer.yml must stay in sync. The frontmatter governs
 local `/review-code` runs; the workflow governs CI runs (which strips this
 frontmatter before passing the body as the prompt). AskUserQuestion is local-only
-(CI skips interaction). Write is needed by PR mode in both. All posting (inline
-review, summary comment, thread replies) goes through `gh api` over Bash — not
-MCP — so it works the same in CI and locally; `mcp__github__pull_request_read`
-is the only GitHub MCP tool, used solely to fetch PR metadata/diff/comments. -->
+(CI skips interaction). Write is needed by PR mode in both. This command uses NO
+GitHub MCP tools — all GitHub I/O (fetching PR metadata/diff/comments and posting
+the inline review, summary comment, and thread replies) goes through `gh`/`gh api`
+over Bash, so it behaves identically in CI and locally with no MCP server. -->
 
 # review-code
 
@@ -59,12 +59,26 @@ MERGE_BASE=$(git merge-base origin/main HEAD)
 
 ## Phase 2: Gather Context
 
-### PR mode — run in parallel
+### PR mode
 
-1. **Metadata + diff + existing comments/reviews** — call `mcp__github__pull_request_read` with `owner=$OWNER`, `repo=$REPO_NAME`, `pullNumber={PR_NUMBER}`. This returns the PR title, body, author, base branch, labels, full unified diff, inline review comments, and existing reviews in a single call.
-2. **Changed files** — `git diff --numstat origin/{BASE_REF}...HEAD` (sort descending by lines; skip lines starting with `-\t-\t`, those are binary)
+All context comes from `gh`/`git` — no MCP. Phase 1 already ran `gh pr checkout {PR_NUMBER}`, so `HEAD` is the PR head and the diff is available locally.
 
-Cross-reference existing inline comments and reviews from step 1 before the analysis phase to avoid re-raising points already covered by other reviewers.
+```bash
+# Metadata (title, body, author, base branch, labels) — capture BASE_REF for the diff
+BASE_REF=$(gh pr view {PR_NUMBER} --json baseRefName --jq '.baseRefName')
+gh pr view {PR_NUMBER} --json title,body,author,baseRefName,headRefName,labels,isDraft
+
+# Ensure the base is present locally, then diff against the merge base
+git fetch origin "$BASE_REF"
+git diff "origin/$BASE_REF...HEAD"            # full unified diff to analyze
+git diff --numstat "origin/$BASE_REF...HEAD"  # changed files; sort desc by lines, skip "-\t-\t" (binary)
+
+# Existing inline comments + reviews — to avoid re-raising covered points
+gh api "repos/$OWNER/$REPO_NAME/pulls/{PR_NUMBER}/comments" --paginate
+gh api "repos/$OWNER/$REPO_NAME/pulls/{PR_NUMBER}/reviews"  --paginate
+```
+
+Cross-reference the existing inline comments and reviews before the analysis phase to avoid re-raising points already covered by other reviewers.
 
 ### LOCAL mode
 
