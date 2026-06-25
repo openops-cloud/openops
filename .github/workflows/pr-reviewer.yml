@@ -7,6 +7,11 @@ on:
         description: 'PR number to review'
         required: true
         type: string
+      model:
+        description: 'Claude model to use'
+        required: false
+        default: 'claude-sonnet-4-6'
+        type: string
 
 permissions:
   contents: read
@@ -17,5 +22,77 @@ jobs:
   review:
     name: 'Review PR #${{ inputs.pr_number }}'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - run: echo "Trigger this workflow from the feature/pr-reviewer branch for the full implementation."
+      - name: Validate PR number
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          echo "$PR_NUMBER" | grep -qE '^[1-9][0-9]*$' || {
+            echo "ERROR: pr_number must be a positive integer, got: $PR_NUMBER"
+            exit 1
+          }
+
+      - name: Get GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v3.2.0
+        with:
+          client-id: ${{ vars.AGENT_GITHUB_APP_ID }}
+          private-key: ${{ secrets.AGENT_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          # Full history is required for `git merge-base` and the
+          # `origin/<base>...HEAD` diff used by the review command. A shallow
+          # clone leaves the merge base out of history and the diff comes back
+          # empty or wrong.
+          fetch-depth: 0
+
+      - name: Render prompt
+        id: prompt
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          python3 - <<'EOF'
+          import os, re
+          with open('.claude/commands/review-code.md') as f:
+              content = f.read()
+          content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
+          pr_number = os.environ['PR_NUMBER']
+          content = content.replace('$ARGUMENTS', pr_number)
+          content = content.replace('{PR_NUMBER}', pr_number)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write('content<<__EOF__\n')
+              out.write(content.strip())
+              out.write('\n__EOF__\n')
+          EOF
+
+      - name: Run PR review
+        id: review
+        env:
+          # The review command shells out to `gh` (pr checkout, summary-comment
+          # upsert). Those calls need an authenticated token in the Bash env —
+          # the MCP github tools are authenticated separately and do not cover
+          # raw `gh` invocations.
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+        uses: anthropics/claude-code-action@80b31826338489861333dc17217865dfe8085cdc # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ steps.app_token.outputs.token }}
+          claude_args: >-
+            --allowedTools "Bash,Read,Glob,Grep,Write,Agent"
+            --model "${{ inputs.model }}"
+          prompt: ${{ steps.prompt.outputs.content }}
+
+      - name: Notify on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "<!-- claude-pr-review-error -->
+          **Claude PR Review failed.** The review could not be completed — [check the Actions log]($RUN_URL) for details."
