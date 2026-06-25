@@ -45,6 +45,11 @@ jobs:
         uses: actions/checkout@v7.0.0
         with:
           token: ${{ steps.app_token.outputs.token }}
+          # Full history is required for `git merge-base` and the
+          # `origin/<base>...HEAD` diff used by the review command. A shallow
+          # clone leaves the merge base out of history and the diff comes back
+          # empty or wrong.
+          fetch-depth: 0
 
       - name: Render prompt
         id: prompt
@@ -67,12 +72,18 @@ jobs:
 
       - name: Run PR review
         id: review
+        env:
+          # The review command shells out to `gh` (pr checkout, summary-comment
+          # upsert). Those calls need an authenticated token in the Bash env —
+          # the MCP github tools are authenticated separately and do not cover
+          # raw `gh` invocations.
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
         uses: anthropics/claude-code-action@80b31826338489861333dc17217865dfe8085cdc # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app_token.outputs.token }}
           claude_args: >-
-            --allowedTools "Bash,Read,Write,Agent,mcp__github__pull_request_read,mcp__github__pull_request_review_write,mcp__github__add_comment_to_pending_review,mcp__github__add_reply_to_pull_request_comment,mcp__github__add_issue_comment"
+            --allowedTools "Bash,Read,Glob,Grep,Write,Agent,mcp__github__pull_request_read,mcp__github__pull_request_review_write,mcp__github__add_comment_to_pending_review,mcp__github__add_reply_to_pull_request_comment,mcp__github__add_issue_comment"
             --model "${{ inputs.model }}"
           prompt: ${{ steps.prompt.outputs.content }}
 

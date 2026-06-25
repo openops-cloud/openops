@@ -3,8 +3,14 @@ name: review-code
 description: Review a GitHub pull request for the OpenOps codebase. Checks out the PR, analyzes changes through OpenOps-specific lenses, validates findings with confidence scoring, previews before posting, and supports inline comments.
 when_to_use: "Reviewing a PR; '/review-code <number>'; 'review PR', 'check PR #N', 'code review'."
 argument-hint: '[<pr-number>] [update]'
-allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Agent, mcp__github__pull_request_read, mcp__github__pull_request_review_write, mcp__github__add_comment_to_pending_review, mcp__github__add_reply_to_pull_request_comment, mcp__github__add_issue_comment]
+allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Write, Agent, mcp__github__pull_request_read, mcp__github__pull_request_review_write, mcp__github__add_comment_to_pending_review, mcp__github__add_reply_to_pull_request_comment, mcp__github__add_issue_comment]
 ---
+
+<!-- Tooling note: this `allowed-tools` list and the `--allowedTools` list in
+.github/workflows/pr-reviewer.yml must stay in sync. The frontmatter governs
+local `/review-code` runs; the workflow governs CI runs (which strips this
+frontmatter before passing the body as the prompt). AskUserQuestion is local-only
+(CI skips interaction). Write is needed by PR mode in both. -->
 
 # review-code
 
@@ -38,11 +44,12 @@ If the working tree is unclean, stop and tell the user to stash or commit first.
 
 ### LOCAL mode
 
-Determine the merge base:
+Determine the merge base against the freshly-fetched remote `main` (use
+`origin/main` consistently — never local `main`, which may be stale):
 
 ```bash
 git fetch origin main
-git merge-base origin/main HEAD
+MERGE_BASE=$(git merge-base origin/main HEAD)
 ```
 
 ---
@@ -58,8 +65,9 @@ Cross-reference existing inline comments and reviews from step 1 before the anal
 
 ### LOCAL mode
 
+Reuse the `MERGE_BASE` resolved in Phase 1 (against `origin/main`):
+
 ```bash
-MERGE_BASE=$(git merge-base main HEAD)
 git diff ${MERGE_BASE}..HEAD
 git diff --numstat ${MERGE_BASE}..HEAD
 ```
@@ -69,7 +77,14 @@ No existing comment fetch needed.
 ### Both modes
 
 - Read `AGENTS.md` at the repo root for project conventions
-- Read the top 5 most-changed text files (up to 500 lines each) using the Read tool
+- Read the top 5 most-changed **source** files (up to 500 lines each) using the Read tool. When ranking by `--numstat`, **exclude** generated/vendored/lock files — they are churn, not logic, and would crowd out the files that matter. Skip: `*-lock.json`, `*.lock`, `package-lock.json`, `pnpm-lock.yaml`, anything under `dist/`, `build/`, `.nx/`, generated snapshots, and minified bundles. Still review lockfiles for the dependency-and-licensing lens (§12), but do not spend a "most-changed" slot reading them line by line.
+
+### Large-diff handling
+
+Before loading the full diff into context, check the size from `--numstat`:
+
+- **> ~1500 changed lines or > 40 files:** do not pull the entire unified diff into one context. Analyze per-file (or per-package), reading each file's hunks from `git diff -- <path>` as you go, and prioritize files by the lenses they trigger (migrations, routes, engine/worker, shared types) over raw line count.
+- If you must bound coverage, **say so explicitly** in the output (a `Coverage` note listing what was not deeply reviewed) — silent truncation reads as "I reviewed everything" when you did not.
 
 ---
 
@@ -288,6 +303,8 @@ Each subagent receives:
 - PR title and description
 - Relevant AGENTS.md section
 
+**The subagent has `Read`, `Glob`, and `Grep` and must use them.** The ± 10-line window is a starting point, not the limit. Many of the strongest findings are cross-file — "column dropped while still referenced in an ORM entity", "endpoint missing from the frontend API layer", "TypeBox schema out of sync with the `packages/shared` type", "block imports from `packages/server/api`". A subagent that cannot see the referenced file **must open it** before voting, not DROP the issue as unverifiable or rubber-stamp it. Resolve the claim against the actual repo: open the entity/type/route/caller the finding depends on and confirm the relationship holds on the post-change tree.
+
 The subagent independently verifies each issue and returns a result per issue:
 
 | Field      | Value                                            |
@@ -420,12 +437,18 @@ If the change is genuinely low-risk: "LGTM — no reliability concerns."
 **If local**: post only if the user approved in Phase 4.
 **If CI**: post directly (no confirmation needed).
 
+Unlike the summary comment, inline review threads are **not** upserted — a re-run would post duplicate threads. Before submitting, cross-reference the existing inline comments fetched in Phase 2 (their `path` + `line` + body) and skip any finding already raised on the same line, whether by Claude or another reviewer. Only post inline comments that are genuinely new.
+
 Submit a GitHub review with inline comments using `mcp__github__pull_request_review_write` with:
 
 - `owner=$OWNER`, `repo=$REPO_NAME`, `pullNumber={PR_NUMBER}`
 - `event=COMMENT`
 - `body=""` (empty — the verdict lives in the summary comment, not the review body, to avoid two separate Claude posts)
 - `comments` array — one entry per finding that maps to a diff line: `{ path, line, body: "**[{CATEGORY}]** {DESCRIPTION}" }`
+
+**Only include lines that are part of the diff.** GitHub rejects the _entire_ review submission if any single comment targets a line that is not an added/changed line on the right side of the diff (unchanged context lines are not addable). Before building the `comments` array, drop any finding whose line is not present as a `+` or changed line in the hunks — move it to the summary comment instead. A finding on a real but unaddable line is still worth reporting; it just cannot be an inline thread.
+
+If the review write still fails (e.g. one line slips through and the API rejects the batch), **do not lose the findings**: fall back to including every inline finding in the summary comment under a `### Inline findings` heading, so the review is never silently dropped. Report the fallback in your final message.
 
 Findings that cannot be mapped to a diff line are included in the summary comment (next step) rather than posted separately.
 
@@ -436,9 +459,11 @@ EXISTING=$(gh api repos/$OWNER/$REPO_NAME/issues/{PR_NUMBER}/comments \
   --jq '[.[] | select(.body | startswith("<!-- claude-pr-review-summary -->"))] | first | .id // empty')
 
 if [ -n "$EXISTING" ]; then
+  # --raw-field (not --field): --field coerces values that look like
+  # true/false/null/numbers, which would mangle a markdown body.
   gh api repos/$OWNER/$REPO_NAME/issues/comments/$EXISTING \
     --method PATCH \
-    --field body="$(cat /tmp/review-{PR_NUMBER}.md)"
+    --raw-field body="$(cat /tmp/review-{PR_NUMBER}.md)"
 fi
 ```
 
