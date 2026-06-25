@@ -485,6 +485,42 @@ describe('batchDeleteRows', () => {
     );
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
+
+  test('Should split batch delete requests into chunks of 200', async () => {
+    const rowIds = Array.from({ length: 450 }, (_, index) => index + 1);
+
+    makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await batchDeleteRows({
+      tableId: 5,
+      tokenOrResolver: 'token',
+      rowIds,
+    });
+
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(0, 200) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(200, 400) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(400, 450) },
+      'some header',
+    );
+  });
 });
 
 describe('truncateTable', () => {
