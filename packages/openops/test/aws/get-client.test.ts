@@ -3,9 +3,15 @@ jest.mock('@openops/server-shared', () => ({
   system: mockSystem,
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
+    AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
   },
 }));
 
+jest.mock('../../src/lib/aws/azure-aws-federation', () => ({
+  getAwsCredentialsFromAzureIdentity: jest.fn(),
+}));
+
+import { getAwsCredentialsFromAzureIdentity } from '../../src/lib/aws/azure-aws-federation';
 import { getAwsClient } from '../../src/lib/aws/get-client';
 
 class MockServiceClient {
@@ -75,7 +81,9 @@ describe('getClient', () => {
   });
 
   test('should not throw an error if credentials are not required', () => {
-    mockSystem.getBoolean.mockReturnValue(true);
+    mockSystem.getBoolean.mockReturnValueOnce(true);
+    mockSystem.getBoolean.mockReturnValueOnce(false);
+
     const credentials = {
       accessKeyId: '',
       secretAccessKey: '',
@@ -87,6 +95,46 @@ describe('getClient', () => {
         region,
         endpoint: undefined,
       });
+    } finally {
+      mockSystem.getBoolean.mockReturnValue(false);
+    }
+  });
+
+  test('should use Azure managed identity when configured', async () => {
+    mockSystem.getBoolean.mockImplementation((prop) => {
+      if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') {
+        return true;
+      }
+      if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') {
+        return true;
+      }
+      return false;
+    });
+
+    const mockCreds = {
+      AccessKeyId: 'azure-key',
+      SecretAccessKey: 'azure-secret',
+    };
+    (getAwsCredentialsFromAzureIdentity as jest.Mock).mockResolvedValue(
+      mockCreds,
+    );
+
+    const credentials = {
+      accessKeyId: '',
+      secretAccessKey: '',
+    };
+
+    try {
+      const client = getAwsClient(MockServiceClient, credentials, region);
+      expect(client).toBeInstanceOf(MockServiceClient);
+      expect(typeof client.config.credentials).toBe('function');
+
+      const result = await client.config.credentials();
+      expect(result).toEqual({
+        accessKeyId: 'azure-key',
+        secretAccessKey: 'azure-secret',
+      });
+      expect(getAwsCredentialsFromAzureIdentity).toHaveBeenCalledWith(region);
     } finally {
       mockSystem.getBoolean.mockReturnValue(false);
     }

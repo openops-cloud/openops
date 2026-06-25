@@ -104,6 +104,7 @@ function staticValuesToOptions(values: StaticOptionValue[]): WizardOption[] {
     id: v.id,
     displayName: v.displayName,
     ...(v.imageLogoUrl !== undefined && { imageLogoUrl: v.imageLogoUrl }),
+    ...(v.items !== undefined && { items: v.items }),
   }));
 }
 

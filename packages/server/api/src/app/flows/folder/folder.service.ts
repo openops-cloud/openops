@@ -14,6 +14,7 @@ import {
   UNCATEGORIZED_FOLDER_ID,
   UpdateFolderRequest,
 } from '@openops/shared';
+import { QueryFailedError } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { flowService } from '../flow/flow.service';
 import { getFolderFlows } from './folder-flows';
@@ -35,19 +36,6 @@ export const flowFolderService = {
   async update(params: UpdateParams): Promise<FolderDto> {
     const { projectId, folderId, request } = params;
     const folder = await this.getOneOrThrow({ projectId, folderId });
-    const folderWithDisplayName = await this.getOneByDisplayNameCaseInsensitive(
-      {
-        projectId,
-        displayName: request.displayName,
-        contentType: folder.contentType,
-      },
-    );
-    if (folderWithDisplayName && folderWithDisplayName.id !== folderId) {
-      throw new ApplicationError({
-        code: ErrorCode.VALIDATION,
-        params: { message: 'Folder displayName is used' },
-      });
-    }
 
     const parentFolder = await flowFolderService.getParentFolder(
       projectId,
@@ -60,6 +48,21 @@ export const flowFolderService = {
         params: {
           message: 'Parent folder has different content type than the request',
         },
+      });
+    }
+
+    const folderWithDisplayName = await this.getOneByDisplayNameCaseInsensitive(
+      {
+        projectId,
+        displayName: request.displayName,
+        contentType: folder.contentType,
+        parentFolderId: request.parentFolderId,
+      },
+    );
+    if (folderWithDisplayName && folderWithDisplayName.id !== folderId) {
+      throw new ApplicationError({
+        code: ErrorCode.VALIDATION,
+        params: { message: 'Folder displayName is used' },
       });
     }
 
@@ -78,6 +81,7 @@ export const flowFolderService = {
         projectId,
         displayName: request.displayName,
         contentType: requestContentType,
+        parentFolderId: request.parentFolderId,
       },
     );
     if (!isNil(folderWithDisplayName)) {
@@ -96,12 +100,29 @@ export const flowFolderService = {
         projectId,
         displayName: request.displayName,
         contentType: requestContentType,
+        parentFolderId: request.parentFolderId,
       },
     );
     if (!isNil(folderWithDisplayName)) {
       return folderWithDisplayName;
     }
-    return createFolder(params);
+    try {
+      return await createFolder(params);
+    } catch (e: unknown) {
+      if (e instanceof QueryFailedError) {
+        const existingFolder = await this.getOneByDisplayNameCaseInsensitive({
+          projectId,
+          displayName: request.displayName,
+          contentType: requestContentType,
+          parentFolderId: request.parentFolderId,
+        });
+
+        if (!isNil(existingFolder)) {
+          return existingFolder;
+        }
+      }
+      throw e;
+    }
   },
   async getParentFolder(
     projectId: string,
@@ -179,15 +200,24 @@ export const flowFolderService = {
   async getOneByDisplayNameCaseInsensitive(
     params: GetOneByDisplayNameParams,
   ): Promise<Folder | null> {
-    const { projectId, displayName, contentType } = params;
-    return folderRepo()
+    const { projectId, displayName, contentType, parentFolderId } = params;
+    const query = folderRepo()
       .createQueryBuilder('folder')
       .where('folder.projectId = :projectId', { projectId })
       .andWhere('LOWER(folder.displayName) = LOWER(:displayName)', {
         displayName,
       })
-      .andWhere('folder.contentType = :contentType', { contentType })
-      .getOne();
+      .andWhere('folder.contentType = :contentType', { contentType });
+
+    if (isNil(parentFolderId)) {
+      query.andWhere('folder.parentFolderId IS NULL');
+    } else {
+      query.andWhere('folder.parentFolderId = :parentFolderId', {
+        parentFolderId,
+      });
+    }
+
+    return query.getOne();
   },
   async getOneOrThrow(params: GetOneOrThrowParams): Promise<FolderDto> {
     const { projectId, folderId } = params;
@@ -221,16 +251,13 @@ async function createFolder(params: UpsertParams): Promise<FolderDto> {
     request.parentFolderId,
   );
 
-  await folderRepo().upsert(
-    {
-      id: folderId,
-      projectId,
-      parentFolder,
-      displayName: request.displayName,
-      contentType: requestContentType,
-    },
-    ['projectId', 'contentType', 'displayName'],
-  );
+  await folderRepo().insert({
+    id: folderId,
+    projectId,
+    parentFolder,
+    displayName: request.displayName,
+    contentType: requestContentType,
+  });
 
   const folder = await folderRepo().findOneByOrFail({
     projectId,
@@ -278,6 +305,7 @@ type GetOneByDisplayNameParams = {
   projectId: ProjectId;
   displayName: string;
   contentType: ContentType;
+  parentFolderId?: FolderId;
 };
 
 type GetOneOrThrowParams = {

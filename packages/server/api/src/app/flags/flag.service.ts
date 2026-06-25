@@ -284,12 +284,6 @@ export const flagService = {
         updated,
       },
       {
-        id: FlagId.CANDU_CLIENT_TOKEN,
-        value: system.get<string>(AppSystemProp.CANDU_CLIENT_TOKEN),
-        created,
-        updated,
-      },
-      {
         id: FlagId.SAMPLE_DATA_SIZE_LIMIT_KB,
         value: system.getNumber(AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB),
         created,
@@ -314,6 +308,7 @@ export const flagService = {
     return `${backendUrl}redirect`;
   },
   async getCurrentRelease(): Promise<string> {
+    // eslint-disable-next-line @nx/enforce-module-boundaries
     const packageJson = await import('package.json');
     return packageJson.version;
   },

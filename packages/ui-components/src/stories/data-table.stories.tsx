@@ -1,7 +1,6 @@
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { waitFor } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BrowserRouter } from 'react-router-dom';
+import { expect, waitFor } from 'storybook/test';
 
 import { DataTable } from '@/ui/data-table';
 import { ScrollArea } from '@/ui/scroll-area';

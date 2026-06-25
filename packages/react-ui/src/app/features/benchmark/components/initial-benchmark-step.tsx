@@ -8,6 +8,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 
+import { sortBySelectability } from '@/app/lib/provider-sorting';
 import { CLOUD_PROVIDERS, CloudProvider } from '../cloud-providers';
 import { ComingSoonLabel } from './coming-soon-label';
 import { NotConnectedContent } from './not-connected-content';
@@ -58,6 +59,10 @@ export const InitialBenchmarkStep = ({
   onConnect,
   connectedProviders,
 }: InitialBenchmarkStepProps) => {
+  const sortedProviders = sortBySelectability(CLOUD_PROVIDERS, {
+    isSelectable: (provider) => provider.enabled,
+    isConnected: (provider) => connectedProviders?.[provider.value] === true,
+  });
   return (
     <>
       <StepTitle>{t("Let's create your Benchmark Report!")}</StepTitle>
@@ -78,7 +83,7 @@ export const InitialBenchmarkStep = ({
           onValueChange={onProviderChange}
         >
           <>
-            {CLOUD_PROVIDERS.map((provider) => (
+            {sortedProviders.map((provider) => (
               <SelectOption
                 key={provider.value}
                 value={provider.value}

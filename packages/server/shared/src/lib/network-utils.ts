@@ -44,6 +44,10 @@ const getInternalApiUrl = (): string => {
     return process.env['OPS_SERVER_API_URL'] ?? 'http://127.0.0.1:3000/';
   }
 
+  if (system.isWorker() && process.env['OPS_SERVER_API_URL']) {
+    return process.env['OPS_SERVER_API_URL'];
+  }
+
   const url = system.getOrThrow(SharedSystemProp.FRONTEND_URL);
   return appendSlashAndApi(url);
 };

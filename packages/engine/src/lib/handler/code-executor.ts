@@ -7,7 +7,7 @@ import {
   StepOutputStatus,
 } from '@openops/shared';
 import path from 'path';
-import { CodeArtifact } from 'server-worker';
+import { CodeArtifact } from '../code-block/code-artifact';
 import { prepareCodeBlock } from '../code-block/prepare-code-block';
 import { initCodeSandbox } from '../core/code/code-sandbox';
 import {
@@ -82,7 +82,7 @@ const executeAction: ActionHandler<CodeAction> = async ({
 
   try {
     const artifactPath = path.resolve(
-      `${constants.baseCodeDirectory}/${constants.flowVersionId}/${action.name}/index.js`,
+      `${constants.baseCodeDirectory}/${constants.flowVersionId}/${constants.flowRunId}/${action.name}/index.js`,
     );
     const codeSandbox = await initCodeSandbox();
 
@@ -117,6 +117,7 @@ async function getExecutionResult(
     await prepareCodeBlock([
       {
         name: action.name,
+        flowRunId: constants.flowRunId,
         flowVersionId: constants.flowVersionId,
         flowVersionState: constants.flowVersionState,
         sourceCode: action.settings.sourceCode,

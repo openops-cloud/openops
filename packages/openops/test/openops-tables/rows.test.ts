@@ -1,6 +1,7 @@
 const makeOpenOpsTablesGetMock = jest.fn();
 const makeOpenOpsTablesPatchMock = jest.fn();
 const makeOpenOpsTablesPostMock = jest.fn();
+const makeOpenOpsTablesPutMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
@@ -13,6 +14,7 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => {
     makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
     makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
     makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
+    makeOpenOpsTablesPut: makeOpenOpsTablesPutMock,
     makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
   };
 });
@@ -54,11 +56,15 @@ import {
 import { axiosTablesRetryConfig } from '../../src/lib/openops-tables/requests-helpers';
 import {
   addRow,
+  batchCreateRows,
   batchDeleteRows,
+  batchTableAggregations,
+  batchUpdateRows,
   deleteRow,
   getRowByPrimaryKeyValue,
   getRows,
   OpenOpsRow,
+  truncateTable,
   updateRow,
 } from '../../src/lib/openops-tables/rows';
 
@@ -279,6 +285,131 @@ describe('add row', () => {
   });
 });
 
+describe('batchCreateRows', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should split batch create requests into chunks of 200', async () => {
+    const items = Array.from({ length: 450 }, (_, index) => ({
+      Name: `row-${index + 1}`,
+    }));
+
+    makeOpenOpsTablesPostMock
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }])
+      .mockResolvedValueOnce([{ id: 4 }]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchCreateRows({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      items,
+    });
+
+    expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(0, 200) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(200, 400) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      { items: items.slice(400, 450) },
+      'some header',
+    );
+  });
+});
+
+describe('batchUpdateRows', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should split batch update requests into chunks of 200', async () => {
+    const items = Array.from({ length: 450 }, (_, index) => ({
+      rowId: index + 1,
+      fields: {
+        Owner: `owner-${index + 1}@openops.com`,
+      },
+    }));
+
+    makeOpenOpsTablesPatchMock
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+      .mockResolvedValueOnce([{ id: 3 }])
+      .mockResolvedValueOnce([{ id: 4 }]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchUpdateRows({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      items,
+    });
+
+    expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledTimes(3);
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(0, 200).map((item) => ({
+          id: item.rowId,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(200, 400).map((item) => ({
+          id: item.rowId,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/1/batch/?user_field_names=true',
+      {
+        items: items.slice(400, 450).map((item) => ({
+          id: item.rowId,
+          ...item.fields,
+        })),
+      },
+      'some header',
+    );
+  });
+
+  test('Should short-circuit empty batch updates', async () => {
+    const result = await batchUpdateRows({
+      tableId: 1,
+      tokenOrResolver: 'token',
+      items: [],
+    });
+
+    expect(result).toStrictEqual([]);
+    expect(makeOpenOpsTablesPatchMock).not.toHaveBeenCalled();
+  });
+});
+
 describe('delete row', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -353,6 +484,274 @@ describe('batchDeleteRows', () => {
       'some header',
     );
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+
+  test('Should split batch delete requests into chunks of 200', async () => {
+    const rowIds = Array.from({ length: 450 }, (_, index) => index + 1);
+
+    makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await batchDeleteRows({
+      tableId: 5,
+      tokenOrResolver: 'token',
+      rowIds,
+    });
+
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      1,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(0, 200) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      2,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(200, 400) },
+      'some header',
+    );
+    expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
+      3,
+      'api/database/rows/table/5/batch-delete/',
+      { items: rowIds.slice(400, 450) },
+      'some header',
+    );
+  });
+});
+
+describe('truncateTable', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('posts to truncate endpoint with correct url and returns count', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ count: 42 });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await truncateTable({
+      tableId: 158,
+      tokenOrResolver: 'token',
+    });
+
+    expect(result).toStrictEqual({ count: 42 });
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/table/158/truncate/',
+      {},
+      'some header',
+    );
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+
+  test('returns zero count when table is already empty', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ count: 0 });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await truncateTable({
+      tableId: 1,
+      tokenOrResolver: 'token',
+    });
+
+    expect(result).toStrictEqual({ count: 0 });
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/table/1/truncate/',
+      {},
+      'some header',
+    );
+  });
+
+  test('logs error and rethrows when post fails', async () => {
+    const error = new Error('permission denied');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await expect(
+      truncateTable({
+        tableId: 123,
+        tokenOrResolver: 'token',
+      }),
+    ).rejects.toThrow('permission denied');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error while truncating table:',
+      expect.objectContaining({
+        error,
+        url: 'api/database/rows/table/123/truncate/',
+        tableId: 123,
+      }),
+    );
+  });
+
+  test('releases lock even when request fails', async () => {
+    const error = new Error('database error');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await expect(
+      truncateTable({
+        tableId: 5,
+        tokenOrResolver: 'token',
+      }),
+    ).rejects.toThrow('database error');
+
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+  });
+});
+
+describe('batchTableAggregations', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('posts to correct url with count aggregation', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ '1': { count: 5 } });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchTableAggregations({
+      tokenOrResolver: 'token',
+      tableIds: [1],
+      aggregations: [{ type: 'count' }],
+    });
+
+    expect(result).toStrictEqual({ '1': { count: 5 } });
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/batch-aggregations/',
+      { table_ids: [1], filters: [], aggregations: [{ type: 'count' }] },
+      'some header',
+    );
+    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+  });
+
+  test('posts to correct url with sum aggregation', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({
+      '2': { 'sum__Estimated savings USD per month': 27880 },
+    });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchTableAggregations({
+      tokenOrResolver: 'token',
+      tableIds: [2],
+      aggregations: [{ type: 'sum', field: 'Estimated savings USD per month' }],
+    });
+
+    expect(result).toStrictEqual({
+      '2': { 'sum__Estimated savings USD per month': 27880 },
+    });
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/batch-aggregations/',
+      {
+        table_ids: [2],
+        filters: [],
+        aggregations: [
+          { type: 'sum', field: 'Estimated savings USD per month' },
+        ],
+      },
+      'some header',
+    );
+  });
+
+  test('posts multiple aggregations for multiple tables', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({
+      '1': { count: 10, sum__Cost: 500 },
+      '2': { count: 3, sum__Cost: 120 },
+    });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await batchTableAggregations({
+      tokenOrResolver: 'token',
+      tableIds: [1, 2],
+      aggregations: [{ type: 'count' }, { type: 'sum', field: 'Cost' }],
+    });
+
+    expect(result).toStrictEqual({
+      '1': { count: 10, sum__Cost: 500 },
+      '2': { count: 3, sum__Cost: 120 },
+    });
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/batch-aggregations/',
+      {
+        table_ids: [1, 2],
+        filters: [],
+        aggregations: [{ type: 'count' }, { type: 'sum', field: 'Cost' }],
+      },
+      'some header',
+    );
+  });
+
+  test('passes filters in request body', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ '1': { count: 2 } });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await batchTableAggregations({
+      tokenOrResolver: 'token',
+      tableIds: [1],
+      filters: [
+        {
+          fieldName: 'Status',
+          type: 'not_in',
+          value: ['Resolved', 'Dismissed'],
+        },
+      ],
+      aggregations: [{ type: 'count' }],
+    });
+
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/batch-aggregations/',
+      {
+        table_ids: [1],
+        filters: [
+          { field: 'Status', type: 'not_in', value: ['Resolved', 'Dismissed'] },
+        ],
+        aggregations: [{ type: 'count' }],
+      },
+      'some header',
+    );
+  });
+
+  test('defaults filters to empty array when not provided', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue({ '1': { count: 0 } });
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await batchTableAggregations({
+      tokenOrResolver: 'token',
+      tableIds: [1],
+      aggregations: [{ type: 'count' }],
+    });
+
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
+      'api/database/rows/batch-aggregations/',
+      expect.objectContaining({ filters: [] }),
+      'some header',
+    );
+  });
+
+  test('logs error and rethrows when post fails', async () => {
+    const error = new Error('network error');
+    makeOpenOpsTablesPostMock.mockRejectedValue(error);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    await expect(
+      batchTableAggregations({
+        tokenOrResolver: 'token',
+        tableIds: [1],
+        aggregations: [{ type: 'count' }],
+      }),
+    ).rejects.toThrow('network error');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error while posting batch table aggregations:',
+      expect.objectContaining({ error, tableIds: [1] }),
+    );
   });
 });
 

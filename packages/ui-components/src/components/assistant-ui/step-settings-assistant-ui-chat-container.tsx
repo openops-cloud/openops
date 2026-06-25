@@ -1,10 +1,10 @@
-import { Theme } from '@/lib/theme';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { ExpandIcon, MinimizeIcon } from 'lucide-react';
 import { useRef } from 'react';
 import { cn } from '../../lib/cn';
+import { Theme } from '../../lib/theme';
 import { Button } from '../../ui/button';
 import { AiModelSelectorProps } from '../ai-chat-container/ai-model-selector';
 import {

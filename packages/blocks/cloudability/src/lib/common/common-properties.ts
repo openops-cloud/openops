@@ -1,5 +1,6 @@
 import { Property } from '@openops/blocks-framework';
-import { Vendor } from '../common/recommendations-api';
+import { Vendor, getRecommendationTypesByVendor } from '@openops/common';
+import { CostBasis, Duration } from './recommendations-api';
 
 export function getVendorsProperty() {
   return {
@@ -49,36 +50,76 @@ export function getRecommendationTypesProperty() {
   };
 }
 
-// https://www.ibm.com/docs/en/cloudability-commercial/cloudability-standard/saas?topic=api-rightsizing-end-points
-function getRecommendationTypesByVendor(
-  vendor: Vendor,
-): { label: string; value: string }[] {
-  switch (vendor) {
-    case Vendor.AWS:
-      return [
-        { label: 'EC2', value: 'ec2' },
-        { label: 'EC2 Auto Scaling Group', value: 'ec2-asg' },
-        { label: 'EBS', value: 'ebs' },
-        { label: 'S3', value: 's3' },
-        { label: 'RDS', value: 'rds' },
-        { label: 'Redshift', value: 'redshift' },
-        { label: 'Lambda', value: 'lambda' },
-      ];
-    case Vendor.Azure:
-      return [
-        { label: 'Compute (VMs)', value: 'compute' },
-        { label: 'Managed Disk', value: 'disk' },
-        { label: 'SQL Database', value: 'sql' },
-      ];
-    case Vendor.GCP:
-      return [
-        { label: 'Compute Engine', value: 'compute' },
-        { label: 'Managed Instance Group', value: 'compute-mig' },
-        { label: 'Persistent Disk', value: 'disk' },
-      ];
-    case Vendor.Containers:
-      return [{ label: 'Container Workloads', value: 'workloads' }];
-    default:
-      return [];
-  }
+export function getRecommendationDurationProperty() {
+  return {
+    duration: Property.Dropdown({
+      displayName: 'Look-Back Period',
+      description:
+        'The look back period in days, used for calculating the recommendations.',
+      required: true,
+      defaultValue: Duration.TenDay,
+      refreshers: ['vendor', 'recommendationType'],
+      options: async ({ vendor, recommendationType }) => {
+        if (!vendor || !recommendationType) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Select a vendor and recommendation type first',
+          };
+        }
+
+        if (vendor === Vendor.AWS && recommendationType === 's3') {
+          return {
+            disabled: false,
+            options: [{ label: 'Last 30 Days', value: Duration.ThirtyDay }],
+          };
+        }
+
+        return {
+          disabled: false,
+          options: [
+            { label: 'Last 10 Days', value: Duration.TenDay },
+            { label: 'Last 30 Days', value: Duration.ThirtyDay },
+          ],
+        };
+      },
+    }),
+  };
+}
+
+export function getCostBasisProperty() {
+  return {
+    basis: Property.Dropdown({
+      displayName: 'Cost Basis',
+      description: 'The cost basis for the recommendations.',
+      required: true,
+      defaultValue: CostBasis.OnDemand,
+      refreshers: ['vendor', 'recommendationType'],
+      options: async ({ vendor, recommendationType }) => {
+        if (!vendor || !recommendationType) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Select a vendor and recommendation type first',
+          };
+        }
+
+        if (vendor === Vendor.AWS && recommendationType === 'redshift') {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Cost basis is not available for AWS Redshift',
+          };
+        }
+
+        return {
+          disabled: false,
+          options: [
+            { label: 'On-Demand', value: CostBasis.OnDemand },
+            { label: 'Effective', value: CostBasis.Effective },
+          ],
+        };
+      },
+    }),
+  };
 }

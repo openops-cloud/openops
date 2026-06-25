@@ -1,7 +1,6 @@
 import { promises as dns } from 'dns';
 import ipRangeCheck from 'ip-range-check';
 import { isIPv4, isIPv6 } from 'net';
-import { networkUtls } from '../network-utils';
 import { SharedSystemProp, system } from '../system';
 
 const internalV4Cidrs = [
@@ -63,28 +62,4 @@ export async function validateHost(host: string | undefined): Promise<void> {
   if (!isHostValidationEnabled || !host) return;
   const isPrivate = await isInternalHost(host);
   if (isPrivate) throw new Error('Host must not be an internal address');
-}
-
-export async function validateHostAllowingPublicWebhookUrl(
-  url: string | undefined,
-): Promise<void> {
-  if (!url) {
-    return;
-  }
-
-  try {
-    await validateHost(url);
-  } catch (error) {
-    const publicUrl = await networkUtls.getPublicUrl();
-
-    const escapedBase = publicUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    const regex = new RegExp(
-      `^${escapedBase}v1/webhooks/[0-9a-zA-Z]{21}/sync$`,
-    );
-
-    if (!regex.test(url)) {
-      throw error;
-    }
-  }
 }

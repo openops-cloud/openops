@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { EditIcon, PlusIcon, SettingsIcon, TrashIcon } from 'lucide-react';
 
 import { TooltipIconButton } from '../../components/assistant-ui/tooltip-icon-button';

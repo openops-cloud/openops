@@ -3,9 +3,8 @@ import {
   BuilderTreeView as BuilderTreeViewEagerLoaded,
   BuilderTreeViewProps,
 } from '@/components/builder-tree-view/builder-tree-view';
-import { expect } from '@storybook/jest';
-import type { ArgTypes, Meta, StoryObj } from '@storybook/react';
-import { fn, userEvent, waitFor, within } from '@storybook/test';
+import type { ArgTypes, Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 import { TooltipProvider } from '../../ui/tooltip';
 import {

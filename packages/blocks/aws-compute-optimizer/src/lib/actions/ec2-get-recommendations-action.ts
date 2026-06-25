@@ -17,7 +17,9 @@ import {
 } from '@openops/common';
 import {
   getEC2RecommendationsForARNs,
+  getEC2RecommendationsForARNsAllowPartial,
   getEC2RecommendationsForRegions,
+  getEC2RecommendationsForRegionsAllowPartial,
 } from '../common/compute-optimizer-ec2-client';
 
 export const ec2GetRecommendationsAction = createAction({
@@ -75,6 +77,13 @@ export const ec2GetRecommendationsAction = createAction({
         return props;
       },
     }),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -83,10 +92,34 @@ export const ec2GetRecommendationsAction = createAction({
         | undefined;
       const findingType = getFindingType(context);
       const resourceArns = context.propsValue.filterProperty['resourceARNs'];
+      const partial = context.propsValue.allowPartialResults === true;
 
       if (resourceArns) {
         const arns = convertToARNArrayWithValidation(resourceArns);
         const groupedARNs = groupARNsByAccount(arns);
+
+        if (partial) {
+          const partialOutcomes = await Promise.all(
+            Object.keys(groupedARNs).map(async (accountId) => {
+              const arnsForAccount = groupedARNs[accountId];
+              const credentials = await getCredentialsForAccount(
+                context.auth,
+                accountId,
+              );
+              return getEC2RecommendationsForARNsAllowPartial(
+                credentials,
+                findingType,
+                arnsForAccount,
+              );
+            }),
+          );
+
+          return {
+            results: partialOutcomes.flatMap((o) => o.results),
+            failedRegions: partialOutcomes.flatMap((o) => o.failedRegions),
+          };
+        }
+
         const promises = [];
 
         for (const accountId in groupedARNs) {
@@ -116,13 +149,27 @@ export const ec2GetRecommendationsAction = createAction({
         context.auth,
         accounts,
       );
-      const promises = credentials.map((credentials) => {
-        return getEC2RecommendationsForRegions(
-          credentials,
-          findingType,
-          regions,
+
+      if (partial) {
+        const partialOutcomes = await Promise.all(
+          credentials.map((creds) =>
+            getEC2RecommendationsForRegionsAllowPartial(
+              creds,
+              findingType,
+              regions,
+            ),
+          ),
         );
-      });
+
+        return {
+          results: partialOutcomes.flatMap((o) => o.results),
+          failedRegions: partialOutcomes.flatMap((o) => o.failedRegions),
+        };
+      }
+
+      const promises = credentials.map((creds) =>
+        getEC2RecommendationsForRegions(creds, findingType, regions),
+      );
 
       const recommendations = await Promise.all(promises);
       return recommendations.flat();

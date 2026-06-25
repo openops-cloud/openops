@@ -33,12 +33,10 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
     systemJobWorker = new Worker(
       SYSTEM_JOB_QUEUE,
       async (job) => {
-        logger.debug(
-          { name: 'RedisSystemJob#systemJobWorker' },
-          `Executing job (${job.name})`,
-        );
+        logger.debug(`Executing system job (${job.name})`);
 
         const jobHandler = systemJobHandlers.getJobHandler(job.name);
+
         await jobHandler(job.data);
       },
       {
@@ -54,20 +52,33 @@ export const redisSystemJobSchedulerService: SystemJobSchedule = {
   },
 
   async upsertJob({ job, schedule }): Promise<void> {
-    logger.info(
-      { name: 'RedisSystemJob#upsertJob', jobName: job.name },
-      'Upserting job',
-    );
-    if (await jobNotInQueue(job.name, job.jobId)) {
-      logger.info(
-        { name: 'RedisSystemJob#upsertJob', jobName: job.name },
-        'Adding job to queue',
-      );
-      await addJobToQueue({
-        job,
-        schedule,
+    const previousJob = await getJobByNameAndJobId(job.name, job.jobId);
+    if (previousJob && previousJob.id) {
+      logger.info('Remove old system job before upsert', {
+        jobId: previousJob.id,
+        jobName: previousJob.name,
       });
+
+      if (schedule.type === 'repeated' && previousJob.repeatJobKey) {
+        await systemJobsQueue.removeRepeatableByKey(previousJob.repeatJobKey);
+      } else {
+        await this.removeJob(previousJob.id);
+      }
     }
+
+    logger.info('Adding system job to queue', {
+      jobName: job.name,
+    });
+
+    await addJobToQueue({
+      job,
+      schedule,
+    });
+  },
+
+  async removeJob(jobId: string): Promise<void> {
+    const job = await systemJobsQueue.getJob(jobId);
+    await job?.remove();
   },
 
   async close(): Promise<void> {
@@ -115,14 +126,6 @@ const configureJobOptions = ({
     ...config,
     ...spreadIfDefined('jobId', jobId),
   };
-};
-
-const jobNotInQueue = async (
-  name: SystemJobName,
-  jobId?: string,
-): Promise<boolean> => {
-  const job = await getJobByNameAndJobId(name, jobId);
-  return isNil(job);
 };
 
 const getJobByNameAndJobId = async <T extends SystemJobName>(

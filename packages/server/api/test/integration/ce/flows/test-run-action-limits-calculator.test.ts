@@ -11,6 +11,7 @@ import {
 import {
   calculateTestRunActionLimits,
   DEFAULT_TEST_RUN_LIMIT,
+  mergeTestRunLimits,
   shouldRecalculateTestRunActionLimits,
   tryIncrementalUpdate,
 } from '../../../../src/app/flows/flow-version/test-run-action-limits-calculator';
@@ -169,6 +170,140 @@ describe('calculateTestRunActionLimits', () => {
 
     expect(result.limits).toHaveLength(1);
     expect(result.limits[0].blockName).toBe('http');
+  });
+});
+
+describe('mergeTestRunLimits', () => {
+  it('should preserve master isEnabled: false from previous', () => {
+    const previous = {
+      isEnabled: false,
+      limits: [
+        {
+          blockName: 'http',
+          actionName: 'send_request',
+          isEnabled: false,
+          limit: 5,
+        },
+      ],
+    };
+    const calculated = {
+      isEnabled: true,
+      limits: [
+        {
+          blockName: 'http',
+          actionName: 'send_request',
+          isEnabled: true,
+          limit: 10,
+        },
+      ],
+    };
+
+    const result = mergeTestRunLimits(previous, calculated);
+
+    expect(result.isEnabled).toBe(false);
+  });
+
+  it('should preserve master isEnabled: true from previous', () => {
+    const previous = {
+      isEnabled: true,
+      limits: [],
+    };
+    const calculated = {
+      isEnabled: true,
+      limits: [],
+    };
+
+    const result = mergeTestRunLimits(previous, calculated);
+
+    expect(result.isEnabled).toBe(true);
+  });
+
+  it('should preserve individual limit isEnabled and limit values from previous', () => {
+    const previous = {
+      isEnabled: true,
+      limits: [
+        {
+          blockName: 'http',
+          actionName: 'send_request',
+          isEnabled: false,
+          limit: 5,
+        },
+      ],
+    };
+    const calculated = {
+      isEnabled: true,
+      limits: [
+        {
+          blockName: 'http',
+          actionName: 'send_request',
+          isEnabled: true,
+          limit: 10,
+        },
+      ],
+    };
+
+    const result = mergeTestRunLimits(previous, calculated);
+
+    expect(result.limits).toEqual([
+      {
+        blockName: 'http',
+        actionName: 'send_request',
+        isEnabled: false,
+        limit: 5,
+      },
+    ]);
+  });
+
+  it('should use defaults from calculated for new limits not in previous', () => {
+    const previous = {
+      isEnabled: false,
+      limits: [],
+    };
+    const calculated = {
+      isEnabled: true,
+      limits: [
+        {
+          blockName: 'slack',
+          actionName: 'post_message',
+          isEnabled: true,
+          limit: 10,
+        },
+      ],
+    };
+
+    const result = mergeTestRunLimits(previous, calculated);
+
+    expect(result.isEnabled).toBe(false);
+    expect(result.limits).toEqual([
+      {
+        blockName: 'slack',
+        actionName: 'post_message',
+        isEnabled: true,
+        limit: 10,
+      },
+    ]);
+  });
+
+  it('should drop limits from previous that are no longer in calculated', () => {
+    const previous = {
+      isEnabled: true,
+      limits: [
+        {
+          blockName: 'http',
+          actionName: 'send_request',
+          isEnabled: false,
+          limit: 3,
+        },
+      ],
+    };
+    const calculated = {
+      isEnabled: true,
+      limits: [],
+    };
+
+    const result = mergeTestRunLimits(previous, calculated);
+
+    expect(result.limits).toEqual([]);
   });
 });
 

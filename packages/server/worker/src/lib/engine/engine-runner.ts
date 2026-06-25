@@ -3,12 +3,9 @@ import {
   DropdownState,
   DynamicPropsValue,
 } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import {
-  ApplicationError,
   BeginExecuteFlowOperation,
   EngineResponseStatus,
-  ErrorCode,
   ExecuteActionResponse,
   ExecuteExtractBlockMetadata,
   ExecutePropsOptions,
@@ -18,23 +15,13 @@ import {
   ExecuteValidateAuthOperation,
   ExecuteValidateAuthResponse,
   FlowRunResponse,
-  FlowVersionState,
   ResolveVariableOperation,
   ResolveVariableResponse,
   ResumeExecuteFlowOperation,
-  SourceCode,
   TriggerHookType,
 } from '@openops/shared';
-import chalk from 'chalk';
 
 type EngineConstants = 'publicUrl' | 'internalApiUrl' | 'engineToken';
-
-export type CodeArtifact = {
-  name: string;
-  sourceCode: SourceCode;
-  flowVersionId: string;
-  flowVersionState: FlowVersionState;
-};
 
 export type EngineHelperFlowResult = Pick<FlowRunResponse, 'status' | 'error'>;
 

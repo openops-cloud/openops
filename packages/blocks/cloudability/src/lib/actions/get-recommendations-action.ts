@@ -1,12 +1,12 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudabilityAuth } from '../auth';
 import {
+  getCostBasisProperty,
+  getRecommendationDurationProperty,
   getRecommendationTypesProperty,
   getVendorsProperty,
 } from '../common/common-properties';
 import {
-  CostBasis,
-  Duration,
   getRecommendations,
   SnoozedFilter,
 } from '../common/recommendations-api';
@@ -20,31 +20,8 @@ export const getRecommendationsAction = createAction({
   props: {
     ...getVendorsProperty(),
     ...getRecommendationTypesProperty(),
-    duration: Property.StaticDropdown({
-      displayName: 'Look-Back Period',
-      description:
-        'The look back period in days, used for calculating the recommendations.',
-      required: true,
-      defaultValue: Duration.TenDay,
-      options: {
-        options: [
-          { label: 'Last 10 Days', value: Duration.TenDay },
-          { label: 'Last 30 Days', value: Duration.ThirtyDay },
-        ],
-      },
-    }),
-    basis: Property.StaticDropdown({
-      displayName: 'Cost Basis',
-      description: 'The cost basis for the recommendations.',
-      required: true,
-      defaultValue: CostBasis.OnDemand,
-      options: {
-        options: [
-          { label: 'On-Demand', value: CostBasis.OnDemand },
-          { label: 'Effective', value: CostBasis.Effective },
-        ],
-      },
-    }),
+    ...getRecommendationDurationProperty(),
+    ...getCostBasisProperty(),
     snoozedFilter: Property.StaticDropdown({
       displayName: 'Recommendations Status',
       description: 'Whether to include recommendations that have been snoozed.',
@@ -66,6 +43,12 @@ export const getRecommendationsAction = createAction({
       description: 'The maximum number of recommendations to return.',
       required: false,
     }),
+    vendorAccountIds: Property.Array({
+      displayName: 'Vendor Account IDs',
+      description:
+        'Optional list of cloud account IDs to scope recommendations to.',
+      required: false,
+    }),
     additionalFilters: Property.Array({
       displayName: 'Additional Filters',
       description:
@@ -82,6 +65,7 @@ export const getRecommendationsAction = createAction({
       additionalFilters,
       basis,
       snoozedFilter,
+      vendorAccountIds,
     } = context.propsValue;
     const { auth } = context;
 
@@ -91,9 +75,10 @@ export const getRecommendationsAction = createAction({
       recommendationType: recommendationType,
       duration: duration,
       limit,
-      filters: additionalFilters as string[],
+      filters: (additionalFilters as string[] | undefined) ?? [],
       basis: basis,
       snoozedFilter: snoozedFilter,
+      vendorAccountIds: vendorAccountIds as string[] | undefined,
     });
 
     return result;

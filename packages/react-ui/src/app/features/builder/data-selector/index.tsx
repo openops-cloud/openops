@@ -70,7 +70,10 @@ const DataSelector = ({
     return pathToTargetStep.map((p) => p.id);
   }, [pathToTargetStep]);
 
-  const [forceRender, setForceRerender] = useState(0); // for cache updates
+  // dataVersion increments when step output data changes — triggers tree rebuild.
+  // Expand/collapse state is managed per-node via useSyncExternalStore in DataSelectorNode,
+  // so toggling a node re-renders only that node without touching this component.
+  const [dataVersion, setDataVersion] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
 
   const { isLoading } = useSelectorData({
@@ -79,7 +82,7 @@ const DataSelector = ({
     isDataSelectorVisible,
     initialLoad,
     setInitialLoad,
-    forceRerender: setForceRerender,
+    forceRerender: setDataVersion,
   });
 
   const mentions = useMemo(() => {
@@ -104,24 +107,14 @@ const DataSelector = ({
       stepTestOutput,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathToTargetStep, stepIds, forceRender, initialLoad]);
-
-  const getExpanded = useCallback(
-    (nodeKey: string) => stepTestOutputCache.getExpanded(nodeKey),
-    [],
-  );
-  const setExpanded = (nodeKey: string, expanded: boolean) => {
-    stepTestOutputCache.setExpanded(nodeKey, expanded);
-    setForceRerender((v) => v + 1);
-  };
+  }, [pathToTargetStep, stepIds, dataVersion, initialLoad]);
 
   useEffect(() => {
-    expandOrCollapseNodesOnSearch(mentions, searchTerm, setForceRerender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm]);
+    expandOrCollapseNodesOnSearch(mentions, searchTerm);
+  }, [mentions, searchTerm]);
 
   const filteredMentions = useMemo(
-    () => dataSelectorUtils.filterBy(structuredClone(mentions), searchTerm),
+    () => dataSelectorUtils.filterBy(mentions, searchTerm),
     [mentions, searchTerm],
   );
 
@@ -214,8 +207,6 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
-                getExpanded={getExpanded}
-                setExpanded={setExpanded}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (

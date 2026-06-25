@@ -1,4 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TriggerStrategy } from '@openops/blocks-framework';
+import {
+  AppConnectionStatus,
+  AppConnectionsWithSupportedBlocks,
+  AppConnectionType,
+  BlockType,
+  flowHelper,
+  FlowStatus,
+  FlowVersionState,
+  openOpsId,
+  PackageType,
+  ScheduleType,
+  TriggerType,
+} from '@openops/shared';
+import {
+  bulkCreateAndPublishFlows,
+  WorkflowTemplate,
+} from '../../../src/app/flows/flow/flow-bulk-create';
+import { triggerHooks } from '../../../src/app/flows/trigger';
+import { triggerUtils } from '../../../src/app/flows/trigger/hooks/trigger-utils';
+
 const mockInsert = jest.fn().mockResolvedValue(undefined);
 const mockQuery = jest.fn().mockResolvedValue(undefined);
 const mockGetRepository = jest.fn().mockReturnValue({ insert: mockInsert });
@@ -12,7 +32,7 @@ const mockFlowRepo = jest.fn().mockReturnValue({
 });
 
 jest.mock('../../../src/app/flows/flow/flow.repo', () => ({
-  flowRepo: mockFlowRepo,
+  flowRepo: (): object => mockFlowRepo(),
 }));
 
 jest.mock('@openops/shared', () => ({
@@ -24,34 +44,73 @@ jest.mock('@openops/shared', () => ({
   },
 }));
 
-import {
-  flowHelper,
-  FlowStatus,
-  FlowVersionState,
-  openOpsId,
-} from '@openops/shared';
-import { bulkCreateAndPublishFlows } from '../../../src/app/flows/flow/flow-bulk-create';
+jest.mock('../../../src/app/flows/trigger/hooks/trigger-utils', () => ({
+  triggerUtils: {
+    getBlockTriggerOrThrow: jest.fn(),
+  },
+}));
+
+jest.mock('../../../src/app/flows/trigger', () => ({
+  triggerHooks: {
+    enable: jest.fn(),
+  },
+}));
 
 const mockOpenOpsId = openOpsId as jest.Mock;
 const mockGetImportOperations = flowHelper.getImportOperations as jest.Mock;
 const mockApply = flowHelper.apply as jest.Mock;
+const mockGetBlockTriggerOrThrow =
+  triggerUtils.getBlockTriggerOrThrow as jest.Mock;
+const mockTriggerHooksEnable = triggerHooks.enable as jest.Mock;
 
-const baseTemplate = {
+const baseTemplate: WorkflowTemplate = {
   template: {
     displayName: 'Test Flow',
-    trigger: { type: 'WEBHOOK', name: 'trigger' } as any,
+    trigger: {
+      type: TriggerType.BLOCK,
+      name: 'trigger',
+      displayName: 'Trigger',
+      settings: {
+        blockName: 'test-block',
+        blockVersion: '1.0.0',
+        triggerName: 'test-trigger',
+        blockType: BlockType.OFFICIAL,
+        packageType: PackageType.REGISTRY,
+        input: {},
+        inputUiInfo: {},
+      },
+      valid: true,
+      nextAction: null,
+    },
   },
 };
 
-const baseConnections = [
-  { id: 'conn-1', name: 'Test', authProviderKey: 'aws', supportedBlocks: [] },
-] as any[];
+const baseConnections: AppConnectionsWithSupportedBlocks[] = [
+  {
+    id: 'conn-1',
+    name: 'Test',
+    authProviderKey: 'aws',
+    supportedBlocks: [],
+    projectId: 'project-1',
+    type: AppConnectionType.SECRET_TEXT,
+    value: {
+      type: AppConnectionType.SECRET_TEXT,
+      secret_text: 'secret',
+    },
+    created: '2021-01-01T00:00:00Z',
+    updated: '2021-01-01T00:00:00Z',
+    status: AppConnectionStatus.ACTIVE,
+  },
+] as unknown as AppConnectionsWithSupportedBlocks[];
 
 describe('bulkCreateAndPublishFlows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetImportOperations.mockReturnValue([]);
     mockApply.mockImplementation((version) => version);
+    mockGetBlockTriggerOrThrow.mockResolvedValue({
+      type: TriggerStrategy.WEBHOOK,
+    });
 
     let idCounter = 0;
     mockOpenOpsId.mockImplementation(() => `generated-id-${++idCounter}`);
@@ -222,9 +281,54 @@ describe('bulkCreateAndPublishFlows', () => {
     );
 
     expect(mockGetImportOperations).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'WEBHOOK' }),
+      expect.objectContaining({ type: TriggerType.BLOCK }),
       baseConnections,
     );
     expect(mockApply).toHaveBeenCalledWith(expect.any(Object), mockOp);
+  });
+
+  it('enables polling triggers and sets schedule', async () => {
+    mockGetBlockTriggerOrThrow.mockResolvedValue({
+      type: TriggerStrategy.POLLING,
+    });
+    mockTriggerHooksEnable.mockResolvedValue({
+      result: {
+        scheduleOptions: {
+          cronExpression: '*/5 * * * *',
+          timezone: 'UTC',
+        },
+      },
+    });
+
+    await bulkCreateAndPublishFlows(
+      [baseTemplate],
+      baseConnections,
+      'project-1',
+      'folder-1',
+    );
+
+    const flowInsertCall = mockInsert.mock.calls[0][0];
+    expect(flowInsertCall[0].schedule).toEqual({
+      cronExpression: '*/5 * * * *',
+      timezone: 'UTC',
+      type: ScheduleType.CRON_EXPRESSION,
+      failureCount: 0,
+    });
+    expect(mockTriggerHooksEnable).toHaveBeenCalled();
+  });
+
+  it('does not call triggerHooks.enable for WEBHOOK triggers', async () => {
+    mockGetBlockTriggerOrThrow.mockResolvedValue({
+      type: TriggerStrategy.WEBHOOK,
+    });
+
+    await bulkCreateAndPublishFlows(
+      [baseTemplate],
+      baseConnections,
+      'project-1',
+      'folder-1',
+    );
+
+    expect(mockTriggerHooksEnable).not.toHaveBeenCalled();
   });
 });

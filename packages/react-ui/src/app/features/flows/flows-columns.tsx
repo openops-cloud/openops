@@ -34,6 +34,7 @@ export const nameColumn: FlowColumnDef = {
 
 export const integrationsColumn: FlowColumnDef = {
   accessorKey: 'integrations',
+  enableSorting: false,
   header: ({ column }) => (
     <DataTableColumnHeader column={column} title={t('Integrations')} />
   ),
@@ -98,6 +99,7 @@ export const updatedColumn: FlowColumnDef = {
 
 export const statusColumn: FlowColumnDef = {
   accessorKey: 'status',
+  enableSorting: false,
   header: ({ column }) => (
     <DataTableColumnHeader column={column} title={t('Status')} />
   ),
@@ -118,6 +120,7 @@ export const statusColumn: FlowColumnDef = {
 
 export const validColumn: FlowColumnDef = {
   accessorKey: 'valid',
+  enableSorting: false,
   header: ({ column }) => <DataTableColumnHeader column={column} title="" />,
   cell: ({ row }) => {
     const valid = row.original.version.valid;
@@ -154,6 +157,7 @@ export const createActionsColumn = (
   onTableRefresh: () => void,
 ): FlowColumnDef => ({
   accessorKey: 'actions',
+  enableSorting: false,
   header: ({ column }) => <DataTableColumnHeader column={column} title="" />,
   cell: ({ row }) => {
     const flow = row.original;

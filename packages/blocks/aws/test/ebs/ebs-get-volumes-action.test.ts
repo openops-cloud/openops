@@ -2,6 +2,7 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsListFromAuth: jest.fn(),
   getEbsVolumes: jest.fn(),
+  getEbsVolumesAllowPartial: jest.fn(),
   dryRunCheckBox: jest.fn().mockReturnValue({
     required: false,
     defaultValue: false,
@@ -73,7 +74,7 @@ describe('ebsGetVolumes action tests', () => {
   };
 
   it('should create action with correct properties', () => {
-    expect(Object.keys(ebsGetVolumesAction.props).length).toBe(8);
+    expect(Object.keys(ebsGetVolumesAction.props).length).toBe(9);
     expect(ebsGetVolumesAction.props).toMatchObject({
       shouldQueryOnlyUnattached: {
         required: false,
@@ -105,6 +106,11 @@ describe('ebsGetVolumes action tests', () => {
       },
       filterProperty: {
         type: 'DYNAMIC',
+      },
+      allowPartialResults: {
+        required: false,
+        defaultValue: false,
+        type: 'CHECKBOX',
       },
     });
   });
@@ -487,6 +493,79 @@ describe('ebsGetVolumes action tests', () => {
       ['region2'],
       false,
       [{ Name: 'volume-id', Values: ['v-2', 'v-4'] }],
+    );
+  });
+
+  test('when allowPartialResults, uses partial helper and returns object shape', async () => {
+    openopsCommonMock.getEbsVolumesAllowPartial.mockResolvedValue({
+      results: [{ volume_id: 'vol-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '111', error: 'Error: denied' },
+      ],
+    });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterProperty: { regions: ['us-east-1', 'eu-west-1'] },
+        dryRun: false,
+        accounts: {},
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await ebsGetVolumesAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ volume_id: 'vol-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '111', error: 'Error: denied' },
+      ],
+    });
+    expect(openopsCommonMock.getEbsVolumesAllowPartial).toHaveBeenCalledWith(
+      'credentials',
+      ['us-east-1', 'eu-west-1'],
+      false,
+      [],
+    );
+    expect(openopsCommonMock.getEbsVolumes).not.toHaveBeenCalled();
+  });
+
+  test('when allowPartialResults, aggregates multiple credentials', async () => {
+    openopsCommonMock.getCredentialsListFromAuth.mockResolvedValue([
+      'cred-a',
+      'cred-b',
+    ]);
+    openopsCommonMock.getEbsVolumesAllowPartial
+      .mockResolvedValueOnce({
+        results: [{ id: 'a' }],
+        failedRegions: [],
+      })
+      .mockResolvedValueOnce({
+        results: [{ id: 'b' }],
+        failedRegions: [{ region: 'us-west-2', accountId: '2', error: 'e' }],
+      });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterProperty: { regions: ['us-east-1'] },
+        dryRun: true,
+        accounts: {},
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await ebsGetVolumesAction.run(context)) as any;
+
+    expect(result.results).toEqual([{ id: 'a' }, { id: 'b' }]);
+    expect(result.failedRegions).toEqual([
+      { region: 'us-west-2', accountId: '2', error: 'e' },
+    ]);
+    expect(openopsCommonMock.getEbsVolumesAllowPartial).toHaveBeenCalledTimes(
+      2,
     );
   });
 });

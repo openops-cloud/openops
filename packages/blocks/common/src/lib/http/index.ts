@@ -1,4 +1,5 @@
 export * from './axios/axios-http-client';
+export * from './core/azure-retry-delay';
 export * from './core/base-http-client';
 export * from './core/delegating-authentication-converter';
 export * from './core/http-client';
@@ -11,3 +12,5 @@ export * from './core/http-request';
 export * from './core/http-response';
 export * from './core/media-type';
 export * from './core/query-params';
+export * from './core/standard-retry-after';
+export * from './retry/create-retry-config';

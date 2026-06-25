@@ -15,6 +15,7 @@ const getSpotlightStepName = (
     case FlowOperationType.DUPLICATE_ACTION:
       return request.stepName;
     case FlowOperationType.ADD_ACTION:
+    case FlowOperationType.PASTE_ACTIONS:
       return request.parentStep;
     default:
       return request.name;

@@ -17,7 +17,9 @@ import {
 } from '@openops/common';
 import {
   getEbsRecommendationsForARNs,
+  getEbsRecommendationsForARNsAllowPartial,
   getEbsRecommendationsForRegions,
+  getEbsRecommendationsForRegionsAllowPartial,
 } from '../common/compute-optimizer-ebs-client';
 
 export const ebsGetRecommendationsAction = createAction({
@@ -72,6 +74,13 @@ export const ebsGetRecommendationsAction = createAction({
         return props;
       },
     }),
+    allowPartialResults: Property.Checkbox({
+      displayName: 'Allow Partial Results',
+      description:
+        'When enabled, the step returns partial results if the operation fails in some selected regions.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     try {
@@ -81,10 +90,34 @@ export const ebsGetRecommendationsAction = createAction({
       const findingType = getFindingType(context);
 
       const resourceArns = context.propsValue.filterProperty['resourceARNs'];
+      const partial = context.propsValue.allowPartialResults === true;
 
       if (resourceArns) {
         const arns = convertToARNArrayWithValidation(resourceArns);
         const groupedARNs = groupARNsByAccount(arns);
+
+        if (partial) {
+          const partialOutcomes = await Promise.all(
+            Object.keys(groupedARNs).map(async (accountId) => {
+              const arnsForAccount = groupedARNs[accountId];
+              const credentials = await getCredentialsForAccount(
+                context.auth,
+                accountId,
+              );
+              return getEbsRecommendationsForARNsAllowPartial(
+                credentials,
+                findingType,
+                arnsForAccount,
+              );
+            }),
+          );
+
+          return {
+            results: partialOutcomes.flatMap((o) => o.results),
+            failedRegions: partialOutcomes.flatMap((o) => o.failedRegions),
+          };
+        }
+
         const promises = [];
 
         for (const accountId in groupedARNs) {
@@ -114,13 +147,27 @@ export const ebsGetRecommendationsAction = createAction({
         context.auth,
         accounts,
       );
-      const promises = credentials.map((credentials) => {
-        return getEbsRecommendationsForRegions(
-          credentials,
-          findingType,
-          regions,
+
+      if (partial) {
+        const partialOutcomes = await Promise.all(
+          credentials.map((creds) =>
+            getEbsRecommendationsForRegionsAllowPartial(
+              creds,
+              findingType,
+              regions,
+            ),
+          ),
         );
-      });
+
+        return {
+          results: partialOutcomes.flatMap((o) => o.results),
+          failedRegions: partialOutcomes.flatMap((o) => o.failedRegions),
+        };
+      }
+
+      const promises = credentials.map((creds) =>
+        getEbsRecommendationsForRegions(creds, findingType, regions),
+      );
 
       const recommendations = await Promise.all(promises);
 

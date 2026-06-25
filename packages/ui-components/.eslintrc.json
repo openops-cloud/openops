@@ -1,5 +1,9 @@
 {
-  "extends": ["plugin:@nx/react", "../../.eslintrc.json"],
+  "extends": [
+    "plugin:@nx/react",
+    "../../.eslintrc.json",
+    "plugin:storybook/recommended"
+  ],
   "ignorePatterns": ["!**/*", "node_modules", "storybook-static"],
   "overrides": [
     {
@@ -9,6 +13,7 @@
         "react": {
           "version": "detect"
         },
+        "import/ignore": ["@vitejs/plugin-react"],
         "import/resolver": {
           "alias": {
             "map": [["@", "./src"]],
@@ -62,14 +67,13 @@
         ],
         "import/no-cycle": "off",
         "linebreak-style": ["error", "unix"],
-        "react/prop-types": "error",
+        "react/prop-types": "off",
         "import/no-unresolved": "off",
         "import/default": "off",
         "import/no-named-as-default-member": "off",
         "import/no-named-as-default": "off",
         "react/react-in-jsx-scope": "off",
         "jsx-a11y/anchor-is-valid": "off",
-        "react/prop-types": "off",
         "testing-library/prefer-screen-queries": "off",
         "@typescript-eslint/no-unused-vars": ["error"],
         "@typescript-eslint/explicit-function-return-type": ["off"],

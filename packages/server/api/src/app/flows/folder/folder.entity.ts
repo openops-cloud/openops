@@ -20,6 +20,10 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
       type: String,
     },
     projectId: OpenOpsIdSchema,
+    parentFolderId: {
+      ...OpenOpsIdSchema,
+      nullable: true,
+    },
     contentType: {
       type: String,
       enum: ContentType,
@@ -28,9 +32,16 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
   },
   indices: [
     {
-      name: 'idx_folder_project_id_content_type_display_name',
-      columns: ['projectId', 'contentType', 'displayName'],
+      name: 'idx_folder_project_id_display_name_content_type',
+      columns: ['projectId', 'displayName', 'contentType'],
       unique: true,
+      where: '"parentFolderId" IS NULL',
+    },
+    {
+      name: 'idx_folder_project_id_parent_display_name_content_type',
+      columns: ['projectId', 'parentFolderId', 'displayName', 'contentType'],
+      unique: true,
+      where: '"parentFolderId" IS NOT NULL',
     },
   ],
   relations: {

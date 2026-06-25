@@ -21,6 +21,7 @@ import {
   isNil,
   Permission,
   Trigger,
+  TriggerWithOptionalId,
 } from '@openops/shared';
 import { t } from 'i18next';
 import { ArrowLeft, TriangleAlert } from 'lucide-react';
@@ -33,7 +34,7 @@ import {
 
 type ConnectionsPickerProps = {
   name: string;
-  trigger?: Trigger;
+  trigger?: Trigger | TriggerWithOptionalId;
   integrations: BlockMetadataModelSummary[];
   isLoading: boolean;
   close: () => void;
@@ -102,7 +103,7 @@ const ConnectionsPicker = ({
     ) {
       isConnectionListPreselected.current = true;
       const usedConnectionNames: { [key: string]: string | undefined } = trigger
-        ? flowHelper.getUsedConnections(trigger)
+        ? flowHelper.getUsedConnections(trigger as Trigger)
         : {};
 
       const connections: Record<

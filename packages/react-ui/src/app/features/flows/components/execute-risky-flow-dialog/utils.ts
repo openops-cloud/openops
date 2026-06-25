@@ -1,11 +1,18 @@
 import { flowsUtils } from '@/app/features/flows/lib/flows-utils';
 import { StepMetadataWithSuggestions } from '@openops/components/ui';
-import { Action, ActionType, RiskLevel, Trigger } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  RiskLevel,
+  Trigger,
+  TriggerWithOptionalId,
+} from '@openops/shared';
 
-type ActionOrTriggerWithIndex = (Action | Trigger) & { index: number };
+type FlowStep = Action | Trigger | TriggerWithOptionalId;
+type ActionOrTriggerWithIndex = FlowStep & { index: number };
 
 export const getRiskyActionFormattedNames = (
-  allSteps: (Action | Trigger)[],
+  allSteps: FlowStep[],
   metadata: StepMetadataWithSuggestions[] | undefined,
   riskLevel: RiskLevel,
 ) =>

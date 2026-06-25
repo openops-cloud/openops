@@ -38,6 +38,17 @@ export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
+export interface BatchCreateRowsParams extends RowParams {
+  items: { [key: string]: any }[];
+}
+
+export interface BatchUpdateRowsParams extends RowParams {
+  items: {
+    rowId: number;
+    fields: { [key: string]: any };
+  }[];
+}
+
 export interface UpsertRowParams extends RowParams {
   fields: { [key: string]: any };
 }
@@ -65,6 +76,7 @@ class TablesAccessSemaphore {
 }
 
 const semaphore = TablesAccessSemaphore.getInstance();
+const MAX_BATCH_ROWS = 200;
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
@@ -202,6 +214,108 @@ export async function addRow(addRowParams: AddRowParams) {
   );
 }
 
+export async function batchCreateRows(
+  batchCreateRowsParams: BatchCreateRowsParams,
+) {
+  if (batchCreateRowsParams.items.length === 0) {
+    return [];
+  }
+
+  const url = `api/database/rows/table/${batchCreateRowsParams.tableId}/batch/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(
+        batchCreateRowsParams.tokenOrResolver,
+      );
+      const results = [];
+
+      for (
+        let index = 0;
+        index < batchCreateRowsParams.items.length;
+        index += MAX_BATCH_ROWS
+      ) {
+        const items = batchCreateRowsParams.items.slice(
+          index,
+          index + MAX_BATCH_ROWS,
+        );
+
+        const response = await makeOpenOpsTablesPost<unknown>(
+          url,
+          { items },
+          authenticationHeader,
+        );
+        if (Array.isArray(response)) {
+          results.push(...response);
+        } else if (response != null) {
+          results.push(response);
+        }
+      }
+
+      return results;
+    },
+    (error) => {
+      logger.error('Error while batch creating rows:', {
+        error,
+        url,
+        itemsCount: batchCreateRowsParams.items.length,
+      });
+    },
+  );
+}
+
+export async function batchUpdateRows(
+  batchUpdateRowsParams: BatchUpdateRowsParams,
+) {
+  if (batchUpdateRowsParams.items.length === 0) {
+    return [];
+  }
+
+  const url = `api/database/rows/table/${batchUpdateRowsParams.tableId}/batch/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(
+        batchUpdateRowsParams.tokenOrResolver,
+      );
+      const results = [];
+
+      for (
+        let index = 0;
+        index < batchUpdateRowsParams.items.length;
+        index += MAX_BATCH_ROWS
+      ) {
+        const items = batchUpdateRowsParams.items
+          .slice(index, index + MAX_BATCH_ROWS)
+          .map(({ rowId, fields }) => ({
+            id: rowId,
+            ...fields,
+          }));
+
+        const response = await makeOpenOpsTablesPatch<unknown>(
+          url,
+          { items },
+          authenticationHeader,
+        );
+        if (Array.isArray(response)) {
+          results.push(...response);
+        } else if (response != null) {
+          results.push(response);
+        }
+      }
+
+      return results;
+    },
+    (error) => {
+      logger.error('Error while batch updating rows:', {
+        error,
+        url,
+        itemsCount: batchUpdateRowsParams.items.length,
+      });
+    },
+  );
+}
+
 export async function deleteRow(deleteRowParams: DeleteRowParams) {
   const url = `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/`;
 
@@ -257,6 +371,66 @@ function getEqualityFilterType(
   return ViewFilterTypesEnum.equal;
 }
 
+export type AggregationSpec =
+  | { type: 'count' }
+  | { type: 'sum'; field: string }
+  | { type: 'distinct_values'; field: string };
+
+export interface TableFilter {
+  fieldName: string;
+  type: 'not_in';
+  value: string[];
+}
+
+export interface BatchTableAggregationsParams {
+  tokenOrResolver: TokenOrResolver;
+  tableIds: number[];
+  filters?: TableFilter[];
+  aggregations: AggregationSpec[];
+}
+
+export type TableAggregationResult = {
+  count?: number;
+  [key: string]: number | string[] | undefined;
+};
+
+export type BatchTableAggregationsResult = Record<
+  string,
+  TableAggregationResult
+>;
+
+export async function batchTableAggregations(
+  params: BatchTableAggregationsParams,
+): Promise<BatchTableAggregationsResult> {
+  const url = 'api/database/rows/batch-aggregations/';
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost<BatchTableAggregationsResult>(
+        url,
+        {
+          table_ids: params.tableIds,
+          filters: (params.filters ?? []).map((filter) => ({
+            field: filter.fieldName,
+            type: filter.type,
+            value: filter.value,
+          })),
+          aggregations: params.aggregations,
+        },
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while posting batch table aggregations:', {
+        error,
+        url,
+        tableIds: params.tableIds,
+      });
+    },
+  );
+}
+
 export async function batchDeleteRows(
   params: BatchDeleteRowsParams,
 ): Promise<void> {
@@ -269,11 +443,16 @@ export async function batchDeleteRows(
   await executeWithConcurrencyLimit(
     async () => {
       const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
-      return await makeOpenOpsTablesPost(
-        url,
-        { items: params.rowIds },
-        authenticationHeader,
-      );
+
+      for (
+        let index = 0;
+        index < params.rowIds.length;
+        index += MAX_BATCH_ROWS
+      ) {
+        const items = params.rowIds.slice(index, index + MAX_BATCH_ROWS);
+
+        await makeOpenOpsTablesPost(url, { items }, authenticationHeader);
+      }
     },
     (error) => {
       logger.error('Error while batch deleting rows:', {
@@ -281,6 +460,30 @@ export async function batchDeleteRows(
         url,
         rowIdsCount: params.rowIds.length,
         rowIdsSample: params.rowIds.slice(0, 10),
+      });
+    },
+  );
+}
+
+export async function truncateTable(
+  params: RowParams,
+): Promise<{ count: number }> {
+  const url = `api/database/rows/table/${params.tableId}/truncate/`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+      return await makeOpenOpsTablesPost<{ count: number }>(
+        url,
+        {},
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while truncating table:', {
+        error,
+        url,
+        tableId: params.tableId,
       });
     },
   );

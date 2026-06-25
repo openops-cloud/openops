@@ -1,13 +1,18 @@
-import { RadioGroup, RadioGroupItem, Separator } from '@openops/components/ui';
 import { t } from 'i18next';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
+import {
+  RadioGroup,
+  RadioGroupItem,
+  Separator,
+  Theme,
+} from '@openops/components/ui';
 
 export default function AppearancePage() {
   const { theme, setTheme } = useTheme();
 
   const handleThemeChange = (value: 'dark' | 'light') => {
-    setTheme(value);
+    setTheme(value === 'dark' ? Theme.DARK : Theme.LIGHT);
   };
 
   return (

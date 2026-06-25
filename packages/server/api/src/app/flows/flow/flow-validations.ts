@@ -4,10 +4,43 @@ import {
   ContentType,
   ErrorCode,
   Flow,
+  FlowStatus,
   isNil,
   PopulatedFlow,
 } from '@openops/shared';
 import dayjs from 'dayjs';
+
+/**
+ * Ensures every requested flow id exists in the project (same count as returned rows).
+ * Call after loading flows with `In(flowIds)` and `projectId`.
+ */
+export function assertAllRequestedFlowsExistInProject(
+  requestedFlowIds: string[],
+  flowsFromDb: Flow[],
+): void {
+  if (flowsFromDb.length !== requestedFlowIds.length) {
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {},
+    });
+  }
+}
+
+export function assertNoFlowsAreEnabledForDeletion(flows: Flow[]): void {
+  const hasEnabled = flows.some((flow) => flow.status === FlowStatus.ENABLED);
+  if (hasEnabled) {
+    throw new ApplicationError({
+      code: ErrorCode.FLOW_OPERATION_INVALID,
+      params: {},
+    });
+  }
+}
+
+export async function assertNoFlowsAreInternal(flows: Flow[]): Promise<void> {
+  for (const flow of flows) {
+    await assertThatFlowIsNotInternal(flow);
+  }
+}
 
 export async function assertThatFlowIsNotInternal(flow: Flow): Promise<void> {
   if (flow.isInternal) {

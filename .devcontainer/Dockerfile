@@ -1,4 +1,4 @@
-ARG VARIANT=1.1.12-20-bullseye
+ARG VARIANT=4.0.11-24-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 RUN <<-```
@@ -26,10 +26,10 @@ RUN <<-```
   chmod +x /usr/bin/yq
 
   # Install hcledit
-  wget https://github.com/minamijoyo/hcledit/releases/download/v0.2.15/hcledit_0.2.15_linux_amd64.tar.gz -O /tmp/hcledit_0.2.15_linux_amd64.tar.gz
-  tar -C /usr/bin -xf /tmp/hcledit_0.2.15_linux_amd64.tar.gz
+  wget https://github.com/minamijoyo/hcledit/releases/download/v0.2.18/hcledit_0.2.18_linux_amd64.tar.gz -O /tmp/hcledit_0.2.18_linux_amd64.tar.gz
+  tar -C /usr/bin -xf /tmp/hcledit_0.2.18_linux_amd64.tar.gz
   chmod +x /usr/bin/hcledit
-  rm /tmp/hcledit_0.2.15_linux_amd64.tar.gz
+  rm /tmp/hcledit_0.2.18_linux_amd64.tar.gz
 
   # Install AWS CLI
   curl -L "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -52,7 +52,7 @@ RUN <<-```
   az extension add --name ssh --only-show-errors || true
 
   # Install Google Cloud CLI
-  curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
+  curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-571.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
   mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
   /opt/google-cloud-sdk/install.sh --quiet
   /opt/google-cloud-sdk/bin/gcloud components install beta --quiet

@@ -15,12 +15,13 @@ type StepStatusIconProps = {
   size: '3' | '4' | '5';
 };
 
-const statusText = {
+const statusText: Record<StepOutputStatus, string> = {
   [StepOutputStatus.RUNNING]: t('Step running'),
   [StepOutputStatus.PAUSED]: t('Step paused'),
   [StepOutputStatus.STOPPED]: t('Step Stopped'),
   [StepOutputStatus.SUCCEEDED]: t('Step Succeeded'),
   [StepOutputStatus.FAILED]: t('Step Failed'),
+  [StepOutputStatus.EXECUTION_LIMIT_REACHED]: t('Execution limit reached'),
 };
 
 const StepStatusIcon = React.memo(({ status, size }: StepStatusIconProps) => {

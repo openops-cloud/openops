@@ -11,7 +11,7 @@ import {
   PropertyType,
   StaticPropsValue,
 } from '@openops/blocks-framework';
-import { validateHost } from '@openops/server-shared';
+import { logger, validateHost } from '@openops/server-shared';
 import {
   BasicAuthConnectionValue,
   CustomAuthConnectionValue,
@@ -134,8 +134,9 @@ export const blockHelper = {
       };
 
       return await evaluateProp(ctx, property, resolvedInput);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      logger.warn('Property execution failed.', error);
+
       return {
         disabled: true,
         options: [],

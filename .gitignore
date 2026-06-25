@@ -46,6 +46,8 @@ node_modules
 !/.vscode/launch.json
 !/.vscode/extensions.json
 
+# Nx Migrations
+migrations.json
 
 #############################################
 # Please do not add rules here without a proper category.

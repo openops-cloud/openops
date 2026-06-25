@@ -1,4 +1,7 @@
+import { logger } from '@openops/server-shared';
+import { extractPropertyString } from '@openops/shared';
 import axios, { AxiosRequestConfig } from 'axios';
+import axiosRetry, { IAxiosRetryConfig } from 'axios-retry';
 import { BaseHttpClient } from '../core/base-http-client';
 import { DelegatingAuthenticationConverter } from '../core/delegating-authentication-converter';
 import { HttpError } from '../core/http-error';
@@ -8,6 +11,14 @@ import { HttpMethod } from '../core/http-method';
 import { HttpRequest } from '../core/http-request';
 import { HttpRequestBody } from '../core/http-request-body';
 import { HttpResponse } from '../core/http-response';
+
+function getRetryAxiosInstance(retryConfigs: IAxiosRetryConfig) {
+  const retryAxiosInstance = axios.create();
+
+  axiosRetry(retryAxiosInstance, retryConfigs);
+
+  return retryAxiosInstance;
+}
 
 export class AxiosHttpClient extends BaseHttpClient {
   constructor(
@@ -19,6 +30,7 @@ export class AxiosHttpClient extends BaseHttpClient {
 
   async sendRequest<ResponseBody extends HttpMessageBody = any>(
     request: HttpRequest<HttpRequestBody>,
+    retryConfigs?: IAxiosRetryConfig,
   ): Promise<HttpResponse<ResponseBody>> {
     try {
       process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -40,29 +52,35 @@ export class AxiosHttpClient extends BaseHttpClient {
         timeout,
       };
 
-      const response = await axios.request(config);
+      const axiosInstance = retryConfigs
+        ? getRetryAxiosInstance(retryConfigs)
+        : axios;
+
+      const response = await axiosInstance.request(config);
 
       return {
         status: response.status,
         headers: response.headers as HttpHeaders,
         body: response.data,
       };
-    } catch (e) {
-      console.error('[HttpClient#sendRequest] error:', e);
-      if (axios.isAxiosError(e)) {
-        console.error(
-          '[HttpClient#sendRequest] error, responseStatus:',
-          e.response?.status,
-        );
-        console.error(
-          '[HttpClient#sendRequest] error, responseBody:',
-          e.response?.data,
-        );
+    } catch (error) {
+      logger.warn('Failed to execute HTTP request.', {
+        method: request.method,
+        url: request.url,
+        errorMessage: extractPropertyString(error, ['message']),
+        statusCode: axios.isAxiosError(error)
+          ? error.response?.status
+          : undefined,
+        responseData: axios.isAxiosError(error)
+          ? error.response?.data
+          : undefined,
+      });
 
-        throw new HttpError(request.body, e);
+      if (axios.isAxiosError(error)) {
+        throw new HttpError(request.body, error);
       }
 
-      throw e;
+      throw error;
     }
   }
 

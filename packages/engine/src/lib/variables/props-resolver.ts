@@ -246,7 +246,6 @@ async function evalInScope(
     });
     return result ?? '';
   } catch (exception) {
-    console.warn('[evalInScope] Error evaluating variable', exception);
     return '';
   }
 }

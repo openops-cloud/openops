@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { DAY_HOURS, timezoneOptions, validateHours } from '../common';
 
 function calculateEveryDayCron(hourOfTheDay: number, runOnWeekends: boolean) {
@@ -91,6 +92,6 @@ export const everyDayTrigger = createTrigger({
     );
   },
   onDisable: async () => {
-    console.log('onDisable');
+    logger.debug('Trigger disabled');
   },
 });

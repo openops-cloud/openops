@@ -298,7 +298,10 @@ export const useAssistantChat = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId, isLoading, openChatResponse?.messages]);
 
-  const runtime = useAISDKRuntime(chat);
+  // Cast needed: root `ai` package version may differ from @assistant-ui/react-ai-sdk's nested copy.
+  const runtime = useAISDKRuntime(
+    chat as unknown as Parameters<typeof useAISDKRuntime>[0],
+  );
   runtimeRef.current = runtime;
 
   const lastConnectionRef = useRef<string | undefined>(undefined);

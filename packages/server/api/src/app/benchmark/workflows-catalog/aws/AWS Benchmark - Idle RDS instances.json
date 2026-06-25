@@ -102,6 +102,7 @@
                 "domainIds": [],
                 "clusterIds": [],
                 "filterByARNs": false,
+                "allowPartialResults": true,
                 "filterProperty": {
                   "regions": "{{step_c['regions']}}"
                 }
@@ -114,6 +115,7 @@
                   "settings": {
                     "input": {
                       "auth": true,
+                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       },
@@ -203,7 +205,7 @@
                   "type": "LOOP_ON_ITEMS",
                   "valid": true,
                   "settings": {
-                    "items": "{{step_1}}",
+                    "items": "{{step_1['results']}}",
                     "inputUiInfo": {
                       "customizedInputs": {}
                     }

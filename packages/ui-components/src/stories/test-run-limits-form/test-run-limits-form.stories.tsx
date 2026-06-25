@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { TestRunLimitsForm } from '../../components/test-run-limits-form/test-run-limits-form';

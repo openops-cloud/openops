@@ -1,6 +1,6 @@
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bell, BookOpen, HelpCircle, Settings } from 'lucide-react';
+import { action } from 'storybook/actions';
 
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { AssistantTopBar } from '../../components/assistant-ui/assistant-top-bar';

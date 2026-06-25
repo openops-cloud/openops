@@ -34,22 +34,22 @@ export async function makeHttpRequest<T>(
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
-    const logMessage = `Error making HTTP request. Url: "${url}"`;
+    const logMessage = `Failed to execute HTTP request. Url: "${url}"`;
     const timeTaken = `${Math.floor(performance.now() - startTimeCode)}ms`;
 
     if (axiosError && axiosError.response?.data) {
-      logger.error(logMessage, {
-        error: axiosError,
-        errorResponse: axiosError.response?.data,
-        status: axiosError.response?.status,
-        statusText: axiosError.response?.statusText,
+      logger.warn(logMessage, {
         timeTaken,
+        error: axiosError,
+        status: axiosError.response?.status,
+        errorResponse: axiosError.response?.data,
+        statusText: axiosError.response?.statusText,
       });
 
       throw new Error(JSON.stringify(axiosError.response?.data));
     }
 
-    logger.error(logMessage, {
+    logger.warn(logMessage, {
       error,
       timeTaken,
     });

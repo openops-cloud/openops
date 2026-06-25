@@ -1,4 +1,4 @@
-import { TextContentPart, ToolCallMessagePartProps } from '@assistant-ui/react';
+import { ToolCallMessagePartProps } from '@assistant-ui/react';
 import { t } from 'i18next';
 import {
   CodeEditor,
@@ -10,6 +10,11 @@ import { Skeleton } from '../../../ui/skeleton';
 import { CodeActions } from '../../code-actions';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { toolStatusUtils } from '../tool-status';
+
+type TextContentPart = {
+  type: 'text';
+  text: string;
+};
 
 type CodeResult = {
   code: string;

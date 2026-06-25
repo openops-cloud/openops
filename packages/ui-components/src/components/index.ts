@@ -60,6 +60,7 @@ export * from './generate-with-ai/generate-with-ai';
 export * from './help-us-improve';
 export * from './json-viewer/json-viewer';
 export * from './knowledge-base-card/knowledge-base-card';
+export * from './nested-multi-select';
 export * from './no-workflows-placeholder/no-workflows-placeholder';
 export * from './overflow-tooltip';
 export * from './overview-card/overview-card';

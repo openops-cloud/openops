@@ -87,6 +87,7 @@
               "input": {
                 "auth": "{{connections['AWS']}}",
                 "regions": "{{step_b['regions']}}",
+                "allowPartialResults": true,
                 "accounts": {
                   "accounts": "{{step_b['accounts']}}"
                 }
@@ -100,6 +101,7 @@
                     "input": {
                       "auth": true,
                       "regions": true,
+                      "allowPartialResults": true,
                       "accounts": {
                         "accounts": true
                       }
@@ -125,7 +127,7 @@
               "valid": true,
               "settings": {
                 "input": {
-                  "inputs": "{{step_3}}"
+                  "inputs": "{{step_3['results']}}"
                 },
                 "sourceCode": {
                   "code": "export const code = async ({inputs}) => {\n  // Use reduce to aggregate the data. The accumulator will be an object\n  // where keys are a composite of accountId and region (e.g., \"123456789012:us-east-1\").\n  const summaryByAccountAndRegion = inputs.reduce((acc, item) => {\n    // We are only interested in recommendations for 'RdsDBInstance'.\n    if (item.recommendationResourceType === 'RdsDBInstance') {\n      // Find the summary entry for over-provisioned instances.\n      // We use toLowerCase() to handle potential variations in casing (e.g., 'Overprovisioned', 'overprovisioned').\n      const overprovisionedSummary = item.summaries.find(\n        summary => summary.name.toLowerCase() === 'overprovisioned'\n      );\n\n      // If an 'Overprovisioned' summary exists and its value is greater than 0,\n      // we add it to the total for that account and region combination.\n      if (overprovisionedSummary && overprovisionedSummary.value > 0) {\n        // Create a unique composite key from the account ID and region.\n        const compositeKey = `${item.accountId}:${item.region}`;\n        \n        // If the compositeKey is not yet in our accumulator, initialize it to 0.\n        // Then, add the value from the summary.\n        acc[compositeKey] = (acc[compositeKey] || 0) + overprovisionedSummary.value;\n      }\n    }\n    // Return the accumulator for the next iteration.\n    return acc;\n  }, {}); // Start with an empty object as the initial accumulator.\n\n  // Convert the aggregated object into the desired array format.\n  // Object.entries() creates an array of [key, value] pairs (e.g., ['123456789012:us-east-1', 5]).\n  // Then, map() transforms each pair into an object with 'account', 'region', and 'value' properties.\n  const result = Object.entries(summaryByAccountAndRegion).map(([compositeKey, count]) => {\n    // Split the composite key back into its original parts.\n    const [accountId, region] = compositeKey.split(':');\n    return {\n      account: accountId,\n      region: region,\n      value: count,\n    };\n  });\n\n  return result;\n};\n",

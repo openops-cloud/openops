@@ -113,7 +113,6 @@ export const nextDayofWeek = createAction({
 
     // Calculate the day difference
     let dayDiff = dayIndex - nextOccurrence.getDay();
-    console.log('dayDiff:', dayDiff, nextOccurrence, new Date());
     if (
       dayDiff < 0 ||
       (dayDiff === 0 && nextOccurrence.getTime() < new Date().getTime())

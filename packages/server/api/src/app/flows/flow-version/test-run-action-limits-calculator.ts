@@ -161,6 +161,7 @@ export function mergeTestRunLimits(
   });
   return {
     ...calculated,
+    isEnabled: previous.isEnabled,
     limits: mergedLimits,
   };
 }

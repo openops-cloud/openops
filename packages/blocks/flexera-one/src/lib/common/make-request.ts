@@ -1,5 +1,15 @@
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
+import {
+  createRetryConfig,
+  httpClient,
+  HttpMethod,
+} from '@openops/blocks-common';
+import { isRetryableError } from 'axios-retry';
+
+const getRequestRetryConfig = createRetryConfig();
+const accessTokenRetryConfig = createRetryConfig({
+  retryCondition: (error) =>
+    error.response?.status === 429 || isRetryableError(error),
+});
 
 export async function makeGetRequest<T>({
   refreshToken,
@@ -17,12 +27,21 @@ export async function makeGetRequest<T>({
     appRegion,
   });
 
-  const finalHeaders = new AxiosHeaders({
+  const finalHeaders: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
     ...headers,
-  });
+  };
 
-  return await makeHttpRequest<T>('GET', url, finalHeaders);
+  const response = await httpClient.sendRequest<T>(
+    {
+      method: HttpMethod.GET,
+      url,
+      headers: finalHeaders,
+    },
+    getRequestRetryConfig,
+  );
+
+  return response.body;
 }
 
 export async function generateAccessToken({
@@ -40,14 +59,16 @@ export async function generateAccessToken({
     refresh_token: refreshToken,
   };
 
-  const result = await makeHttpRequest<{ access_token: string }>(
-    'POST',
-    url,
-    undefined,
-    body,
+  const response = await httpClient.sendRequest<{ access_token: string }>(
+    {
+      method: HttpMethod.POST,
+      url,
+      body,
+    },
+    accessTokenRetryConfig,
   );
 
-  return result.access_token;
+  return response.body.access_token;
 }
 
 // https://docs.flexera.com/flexera/EN/FlexeraAPI/GenerateAccessToken.htm#gettingstarted_850488088_1116484

@@ -1,3 +1,4 @@
+import { appendToContext } from '@openops/server-shared';
 import {
   EncryptedObject,
   ExecuteFlowOperation,
@@ -79,6 +80,10 @@ export class EngineConstants {
       input.internalApiUrl,
       input.engineToken,
     );
+
+    appendToContext({
+      projectDisplayName: project.displayName,
+    });
 
     return new EngineConstants(
       input.executionCorrelationId,

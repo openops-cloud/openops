@@ -3,6 +3,7 @@ import {
   TagResourcesCommand,
   TagResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
+import { logger } from '@openops/server-shared';
 import { AwsCredentials } from '../auth';
 import { getAwsClient } from '../get-client';
 import { groupARNsByRegion } from '../regions';
@@ -37,9 +38,11 @@ export async function addTagsToResources(
       if (response.FailedResourcesMap) {
         Object.entries(response.FailedResourcesMap).forEach(
           ([key, failureInfo]) => {
-            console.log(
-              `Error adding tags to resource. Arn: ${key}, Error Message: ${failureInfo.ErrorMessage}`,
-            );
+            logger.info(`Error adding tags to resource.`, {
+              ...failureInfo,
+              Arn: key,
+            });
+
             result.failed[key] =
               failureInfo.ErrorMessage ?? 'Error adding tags to resource';
           },

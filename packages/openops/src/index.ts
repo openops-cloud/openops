@@ -17,6 +17,7 @@ export * from './lib/aws/ec2/ec2-modify-instance-attribute';
 export * from './lib/aws/ec2/ec2-terminate-instances';
 export * from './lib/aws/get-client';
 export * from './lib/aws/organizations-common';
+export * from './lib/aws/partial-result';
 export * from './lib/aws/rds/rds-create-snapshot';
 export * from './lib/aws/rds/rds-delete-instance';
 export * from './lib/aws/rds/rds-delete-snapshot';
@@ -81,3 +82,11 @@ export * from './lib/ai/providers';
 
 export * from './lib/json-utils';
 export * from './lib/microsoft/get-microsoft-graph-client';
+
+export * from './lib/cloudability/recommendation-types';
+
+export * from './lib/servicenow/auth';
+export * from './lib/servicenow/get-choice-values';
+export * from './lib/servicenow/get-state-fields';
+export * from './lib/servicenow/get-table-fields';
+export * from './lib/servicenow/get-tables';

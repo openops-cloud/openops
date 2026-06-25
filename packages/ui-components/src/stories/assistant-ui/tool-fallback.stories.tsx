@@ -1,7 +1,6 @@
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { userEvent, waitFor } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FC } from 'react';
+import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { ToolFallback } from '../../components/assistant-ui/tool-fallback';
 import { TOOL_STATUS_TYPES } from '../../components/assistant-ui/tool-status';

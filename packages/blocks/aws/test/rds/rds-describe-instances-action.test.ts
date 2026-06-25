@@ -2,6 +2,7 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsListFromAuth: jest.fn(),
   describeRdsInstances: jest.fn(),
+  describeRdsInstancesAllowPartial: jest.fn(),
   getAwsAccountsMultiSelectDropdown: jest.fn().mockReturnValue({
     accounts: {
       required: true,
@@ -47,7 +48,7 @@ describe('rdsGetInstancesAction', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(rdsGetInstancesAction.props).length).toBe(7);
+    expect(Object.keys(rdsGetInstancesAction.props).length).toBe(8);
     expect(rdsGetInstancesAction.props).toMatchObject({
       accounts: {
         required: true,
@@ -72,6 +73,11 @@ describe('rdsGetInstancesAction', () => {
       },
       condition: {
         type: 'STATIC_DROPDOWN',
+      },
+      allowPartialResults: {
+        required: false,
+        defaultValue: false,
+        type: 'CHECKBOX',
       },
     });
   });
@@ -357,5 +363,75 @@ describe('rdsGetInstancesAction', () => {
       auth,
       undefined,
     );
+  });
+
+  test('when allowPartialResults, uses partial helper and returns object shape', async () => {
+    openopsCommonMock.describeRdsInstancesAllowPartial.mockResolvedValue({
+      results: [{ DBInstanceIdentifier: 'db-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '111', error: 'Error: denied' },
+      ],
+    });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterByARNs: false,
+        filterProperty: { regions: ['us-east-1', 'eu-west-1'] },
+        accounts: {},
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await rdsGetInstancesAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ DBInstanceIdentifier: 'db-1' }],
+      failedRegions: [
+        { region: 'eu-west-1', accountId: '111', error: 'Error: denied' },
+      ],
+    });
+    expect(
+      openopsCommonMock.describeRdsInstancesAllowPartial,
+    ).toHaveBeenCalledWith('credentials1', ['us-east-1', 'eu-west-1'], []);
+    expect(openopsCommonMock.describeRdsInstances).not.toHaveBeenCalled();
+  });
+
+  test('when allowPartialResults, aggregates multiple credentials', async () => {
+    openopsCommonMock.getCredentialsListFromAuth.mockResolvedValue([
+      'cred-a',
+      'cred-b',
+    ]);
+    openopsCommonMock.describeRdsInstancesAllowPartial
+      .mockResolvedValueOnce({
+        results: [{ id: 'a' }],
+        failedRegions: [],
+      })
+      .mockResolvedValueOnce({
+        results: [{ id: 'b' }],
+        failedRegions: [{ region: 'us-west-2', accountId: '2', error: 'e' }],
+      });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        filterByARNs: false,
+        filterProperty: { regions: ['us-east-1'] },
+        accounts: {},
+        allowPartialResults: true,
+      },
+    };
+
+    const result = (await rdsGetInstancesAction.run(context)) as any;
+
+    expect(result.results).toEqual([{ id: 'a' }, { id: 'b' }]);
+    expect(result.failedRegions).toEqual([
+      { region: 'us-west-2', accountId: '2', error: 'e' },
+    ]);
+    expect(
+      openopsCommonMock.describeRdsInstancesAllowPartial,
+    ).toHaveBeenCalledTimes(2);
   });
 });

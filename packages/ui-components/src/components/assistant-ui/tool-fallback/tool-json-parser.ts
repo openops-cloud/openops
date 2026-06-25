@@ -1,5 +1,9 @@
-import { TextContentPart } from '@assistant-ui/react';
 import { tryParseJson } from '../../../lib/json-utils';
+
+type TextContentPart = {
+  type: 'text';
+  text: string;
+};
 
 type ContentStructure = {
   content: TextContentPart[];

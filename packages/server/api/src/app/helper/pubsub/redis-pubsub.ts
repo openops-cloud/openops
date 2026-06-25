@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { Redis } from 'ioredis';
 
 export const redisPubSub = (
@@ -7,10 +8,14 @@ export const redisPubSub = (
   return {
     async subscribe(
       channel: string,
-      listener: (channel: string, message: string) => void,
+      listener: (channel: string, message: string) => Promise<void>,
     ): Promise<void> {
       await redisClientSubscriber.subscribe(channel);
-      redisClientSubscriber.on('message', listener);
+      redisClientSubscriber.on('message', (channel, message) => {
+        listener(channel, message).catch((err) => {
+          logger.error('Error while processing Redis pub/sub message', err);
+        });
+      });
     },
     async publish(channel: string, message: string): Promise<void> {
       await redisClientPublisher.publish(channel, message);

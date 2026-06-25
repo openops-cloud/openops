@@ -6,43 +6,31 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/blocks/aws",
         "tsConfig": "packages/blocks/aws/tsconfig.lib.json",
         "packageJson": "packages/blocks/aws/package.json",
         "main": "packages/blocks/aws/src/index.ts",
-        "assets": [
-          "packages/blocks/aws/*.md"
-        ],
+        "assets": ["packages/blocks/aws/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "publish": {
       "command": "node tools/scripts/publish.mjs blocks-aws {args.ver} {args.tag}",
-      "dependsOn": [
-        "build"
-      ]
+      "dependsOn": ["build"]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/blocks/aws/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/blocks/aws/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/blocks/aws/jest.config.ts",
         "passWithNoTests": true

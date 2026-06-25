@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Cloud, Database, Globe, Lock, Server } from 'lucide-react';
 import { useState } from 'react';
 

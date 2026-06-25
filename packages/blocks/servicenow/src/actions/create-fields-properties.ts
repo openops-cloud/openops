@@ -1,10 +1,10 @@
 import { Property } from '@openops/blocks-framework';
-import { ServiceNowAuth } from '../lib/auth';
-import { createFieldValueProperty } from '../lib/create-field-value-property';
 import {
   getServiceNowTableFields,
+  ServiceNowAuth,
   ServiceNowTableField,
-} from '../lib/get-table-fields';
+} from '@openops/common';
+import { createFieldValueProperty } from '../lib/create-field-value-property';
 
 function filterWritableFields(tableFields: ServiceNowTableField[]) {
   return tableFields.filter(
@@ -39,6 +39,8 @@ async function createFieldsProperties(
       properties: {
         fieldName: Property.StaticDropdown<string>({
           displayName: 'Field name',
+          description:
+            'Includes inherited fields from parent tables if user has read access to sys_db_object.',
           required: true,
           options: {
             options: mapFieldsToOptions(writableFields),

@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 
 function calculateEveryXMinutesCron(minutes: number) {
   const cronExpression = `*/${minutes} * * * *`;
@@ -57,6 +58,6 @@ export const everyXMinutesTrigger = createTrigger({
     return getEveryXMinutesData(ctx.propsValue.minutes);
   },
   onDisable: async () => {
-    console.log('onDisable');
+    logger.debug('Trigger disabled');
   },
 });

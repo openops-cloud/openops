@@ -4,5 +4,6 @@ export type CodeArtifact = {
   name: string;
   sourceCode: SourceCode;
   flowVersionId: string;
+  flowRunId: string;
   flowVersionState: FlowVersionState;
 };

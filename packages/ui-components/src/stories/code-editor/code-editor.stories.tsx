@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Controller, useForm } from 'react-hook-form';
 
 import { SourceCode } from '@openops/shared';

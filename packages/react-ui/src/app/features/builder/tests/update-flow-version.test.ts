@@ -208,7 +208,7 @@ describe('updateFlowVersion', () => {
     const clearStepSpy = jest.spyOn(stepTestOutputCache, 'clearStep');
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
-    expect(clearStepSpy).toHaveBeenCalledWith('step_a');
+    expect(clearStepSpy).toHaveBeenCalledWith('step_a', 'step_a');
     clearStepSpy.mockRestore();
   });
 });

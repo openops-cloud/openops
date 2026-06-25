@@ -50,7 +50,9 @@ export default defineConfig({
     react(),
     nxViteTsPaths(),
     checker({
-      typescript: true,
+      typescript: {
+        tsconfigPath: 'tsconfig.app.json',
+      },
     }),
     circleDependency({
       exclude: ['**/node_modules/**', '**/auto-properties-form.tsx'],
@@ -64,7 +66,7 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    rollupOptions: {
+    rolldownOptions: {
       onLog(level, log, handler) {
         if (
           log.cause &&

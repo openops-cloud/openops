@@ -23,7 +23,7 @@ import {
   isRunningState,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { ColumnDef } from '@tanstack/react-table';
+import { CellContext, ColumnDef, HeaderContext } from '@tanstack/react-table';
 import { t } from 'i18next';
 import { CircleStop, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -32,15 +32,13 @@ import { RunType } from '@/app/features/flow-runs/components/run-type';
 import { StopRunDialog } from '@/app/features/flow-runs/components/stop-run-dialog';
 import { flowRunUtils, shouldHideRunActions } from '../lib/flow-run-utils';
 
-type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
-  accessorKey: string;
-};
+type RunTableRow = RowDataWithActions<FlowRun>;
 
 export const useRunsTableColumns = ({
   refetch,
 }: {
   refetch: () => void;
-}): Column[] => {
+}): ColumnDef<RunTableRow>[] => {
   const durationEnabled = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_DURATION,
   ).data;
@@ -76,15 +74,15 @@ export const useRunsTableColumns = ({
     },
   });
 
-  return useMemo(
+  return useMemo<ColumnDef<RunTableRow>[]>(
     () =>
       [
         {
           accessorKey: 'flowId',
-          header: ({ column }) => (
+          header: ({ column }: HeaderContext<RunTableRow, unknown>) => (
             <DataTableColumnHeader column={column} title={t('Workflow')} />
           ),
-          cell: ({ row }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             return (
               <div className="text-left">{row.original.flowDisplayName}</div>
             );
@@ -92,10 +90,10 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'status',
-          header: ({ column }) => (
+          header: ({ column }: HeaderContext<RunTableRow, unknown>) => (
             <DataTableColumnHeader column={column} title={t('Status')} />
           ),
-          cell: ({ row }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             const status = row.original.status;
             const { variant, Icon } = flowRunUtils.getStatusIcon(status);
             const explanation = flowRunUtils.getStatusExplanation(status);
@@ -113,10 +111,10 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'triggerSource',
-          header: ({ column }) => (
+          header: ({ column }: HeaderContext<RunTableRow, unknown>) => (
             <DataTableColumnHeader column={column} title={t('Type')} />
           ),
-          cell: ({ row }: { row: { original: FlowRun } }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             const status = row.original.triggerSource;
 
             return <RunType type={status}></RunType>;
@@ -124,10 +122,10 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'created',
-          header: ({ column }) => (
+          header: ({ column }: HeaderContext<RunTableRow, unknown>) => (
             <DataTableColumnHeader column={column} title={t('Start Time')} />
           ),
-          cell: ({ row }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             return (
               <div className="text-left">
                 {formatUtils.formatDate(new Date(row.original.startTime))}
@@ -137,10 +135,11 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'duration',
-          header: ({ column }) => (
+          enableSorting: false,
+          header: ({ column }: HeaderContext<RunTableRow, unknown>) => (
             <DataTableColumnHeader column={column} title={t('Duration')} />
           ),
-          cell: ({ row }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             return (
               <div className="text-left">
                 {row.original.finishTime &&
@@ -151,8 +150,9 @@ export const useRunsTableColumns = ({
         },
         {
           accessorKey: 'actions',
+          enableSorting: false,
           header: () => null,
-          cell: ({ row }) => {
+          cell: ({ row }: CellContext<RunTableRow, unknown>) => {
             const isFailed = isFailedState(row.original.status);
             const isRunning = isRunningState(row.original.status);
             const isSuccessfulRun =

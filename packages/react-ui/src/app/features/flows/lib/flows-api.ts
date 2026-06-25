@@ -8,6 +8,7 @@ import {
   CreateEmptyFlowRequest,
   CreateFlowFromTemplateRequest,
   CreateStepRunRequestBody,
+  DeleteFlowsRequest,
   FlowImportTemplate,
   FlowOperationRequest,
   FlowRun,
@@ -18,6 +19,7 @@ import {
   ListFlowVersionRequest,
   ListFlowsRequest,
   MinimalFlow,
+  MoveFlowsRequest,
   PopulatedFlow,
   RunFlowSuccessResponse,
   SeekPage,
@@ -120,6 +122,13 @@ export const flowsApi = {
   },
   delete(flowId: string) {
     return api.delete<void>(`/v1/flows/${flowId}`);
+  },
+  deleteMany(request: DeleteFlowsRequest) {
+    const query = qs.stringify(request, { arrayFormat: 'repeat' });
+    return api.delete<void>(`/v1/flows?${query}`);
+  },
+  moveMany(request: MoveFlowsRequest) {
+    return api.post<void, MoveFlowsRequest>('/v1/flows/move', request);
   },
   count() {
     return api.get<number>('/v1/flows/count');

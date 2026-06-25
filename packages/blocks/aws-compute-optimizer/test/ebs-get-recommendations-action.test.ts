@@ -17,6 +17,8 @@ jest.mock('@openops/common', () => openopsCommon);
 const computeOptimizerMock = {
   getEbsRecommendationsForARNs: jest.fn(),
   getEbsRecommendationsForRegions: jest.fn(),
+  getEbsRecommendationsForARNsAllowPartial: jest.fn(),
+  getEbsRecommendationsForRegionsAllowPartial: jest.fn(),
 };
 
 jest.mock(
@@ -57,6 +59,10 @@ describe('ebsGetRecommendationsAction', () => {
       accounts: {
         required: true,
         type: 'STATIC_MULTI_SELECT_DROPDOWN',
+      },
+      allowPartialResults: {
+        type: 'CHECKBOX',
+        required: false,
       },
     });
   });
@@ -287,5 +293,47 @@ describe('ebsGetRecommendationsAction', () => {
     expect(
       computeOptimizerMock.getEbsRecommendationsForRegions,
     ).toHaveBeenNthCalledWith(2, 'credentials2', 'Optimized', ['us-east-2']);
+  });
+
+  test('when allowPartialResults with regions, uses partial helper and returns object shape', async () => {
+    openopsCommon.getCredentialsListFromAuth.mockResolvedValue([
+      'credentials1',
+      'credentials2',
+    ]);
+    computeOptimizerMock.getEbsRecommendationsForRegionsAllowPartial
+      .mockResolvedValueOnce({
+        results: [{ arn: 'vol-1' }],
+        failedRegions: [{ region: 'eu-west-1', accountId: '9', error: 'x' }],
+      })
+      .mockResolvedValueOnce({
+        results: [{ arn: 'vol-2' }],
+        failedRegions: [],
+      });
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        accounts: { accounts: ['1', '2'] },
+        recommendationType: 'Optimized',
+        allowPartialResults: true,
+        filterProperty: {
+          regions: ['us-east-2'],
+        },
+      },
+    };
+
+    const result = (await ebsGetRecommendationsAction.run(context)) as any;
+
+    expect(result).toEqual({
+      results: [{ arn: 'vol-1' }, { arn: 'vol-2' }],
+      failedRegions: [{ region: 'eu-west-1', accountId: '9', error: 'x' }],
+    });
+    expect(
+      computeOptimizerMock.getEbsRecommendationsForRegionsAllowPartial,
+    ).toHaveBeenCalledTimes(2);
+    expect(
+      computeOptimizerMock.getEbsRecommendationsForRegions,
+    ).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 # .github/workflows/chromatic.yml
 
-name: "Chromatic"
+name: 'Chromatic'
 
 on:
   push:
@@ -18,13 +18,17 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Cache node_modules
         id: node-modules-cache
-        uses: actions/cache@v5.0.4
+        uses: actions/cache@v5.0.5
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -36,7 +40,7 @@ jobs:
 
       - name: Run Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN
-        uses: chromaui/action@v16.0.0
+        uses: chromaui/action@7804f34e4e59c0d9b3c856848f46ad96d7897429 # v17
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true # 👈 Required option to enable TurboSnap

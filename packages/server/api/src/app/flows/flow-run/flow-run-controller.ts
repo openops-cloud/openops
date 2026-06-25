@@ -47,6 +47,8 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
       limit: Number(request.query.limit ?? DEFAULT_PAGING_LIMIT),
       createdAfter: request.query.createdAfter,
       createdBefore: request.query.createdBefore,
+      sortBy: request.query.sortBy,
+      sortDirection: request.query.sortDirection,
     });
   });
 

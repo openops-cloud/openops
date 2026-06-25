@@ -1,10 +1,18 @@
-import { BuilderState } from '@/app/features/builder/builder-types';
+import { FlowVersionUndoRedoHistoryItem } from '@/app/features/builder/flow-version-undo-redo/types';
+import { FlowVersion } from '@openops/shared';
 
+type UndoRedoStack = {
+  clear: () => void;
+  push: (item: FlowVersionUndoRedoHistoryItem) => void;
+};
+
+/** @deprecated Use useFlowVersionUndoRedo().addToUndoHistory instead. */
 export const pushFlowVersionToVersionHistory = (
-  currentState: Pick<
-    BuilderState,
-    'flowVersion' | 'undoFlowVersionHistory' | 'redoFlowVersionHistory'
-  >,
+  currentState: {
+    flowVersion: { id: string; trigger: FlowVersion['trigger'] };
+    undoFlowVersionHistory: UndoRedoStack;
+    redoFlowVersionHistory: UndoRedoStack;
+  },
   spotlightStepName?: string,
 ) => {
   const { flowVersion, undoFlowVersionHistory, redoFlowVersionHistory } =

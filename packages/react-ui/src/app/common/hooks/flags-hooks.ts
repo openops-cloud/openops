@@ -60,7 +60,7 @@ export const flagsHooks = {
 
     // Fetch cloud templates when cloud connection page is disabled
     // OR when federated login is enabled
-    return !cloudConnectionPageEnabled || federatedLoginEnabled;
+    return Boolean(!cloudConnectionPageEnabled || federatedLoginEnabled);
   },
 
   useShouldShowCloudUserInMenu: () => {

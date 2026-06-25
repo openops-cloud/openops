@@ -1,4 +1,4 @@
-import { SourceCode } from '@openops/shared/src';
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { Plus } from 'lucide-react';
 import { Button } from '../../ui/button';

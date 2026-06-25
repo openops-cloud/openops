@@ -1,5 +1,6 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
+import { ServiceNowAuth } from '@openops/common';
+import { servicenowAuth } from '../lib/auth';
 import { servicenowFieldsDropdownProperty } from '../lib/fields-dropdown-property';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
 import { runGetRecordAction } from './action-runners';

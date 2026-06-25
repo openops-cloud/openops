@@ -112,13 +112,23 @@ describe('updateRowAction', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    cacheWrapperMock.getOrAdd
-      .mockReturnValueOnce(1)
-      .mockReturnValue([{ id: 1, primary: true }]);
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
 
     openopsCommonMock.upsertRow.mockResolvedValue('mock result');
 
-    const context = createContext();
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
+      fieldsProperties: [
+        {
+          fieldName: 'field1',
+          newFieldValue: { newFieldValue: 'value' },
+        },
+      ],
+    });
 
     const result = (await updateRecordAction.run(context)) as any;
 
@@ -250,6 +260,119 @@ describe('updateRowAction', () => {
         value: '3',
       },
     ]);
+  });
+
+  test.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['empty string', ''],
+    ['whitespace string', '   '],
+  ])(
+    'should skip field when value is %s',
+    async (_label: string, fieldValue: any) => {
+      openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+        name: 'primary key field',
+        type: 'text',
+      });
+      cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+        { id: 3, primary: false, name: 'field2' },
+      ]);
+      openopsCommonMock.upsertRow.mockResolvedValue('mock result');
+
+      const context = createContext({
+        tableName: 'Opportunity',
+        rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
+        fieldsProperties: [
+          {
+            fieldName: 'field1',
+            newFieldValue: { newFieldValue: 'present value' },
+          },
+          {
+            fieldName: 'field2',
+            newFieldValue: { newFieldValue: fieldValue },
+          },
+        ],
+      });
+
+      await updateRecordAction.run(context);
+
+      expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: {
+            'primary key field': 'some primary key value',
+            field1: 'present value',
+          },
+        }),
+      );
+    },
+  );
+
+  test('should skip upsert when all numeric field values are null', async () => {
+    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+      name: 'id',
+      type: 'number',
+    });
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      {
+        id: 1,
+        primary: true,
+        name: 'id',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+      {
+        id: 2,
+        primary: false,
+        name: 'amount',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+    ]);
+
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: '1' },
+      fieldsProperties: [
+        {
+          fieldName: 'amount',
+          newFieldValue: { newFieldValue: null },
+        },
+      ],
+    });
+
+    const result = await updateRecordAction.run(context);
+
+    expect(result).toBeNull();
+    expect(openopsCommonMock.upsertRow).not.toHaveBeenCalled();
+  });
+
+  test('should skip upsert and return null when all field values are empty', async () => {
+    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+      name: 'primary key field',
+      type: 'text',
+    });
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
+
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
+      fieldsProperties: [
+        {
+          fieldName: 'field1',
+          newFieldValue: { newFieldValue: null },
+        },
+      ],
+    });
+
+    const result = await updateRecordAction.run(context);
+
+    expect(result).toBeNull();
+    expect(openopsCommonMock.upsertRow).not.toHaveBeenCalled();
   });
 
   test('should round numeric values when roundToFieldPrecision is true', async () => {

@@ -14,9 +14,18 @@ const getAwsClientMock = {
 
 jest.mock('../../../src/lib/aws/get-client', () => getAwsClientMock);
 
+jest.mock('../../../src/lib/aws/sts-common', () => ({
+  getAccountId: jest.fn().mockResolvedValue('RdsTestAccountId'),
+}));
+jest.mock('../../../src/lib/aws/organizations-common', () => ({
+  getAccountName: jest.fn().mockResolvedValue('RdsTestAccountName'),
+}));
+
 import {
   describeRdsInstances,
+  describeRdsInstancesAllowPartial,
   describeRdsSnapshots,
+  describeRdsSnapshotsAllowPartial,
 } from '../../../src/lib/aws/rds/rds-describe';
 
 describe('describeRdsSnapshots', () => {
@@ -122,5 +131,75 @@ describe('describeRdsInstances', () => {
       describeRdsInstances('credentials', ['some-region1'], []),
     ).rejects.toThrow('some error');
     expect(sendMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('describeRdsSnapshotsAllowPartial', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns snapshots from successful regions and records failed regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({ DBSnapshots: [{ obj: '1' }] })
+      .mockRejectedValueOnce(new Error('Throttling'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsSnapshotsAllowPartial(
+      'credentials',
+      ['some-region1', 'some-region2'],
+      [],
+    );
+
+    expect(result.results).toStrictEqual([
+      { obj: '1', region: 'some-region1' },
+    ]);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'some-region2',
+        accountId: 'RdsTestAccountId',
+        error: 'Error: Throttling',
+      },
+    ]);
+    expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('describeRdsInstancesAllowPartial', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns instances from successful regions and records failed regions', async () => {
+    const sendMock = jest
+      .fn()
+      .mockResolvedValueOnce({ DBInstances: [{ instance: 'ok' }] })
+      .mockRejectedValueOnce(new Error('AccessDenied'));
+
+    getAwsClientMock.getAwsClient.mockImplementation(() => ({
+      send: sendMock,
+    }));
+
+    const result = await describeRdsInstancesAllowPartial(
+      'credentials',
+      ['some-region1', 'some-region2'],
+      [],
+    );
+
+    expect(result.results).toStrictEqual([
+      { instance: 'ok', region: 'some-region1' },
+    ]);
+    expect(result.failedRegions).toEqual([
+      {
+        region: 'some-region2',
+        accountId: 'RdsTestAccountId',
+        error: 'Error: AccessDenied',
+      },
+    ]);
+    expect(sendMock).toHaveBeenCalledTimes(2);
   });
 });

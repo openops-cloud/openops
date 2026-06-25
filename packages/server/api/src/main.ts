@@ -32,7 +32,7 @@ const start = async (app: FastifyInstance): Promise<void> => {
   try {
     await app.listen({
       host: '0.0.0.0',
-      port: 3000,
+      port: Number(process.env['PORT'] || 3000),
     });
     if (system.isWorker()) {
       await workerPostBoot();
@@ -80,6 +80,7 @@ async function validateEnvPropsOnStartup(): Promise<void> {
 
 const main = async (): Promise<void> => {
   setupTimeZone();
+  initializeLock();
 
   if (system.isApp()) {
     await validateEnvPropsOnStartup();
@@ -107,18 +108,20 @@ const main = async (): Promise<void> => {
     } else {
       logger.info('Skipping analytics seed run, analytics disabled');
     }
-  }
 
-  const environmentId = await seedEnvironmentId();
+    const environmentId = await seedEnvironmentId();
+    await telemetry.start(() => Promise.resolve(environmentId));
+  }
 
   const app = await setupServer();
 
   setStopHandlers(app, async () => {
-    logger.info('Flushing telemetry...');
-    await telemetry.flush();
+    if (system.isApp()) {
+      logger.info('Flushing telemetry...');
+      await telemetry.flush();
+    }
   });
 
-  await telemetry.start(() => Promise.resolve(environmentId));
   await start(app);
 };
 

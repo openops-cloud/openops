@@ -8,12 +8,13 @@ import { TestFlowWidget } from '@/app/features/builder/flow-canvas/widgets/test-
 import { OPS_NODE_SIZE } from '@openops/components/ui';
 
 const AboveFlowWidgets = React.memo(() => {
-  const [flowVersion, setRun, selectStepByName, readonly] =
+  const [flowVersion, setRun, selectStepByName, readonly, saving] =
     useBuilderStateContext((state) => [
       state.flowVersion,
       state.setRun,
       state.selectStepByName,
       state.readonly,
+      state.saving,
     ]);
 
   return (
@@ -33,6 +34,7 @@ const AboveFlowWidgets = React.memo(() => {
               <TestFlowWidget
                 flowVersion={flowVersion}
                 setRun={setRun}
+                saving={saving}
               ></TestFlowWidget>
               <IncompleteSettingsButton
                 flowVersion={flowVersion}

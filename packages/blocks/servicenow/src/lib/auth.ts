@@ -1,12 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property } from '@openops/blocks-framework';
-import { generateAuthHeader } from './generate-auth-header';
-
-export interface ServiceNowAuth {
-  username: string;
-  password: string;
-  instanceName: string;
-}
+import { generateAuthHeader } from '@openops/common';
 
 export const servicenowAuth = BlockAuth.CustomAuth({
   authProviderKey: 'servicenow',
@@ -39,7 +33,7 @@ export const servicenowAuth = BlockAuth.CustomAuth({
         method: HttpMethod.GET,
         url: `https://${instanceName}.service-now.com/api/now/ui/user/current_user`,
         headers: {
-          ...generateAuthHeader({ username, password }),
+          ...generateAuthHeader({ username, password, instanceName }),
           Accept: 'application/json',
         },
       });

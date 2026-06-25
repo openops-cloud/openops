@@ -1,13 +1,16 @@
-import { MentionNodeAttrs } from '@tiptap/extension-mention';
 import { JSONContent } from '@tiptap/react';
 
 import { StepMetadata } from '@openops/components/ui';
 import {
   Action,
   Trigger,
+  TriggerWithOptionalId,
   assertNotNullOrUndefined,
   isNil,
 } from '@openops/shared';
+import { DOMOutputSpec } from '@tiptap/pm/model';
+
+type FlowStep = Action | Trigger | TriggerWithOptionalId;
 
 const removeIntroplationBrackets = (text: string) => {
   return text.slice(2, text.length - 2);
@@ -30,7 +33,9 @@ const keysWithinPath = (path: string) => {
     .map((key) => removeQuotes(key));
 };
 
-type MentionNodeAttrs = {
+export type MentionNodeAttrs = {
+  id?: string;
+  label?: string;
   logoUrl?: string;
   displayText: string;
   serverValue: string;
@@ -91,7 +96,7 @@ function parseMentionNodeFromText(request: ParseMentionNodeFromText) {
 type StepMetadataWithDisplayName = StepMetadata & { stepDisplayName: string };
 const getStepMetadataFromPath = (
   path: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) => {
   const stepPath = removeIntroplationBrackets(path);
@@ -105,7 +110,7 @@ const getStepMetadataFromPath = (
 
 function convertTextToTipTapJsonContent(
   userInputText: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ): {
   type: TipTapNodeTypes.paragraph;
@@ -149,7 +154,7 @@ function convertTextToTipTapJsonContent(
 
 function createMentionNodeFromText(
   mention: string,
-  steps: (Action | Trigger)[],
+  steps: FlowStep[],
   stepsMetadata: (StepMetadataWithDisplayName | undefined)[],
 ) {
   const { stepMetadata, dfsIndex } = getStepMetadataFromPath(
@@ -190,39 +195,45 @@ function convertTiptapJsonToText(nodes: JSONContent[]): string {
   return res.join('');
 }
 
-const generateMentionHtmlElement = (mentionAttrs: MentionNodeAttrs) => {
-  const mentionElement = document.createElement('span');
+const generateMentionHtmlElement = (
+  mentionAttrs: MentionNodeAttrs,
+): DOMOutputSpec => {
   const apMentionNodeAttrs: MentionNodeAttrs = JSON.parse(
     mentionAttrs.label || '{}',
   );
-  mentionElement.className =
-    'inline-flex bg-muted/10 break-all my-1 mx-[1px] border border-[#9e9e9e] border-solid items-center gap-2 py-1 px-2 rounded-[3px] text-muted-foreground ';
   assertNotNullOrUndefined(mentionAttrs.label, 'mentionAttrs.label');
   assertNotNullOrUndefined(mentionAttrs.id, 'mentionAttrs.id');
   assertNotNullOrUndefined(
     apMentionNodeAttrs.displayText,
     'apMentionNodeAttrs.displayText',
   );
-  mentionElement.dataset.id = mentionAttrs.id;
-  mentionElement.dataset.label = mentionAttrs.label;
-  mentionElement.dataset.displayText = apMentionNodeAttrs.displayText;
-  mentionElement.dataset.type = TipTapNodeTypes.mention;
-  mentionElement.contentEditable = 'false';
 
+  const attrs: Record<string, string> = {
+    class:
+      'inline-flex bg-muted/10 break-all my-1 mx-[1px] border border-[#9e9e9e] border-solid items-center gap-2 py-1 px-2 rounded-[3px] text-muted-foreground',
+    'data-id': mentionAttrs.id,
+    'data-label': mentionAttrs.label,
+    'data-display-text': apMentionNodeAttrs.displayText,
+    'data-type': TipTapNodeTypes.mention,
+    contenteditable: 'false',
+    servervalue: apMentionNodeAttrs.serverValue,
+  };
+
+  const children: DOMOutputSpec[] = [];
   if (apMentionNodeAttrs.logoUrl) {
-    const imgElement = document.createElement('img');
-    imgElement.src = apMentionNodeAttrs.logoUrl;
-    imgElement.className = 'object-fit w-4 h-4';
-    mentionElement.appendChild(imgElement);
+    children.push([
+      'img',
+      { src: apMentionNodeAttrs.logoUrl, class: 'object-fit w-4 h-4' },
+    ]);
   }
 
-  const mentiontextDiv = document.createTextNode(
+  // Text nodes are valid DOMOutputSpec children; newer @tiptap/pm types omit `string`.
+  return [
+    'span',
+    attrs,
+    ...children,
     apMentionNodeAttrs.displayText,
-  );
-  mentionElement.setAttribute('serverValue', apMentionNodeAttrs.serverValue);
-
-  mentionElement.appendChild(mentiontextDiv);
-  return mentionElement;
+  ] as DOMOutputSpec;
 };
 
 const inputThatUsesMentionClass = 'ap-text-with-mentions';

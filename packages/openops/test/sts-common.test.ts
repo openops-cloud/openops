@@ -35,6 +35,24 @@ const ACCESS_KEY_ID = 'random accessKeyId';
 const SECRET_ACCESS_KEY = 'random secretAccessKey';
 const DEFAULT_REGION = 'random defaultRegion';
 
+const mockAssumeTargetRoleViaAzureFederation = jest.fn();
+
+jest.mock('../src/lib/aws/azure-aws-federation', () => ({
+  assumeTargetRoleViaAzureFederation: (...args: any[]) =>
+    mockAssumeTargetRoleViaAzureFederation(...args),
+}));
+
+const mockSystemGetBoolean = jest.fn();
+jest.mock('@openops/server-shared', () => ({
+  SharedSystemProp: {
+    AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
+    AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
+  },
+  system: {
+    getBoolean: (...args: any[]) => mockSystemGetBoolean(...args),
+  },
+}));
+
 import { assumeRole, getAccountId } from '../src/lib/aws/sts-common';
 
 describe('assumeRole tests', () => {
@@ -122,5 +140,94 @@ describe('getAccountId tests', () => {
         sessionToken: 'some token',
       },
     });
+  });
+
+  test('should return empty string if account is missing', async () => {
+    mockSend.mockResolvedValueOnce({});
+    const result = await getAccountId(
+      {
+        accessKeyId: ACCESS_KEY_ID,
+        secretAccessKey: SECRET_ACCESS_KEY,
+      },
+      DEFAULT_REGION,
+    );
+
+    expect(result).toBe('');
+  });
+});
+
+describe('assumeRole with Azure Federation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should use Azure Federation when credentials are missing and enabled', async () => {
+    mockSystemGetBoolean.mockImplementation((prop) => {
+      if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') {
+        return true;
+      }
+      if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') {
+        return true;
+      }
+      return false;
+    });
+    mockAssumeTargetRoleViaAzureFederation.mockResolvedValue(
+      'azure credentials',
+    );
+
+    const result = await assumeRole(
+      '',
+      '',
+      DEFAULT_REGION,
+      'some role arn',
+      'external id',
+      'some endpoint',
+    );
+
+    expect(result).toBe('azure credentials');
+    expect(mockAssumeTargetRoleViaAzureFederation).toHaveBeenCalledWith(
+      DEFAULT_REGION,
+      'some role arn',
+      'external id',
+      'some endpoint',
+    );
+    expect(mockCreateStsClient).not.toHaveBeenCalled();
+  });
+
+  test('should NOT use Azure Federation when AWS_ENABLE_IMPLICIT_ROLE is false', async () => {
+    mockSystemGetBoolean.mockImplementation((prop) => {
+      if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') {
+        return false;
+      }
+      if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') {
+        return true;
+      }
+      return false;
+    });
+
+    await expect(
+      assumeRole('', '', DEFAULT_REGION, 'some role arn', 'external id'),
+    ).rejects.toThrow(
+      'AWS credentials are required, please provide accessKeyId and secretAccessKey',
+    );
+
+    expect(mockAssumeTargetRoleViaAzureFederation).not.toHaveBeenCalled();
+  });
+
+  test('should NOT use Azure Federation when AWS_USE_AZURE_MANAGED_IDENTITY is false', async () => {
+    mockSystemGetBoolean.mockImplementation((prop) => {
+      if (prop === 'AWS_ENABLE_IMPLICIT_ROLE') {
+        return true;
+      }
+      if (prop === 'AWS_USE_AZURE_MANAGED_IDENTITY') {
+        return false;
+      }
+      return false;
+    });
+
+    await assumeRole('', '', DEFAULT_REGION, 'some role arn', 'external id');
+
+    expect(mockAssumeTargetRoleViaAzureFederation).not.toHaveBeenCalled();
+    expect(mockCreateStsClient).toHaveBeenCalled();
   });
 });
