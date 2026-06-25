@@ -83,7 +83,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app_token.outputs.token }}
           claude_args: >-
-            --allowedTools "Bash,Read,Glob,Grep,Write,Agent,mcp__github__pull_request_read,mcp__github__pull_request_review_write,mcp__github__add_comment_to_pending_review,mcp__github__add_reply_to_pull_request_comment,mcp__github__add_issue_comment"
+            --allowedTools "Bash,Read,Glob,Grep,Write,Agent,mcp__github__pull_request_read"
             --model "${{ inputs.model }}"
           prompt: ${{ steps.prompt.outputs.content }}
 

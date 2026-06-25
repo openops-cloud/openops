@@ -3,14 +3,17 @@ name: review-code
 description: Review a GitHub pull request for the OpenOps codebase. Checks out the PR, analyzes changes through OpenOps-specific lenses, validates findings with confidence scoring, previews before posting, and supports inline comments.
 when_to_use: "Reviewing a PR; '/review-code <number>'; 'review PR', 'check PR #N', 'code review'."
 argument-hint: '[<pr-number>] [update]'
-allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Write, Agent, mcp__github__pull_request_read, mcp__github__pull_request_review_write, mcp__github__add_comment_to_pending_review, mcp__github__add_reply_to_pull_request_comment, mcp__github__add_issue_comment]
+allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep, Write, Agent, mcp__github__pull_request_read]
 ---
 
 <!-- Tooling note: this `allowed-tools` list and the `--allowedTools` list in
 .github/workflows/pr-reviewer.yml must stay in sync. The frontmatter governs
 local `/review-code` runs; the workflow governs CI runs (which strips this
 frontmatter before passing the body as the prompt). AskUserQuestion is local-only
-(CI skips interaction). Write is needed by PR mode in both. -->
+(CI skips interaction). Write is needed by PR mode in both. All posting (inline
+review, summary comment, thread replies) goes through `gh api` over Bash — not
+MCP — so it works the same in CI and locally; `mcp__github__pull_request_read`
+is the only GitHub MCP tool, used solely to fetch PR metadata/diff/comments. -->
 
 # review-code
 
@@ -437,18 +440,27 @@ If the change is genuinely low-risk: "LGTM — no reliability concerns."
 **If local**: post only if the user approved in Phase 4.
 **If CI**: post directly (no confirmation needed).
 
-Unlike the summary comment, inline review threads are **not** upserted — a re-run would post duplicate threads. Before submitting, cross-reference the existing inline comments fetched in Phase 2 (their `path` + `line` + body) and skip any finding already raised on the same line, whether by Claude or another reviewer. Only post inline comments that are genuinely new.
+Inline comments are posted by **submitting a single GitHub review via `gh api`** — not through any MCP tool. This is the only mechanism that works identically in CI and locally: `gh` is already authenticated in both (the `GH_TOKEN` set on the CI step, your local `gh auth`), it needs no MCP server, and it is immune to the `claude-code-action` inline-comment buffering and its `context.isPR` / `workflow_dispatch` gate.
 
-Submit a GitHub review with inline comments using `mcp__github__pull_request_review_write` with:
+Unlike the summary comment, inline review threads are **not** upserted — a re-run would post duplicate threads. Before building the payload, cross-reference the existing inline comments fetched in Phase 2 (their `path` + `line` + body) and skip any finding already raised on the same line, whether by Claude or another reviewer. Only include inline comments that are genuinely new.
 
-- `owner=$OWNER`, `repo=$REPO_NAME`, `pullNumber={PR_NUMBER}`
-- `event=COMMENT`
-- `body=""` (empty — the verdict lives in the summary comment, not the review body, to avoid two separate Claude posts)
-- `comments` array — one entry per finding that maps to a diff line: `{ path, line, body: "**[{CATEGORY}]** {DESCRIPTION}" }`
+**Only include lines that are part of the diff.** GitHub rejects the _entire_ review (HTTP 422) if any single comment targets a line that is not an added/changed line on the right side of the diff (unchanged context lines are not addable). Before building the `comments` array, drop any finding whose line is not present as a `+`/changed line in the hunks — move it to the summary comment instead. A finding on a real but unaddable line is still worth reporting; it just cannot be an inline thread.
 
-**Only include lines that are part of the diff.** GitHub rejects the _entire_ review submission if any single comment targets a line that is not an added/changed line on the right side of the diff (unchanged context lines are not addable). Before building the `comments` array, drop any finding whose line is not present as a `+` or changed line in the hunks — move it to the summary comment instead. A finding on a real but unaddable line is still worth reporting; it just cannot be an inline thread.
+Build the comments array (one entry per new finding that maps to a diff line) and submit the review. Use `side: "RIGHT"` for added/changed lines (`"LEFT"` for a deleted line); for a multi-line range add `"start_line"` alongside `"line"`. Construct the JSON with `jq` so finding bodies with quotes/newlines/backticks are escaped correctly — never string-interpolate the body into the JSON:
 
-If the review write still fails (e.g. one line slips through and the API rejects the batch), **do not lose the findings**: fall back to including every inline finding in the summary comment under a `### Inline findings` heading, so the review is never silently dropped. Report the fallback in your final message.
+```bash
+# $COMMENTS_JSON is a JSON array: [{"path":...,"line":...,"side":"RIGHT","body":"**[CATEGORY]** ..."}, ...]
+jq -n --argjson comments "$COMMENTS_JSON" \
+  '{event: "COMMENT", body: "", comments: $comments}' > /tmp/review-payload-{PR_NUMBER}.json
+
+gh api repos/$OWNER/$REPO_NAME/pulls/{PR_NUMBER}/reviews \
+  --method POST \
+  --input /tmp/review-payload-{PR_NUMBER}.json
+```
+
+`body: ""` is intentional — the verdict lives in the summary comment, not the review body, so there are not two separate posts.
+
+If the review POST still fails (e.g. a line slips through and the API returns 422), **do not lose the findings**: fall back to including every inline finding in the summary comment under a `### Inline findings` heading, so the review is never silently dropped. Report the fallback in your final message.
 
 Findings that cannot be mapped to a diff line are included in the summary comment (next step) rather than posted separately.
 
@@ -458,16 +470,18 @@ After posting the review, upsert the summary comment — update if one already e
 EXISTING=$(gh api repos/$OWNER/$REPO_NAME/issues/{PR_NUMBER}/comments \
   --jq '[.[] | select(.body | startswith("<!-- claude-pr-review-summary -->"))] | first | .id // empty')
 
+# --raw-field (not --field): --field coerces values that look like
+# true/false/null/numbers, which would mangle a markdown body.
 if [ -n "$EXISTING" ]; then
-  # --raw-field (not --field): --field coerces values that look like
-  # true/false/null/numbers, which would mangle a markdown body.
   gh api repos/$OWNER/$REPO_NAME/issues/comments/$EXISTING \
     --method PATCH \
     --raw-field body="$(cat /tmp/review-{PR_NUMBER}.md)"
+else
+  gh api repos/$OWNER/$REPO_NAME/issues/{PR_NUMBER}/comments \
+    --method POST \
+    --raw-field body="$(cat /tmp/review-{PR_NUMBER}.md)"
 fi
 ```
-
-If `$EXISTING` was empty (no prior summary), post the summary as a new comment using `mcp__github__add_issue_comment` with `owner=$OWNER`, `repo=$REPO_NAME`, `issueNumber={PR_NUMBER}`, `body=<contents of /tmp/review-{PR_NUMBER}.md>`.
 
 ---
 
@@ -486,4 +500,10 @@ For each thread, determine the action needed:
 2. **The author asked a question** → draft an answer
 3. No action needed → skip
 
-Preview planned responses using the same `AskUserQuestion` flow as Phase 4. Post approved replies using `mcp__github__add_reply_to_pull_request_comment` with `owner=$OWNER`, `repo=$REPO_NAME`, `pullRequestNumber={PR_NUMBER}`, `commentId={COMMENT_ID}`, `body={REPLY}`.
+Preview planned responses using the same `AskUserQuestion` flow as Phase 4. Post approved replies via `gh api` (escape the body with `jq` so quotes/newlines survive):
+
+```bash
+gh api repos/$OWNER/$REPO_NAME/pulls/{PR_NUMBER}/comments/{COMMENT_ID}/replies \
+  --method POST \
+  --raw-field body="$REPLY"
+```
