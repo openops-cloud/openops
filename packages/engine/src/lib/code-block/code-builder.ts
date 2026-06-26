@@ -15,6 +15,7 @@ import fs, { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { rollup } from 'rollup';
 import { ExecutionMode } from '../core/code/execution-mode';
+import { BASE64_POLYFILL_TYPES } from '../core/code/polyfills/base64-polyfill';
 import { CodeArtifact } from './code-artifact';
 
 const executionMode = system.get<ExecutionMode>(
@@ -137,6 +138,12 @@ const compileCode = async ({
   code,
 }: CompileCodeParams): Promise<void> => {
   await fs.writeFile(`${path}/tsconfig.json`, TS_CONFIG_CONTENT, {
+    encoding: 'utf8',
+    flag: 'w',
+  });
+  // Declare the polyfilled globals (btoaUtf8/atobUtf8) so tsc can type-check
+  // code blocks that use them; the runtime definitions live in BASE64_POLYFILL.
+  await fs.writeFile(`${path}/openops-globals.d.ts`, BASE64_POLYFILL_TYPES, {
     encoding: 'utf8',
     flag: 'w',
   });

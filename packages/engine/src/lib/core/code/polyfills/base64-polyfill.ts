@@ -39,6 +39,12 @@ export const BASE64_POLYFILL = `(() => {
     };
   }
 
+  if (typeof globalThis.btoaUtf8 !== 'function') {
+    globalThis.btoaUtf8 = (str) => {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16))));
+    }
+  }
+
   if (typeof globalThis.atob !== 'function') {
     globalThis.atob = (input) => {
       let string = String(input).replace(/[\\t\\n\\f\\r ]+/g, '');
@@ -89,4 +95,21 @@ export const BASE64_POLYFILL = `(() => {
       return output;
     };
   }
+
+  if (typeof globalThis.atobUtf8 !== 'function') {
+    globalThis.atobUtf8 = (str) => {
+      return decodeURIComponent(Array.prototype.map.call(atob(str), (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    }
+  }
 })();`;
+
+/**
+ * Ambient declarations for the custom globals the polyfill injects at runtime.
+ * `btoa`/`atob` are already typed via the `dom` lib, but `btoaUtf8`/`atobUtf8`
+ * are OpenOps-specific, so without this declaration `tsc` rejects code blocks
+ * that use them with `TS2304: Cannot find name 'btoaUtf8'`. This is written into
+ * each code block's compile directory by the code builder so the two stay in sync.
+ */
+export const BASE64_POLYFILL_TYPES = `declare function btoaUtf8(data: string): string;
+declare function atobUtf8(data: string): string;
+`;
