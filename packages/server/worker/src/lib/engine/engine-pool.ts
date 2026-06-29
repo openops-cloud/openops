@@ -39,7 +39,7 @@ const GRACE_PERIOD_MS = 5_000;
 // bootstrap concurrently; excess acquisitions queue for a freed slot.
 const COLD_FORK_CONCURRENCY = Math.max(
   1,
-  system.getNumber(WorkerSystemProps.ENGINE_COLD_FORK_CONCURRENCY) ?? 2,
+  system.getNumber(WorkerSystemProps.ENGINE_COLD_FORK_CONCURRENCY) ?? 3,
 );
 let engineForkCounter = 0;
 
