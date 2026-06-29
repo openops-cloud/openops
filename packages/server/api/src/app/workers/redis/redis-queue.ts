@@ -91,7 +91,7 @@ export const redisQueue: QueueManager = {
       return;
     }
 
-    logger.info(' Removing repeating job for flow version', {
+    logger.info('Removing repeating job for flow version', {
       flowVersionId,
     });
 
