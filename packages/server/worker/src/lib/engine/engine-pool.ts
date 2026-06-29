@@ -30,7 +30,49 @@ const ENGINE_DEBUG_BASE_PORT = 9231;
 const STARTUP_TIMEOUT_MS = 10_000;
 const IDLE_SCALE_DOWN_MS = 60_000;
 const GRACE_PERIOD_MS = 5_000;
+
+// Bootstrapping a fresh engine is CPU-heavy (V8 compile of the bundle with
+// --no-node-snapshot). A burst of acquisitions (e.g. many `/options` dropdown
+// resolutions at once) would otherwise cold-fork an unbounded number of engines
+// simultaneously, oversubscribing the CPU so badly that some never reach the
+// "ready" handshake within STARTUP_TIMEOUT_MS. Cap how many cold-forks may
+// bootstrap concurrently; excess acquisitions queue for a freed slot.
+const COLD_FORK_CONCURRENCY = Math.max(
+  1,
+  system.getNumber(WorkerSystemProps.ENGINE_COLD_FORK_CONCURRENCY) ?? 3,
+);
 let engineForkCounter = 0;
+
+let activeColdForks = 0;
+const coldForkWaiters: Array<() => void> = [];
+
+/** Reserve a cold-fork slot if one is free. Returns false if at capacity. */
+function tryAcquireColdForkSlot(): boolean {
+  if (activeColdForks < COLD_FORK_CONCURRENCY) {
+    activeColdForks++;
+    return true;
+  }
+
+  return false;
+}
+
+/** Wait until a cold-fork slot frees, reserving it on wake-up. */
+function waitForColdForkSlot(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    coldForkWaiters.push(() => {
+      activeColdForks++;
+      resolve();
+    });
+  });
+}
+
+function releaseColdForkSlot(): void {
+  activeColdForks--;
+  const next = coldForkWaiters.shift();
+  if (next) {
+    next();
+  }
+}
 
 function pipeWithPrefix(child: ChildProcess): void {
   child.stdout?.on('data', (data: Buffer) => {
@@ -417,9 +459,12 @@ export function initEnginePool(): void {
   startIdleScaler();
 }
 
-export async function acquireEngine(): Promise<PooledEngine> {
+/**
+ * Pop a ready, non-stale engine from the pool, discarding any stale ones
+ * encountered. Returns undefined if no ready engine is available.
+ */
+function takeWarmReadyEngine(): ChildProcess | undefined {
   const currentMtime = getBundleMtime();
-  // Discard stale processes until we find a valid one or exhaust the pool
   let readyIdx = pool.findIndex((e) => e.state === 'ready');
   while (readyIdx !== -1) {
     const entry = pool[readyIdx];
@@ -439,69 +484,130 @@ export async function acquireEngine(): Promise<PooledEngine> {
     }
 
     entry.child.removeAllListeners('exit');
-    inFlightCount++;
-    greedyRefill();
-    logger.debug('Acquired warm engine', {
-      pid: entry.child.pid,
-    });
-    return new PooledEngine(entry.child);
+    return entry.child;
+  }
+
+  return undefined;
+}
+
+function acquireWarmEngine(warm: ChildProcess): PooledEngine {
+  inFlightCount++;
+  greedyRefill();
+  logger.debug('Acquired warm engine', { pid: warm.pid });
+  return new PooledEngine(warm);
+}
+
+export async function acquireEngine(): Promise<PooledEngine> {
+  const warm = takeWarmReadyEngine();
+  if (warm) {
+    return acquireWarmEngine(warm);
+  }
+
+  // Fast path: a slot is free, so cold-fork synchronously (no microtask delay).
+  if (tryAcquireColdForkSlot()) {
+    return bootstrapColdFork();
+  }
+
+  // At capacity: wait for a slot, then re-check for a warm engine first.
+  await waitForColdForkSlot();
+  const warmAfterWait = takeWarmReadyEngine();
+  if (warmAfterWait) {
+    releaseColdForkSlot();
+    return acquireWarmEngine(warmAfterWait);
+  }
+
+  return bootstrapColdFork();
+}
+
+async function bootstrapColdFork(): Promise<PooledEngine> {
+  // A graceful shutdown may have begun while this caller was queued in
+  // waitForColdForkSlot(). Never fork new engines once draining: release the
+  // slot (which wakes the next waiter, who will also bail here) and fail the
+  // caller so the rejection propagates instead of spawning orphaned engines.
+  if (draining) {
+    releaseColdForkSlot();
+    throw new Error('Engine pool is shutting down');
   }
 
   logger.debug('No warm engine available, cold-forking');
   inFlightCount++;
 
-  if (pool.length < POOL_MAX_SIZE) {
-    spawnPoolProcess();
-  }
+  try {
+    if (pool.length < POOL_MAX_SIZE) {
+      spawnPoolProcess();
+    }
 
-  const child = forkEngine(engineForkCounter++ % POOL_MAX_SIZE);
+    // forkEngine() can throw synchronously (e.g. invalid spawn options); keep it
+    // inside the try so the slot and inFlightCount are always released below.
+    const child = forkEngine(engineForkCounter++ % POOL_MAX_SIZE);
 
-  pipeWithPrefix(child);
+    pipeWithPrefix(child);
 
-  await new Promise<void>((resolve, reject) => {
-    const cleanup = () => {
-      child.removeListener('message', onMessage);
-      child.removeListener('exit', onExit);
-      clearTimeout(timer);
-    };
+    await new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        child.removeListener('message', onMessage);
+        child.removeListener('exit', onExit);
+        clearTimeout(timer);
+      };
 
-    const timer = setTimeout(() => {
-      cleanup();
-      killProcess(child);
-      inFlightCount--;
-      reject(new Error('Cold-forked engine failed to become ready'));
-    }, STARTUP_TIMEOUT_MS);
-
-    const onMessage = (msg: unknown) => {
-      if (!msg || typeof msg !== 'object') {
-        return;
-      }
-
-      const message = msg as { type: string };
-      if (message.type === 'ready') {
+      const timer = setTimeout(() => {
         cleanup();
-        resolve();
-      }
-    };
+        killProcess(child);
+        reject(new Error('Cold-forked engine failed to become ready'));
+      }, STARTUP_TIMEOUT_MS);
 
-    const onExit = (code: number | null) => {
-      cleanup();
-      inFlightCount--;
-      reject(
-        new Error(`Cold-forked engine exited during startup with code ${code}`),
-      );
-    };
+      const onMessage = (msg: unknown) => {
+        if (!msg || typeof msg !== 'object') {
+          return;
+        }
 
-    child.on('message', onMessage);
-    child.on('exit', onExit);
-  });
+        const message = msg as { type: string };
+        if (message.type === 'ready') {
+          cleanup();
+          resolve();
+        }
+      };
 
-  return new PooledEngine(child);
+      const onExit = (code: number | null) => {
+        cleanup();
+        reject(
+          new Error(
+            `Cold-forked engine exited during startup with code ${code}`,
+          ),
+        );
+      };
+
+      child.on('message', onMessage);
+      child.on('exit', onExit);
+    });
+
+    return new PooledEngine(child);
+  } catch (err) {
+    // Any failure to bootstrap (sync fork throw, startup timeout, early exit)
+    // means this acquisition never produced a usable engine.
+    decrementInFlight();
+    throw err;
+  } finally {
+    releaseColdForkSlot();
+  }
+}
+
+/**
+ * Release one in-flight slot and, if a shutdown is waiting on the pool to
+ * quiesce, resolve it once the last in-flight engine is accounted for.
+ */
+function decrementInFlight(): void {
+  inFlightCount--;
+
+  if (draining && inFlightCount === 0 && shutdownResolve) {
+    shutdownResolve();
+    shutdownResolve = undefined;
+  }
 }
 
 /** Dispose of an engine process after execution (one-shot model: engines are not reused). */
 export function disposeEngine(engine: PooledEngine): void {
-  inFlightCount--;
+  decrementInFlight();
 
   if (draining) {
     if (engine.child.exitCode === null) {
@@ -515,11 +621,6 @@ export function disposeEngine(engine: PooledEngine): void {
     }, GRACE_PERIOD_MS);
 
     engine.child.once('exit', () => clearTimeout(timer));
-  }
-
-  if (draining && inFlightCount === 0 && shutdownResolve) {
-    shutdownResolve();
-    shutdownResolve = undefined;
   }
 }
 
