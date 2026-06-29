@@ -49,21 +49,22 @@ async function executeRepeatingJob({
         publishedVersionId: populatedFlow?.publishedVersionId,
       },
     );
+
     await engineApiService(engineToken).removeStaleFlow({
       flowId: populatedFlow?.id,
       flowVersionId,
     });
+
     return;
   }
 
   if (shouldSkipDisabledFlow(data, populatedFlow)) {
     logger.info(
+      'Skipping workflow execution because the workflow is disabled',
       {
-        message: '[FlowQueueConsumer#executeRepeatingJob]',
         flowVersionId,
         publishedVersionId: populatedFlow?.publishedVersionId,
       },
-      'skipping disabled flow',
     );
     return;
   }
