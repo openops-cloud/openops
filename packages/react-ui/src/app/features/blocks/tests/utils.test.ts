@@ -1,6 +1,6 @@
 import { ActionType, CODE_BLOCK_NAME } from '@openops/shared';
+import { getActionName, getBlockName } from '../lib/utils';
 import { StepDetails } from '../types';
-import { getActionName, getBlockName } from './utils';
 
 describe('utils', () => {
   describe('getBlockName', () => {
