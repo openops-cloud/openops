@@ -30738,6 +30738,7 @@ The following npm packages may be included in this product:
  - ansi-styles@4.3.0
  - callsites@3.1.0
  - chalk@2.4.2
+ - chalk@4.1.2
  - env-paths@2.2.1
  - file-type@6.2.0
  - has-flag@3.0.0
@@ -30761,6 +30762,7 @@ The following npm packages may be included in this product:
  - string-width@4.2.3
  - strip-ansi@6.0.1
  - supports-color@5.5.0
+ - supports-color@7.2.0
  - yn@3.1.1
 
 These packages each contain the following license:
