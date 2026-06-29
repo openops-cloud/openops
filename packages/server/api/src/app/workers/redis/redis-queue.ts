@@ -1,7 +1,6 @@
 import {
   createRedisClient,
   distributedLock,
-  exceptionHandler,
   JobType,
   logger,
   QueueName,
@@ -38,7 +37,7 @@ export const redisQueue: QueueManager = {
     );
     await Promise.all(queues);
     await redisMigrations.run();
-    logger.info('[redisQueueManager#init] Redis queues initialized');
+    logger.info('Redis queues initialized');
 
     // TODO: Remove after redis cleanup
     await expiredFlowRunCleaner();
@@ -81,20 +80,21 @@ export const redisQueue: QueueManager = {
     const queue = await ensureQueueExists(QueueName.SCHEDULED);
     const client = await queue.client;
     const repeatJob = await findRepeatableJobKey(flowVersionId);
+
     if (isNil(repeatJob)) {
       const message = `Couldn't find job key for flow version id "${flowVersionId}"`;
+
       logger.warn(message, {
         flowVersionId,
       });
-      exceptionHandler.handle(new Error(message));
+
       return;
     }
-    logger.info(
-      {
-        flowVersionId,
-      },
-      '[redisQueue#removeRepeatingJob] removing the jobs',
-    );
+
+    logger.info(' Removing repeating job for flow version', {
+      flowVersionId,
+    });
+
     const result = await queue.removeRepeatableByKey(repeatJob);
     if (!result) {
       throw new ApplicationError({
@@ -104,6 +104,7 @@ export const redisQueue: QueueManager = {
         },
       });
     }
+
     await client.del(repeatingJobKey(flowVersionId));
   },
   async findJobsOlderThan(timestamp: number): Promise<string[]> {
@@ -129,10 +130,9 @@ async function findRepeatableJobKey(
   const client = await queue.client;
   const jobKey = await client.get(repeatingJobKey(flowVersionId));
   if (isNil(jobKey)) {
-    logger.warn(
-      { flowVersionId },
-      'Job key not found in redis, trying to find it in the queue',
-    );
+    logger.warn('Job key not found in redis, trying to find it in the queue', {
+      flowVersionId,
+    });
     // TODO: this temporary solution for jobs that doesn't have repeatJobKey in redis, it's also confusing because it search by flowVersionId
     const jobs = await queue.getJobs();
     const jobKeyInRedis = jobs

@@ -235,18 +235,21 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
           versionId: flowVersionId,
           id: flowId,
         });
+
     if (isNil(flow)) {
       await flowQueue.removeRepeatingJob({
         flowVersionId,
       });
       return;
     }
+
     await triggerHooks.disable({
       projectId: flow.projectId,
       flowVersion: flow.version,
       simulate: false,
       ignoreError: true,
     });
+
     return {};
   });
 
