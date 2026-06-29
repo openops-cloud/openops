@@ -520,6 +520,15 @@ export async function acquireEngine(): Promise<PooledEngine> {
 }
 
 async function bootstrapColdFork(): Promise<PooledEngine> {
+  // A graceful shutdown may have begun while this caller was queued in
+  // waitForColdForkSlot(). Never fork new engines once draining: release the
+  // slot (which wakes the next waiter, who will also bail here) and fail the
+  // caller so the rejection propagates instead of spawning orphaned engines.
+  if (draining) {
+    releaseColdForkSlot();
+    throw new Error('Engine pool is shutting down');
+  }
+
   logger.debug('No warm engine available, cold-forking');
   inFlightCount++;
 
@@ -576,16 +585,29 @@ async function bootstrapColdFork(): Promise<PooledEngine> {
   } catch (err) {
     // Any failure to bootstrap (sync fork throw, startup timeout, early exit)
     // means this acquisition never produced a usable engine.
-    inFlightCount--;
+    decrementInFlight();
     throw err;
   } finally {
     releaseColdForkSlot();
   }
 }
 
+/**
+ * Release one in-flight slot and, if a shutdown is waiting on the pool to
+ * quiesce, resolve it once the last in-flight engine is accounted for.
+ */
+function decrementInFlight(): void {
+  inFlightCount--;
+
+  if (draining && inFlightCount === 0 && shutdownResolve) {
+    shutdownResolve();
+    shutdownResolve = undefined;
+  }
+}
+
 /** Dispose of an engine process after execution (one-shot model: engines are not reused). */
 export function disposeEngine(engine: PooledEngine): void {
-  inFlightCount--;
+  decrementInFlight();
 
   if (draining) {
     if (engine.child.exitCode === null) {
@@ -599,11 +621,6 @@ export function disposeEngine(engine: PooledEngine): void {
     }, GRACE_PERIOD_MS);
 
     engine.child.once('exit', () => clearTimeout(timer));
-  }
-
-  if (draining && inFlightCount === 0 && shutdownResolve) {
-    shutdownResolve();
-    shutdownResolve = undefined;
   }
 }
 

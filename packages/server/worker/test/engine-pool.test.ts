@@ -488,6 +488,61 @@ describe('engine-pool', () => {
 
       expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 3);
     });
+
+    it('rejects queued waiters during shutdown without spawning new engines', async () => {
+      const { initEnginePool, acquireEngine, shutdownEnginePool } =
+        loadColdForkModule();
+      initEnginePool();
+
+      const forksAfterInit = mockFork.mock.calls.length;
+      expect(forksAfterInit).toBe(3);
+
+      // 2 cold-forks bootstrap; the remaining 3 acquires queue for a slot.
+      const acquires = Array.from({ length: 5 }, () => acquireEngine());
+      acquires.forEach((p: Promise<unknown>) => p.catch(() => undefined));
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+
+      // Shutdown starts while the queue is non-empty; it waits on the 2 in-flight.
+      const shutdownPromise = shutdownEnginePool();
+
+      // The 2 in-flight cold-forks fail, freeing their slots and waking waiters.
+      mockFork.mock.results[forksAfterInit].value.emit('exit', 1);
+      mockFork.mock.results[forksAfterInit + 1].value.emit('exit', 1);
+
+      const results = await Promise.allSettled(acquires);
+
+      // No engine forked after draining began, and every waiter was rejected.
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+      expect(results.every((r) => r.status === 'rejected')).toBe(true);
+      await expect(shutdownPromise).resolves.toBeUndefined();
+    });
+
+    it('lets a queued waiter claim a warm engine instead of cold-forking', async () => {
+      const { initEnginePool, acquireEngine } = loadColdForkModule();
+      initEnginePool();
+
+      const forksAfterInit = mockFork.mock.calls.length;
+
+      // 2 cold-forks bootstrap; the 3rd acquire queues for a slot.
+      const acquires = Array.from({ length: 3 }, () => acquireEngine());
+      acquires.forEach((p: Promise<unknown>) => p.catch(() => undefined));
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+
+      // A pooled engine becomes ready while the 3rd acquire is still queued.
+      const warmChild = mockFork.mock.results[0].value;
+      warmChild.emit('message', { type: 'ready' });
+
+      // First cold-fork becomes ready, freeing a slot and waking the waiter.
+      mockFork.mock.results[forksAfterInit].value.emit('message', {
+        type: 'ready',
+      });
+      await acquires[0];
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // The woken waiter took the warm engine rather than bootstrapping another.
+      expect((await acquires[2]).child).toBe(warmChild);
+    });
   });
 });
 
