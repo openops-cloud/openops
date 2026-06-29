@@ -433,6 +433,21 @@ describe('engine-pool', () => {
     });
   });
 
+  describe('startup timeout', () => {
+    it('kills process and spawns replacement if startup times out', () => {
+      const { initEnginePool } = getModule();
+      initEnginePool();
+
+      const child = mockFork.mock.results[0].value;
+      const forkCountBefore = mockFork.mock.calls.length;
+
+      jest.advanceTimersByTime(10_000);
+
+      expect(mockTreeKill).toHaveBeenCalledWith(child.pid, 'SIGKILL');
+      expect(mockFork.mock.calls).toHaveLength(forkCountBefore + 1);
+    });
+  });
+
   describe('cold-fork concurrency cap', () => {
     function loadColdForkModule(): any {
       let mod: any;
@@ -462,7 +477,7 @@ describe('engine-pool', () => {
       await Promise.resolve();
 
       // Only 2 cold-forks may bootstrap concurrently; the other 3 acquires wait.
-      expect(mockFork.mock.calls.length).toBe(forksAfterInit + 2);
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
 
       // When one cold-fork becomes ready, its slot frees and one waiter forks.
       const firstColdChild = mockFork.mock.results[forksAfterInit].value;
@@ -471,7 +486,7 @@ describe('engine-pool', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(mockFork.mock.calls.length).toBe(forksAfterInit + 3);
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 3);
     });
   });
 });

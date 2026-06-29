@@ -523,15 +523,17 @@ async function bootstrapColdFork(): Promise<PooledEngine> {
   logger.debug('No warm engine available, cold-forking');
   inFlightCount++;
 
-  if (pool.length < POOL_MAX_SIZE) {
-    spawnPoolProcess();
-  }
-
-  const child = forkEngine(engineForkCounter++ % POOL_MAX_SIZE);
-
-  pipeWithPrefix(child);
-
   try {
+    if (pool.length < POOL_MAX_SIZE) {
+      spawnPoolProcess();
+    }
+
+    // forkEngine() can throw synchronously (e.g. invalid spawn options); keep it
+    // inside the try so the slot and inFlightCount are always released below.
+    const child = forkEngine(engineForkCounter++ % POOL_MAX_SIZE);
+
+    pipeWithPrefix(child);
+
     await new Promise<void>((resolve, reject) => {
       const cleanup = () => {
         child.removeListener('message', onMessage);
@@ -542,7 +544,6 @@ async function bootstrapColdFork(): Promise<PooledEngine> {
       const timer = setTimeout(() => {
         cleanup();
         killProcess(child);
-        inFlightCount--;
         reject(new Error('Cold-forked engine failed to become ready'));
       }, STARTUP_TIMEOUT_MS);
 
@@ -560,7 +561,6 @@ async function bootstrapColdFork(): Promise<PooledEngine> {
 
       const onExit = (code: number | null) => {
         cleanup();
-        inFlightCount--;
         reject(
           new Error(
             `Cold-forked engine exited during startup with code ${code}`,
@@ -573,6 +573,11 @@ async function bootstrapColdFork(): Promise<PooledEngine> {
     });
 
     return new PooledEngine(child);
+  } catch (err) {
+    // Any failure to bootstrap (sync fork throw, startup timeout, early exit)
+    // means this acquisition never produced a usable engine.
+    inFlightCount--;
+    throw err;
   } finally {
     releaseColdForkSlot();
   }
