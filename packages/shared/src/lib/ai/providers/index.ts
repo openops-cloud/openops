@@ -17,6 +17,7 @@ export enum AiProviderEnum {
   GOOGLE = 'Google Generative AI',
   GOOGLE_VERTEX = 'Google Vertex AI',
   GROQ = 'Groq',
+  MINIMAX = 'MiniMax',
   MISTRAL = 'Mistral',
   OPENAI = 'OpenAI',
   OPENAI_COMPATIBLE = 'OpenAI Compatible',

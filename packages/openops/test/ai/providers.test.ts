@@ -39,6 +39,10 @@ jest.mock('../../src/lib/ai/providers/groq', () => ({
   groqProvider: { models: ['groqModel'] },
 }));
 
+jest.mock('../../src/lib/ai/providers/minimax', () => ({
+  minimaxProvider: { models: ['minimaxModel'] },
+}));
+
 jest.mock('../../src/lib/ai/providers/openai-compatible', () => ({
   openaiCompatibleProvider: {
     models: ['openaiCompatibleModel'],
@@ -67,10 +71,14 @@ jest.mock('../../src/lib/ai/providers/xai', () => ({
 
 const isInstanceMock = jest.fn();
 const generateTextMock = jest.fn();
+const wrapLanguageModelMock = jest.fn();
+const extractReasoningMiddlewareMock = jest.fn();
 jest.mock('ai', () => ({
   AISDKError: { isInstance: isInstanceMock },
   generateText: generateTextMock,
   LanguageModel: jest.fn(),
+  wrapLanguageModel: wrapLanguageModelMock,
+  extractReasoningMiddleware: extractReasoningMiddlewareMock,
 }));
 
 import { AiProviderEnum } from '@openops/shared';
@@ -136,6 +144,10 @@ describe('getAvailableProvidersWithModels', () => {
         models: ['groqModel'],
       },
       {
+        provider: AiProviderEnum.MINIMAX,
+        models: ['minimaxModel'],
+      },
+      {
         provider: AiProviderEnum.MISTRAL,
         models: ['mistralModel'],
       },
@@ -161,7 +173,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(15);
+    expect(result).toHaveLength(16);
     expect(result).toEqual(expected);
   });
 });
@@ -169,6 +181,11 @@ describe('getAvailableProvidersWithModels', () => {
 describe('getAiProviderLanguageModel tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    extractReasoningMiddlewareMock.mockReturnValue('think-middleware');
+    wrapLanguageModelMock.mockImplementation(({ model }) => ({
+      wrapped: true,
+      model,
+    }));
   });
 
   it('should return a the language model instance when successful', async () => {
@@ -191,7 +208,14 @@ describe('getAiProviderLanguageModel tests', () => {
         baseURL: 'https://api.example.com',
       },
     });
-    expect(result).toEqual(fakeModel);
+    expect(extractReasoningMiddlewareMock).toHaveBeenCalledWith({
+      tagName: 'think',
+    });
+    expect(wrapLanguageModelMock).toHaveBeenCalledWith({
+      model: fakeModel,
+      middleware: 'think-middleware',
+    });
+    expect(result).toEqual({ wrapped: true, model: fakeModel });
   });
 
   test.each([
@@ -247,7 +271,7 @@ describe('getAiProviderLanguageModel tests', () => {
         model: aiConfig.model,
         providerSettings: expectedSanitizedSettings,
       });
-      expect(result).toEqual(fakeModel);
+      expect(result).toEqual({ wrapped: true, model: fakeModel });
     },
   );
 });
@@ -255,6 +279,8 @@ describe('getAiProviderLanguageModel tests', () => {
 describe('validateAiProviderConfig tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    extractReasoningMiddlewareMock.mockReturnValue('think-middleware');
+    wrapLanguageModelMock.mockImplementation(({ model }) => model);
   });
 
   it('should return success if we are able to send the message', async () => {
