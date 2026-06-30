@@ -6,6 +6,11 @@ import {
   DropdownState,
 } from '@openops/blocks-framework';
 import {
+  BlockStepMetadata,
+  PRIMITIVE_STEP_METADATA,
+  StepMetadata,
+} from '@openops/components/ui';
+import {
   Action,
   ActionType,
   AddBlockRequestBody,
@@ -19,12 +24,10 @@ import {
   Trigger,
   TriggerType,
 } from '@openops/shared';
+import pLimit from 'p-limit';
 
-import {
-  BlockStepMetadata,
-  PRIMITIVE_STEP_METADATA,
-  StepMetadata,
-} from '@openops/components/ui';
+const MAX_CONCURRENT_OPTIONS_REQUESTS = 4;
+const limitOptionsRequests = pLimit(MAX_CONCURRENT_OPTIONS_REQUESTS);
 
 export const blocksApi = {
   list(request: ListBlocksRequestQuery): Promise<BlockMetadataModelSummary[]> {
@@ -40,7 +43,9 @@ export const blocksApi = {
   options<
     T extends DropdownState<unknown> | BlockPropertyMap | EngineErrorResponse,
   >(request: BlockOptionRequest): Promise<T> {
-    return api.post<T>(`/v1/blocks/options`, request);
+    return limitOptionsRequests(() =>
+      api.post<T>(`/v1/blocks/options`, request),
+    );
   },
   mapToMetadata(
     type: 'action' | 'trigger',

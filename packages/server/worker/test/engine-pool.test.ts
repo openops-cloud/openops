@@ -68,6 +68,7 @@ describe('engine-pool', () => {
       system: {
         get: jest.fn().mockReturnValue(undefined),
         getBoolean: jest.fn().mockReturnValue(false),
+        getNumber: jest.fn().mockReturnValue(null),
         getOrThrow: jest.fn().mockImplementation((prop: string) => {
           const defaults: Record<string, string> = {
             ENGINE_MEMORY_LIMIT_MB: '512',
@@ -82,6 +83,7 @@ describe('engine-pool', () => {
         ENGINE_MEMORY_LIMIT_MB: 'ENGINE_MEMORY_LIMIT_MB',
         ENGINE_POOL_MIN_SIZE: 'ENGINE_POOL_MIN_SIZE',
         ENGINE_POOL_MAX_SIZE: 'ENGINE_POOL_MAX_SIZE',
+        ENGINE_COLD_FORK_CONCURRENCY: 'ENGINE_COLD_FORK_CONCURRENCY',
       },
     }));
 
@@ -118,6 +120,7 @@ describe('engine-pool', () => {
           system: {
             get: jest.fn().mockReturnValue(undefined),
             getBoolean: jest.fn().mockReturnValue(false),
+            getNumber: jest.fn().mockReturnValue(null),
             getOrThrow: jest.fn().mockImplementation((prop: string) => {
               if (prop === 'ENGINE_POOL_MIN_SIZE') {
                 return '5';
@@ -135,6 +138,7 @@ describe('engine-pool', () => {
             ENGINE_MEMORY_LIMIT_MB: 'ENGINE_MEMORY_LIMIT_MB',
             ENGINE_POOL_MIN_SIZE: 'ENGINE_POOL_MIN_SIZE',
             ENGINE_POOL_MAX_SIZE: 'ENGINE_POOL_MAX_SIZE',
+            ENGINE_COLD_FORK_CONCURRENCY: 'ENGINE_COLD_FORK_CONCURRENCY',
           },
         }));
         jest.doMock('node:child_process', () => ({ fork: mockFork }));
@@ -440,7 +444,154 @@ describe('engine-pool', () => {
       jest.advanceTimersByTime(10_000);
 
       expect(mockTreeKill).toHaveBeenCalledWith(child.pid, 'SIGKILL');
-      expect(mockFork.mock.calls.length).toBeGreaterThan(forkCountBefore);
+      expect(mockFork.mock.calls).toHaveLength(forkCountBefore + 1);
+    });
+  });
+
+  describe('cold-fork concurrency cap', () => {
+    function loadColdForkModule(): any {
+      let mod: any;
+      jest.isolateModules(() => {
+        loadModuleWithConfig({
+          ENGINE_COLD_FORK_CONCURRENCY: 2,
+          poolMin: '3',
+          poolMax: '3',
+        });
+        mod = require('../src/lib/engine/engine-pool'); // eslint-disable-line @typescript-eslint/no-var-requires
+      });
+      return mod;
+    }
+
+    it('does not bootstrap more cold-forks at once than the configured cap', async () => {
+      const { initEnginePool, acquireEngine } = loadColdForkModule();
+      initEnginePool();
+
+      // Pool is full (3 spawning, none ready) so cold-forks trigger no refills.
+      const forksAfterInit = mockFork.mock.calls.length;
+      expect(forksAfterInit).toBe(3);
+
+      const acquires = Array.from({ length: 5 }, () => acquireEngine());
+      acquires.forEach((p: Promise<unknown>) => p.catch(() => undefined));
+
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Only 2 cold-forks may bootstrap concurrently; the other 3 acquires wait.
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+
+      // When one cold-fork becomes ready, its slot frees and one waiter forks.
+      const firstColdChild = mockFork.mock.results[forksAfterInit].value;
+      firstColdChild.emit('message', { type: 'ready' });
+      await acquires[0];
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 3);
+    });
+
+    it('rejects queued waiters during shutdown without spawning new engines', async () => {
+      const { initEnginePool, acquireEngine, shutdownEnginePool } =
+        loadColdForkModule();
+      initEnginePool();
+
+      const forksAfterInit = mockFork.mock.calls.length;
+      expect(forksAfterInit).toBe(3);
+
+      // 2 cold-forks bootstrap; the remaining 3 acquires queue for a slot.
+      const acquires = Array.from({ length: 5 }, () => acquireEngine());
+      acquires.forEach((p: Promise<unknown>) => p.catch(() => undefined));
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+
+      // Shutdown starts while the queue is non-empty; it waits on the 2 in-flight.
+      const shutdownPromise = shutdownEnginePool();
+
+      // The 2 in-flight cold-forks fail, freeing their slots and waking waiters.
+      mockFork.mock.results[forksAfterInit].value.emit('exit', 1);
+      mockFork.mock.results[forksAfterInit + 1].value.emit('exit', 1);
+
+      const results = await Promise.allSettled(acquires);
+
+      // No engine forked after draining began, and every waiter was rejected.
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+      expect(results.every((r) => r.status === 'rejected')).toBe(true);
+      await expect(shutdownPromise).resolves.toBeUndefined();
+    });
+
+    it('lets a queued waiter claim a warm engine instead of cold-forking', async () => {
+      const { initEnginePool, acquireEngine } = loadColdForkModule();
+      initEnginePool();
+
+      const forksAfterInit = mockFork.mock.calls.length;
+
+      // 2 cold-forks bootstrap; the 3rd acquire queues for a slot.
+      const acquires = Array.from({ length: 3 }, () => acquireEngine());
+      acquires.forEach((p: Promise<unknown>) => p.catch(() => undefined));
+      expect(mockFork.mock.calls).toHaveLength(forksAfterInit + 2);
+
+      // A pooled engine becomes ready while the 3rd acquire is still queued.
+      const warmChild = mockFork.mock.results[0].value;
+      warmChild.emit('message', { type: 'ready' });
+
+      // First cold-fork becomes ready, freeing a slot and waking the waiter.
+      mockFork.mock.results[forksAfterInit].value.emit('message', {
+        type: 'ready',
+      });
+      await acquires[0];
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // The woken waiter took the warm engine rather than bootstrapping another.
+      expect((await acquires[2]).child).toBe(warmChild);
     });
   });
 });
+
+function loadModuleWithConfig(config: {
+  poolMin?: string;
+  poolMax?: string;
+  ENGINE_COLD_FORK_CONCURRENCY?: number;
+}): void {
+  jest.doMock('@openops/server-shared', () => ({
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      error: jest.fn(),
+    },
+    system: {
+      get: jest.fn().mockReturnValue(undefined),
+      getBoolean: jest.fn().mockReturnValue(false),
+      getNumber: jest.fn().mockImplementation((prop: string) => {
+        if (prop === 'ENGINE_COLD_FORK_CONCURRENCY') {
+          return config.ENGINE_COLD_FORK_CONCURRENCY ?? null;
+        }
+        return null;
+      }),
+      getOrThrow: jest.fn().mockImplementation((prop: string) => {
+        const defaults: Record<string, string> = {
+          ENGINE_MEMORY_LIMIT_MB: '512',
+          ENGINE_POOL_MIN_SIZE: config.poolMin ?? '1',
+          ENGINE_POOL_MAX_SIZE: config.poolMax ?? '3',
+        };
+        return defaults[prop] ?? '';
+      }),
+    },
+    SharedSystemProp: { BLOCKS_DEV_MODE_ENABLED: 'BLOCKS_DEV_MODE_ENABLED' },
+    WorkerSystemProps: {
+      ENGINE_MEMORY_LIMIT_MB: 'ENGINE_MEMORY_LIMIT_MB',
+      ENGINE_POOL_MIN_SIZE: 'ENGINE_POOL_MIN_SIZE',
+      ENGINE_POOL_MAX_SIZE: 'ENGINE_POOL_MAX_SIZE',
+      ENGINE_COLD_FORK_CONCURRENCY: 'ENGINE_COLD_FORK_CONCURRENCY',
+    },
+  }));
+  jest.doMock('node:child_process', () => ({ fork: mockFork }));
+  jest.doMock('node:fs', () => ({
+    statSync: jest.fn(() => ({ mtimeMs: mockStatSyncMtime })),
+    watchFile: mockWatchFile,
+    unwatchFile: mockUnwatchFile,
+  }));
+  jest.doMock('tree-kill', () => ({
+    __esModule: true,
+    default: mockTreeKill,
+  }));
+}
