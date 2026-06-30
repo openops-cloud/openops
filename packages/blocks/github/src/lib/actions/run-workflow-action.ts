@@ -75,6 +75,12 @@ export const runWorkflowAction = createAction({
           { accept: 'application/vnd.github.v3.raw' },
         );
 
+        // js-yaml v5 throws on empty input instead of returning undefined,
+        // so guard against an empty/blank workflow file before parsing.
+        if (!workflowYaml || workflowYaml.trim().length === 0) {
+          return {};
+        }
+
         const parsedWorkflow: WorkflowConfig = yaml.load(
           workflowYaml,
         ) as unknown as WorkflowConfig;

@@ -140,7 +140,6 @@
     "@tiptap/react": "2.27.2",
     "@tiptap/starter-kit": "2.27.2",
     "@tiptap/suggestion": "2.27.2",
-    "@types/js-yaml": "4.0.9",
     "@types/jsonwebtoken": "9.0.10",
     "@types/mailparser": "3.4.6",
     "@types/node": "20.17.1",
@@ -209,7 +208,7 @@
     "ip-range-check": "0.2.0",
     "is-base64": "1.1.0",
     "isolated-vm": "6.1.2",
-    "js-yaml": "4.2.0",
+    "js-yaml": "5.2.0",
     "jsdom": "23.2.0",
     "json-server": "1.0.0-beta.15",
     "json-to-pretty-yaml": "1.2.2",
@@ -454,6 +453,9 @@
     "js-cookie": "3.0.8",
     "ws": "8.21.0",
     "axios": "$axios",
-    "uuid": "$uuid"
+    "uuid": "$uuid",
+    "form-data": "$form-data",
+    "tmp": "0.2.7",
+    "dompurify": "$dompurify"
   }
 }
