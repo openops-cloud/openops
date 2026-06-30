@@ -42,16 +42,29 @@ export function sendMessageToParent(
   message: ParentMessage,
 ): Promise<void> {
   return new Promise((resolve) => {
-    send(message, (error) => {
-      if (error) {
-        logger.error('Failed to deliver engine message to worker before exit', {
-          error,
-          messageType: message.type,
-        });
-      }
+    const logFailure = (error: unknown): void => {
+      logger.error('Failed to deliver engine message to worker before exit', {
+        error,
+        messageType: message.type,
+      });
+    };
 
+    // `process.send` can throw synchronously when the IPC channel is already
+    // closed (the worker guards `child.send` for the same reason). Treat that
+    // like a delivery failure: log it and still resolve so the caller can exit
+    // deterministically instead of crashing before reporting an outcome.
+    try {
+      send(message, (error) => {
+        if (error) {
+          logFailure(error);
+        }
+
+        resolve();
+      });
+    } catch (error) {
+      logFailure(error);
       resolve();
-    });
+    }
   });
 }
 

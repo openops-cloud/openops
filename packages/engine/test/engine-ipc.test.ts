@@ -139,4 +139,18 @@ describe('sendMessageToParent', () => {
       expect.objectContaining({ error: sendError, messageType: 'error' }),
     );
   });
+
+  it('logs and still resolves when the IPC send throws synchronously', async () => {
+    const sendError = new Error('channel closed');
+    const send: ParentMessageSender = () => {
+      throw sendError;
+    };
+
+    await sendMessageToParent(send, { type: 'result', resultKey: 'k' });
+
+    expect(errorMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ error: sendError, messageType: 'result' }),
+    );
+  });
 });
