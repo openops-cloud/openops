@@ -27,11 +27,27 @@ describe('shouldResyncStepSettings', () => {
     expect(shouldResyncStepSettings(refetched, current)).toBe(true);
   });
 
-  it('resyncs when the version id changed', () => {
+  it('resyncs when an external change produced a newer version id', () => {
+    const current = version('v1', '2026-06-30T08:10:52.485Z');
+    const refetched = version('v2', '2026-06-30T08:11:00.000Z');
+
+    expect(shouldResyncStepSettings(refetched, current)).toBe(true);
+  });
+
+  it('does not resync for an older version even when the id changed', () => {
+    // Editing a LOCKED version mints a new draft id locally while the cache
+    // still holds the older version; that stale version is emitted on focus.
+    const current = version('v2', '2026-06-30T08:11:00.000Z');
+    const refetched = version('v1', '2026-06-30T08:10:52.485Z');
+
+    expect(shouldResyncStepSettings(refetched, current)).toBe(false);
+  });
+
+  it('does not resync when the id changed but timestamps are equal', () => {
     const current = version('v1', '2026-06-30T08:10:52.485Z');
     const refetched = version('v2', '2026-06-30T08:10:52.485Z');
 
-    expect(shouldResyncStepSettings(refetched, current)).toBe(true);
+    expect(shouldResyncStepSettings(refetched, current)).toBe(false);
   });
 
   it('does not resync when either version is missing', () => {
