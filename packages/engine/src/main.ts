@@ -6,6 +6,7 @@ import {
 } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
 import { executeEngine } from './lib/engine-executor';
+import { runEngineOperation } from './lib/engine-ipc';
 
 type EngineInput = {
   operationType: EngineOperationType;
@@ -32,35 +33,21 @@ async function executeFromRedis(inputKey: string): Promise<string> {
 }
 
 if (process.send) {
-  process.send({ type: 'ready' });
+  const sendToParent = process.send.bind(process);
+  sendToParent({ type: 'ready' });
 
   process.on('message', (msg: { type: string; inputKey?: string }) => {
     if (msg.type === 'execute' && msg.inputKey) {
-      void (async () => {
-        try {
-          const resultKey = await executeFromRedis(msg.inputKey!);
-
-          await sendLogs();
-
-          if (process.send) {
-            process.send({ type: 'result', resultKey });
-          }
-
-          process.exit(0);
-        } catch (error) {
-          logger.error('Engine pool process failed', { error });
-          await sendLogs();
-
-          if (process.send) {
-            process.send({
-              type: 'error',
-              message: error instanceof Error ? error.message : String(error),
-            });
-          }
-
-          process.exit(1);
-        }
-      })();
+      void runEngineOperation(msg.inputKey, {
+        execute: executeFromRedis,
+        flushLogs: sendLogs,
+        send: (message, callback) => {
+          sendToParent(message, callback);
+        },
+        exit: (code) => {
+          process.exit(code);
+        },
+      });
     }
   });
 } else {
