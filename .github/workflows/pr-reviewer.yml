@@ -78,7 +78,7 @@ jobs:
           # the MCP github tools are authenticated separately and do not cover
           # raw `gh` invocations.
           GH_TOKEN: ${{ steps.app_token.outputs.token }}
-        uses: anthropics/claude-code-action@80b31826338489861333dc17217865dfe8085cdc # v1
+        uses: anthropics/claude-code-action@a92e7c70a4da9793dc164451d829089dc057a464 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app_token.outputs.token }}

@@ -20,7 +20,7 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Lookup node_modules cache
         id: node-modules-cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -40,7 +40,7 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -58,13 +58,13 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
@@ -100,7 +100,7 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -114,7 +114,7 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
@@ -150,13 +150,13 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: .nx/cache
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
@@ -186,13 +186,13 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
@@ -205,7 +205,7 @@ jobs:
           npx nx run-many --target=build
           ./tools/truncate-nx-cache.sh
       - name: Save build cache
-        uses: actions/cache/save@v5.0.5
+        uses: actions/cache/save@v6.1.0
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -226,7 +226,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.0
       - name: Restore build cache
-        uses: actions/cache/restore@v5.0.5
+        uses: actions/cache/restore@v6.1.0
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -235,7 +235,7 @@ jobs:
         uses: docker/setup-buildx-action@v4.1.0
       - name: Configure AWS credentials
         if: vars.ECR_REGION
-        uses: aws-actions/configure-aws-credentials@v6.2.0
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
@@ -292,7 +292,7 @@ jobs:
     needs: build-images
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.0
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
