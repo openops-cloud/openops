@@ -10,7 +10,7 @@ on:
       model:
         description: 'Claude model to use'
         required: false
-        default: 'claude-opus-4-8'
+        default: 'opus'
         type: string
 
 permissions:
