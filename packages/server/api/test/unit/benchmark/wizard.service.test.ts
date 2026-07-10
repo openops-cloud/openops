@@ -165,6 +165,49 @@ describe('resolveWizardNavigation', () => {
     expect(result.totalSteps).toBe(4);
   });
 
+  describe('excludedStepIds', () => {
+    it('skips an excluded tail step and completes the wizard from its predecessor', async () => {
+      const result = await resolveWizardNavigation(
+        'test',
+        getProvider('test'),
+        { currentStep: 'step3' },
+        TEST_PROJECT_ID,
+        ['last_step'],
+      );
+
+      expect(result.currentStep).toBe('step3');
+      expect(result.nextStep).toBeNull();
+      expect(result.totalSteps).toBe(3);
+    });
+
+    it('skips an excluded middle step and re-points to the next survivor', async () => {
+      const result = await resolveWizardNavigation(
+        'test',
+        getProvider('test'),
+        { currentStep: 'step1' },
+        TEST_PROJECT_ID,
+        ['step2'],
+      );
+
+      expect(result.currentStep).toBe('step3');
+      expect(result.nextStep).toBe('last_step');
+      expect(result.totalSteps).toBe(3);
+    });
+
+    it('behaves identically to omitting the argument when excludedStepIds is empty', async () => {
+      const result = await resolveWizardNavigation(
+        'test',
+        getProvider('test'),
+        { currentStep: 'step1' },
+        TEST_PROJECT_ID,
+        [],
+      );
+
+      expect(result.currentStep).toBe('step2');
+      expect(result.totalSteps).toBe(4);
+    });
+  });
+
   it('throws for unknown currentStep', async () => {
     await expect(
       resolveWizardNavigation(

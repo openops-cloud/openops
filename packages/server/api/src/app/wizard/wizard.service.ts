@@ -9,6 +9,7 @@ import {
   WizardRequest,
   WizardStepResponse,
 } from '@openops/shared';
+import { filterWizardConfig } from './wizard-config-filter';
 
 function getStepProgress(
   config: WizardConfig,
@@ -135,8 +136,9 @@ export async function resolveWizardNavigation(
   providerAdapter: ProviderAdapter,
   request: WizardRequest,
   projectId: string,
+  excludedStepIds?: string[],
 ): Promise<WizardStepResponse> {
-  const config = providerAdapter.config;
+  const config = filterWizardConfig(providerAdapter.config, excludedStepIds);
 
   const context: WizardContext = {
     wizardState: request.wizardState,
