@@ -23,7 +23,7 @@ const mockContext = {
     queryParams: {
       button: 'Approve',
       path: 'execution-path-1',
-    },
+    } as Record<string, string>,
   },
   currentExecutionPath: 'execution-path-1',
   run: { pause: jest.fn() },
@@ -50,6 +50,7 @@ describe('onActionReceived', () => {
       action: '',
       isExpired: true,
       message: mockMessageObj,
+      parameters: {},
     });
   });
 
@@ -89,6 +90,75 @@ describe('onActionReceived', () => {
       action: 'Approve',
       message: mockMessageObj,
       isExpired: false,
+      parameters: {},
     });
+  });
+
+  test('should surface extra resume query params as parameters', async () => {
+    mockContext.store.get.mockResolvedValueOnce({ pauseMetadata: 'mock-data' });
+    mockContext.resumePayload = {
+      queryParams: {
+        button: 'Approve',
+        path: 'execution-path-1',
+        executionCorrelationId: 'corr-1',
+        isTest: 'false',
+        newOwner: 'alice@example.com',
+      },
+    };
+
+    const result = await onActionReceived({
+      messageObj: mockMessageObj,
+      actions: mockActions,
+      context: mockContext,
+    });
+
+    expect(result).toEqual({
+      action: 'Approve',
+      message: mockMessageObj,
+      isExpired: false,
+      parameters: { newOwner: 'alice@example.com' },
+    });
+  });
+
+  test('should not include prototype-pollution keys in parameters', async () => {
+    mockContext.store.get.mockResolvedValueOnce({ pauseMetadata: 'mock-data' });
+    mockContext.resumePayload = {
+      queryParams: {
+        button: 'Approve',
+        path: 'execution-path-1',
+        ['__proto__']: 'polluted',
+        constructor: 'polluted',
+        prototype: 'polluted',
+        answer: 'alice@example.com',
+      } as Record<string, string>,
+    };
+
+    const result = await onActionReceived({
+      messageObj: mockMessageObj,
+      actions: mockActions,
+      context: mockContext,
+    });
+
+    expect(result.parameters).toEqual({ answer: 'alice@example.com' });
+  });
+
+  test('should not include internal routing params in parameters', async () => {
+    mockContext.store.get.mockResolvedValueOnce({ pauseMetadata: 'mock-data' });
+    mockContext.resumePayload = {
+      queryParams: {
+        button: 'Approve',
+        path: 'execution-path-1',
+        executionCorrelationId: 'corr-1',
+        isTest: 'true',
+      },
+    };
+
+    const result = await onActionReceived({
+      messageObj: mockMessageObj,
+      actions: mockActions,
+      context: mockContext,
+    });
+
+    expect(result.parameters).toEqual({});
   });
 });
