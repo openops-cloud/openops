@@ -125,7 +125,12 @@ describe('onActionReceived', () => {
     const queryParams = Object.create(null) as Record<string, string>;
     queryParams['button'] = 'Approve';
     queryParams['path'] = 'execution-path-1';
-    queryParams['__proto__'] = 'polluted';
+    Object.defineProperty(queryParams, '__proto__', {
+      value: 'polluted',
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
     queryParams['constructor'] = 'polluted';
     queryParams['prototype'] = 'polluted';
     queryParams['answer'] = 'alice@example.com';
