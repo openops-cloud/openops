@@ -122,16 +122,14 @@ describe('onActionReceived', () => {
 
   test('should not include prototype-pollution keys in parameters', async () => {
     mockContext.store.get.mockResolvedValueOnce({ pauseMetadata: 'mock-data' });
-    mockContext.resumePayload = {
-      queryParams: {
-        button: 'Approve',
-        path: 'execution-path-1',
-        ['__proto__']: 'polluted',
-        constructor: 'polluted',
-        prototype: 'polluted',
-        answer: 'alice@example.com',
-      } as Record<string, string>,
-    };
+    const queryParams = Object.create(null) as Record<string, string>;
+    queryParams['button'] = 'Approve';
+    queryParams['path'] = 'execution-path-1';
+    queryParams['__proto__'] = 'polluted';
+    queryParams['constructor'] = 'polluted';
+    queryParams['prototype'] = 'polluted';
+    queryParams['answer'] = 'alice@example.com';
+    mockContext.resumePayload = { queryParams };
 
     const result = await onActionReceived({
       messageObj: mockMessageObj,

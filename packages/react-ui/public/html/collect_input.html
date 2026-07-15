@@ -221,7 +221,7 @@
           return EMAIL_REGEX.test(value);
         }
         if (answerFormat === 'number') {
-          return !Number.isNaN(Number(value));
+          return Number.isFinite(Number(value));
         }
         return true;
       }
