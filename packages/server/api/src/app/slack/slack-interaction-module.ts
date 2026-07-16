@@ -10,6 +10,7 @@ import axios from 'axios';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { sendEphemeralMessage } from './ephemeral-message';
 import { getUserSelection } from './get-user-selection';
+import { isFollowUpAction } from './is-follow-up-action';
 import { verifySignature } from './slack-token-verifier';
 
 export const CreateSlackInteractionRequest = Type.Object({
@@ -138,6 +139,20 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     await sendEphemeralMessage({ responseUrl, ephemeralText, userId });
 
     return reply.code(200).send({ text: 'Finished sending ephemeral' });
+  }
+
+  const followUpActions: unknown =
+    payload.message.metadata.event_payload.followUpActions;
+
+  if (isFollowUpAction(userSelection, followUpActions)) {
+    logger.debug(
+      'Ignoring a Slack interaction: follow-up action resumes via the browser form',
+      { userSelection },
+    );
+
+    return reply
+      .code(200)
+      .send({ text: 'Follow-up action is handled in the browser' });
   }
 
   const resumeUrl: string = payload.message.metadata.event_payload.resumeUrl;

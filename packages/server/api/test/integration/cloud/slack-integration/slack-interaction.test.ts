@@ -257,6 +257,91 @@ describe('Slack API', () => {
       expect(axiosGetMock).not.toHaveBeenCalled();
     });
 
+    test('should return 200 without resuming when the clicked button is a follow-up action', async () => {
+      verifySignatureMock.mockReturnValueOnce(true);
+
+      const payload = JSON.stringify(
+        buildButtonClickPayload("I'm not the owner", {
+          isTest: false,
+          resumeUrl: 'http://some-resume-url.com?test=1',
+          followUpActions: ["I'm not the owner"],
+        }),
+      );
+
+      const response = await makeRequest(payload);
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(response?.json()).toEqual({
+        text: 'Follow-up action is handled in the browser',
+      });
+      expect(axiosGetMock).not.toHaveBeenCalled();
+      expect(sendEphemeralMessageMock).not.toHaveBeenCalled();
+    });
+
+    test('should resume when the clicked button is not a follow-up action on a message that has some', async () => {
+      verifySignatureMock.mockReturnValueOnce(true);
+      axiosGetMock.mockResolvedValueOnce({});
+
+      const payload = JSON.stringify(
+        buildButtonClickPayload('Approve', {
+          isTest: false,
+          resumeUrl: 'http://some-resume-url.com?test=1',
+          followUpActions: ["I'm not the owner"],
+        }),
+      );
+
+      const response = await makeRequest(payload);
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(axiosGetMock).toHaveBeenCalledTimes(1);
+      expect(axiosGetMock.mock.calls[0][0]).toContain(
+        'http://some-resume-url.com/?test=1',
+      );
+    });
+
+    test('should resume when the message has no followUpActions metadata', async () => {
+      verifySignatureMock.mockReturnValueOnce(true);
+      axiosGetMock.mockResolvedValueOnce({});
+
+      const payload = JSON.stringify(
+        buildButtonClickPayload('Approve', {
+          isTest: false,
+          resumeUrl: 'http://some-resume-url.com?test=1',
+        }),
+      );
+
+      const response = await makeRequest(payload);
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(axiosGetMock).toHaveBeenCalledTimes(1);
+    });
+
+    function buildButtonClickPayload(
+      buttonText: string,
+      eventPayload: Record<string, unknown>,
+    ): Record<string, unknown> {
+      return {
+        actions: [
+          {
+            type: 'button',
+            action_id: 'some_id',
+            text: { type: 'plain_text', text: buttonText },
+          },
+        ],
+        user: {
+          id: 'some_user_id',
+          name: 'some_user_name',
+        },
+        message: {
+          metadata: {
+            event_payload: eventPayload,
+          },
+        },
+        response_url:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+      };
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function makeRequest(payload: string): Promise<any> {
       const request: CreateSlackInteractionRequest = {
