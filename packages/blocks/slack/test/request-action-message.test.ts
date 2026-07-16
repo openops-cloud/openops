@@ -218,6 +218,7 @@ describe('requestActionMessageAction', () => {
           domain: mockContextWithHeader.server.publicUrl,
           resumeUrl: undefined,
           interactionsDisabled: false,
+          followUpActions: [],
         },
       });
 
@@ -340,6 +341,104 @@ describe('requestActionMessageAction', () => {
         expect(result.eventPayload.interactionsDisabled).toBe(false);
       },
     );
+  });
+
+  describe('follow-up question buttons', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      waitForInteractionMock.mockImplementation(async (messageObj: any) =>
+        Promise.resolve({ ...messageObj }),
+      );
+      slackSendMessageMock.mockImplementation(async (message: any) =>
+        Promise.resolve(message),
+      );
+    });
+
+    function buildContextWithFollowUpAction(): any {
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.propsValue.actions.push({
+        buttonText: "I'm not the owner",
+        buttonStyle: '',
+        followUpQuestion: "What is the correct owner's email?",
+        answerFormat: 'email',
+        noAnswerOption: "I don't know the owner",
+      });
+      mockContext.run.isTest = false;
+      mockContext.generateResumeUrl.mockImplementation(
+        ({ queryParams }: any) => {
+          const query = new URLSearchParams(queryParams).toString();
+          return `https://example.com/resume?${query}`;
+        },
+      );
+      return mockContext;
+    }
+
+    test('should give only the follow-up button a collect_input url in interactions mode', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const mockContext = buildContextWithFollowUpAction();
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      const [plainButton, followUpButton] = actionBlock.elements;
+
+      expect(plainButton.url).not.toBeDefined();
+
+      expect(followUpButton.url).toContain('/html/collect_input.html?');
+      const params = new URL(followUpButton.url).searchParams;
+      expect(params.get('question')).toBe("What is the correct owner's email?");
+      expect(params.get('format')).toBe('email');
+      expect(params.get('noAnswerOption')).toBe("I don't know the owner");
+      expect(params.get('title')).toBe('Header Text');
+      expect(params.get('redirectUrl')).toContain(
+        'executionCorrelationId=pause_123',
+      );
+      expect(params.get('redirectUrl')).toContain('actionClicked=');
+      expect(result.eventPayload.interactionsDisabled).toBe(false);
+    });
+
+    test('should wrap all buttons in non-interaction mode and use collect_input for the follow-up one', async () => {
+      getBooleanMock.mockReturnValueOnce(false);
+
+      const mockContext = buildContextWithFollowUpAction();
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      const [plainButton, followUpButton] = actionBlock.elements;
+
+      expect(plainButton.url).toContain('/html/resume_execution.html?');
+      expect(followUpButton.url).toContain('/html/collect_input.html?');
+      expect(result.eventPayload.interactionsDisabled).toBe(true);
+    });
+
+    test('should list exactly the follow-up button texts in eventPayload.followUpActions', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const mockContext = buildContextWithFollowUpAction();
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      expect(result.eventPayload.followUpActions).toEqual([
+        "I'm not the owner",
+      ]);
+    });
+
+    test('should store emoji-shortcode form in followUpActions and the actionClicked value', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const mockContext = buildContextWithFollowUpAction();
+      mockContext.propsValue.actions[1].buttonText = '🎲 Reroll';
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      expect(result.eventPayload.followUpActions).toEqual([
+        ':game_die: Reroll',
+      ]);
+
+      const { queryParams } = mockContext.generateResumeUrl.mock.calls[0][0];
+      expect(JSON.parse(queryParams.actionClicked)).toEqual({
+        value: ':game_die: Reroll',
+        displayText: '🎲 Reroll',
+      });
+    });
   });
 
   describe('RESUME execution', () => {

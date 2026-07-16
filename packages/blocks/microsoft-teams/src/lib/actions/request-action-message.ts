@@ -4,9 +4,9 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
+import { buildWrapperUrl } from '@openops/common';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
-import { buildWrapperUrl } from '../common/build-wrapper-url';
 import { chatExists } from '../common/chat-exists';
 import { ChannelOption, ChatOption, ChatTypes } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
