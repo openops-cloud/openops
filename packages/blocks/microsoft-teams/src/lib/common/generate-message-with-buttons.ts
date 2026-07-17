@@ -1,6 +1,9 @@
 export type TeamsMessageAction = {
   buttonText: string;
   buttonStyle: string;
+  followUpQuestion?: string;
+  answerFormat?: string;
+  noAnswerOption?: string;
 };
 
 export type TeamsMessageButton = TeamsMessageAction & { resumeUrl?: string };

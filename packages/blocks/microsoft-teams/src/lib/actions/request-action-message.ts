@@ -6,6 +6,7 @@ import {
 } from '@openops/blocks-framework';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
+import { buildWrapperUrl } from '../common/build-wrapper-url';
 import { chatExists } from '../common/chat-exists';
 import { ChannelOption, ChatOption, ChatTypes } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
@@ -67,6 +68,31 @@ export const requestActionMessageAction = createAction({
               { label: 'Transparent', value: 'default' },
             ],
           },
+        }),
+        followUpQuestion: Property.ShortText({
+          displayName: 'Follow-up question',
+          description:
+            'Optionally ask a follow-up question in a popup window when this button is clicked.',
+          required: false,
+        }),
+        answerFormat: Property.StaticDropdown({
+          displayName: 'Answer format',
+          description: 'Only used when a follow-up question is set.',
+          required: false,
+          defaultValue: 'text',
+          options: {
+            options: [
+              { label: 'Text', value: 'text' },
+              { label: 'Email', value: 'email' },
+              { label: 'Number', value: 'number' },
+            ],
+          },
+        }),
+        noAnswerOption: Property.ShortText({
+          displayName: 'No answer option',
+          description:
+            "Optional text for a secondary choice when the person can't answer.",
+          required: false,
         }),
       },
     }),
@@ -133,9 +159,19 @@ export const requestActionMessageAction = createAction({
         );
         return {
           ...action,
-          resumeUrl: `${frontendUrl}/html/resume_execution.html?isTest=${
-            context.run.isTest
-          }&redirectUrl=${encodeURIComponent(resumeUrl)}`,
+          resumeUrl: buildWrapperUrl({
+            frontendUrl,
+            isTest: context.run.isTest,
+            resumeUrl,
+            followUp: action.followUpQuestion
+              ? {
+                  question: action.followUpQuestion,
+                  answerFormat: action.answerFormat,
+                  noAnswerOption: action.noAnswerOption,
+                  title: header,
+                }
+              : undefined,
+          }),
         };
       });
 
