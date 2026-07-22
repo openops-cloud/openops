@@ -42,7 +42,7 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Checkout repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           token: ${{ steps.app_token.outputs.token }}
           # Full history is required for `git merge-base` and the
