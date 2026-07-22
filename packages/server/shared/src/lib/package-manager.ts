@@ -1,8 +1,6 @@
 import { isEmpty } from '@openops/shared';
-import { ExecException } from 'child_process';
 import fs from 'fs/promises';
 import fsPath from 'path';
-import { enrichErrorContext } from './exception-handler';
 import { execAsync } from './exec-async';
 import { fileExists } from './file-system';
 import { logger, truncate } from './logger';
