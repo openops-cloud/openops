@@ -28,7 +28,7 @@ jobs:
           save-always: true
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund --prefer-offline
   audit:
     name: Security Audit
     needs: install

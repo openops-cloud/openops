@@ -36,7 +36,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline
+        run: npm ci --no-audit --no-fund --prefer-offline
 
       - name: Run Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN
