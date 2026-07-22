@@ -57,7 +57,7 @@ const packageChangedFromMainBranch = async (path: string): Promise<boolean> => {
   console.info(`[packageChangedFromMainBranch] path=${cleaned}`);
 
   try {
-    await exec(`git diff --quiet origin/main -- ${cleaned}`);
+    const diff = await exec(`git diff --quiet origin/main -- ${cleaned}`);
     return false;
   } catch (e) {
     if ((e as ExecException).code === 1) {
