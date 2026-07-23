@@ -62,6 +62,7 @@ describe('waitForAction', () => {
       isExpired: undefined,
       message: context.propsValue.message,
       userSelection: null,
+      parameters: {},
     });
 
     expect(pauseMock).toHaveBeenCalledTimes(1);
@@ -89,6 +90,7 @@ describe('waitForAction', () => {
       isExpired: true,
       message: 'some updated message',
       userSelection: null,
+      parameters: {},
     });
 
     expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -146,6 +148,7 @@ describe('waitForAction', () => {
           displayText: actionText,
           value: actionValue,
         },
+        parameters: {},
       });
 
       expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -213,6 +216,7 @@ describe('waitForAction', () => {
           displayText: 'text 2',
         },
       ],
+      parameters: {},
     });
 
     expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -269,6 +273,7 @@ describe('waitForAction', () => {
           displayText: 'some action',
           value: 'some action',
         },
+        parameters: {},
       });
 
       expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -319,6 +324,7 @@ describe('waitForAction', () => {
       isExpired: undefined,
       message: context.propsValue.message,
       userSelection: null,
+      parameters: {},
     });
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
@@ -355,6 +361,7 @@ describe('waitForAction', () => {
       isExpired: undefined,
       message: context.propsValue.message,
       userSelection: null,
+      parameters: {},
     });
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
