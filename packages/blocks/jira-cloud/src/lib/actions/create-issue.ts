@@ -1,6 +1,6 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { convertToStringArrayWithValidation } from '@openops/shared';
-import validator, { isEmpty } from 'validator';
+import validator from 'validator';
 import { JiraAuth, jiraCloudAuth } from '../../auth';
 import {
   createJiraIssue,

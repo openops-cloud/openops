@@ -68,12 +68,6 @@ import {
   updateRow,
 } from '../../src/lib/openops-tables/rows';
 
-const expectRetryConfig = expect.objectContaining({
-  retries: 3,
-  retryDelay: expect.any(Function),
-  retryCondition: expect.any(Function),
-});
-
 describe('getRows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
