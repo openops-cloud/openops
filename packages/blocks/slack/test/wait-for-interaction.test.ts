@@ -34,6 +34,7 @@ describe('wait-for-interaction', () => {
         userSelection: null,
         isExpired: undefined,
         message: messageObj,
+        parameters: {},
       });
 
       expect(pauseMock).toHaveBeenCalledTimes(1);
@@ -72,6 +73,7 @@ describe('wait-for-interaction', () => {
           userSelection: null,
           isExpired: true,
           message: 'updated message',
+          parameters: {},
         });
 
         expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -316,6 +318,7 @@ describe('wait-for-interaction', () => {
           userSelection: null,
           isExpired: undefined,
           message: messageObj,
+          parameters: {},
         });
 
         expect(pauseMock).toHaveBeenCalledTimes(1);
@@ -361,6 +364,7 @@ describe('wait-for-interaction', () => {
           userSelection: null,
           isExpired: undefined,
           message: messageObj,
+          parameters: {},
         });
 
         expect(pauseMock).toHaveBeenCalledTimes(1);
@@ -389,6 +393,118 @@ describe('wait-for-interaction', () => {
         await expect(
           onReceivedInteraction(messageObj, ['🎲 Reroll'], context, 'step_1'),
         ).rejects.toThrow('Could not fetch pause metadata: step_1');
+      });
+    });
+
+    describe('resume parameters', () => {
+      test('should surface extra resume query params as parameters on a matched resume', async () => {
+        const messageObj: MessageInfo = createMockMessage();
+        const context = createMockContext({
+          resumePayload: {
+            queryParams: {
+              userName: 'test_user',
+              actionType: 'button',
+              actionClicked: JSON.stringify({
+                value: "I'm not the owner",
+                displayText: "I'm not the owner",
+              }),
+              path: 'step_1',
+              executionCorrelationId: 'corr-1',
+              isTest: 'false',
+              answer: 'someone@example.com',
+            },
+          },
+          store: {
+            get: jest.fn().mockResolvedValue({
+              executionCorrelationId: 'pause_123',
+              resumeDateTime: new Date().toISOString(),
+            }),
+          },
+        });
+
+        const result = await onReceivedInteraction(
+          messageObj,
+          ["I'm not the owner"],
+          context,
+          'step_1',
+        );
+
+        expect(result.isExpired).toBe(false);
+        expect(result.parameters).toEqual({ answer: 'someone@example.com' });
+      });
+
+      test('should not include prototype-pollution keys in parameters', async () => {
+        const messageObj: MessageInfo = createMockMessage();
+        const queryParams = Object.create(null) as Record<string, string>;
+        queryParams['userName'] = 'test_user';
+        queryParams['actionType'] = 'button';
+        queryParams['actionClicked'] = JSON.stringify({
+          value: 'Approve',
+          displayText: 'Approve',
+        });
+        queryParams['path'] = 'step_1';
+        Object.defineProperty(queryParams, '__proto__', {
+          value: 'polluted',
+          enumerable: true,
+          configurable: true,
+          writable: true,
+        });
+        queryParams['constructor'] = 'polluted';
+        queryParams['prototype'] = 'polluted';
+        queryParams['answer'] = 'someone@example.com';
+
+        const context = createMockContext({
+          resumePayload: { queryParams },
+          store: {
+            get: jest.fn().mockResolvedValue({
+              executionCorrelationId: 'pause_123',
+              resumeDateTime: new Date().toISOString(),
+            }),
+          },
+        });
+
+        const result = await onReceivedInteraction(
+          messageObj,
+          ['Approve'],
+          context,
+          'step_1',
+        );
+
+        expect(result.parameters).toEqual({ answer: 'someone@example.com' });
+      });
+
+      test('should return empty parameters when only routing params are present', async () => {
+        const messageObj: MessageInfo = createMockMessage();
+        const context = createMockContext({
+          resumePayload: {
+            queryParams: {
+              userName: 'test_user',
+              actionType: 'button',
+              actionClicked: JSON.stringify({
+                value: 'Approve',
+                displayText: 'Approve',
+              }),
+              path: 'step_1',
+              executionCorrelationId: 'corr-1',
+              isTest: 'true',
+            },
+          },
+          store: {
+            get: jest.fn().mockResolvedValue({
+              executionCorrelationId: 'pause_123',
+              resumeDateTime: new Date().toISOString(),
+            }),
+          },
+        });
+
+        const result = await onReceivedInteraction(
+          messageObj,
+          ['Approve'],
+          context,
+          'step_1',
+        );
+
+        expect(result.parameters).toEqual({});
       });
     });
 
@@ -446,12 +562,7 @@ describe('wait-for-interaction', () => {
 function createMockContext(params?: {
   run?: { pause?: jest.Mock; pauseId?: string };
   resumePayload?: {
-    queryParams?: {
-      userName?: string;
-      actionType?: string;
-      actionClicked?: string;
-      path?: string;
-    };
+    queryParams?: Record<string, string>;
   };
   store?: {
     get?: jest.Mock;

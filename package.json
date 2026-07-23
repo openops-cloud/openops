@@ -275,7 +275,7 @@
     "rxjs": "7.8.2",
     "semver": "7.8.5",
     "shade-generator": "1.2.7",
-    "shell-quote": "1.8.4",
+    "shell-quote": "1.10.0",
     "showdown": "2.1.0",
     "snowflake-sdk": "2.4.3",
     "socket.io": "4.8.3",

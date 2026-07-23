@@ -1,4 +1,4 @@
-import { buildWrapperUrl } from '../src/lib/common/build-wrapper-url';
+import { buildWrapperUrl } from '../src/lib/build-wrapper-url';
 
 const baseParams = {
   frontendUrl: 'https://app.openops.com',
