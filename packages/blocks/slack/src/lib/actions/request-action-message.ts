@@ -1,4 +1,5 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
+import { buildWrapperUrl } from '@openops/common';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
@@ -17,7 +18,7 @@ import {
   username,
   usersAndChannels,
 } from '../common/props';
-import { slackSendMessage } from '../common/utils';
+import { normalizeEmojiString, slackSendMessage } from '../common/utils';
 import {
   onReceivedInteraction,
   waitForInteraction,
@@ -111,30 +112,53 @@ const sendMessageAskingForAction = async (
   const enableSlackInteractions =
     system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
 
-  if (!enableSlackInteractions) {
+  const buttonsNeedingUrl = actions.filter(
+    (action: SlackActionDefinition) =>
+      !enableSlackInteractions || action.followUpQuestion,
+  );
+
+  if (buttonsNeedingUrl.length) {
     const apiUrl = await networkUtls.getPublicUrl();
     const frontendUrl = system
       .getOrThrow(SharedSystemProp.FRONTEND_URL)
       .replace(/\/$/, '');
 
-    actions.forEach((action: SlackActionDefinition) => {
+    buttonsNeedingUrl.forEach((action: SlackActionDefinition) => {
       const resumeUrl = context.generateResumeUrl(
         {
           queryParams: {
             executionCorrelationId: context.run.pauseId,
             actionClicked: JSON.stringify({
-              value: action.buttonText,
+              value: normalizeEmojiString(action.buttonText),
               displayText: action.buttonText,
             }),
           },
         },
         apiUrl,
       );
-      action.url = `${frontendUrl}/html/resume_execution.html?isTest=${
-        context.run.isTest
-      }&redirectUrl=${encodeURIComponent(resumeUrl)}`;
+      action.url = buildWrapperUrl({
+        frontendUrl,
+        isTest: context.run.isTest,
+        resumeUrl,
+        followUp: action.followUpQuestion
+          ? {
+              question: action.followUpQuestion,
+              answerFormat: action.answerFormat,
+              noAnswerOption: action.noAnswerOption,
+              title: headerText,
+            }
+          : undefined,
+      });
     });
   }
+
+  // Stored normalized because Slack interaction payloads return button text
+  // in emoji-shortcode form, which is what the interactions endpoint compares.
+  const followUpActions = actions
+    .filter((action: SlackActionDefinition) => action.followUpQuestion)
+    .map((action: SlackActionDefinition) =>
+      normalizeEmojiString(action.buttonText),
+    );
 
   const blocks = createMessageBlocks(headerText, text, actions);
 
@@ -154,6 +178,7 @@ const sendMessageAskingForAction = async (
           executionCorrelationId: context.run.pauseId,
         },
       }),
+      followUpActions,
     },
   });
 };
@@ -183,6 +208,9 @@ interface SlackActionDefinition {
   buttonStyle: string;
   confirmationPrompt: boolean;
   confirmationPromptText: string;
+  followUpQuestion?: string;
+  answerFormat?: string;
+  noAnswerOption?: string;
   url?: string;
 }
 

@@ -20,7 +20,22 @@ export interface WaitForInteractionResult {
   message: MessageInfo;
   isExpired: boolean | undefined;
   userSelection: UserSelection | UserSelection[] | null;
+  parameters: Record<string, string>;
 }
+
+// Query params the resume mechanism uses for routing; everything else is
+// user-provided data (e.g. from a form wrapper page) surfaced as `parameters`.
+const EXCLUDED_RESUME_PARAMS = new Set([
+  'actionClicked',
+  'actionType',
+  'userName',
+  'path',
+  'executionCorrelationId',
+  'isTest',
+  '__proto__',
+  'constructor',
+  'prototype',
+]);
 
 export async function waitForInteraction(
   messageObj: MessageInfo,
@@ -50,6 +65,7 @@ export async function waitForInteraction(
     userSelection: null,
     isExpired: undefined,
     message: messageObj,
+    parameters: {},
   };
 }
 
@@ -72,6 +88,7 @@ export async function onReceivedInteraction(
       userSelection: null,
       isExpired: true,
       message: updatedMessage,
+      parameters: {},
     };
   }
 
@@ -113,8 +130,15 @@ export async function onReceivedInteraction(
       userSelection: null,
       isExpired: undefined,
       message: messageObj,
+      parameters: {},
     };
   }
+
+  const parameters = Object.fromEntries(
+    Object.entries(resumePayload as unknown as Record<string, string>).filter(
+      ([key]) => !EXCLUDED_RESUME_PARAMS.has(key),
+    ),
+  );
 
   const updatedMessage = await actionReceived(
     context,
@@ -131,6 +155,7 @@ export async function onReceivedInteraction(
     message: updatedMessage,
     userSelection,
     isExpired: false,
+    parameters,
   };
 }
 
