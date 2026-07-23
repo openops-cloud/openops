@@ -6082,7 +6082,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - js-yaml@5.2.0
+ - js-yaml@5.2.1
 
 This package contains the following license:
 
@@ -19508,7 +19508,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/cohere@3.0.39
  - @ai-sdk/deepinfra@2.0.55
  - @ai-sdk/deepseek@2.0.39
- - @ai-sdk/gateway@2.0.117
+ - @ai-sdk/gateway@2.0.118
  - @ai-sdk/gateway@3.0.132
  - @ai-sdk/gateway@3.0.133
  - @ai-sdk/google-vertex@3.0.142
@@ -19525,11 +19525,11 @@ The following npm packages may be included in this product:
  - @ai-sdk/provider-utils@3.0.30
  - @ai-sdk/provider@2.0.3
  - @ai-sdk/provider@3.0.10
- - @ai-sdk/react@2.0.220
+ - @ai-sdk/react@2.0.221
  - @ai-sdk/react@3.0.210
  - @ai-sdk/togetherai@2.0.56
  - @ai-sdk/xai@3.0.96
- - ai@5.0.218
+ - ai@5.0.219
  - ai@6.0.206
  - ai@6.0.208
 
