@@ -22948,7 +22948,7 @@ The following npm packages may be included in this product:
  - sirv@3.0.2
  - toggle-selection@1.0.6
  - tr46@0.0.3
- - typeorm@0.3.30
+ - typeorm@0.3.31
  - use-composed-ref@1.4.0
  - varint@6.0.0
  - xml-naming@0.1.0
