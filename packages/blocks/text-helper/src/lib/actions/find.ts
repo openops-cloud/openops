@@ -1,4 +1,4 @@
-import { Property, Validators, createAction } from '@openops/blocks-framework';
+import { Property, createAction } from '@openops/blocks-framework';
 
 export const find = createAction({
   description: 'Find substring (Regex or Text).',

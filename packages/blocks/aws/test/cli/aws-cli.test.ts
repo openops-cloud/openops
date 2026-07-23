@@ -5,7 +5,6 @@ jest.mock('@openops/server-shared', () => ({
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
   },
 }));
-import { awsCliAction } from '../../src/lib/actions/cli/aws-cli-action';
 
 const openOpsMock = {
   runCliCommand: jest.fn(),
