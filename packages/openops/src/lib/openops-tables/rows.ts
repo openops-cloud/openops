@@ -82,7 +82,7 @@ async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
   onError: (error: Error) => void,
 ): Promise<T> {
-  const [value, release] = await semaphore.acquire();
+  const [_value, release] = await semaphore.acquire();
   try {
     return await fn();
   } catch (error) {
