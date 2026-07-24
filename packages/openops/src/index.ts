@@ -68,6 +68,7 @@ export * from './lib/azure/subscription/get-subscription-dropdown';
 export * from './lib/azure/subscription/get-subscriptions';
 
 export * from './lib/axios-wrapper';
+export * from './lib/build-wrapper-url';
 export * from './lib/cloud-cli-common';
 export * from './lib/dry-run-property';
 
