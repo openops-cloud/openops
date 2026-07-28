@@ -35,6 +35,15 @@ const MINIMIZED_NAVIGATION_ROUTES = [
   '/analytics',
 ];
 
+/**
+ * Requires a session, but renders without the application chrome.
+ *
+ * Granting an external application access is a decision about the account, so it needs
+ * a real signed-in user — while a sidebar and its navigation invite the user to wander
+ * off mid-flow, and the pending authorization expires if they do.
+ */
+const CHROMELESS_AUTHENTICATED_ROUTES = ['/oauth/consent'];
+
 const UNAUTHENTICATED_ROUTES = [
   '/sign-in',
   '/sign-up',
@@ -64,6 +73,10 @@ export function GlobalLayout() {
     (route) =>
       location.pathname.startsWith(route) &&
       !location.pathname.startsWith('/connections'),
+  );
+
+  const isChromelessAuthenticatedRoute = CHROMELESS_AUTHENTICATED_ROUTES.some(
+    (route) => location.pathname.startsWith(route),
   );
 
   useEffect(() => {
@@ -101,6 +114,18 @@ export function GlobalLayout() {
       <div className="h-screen w-screen overflow-hidden">
         <Outlet />
       </div>
+    );
+  }
+
+  if (isChromelessAuthenticatedRoute) {
+    return (
+      <OpsErrorBoundary>
+        <FronteggAuthGuard>
+          <AllowOnlyLoggedInUserOnlyGuard>
+            <Outlet />
+          </AllowOnlyLoggedInUserOnlyGuard>
+        </FronteggAuthGuard>
+      </OpsErrorBoundary>
     );
   }
 

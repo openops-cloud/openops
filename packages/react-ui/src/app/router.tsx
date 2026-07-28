@@ -46,6 +46,8 @@ import GeneralPage from './routes/settings/general';
 import { SignInPage } from './routes/sign-in';
 import { SignUpPage } from './routes/sign-up';
 
+const OAuthConsentPage = lazy(() => import('@/app/routes/oauth/consent'));
+
 const SettingsRerouter = () => {
   const { hash } = useLocation();
   const fragmentWithoutHash = hash.slice(1).toLowerCase();
@@ -289,6 +291,16 @@ const createRoutes = ({
     ];
     routes.push(...regularLoginRoutes);
   }
+
+  routes.push({
+    path: 'oauth/consent',
+    element: (
+      <Suspense>
+        <OAuthConsentPage />
+      </Suspense>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  });
 
   const redirectRoutes = [
     {

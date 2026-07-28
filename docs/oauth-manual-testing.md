@@ -3,11 +3,12 @@
 How to exercise the OAuth 2.1 authorization server by hand. Design:
 `docs/oauth-design.md` (OPS-4673).
 
-> **What is not built yet.** There is no consent page (that is phase P4) and no
-> hosted MCP resource server (P3). A real MCP client will therefore complete
-> discovery and registration, open a browser, and land on a URL the frontend does
-> not route. Everything else works, and the script below stands in for the consent
-> page by calling the decision endpoint directly.
+The whole chain works end to end: an MCP client discovers the server, registers,
+opens the browser at the consent screen, and receives a token. Two ways to test it
+— [by hand with the script](#walk-the-whole-flow), which needs no browser, or
+[with a real client](#connect-a-real-client), which is what users will do.
+
+The MCP resource server lives in its own repository, `openops-mcp`.
 
 ## Start the API with OAuth on
 
@@ -56,6 +57,49 @@ The two modes differ in one way that matters: with `mcp`, the client's own token
 is **refused** by the API (401) and has to be exchanged for a separate
 API-audience token first. That is the no-token-passthrough rule, and the script
 asserts it.
+
+## Connect a real client
+
+This is the path a user takes, and the only one that exercises the consent screen.
+You need the frontend running (`npx nx serve react-ui`, port 4200) as well as the
+API, and `OPS_FRONTEND_URL` pointing at it — that is what the authorize endpoint
+redirects the browser to.
+
+Start the MCP resource server from the `openops-mcp` repository:
+
+```bash
+cd ../openops-mcp
+MCP_TRANSPORT=http \
+OPENOPS_API_URL=http://localhost:3000 \
+OPENOPS_MCP_ROUTES=config/routes.oss.yaml \
+OPENOPS_MCP_ISSUER=http://localhost:3000 \
+OPENOPS_MCP_RESOURCE_URL=http://localhost:3020/mcp \
+OPENOPS_MCP_CLIENT_SECRET="$OPS_OAUTH_RS_CLIENT_SECRET" \
+uv run openops-mcp
+```
+
+Then point a client at it. With Claude Code:
+
+```bash
+claude mcp add --transport http openops http://localhost:3020/mcp
+```
+
+The client discovers the authorization server, registers itself, and opens your
+browser. Sign in if you are not already, and the consent screen names the
+application and the project it will act in. Approving sends the browser back to
+the client, which redeems the code and lists the tools.
+
+Worth confirming while you are here:
+
+- **The project is named on the screen**, and it matches `project_id` in the
+  issued token — that claim is what every later request is authorized against.
+- **Cancelling** returns the client to its callback with `error=access_denied`.
+- **Reloading the consent screen** after deciding shows the expired-request
+  message rather than granting a second authorization. The pending record is
+  single-use.
+- **Connecting a second client** (or the same one again) produces an independent
+  connection: `GET /v1/oauth/grants` lists both, and revoking one leaves the
+  other working.
 
 ## Things worth poking at by hand
 

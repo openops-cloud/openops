@@ -61,6 +61,9 @@ export const QueryKeys = {
   // Cloud
   cloudUserInfo: 'cloud-user-info',
 
+  // OAuth
+  oauthConsentRequest: 'oauth-consent-request',
+
   // Connections
   appConnections: 'app-connections',
   appConnection: 'app-connection',
