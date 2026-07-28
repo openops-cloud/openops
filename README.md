@@ -1,4 +1,6 @@
 # **OpenOps**
+
+[![MCP Toplist](https://mcptoplist.com/badge/mcp.so%2Fopenops%2Fopenops-cloud.svg)](https://mcptoplist.com/server/mcp.so%2Fopenops%2Fopenops-cloud)
 ![Welcome to OpenOps!](./static/OpenOps-GitHub-Cover.png)
 
 [![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=for-the-badge)](https://www.apache.org/licenses/LICENSE-2.0) 
