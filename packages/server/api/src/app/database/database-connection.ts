@@ -23,6 +23,14 @@ import { FlowEntity } from '../flows/flow/flow.entity';
 import { FolderEntity } from '../flows/folder/folder.entity';
 import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 import { TriggerEventEntity } from '../flows/trigger-events/trigger-event.entity';
+import {
+  OAuthAuthorizationCodeEntity,
+  OAuthClientEntity,
+  OAuthGrantEntity,
+  OAuthPendingAuthorizationEntity,
+  OAuthRefreshTokenEntity,
+  OAuthSigningKeyEntity,
+} from '../oauth/oauth.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
 import { StoreEntryEntity } from '../store-entry/store-entry-entity';
@@ -60,6 +68,12 @@ function getEntities(): EntitySchema<unknown>[] {
     AiConfigEntity,
     McpConfigEntity,
     FlowStepTestOutputEntity,
+    OAuthSigningKeyEntity,
+    OAuthClientEntity,
+    OAuthGrantEntity,
+    OAuthPendingAuthorizationEntity,
+    OAuthAuthorizationCodeEntity,
+    OAuthRefreshTokenEntity,
   ];
 
   return entities;
