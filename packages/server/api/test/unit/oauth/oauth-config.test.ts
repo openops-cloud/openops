@@ -1,4 +1,4 @@
-import { system } from '@openops/server-shared';
+import { AppSystemProp, system } from '@openops/server-shared';
 import { oauthConfig } from '../../../src/app/oauth/oauth-config';
 
 describe('oauthConfig', () => {
@@ -32,16 +32,40 @@ describe('oauthConfig', () => {
     expect(oauthConfig.getMcpResourceUrl()).toBeUndefined();
   });
 
-  it('reads TTLs from the configured defaults', () => {
-    expect(oauthConfig.getAccessTokenTtlSeconds()).toBe(900);
-    expect(oauthConfig.getRefreshTokenTtlDays()).toBe(30);
-    expect(oauthConfig.getExchangeTokenTtlSeconds()).toBe(300);
+  it('reads each TTL from its own setting', () => {
+    const getNumber = jest
+      .spyOn(system, 'getNumberOrThrow')
+      .mockReturnValue(42);
+
+    expect(oauthConfig.getAccessTokenTtlSeconds()).toBe(42);
+    expect(getNumber).toHaveBeenLastCalledWith(
+      AppSystemProp.OAUTH_ACCESS_TOKEN_TTL_SECONDS,
+    );
+
+    expect(oauthConfig.getRefreshTokenTtlDays()).toBe(42);
+    expect(getNumber).toHaveBeenLastCalledWith(
+      AppSystemProp.OAUTH_REFRESH_TOKEN_TTL_DAYS,
+    );
+
+    expect(oauthConfig.getExchangeTokenTtlSeconds()).toBe(42);
+    expect(getNumber).toHaveBeenLastCalledWith(
+      AppSystemProp.OAUTH_EXCHANGE_TOKEN_TTL_SECONDS,
+    );
   });
 
   it('is disabled unless explicitly enabled', () => {
+    // Driven through the mock rather than the ambient environment. A developer's local
+    // .env sets this, and the default when nothing sets it is what is under test.
+    const getBoolean = jest.spyOn(system, 'getBoolean');
+
+    getBoolean.mockReturnValue(undefined);
     expect(oauthConfig.isEnabled()).toBe(false);
 
-    jest.spyOn(system, 'getBoolean').mockReturnValue(true);
+    getBoolean.mockReturnValue(false);
+    expect(oauthConfig.isEnabled()).toBe(false);
+
+    getBoolean.mockReturnValue(true);
     expect(oauthConfig.isEnabled()).toBe(true);
+    expect(getBoolean).toHaveBeenLastCalledWith(AppSystemProp.OAUTH_ENABLED);
   });
 });
