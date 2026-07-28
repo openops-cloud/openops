@@ -53,6 +53,8 @@ import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
 import { systemJobsSchedule } from './helper/system-jobs';
+import { oauthConfig } from './oauth/oauth-config';
+import { oauthModule } from './oauth/oauth.module';
 import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
 import { slackInteractionModule } from './slack/slack-interaction-module';
@@ -224,6 +226,10 @@ export const setupApp = async (
   await app.register(aiModule);
   await app.register(blockVariableModule);
   await app.register(benchmarkModule);
+
+  if (oauthConfig.isEnabled()) {
+    await app.register(oauthModule);
+  }
 
   app.get(
     '/redirect',
