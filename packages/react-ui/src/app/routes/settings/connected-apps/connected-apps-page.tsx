@@ -49,16 +49,16 @@ const ConnectedAppsPage = () => {
   const cancelRevoke = useCallback(() => setAppToRevoke(null), []);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="space-y-6 w-full">
-        <div>
-          <h3 className="text-lg font-medium">{t('Connected apps')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t(
-              'AI agents and other applications you have allowed to act in OpenOps on your behalf. Disconnecting one takes effect immediately and does not affect the others.',
-            )}
-          </p>
-        </div>
+    // Same shape as the other settings routes, so the page title and description read
+    // the same wherever you land (see `routes/settings/ai`).
+    <div className="flex w-full flex-col items-center justify-center gap-4">
+      <div className="mx-auto w-full flex flex-col gap-4">
+        <h1 className="text-[24px] font-bold">{t('Connected apps')}</h1>
+        <p className="text-base font-normal">
+          {t(
+            'AI agents and other applications you have allowed to act in OpenOps on your behalf. Disconnecting one takes effect immediately and does not affect the others.',
+          )}
+        </p>
 
         {/* A pending request that cannot be read is almost always expired, already
             answered, or a reloaded page — the single-use record is gone either way. */}
