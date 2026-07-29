@@ -9,7 +9,6 @@ import {
   AlertTitle,
   ConfirmationDialog,
   LoadingSpinner,
-  Separator,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { useCallback, useState } from 'react';
@@ -60,7 +59,6 @@ const ConnectedAppsPage = () => {
             )}
           </p>
         </div>
-        <Separator />
 
         {/* A pending request that cannot be read is almost always expired, already
             answered, or a reloaded page — the single-use record is gone either way. */}
