@@ -160,7 +160,7 @@ say "9. Connected apps, and revoking one"
 curl -s -b "$WORK_DIR/cookies" "$API/v1/oauth/grants" | python3 -c "
 import sys, json
 for g in json.load(sys.stdin)['data']:
-    print(f\"    {g['clientName']}  grant={g['id']}  project={g['projectId']}  last used={g['lastUsedAt']}\")"
+    print(f\"    {g['clientName']}  grant={g['id']}  via={g['resourceId']}  last used={g['lastUsedAt']}\")"
 
 GRANT_ID="$(python3 -c "
 import base64, json

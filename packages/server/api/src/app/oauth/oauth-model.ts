@@ -11,13 +11,17 @@ export type OAuthSigningKey = BaseModel<string> & {
 
 export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_basic';
 
+/**
+ * No `scope`. A client may send one at registration, but what a token actually gets is
+ * decided by the resource it names (see `resource-registry`), checked at `/authorize`.
+ * Storing the requested scope would be a second, unconsulted answer to the same question.
+ */
 export type OAuthClient = BaseModel<string> & {
   clientName: string;
   redirectUris: string[];
   grantTypes: string[];
   tokenEndpointAuthMethod: OAuthTokenEndpointAuthMethod;
   clientSecretHash: string | null;
-  scope: string;
 };
 
 /**
@@ -49,13 +53,13 @@ export type OAuthAuthorizationCode = BaseModel<string> & {
   consumedAt: string | null;
 };
 
+/** No `userId`: the grant is where the acting user is recorded, and it is authoritative. */
 export type OAuthRefreshToken = BaseModel<string> & {
   tokenHash: string;
   grantId: string;
   /** Shared by every token rotated from the same original issuance. */
   familyId: string;
   clientId: string;
-  userId: string;
   resource: string;
   scope: string;
   expiresAt: string;
@@ -68,17 +72,19 @@ export type OAuthGrantStatus = 'active' | 'revoked';
  * One authorized connection. A user may hold several for the same client — each
  * from a separate authorization — and revoke them independently.
  *
- * `projectId` is fixed when the authorization is granted, matching the project
- * the user was signed in to. Multi-project access is an enterprise capability
- * layered on top; the OSS server issues tokens for exactly one project and never
- * mutates that choice.
+ * `projectId` records where the connection started, and is the default used when minting
+ * if no project is asked for. It does not limit the connection: a token may name any
+ * project the user belongs to, so this is not rewritten when one does.
+ *
+ * No `scope`: it would restate `resourceId`, since each resource grants exactly one.
+ * `revokedAt` is write-only on purpose — `status` is what code checks, and this answers
+ * "when" for anyone looking afterwards.
  */
 export type OAuthGrant = BaseModel<string> & {
   clientId: string;
   userId: string;
   projectId: string;
   resourceId: string;
-  scope: string;
   status: OAuthGrantStatus;
   lastUsedAt: string | null;
   revokedAt: string | null;

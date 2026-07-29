@@ -51,7 +51,6 @@ export const OAuthClientEntity = new EntitySchema<OAuthClient>({
       length: SHA256_HEX_LENGTH,
       nullable: true,
     },
-    scope: { type: String, length: 128 },
   },
   indices: [],
 });
@@ -114,7 +113,6 @@ export const OAuthRefreshTokenEntity = new EntitySchema<OAuthRefreshToken>({
     grantId: { ...OpenOpsIdSchema },
     familyId: { ...OpenOpsIdSchema },
     clientId: { ...OpenOpsIdSchema },
-    userId: { ...OpenOpsIdSchema },
     resource: { type: String, length: URI_LENGTH },
     scope: { type: String, length: 128 },
     expiresAt: { type: TIMESTAMP_COLUMN_TYPE },
@@ -140,7 +138,6 @@ export const OAuthGrantEntity = new EntitySchema<OAuthGrant>({
     userId: { ...OpenOpsIdSchema },
     projectId: { ...OpenOpsIdSchema },
     resourceId: { type: String, length: 32 },
-    scope: { type: String, length: 128 },
     status: { type: String, length: 16 },
     lastUsedAt: { type: TIMESTAMP_COLUMN_TYPE, nullable: true },
     revokedAt: { type: TIMESTAMP_COLUMN_TYPE, nullable: true },

@@ -24,7 +24,6 @@ export const TOKEN_EXCHANGE_GRANT =
   'urn:ietf:params:oauth:grant-type:token-exchange';
 
 const RS_CLIENT_NAME = 'OpenOps MCP Resource Server';
-const RS_CLIENT_SCOPE = 'mcp';
 const RS_CLIENT_SECRET_MIN_LENGTH = 32;
 const UNIQUE_VIOLATION = '23505';
 
@@ -40,7 +39,6 @@ const UNMATCHABLE_HASH = '-'.repeat(64);
 const REGISTRABLE_GRANT_TYPES = ['authorization_code', 'refresh_token'];
 
 const MAX_CLIENT_NAME_LENGTH = 128;
-const MAX_SCOPE_LENGTH = 128;
 const MAX_REDIRECT_URIS = 10;
 
 export type RegisteredClientResponse = {
@@ -49,7 +47,6 @@ export type RegisteredClientResponse = {
   redirect_uris: string[];
   grant_types: string[];
   token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
-  scope: string;
   client_id_issued_at: number;
 };
 
@@ -57,7 +54,6 @@ type ClientRegistrationMetadata = {
   clientName: string;
   redirectUris: string[];
   grantTypes: string[];
-  scope: string;
 };
 
 function parseClientName(value: unknown): string {
@@ -119,26 +115,6 @@ function parseGrantTypes(value: unknown): string[] {
   return value as string[];
 }
 
-function parseScope(value: unknown): string {
-  // Left empty on purpose: the authorize endpoint applies the requested
-  // resource's default scope, which registration cannot know yet.
-  if (value === undefined) {
-    return '';
-  }
-
-  if (typeof value !== 'string') {
-    throw invalidClientMetadata('scope must be a string');
-  }
-
-  if (value.length > MAX_SCOPE_LENGTH) {
-    throw invalidClientMetadata(
-      `scope must be at most ${MAX_SCOPE_LENGTH} characters`,
-    );
-  }
-
-  return value;
-}
-
 function assertPublicAuthMethod(value: unknown): void {
   if (value !== undefined && value !== 'none') {
     throw invalidClientMetadata(
@@ -159,7 +135,6 @@ function parseRegistrationMetadata(body: unknown): ClientRegistrationMetadata {
     clientName: parseClientName(metadata['client_name']),
     redirectUris: parseRedirectUris(metadata['redirect_uris']),
     grantTypes: parseGrantTypes(metadata['grant_types']),
-    scope: parseScope(metadata['scope']),
   };
 }
 
@@ -215,7 +190,6 @@ export const clientsService = {
       grantTypes: metadata.grantTypes,
       tokenEndpointAuthMethod: 'none',
       clientSecretHash: null,
-      scope: metadata.scope,
     };
 
     await repo().save(client);
@@ -230,7 +204,6 @@ export const clientsService = {
       redirect_uris: client.redirectUris,
       grant_types: client.grantTypes,
       token_endpoint_auth_method: client.tokenEndpointAuthMethod,
-      scope: client.scope,
       client_id_issued_at: Math.floor(
         new Date(client.created).getTime() / 1000,
       ),
@@ -355,7 +328,6 @@ export const clientsService = {
         grantTypes: [TOKEN_EXCHANGE_GRANT],
         tokenEndpointAuthMethod: 'client_secret_basic',
         clientSecretHash: secretHash,
-        scope: RS_CLIENT_SCOPE,
       });
       logger.info('OAuth resource server client created');
     } catch (error) {

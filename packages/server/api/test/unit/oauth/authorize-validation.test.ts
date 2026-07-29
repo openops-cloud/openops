@@ -23,7 +23,6 @@ const CLIENT: OAuthClient = {
   grantTypes: ['authorization_code', 'refresh_token'],
   tokenEndpointAuthMethod: 'none',
   clientSecretHash: null,
-  scope: '',
 };
 
 function query(overrides: Record<string, unknown> = {}): AuthorizeQuery {

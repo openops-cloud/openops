@@ -375,9 +375,7 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
         data: grants.map((grant, index) => ({
           id: grant.id,
           clientName: clients[index]?.clientName ?? 'Unknown application',
-          scope: grant.scope,
           resourceId: grant.resourceId,
-          projectId: grant.projectId,
           created: grant.created,
           lastUsedAt: grant.lastUsedAt,
         })),

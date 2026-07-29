@@ -25,7 +25,6 @@ export type GrantSnapshot = {
   userId: string;
   clientId: string;
   projectId: string;
-  scope: string;
   status: OAuthGrant['status'];
 };
 
@@ -50,7 +49,6 @@ function toSnapshot(grant: OAuthGrant): GrantSnapshot {
     userId: grant.userId,
     clientId: grant.clientId,
     projectId: grant.projectId,
-    scope: grant.scope,
     status: grant.status,
   };
 }
@@ -62,7 +60,6 @@ function invalidateSnapshot(grantId: string): void {
 export type CreateGrantParams = {
   clientId: string;
   userId: string;
-  scope: string;
   resourceId: string;
   projectId: string;
 };
@@ -87,7 +84,6 @@ export const grantsService = {
       userId: params.userId,
       projectId: params.projectId,
       resourceId: params.resourceId,
-      scope: params.scope,
       status: 'active',
       lastUsedAt: null,
       revokedAt: null,

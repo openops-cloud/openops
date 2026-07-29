@@ -235,7 +235,7 @@ none` (public, PKCE-only).
 `oauth_grant` — one row per **connection**: one completed authorization for one
 client and user. Created at code redemption (**not** at consent, so an
 authorization the client never finished is not shown as a connection):
-`id`, `clientId`, `userId`, `projectId`, `resourceId`, `scope`,
+`id`, `clientId`, `userId`, `projectId`, `resourceId`,
 `status (active|revoked)`, `createdAt`, `lastUsedAt`, `revokedAt`.
 
 The index on `(clientId, userId)` is deliberately **not unique**. Authorizing the
@@ -314,8 +314,10 @@ minting if no project is asked for. It does not decide what a live token can do.
   `status = 'active'` is what makes concurrent replica boots converge on one key.
 - `oauth_client` — DCR clients + the provisioned RS confidential client:
   `id`, `clientName`, `redirectUris` (jsonb), `grantTypes` (jsonb),
-  `tokenEndpointAuthMethod`, `clientSecretHash` (nullable), `scope`, timestamps.
-  Usage is recorded per connection on the grant, not per client.
+  `tokenEndpointAuthMethod`, `clientSecretHash` (nullable), timestamps.
+  Usage is recorded per connection on the grant, not per client. No `scope`: a client may
+  send one at registration, but what a token gets is decided by the resource it names, so
+  storing the request would be a second answer nothing reads.
 - `oauth_pending_authorization` — `id` (opaque request_id), `clientId` (FK),
   `redirectUri`, `codeChallenge`, `resource`, `scope`, `state`, `expiresAt`,
   `consumedAt`. No `userId`: the acting user is not known until the decision is
@@ -323,10 +325,14 @@ minting if no project is asked for. It does not decide what a live token can do.
 - `oauth_authorization_code` — `codeHash` (unique), `clientId` (FK), `userId`,
   `redirectUri`, `codeChallenge`, `resource`, `scope`, `expiresAt`, `consumedAt`.
 - `oauth_refresh_token` — `tokenHash` (unique), `grantId` (FK, **indexed**),
-  `familyId` (**indexed**), `clientId`, `userId`, `resource`, `scope`, `expiresAt`
-  (**indexed**), `revokedAt`.
+  `familyId` (**indexed**), `clientId`, `resource`, `scope`, `expiresAt`
+  (**indexed**), `revokedAt`. No `userId`: the grant records the acting user and is
+  authoritative, so a copy here could only ever disagree.
 - `oauth_grant` — as above; FKs with `ON DELETE CASCADE`; no defaulted-to-`''`
-  columns (L3); `(clientId, userId)` indexed but **not** unique.
+  columns (L3); `(clientId, userId)` indexed but **not** unique. No `scope`: it would
+  restate `resourceId`, since each resource grants exactly one. `revokedAt` is
+  write-only on purpose — `status` is what code branches on, and this answers "when"
+  for anyone auditing later.
 
 All single-use consumption (pending record, code, refresh rotation) is an atomic
 conditional `UPDATE … WHERE … AND consumedAt IS NULL` branching on affected rows (M1).
@@ -541,10 +547,14 @@ document originally specified.
 6. **Revocation is effectively immediate on a single instance**, not merely
    within the ~60 s cache TTL: revoking busts the in-process grant cache. The TTL
    bound applies across replicas, whose caches are not invalidated.
-7. **`oauth_client` has no usage column and signing keys have no `alg` column.**
-   Both were written and never read: usage is meaningful per connection (on the
-   grant), and the server signs with one algorithm, which the JWKS reports from a
-   constant. Removed rather than left as write-only fields.
+7. **Five columns the design named were removed as write-only.** `oauth_client.lastUsedAt`
+   (usage is meaningful per connection, on the grant) and `oauth_signing_key.alg` (one
+   algorithm, reported by the JWKS from a constant) went first. A later sweep took
+   `oauth_client.scope`, `oauth_grant.scope` and `oauth_refresh_token.userId` for the
+   same reason — each was written, and in two cases echoed through an API response, but
+   never consulted for a decision. Scope is settled by the resource; the acting user is
+   settled by the grant. `oauth_grant.revokedAt` was kept despite being write-only: it is
+   an audit answer to "when", which `status` alone cannot give.
 8. **Bearer now beats the session cookie** in `access-token-authn-handler.ts`
    (was cookie-first). A caller presenting a token is stating which identity it
    wants; preferring an ambient cookie would authenticate it as someone else.

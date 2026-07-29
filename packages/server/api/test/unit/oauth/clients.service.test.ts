@@ -85,7 +85,6 @@ describe('clientsService', () => {
         'refresh_token',
       ]);
       expect(response.token_endpoint_auth_method).toBe('none');
-      expect(response.scope).toBe('');
       expect(response.client_id_issued_at).toBeLessThanOrEqual(
         Math.floor(Date.now() / 1000),
       );
@@ -101,20 +100,34 @@ describe('clientsService', () => {
       expect(row.grantTypes).toEqual(['authorization_code', 'refresh_token']);
       // No client-level usage column: usage is tracked per connection on the grant.
       expect('lastUsedAt' in row).toBe(false);
+      // And no scope: what a token gets is decided by the resource it names, so
+      // storing or echoing a requested scope would be a second, unread answer.
+      expect('scope' in row).toBe(false);
+      expect('scope' in response).toBe(false);
     });
 
     it('persists an explicitly requested subset of grant types', async () => {
       const response = await clientsService.registerClient({
         ...validMetadata(),
         grant_types: ['authorization_code'],
-        scope: 'mcp',
       });
 
       expect(response.grant_types).toEqual(['authorization_code']);
-      expect(response.scope).toBe('mcp');
       expect(storedRow(response.client_id).grantTypes).toEqual([
         'authorization_code',
       ]);
+    });
+
+    it('ignores a requested scope rather than storing it', async () => {
+      const response = await clientsService.registerClient({
+        ...validMetadata(),
+        scope: 'mcp api something-invented',
+      });
+
+      // Accepted, because refusing a field we simply do not use would be worse for
+      // clients that send it. It is neither stored nor echoed.
+      expect('scope' in storedRow(response.client_id)).toBe(false);
+      expect('scope' in response).toBe(false);
     });
 
     it('rejects a missing client_name', async () => {
@@ -206,15 +219,6 @@ describe('clientsService', () => {
       ).rejects.toThrow('invalid_client_metadata');
       expect(clientRows).toHaveLength(0);
     });
-
-    it('rejects a scope over 128 characters', async () => {
-      await expect(
-        clientsService.registerClient({
-          ...validMetadata(),
-          scope: 's'.repeat(129),
-        }),
-      ).rejects.toThrow('invalid_client_metadata');
-    });
   });
 
   describe('getClient / getClientOrThrow', () => {
@@ -259,7 +263,6 @@ describe('clientsService', () => {
         grantTypes,
         tokenEndpointAuthMethod: 'none',
         clientSecretHash: null,
-        scope: '',
       } as OAuthClient);
 
     it('allows a grant type the client registered', () => {
@@ -337,7 +340,6 @@ describe('clientsService', () => {
       expect(row.grantTypes).toEqual([TOKEN_EXCHANGE_GRANT]);
       expect(row.tokenEndpointAuthMethod).toBe('client_secret_basic');
       expect(row.clientSecretHash).toBe(sha256Hex(RS_SECRET));
-      expect(row.scope).toBe('mcp');
       expect(JSON.stringify(row)).not.toContain(RS_SECRET);
     });
 

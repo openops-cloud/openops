@@ -14,9 +14,7 @@ const mockedRevoke = oauthApi.revokeConnectedApp as jest.Mock;
 const app = (id: string, clientName = 'Claude Code'): ConnectedApp => ({
   id,
   clientName,
-  scope: 'mcp',
   resourceId: 'mcp',
-  projectId: 'proj-1',
   created: '2026-07-01T10:00:00.000Z',
   lastUsedAt: null,
 });

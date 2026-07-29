@@ -2,7 +2,22 @@ import { formatUtils } from '@/app/lib/utils';
 import { Button } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Plug } from 'lucide-react';
-import { ConnectedApp } from '../lib/oauth-api';
+import { ConnectedApp, OAuthResourceId } from '../lib/oauth-api';
+
+/**
+ * How the application reaches OpenOps. Worth showing because it is the one thing that
+ * distinguishes otherwise identical rows, and it is not derivable from anything else the
+ * row displays.
+ */
+const describeResource = (resourceId: OAuthResourceId | null): string => {
+  if (resourceId === 'mcp') {
+    return t('via the MCP server');
+  }
+  if (resourceId === 'api') {
+    return t('via the API');
+  }
+  return t('unknown connection type');
+};
 
 type ConnectedAppsListProps = {
   apps: ConnectedApp[];
@@ -37,7 +52,9 @@ const ConnectedAppRow = ({
     <div className="flex flex-col gap-1 min-w-0">
       <span className="text-sm font-medium truncate">{app.clientName}</span>
       <span className="text-xs text-muted-foreground">
-        {t('Connected')} {formatUtils.formatDate(new Date(app.created))}
+        {describeResource(app.resourceId)}
+        {' · '}
+        {t('connected')} {formatUtils.formatDate(new Date(app.created))}
         {' · '}
         {app.lastUsedAt
           ? `${t('last used')} ${formatUtils.formatDate(

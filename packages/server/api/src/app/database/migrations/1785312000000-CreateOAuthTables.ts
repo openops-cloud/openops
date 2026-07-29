@@ -33,7 +33,6 @@ export class CreateOAuthTables1785312000000 implements MigrationInterface {
         "grantTypes" jsonb NOT NULL,
         "tokenEndpointAuthMethod" varchar(32) NOT NULL,
         "clientSecretHash" varchar(64),
-        "scope" varchar(128) NOT NULL,
         CONSTRAINT "PK_oauth_client" PRIMARY KEY ("id")
       );
     `);
@@ -47,7 +46,6 @@ export class CreateOAuthTables1785312000000 implements MigrationInterface {
         "userId" varchar(21) NOT NULL,
         "projectId" varchar(21) NOT NULL,
         "resourceId" varchar(32) NOT NULL,
-        "scope" varchar(128) NOT NULL,
         "status" varchar(16) NOT NULL,
         "lastUsedAt" timestamp with time zone,
         "revokedAt" timestamp with time zone,
@@ -133,7 +131,6 @@ export class CreateOAuthTables1785312000000 implements MigrationInterface {
         "grantId" varchar(21) NOT NULL,
         "familyId" varchar(21) NOT NULL,
         "clientId" varchar(21) NOT NULL,
-        "userId" varchar(21) NOT NULL,
         "resource" varchar(512) NOT NULL,
         "scope" varchar(128) NOT NULL,
         "expiresAt" timestamp with time zone NOT NULL,

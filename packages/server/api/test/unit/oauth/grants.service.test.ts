@@ -55,7 +55,6 @@ import { grantsService } from '../../../src/app/oauth/grants.service';
 const BASE_PARAMS = {
   clientId: 'client-1',
   userId: 'user-1',
-  scope: 'mcp',
   resourceId: 'mcp',
   projectId: 'project-1',
 };
@@ -67,7 +66,6 @@ function seedRefreshToken(overrides: Row = {}): Row {
     grantId: 'grant-1',
     familyId: 'family-1',
     clientId: 'client-1',
-    userId: 'user-1',
     resource: 'https://ops.example.com/mcp',
     scope: 'mcp',
     expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
@@ -95,10 +93,12 @@ describe('grantsService', () => {
         userId: 'user-1',
         projectId: 'project-1',
         resourceId: 'mcp',
-        scope: 'mcp',
         status: 'active',
         revokedAt: null,
       });
+      // resourceId alone says what the connection is for; a scope column would
+      // restate it, since each resource grants exactly one.
+      expect('scope' in (grantRows[0] as object)).toBe(false);
     });
 
     it('creates an independent grant each time the same client is authorized', async () => {

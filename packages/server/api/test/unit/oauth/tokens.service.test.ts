@@ -275,7 +275,6 @@ describe('tokensService', () => {
       expect(grantsService.create).toHaveBeenCalledWith({
         clientId: 'client-1',
         userId: 'user-1',
-        scope: 'mcp',
         resourceId: 'mcp',
         projectId: 'project-1',
       });

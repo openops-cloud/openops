@@ -14,8 +14,6 @@ const mockedDecide = oauthApi.decide as jest.Mock;
 const REQUEST: OAuthConsentRequest = {
   requestId: 'req-1',
   clientName: 'Claude Code',
-  scope: 'mcp',
-  resourceId: 'mcp',
 };
 
 const assign = jest.fn();

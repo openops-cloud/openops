@@ -118,7 +118,6 @@ async function issueRefreshToken(params: {
   grantId: string;
   familyId: string;
   clientId: string;
-  userId: string;
   resource: string;
   scope: string;
 }): Promise<string> {
@@ -136,7 +135,6 @@ async function issueRefreshToken(params: {
     grantId: params.grantId,
     familyId: params.familyId,
     clientId: params.clientId,
-    userId: params.userId,
     resource: params.resource,
     scope: params.scope,
     expiresAt: expiresAt.toISOString(),
@@ -241,7 +239,6 @@ export const tokensService = {
     const grant = await grantsService.create({
       clientId: codeRecord.clientId,
       userId: codeRecord.userId,
-      scope: codeRecord.scope,
       resourceId: resource.id,
       projectId: await resolveDefaultProjectId(user),
     });
@@ -258,7 +255,6 @@ export const tokensService = {
       grantId: grant.id,
       familyId: openOpsId(),
       clientId: grant.clientId,
-      userId: grant.userId,
       resource: resource.canonicalUri,
       scope: codeRecord.scope,
     });
@@ -364,7 +360,6 @@ export const tokensService = {
       // Same family: rotation forms a chain, and reuse anywhere in it is fatal.
       familyId: existingToken.familyId,
       clientId: existingToken.clientId,
-      userId: existingToken.userId,
       resource: existingToken.resource,
       scope: existingToken.scope,
     });

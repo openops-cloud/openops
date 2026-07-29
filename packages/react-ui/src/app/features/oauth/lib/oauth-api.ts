@@ -11,8 +11,6 @@ export type OAuthResourceId = 'api' | 'mcp';
 export type OAuthConsentRequest = {
   requestId: string;
   clientName: string;
-  scope: string;
-  resourceId: OAuthResourceId | null;
 };
 
 export type OAuthConsentDecision = {
@@ -24,9 +22,7 @@ export type OAuthConsentDecision = {
 export type ConnectedApp = {
   id: string;
   clientName: string;
-  scope: string;
   resourceId: OAuthResourceId | null;
-  projectId: string;
   created: string;
   lastUsedAt: string | null;
 };
