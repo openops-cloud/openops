@@ -31,15 +31,16 @@ when SSO is enabled and password login is disabled (OPS-4673).
 4. **Connections:** a user may hold **several independent connections**, including
    more than one for the same agent. Each is authorized, listed and revoked on its
    own. Single full-access scope per resource in v1 (`mcp`, `api`).
-5. **Projects:** every OAuth-issued token carries a required `project_id` claim
-   and may act only on that project, so a token's authority is fixed for its whole
-   life and cannot be redirected by changing stored state. This edition has one
-   project per organization; multi-project access is an **enterprise capability**
-   layered on top by minting a token with a different claim (mirroring how
-   enterprise's `POST /v1/authentication/switch-project` already issues a new token
-   per project rather than mutating state). The OSS server therefore builds **no**
-   switching mechanism of its own — it just refuses to be the second source of
-   truth.
+5. **Projects:** every OAuth-issued token carries a required `project_id` claim and
+   acts only on that project, so an individual token's authority is fixed for its whole
+   life and cannot be redirected by changing stored state. A _connection_ is not fixed:
+   it can act wherever its user can, by asking for a different project when it gets a
+   token. That mirrors how enterprise's `POST /v1/authentication/switch-project` issues
+   a new token per project rather than mutating state — the switch produces a new
+   credential, never a rewritten one. The bound is the user's own membership, re-read on
+   every mint and again on every request, so a connection can never reach further than
+   its user could in the browser. This edition has one project per organization, so
+   there is usually nowhere else to go; the mechanism is the same either way.
 6. **Revocation is a hard requirement:** users/admins revoke a connection and it stops
    working promptly.
 
@@ -65,7 +66,7 @@ when SSO is enabled and password login is disabled (OPS-4673).
 | M2    | Static form-field exchange secret, `change-me` default, unrate-limited                                                                | RS is a **confidential client** with a generated high-entropy secret (hashed at rest), `client_secret_basic`, rate-limited failures |
 | M3    | Audience deny-list in one handler; websockets bypass                                                                                  | **Positive** audience enforcement inside `extractPrincipal` (single chokepoint)                                                     |
 | M4    | One HS256 secret signs everything; fake `jwks_uri`                                                                                    | Dedicated **RS256 keypair + real JWKS** for OAuth tokens                                                                            |
-| M5    | In-process `_active_project_by_user` map (cross-session leakage, restart loss)                                                        | No mutable project state anywhere: the project is fixed on the grant at authorization                                               |
+| M5    | In-process `_active_project_by_user` map (cross-session leakage, restart loss)                                                        | No mutable server-side project state: the project is a claim on each token, and switching mints a new token rather than editing one |
 | M6    | 2× remote exchange per tool call; proceeds unauthenticated on failure                                                                 | Local JWKS validation; exchange only to mint API tokens, cached, **fail-closed**                                                    |
 | M7    | Non-RFC 6749 error bodies                                                                                                             | Dedicated OAuth error serializer for `/v1/oauth/*`                                                                                  |
 | M8    | Phantom grants at consent                                                                                                             | Grant created at code redemption, not at consent (repeat authorizations are intentionally separate connections)                     |
@@ -97,12 +98,13 @@ when SSO is enabled and password login is disabled (OPS-4673).
 3. Client fetches AS metadata (RFC 8414 and/or OIDC discovery), registers via DCR,
    opens `/oauth/authorize` with PKCE (S256) + `state` + `resource`.
 4. AS validates everything, persists a **pending-authorization record**, sends the
-   browser to the consent page with only an opaque `request_id`. Unauthenticated users
-   go through normal app login (SSO-aware) first.
-5. Consent page fetches client metadata **from the server by `request_id`** (never from
-   URL params), user approves/denies. Approve → single-use code bound to the record;
-   deny → server-validated `error=access_denied` redirect. Both redirects carry `state`
-   and `iss` (RFC 9207).
+   browser to Settings → Connected apps with only an opaque `request_id`.
+   Unauthenticated users go through normal app login (SSO-aware) first.
+5. The consent dialog fetches client metadata **from the server by `request_id`** (never
+   from URL params), user approves/denies. Approve → single-use code bound to the
+   record; deny → server-validated `error=access_denied` redirect. Dismissing the dialog
+   denies, so a client is never left waiting on a decision the user has walked away
+   from. Both redirects carry `state` and `iss` (RFC 9207).
 6. Client exchanges code at `/oauth/token` (PKCE verifier + `resource`) → RS256 access
    token (`aud` = resource) + rotating refresh token. Grant activated/upserted here.
 7. MCP calls: RS validates locally via JWKS (issuer + audience + exp), exchanges for an
@@ -188,8 +190,8 @@ none` (public, PKCE-only).
   loopback; loopback matches any port per RFC 8252), PKCE S256-only, known `resource`,
   scope ⊆ resource scopes. On unknown client/unregistered redirect_uri: render an error
   page, **never redirect**. On success: persist `oauth_pending_authorization`
-  (~10 min TTL, single-use) and redirect the browser to the consent route with only
-  `?request_id=<opaque>`.
+  (~10 min TTL, single-use) and redirect the browser to Settings → Connected apps with
+  only `?request_id=<opaque>`.
 - `GET /oauth/requests/{id}` (USER session) — consent-page data: client name
   from the **DB**, scopes, resource id. Any signed-in user holding the (unguessable)
   request id can read it: the record is not bound to a user until the decision is
@@ -207,19 +209,26 @@ none` (public, PKCE-only).
     mint access + refresh (new `familyId`), activate the grant.
   - `refresh_token` — atomic rotate; **reuse of a rotated/revoked token revokes the
     entire family** (H1) and logs a security event; checks grant active + user active
-    on every rotation (H2); re-binds `resource`.
+    on every rotation (H2); re-binds `resource`. Accepts an optional `project_id` to
+    move the connection, checked against membership **before** the token is consumed, so
+    a refused switch does not cost a working credential.
   - `urn:ietf:params:oauth:grant-type:token-exchange` — **RS-only**: authenticated via
     `client_secret_basic` with the RS's confidential client (secret generated at
     provisioning, stored hashed, timing-safe compare, rate-limited failures — M2).
     Validates the subject token (signature, `aud = mcp`, exp), checks grant active +
-    user active + membership of the target project, mints the ~5 min `aud=api` token
-    for the project named by the subject token, so the two tokens always refer to
-    the same project and the resource server cannot widen what it was given.
+    user active + membership of the target project, mints the ~5 min `aud=api` token.
+    The target defaults to the project the subject token names; the RS may pass
+    `project_id` to act elsewhere, which is how an agent switches project. It cannot
+    widen beyond the user's own membership, which is re-read here on every exchange.
 - `POST /oauth/revoke` (RFC 7009, public with client identification): revokes by
   refresh token → marks grant + family revoked.
 - `GET /oauth/grants` / `DELETE /oauth/grants/{id}` (USER, project-scoped policy):
   connected-apps management. Delete = revoke grant **and cascade-revoke all its refresh
   tokens** (indexed `grantId` UPDATE — H2).
+- `GET /oauth/projects` (USER **or SERVICE**): the projects the caller may act in, and
+  which one they are acting in now. `SERVICE` is allowed because this is the one route a
+  connection calls about itself, to find out where it can switch to; it exposes only the
+  names of projects the caller already reaches.
 
 ### Grant model
 
@@ -377,13 +386,23 @@ URI`) wrapped in `RemoteAuthProvider` → serves RFC 9728 PRM (root and path-awa
 
 ## Consent UI (react-ui)
 
-- Consent route reads only `request_id`, fetches
-  `GET /v1/oauth/requests/{id}`, renders client name/scopes **from the
-  server**, with plain-language copy: "_<client>_ will be able to act in OpenOps as
-  you, across all your projects." Approve/Deny both POST the decision and navigate to
-  the server-returned URL only.
-- **Connected apps** page under settings: lists grants (client, created, last used,
-  active project) with Revoke. All strings i18n; `react` skill patterns.
+Consent and connection management live in one place — `/settings/connected-apps` — so the
+user decides where they later review and revoke.
+
+- **Consent dialog**, shown over that page when the URL carries a `request_id`. Reads
+  only the id, fetches `GET /v1/oauth/requests/{id}` and renders the client name **from
+  the server**, never from URL params. Plain-language copy naming what is granted,
+  including that the connection may act in any project the user has access to. Approve
+  and Deny both POST the decision and navigate to the server-returned URL only.
+  Dismissing counts as Deny. The response deliberately carries **no project**: a
+  connection is not confined to one, and naming the project it starts in would read as a
+  limit that does not exist.
+- **Connected apps list** on the same page: one row per authorization — not per
+  application, since two connections for the same agent are independently revocable —
+  with client name, when connected, when last used, and Disconnect behind a
+  confirmation. Hidden entirely by the `CONNECTED_APPS_ENABLED` flag when OAuth is off,
+  since every route it depends on is then unregistered. All strings i18n; `react` skill
+  patterns.
 
 ## Abuse controls & hygiene
 
@@ -444,8 +463,21 @@ Every audit finding becomes a regression test. Highlights:
   suite.
 - **P3 — Python RS:** http transport, JWKS verifier, PRM + challenge middleware,
   exchange client + cache + fail-closed, project-switch tool.
-- **P4 — UI:** consent page, connected-apps settings page.
+- **P4 — UI:** consent dialog, connected-apps settings page.
 - **P5 — Deploy/E2E:** config, path routing, Docker, E2E matrix.
+
+Status: P1, P2 and P4 are complete in this repository. P3 lives in the `openops-mcp`
+repository and is complete apart from the project-switch tool — the API side of switching
+is built and tested here, but nothing in the resource server calls it yet. P5 is
+outstanding in `openops-mcp`: Dockerfile, README, and the Helm values for
+`openops-cloud/helm-chart`.
+
+The switch tool needs somewhere to hold the selection, and **that is where audit finding
+M5 came from** — an in-process `_active_project_by_user` map that leaked across sessions
+and vanished on restart. HTTP mode runs `stateless_http`, so the same map would work on
+one instance and silently diverge across replicas. Whatever holds the selection has to be
+per-connection and either shared or carried in the request; reaching for a process-local
+dictionary would reintroduce the finding this design set out to fix.
 
 ## Verification
 
@@ -488,15 +520,24 @@ document originally specified.
    is deliberate — it allows exactly one verifier guess per code — and the cost
    is only that a party who already holds a code can deny the legitimate client
    that one code.
-5. **The project moved onto the token, and switching left the OSS server.** The
-   design originally wanted an all-projects grant with runtime switching, plus a
-   `project_id` parameter on token exchange. Both were wrong: multi-project access
-   is an enterprise capability that already issues a token per project, so an OSS
-   switching mechanism would compete with it, and a request-time project parameter
-   could only succeed by being redundant. The project is now a required token claim
-   (see _Project authorization_), which resolves audit finding M5 outright — there
-   is no mutable project state left for sessions to share — and additionally means
-   a token cannot have its authority changed after issuance.
+5. **The project moved onto the token; switching then came back, deliberately.** The
+   design originally wanted an all-projects grant with runtime switching. That became a
+   required `project_id` claim instead, which is what resolves audit finding M5 — no
+   mutable project state for sessions to share — and fixes each token's authority for
+   its whole life.
+
+   An intermediate step went further and refused to build any switching at all, on the
+   grounds that enterprise's `/switch-project` already mints a token per project. That
+   was wrong twice over. `/switch-project` is unreachable for an OAuth connection (it
+   requires `PrincipalType.USER` and session cookies), so refusing to build a mechanism
+   did not defer the capability to enterprise — it removed it. And an agent confined to
+   one project is not the parity users expect from a tool acting on their behalf.
+
+   Switching is therefore built here, at the token endpoint, where the membership check
+   already lives (see _Project authorization_). The claim stays immutable per token; what
+   moves is the connection, by asking for a new token. That keeps M5 resolved — still no
+   mutable server-side state — while making the capability reachable.
+
 6. **Revocation is effectively immediate on a single instance**, not merely
    within the ~60 s cache TTL: revoking busts the in-process grant cache. The TTL
    bound applies across replicas, whose caches are not invalidated.
@@ -521,9 +562,10 @@ document originally specified.
 
 ## Out of scope
 
-- Multi-project access and project switching — an enterprise capability with its
-  own project-token endpoint (requirement 5). Enterprise layers it on by issuing a
-  token for another project; the OSS grant model needs no change to allow that.
+- Per-project _consent_. A connection is authorized against the user's account and may
+  act in any project they can reach, which is the parity a tool acting on someone's
+  behalf needs. Letting a user grant one project and withhold another would be a
+  finer-grained consent model, and belongs with the scopes work below.
 - API keys / PATs (M365 Copilot cannot use them).
 - RFC 7592 client management endpoints.
 - Changes to internal HS256 token flows (sessions, worker, engine, AI-chat stdio).

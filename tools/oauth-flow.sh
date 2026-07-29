@@ -86,7 +86,7 @@ REQUEST_ID="$(printf '%s' "$LOCATION" | sed -n 's/.*request_id=\([^&]*\).*/\1/p'
 [ -n "$REQUEST_ID" ] || fail "no request_id in the redirect — check the authorize parameters"
 
 # ------------------------------------------------------------------ consent ---
-say "4. Consent (the UI does this; there is no consent page yet, so we drive it directly)"
+say "4. Consent (a browser would show the dialog on Settings -> Connected apps; driven directly here)"
 curl -s -c "$WORK_DIR/cookies" -X POST "$API/v1/authentication/sign-in" \
   -H 'Content-Type: application/json' \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}" -o /dev/null ||
