@@ -423,8 +423,20 @@ user decides where they later review and revoke.
 - Rate limits (existing module, per-IP): `/register`, `/authorize`, `/token`
   (failure-weighted so refresh cadence is never throttled), exchange failures.
 - Cleanup job (existing system-jobs): indexed range-deletes of expired pending
-  records, codes, and expired/revoked refresh tokens; stale-client removal via
+  records, codes, and expired refresh tokens; stale-client removal via
   `NOT EXISTS` query (no full-table loads); runs hourly.
+  - **Retention is anchored to expiry, including for revoked rows.** A rotated refresh
+    token is kept until the moment it could no longer be presented anyway, because that
+    is exactly the window in which a replay must be recognised as _reuse_ — which revokes
+    the family and logs a security event — rather than reported as an unknown token. An
+    independent, shorter window would quietly turn a replay of an older token into a
+    plain `invalid refresh token`: still rejected, but with the compromise signal lost
+    precisely because the token was old. Growth is bounded by the refresh TTL, so pick
+    that TTL with the table in mind rather than adding a second knob here.
+  - The **handler is registered on every boot**, including when OAuth is disabled, and
+    returns immediately in that case. The schedule lives in Redis and outlives the boot
+    that created it, so an instance that enabled OAuth once and later turned it off still
+    has the job firing; with no handler registered the worker fails it hourly.
 - Security telemetry: log DCR registrations, refresh-reuse family revocations, exchange
   auth failures, revocations.
 

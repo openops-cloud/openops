@@ -3,6 +3,7 @@ import { repoFactory } from '../core/db/repo-factory';
 import { systemJobsSchedule } from '../helper/system-jobs';
 import { SystemJobName } from '../helper/system-jobs/common';
 import { systemJobHandlers } from '../helper/system-jobs/job-handlers';
+import { oauthConfig } from './oauth-config';
 import {
   OAuthAuthorizationCode,
   OAuthClient,
@@ -29,10 +30,22 @@ const grantRepo = repoFactory<OAuthGrant>(OAuthGrantEntity);
 
 export const OAUTH_CLEANUP_CRON = '0 * * * *';
 
-export const registerOAuthCleanupJob = async (): Promise<void> => {
+/**
+ * Registered on every boot, including when OAuth is disabled.
+ *
+ * The schedule lives in Redis and outlives the process that created it, so a deployment
+ * that enabled OAuth once and later turned it off still has this job firing. Without a
+ * handler the worker throws `No handler for job`, and BullMQ retries — an hourly failure
+ * for a feature nobody is using. Registering unconditionally costs a map entry.
+ */
+export const registerOAuthCleanupHandler = (): void => {
   systemJobHandlers.registerJobHandler(
     SystemJobName.OAUTH_CLEANUP,
     async (): Promise<void> => {
+      if (!oauthConfig.isEnabled()) {
+        return;
+      }
+
       try {
         await oauthCleanupJobHandler();
       } catch (error) {
@@ -41,7 +54,9 @@ export const registerOAuthCleanupJob = async (): Promise<void> => {
       }
     },
   );
+};
 
+export const scheduleOAuthCleanupJob = async (): Promise<void> => {
   await systemJobsSchedule.upsertJob({
     job: {
       name: SystemJobName.OAUTH_CLEANUP,
@@ -55,12 +70,6 @@ export const registerOAuthCleanupJob = async (): Promise<void> => {
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-/**
- * Revoked refresh tokens are kept for a while so rotation reuse detection still
- * has the history it needs to recognize a replay of an old token.
- */
-const REVOKED_RETENTION_DAYS = 7;
 
 /** Registration is open to the network, so unused clients must not accumulate. */
 const UNUSED_CLIENT_RETENTION_DAYS = 30;
@@ -78,7 +87,6 @@ export const oauthCleanupJobHandler = async (): Promise<void> => {
   // Every cutoff is a Date, never an ISO string: see `earlierThan`. The same
   // applies to the query-builder parameters below, which are bound the same way.
   const nowDate = new Date(now);
-  const revokedCutoff = new Date(now - REVOKED_RETENTION_DAYS * DAY_MS);
   const clientCutoff = new Date(now - UNUSED_CLIENT_RETENTION_DAYS * DAY_MS);
   const deadGrantCutoff = new Date(now - DEAD_GRANT_RETENTION_DAYS * DAY_MS);
 
@@ -88,12 +96,20 @@ export const oauthCleanupJobHandler = async (): Promise<void> => {
   const pendingAuthorizations = await pendingAuthorizationService.deleteExpired(
     nowDate,
   );
-  // An expired refresh token can no longer be rotated, so nothing depends on it.
+  /*
+   * Expiry is the only anchor, for revoked rows as much as live ones.
+   *
+   * A rotated token stays in the table until the moment it could no longer be used
+   * anyway, which is what lets reuse detection recognise a replay for as long as a
+   * replay could plausibly succeed. An independent, shorter window would mean a token
+   * replayed after it lapsed came back as a plain `invalid refresh token`: rejected, but
+   * with no family revocation and no security log line — the compromise signal lost
+   * precisely because the token was old.
+   *
+   * The cost is bounded by the refresh TTL, so this cannot grow without limit.
+   */
   const expiredRefreshTokens = await refreshTokenRepo().delete({
     expiresAt: earlierThan(nowDate),
-  });
-  const revokedRefreshTokens = await refreshTokenRepo().delete({
-    revokedAt: earlierThan(revokedCutoff),
   });
 
   // A `NOT EXISTS` subquery keeps this a single statement: loading every grant to
@@ -127,7 +143,6 @@ export const oauthCleanupJobHandler = async (): Promise<void> => {
     authorizationCodes: authorizationCodes.affected ?? 0,
     pendingAuthorizations,
     expiredRefreshTokens: expiredRefreshTokens.affected ?? 0,
-    revokedRefreshTokens: revokedRefreshTokens.affected ?? 0,
     unusedClients: unusedClients.affected ?? 0,
     deadGrants: deadGrants.affected ?? 0,
   });

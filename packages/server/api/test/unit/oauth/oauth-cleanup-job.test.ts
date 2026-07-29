@@ -194,28 +194,37 @@ describe('oauthCleanupJobHandler', () => {
     expect(refreshRows.map((row) => row.id)).toEqual(['live-token']);
   });
 
-  it('keeps recently revoked refresh tokens so reuse detection still has history', async () => {
+  it('keeps revoked refresh tokens until they expire, however long ago they were rotated', async () => {
     refreshRows.push(
       {
-        id: 'revoked-long-ago',
-        expiresAt: isoDaysAgo(-30),
-        revokedAt: isoDaysAgo(8),
+        id: 'revoked-long-ago-still-valid',
+        expiresAt: isoDaysAgo(-20),
+        revokedAt: isoDaysAgo(25),
       },
       {
         id: 'revoked-recently',
-        expiresAt: isoDaysAgo(-30),
+        expiresAt: isoDaysAgo(-20),
         revokedAt: isoDaysAgo(1),
       },
       {
+        id: 'revoked-and-expired',
+        expiresAt: isoDaysAgo(1),
+        revokedAt: isoDaysAgo(25),
+      },
+      {
         id: 'never-revoked',
-        expiresAt: isoDaysAgo(-30),
+        expiresAt: isoDaysAgo(-20),
         revokedAt: null,
       },
     );
 
     await oauthCleanupJobHandler();
 
+    // Age of the rotation is irrelevant: a row survives while the token it represents
+    // could still be presented, which is exactly the window in which a replay has to be
+    // recognised as reuse rather than reported as an unknown token.
     expect(refreshRows.map((row) => row.id)).toEqual([
+      'revoked-long-ago-still-valid',
       'revoked-recently',
       'never-revoked',
     ]);
@@ -270,7 +279,6 @@ describe('oauthCleanupJobHandler', () => {
       authorizationCodes: 1,
       pendingAuthorizations: 1,
       expiredRefreshTokens: 1,
-      revokedRefreshTokens: 1,
       unusedClients: 2,
       deadGrants: 1,
     });

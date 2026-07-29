@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import { clientsService } from './clients.service';
-import { registerOAuthCleanupJob } from './oauth-cleanup-job';
+import { scheduleOAuthCleanupJob } from './oauth-cleanup-job';
 import { validateOAuthConfiguration } from './oauth-config-validation';
 import { OAuthError } from './oauth-errors';
 import { oauthWellKnownController } from './oauth-well-known.controller';
@@ -13,7 +13,7 @@ export const oauthModule: FastifyPluginAsyncTypebox = async (app) => {
 
   await signingKeyService.ensureSigningKey();
   await clientsService.ensureResourceServerClient();
-  await registerOAuthCleanupJob();
+  await scheduleOAuthCleanupJob();
 
   await app.register(
     async (instance) => {
