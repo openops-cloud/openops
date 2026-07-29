@@ -1,6 +1,6 @@
 import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
-import { Settings, Sparkles, SunMoon } from 'lucide-react';
+import { Plug, Settings, Sparkles, SunMoon } from 'lucide-react';
 
 import SidebarLayout from '@/app/common/components/sidebar-layout';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -27,6 +27,12 @@ const aiNavItem = {
   icon: <Sparkles size={iconSize} />,
 };
 
+const connectedAppsNavItem = {
+  title: t('Connected apps'),
+  href: '/settings/connected-apps',
+  icon: <Plug size={iconSize} />,
+};
+
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -38,10 +44,17 @@ export default function ProjectSettingsLayout({
     FlagId.DARK_THEME_ENABLED,
   ).data;
 
+  // Hidden unless the instance can actually accept external connections: with OAuth
+  // off, every route the page depends on is unregistered.
+  const showConnectedApps = flagsHooks.useFlag<boolean>(
+    FlagId.CONNECTED_APPS_ENABLED,
+  ).data;
+
   const sidebarNavItems = [
     ...baseNavItems,
     ...(showAppearanceSettings ? [appearanceNavItem] : []),
     aiNavItem,
+    ...(showConnectedApps ? [connectedAppsNavItem] : []),
   ];
 
   return <SidebarLayout items={sidebarNavItems}>{children}</SidebarLayout>;

@@ -46,7 +46,9 @@ import GeneralPage from './routes/settings/general';
 import { SignInPage } from './routes/sign-in';
 import { SignUpPage } from './routes/sign-up';
 
-const OAuthConsentPage = lazy(() => import('@/app/routes/oauth/consent'));
+const ConnectedAppsPage = lazy(
+  () => import('@/app/routes/settings/connected-apps'),
+);
 
 const SettingsRerouter = () => {
   const { hash } = useLocation();
@@ -293,11 +295,19 @@ const createRoutes = ({
   }
 
   routes.push({
-    path: 'oauth/consent',
+    path: 'settings/connected-apps',
     element: (
-      <Suspense>
-        <OAuthConsentPage />
-      </Suspense>
+      <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
+        <ProjectSettingsLayout>
+          <OpsErrorBoundary>
+            <PageTitle title="Connected apps">
+              <Suspense>
+                <ConnectedAppsPage />
+              </Suspense>
+            </PageTitle>
+          </OpsErrorBoundary>
+        </ProjectSettingsLayout>
+      </RouteWrapper>
     ),
     errorElement: <RouteErrorBoundary />,
   });

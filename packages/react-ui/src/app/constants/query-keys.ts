@@ -63,6 +63,7 @@ export const QueryKeys = {
 
   // OAuth
   oauthConsentRequest: 'oauth-consent-request',
+  connectedApps: 'connected-apps',
 
   // Connections
   appConnections: 'app-connections',

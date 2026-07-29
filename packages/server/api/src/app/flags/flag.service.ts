@@ -10,6 +10,7 @@ import { Flag, FlagId } from '@openops/shared';
 import axios from 'axios';
 import { webhookUtils } from 'server-worker';
 import { repoFactory } from '../core/db/repo-factory';
+import { oauthConfig } from '../oauth/oauth-config';
 import { devFlagsService } from './dev-flags.service';
 import { FlagEntity } from './flag.entity';
 import { defaultTheme } from './theme';
@@ -274,6 +275,15 @@ export const flagService = {
       {
         id: FlagId.OAUTH_PROXY_URL,
         value: system.get<string>(SharedSystemProp.INTERNAL_OAUTH_PROXY_URL),
+        created,
+        updated,
+      },
+      {
+        // Whether external applications can connect at all. With OAuth off, every
+        // /v1/oauth route 404s, so the UI that manages those connections has nothing
+        // to show and is hidden.
+        id: FlagId.CONNECTED_APPS_ENABLED,
+        value: oauthConfig.isEnabled(),
         created,
         updated,
       },

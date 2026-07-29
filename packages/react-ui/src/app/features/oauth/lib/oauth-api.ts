@@ -22,6 +22,21 @@ export type OAuthConsentDecision = {
   redirectTo: string;
 };
 
+/** One authorization the user granted. Each is revocable on its own. */
+export type ConnectedApp = {
+  id: string;
+  clientName: string;
+  scope: string;
+  resourceId: OAuthResourceId | null;
+  projectId: string;
+  created: string;
+  lastUsedAt: string | null;
+};
+
+type ListConnectedAppsResponse = {
+  data: ConnectedApp[];
+};
+
 const getConsentRequest = (requestId: string): Promise<OAuthConsentRequest> =>
   api.get<OAuthConsentRequest>(`/v1/oauth/requests/${requestId}`);
 
@@ -36,7 +51,17 @@ const decide = (
     { [CONSENT_HEADER]: '1' },
   );
 
+const listConnectedApps = (): Promise<ConnectedApp[]> =>
+  api
+    .get<ListConnectedAppsResponse>('/v1/oauth/grants')
+    .then((response) => response.data);
+
+const revokeConnectedApp = (grantId: string): Promise<void> =>
+  api.delete(`/v1/oauth/grants/${grantId}`);
+
 export const oauthApi = {
   getConsentRequest,
   decide,
+  listConnectedApps,
+  revokeConnectedApp,
 };

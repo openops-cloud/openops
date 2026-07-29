@@ -2,16 +2,18 @@ import { api } from '@/app/lib/api';
 import { oauthApi } from '../oauth-api';
 
 jest.mock('@/app/lib/api', () => ({
-  api: { get: jest.fn(), post: jest.fn() },
+  api: { get: jest.fn(), post: jest.fn(), delete: jest.fn() },
 }));
 
 const mockedGet = api.get as jest.Mock;
 const mockedPost = api.post as jest.Mock;
+const mockedDelete = api.delete as jest.Mock;
 
 describe('oauthApi', () => {
   beforeEach(() => {
     mockedGet.mockReset().mockResolvedValue({});
     mockedPost.mockReset().mockResolvedValue({ redirectTo: 'https://client' });
+    mockedDelete.mockReset().mockResolvedValue(undefined);
   });
 
   it('reads a pending request by id', async () => {
@@ -31,6 +33,21 @@ describe('oauthApi', () => {
       undefined,
       { 'x-openops-consent': '1' },
     );
+  });
+
+  it('unwraps the connected apps list', async () => {
+    mockedGet.mockResolvedValue({ data: [{ id: 'grant-1' }] });
+
+    await expect(oauthApi.listConnectedApps()).resolves.toEqual([
+      { id: 'grant-1' },
+    ]);
+    expect(mockedGet).toHaveBeenCalledWith('/v1/oauth/grants');
+  });
+
+  it('revokes one connection by its own id', async () => {
+    await oauthApi.revokeConnectedApp('grant-2');
+
+    expect(mockedDelete).toHaveBeenCalledWith('/v1/oauth/grants/grant-2');
   });
 
   it('carries a denial through as approve false', async () => {

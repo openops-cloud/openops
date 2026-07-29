@@ -85,21 +85,24 @@ claude mcp add --transport http openops http://localhost:3020/mcp
 ```
 
 The client discovers the authorization server, registers itself, and opens your
-browser. Sign in if you are not already, and the consent screen names the
-application and the project it will act in. Approving sends the browser back to
-the client, which redeems the code and lists the tools.
+browser at **Settings → Connected apps**, with the consent dialog over it. Sign in
+if you are not already. Approving sends the browser back to the client, which
+redeems the code and lists the tools.
 
 Worth confirming while you are here:
 
-- **The project is named on the screen**, and it matches `project_id` in the
+- **The project is named in the dialog**, and it matches `project_id` in the
   issued token — that claim is what every later request is authorized against.
 - **Cancelling** returns the client to its callback with `error=access_denied`.
-- **Reloading the consent screen** after deciding shows the expired-request
-  message rather than granting a second authorization. The pending record is
-  single-use.
+  So does dismissing the dialog: the client is waiting on its redirect, and
+  telling it no beats leaving it to time out.
+- **Reloading the page** after deciding shows the expired-request message rather
+  than a second consent dialog. The pending record is single-use.
 - **Connecting a second client** (or the same one again) produces an independent
-  connection: `GET /v1/oauth/grants` lists both, and revoking one leaves the
-  other working.
+  connection. Both appear as separate rows on that page, and disconnecting one
+  leaves the other working — which is the point of the per-connection model.
+- **The page is hidden** when `OPS_OAUTH_ENABLED` is false, because every route it
+  depends on is unregistered.
 
 ## Things worth poking at by hand
 
@@ -134,8 +137,8 @@ curl -s -b /tmp/ck -X POST "localhost:3000/v1/oauth/requests/anything/decision" 
 ```
 
 To check that **connections are independent**, run `tools/oauth-flow.sh` twice
-without revoking in between, then look at `GET /v1/oauth/grants`: two rows for
-the same client, each revocable on its own.
+without revoking in between, then look at Settings → Connected apps (or
+`GET /v1/oauth/grants`): two rows for the same client, each revocable on its own.
 
 ## Inspecting state
 

@@ -91,12 +91,16 @@ function noStore(reply: FastifyReply): FastifyReply {
   return reply.header('Cache-Control', 'no-store').header('Pragma', 'no-cache');
 }
 
+/**
+ * The consent screen is a dialog over the page that lists connected applications, so
+ * the user decides in the same place they later review and revoke what they granted.
+ */
 function getConsentUrl(requestId: string): string {
   const frontendUrl = system
     .getOrThrow<string>(SharedSystemProp.FRONTEND_URL)
     .replace(/\/+$/, '');
 
-  return `${frontendUrl}/oauth/consent?request_id=${encodeURIComponent(
+  return `${frontendUrl}/settings/connected-apps?request_id=${encodeURIComponent(
     requestId,
   )}`;
 }
