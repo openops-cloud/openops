@@ -126,6 +126,7 @@ const ConnectedAppsPage = () => {
           'It will immediately lose access to OpenOps and will have to be authorized again to reconnect.',
         )}
         confirmButtonText={t('Disconnect')}
+        confirmButtonVariant="destructive"
         onConfirm={confirmRevoke}
         onCancel={cancelRevoke}
       />

@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { Button } from '../../ui/button';
+import { Button, ButtonProps } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,12 @@ type ConfirmationDialogProps = {
   className?: string;
   titleClassName?: string;
   descriptionClassName?: string;
+  /**
+   * Styling for the confirm action. Defaults to the primary button; pass
+   * `destructive` when confirming destroys something, so the dialog matches the
+   * control that opened it.
+   */
+  confirmButtonVariant?: ButtonProps['variant'];
   children?: React.ReactNode;
 };
 
@@ -38,6 +44,7 @@ const ConfirmationDialog = ({
   onCancel,
   titleClassName,
   descriptionClassName,
+  confirmButtonVariant,
   children,
 }: ConfirmationDialogProps & ConfirmationDialogContent) => {
   return (
@@ -56,7 +63,7 @@ const ConfirmationDialog = ({
               {cancelButtonText ? cancelButtonText : t('Cancel')}
             </Button>
           )}
-          <Button size="sm" onClick={onConfirm}>
+          <Button size="sm" variant={confirmButtonVariant} onClick={onConfirm}>
             {confirmButtonText ? confirmButtonText : t('Confirm')}
           </Button>
         </DialogFooter>

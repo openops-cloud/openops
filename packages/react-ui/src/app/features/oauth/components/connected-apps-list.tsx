@@ -26,9 +26,9 @@ type ConnectedAppsListProps = {
 };
 
 const EmptyState = () => (
-  <div className="flex flex-col items-center gap-2 rounded-md border border-dashed py-10 px-4 text-center">
+  <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-background p-6 py-10 text-center">
     <Plug className="size-6 text-muted-foreground" />
-    <span className="text-sm font-medium">
+    <span className="text-base font-semibold text-foreground">
       {t('No applications are connected')}
     </span>
     <span className="text-sm text-muted-foreground max-w-[420px]">
@@ -48,25 +48,34 @@ const ConnectedAppRow = ({
   onRevoke: (app: ConnectedApp) => void;
   isRevoking: boolean;
 }) => (
-  <div className="flex items-center justify-between gap-4 rounded-md border px-4 py-3">
-    <div className="flex flex-col gap-1 min-w-0">
-      <span className="text-sm font-medium truncate">{app.clientName}</span>
-      <span className="text-xs text-muted-foreground">
-        {describeResource(app.resourceId)}
-        {' · '}
-        {t('connected')} {formatUtils.formatDate(new Date(app.created))}
-        {' · '}
-        {app.lastUsedAt
-          ? `${t('last used')} ${formatUtils.formatDate(
-              new Date(app.lastUsedAt),
-            )}`
-          : t('never used')}
-      </span>
+  <div className="flex items-center justify-between gap-6 rounded-lg border bg-background p-6">
+    <div className="flex items-center gap-6 min-w-0">
+      {/* Stands in for the product logo an integration card shows. Connected
+          applications are self-registered, so there is no artwork to use. */}
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-md border">
+        <Plug className="size-6 text-muted-foreground" />
+      </div>
+
+      <div className="flex flex-col gap-1 min-w-0">
+        <span className="text-base font-semibold text-foreground truncate">
+          {app.clientName}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {describeResource(app.resourceId)}
+          {' · '}
+          {t('connected')} {formatUtils.formatDate(new Date(app.created))}
+          {' · '}
+          {app.lastUsedAt
+            ? `${t('last used')} ${formatUtils.formatDate(
+                new Date(app.lastUsedAt),
+              )}`
+            : t('never used')}
+        </span>
+      </div>
     </div>
 
     <Button
-      variant="outline"
-      size="sm"
+      variant="destructive"
       className="shrink-0"
       loading={isRevoking}
       onClick={() => onRevoke(app)}
@@ -91,7 +100,7 @@ const ConnectedAppsList = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       {apps.map((app) => (
         <ConnectedAppRow
           key={app.id}
