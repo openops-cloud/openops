@@ -29,10 +29,10 @@ const describeAccess = (): string[] => [
   t('View your workflows, runs, and connections'),
   t('Create and change workflows on your behalf'),
   t('Run workflows and retry runs'),
-  // Said out loud because it is the widest thing being granted. The project below is
-  // where the connection starts, not a fence around it: the application can move to
-  // any project this user can reach, exactly as they could in the browser.
-  t('Act in any project you have access to, not only the one below'),
+  // The widest thing being granted, so it is stated rather than implied. Naming one
+  // project here instead would read as a limit, and there is no limit to read: a
+  // connection can move to any project its user can reach.
+  t('Act in any project you have access to'),
 ];
 
 const ConsentDialog = ({
@@ -62,17 +62,6 @@ const ConsentDialog = ({
       </DialogHeader>
 
       <div className="flex flex-col gap-4">
-        {request.projectName && (
-          <div className="flex items-baseline justify-between gap-4 rounded-sm border px-3 py-2">
-            <span className="text-sm text-muted-foreground">
-              {t('Starting in')}
-            </span>
-            <span className="text-sm font-medium text-right break-all">
-              {request.projectName}
-            </span>
-          </div>
-        )}
-
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium">
             {t('It will be able to:')}

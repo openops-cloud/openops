@@ -13,8 +13,6 @@ export type OAuthConsentRequest = {
   clientName: string;
   scope: string;
   resourceId: OAuthResourceId | null;
-  projectId: string | null;
-  projectName: string | null;
 };
 
 export type OAuthConsentDecision = {

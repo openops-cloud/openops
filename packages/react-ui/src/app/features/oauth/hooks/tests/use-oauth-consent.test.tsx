@@ -16,8 +16,6 @@ const REQUEST: OAuthConsentRequest = {
   clientName: 'Claude Code',
   scope: 'mcp',
   resourceId: 'mcp',
-  projectId: 'proj-1',
-  projectName: 'Cloud Ops',
 };
 
 const assign = jest.fn();

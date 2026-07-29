@@ -16,11 +16,8 @@ import {
   requireParam,
   validateAuthorizeRequest,
 } from './authorize-validation';
+import { listAvailableProjects } from './available-projects';
 import { clientsService, TOKEN_EXCHANGE_GRANT } from './clients.service';
-import {
-  describeTargetProject,
-  listAvailableProjects,
-} from './consent-details';
 import { grantsService } from './grants.service';
 import { oauthConfig } from './oauth-config';
 import { invalidRequest, unsupportedGrantType } from './oauth-errors';
@@ -200,15 +197,14 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
       // user bases their decision on, so it must not be attacker-supplied.
       const client = await clientsService.getClientOrThrow(pending.clientId);
       const resource = resolveResource(pending.resource);
-      const project = await describeTargetProject(request.principal.id);
 
+      // No project is reported. A connection is not confined to one, so naming the
+      // project it happens to start in would read as a limit that does not exist.
       return {
         requestId,
         clientName: client.clientName,
         scope: pending.scope,
         resourceId: resource?.id ?? null,
-        projectId: project?.projectId ?? null,
-        projectName: project?.projectName ?? null,
       };
     },
   );
