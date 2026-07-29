@@ -133,6 +133,17 @@ describe('extractPrincipal with OAuth tokens', () => {
     jest.restoreAllMocks();
   });
 
+  /**
+   * SERVICE, never USER — and that is load-bearing, not cosmetic.
+   *
+   * Routes restricted to `PrincipalType.USER` are the ones that act on the session
+   * rather than within a project. Enterprise's `/switch-project` is one of them: it
+   * mints a token for a *different* project, and is deliberately exempt from the
+   * guard that rejects a request naming a project other than the principal's. The
+   * principal type is therefore the only thing stopping an OAuth connection from
+   * stepping outside the project its token names, which would make `project_id`
+   * meaningless. Do not widen this to USER.
+   */
   it('builds a SERVICE principal on the grant active project', async () => {
     const principal = await accessTokenManager.extractPrincipal(
       signOAuthToken(),

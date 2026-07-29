@@ -314,6 +314,21 @@ conditional `UPDATE … WHERE … AND consumedAt IS NULL` branching on affected 
   cookie-based flows.
 - Route policies: OAuth-derived `SERVICE` principals flow through the existing ~40
   `[USER, SERVICE]` route policies unchanged.
+- **`SERVICE`, never `USER` — this is what confines a connection to its project.**
+  `ProjectAuthzHandler` rejects a request naming a project other than the principal's,
+  but enterprise's `/switch-project` is on that handler's ignore list, because minting
+  a token for another project is its whole job. What keeps an OAuth connection out of
+  it is its policy, `getUnscopedRoutePolicy([PrincipalType.USER])`: a `SERVICE`
+  principal gets `403 invalid route for principal type`. Two consequences for whoever
+  merges this into enterprise: do not add `SERVICE` to `/switch-project`'s
+  `allowedPrincipals`, and do not build the OAuth principal as `USER`. Either change
+  makes the `project_id` claim decorative. The invariant is pinned by
+  `test/unit/oauth/oauth-principal.test.ts`.
+- **`SERVICE` is in `DEFAULT_ALLOWED_PRINCIPAL_TYPES`**, so a route that declares no
+  policy is reachable by an OAuth token. The project guard still applies, so this is a
+  project-scoped reachability question rather than a cross-project one — but it means
+  the set an OAuth connection can touch is "everything not explicitly restricted",
+  not "everything explicitly opened". Worth keeping in mind when adding routes.
 
 ## Python resource server (`mcp-server/`)
 
