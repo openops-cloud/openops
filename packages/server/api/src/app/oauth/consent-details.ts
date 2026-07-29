@@ -9,6 +9,36 @@ export type ConsentProject = {
 };
 
 /**
+ * Every project the user may act in, for a client deciding where to switch to.
+ *
+ * Names are resolved here rather than by the membership service because the seam
+ * answers questions about authority, not about display.
+ */
+export async function listAvailableProjects(
+  userId: string,
+): Promise<ConsentProject[]> {
+  const user = await userService.get({ id: userId });
+
+  if (isNil(user)) {
+    return [];
+  }
+
+  const memberships = await getOAuthProjectMembershipService().listForUser(
+    user,
+  );
+  const projects = await Promise.all(
+    memberships.map((membership) =>
+      projectService.getOne(membership.projectId),
+    ),
+  );
+
+  return memberships.map((membership, index) => ({
+    projectId: membership.projectId,
+    projectName: projects[index]?.displayName ?? membership.projectId,
+  }));
+}
+
+/**
  * The project a new connection would be bound to, resolved for display only.
  *
  * The binding itself happens when the authorization code is redeemed, from the same

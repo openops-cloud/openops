@@ -15,12 +15,12 @@ export type OAuthProjectMembership = {
 };
 
 /**
- * The two questions the OAuth server asks about projects. Kept behind a factory
+ * The three questions the OAuth server asks about projects. Kept behind a factory
  * (`project-membership-factory.ts`) so an edition with real multi-project
  * membership can answer them without the OAuth code changing.
  */
 export type OAuthProjectMembershipService = {
-  /** Which project a newly authorized connection is bound to. */
+  /** Where a newly authorized connection starts. */
   getDefaultForUser(user: User): Promise<OAuthProjectMembership | null>;
   /**
    * Whether this user may act in this project, and as what. Called on every
@@ -31,6 +31,12 @@ export type OAuthProjectMembershipService = {
     user: User,
     projectId: string,
   ): Promise<OAuthProjectMembership | null>;
+  /**
+   * Every project the connection may act in — what a client lists to decide where
+   * to switch to. Membership is the authority, so this is the same set the user
+   * could reach in the browser.
+   */
+  listForUser(user: User): Promise<OAuthProjectMembership[]>;
 };
 
 // This edition has one project per organization and no role model, so both
@@ -67,5 +73,27 @@ export const oauthProjectMembershipService: OAuthProjectMembershipService = {
       organizationId: project.organizationId,
       projectRole: PROJECT_ROLE,
     };
+  },
+
+  async listForUser(user: User): Promise<OAuthProjectMembership[]> {
+    // Deliberately the same rule as `getForUser` — every project in the user's
+    // organization — rather than "the one project this edition expects". If this
+    // listed less than `getForUser` allows, a client could be told it may only act in
+    // one place while the token endpoint happily switched it to another it was never
+    // shown. In practice this edition has one project per organization and the list
+    // has a single entry.
+    if (isNil(user.organizationId)) {
+      return [];
+    }
+
+    const projectIds = await projectService.getProjectIdsByOrganizationId(
+      user.organizationId,
+    );
+
+    return projectIds.map((projectId) => ({
+      projectId,
+      organizationId: user.organizationId as string,
+      projectRole: PROJECT_ROLE,
+    }));
   },
 };

@@ -17,7 +17,10 @@ import {
   validateAuthorizeRequest,
 } from './authorize-validation';
 import { clientsService, TOKEN_EXCHANGE_GRANT } from './clients.service';
-import { describeTargetProject } from './consent-details';
+import {
+  describeTargetProject,
+  listAvailableProjects,
+} from './consent-details';
 import { grantsService } from './grants.service';
 import { oauthConfig } from './oauth-config';
 import { invalidRequest, unsupportedGrantType } from './oauth-errors';
@@ -291,6 +294,7 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
               authorizationHeader: request.headers.authorization,
               subjectToken: requireParam(body, 'subject_token'),
               subjectTokenType: optionalParam(body, 'subject_token_type'),
+              requestedProjectId: optionalParam(body, 'project_id'),
             }),
           );
         default:
@@ -325,6 +329,33 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
 
       // RFC 7009 §2.2: an unknown token is not an error.
       return noStore(reply).status(StatusCodes.OK).send({});
+    },
+  );
+
+  app.get(
+    '/projects',
+    {
+      config: {
+        // SERVICE as well as USER: this is the one route a connection itself calls, to
+        // find out where it may switch to. Nothing here is project data — only the
+        // names of projects the caller already has access to.
+        security: getUnscopedRoutePolicy([
+          PrincipalType.USER,
+          PrincipalType.SERVICE,
+        ]),
+      },
+      schema: {
+        description:
+          'The projects the caller may act in, and which one they are acting in now.',
+      },
+    },
+    async (request) => {
+      const projects = await listAvailableProjects(request.principal.id);
+
+      return {
+        data: projects,
+        currentProjectId: request.principal.projectId,
+      };
     },
   );
 
@@ -406,5 +437,6 @@ async function handleRefreshTokenGrant(
   return tokensService.rotateRefreshToken({
     refreshToken: requireParam(body, 'refresh_token'),
     clientId,
+    requestedProjectId: optionalParam(body, 'project_id'),
   });
 }

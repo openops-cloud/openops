@@ -15,6 +15,8 @@ export type ExchangeTokenParams = {
   authorizationHeader: string | undefined;
   subjectToken: string;
   subjectTokenType?: string;
+  /** Act in this project instead of the subject token's. Must be one the user has. */
+  requestedProjectId?: string;
 };
 
 export type ExchangeTokenResponse = {
@@ -81,19 +83,30 @@ export async function exchangeToken(
     throw invalidGrant('the user for this authorization is no longer active');
   }
 
-  // The exchanged token inherits the project from the subject token, so the pair
-  // always refer to the same project and the resource server cannot widen what it
-  // was given. Re-authorized here because access can be withdrawn after the
-  // connection was made.
   const subjectProjectId = claims['project_id'];
 
   if (typeof subjectProjectId !== 'string') {
     throw invalidGrant('token is not bound to a project');
   }
 
+  /*
+   * Which project the exchanged token acts in.
+   *
+   * By default the subject token's, so the pair refer to the same place. A resource
+   * server may name a different one, which is how an agent switches project without
+   * the user re-authorizing: the MCP server has no way to mint tokens itself, so it
+   * asks here and this decides.
+   *
+   * The bound is the user's own membership, re-read on every exchange. That makes the
+   * project a selector over what the user can already reach rather than a privilege
+   * the connection holds — so a switch can never reach further than the browser could,
+   * and losing access to a project takes effect on the next request.
+   */
+  const targetProjectId = params.requestedProjectId ?? subjectProjectId;
+
   const membership = await getOAuthProjectMembershipService().getForUser(
     user,
-    subjectProjectId,
+    targetProjectId,
   );
 
   if (isNil(membership)) {

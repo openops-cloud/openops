@@ -29,6 +29,10 @@ const describeAccess = (): string[] => [
   t('View your workflows, runs, and connections'),
   t('Create and change workflows on your behalf'),
   t('Run workflows and retry runs'),
+  // Said out loud because it is the widest thing being granted. The project below is
+  // where the connection starts, not a fence around it: the application can move to
+  // any project this user can reach, exactly as they could in the browser.
+  t('Act in any project you have access to, not only the one below'),
 ];
 
 const ConsentDialog = ({
@@ -61,7 +65,7 @@ const ConsentDialog = ({
         {request.projectName && (
           <div className="flex items-baseline justify-between gap-4 rounded-sm border px-3 py-2">
             <span className="text-sm text-muted-foreground">
-              {t('Project')}
+              {t('Starting in')}
             </span>
             <span className="text-sm font-medium text-right break-all">
               {request.projectName}

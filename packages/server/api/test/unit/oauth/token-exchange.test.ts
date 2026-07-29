@@ -333,6 +333,54 @@ describe('exchangeToken', () => {
     );
   });
 
+  it('acts in a requested project instead of the subject token one', async () => {
+    // How an agent switches project: the resource server names where it wants to act,
+    // and the exchange decides whether it may.
+    getForUserMock.mockResolvedValue({
+      projectId: 'project-9',
+      organizationId: 'org-1',
+      projectRole: 'ADMIN',
+    });
+
+    await exchangeToken(exchangeParams({ requestedProjectId: 'project-9' }));
+
+    expect(getForUserMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'user-1' }),
+      'project-9',
+    );
+    expect(mintMock).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: 'project-9' }),
+    );
+  });
+
+  it('refuses a requested project the user is not a member of', async () => {
+    getForUserMock.mockResolvedValue(null);
+
+    // The whole safety of switching rests here. Without this check a resource server
+    // could mint itself a token for any project it cared to name.
+    await expect(
+      exchangeToken(exchangeParams({ requestedProjectId: 'someone-elses' })),
+    ).rejects.toMatchObject({ errorCode: 'invalid_target' });
+    expect(mintMock).not.toHaveBeenCalled();
+  });
+
+  it('checks membership for the requested project, not the subject token one', async () => {
+    getForUserMock.mockResolvedValue({
+      projectId: 'project-9',
+      organizationId: 'org-1',
+      projectRole: 'ADMIN',
+    });
+
+    await exchangeToken(exchangeParams({ requestedProjectId: 'project-9' }));
+
+    // Verifying the wrong project would authorize a switch on the strength of access
+    // to the project being switched away from.
+    expect(getForUserMock).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'project-1',
+    );
+  });
+
   it('rejects a subject token that names no project', async () => {
     verifyAccessTokenMock.mockResolvedValue({
       sub: 'user-1',

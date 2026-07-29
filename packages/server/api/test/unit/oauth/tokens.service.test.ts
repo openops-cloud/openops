@@ -473,6 +473,84 @@ describe('tokensService', () => {
       );
     });
 
+    it('switches the connection to a requested project', async () => {
+      const original = await issueInitialTokens();
+      membershipService.getForUser.mockResolvedValue({
+        projectId: 'project-2',
+        organizationId: 'org-1',
+        projectRole: 'ADMIN',
+      });
+
+      const rotated = await tokensService.rotateRefreshToken({
+        refreshToken: original,
+        clientId: 'client-1',
+        requestedProjectId: 'project-2',
+      });
+
+      expect(membershipService.getForUser).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'user-1' }),
+        'project-2',
+      );
+      expect(JSON.parse(rotated.access_token).project_id).toBe('project-2');
+    });
+
+    it('refuses a requested project the user is not a member of', async () => {
+      const original = await issueInitialTokens();
+      membershipService.getForUser.mockResolvedValue(null);
+
+      // invalid_target rather than invalid_grant: the client asked for something
+      // specific and may not have it, which is a correctable request.
+      await expect(
+        tokensService.rotateRefreshToken({
+          refreshToken: original,
+          clientId: 'client-1',
+          requestedProjectId: 'someone-elses',
+        }),
+      ).rejects.toMatchObject({ errorCode: 'invalid_target' });
+    });
+
+    it('leaves the refresh token usable when a switch is refused', async () => {
+      const original = await issueInitialTokens();
+      membershipService.getForUser.mockResolvedValue(null);
+
+      await expect(
+        tokensService.rotateRefreshToken({
+          refreshToken: original,
+          clientId: 'client-1',
+          requestedProjectId: 'someone-elses',
+        }),
+      ).rejects.toMatchObject({ errorCode: 'invalid_target' });
+
+      // A rejected switch must not cost the connection its credential. Consuming the
+      // token here would brick a working agent for asking the wrong question, and the
+      // retry would look like a replay.
+      membershipService.getForUser.mockResolvedValue(MEMBERSHIP);
+      await expect(
+        tokensService.rotateRefreshToken({
+          refreshToken: original,
+          clientId: 'client-1',
+        }),
+      ).resolves.toEqual(
+        expect.objectContaining({ access_token: expect.any(String) }),
+      );
+    });
+
+    it('stays where it is when no project is requested', async () => {
+      const original = await issueInitialTokens();
+      membershipService.getForUser.mockClear();
+
+      const rotated = await tokensService.rotateRefreshToken({
+        refreshToken: original,
+        clientId: 'client-1',
+      });
+
+      expect(membershipService.getForUser).toHaveBeenCalledWith(
+        expect.anything(),
+        'project-1',
+      );
+      expect(JSON.parse(rotated.access_token).project_id).toBe('project-1');
+    });
+
     it('rejects an unknown refresh token', async () => {
       await expect(
         tokensService.rotateRefreshToken({

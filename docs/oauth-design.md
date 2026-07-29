@@ -246,34 +246,57 @@ worst case, and other connections are unaffected.
 
 ### Project authorization
 
-The project a token may act on is a **required `project_id` claim**, set by the
-authorization server at mint time and never supplied by the client. This is what
-keeps a credential's meaning immutable: a token minted for one project can never
-act on another, and a leaked token's blast radius is fixed.
+The project a token may act on is a **required `project_id` claim**, minted by the
+authorization server and never asserted by the client. Each individual token is
+immutable — the project it names is fixed for its whole life, so a leaked token's blast
+radius is fixed with it.
 
 The claim is a _selector, not a grant of authority_. Every request that presents an
 OAuth token re-authorizes the named project, so withdrawing someone's access takes
-effect at their next request rather than at token expiry. Both questions the server
-asks about projects sit behind one factory,
+effect at their next request rather than at token expiry.
+
+**Switching project.** Because the claim is a selector, a connection is not confined to
+one project — it acts wherever the user can, exactly as their browser session does. A
+client asks for a different project when getting a token, and membership decides:
+
+- `POST /token` with `grant_type=refresh_token` and `project_id` — how a direct API
+  client (CLI, partner agent) moves.
+- `POST /token` with the token-exchange grant and `project_id` — how a resource server
+  moves on an agent's behalf. This is the path an MCP client such as Claude Code takes,
+  since it cannot mint tokens itself.
+- `GET /v1/oauth/projects` — where a connection may go, and where it is now. Allows
+  `SERVICE` so the connection itself can ask.
+
+A project the user is not a member of is refused with `invalid_target` (RFC 8707), and
+on the refresh path the refusal happens **before** the token is consumed, so asking for
+the wrong project does not cost a working credential. Nothing is stored: a switch lasts
+exactly as long as the token it produced, and `oauth_grant.projectId` continues to
+record where the connection started rather than where it is.
+
+The security property is that a switch can never reach further than the user can. The
+bound is their own membership, re-read on every mint and again on every request.
+
+The three questions the server asks about projects sit behind one factory,
 `getOAuthProjectMembershipService()` — following the convention used by
 `authentication-service-factory` and friends, where an edition overrides behaviour
 by swapping the import in the factory file:
 
-- `getDefaultForUser(user)` — the project a newly authorized connection binds to.
+- `getDefaultForUser(user)` — where a newly authorized connection starts.
 - `getForUser(user, projectId)` — whether the user may act there, and as what role.
+- `listForUser(user)` — every project the connection may switch to.
 
-This edition answers both from the organization's single project with role
-`ADMIN`, matching the session login path. An edition with real project membership
-maps them onto its own lookups (in the enterprise fork,
+`listForUser` must stay consistent with `getForUser`: if it returned less than
+`getForUser` permits, a client would be shown one destination while the token endpoint
+allowed another it was never told about. This edition answers all three from the
+organization's projects with role `ADMIN`, matching the session login path. An edition
+with real project membership maps them onto its own lookups (in the enterprise fork,
 `usersService.getLandingProjectForUser` and `usersService.getUserProject`, which
-already return `{ project, projectRole }`) and gets two things for free: real
-per-project roles on OAuth principals, and multi-project support with no change to
-the OAuth code. `projectRole` is deliberately typed as `string` here because the
-role enum lives in enterprise-only shared code.
+already return `{ project, projectRole }`) and gets real per-project roles and
+multi-project switching with no change to the OAuth code. `projectRole` is deliberately
+typed as `string` here because the role enum lives in enterprise-only shared code.
 
-`oauth_grant.projectId` records what the connection was authorized for — the
-default used when minting, and what the connected-apps list shows. It does not
-decide what a live token can do.
+`oauth_grant.projectId` records where the connection started — the default used when
+minting if no project is asked for. It does not decide what a live token can do.
 
 ### Data model (new tables)
 
@@ -314,15 +337,15 @@ conditional `UPDATE … WHERE … AND consumedAt IS NULL` branching on affected 
   cookie-based flows.
 - Route policies: OAuth-derived `SERVICE` principals flow through the existing ~40
   `[USER, SERVICE]` route policies unchanged.
-- **`SERVICE`, never `USER` — this is what confines a connection to its project.**
-  `ProjectAuthzHandler` rejects a request naming a project other than the principal's,
-  but enterprise's `/switch-project` is on that handler's ignore list, because minting
-  a token for another project is its whole job. What keeps an OAuth connection out of
-  it is its policy, `getUnscopedRoutePolicy([PrincipalType.USER])`: a `SERVICE`
-  principal gets `403 invalid route for principal type`. Two consequences for whoever
-  merges this into enterprise: do not add `SERVICE` to `/switch-project`'s
-  `allowedPrincipals`, and do not build the OAuth principal as `USER`. Either change
-  makes the `project_id` claim decorative. The invariant is pinned by
+- **`SERVICE`, never `USER`.** `ProjectAuthzHandler` rejects a request naming a project
+  other than the principal's, but enterprise's `/switch-project` is on that handler's
+  ignore list, because minting a token for another project is its whole job. What keeps
+  an OAuth connection out of it is its policy,
+  `getUnscopedRoutePolicy([PrincipalType.USER])`: a `SERVICE` principal gets
+  `403 invalid route for principal type`. Do not build the OAuth principal as `USER`,
+  and do not add `SERVICE` to `/switch-project`. OAuth connections switch project
+  through the token endpoint instead (below), which is the same capability with the
+  membership check kept in one place. Pinned by
   `test/unit/oauth/oauth-principal.test.ts`.
 - **`SERVICE` is in `DEFAULT_ALLOWED_PRINCIPAL_TYPES`**, so a route that declares no
   policy is reachable by an OAuth token. The project guard still applies, so this is a

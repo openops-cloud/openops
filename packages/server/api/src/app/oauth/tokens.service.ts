@@ -6,7 +6,7 @@ import { userService } from '../user/user-service';
 import { grantsService } from './grants.service';
 import { oauthConfig } from './oauth-config';
 import { generateOpaqueToken, sha256Hex } from './oauth-crypto';
-import { invalidGrant } from './oauth-errors';
+import { invalidGrant, invalidTarget } from './oauth-errors';
 import {
   OAuthAuthorizationCode,
   OAuthGrant,
@@ -74,6 +74,7 @@ async function resolveDefaultProjectId(user: User): Promise<string> {
 async function authorizeProjectOrThrow(
   user: User,
   projectId: string,
+  wasRequested = false,
 ): Promise<string> {
   const membership = await getOAuthProjectMembershipService().getForUser(
     user,
@@ -81,7 +82,13 @@ async function authorizeProjectOrThrow(
   );
 
   if (isNil(membership)) {
-    throw invalidGrant('the project for this authorization is not accessible');
+    // Two different failures. The client naming a project it may not have is
+    // `invalid_target` (RFC 8707) — a bad request it can correct. The connection's own
+    // project having become unreachable is `invalid_grant`: the authorization is stale
+    // and re-authorizing is the only fix.
+    throw wasRequested
+      ? invalidTarget('the requested project is not accessible')
+      : invalidGrant('the project for this authorization is not accessible');
   }
 
   return membership.projectId;
@@ -150,6 +157,12 @@ export type RedeemAuthorizationCodeParams = {
 export type RotateRefreshTokenParams = {
   refreshToken: string;
   clientId: string;
+  /**
+   * Switch the connection to another project the user belongs to. Omitted keeps it
+   * where it is. Membership is re-checked either way, so this cannot reach a project
+   * the user could not reach in the browser.
+   */
+  requestedProjectId?: string;
 };
 
 export const tokensService = {
@@ -291,7 +304,14 @@ export const tokensService = {
       existingToken.grantId,
     );
     const user = await loadActiveUserOrThrow(grant.userId);
-    const projectId = await authorizeProjectOrThrow(user, grant.projectId);
+    // A refresh is where a connection changes project: the client names where it wants
+    // to be, and membership decides whether it may. Nothing is stored, so the switch
+    // lasts exactly as long as the token it produced.
+    const projectId = await authorizeProjectOrThrow(
+      user,
+      params.requestedProjectId ?? grant.projectId,
+      params.requestedProjectId !== undefined,
+    );
 
     const resource = resolveResource(existingToken.resource);
 

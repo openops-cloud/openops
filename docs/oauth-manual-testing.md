@@ -104,6 +104,35 @@ Worth confirming while you are here:
 - **The page is hidden** when `OPS_OAUTH_ENABLED` is false, because every route it
   depends on is unregistered.
 
+## Switching project
+
+A connection acts wherever the user can, not only where it started. With a token in
+hand:
+
+```bash
+# Where may this connection go, and where is it now?
+curl -s localhost:3000/v1/oauth/projects -H "Authorization: Bearer $TOKEN" | jq
+
+# Move a direct API client.
+curl -s -X POST localhost:3000/v1/oauth/token \
+  -d "grant_type=refresh_token&refresh_token=$REFRESH&client_id=$CID&project_id=$OTHER" | jq
+
+# Move a resource server on an agent's behalf — the Claude Code path.
+curl -s -X POST localhost:3000/v1/oauth/token \
+  -u "openops-mcp-rs:$OPS_OAUTH_RS_CLIENT_SECRET" \
+  -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token=$MCP_TOKEN&project_id=$OTHER" | jq
+```
+
+Naming a project the user is not a member of returns `invalid_target`, and on the
+refresh path the refusal happens before the token is consumed — so a wrong guess does
+not cost a working connection. Decode `project_id` from the returned access token to
+confirm the move.
+
+This edition has one project per organization, so there is usually nowhere else to go.
+To exercise it, add a second project to the same organization — note that
+`tablesDatabaseToken` must be a genuinely encrypted value, since the API decrypts it at
+boot and will refuse to start on a malformed one.
+
 ## Things worth poking at by hand
 
 Each of these should produce a clean OAuth error, never a 500:
