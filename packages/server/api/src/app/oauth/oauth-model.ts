@@ -62,6 +62,12 @@ export type OAuthRefreshToken = BaseModel<string> & {
   clientId: string;
   resource: string;
   scope: string;
+  /**
+   * Where this chain is currently acting. Carried forward on every rotation unless the
+   * client asks to move, so renewing a credential hands back an equivalent one instead
+   * of quietly returning the connection to wherever it started.
+   */
+  projectId: string;
   expiresAt: string;
   revokedAt: string | null;
 };
@@ -72,9 +78,10 @@ export type OAuthGrantStatus = 'active' | 'revoked';
  * One authorized connection. A user may hold several for the same client — each
  * from a separate authorization — and revoke them independently.
  *
- * `projectId` records where the connection started, and is the default used when minting
- * if no project is asked for. It does not limit the connection: a token may name any
- * project the user belongs to, so this is not rewritten when one does.
+ * No `projectId`. Which project a connection acts in changes over its life, so it lives
+ * on the refresh token that carries the chain forward, not here — a copy on the grant
+ * could only be the project the connection started in, and using it as the refresh
+ * default silently undid switches.
  *
  * No `scope`: it would restate `resourceId`, since each resource grants exactly one.
  * `revokedAt` is write-only on purpose — `status` is what code checks, and this answers
@@ -83,7 +90,6 @@ export type OAuthGrantStatus = 'active' | 'revoked';
 export type OAuthGrant = BaseModel<string> & {
   clientId: string;
   userId: string;
-  projectId: string;
   resourceId: string;
   status: OAuthGrantStatus;
   lastUsedAt: string | null;

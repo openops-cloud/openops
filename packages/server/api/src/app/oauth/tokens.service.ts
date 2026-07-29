@@ -120,6 +120,7 @@ async function issueRefreshToken(params: {
   clientId: string;
   resource: string;
   scope: string;
+  projectId: string;
 }): Promise<string> {
   const token = generateOpaqueToken();
   const now = new Date();
@@ -137,6 +138,7 @@ async function issueRefreshToken(params: {
     clientId: params.clientId,
     resource: params.resource,
     scope: params.scope,
+    projectId: params.projectId,
     expiresAt: expiresAt.toISOString(),
     revokedAt: null,
   });
@@ -236,18 +238,21 @@ export const tokensService = {
     }
 
     const user = await loadActiveUserOrThrow(codeRecord.userId);
+    // Where the connection starts. Recorded on the refresh token rather than the grant,
+    // because it is a property of the credential chain and changes when the client
+    // switches project.
+    const projectId = await resolveDefaultProjectId(user);
     const grant = await grantsService.create({
       clientId: codeRecord.clientId,
       userId: codeRecord.userId,
       resourceId: resource.id,
-      projectId: await resolveDefaultProjectId(user),
     });
 
     const accessToken = await mintAccessToken({
       grant,
       audience: resource.audience,
       scope: codeRecord.scope,
-      projectId: grant.projectId,
+      projectId,
       ttlSeconds: oauthConfig.getAccessTokenTtlSeconds(),
     });
 
@@ -257,6 +262,7 @@ export const tokensService = {
       clientId: grant.clientId,
       resource: resource.canonicalUri,
       scope: codeRecord.scope,
+      projectId,
     });
 
     return {
@@ -301,11 +307,12 @@ export const tokensService = {
     );
     const user = await loadActiveUserOrThrow(grant.userId);
     // A refresh is where a connection changes project: the client names where it wants
-    // to be, and membership decides whether it may. Nothing is stored, so the switch
-    // lasts exactly as long as the token it produced.
+    // to be, and membership decides whether it may. Defaulting to the presented token's
+    // own project is what makes a plain renewal equivalent to the credential it
+    // replaces — falling back to the grant would quietly undo an earlier switch.
     const projectId = await authorizeProjectOrThrow(
       user,
-      params.requestedProjectId ?? grant.projectId,
+      params.requestedProjectId ?? existingToken.projectId,
       params.requestedProjectId !== undefined,
     );
 
@@ -362,6 +369,7 @@ export const tokensService = {
       clientId: existingToken.clientId,
       resource: existingToken.resource,
       scope: existingToken.scope,
+      projectId,
     });
 
     return {

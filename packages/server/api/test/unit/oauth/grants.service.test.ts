@@ -56,7 +56,6 @@ const BASE_PARAMS = {
   clientId: 'client-1',
   userId: 'user-1',
   resourceId: 'mcp',
-  projectId: 'project-1',
 };
 
 function seedRefreshToken(overrides: Row = {}): Row {
@@ -91,7 +90,6 @@ describe('grantsService', () => {
       expect(grant).toMatchObject({
         clientId: 'client-1',
         userId: 'user-1',
-        projectId: 'project-1',
         resourceId: 'mcp',
         status: 'active',
         revokedAt: null,
@@ -128,10 +126,14 @@ describe('grantsService', () => {
       expect(secondToken.revokedAt).toBeNull();
     });
 
-    it('fixes the project on the grant and never mutates it', async () => {
+    it('records no project on the grant', async () => {
       const grant = await grantsService.create(BASE_PARAMS);
 
-      expect(grant.projectId).toBe('project-1');
+      // Which project a connection acts in changes over its life, so it belongs to the
+      // credential chain (the refresh token), not here. A copy on the grant could only
+      // be where the connection started, and using it as the refresh default silently
+      // undid switches.
+      expect('projectId' in (grant as object)).toBe(false);
       expect(
         'setActiveProject' in (grantsService as Record<string, unknown>),
       ).toBe(false);
@@ -263,7 +265,7 @@ describe('grantsService', () => {
         {
           id: grant.id,
           userId: 'user-1',
-          projectId: 'project-1',
+          status: 'active',
         },
       );
     });

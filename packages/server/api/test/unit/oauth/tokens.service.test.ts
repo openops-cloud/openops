@@ -153,7 +153,14 @@ describe('tokensService', () => {
       organizationId: 'org-1',
     });
     membershipService.getDefaultForUser.mockResolvedValue(MEMBERSHIP);
-    membershipService.getForUser.mockResolvedValue(MEMBERSHIP);
+    // Echoes the project it is asked about, like the real service. Returning a fixed
+    // membership would make every caller look correct no matter which project it passed.
+    membershipService.getForUser.mockImplementation(
+      async (_user: unknown, projectId: unknown) => ({
+        ...MEMBERSHIP,
+        projectId: projectId as string,
+      }),
+    );
   });
 
   afterEach(() => {
@@ -216,6 +223,19 @@ describe('tokensService', () => {
       });
     });
 
+    it('records the project on the refresh token, not the grant', async () => {
+      const code = await tokensService.issueAuthorizationCode(
+        PENDING,
+        'user-1',
+      );
+
+      await tokensService.redeemAuthorizationCode(redeemParams({ code }));
+
+      // The chain carries it forward, which is what lets a plain renewal stay where the
+      // connection currently is.
+      expect(refreshRows[0].projectId).toBe('project-1');
+    });
+
     it('pins the project into the token claims', async () => {
       const code = await tokensService.issueAuthorizationCode(
         PENDING,
@@ -276,7 +296,6 @@ describe('tokensService', () => {
         clientId: 'client-1',
         userId: 'user-1',
         resourceId: 'mcp',
-        projectId: 'project-1',
       });
     });
 
@@ -532,6 +551,27 @@ describe('tokensService', () => {
       ).resolves.toEqual(
         expect.objectContaining({ access_token: expect.any(String) }),
       );
+    });
+
+    it('keeps a switched project across a later plain refresh', async () => {
+      const original = await issueInitialTokens();
+
+      const switched = await tokensService.rotateRefreshToken({
+        refreshToken: original,
+        clientId: 'client-1',
+        requestedProjectId: 'project-2',
+      });
+
+      // The renewal a client performs on its own schedule, naming no project.
+      const renewed = await tokensService.rotateRefreshToken({
+        refreshToken: switched.refresh_token as string,
+        clientId: 'client-1',
+      });
+
+      // Must not fall back to where the connection started. Renewing a credential
+      // should hand back an equivalent one; quietly moving the agent to another
+      // project mid-run would be near-impossible to attribute.
+      expect(JSON.parse(renewed.access_token).project_id).toBe('project-2');
     });
 
     it('stays where it is when no project is requested', async () => {

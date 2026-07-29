@@ -235,7 +235,7 @@ none` (public, PKCE-only).
 `oauth_grant` — one row per **connection**: one completed authorization for one
 client and user. Created at code redemption (**not** at consent, so an
 authorization the client never finished is not shown as a connection):
-`id`, `clientId`, `userId`, `projectId`, `resourceId`,
+`id`, `clientId`, `userId`, `resourceId`,
 `status (active|revoked)`, `createdAt`, `lastUsedAt`, `revokedAt`.
 
 The index on `(clientId, userId)` is deliberately **not unique**. Authorizing the
@@ -304,8 +304,14 @@ already return `{ project, projectRole }`) and gets real per-project roles and
 multi-project switching with no change to the OAuth code. `projectRole` is deliberately
 typed as `string` here because the role enum lives in enterprise-only shared code.
 
-`oauth_grant.projectId` records where the connection started — the default used when
-minting if no project is asked for. It does not decide what a live token can do.
+**The project lives on the refresh token, not the grant.** It was on the grant first,
+used as the default when a refresh named no project — which meant a plain renewal put the
+connection back where it started, silently discarding a switch. An agent would have moved
+to another project and drifted back roughly 15 minutes later, with nothing to attribute it
+to. The refresh token is the credential chain, so it is what carries the current project:
+rotation copies it forward unless the client asks to move, and renewing a credential
+therefore yields an equivalent one. That also left the grant's copy unread, so it is
+gone — `test/unit/oauth/tokens.service.test.ts` pins the behaviour.
 
 ### Data model (new tables)
 
@@ -325,14 +331,16 @@ minting if no project is asked for. It does not decide what a live token can do.
 - `oauth_authorization_code` — `codeHash` (unique), `clientId` (FK), `userId`,
   `redirectUri`, `codeChallenge`, `resource`, `scope`, `expiresAt`, `consumedAt`.
 - `oauth_refresh_token` — `tokenHash` (unique), `grantId` (FK, **indexed**),
-  `familyId` (**indexed**), `clientId`, `resource`, `scope`, `expiresAt`
+  `familyId` (**indexed**), `clientId`, `resource`, `scope`, `projectId`, `expiresAt`
   (**indexed**), `revokedAt`. No `userId`: the grant records the acting user and is
-  authoritative, so a copy here could only ever disagree.
+  authoritative, so a copy here could only ever disagree. `projectId` **is** here rather
+  than on the grant: it is where the chain is currently acting, so a rotation carries it
+  forward and a plain renewal stays put.
 - `oauth_grant` — as above; FKs with `ON DELETE CASCADE`; no defaulted-to-`''`
   columns (L3); `(clientId, userId)` indexed but **not** unique. No `scope`: it would
-  restate `resourceId`, since each resource grants exactly one. `revokedAt` is
-  write-only on purpose — `status` is what code branches on, and this answers "when"
-  for anyone auditing later.
+  restate `resourceId`, since each resource grants exactly one. No `projectId` either —
+  see below. `revokedAt` is write-only on purpose — `status` is what code branches on,
+  and this answers "when" for anyone auditing later.
 
 All single-use consumption (pending record, code, refresh rotation) is an atomic
 conditional `UPDATE … WHERE … AND consumedAt IS NULL` branching on affected rows (M1).
@@ -547,7 +555,7 @@ document originally specified.
 6. **Revocation is effectively immediate on a single instance**, not merely
    within the ~60 s cache TTL: revoking busts the in-process grant cache. The TTL
    bound applies across replicas, whose caches are not invalidated.
-7. **Five columns the design named were removed as write-only.** `oauth_client.lastUsedAt`
+7. **Six columns the design named were removed as write-only.** `oauth_client.lastUsedAt`
    (usage is meaningful per connection, on the grant) and `oauth_signing_key.alg` (one
    algorithm, reported by the JWKS from a constant) went first. A later sweep took
    `oauth_client.scope`, `oauth_grant.scope` and `oauth_refresh_token.userId` for the
@@ -555,6 +563,13 @@ document originally specified.
    never consulted for a decision. Scope is settled by the resource; the acting user is
    settled by the grant. `oauth_grant.revokedAt` was kept despite being write-only: it is
    an audit answer to "when", which `status` alone cannot give.
+
+   `oauth_grant.projectId` was the sixth, and the only one whose removal fixed a bug
+   rather than just saving a column. It was read — as the default when a refresh named no
+   project — and that default was wrong: a plain renewal returned the connection to where
+   it started, discarding a switch made minutes earlier. The project moved to
+   `oauth_refresh_token`, which is the chain being rotated, so renewal now preserves it.
+
 8. **Bearer now beats the session cookie** in `access-token-authn-handler.ts`
    (was cookie-first). A caller presenting a token is stating which identity it
    wants; preferring an ambient cookie would authenticate it as someone else.

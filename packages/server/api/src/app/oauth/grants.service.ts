@@ -24,7 +24,6 @@ export type GrantSnapshot = {
   id: string;
   userId: string;
   clientId: string;
-  projectId: string;
   status: OAuthGrant['status'];
 };
 
@@ -48,7 +47,6 @@ function toSnapshot(grant: OAuthGrant): GrantSnapshot {
     id: grant.id,
     userId: grant.userId,
     clientId: grant.clientId,
-    projectId: grant.projectId,
     status: grant.status,
   };
 }
@@ -61,7 +59,6 @@ export type CreateGrantParams = {
   clientId: string;
   userId: string;
   resourceId: string;
-  projectId: string;
 };
 
 export const grantsService = {
@@ -82,7 +79,6 @@ export const grantsService = {
       updated: now,
       clientId: params.clientId,
       userId: params.userId,
-      projectId: params.projectId,
       resourceId: params.resourceId,
       status: 'active',
       lastUsedAt: null,
