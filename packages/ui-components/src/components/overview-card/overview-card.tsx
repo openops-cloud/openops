@@ -49,7 +49,10 @@ const OverviewCard = ({
       </span>
     </div>
     <div className="flex items-baseline gap-2 flex-wrap">
-      <p className="font-bold text-[32px]/[32px] text-foreground">{value}</p>
+      {/* div, not p: value is a ReactNode and may legally contain non-phrasing content */}
+      <div className="font-bold text-[32px]/[32px] text-foreground">
+        {value}
+      </div>
       {secondaryValue}
     </div>
     {bottomLineText && (
