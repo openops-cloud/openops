@@ -4,7 +4,9 @@ import { cn } from '../../lib/cn';
 type OverviewCardProps = {
   title: string;
   icon: ReactNode;
-  value: string | number;
+  value: ReactNode;
+  /** Rendered baseline-aligned to the right of the value (e.g. secondary currency amounts). */
+  secondaryValue?: ReactNode;
   bottomLineText?: string;
   onClick?: () => void;
   iconWrapperClassName?: string;
@@ -16,6 +18,7 @@ const OverviewCard = ({
   title,
   icon,
   value,
+  secondaryValue,
   bottomLineText,
   onClick,
   iconWrapperClassName,
@@ -45,7 +48,10 @@ const OverviewCard = ({
         {title}
       </span>
     </div>
-    <p className="font-bold text-[32px]/[32px] text-foreground">{value}</p>
+    <div className="flex items-baseline gap-2 flex-wrap">
+      <p className="font-bold text-[32px]/[32px] text-foreground">{value}</p>
+      {secondaryValue}
+    </div>
     {bottomLineText && (
       <p className="font-normal text-sm text-gray-400">{bottomLineText}</p>
     )}
