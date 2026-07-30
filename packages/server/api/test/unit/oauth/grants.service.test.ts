@@ -240,6 +240,41 @@ describe('grantsService', () => {
       });
     });
 
+    it('drops expired entries instead of growing forever', async () => {
+      // Each reconnect creates a new grant, so the cache is keyed by an ever-growing set.
+      // Nothing evicted an entry once its window passed: a stale one was overwritten on
+      // the next read, leaving the key behind for the life of the process.
+      const grant = await grantsService.create(BASE_PARAMS);
+      await grantsService.getGrantSnapshot(grant.id);
+
+      // Fill past the sweep threshold with ids that will never be read again, as a fleet
+      // of short-lived connections would.
+      for (let i = 0; i < 10_000; i++) {
+        await grantsService.getGrantSnapshot(`departed-grant-${i}`);
+      }
+
+      // Every entry above is now stale, so the next insert sweeps them.
+      const nowSpy = jest
+        .spyOn(Date, 'now')
+        .mockReturnValue(Date.now() + 61_000);
+      await grantsService.getGrantSnapshot('one-more');
+      nowSpy.mockRestore();
+
+      expect(grantsService.snapshotCacheSizeForTests()).toBeLessThan(10_000);
+    });
+
+    it('bounds the cache even when every entry is still live', async () => {
+      // A sweep can free nothing if the working set really is that large. The cache is an
+      // optimization, so memory is bounded ahead of the query count.
+      for (let i = 0; i < 10_001; i++) {
+        await grantsService.getGrantSnapshot(`live-grant-${i}`);
+      }
+
+      expect(grantsService.snapshotCacheSizeForTests()).toBeLessThanOrEqual(
+        10_000,
+      );
+    });
+
     it('re-reads once the cache entry expires', async () => {
       const grant = await grantsService.create(BASE_PARAMS);
       await grantsService.getGrantSnapshot(grant.id);

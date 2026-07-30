@@ -28,6 +28,28 @@ function canonicalize(audience: string): string {
   }
 }
 
+/**
+ * Every TTL is already required to be a number, which catches a typo but not a value that
+ * is merely wrong. These bounds exist because the wrong number produces a server that
+ * looks healthy: tokens verify, tests pass, and a guarantee is quietly gone. An
+ * access-token TTL of a month is the clearest case — revocation latency becomes a month,
+ * since a self-contained token is only re-checked when it expires.
+ */
+function assertWithinRange(
+  prop: string,
+  value: number,
+  min: number,
+  max: number,
+  unit: string,
+): void {
+  if (!Number.isInteger(value) || value < min || value > max) {
+    throw invalidProp(
+      prop,
+      `must be a whole number of ${unit} between ${min} and ${max}, got ${value}`,
+    );
+  }
+}
+
 function parseAbsoluteUrl(prop: string, value: string): URL {
   let url: URL;
 
@@ -64,6 +86,35 @@ export function validateOAuthConfiguration(): void {
   }
 
   parseAbsoluteUrl(AppSystemProp.OAUTH_ISSUER_URL, oauthConfig.getIssuerUrl());
+
+  // An access token is self-contained, so its TTL is the worst case for how long a
+  // revoked connection keeps working. An hour is already generous for that.
+  assertWithinRange(
+    AppSystemProp.OAUTH_ACCESS_TOKEN_TTL_SECONDS,
+    oauthConfig.getAccessTokenTtlSeconds(),
+    60,
+    60 * 60,
+    'seconds',
+  );
+
+  // The exchanged token only has to outlive one API call made on an agent's behalf.
+  assertWithinRange(
+    AppSystemProp.OAUTH_EXCHANGE_TOKEN_TTL_SECONDS,
+    oauthConfig.getExchangeTokenTtlSeconds(),
+    60,
+    15 * 60,
+    'seconds',
+  );
+
+  // Refresh tokens rotate, so a long life is reasonable; unbounded is not, because it
+  // also sets how long a revoked row must be retained for reuse detection.
+  assertWithinRange(
+    AppSystemProp.OAUTH_REFRESH_TOKEN_TTL_DAYS,
+    oauthConfig.getRefreshTokenTtlDays(),
+    1,
+    90,
+    'days',
+  );
 
   const mcpResourceUrl = oauthConfig.getMcpResourceUrl();
   if (mcpResourceUrl !== undefined) {

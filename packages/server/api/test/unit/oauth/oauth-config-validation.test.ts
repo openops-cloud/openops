@@ -77,6 +77,55 @@ describe('validateOAuthConfiguration', () => {
     expect(() => validateOAuthConfiguration()).toThrow('OPS_MCP_RESOURCE_URL');
   });
 
+  it('accepts the TTLs this repository ships as defaults', () => {
+    // Guards the bounds themselves: a range that excluded the shipped configuration
+    // would fail every boot, and the assertions below would still look correct.
+    expect(oauthConfig.getAccessTokenTtlSeconds()).toBe(900);
+    expect(oauthConfig.getExchangeTokenTtlSeconds()).toBe(300);
+    expect(oauthConfig.getRefreshTokenTtlDays()).toBe(30);
+    expect(() => validateOAuthConfiguration()).not.toThrow();
+  });
+
+  it.each([
+    [
+      'getAccessTokenTtlSeconds',
+      30,
+      AppSystemProp.OAUTH_ACCESS_TOKEN_TTL_SECONDS,
+    ],
+    [
+      'getAccessTokenTtlSeconds',
+      60 * 60 * 24 * 30,
+      AppSystemProp.OAUTH_ACCESS_TOKEN_TTL_SECONDS,
+    ],
+    [
+      'getExchangeTokenTtlSeconds',
+      30,
+      AppSystemProp.OAUTH_EXCHANGE_TOKEN_TTL_SECONDS,
+    ],
+    [
+      'getExchangeTokenTtlSeconds',
+      3600,
+      AppSystemProp.OAUTH_EXCHANGE_TOKEN_TTL_SECONDS,
+    ],
+    ['getRefreshTokenTtlDays', 0, AppSystemProp.OAUTH_REFRESH_TOKEN_TTL_DAYS],
+    ['getRefreshTokenTtlDays', 365, AppSystemProp.OAUTH_REFRESH_TOKEN_TTL_DAYS],
+  ] as const)(
+    'refuses %s of %d, naming the property at fault',
+    (getter, value, prop) => {
+      jest.spyOn(oauthConfig, getter).mockReturnValue(value);
+
+      // A wrong TTL boots a server that looks healthy while a guarantee is gone, so it
+      // has to fail here rather than surface as a revocation that takes a month.
+      expect(() => validateOAuthConfiguration()).toThrow(`OPS_${prop}`);
+    },
+  );
+
+  it('refuses a fractional TTL rather than silently truncating it', () => {
+    jest.spyOn(oauthConfig, 'getAccessTokenTtlSeconds').mockReturnValue(900.5);
+
+    expect(() => validateOAuthConfiguration()).toThrow('whole number');
+  });
+
   it('refuses to run on sqlite, where the migration is not registered', () => {
     (system.get as jest.Mock).mockImplementation((prop: string) =>
       prop === AppSystemProp.DB_TYPE ? 'SQLITE3' : undefined,

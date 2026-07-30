@@ -42,6 +42,41 @@ const snapshotCache = new Map<string, CachedSnapshot>();
 /** Last time `lastUsedAt` was written, per grant, to throttle those writes. */
 const lastUsedWrittenAt = new Map<string, number>();
 
+/**
+ * Both maps are keyed by grant id and would otherwise grow for the life of the process.
+ * Nothing evicts an entry once its window has passed: a stale one is overwritten on the
+ * next read, so the key survives. Reconnecting an agent creates a *new* grant by design,
+ * so a fleet that reconnects on a schedule leaves a key behind every time.
+ *
+ * Sweeping on insert, and only once a map is larger than any real working set, keeps this
+ * off the hot path. Both maps are pure optimizations — dropping an entry costs one query
+ * or one `lastUsedAt` write — so clearing wholesale is safe if a sweep frees nothing.
+ */
+const CACHE_SWEEP_THRESHOLD = 10_000;
+
+function remember<T>(
+  cache: Map<string, T>,
+  key: string,
+  value: T,
+  isExpired: (entry: T) => boolean,
+): void {
+  if (cache.size >= CACHE_SWEEP_THRESHOLD) {
+    for (const [existingKey, entry] of cache) {
+      if (isExpired(entry)) {
+        cache.delete(existingKey);
+      }
+    }
+
+    // Still oversized means the entries are live, not stale. Correctness does not
+    // depend on them, so bound the memory rather than the query count.
+    if (cache.size >= CACHE_SWEEP_THRESHOLD) {
+      cache.clear();
+    }
+  }
+
+  cache.set(key, value);
+}
+
 function toSnapshot(grant: OAuthGrant): GrantSnapshot {
   return {
     id: grant.id,
@@ -98,7 +133,12 @@ export const grantsService = {
 
     const grant = await grantRepo().findOneBy({ id: grantId });
     const snapshot = grant ? toSnapshot(grant) : undefined;
-    snapshotCache.set(grantId, { snapshot, fetchedAt: Date.now() });
+    remember(
+      snapshotCache,
+      grantId,
+      { snapshot, fetchedAt: Date.now() },
+      (entry) => Date.now() - entry.fetchedAt >= GRANT_SNAPSHOT_CACHE_TTL_MS,
+    );
 
     return snapshot;
   },
@@ -168,7 +208,12 @@ export const grantsService = {
       return;
     }
 
-    lastUsedWrittenAt.set(grantId, now);
+    remember(
+      lastUsedWrittenAt,
+      grantId,
+      now,
+      (writtenAtEntry) => now - writtenAtEntry >= LAST_USED_WRITE_INTERVAL_MS,
+    );
     await grantRepo().update(
       { id: grantId },
       { lastUsedAt: new Date(now).toISOString() },
@@ -178,5 +223,9 @@ export const grantsService = {
   clearSnapshotCacheForTests(): void {
     snapshotCache.clear();
     lastUsedWrittenAt.clear();
+  },
+
+  snapshotCacheSizeForTests(): number {
+    return snapshotCache.size;
   },
 };
