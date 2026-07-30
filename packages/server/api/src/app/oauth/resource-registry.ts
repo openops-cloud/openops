@@ -1,3 +1,4 @@
+import { stripTrailingSlashes } from './canonical-url';
 import { oauthConfig } from './oauth-config';
 
 export type ResourceId = 'api' | 'mcp';
@@ -49,7 +50,7 @@ export function resolveResource(
     return undefined;
   }
 
-  const normalized = resource.replace(/\/+$/, '');
+  const normalized = stripTrailingSlashes(resource);
   return getRegisteredResources().find((r) => r.canonicalUri === normalized);
 }
 

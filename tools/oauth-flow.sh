@@ -29,16 +29,20 @@ say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 fail() { printf '\033[31mFAILED: %s\033[0m\n' "$*" >&2; exit 1; }
 
 claims() {
+  local jwt="$1"
   python3 -c "
 import base64, json, sys
 payload = sys.argv[1].split('.')[1]
 payload += '=' * (-len(payload) % 4)
 decoded = json.loads(base64.urlsafe_b64decode(payload))
 shown = {k: decoded[k] for k in ('aud','sub','scope','grant_id','project_id') if k in decoded}
-print(json.dumps(shown, indent=2))" "$1"
+print(json.dumps(shown, indent=2))" "$jwt"
 }
 
-json_get() { python3 -c "import json,sys;print(json.load(open(sys.argv[1]))[sys.argv[2]])" "$1" "$2"; }
+json_get() {
+  local file="$1" key="$2"
+  python3 -c "import json,sys;print(json.load(open(sys.argv[1]))[sys.argv[2]])" "$file" "$key"
+}
 
 # ---------------------------------------------------------------- preflight ---
 say "Preflight"
@@ -48,9 +52,9 @@ if ! curl -sf -o /dev/null "$API/.well-known/oauth-authorization-server"; then
 fi
 echo "  API up, OAuth enabled"
 
-if [ "$RESOURCE_KIND" = "mcp" ]; then
+if [[ "$RESOURCE_KIND" == "mcp" ]]; then
   RESOURCE="$MCP_RESOURCE"
-  [ -n "$RS_SECRET" ] || fail "mcp mode needs OPS_OAUTH_RS_CLIENT_SECRET (same value the API was started with)"
+  [[ -n "$RS_SECRET" ]] || fail "mcp mode needs OPS_OAUTH_RS_CLIENT_SECRET (same value the API was started with)"
   curl -s "$API/.well-known/oauth-authorization-server" |
     grep -q '"mcp"' || fail "the API has no mcp resource configured (set OPS_MCP_RESOURCE_URL)"
 else
@@ -83,7 +87,7 @@ AUTHORIZE_URL="$API/v1/oauth/authorize?client_id=$CLIENT_ID&redirect_uri=$(
 LOCATION="$(curl -s -i "$AUTHORIZE_URL" | grep -i '^location:' | tr -d '\r' | sed 's/^[Ll]ocation: //')"
 echo "  browser would be sent to: $LOCATION"
 REQUEST_ID="$(printf '%s' "$LOCATION" | sed -n 's/.*request_id=\([^&]*\).*/\1/p')"
-[ -n "$REQUEST_ID" ] || fail "no request_id in the redirect — check the authorize parameters"
+[[ -n "$REQUEST_ID" ]] || fail "no request_id in the redirect — check the authorize parameters"
 
 # ------------------------------------------------------------------ consent ---
 say "4. Consent (a browser would show the dialog on Settings -> Connected apps; driven directly here)"
@@ -116,7 +120,7 @@ echo "  claims in the client's token:"
 claims "$ACCESS_TOKEN" | sed 's/^/    /'
 
 # ------------------------------------------------------- use it on the API ---
-if [ "$RESOURCE_KIND" = "mcp" ]; then
+if [[ "$RESOURCE_KIND" == "mcp" ]]; then
   say "6. Token exchange (what the MCP resource server does per tool call)"
   BASIC="$(printf 'openops-mcp-rs:%s' "$RS_SECRET" | base64 | tr -d '\n')"
   echo "  the client's own token must NOT work against the API:"
@@ -140,7 +144,7 @@ print(json.loads(base64.urlsafe_b64decode(p))['project_id'])")"
 STATUS="$(curl -s -o "$WORK_DIR/flows.json" -w '%{http_code}' \
   -H "Authorization: Bearer $API_TOKEN" "$API/v1/flows?projectId=$PROJECT_ID")"
 echo "  GET /v1/flows -> HTTP $STATUS"
-[ "$STATUS" = "200" ] || fail "the token was refused by the API"
+[[ "$STATUS" == "200" ]] || fail "the token was refused by the API"
 
 # ------------------------------------------------------------------ refresh ---
 say "8. Refresh, and confirm the old token is single-use"

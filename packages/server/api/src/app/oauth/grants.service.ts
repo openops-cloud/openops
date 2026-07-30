@@ -106,7 +106,7 @@ export const grantsService = {
   async getActiveGrantOrThrow(grantId: string): Promise<GrantSnapshot> {
     const snapshot = await grantsService.getGrantSnapshot(grantId);
 
-    if (!snapshot || snapshot.status !== 'active') {
+    if (snapshot?.status !== 'active') {
       throw invalidGrant('the authorization for this client has been revoked');
     }
 

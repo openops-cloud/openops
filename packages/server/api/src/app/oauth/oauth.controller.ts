@@ -17,6 +17,7 @@ import {
   validateAuthorizeRequest,
 } from './authorize-validation';
 import { listAvailableProjects } from './available-projects';
+import { stripTrailingSlashes } from './canonical-url';
 import { clientsService, TOKEN_EXCHANGE_GRANT } from './clients.service';
 import { grantsService } from './grants.service';
 import { oauthConfig } from './oauth-config';
@@ -81,10 +82,10 @@ function renderAuthorizeError(
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 }
 
 function noStore(reply: FastifyReply): FastifyReply {
@@ -96,9 +97,9 @@ function noStore(reply: FastifyReply): FastifyReply {
  * the user decides in the same place they later review and revoke what they granted.
  */
 function getConsentUrl(requestId: string): string {
-  const frontendUrl = system
-    .getOrThrow<string>(SharedSystemProp.FRONTEND_URL)
-    .replace(/\/+$/, '');
+  const frontendUrl = stripTrailingSlashes(
+    system.getOrThrow<string>(SharedSystemProp.FRONTEND_URL),
+  );
 
   return `${frontendUrl}/settings/connected-apps?request_id=${encodeURIComponent(
     requestId,

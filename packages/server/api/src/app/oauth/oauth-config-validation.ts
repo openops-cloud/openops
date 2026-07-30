@@ -1,5 +1,6 @@
 import { AppSystemProp, DatabaseType, system } from '@openops/server-shared';
 import { ApplicationError, ErrorCode } from '@openops/shared';
+import { stripTrailingSlashes } from './canonical-url';
 import { oauthConfig } from './oauth-config';
 import { getRegisteredResources } from './resource-registry';
 
@@ -19,9 +20,8 @@ function invalidProp(prop: string, message: string): ApplicationError {
 function canonicalize(audience: string): string {
   try {
     const url = new URL(audience);
-    return `${url.protocol.toLowerCase()}//${url.host.toLowerCase()}${url.pathname.replace(
-      /\/+$/,
-      '',
+    return `${url.protocol.toLowerCase()}//${url.host.toLowerCase()}${stripTrailingSlashes(
+      url.pathname,
     )}`;
   } catch {
     return audience;

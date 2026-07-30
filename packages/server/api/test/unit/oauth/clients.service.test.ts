@@ -75,7 +75,7 @@ describe('clientsService', () => {
       const response = await clientsService.registerClient(validMetadata());
 
       expect(response.client_id).toEqual(expect.any(String));
-      expect(response.client_id.length).toBe(21);
+      expect(response.client_id).toHaveLength(21);
       expect(response.client_name).toBe('Test MCP Client');
       expect(response.redirect_uris).toEqual([
         'https://client.example.com/callback',

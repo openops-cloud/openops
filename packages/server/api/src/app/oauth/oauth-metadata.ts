@@ -1,3 +1,4 @@
+import { stripTrailingSlashes } from './canonical-url';
 import { oauthConfig } from './oauth-config';
 import { getSupportedScopes } from './resource-registry';
 
@@ -47,9 +48,8 @@ export function buildAuthorizationServerMetadata(): AuthorizationServerMetadata 
  * own path component, so an issuer served under a sub-path is discoverable.
  */
 export function getWellKnownPathVariants(basePath: string): string[] {
-  const issuerPath = new URL(oauthConfig.getIssuerUrl()).pathname.replace(
-    /\/+$/,
-    '',
+  const issuerPath = stripTrailingSlashes(
+    new URL(oauthConfig.getIssuerUrl()).pathname,
   );
 
   return issuerPath ? [basePath, `${basePath}${issuerPath}`] : [basePath];

@@ -1,8 +1,5 @@
 import { AppSystemProp, system } from '@openops/server-shared';
-
-function stripTrailingSlashes(value: string): string {
-  return value.replace(/\/+$/, '');
-}
+import { stripTrailingSlashes } from './canonical-url';
 
 export const oauthConfig = {
   isEnabled(): boolean {
