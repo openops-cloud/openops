@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: stale
-        uses: actions/stale@v10
+        uses: actions/stale@v11
         with:
           debug-only: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs['dry-run'] == 'true') || 'false' }}
 
