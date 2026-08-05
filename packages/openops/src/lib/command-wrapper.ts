@@ -61,21 +61,31 @@ async function getResult(childProcess: ChildProcess, fullCommand: string) {
     stdout += data;
   });
 
-  const exitCode = await new Promise<number>((resolve) => {
-    childProcess.on('close', (code: number) => {
-      resolve(code);
-    });
+  const result = await new Promise<{
+    exitCode: number;
+    signal: NodeJS.Signals | null;
+  }>((resolve) => {
+    childProcess.on(
+      'close',
+      (exitCode: number, signal: NodeJS.Signals | null) => {
+        resolve({ exitCode, signal });
+      },
+    );
   });
 
   logger.debug('Command exited', {
-    command: fullCommand,
-    exitCode,
     stdout,
     errorMessage,
+    command: fullCommand,
+    pid: childProcess.pid,
+    signal: result.signal,
+    exitCode: result.exitCode,
+    stdoutBytes: Buffer.byteLength(stdout),
+    stderrBytes: Buffer.byteLength(errorMessage),
   });
 
   return {
-    exitCode: exitCode,
+    exitCode: result.exitCode,
     stdOut: trimNewLines(stdout),
     stdError: trimNewLines(errorMessage),
   };
