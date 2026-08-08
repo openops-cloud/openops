@@ -32506,7 +32506,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - mermaid@11.15.0
+ - mermaid@11.16.1
 
 This package contains the following license:
 
@@ -35958,7 +35958,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @mermaid-js/parser@1.1.1
+ - @mermaid-js/parser@1.2.0
 
 This package contains the following license:
 
