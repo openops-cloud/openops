@@ -180,7 +180,7 @@
     "dayjs": "1.11.21",
     "decimal.js": "10.6.0",
     "deepmerge-ts": "7.1.5",
-    "dompurify": "3.4.12",
+    "dompurify": "3.4.13",
     "dotenv": "16.6.1",
     "embla-carousel-react": "8.6.0",
     "fast-deep-equal": "3.1.3",
