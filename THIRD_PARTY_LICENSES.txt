@@ -7263,7 +7263,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - socket.io-adapter@2.5.8
- - socket.io-parser@4.2.6
+ - socket.io-parser@4.2.7
 
 These packages each contain the following license:
 
@@ -14830,7 +14830,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - ip-address@10.2.0
+ - ip-address@10.4.0
 
 This package contains the following license:
 
@@ -15125,7 +15125,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fast-uri@3.1.4
+ - fast-uri@3.1.5
 
 This package contains the following license:
 
@@ -27018,7 +27018,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - hono@4.12.27
+ - hono@4.13.1
 
 This package contains the following license:
 
@@ -29408,7 +29408,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.19.8
- - undici@6.27.0
+ - undici@6.28.0
 
 These packages each contain the following license:
 
