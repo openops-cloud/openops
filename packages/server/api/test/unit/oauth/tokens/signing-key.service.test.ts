@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const ISSUER = 'https://ops.example.com/api';
 const API_AUDIENCE = ISSUER;
@@ -303,5 +306,83 @@ describe('signingKeyService', () => {
     await expect(signingKeyService.getJwks()).rejects.toThrow(
       'not initialized',
     );
+  });
+
+  // An operator-supplied key is not read again until the first sign or verify, so anything
+  // wrong with it has to be caught at boot or it surfaces as a 500 on a token request.
+  describe('operator-supplied signing key', () => {
+    let dir: string;
+
+    const write = (name: string, contents: string): string => {
+      const file = path.join(dir, name);
+      fs.writeFileSync(file, contents, 'utf-8');
+      return file;
+    };
+
+    beforeAll(() => {
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oauth-signing-key-'));
+    });
+
+    afterAll(() => {
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+
+    it('accepts an RSA private key and generates no key of its own', async () => {
+      const { privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+      });
+      const pemPath = write(
+        'valid.pem',
+        privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
+      );
+      jest.spyOn(oauthConfig, 'getSigningKeyPemPath').mockReturnValue(pemPath);
+
+      await expect(
+        signingKeyService.ensureSigningKey(),
+      ).resolves.toBeUndefined();
+      expect(keyRows).toHaveLength(0);
+    });
+
+    it('refuses to boot when the file is missing', async () => {
+      jest
+        .spyOn(oauthConfig, 'getSigningKeyPemPath')
+        .mockReturnValue(path.join(dir, 'absent.pem'));
+
+      await expect(signingKeyService.ensureSigningKey()).rejects.toThrow(
+        'OPS_OAUTH_SIGNING_KEY_PEM_PATH must point at a readable PEM private key',
+      );
+    });
+
+    it('refuses to boot when pointed at a public key', async () => {
+      const { publicKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+      });
+      const pemPath = write(
+        'public.pem',
+        publicKey.export({ type: 'spki', format: 'pem' }) as string,
+      );
+      jest.spyOn(oauthConfig, 'getSigningKeyPemPath').mockReturnValue(pemPath);
+
+      // The likely mistake: naming the `.pub` half. A public key parses as a key, so only
+      // an explicit private-key check rejects it.
+      await expect(signingKeyService.ensureSigningKey()).rejects.toThrow(
+        'must point at a readable PEM private key',
+      );
+    });
+
+    it('refuses to boot on a key type RS256 cannot sign with', async () => {
+      const { privateKey } = crypto.generateKeyPairSync('ec', {
+        namedCurve: 'prime256v1',
+      });
+      const pemPath = write(
+        'ec.pem',
+        privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
+      );
+      jest.spyOn(oauthConfig, 'getSigningKeyPemPath').mockReturnValue(pemPath);
+
+      await expect(signingKeyService.ensureSigningKey()).rejects.toThrow(
+        'must be an RSA private key to sign RS256 tokens, got ec',
+      );
+    });
   });
 });

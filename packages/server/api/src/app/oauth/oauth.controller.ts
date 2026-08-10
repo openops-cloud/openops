@@ -70,7 +70,7 @@ function renderAuthorizeError(
   error: string,
   description: string,
 ): FastifyReply {
-  return reply
+  return noStore(reply)
     .status(StatusCodes.BAD_REQUEST)
     .type('text/html')
     .send(

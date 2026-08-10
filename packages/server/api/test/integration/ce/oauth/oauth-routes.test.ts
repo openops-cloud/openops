@@ -219,6 +219,25 @@ describe('OAuth routes', () => {
       expect(response.headers.location).toBeUndefined();
     });
 
+    it('keeps rendered authorize errors out of caches', async () => {
+      const response = await app!.inject({
+        method: 'GET',
+        url: authorizeUrl({
+          client_id: 'not-a-registered-client',
+          redirect_uri: REGISTERED_REDIRECT,
+          response_type: 'code',
+          code_challenge: CODE_CHALLENGE,
+          code_challenge_method: 'S256',
+          resource: 'http://localhost:3020/mcp',
+        }),
+      });
+
+      // A public endpoint whose error page echoes request-derived text; an intermediary
+      // must not serve it to anyone else.
+      expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
     it('renders an error for an unknown client instead of redirecting', async () => {
       const response = await app!.inject({
         method: 'GET',

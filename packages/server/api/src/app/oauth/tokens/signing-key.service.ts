@@ -1,5 +1,10 @@
-import { encryptUtils, logger } from '@openops/server-shared';
-import { EncryptedObject, openOpsId } from '@openops/shared';
+import { AppSystemProp, encryptUtils, logger } from '@openops/server-shared';
+import {
+  ApplicationError,
+  EncryptedObject,
+  ErrorCode,
+  openOpsId,
+} from '@openops/shared';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -46,6 +51,37 @@ function loadOperatorProvidedKey(pemPath: string): LoadedKeys {
     verification: new Map([[kid, publicKeyPem]]),
     loadedAt: Date.now(),
   };
+}
+
+// Nothing reads an operator-supplied key until the first sign or verify, so without this
+// a bad path or a public key in place of a private one boots a healthy-looking server that
+// fails on its first token request.
+function assertOperatorKeyIsUsable(pemPath: string): void {
+  const invalid = (reason: string): ApplicationError =>
+    new ApplicationError(
+      {
+        code: ErrorCode.SYSTEM_PROP_INVALID,
+        params: { prop: AppSystemProp.OAUTH_SIGNING_KEY_PEM_PATH },
+      },
+      `OPS_${AppSystemProp.OAUTH_SIGNING_KEY_PEM_PATH} ${reason}`,
+    );
+
+  let key: crypto.KeyObject;
+
+  try {
+    key = crypto.createPrivateKey(fs.readFileSync(pemPath, 'utf-8'));
+  } catch (error) {
+    throw invalid(
+      `must point at a readable PEM private key: ${(error as Error).message}`,
+    );
+  }
+
+  // Tokens are signed with RS256, so any other key type fails only at sign time.
+  if (key.asymmetricKeyType !== 'rsa') {
+    throw invalid(
+      `must be an RSA private key to sign ${ALGORITHM} tokens, got ${key.asymmetricKeyType}`,
+    );
+  }
 }
 
 async function loadKeysFromDatabase(): Promise<LoadedKeys> {
@@ -108,7 +144,10 @@ export const signingKeyService = {
    * `status = 'active'`; the loser reuses the winner's key.
    */
   async ensureSigningKey(): Promise<void> {
-    if (oauthConfig.getSigningKeyPemPath()) {
+    const pemPath = oauthConfig.getSigningKeyPemPath();
+
+    if (pemPath) {
+      assertOperatorKeyIsUsable(pemPath);
       return;
     }
 

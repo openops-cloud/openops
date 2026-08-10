@@ -22,14 +22,17 @@ export async function listAvailableProjects(
   const memberships = await getOAuthProjectMembershipService().listForUser(
     user,
   );
-  const projects = await Promise.all(
-    memberships.map((membership) =>
-      projectService.getOne(membership.projectId),
-    ),
+
+  // One query rather than one per membership: agents poll this to decide where to switch.
+  const projects = await projectService.getManyByIds(
+    memberships.map((membership) => membership.projectId),
+  );
+  const displayNames = new Map(
+    projects.map((project) => [project.id, project.displayName]),
   );
 
-  return memberships.map((membership, index) => ({
+  return memberships.map((membership) => ({
     projectId: membership.projectId,
-    projectName: projects[index]?.displayName ?? membership.projectId,
+    projectName: displayNames.get(membership.projectId) ?? membership.projectId,
   }));
 }
