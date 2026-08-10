@@ -7263,7 +7263,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - socket.io-adapter@2.5.8
- - socket.io-parser@4.2.6
+ - socket.io-parser@4.2.7
 
 These packages each contain the following license:
 
@@ -27018,7 +27018,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - hono@4.12.27
+ - hono@4.13.1
 
 This package contains the following license:
 
@@ -29408,7 +29408,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.19.8
- - undici@6.27.0
+ - undici@6.28.0
 
 These packages each contain the following license:
 
@@ -30660,7 +30660,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - dompurify@3.4.12
+ - dompurify@3.4.13
 
 This package contains the following license:
 
@@ -32506,7 +32506,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - mermaid@11.15.0
+ - mermaid@11.16.1
 
 This package contains the following license:
 
@@ -35958,7 +35958,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @mermaid-js/parser@1.1.1
+ - @mermaid-js/parser@1.2.0
 
 This package contains the following license:
 
@@ -36926,12 +36926,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - nanoid@3.3.12
- - nanoid@3.3.16
+ - nanoid@3.3.17
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
