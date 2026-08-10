@@ -45,8 +45,8 @@ export async function buildOAuthServicePrincipal(
     throw invalidGrant('the project for this authorization is not accessible');
   }
 
-  // Also at token exchange, so a connection used directly against the API still shows a
-  // last-used time. Throttled internally.
+  // Also called at token exchange, so a connection used directly against the API still
+  // shows a last-used time.
   await grantsService.touch(grant.id);
 
   return {

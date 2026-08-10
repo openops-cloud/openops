@@ -79,8 +79,7 @@ export const pendingAuthorizationService = {
    */
   async consume(id: string): Promise<OAuthPendingAuthorization> {
     const consumedAt = new Date().toISOString();
-    // Some drivers report `affected` as null; anything but one claimed row means another
-    // request already took it.
+    // Some drivers report `affected` as null rather than 0.
     const result = await repo().update(
       { id, consumedAt: IsNull() },
       { consumedAt },
@@ -99,7 +98,6 @@ export const pendingAuthorizationService = {
     return record;
   },
 
-  /** Cleanup job hook. Takes a `Date`, never an ISO string — see `earlierThan`. */
   async deleteExpired(now = new Date()): Promise<number> {
     const result = await repo().delete({ expiresAt: earlierThan(now) });
 

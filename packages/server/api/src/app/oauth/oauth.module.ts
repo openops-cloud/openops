@@ -17,8 +17,6 @@ export const oauthModule: FastifyPluginAsyncTypebox = async (app) => {
 
   await app.register(
     async (instance) => {
-      // OAuth clients branch on the RFC 6749 `error` code, so these routes must not use
-      // the application's own error envelope.
       instance.setErrorHandler((error, _request, reply) => {
         if (error instanceof OAuthError) {
           logger.debug('OAuth request rejected', {

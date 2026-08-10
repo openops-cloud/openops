@@ -141,9 +141,8 @@ export const grantsService = {
   },
 
   /**
-   * Revokes one connection and every refresh token under it — without the cascade the
-   * client could keep minting access tokens by refreshing. Other connections for the
-   * same user and client are untouched.
+   * Without the token cascade the client could keep minting access tokens by refreshing.
+   * Other connections for the same user and client are untouched.
    */
   async revoke(grantId: string): Promise<void> {
     const now = new Date().toISOString();

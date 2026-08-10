@@ -346,7 +346,6 @@ export const tokensService = {
 
     const refreshToken = await issueRefreshToken({
       grantId: grant.id,
-      // Same family: reuse anywhere in the chain is fatal to all of it.
       familyId: existingToken.familyId,
       clientId: existingToken.clientId,
       resource: existingToken.resource,

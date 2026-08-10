@@ -20,7 +20,6 @@ export type OAuthProjectMembershipService = {
     user: User,
     projectId: string,
   ): Promise<OAuthProjectMembership | null>;
-  /** Every project the connection may switch to. */
   listForUser(user: User): Promise<OAuthProjectMembership[]>;
 };
 

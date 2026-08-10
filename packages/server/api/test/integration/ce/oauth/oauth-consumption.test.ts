@@ -330,7 +330,6 @@ describe('cleanup job', () => {
     await expect(
       pendingAuthorizationService.get(liveRequest),
     ).resolves.toMatchObject({ clientId: CLIENT_ID });
-    // The live code is untouched and still redeemable.
     await expect(
       tokensService.redeemAuthorizationCode(redeemParams(liveCode)),
     ).resolves.toMatchObject({ token_type: 'Bearer' });
@@ -372,7 +371,6 @@ describe('cleanup job', () => {
 
     await oauthCleanupJobHandler();
 
-    // `lastUsedAt` is recent, so this is an active connection despite its age.
     expect(await repo('oauth_grant').count()).toBe(1);
   });
 

@@ -240,7 +240,6 @@ describe('signingKeyService', () => {
       60,
     );
 
-    // Rotate: demote the current key, add a new active one.
     keyRows[0].status = 'retiring';
     signingKeyService.clearKeyCacheForTests();
     await signingKeyService.ensureSigningKey();

@@ -563,7 +563,6 @@ describe('tokensService', () => {
         requestedProjectId: 'project-2',
       });
 
-      // The renewal a client performs on its own schedule, naming no project.
       const renewed = await tokensService.rotateRefreshToken({
         refreshToken: switched.refresh_token as string,
         clientId: 'client-1',

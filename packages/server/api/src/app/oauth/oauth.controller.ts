@@ -226,7 +226,6 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
       const { requestId } = request.params as { requestId: string };
       const { approve } = request.body as { approve: boolean };
 
-      // Claiming the record is what stops a decision being replayed into a second code.
       const pending = await pendingAuthorizationService.consume(requestId);
 
       if (!approve) {

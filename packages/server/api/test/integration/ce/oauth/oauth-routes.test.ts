@@ -251,7 +251,6 @@ describe('OAuth routes', () => {
         }),
       });
 
-      // A good request does redirect, to the consent surface rather than to the client.
       expect(response.statusCode).toBe(StatusCodes.MOVED_TEMPORARILY);
       expect(response.headers.location).toContain('/settings/connected-apps');
       expect(response.headers.location).toContain('request_id=');
@@ -338,7 +337,6 @@ describe('OAuth routes', () => {
         url: new URL(metadata.jwks_uri).pathname,
       });
 
-      // A real key, reachable where the metadata says it is.
       expect(response.statusCode).toBe(StatusCodes.OK);
       expect(response.json().keys[0]).toMatchObject({
         kty: 'RSA',

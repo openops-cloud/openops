@@ -46,7 +46,6 @@ export const registerOAuthCleanupHandler = (): void => {
       try {
         await oauthCleanupJobHandler();
       } catch (error) {
-        // Not rethrown, so one bad run does not stop the schedule.
         logger.error('OAuth cleanup job failed', error);
       }
     },
@@ -77,8 +76,8 @@ const DEAD_GRANT_RETENTION_DAYS = 30;
 
 export const oauthCleanupJobHandler = async (): Promise<void> => {
   const now = Date.now();
-  // Every cutoff is a Date, never an ISO string — see `earlierThan`. Applies to the
-  // query-builder parameters below too.
+  // The query-builder parameters below are bound as Dates, never ISO strings — the
+  // reason is in `earlierThan`.
   const nowDate = new Date(now);
   const clientCutoff = new Date(now - UNUSED_CLIENT_RETENTION_DAYS * DAY_MS);
   const deadGrantCutoff = new Date(now - DEAD_GRANT_RETENTION_DAYS * DAY_MS);

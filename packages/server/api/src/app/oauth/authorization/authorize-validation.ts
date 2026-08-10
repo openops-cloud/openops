@@ -114,7 +114,6 @@ export function validateAuthorizeRequest(
     };
   }
 
-  // PKCE is mandatory in OAuth 2.1, and only S256 is accepted.
   if (readParam(query, 'code_challenge_method') !== 'S256') {
     return {
       kind: 'redirect_error',
@@ -191,8 +190,6 @@ export function validateAuthorizeRequest(
   };
 }
 
-// Requiring a string keeps a `code[x]=1` object from surfacing as a 500 instead of an
-// RFC 6749 error.
 export function requireParam(body: OAuthRequestBody, name: string): string {
   const value = body[name];
 

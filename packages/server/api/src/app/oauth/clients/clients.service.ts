@@ -167,7 +167,6 @@ function parseBasicCredentials(
 }
 
 export const clientsService = {
-  /** RFC 7591 Dynamic Client Registration, restricted to public PKCE clients. */
   async registerClient(body: unknown): Promise<RegisteredClientResponse> {
     const metadata = parseRegistrationMetadata(body);
     const now = new Date().toISOString();
@@ -223,10 +222,8 @@ export const clientsService = {
     }
   },
 
-  /**
-   * HTTP Basic authentication (RFC 6749 §2.3.1) for the confidential resource server.
-   * Every failure returns the same description, so client ids cannot be enumerated.
-   */
+  // RFC 6749 §2.3.1. Every failure returns the same description, so client ids cannot
+  // be enumerated.
   async authenticateResourceServerClient(
     authorizationHeader: string | undefined,
   ): Promise<OAuthClient> {
@@ -264,10 +261,8 @@ export const clientsService = {
     return client;
   },
 
-  /**
-   * Provisions the hosted MCP resource server as a confidential client on boot. Installs
-   * without a hosted resource server configure no secret and get no such client.
-   */
+  // Optional: an install with no hosted resource server configures no secret and gets
+  // no such client.
   async ensureResourceServerClient(): Promise<void> {
     const secret = oauthConfig.getResourceServerClientSecret();
 
