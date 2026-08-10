@@ -67,3 +67,18 @@ export const CustomIconWrapperClassName: Story = {
     iconWrapperClassName: 'bg-green-400',
   },
 };
+
+/**
+ * Card with a secondary value rendered baseline-aligned next to the main value
+ * (e.g. remaining currency amounts for a multi-currency total).
+ */
+export const WithSecondaryValue: Story = {
+  args: {
+    value: '$12.4K',
+    secondaryValue: (
+      <span className="text-xs font-medium text-muted-foreground">
+        + €3.1K · £980
+      </span>
+    ),
+  },
+};
