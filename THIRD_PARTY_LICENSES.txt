@@ -36926,12 +36926,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - nanoid@3.3.12
- - nanoid@3.3.16
+ - nanoid@3.3.17
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
