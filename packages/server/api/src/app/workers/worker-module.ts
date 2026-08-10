@@ -3,7 +3,6 @@ import { flowConsumer } from './consumer';
 import { flowEngineWorker } from './engine-controller';
 import { workerMachineController } from './machine/machine-controller';
 import { flowQueue } from './queue';
-import { setupBullMQBoard } from './redis/redis-bullboard';
 import { flowWorkerController } from './worker-controller';
 
 export const workerModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -18,5 +17,4 @@ export const workerModule: FastifyPluginAsyncTypebox = async (app) => {
   });
   await flowQueue.init();
   await flowConsumer.init();
-  await setupBullMQBoard(app);
 };
