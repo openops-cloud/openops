@@ -43,11 +43,8 @@ function isFindOperator(value: unknown): value is { value: unknown } {
   );
 }
 
-/**
- * Only `LessThan` is used by the cleanup job, so that is all this honours.
- * Compared as instants rather than strings, because the service binds cutoffs as
- * `Date` objects — see `oauth-query.ts` for why.
- */
+// Only `LessThan` is used by the cleanup job. Compared as instants, because the service
+// binds cutoffs as `Date` objects — see `oauth-query.ts`.
 function matches(row: Row, criteria: Row): boolean {
   return Object.entries(criteria).every(([key, expected]) => {
     if (isFindOperator(expected)) {
@@ -220,9 +217,8 @@ describe('oauthCleanupJobHandler', () => {
 
     await oauthCleanupJobHandler();
 
-    // Age of the rotation is irrelevant: a row survives while the token it represents
-    // could still be presented, which is exactly the window in which a replay has to be
-    // recognised as reuse rather than reported as an unknown token.
+    // A row survives while its token could still be presented, which is the window in
+    // which a replay must be recognised as reuse rather than an unknown token.
     expect(refreshRows.map((row) => row.id)).toEqual([
       'revoked-long-ago-still-valid',
       'revoked-recently',
@@ -252,8 +248,7 @@ describe('oauthCleanupJobHandler', () => {
     ) as Record<string, unknown>;
 
     expect(parameters.authMethod).toBe('none');
-    // Bound as a Date, so the driver serialises it the way it serialises stored
-    // timestamps rather than leaving a textual comparison to chance.
+    // Bound as a Date, so the driver serialises it the way it serialises stored values.
     expect(parameters.cutoff).toBeInstanceOf(Date);
     const cutoffAge = Date.now() - (parameters.cutoff as Date).getTime();
     expect(cutoffAge).toBeGreaterThan(29 * DAY_MS);

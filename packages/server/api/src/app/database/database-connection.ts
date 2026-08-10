@@ -30,7 +30,7 @@ import {
   OAuthPendingAuthorizationEntity,
   OAuthRefreshTokenEntity,
   OAuthSigningKeyEntity,
-} from '../oauth/oauth.entity';
+} from '../oauth/storage/oauth.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
 import { StoreEntryEntity } from '../store-entry/store-entry-entity';

@@ -1,12 +1,12 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
-import { clientsService } from './clients.service';
+import { clientsService } from './clients/clients.service';
+import { OAuthError } from './common/oauth-errors';
+import { validateOAuthConfiguration } from './config/oauth-config-validation';
+import { oauthWellKnownController } from './discovery/oauth-well-known.controller';
 import { scheduleOAuthCleanupJob } from './oauth-cleanup-job';
-import { validateOAuthConfiguration } from './oauth-config-validation';
-import { OAuthError } from './oauth-errors';
-import { oauthWellKnownController } from './oauth-well-known.controller';
 import { oauthController } from './oauth.controller';
-import { signingKeyService } from './signing-key.service';
+import { signingKeyService } from './tokens/signing-key.service';
 
 export const oauthModule: FastifyPluginAsyncTypebox = async (app) => {
   validateOAuthConfiguration();
@@ -17,9 +17,8 @@ export const oauthModule: FastifyPluginAsyncTypebox = async (app) => {
 
   await app.register(
     async (instance) => {
-      // OAuth clients branch on the RFC 6749 `error` code to decide whether to
-      // retry, re-authorize, or discard a stored credential, so these routes
-      // must not use the application's own error envelope.
+      // OAuth clients branch on the RFC 6749 `error` code, so these routes must not use
+      // the application's own error envelope.
       instance.setErrorHandler((error, _request, reply) => {
         if (error instanceof OAuthError) {
           logger.debug('OAuth request rejected', {

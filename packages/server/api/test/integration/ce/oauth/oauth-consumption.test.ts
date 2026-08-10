@@ -2,12 +2,12 @@ import { encryptUtils } from '@openops/server-shared';
 import { UserStatus } from '@openops/shared';
 import { IsNull } from 'typeorm';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
-import { grantsService } from '../../../../src/app/oauth/grants.service';
+import { pendingAuthorizationService } from '../../../../src/app/oauth/authorization/pending-authorization.service';
+import { grantsService } from '../../../../src/app/oauth/clients/grants.service';
+import { oauthConfig } from '../../../../src/app/oauth/config/oauth-config';
 import { oauthCleanupJobHandler } from '../../../../src/app/oauth/oauth-cleanup-job';
-import { oauthConfig } from '../../../../src/app/oauth/oauth-config';
-import { pendingAuthorizationService } from '../../../../src/app/oauth/pending-authorization.service';
-import { signingKeyService } from '../../../../src/app/oauth/signing-key.service';
-import { tokensService } from '../../../../src/app/oauth/tokens.service';
+import { signingKeyService } from '../../../../src/app/oauth/tokens/signing-key.service';
+import { tokensService } from '../../../../src/app/oauth/tokens/tokens.service';
 import {
   createMockOrganization,
   createMockProject,
@@ -15,15 +15,10 @@ import {
 } from '../../../helpers/mocks';
 
 /**
- * Exercises the guarantees that unit tests with in-memory repositories cannot
- * observe: that single-use consumption really is a conditional UPDATE the database
- * serialises, that `LessThan` and `IsNull` are distinct predicates, and that the
- * cleanup job's query-builder SQL deletes the rows it should and no others.
- *
- * Runs under the repo's integration harness, which uses SQLite with schema
- * synchronisation. That is not the production driver — OAuth targets Postgres —
- * but it does replace hand-written mocks with a real ORM and real SQL, which is
- * where the risk was.
+ * The guarantees in-memory repositories cannot observe: that single-use consumption really
+ * is a conditional UPDATE the database serialises, and that the cleanup job's SQL deletes
+ * the rows it should and no others. Runs on SQLite rather than the production driver, but
+ * against a real ORM and real SQL, which is where the risk was.
  */
 
 const ISSUER = 'http://localhost:3000';

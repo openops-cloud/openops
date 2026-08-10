@@ -28,16 +28,14 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
 }));
 
 import { SystemJobName } from '../../../src/app/helper/system-jobs/common';
+import { oauthConfig } from '../../../src/app/oauth/config/oauth-config';
 import {
   registerOAuthCleanupHandler,
   scheduleOAuthCleanupJob,
 } from '../../../src/app/oauth/oauth-cleanup-job';
-import { oauthConfig } from '../../../src/app/oauth/oauth-config';
 
-/**
- * The schedule is stored in Redis, so it outlives the boot that created it. These cover
- * the next boot — which may have OAuth switched off.
- */
+// The schedule is stored in Redis, so it outlives the boot that created it. These cover
+// the next boot, which may have OAuth switched off.
 describe('OAuth cleanup registration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,8 +50,8 @@ describe('OAuth cleanup registration', () => {
 
     registerOAuthCleanupHandler();
 
-    // Without this, the worker cannot find a handler for a job still on the schedule
-    // and fails it — hourly, for a feature nobody is using.
+    // Without this the worker finds no handler for a job still on the schedule and fails
+    // it hourly, for a feature nobody is using.
     expect(registerJobHandler).toHaveBeenCalledWith(
       SystemJobName.OAUTH_CLEANUP,
       expect.any(Function),
@@ -91,8 +89,8 @@ describe('OAuth cleanup registration', () => {
         schedule: expect.objectContaining({ type: 'repeated' }),
       }),
     );
-    // Scheduling happens only on an OAuth-enabled boot, so it must not be what puts the
-    // handler in place.
+    // Scheduling happens only on an OAuth-enabled boot, so it cannot be what registers
+    // the handler.
     expect(registerJobHandler).not.toHaveBeenCalled();
   });
 });

@@ -56,8 +56,7 @@ export class CreateOAuthTables1785312000000 implements MigrationInterface {
       );
     `);
 
-    // Not unique: a user may hold several connections for the same client, each
-    // from its own authorization and revocable on its own.
+    // Not unique: a user may hold several connections for the same client.
     await queryRunner.query(`
       CREATE INDEX "idx_oauth_grant_client_id_user_id"
       ON "oauth_grant" ("clientId", "userId");
