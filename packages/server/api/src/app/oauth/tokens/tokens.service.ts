@@ -217,7 +217,11 @@ export const tokensService = {
 
     const resource = resolveResource(params.resource);
 
-    if (!resource || resource.canonicalUri !== codeRecord.resource) {
+    if (!resource) {
+      throw invalidGrant(UNUSABLE_CODE);
+    }
+
+    if (resource.canonicalUri !== codeRecord.resource) {
       throw invalidGrant(UNUSABLE_CODE);
     }
 

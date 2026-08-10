@@ -62,11 +62,11 @@ export const pendingAuthorizationService = {
   async get(id: string): Promise<OAuthPendingAuthorization> {
     const record = await repo().findOneBy({ id });
 
-    if (
-      !record ||
-      record.consumedAt !== null ||
-      isExpired(record, Date.now())
-    ) {
+    if (!record) {
+      throw invalidRequest(UNUSABLE_REQUEST);
+    }
+
+    if (record.consumedAt !== null || isExpired(record, Date.now())) {
       throw invalidRequest(UNUSABLE_REQUEST);
     }
 

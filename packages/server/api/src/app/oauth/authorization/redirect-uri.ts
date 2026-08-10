@@ -29,7 +29,11 @@ function isUsableRedirectUri(uri: string): boolean {
   }
 
   const url = parseUri(uri);
-  if (!url || url.hash !== '' || url.username !== '' || url.password !== '') {
+  if (!url) {
+    return false;
+  }
+
+  if (url.hash !== '' || url.username !== '' || url.password !== '') {
     return false;
   }
 
