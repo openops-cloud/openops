@@ -62,12 +62,11 @@ export const api = {
     url: string,
     body?: TBody,
     params?: TParams,
-    headers: Record<string, string> = {},
   ) =>
     request<TResponse>(url, {
       method: 'POST',
       data: body,
-      headers: { 'Content-Type': 'application/json', ...headers },
+      headers: { 'Content-Type': 'application/json' },
       params: params,
     }),
 
