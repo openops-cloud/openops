@@ -279,8 +279,6 @@ export const flagService = {
         updated,
       },
       {
-        // With OAuth off every /v1/oauth route 404s, so the UI that manages these
-        // connections has nothing to show and is hidden.
         id: FlagId.CONNECTED_APPS_ENABLED,
         value: oauthConfig.isEnabled(),
         created,

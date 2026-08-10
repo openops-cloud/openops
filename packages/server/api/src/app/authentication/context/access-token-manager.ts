@@ -143,8 +143,6 @@ export const accessTokenManager = {
   },
 };
 
-// Internal tokens are always HS256 and OAuth-issued ones the only RS256, so dispatching on
-// the algorithm keeps the two trust domains separate.
 function isOAuthIssuedToken(token: string): boolean {
   return (
     jwtLibrary.decode(token, { complete: true })?.header?.alg ===
@@ -152,11 +150,6 @@ function isOAuthIssuedToken(token: string): boolean {
   );
 }
 
-/**
- * Verified here rather than per route so no caller can skip the audience check: a token
- * minted for the MCP resource server is rejected everywhere, including paths that call
- * `extractPrincipal` directly, such as websockets.
- */
 async function extractOAuthPrincipal(token: string): Promise<Principal> {
   const invalidToken = new ApplicationError({
     code: ErrorCode.INVALID_BEARER_TOKEN,

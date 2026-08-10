@@ -1,9 +1,9 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateOAuthTables1785312000000 implements MigrationInterface {
+export class CreateOAuthTables1786355547856 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('CreateOAuthTables1785312000000: starting');
+    logger.info('CreateOAuthTables1786355547856: starting');
 
     await queryRunner.query(`
       CREATE TABLE "oauth_signing_key" (
@@ -162,17 +162,10 @@ export class CreateOAuthTables1785312000000 implements MigrationInterface {
       ON "oauth_refresh_token" ("expiresAt");
     `);
 
-    logger.info('CreateOAuthTables1785312000000: completed');
+    logger.info('CreateOAuthTables1786355547856: completed');
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE IF EXISTS "oauth_refresh_token";`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oauth_authorization_code";`);
-    await queryRunner.query(
-      `DROP TABLE IF EXISTS "oauth_pending_authorization";`,
-    );
-    await queryRunner.query(`DROP TABLE IF EXISTS "oauth_grant";`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oauth_client";`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oauth_signing_key";`);
+    throw new Error('Rollback not implemented');
   }
 }
