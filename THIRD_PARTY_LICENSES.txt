@@ -27018,7 +27018,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - hono@4.12.27
+ - hono@4.13.1
 
 This package contains the following license:
 
