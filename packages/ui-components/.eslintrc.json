@@ -48,7 +48,7 @@
         //"plugin:jsx-a11y/recommended",
         "plugin:testing-library/react",
         "plugin:jest-dom/recommended",
-        "plugin:vitest/legacy-recommended"
+        "plugin:@vitest/legacy-recommended"
       ],
       "rules": {
         "no-console": "error",
@@ -66,6 +66,9 @@
           }
         ],
         "import/no-cycle": "off",
+        // TODO: pre-existing conditional `expect` calls in data-driven tests;
+        // newly reported after moving to @vitest/eslint-plugin. Fix the tests, then drop this.
+        "@vitest/no-conditional-expect": "off",
         "linebreak-style": ["error", "unix"],
         "react/prop-types": "off",
         "import/no-unresolved": "off",

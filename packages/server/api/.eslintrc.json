@@ -1,13 +1,13 @@
 {
-  "extends": [
-    "../../../.eslintrc.json",
-    "plugin:@typescript-eslint/strict",
-    "plugin:import-x/recommended"
-  ],
+  "extends": ["../../../.eslintrc.json"],
   "ignorePatterns": ["!**/*", "node_modules/**/*"],
   "overrides": [
     {
       "files": ["*.ts", "*.js"],
+      "extends": [
+        "plugin:@typescript-eslint/strict",
+        "plugin:import-x/recommended"
+      ],
       "parserOptions": {
         "project": ["packages/server/api/tsconfig.*?.json"]
       },
@@ -15,7 +15,10 @@
         "import-x/no-unresolved": "off",
         "no-console": "error",
         "object-shorthand": "error",
-        "@typescript-eslint/switch-exhaustiveness-check": "error",
+        "@typescript-eslint/switch-exhaustiveness-check": [
+          "error",
+          { "considerDefaultExhaustiveForUnions": true }
+        ],
         "@typescript-eslint/consistent-type-definitions": ["error", "type"],
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-redundant-type-constituents": "error",
@@ -36,6 +39,12 @@
         "@typescript-eslint/return-await": ["error", "in-try-catch"],
         "default-case-last": "error",
         "import-x/no-duplicates": "error"
+      }
+    },
+    {
+      "files": ["*.test.ts", "*.spec.ts"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
       }
     }
   ],

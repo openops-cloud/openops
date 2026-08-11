@@ -13,6 +13,7 @@ const BLOCK_MEMORY_LIMIT_IN_MB = system.getNumberOrThrow(
 let ivmCache: any;
 const getIvm = () => {
   if (!ivmCache) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- must stay a lazy require; see the isolated-vm issue linked above
     ivmCache = require('isolated-vm');
   }
   return ivmCache as typeof import('isolated-vm');
