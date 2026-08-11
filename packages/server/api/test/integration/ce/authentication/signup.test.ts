@@ -1,5 +1,3 @@
-import { accessTokenManager } from '../../../../src/app/authentication/context/access-token-manager';
-
 const authUserMock = jest.fn().mockResolvedValue({
   token: 'token',
   refresh_token: 'refresh_token',
@@ -38,6 +36,7 @@ jest.mock('../../../../src/app/openops-tables/index', () => ({
 import { PrincipalType, UserStatus } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { accessTokenManager } from '../../../../src/app/authentication/context/access-token-manager';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
