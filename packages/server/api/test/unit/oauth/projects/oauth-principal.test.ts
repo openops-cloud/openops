@@ -145,9 +145,8 @@ describe('extractPrincipal with OAuth tokens', () => {
    * names. Do not widen this to USER.
    */
   it('builds a SERVICE principal on the grant active project', async () => {
-    const principal = await accessTokenManager.extractPrincipal(
-      signOAuthToken(),
-    );
+    const principal =
+      await accessTokenManager.extractPrincipal(signOAuthToken());
 
     expect(principal).toEqual({
       id: 'user-1',
@@ -197,9 +196,8 @@ describe('extractPrincipal with OAuth tokens', () => {
       projectRole: 'VIEWER',
     });
 
-    const principal = await accessTokenManager.extractPrincipal(
-      signOAuthToken(),
-    );
+    const principal =
+      await accessTokenManager.extractPrincipal(signOAuthToken());
 
     expect(principal.projectRole).toBe('VIEWER');
   });
