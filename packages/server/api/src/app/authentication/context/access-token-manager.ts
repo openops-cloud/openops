@@ -12,8 +12,14 @@ import {
   WorkerMachineType,
   WorkerPrincipal,
 } from '@openops/shared';
+import jwtLibrary from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
-import { jwtUtils } from '../../helper/jwt-utils';
+import { JwtSignAlgorithm, jwtUtils } from '../../helper/jwt-utils';
+import { OAuthError } from '../../oauth/common/oauth-errors';
+import { oauthConfig } from '../../oauth/config/oauth-config';
+import { buildOAuthServicePrincipal } from '../../oauth/projects/service-principal';
+import { OAuthAccessTokenClaims } from '../../oauth/storage/oauth-model';
+import { signingKeyService } from '../../oauth/tokens/signing-key.service';
 
 const openOpsRefreshTokenLifetimeSeconds =
   (system.getNumber(AppSystemProp.JWT_TOKEN_LIFETIME_HOURS) ?? 168) * 3600;
@@ -111,6 +117,10 @@ export const accessTokenManager = {
   },
 
   async extractPrincipal(token: string): Promise<Principal> {
+    if (isOAuthIssuedToken(token)) {
+      return extractOAuthPrincipal(token);
+    }
+
     const secret = await jwtUtils.getJwtSecret();
 
     try {
@@ -132,6 +142,51 @@ export const accessTokenManager = {
     }
   },
 };
+
+function isOAuthIssuedToken(token: string): boolean {
+  return (
+    jwtLibrary.decode(token, { complete: true })?.header?.alg ===
+    JwtSignAlgorithm.RS256
+  );
+}
+
+async function extractOAuthPrincipal(token: string): Promise<Principal> {
+  const invalidToken = new ApplicationError({
+    code: ErrorCode.INVALID_BEARER_TOKEN,
+    params: {
+      message: 'invalid access token',
+    },
+  });
+
+  if (!oauthConfig.isEnabled()) {
+    throw invalidToken;
+  }
+
+  try {
+    const claims = await signingKeyService.verifyAccessToken(
+      token,
+      oauthConfig.getApiAudience(),
+    );
+
+    return await buildOAuthServicePrincipal(
+      claims as unknown as OAuthAccessTokenClaims,
+    );
+  } catch (error) {
+    // Only a verdict about the token itself becomes a 401. Reporting a server-side
+    // failure as an invalid credential would have clients discard their refresh token and
+    // re-authorize, turning a brief outage into a re-consent storm.
+    if (error instanceof OAuthError && error.statusCode < 500) {
+      logger.info('Rejected OAuth access token', {
+        error: error.errorCode,
+        description: error.description,
+      });
+      throw invalidToken;
+    }
+
+    logger.error('OAuth authentication failed for a non-token reason', error);
+    throw error;
+  }
+}
 
 type GenerateEngineTokenParams = {
   projectId: ProjectId;
