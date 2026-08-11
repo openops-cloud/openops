@@ -113,15 +113,19 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     },
     async (request) => {
       const { flowId, projectId, payloads } = request.body;
-      const savePayloads = payloads.map((payload) =>
-        triggerEventService.saveEvent({
-          flowId,
-          payload,
-          projectId,
-          input: {},
-        }),
+      // Fire and forget, one handler per save so every failure is logged. The
+      // previous `rejectedPromiseHandler(Promise.all(...))` was dead code: the
+      // mapped values were already void, so the aggregate never saw a rejection.
+      payloads.forEach((payload) =>
+        rejectedPromiseHandler(
+          triggerEventService.saveEvent({
+            flowId,
+            payload,
+            projectId,
+            input: {},
+          }),
+        ),
       );
-      rejectedPromiseHandler(Promise.all(savePayloads));
       return {};
     },
   );
