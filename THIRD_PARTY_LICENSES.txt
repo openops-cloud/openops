@@ -19477,7 +19477,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/cohere@3.0.39
  - @ai-sdk/deepinfra@2.0.55
  - @ai-sdk/deepseek@2.0.39
- - @ai-sdk/gateway@2.0.129
+ - @ai-sdk/gateway@2.0.118
  - @ai-sdk/gateway@3.0.132
  - @ai-sdk/gateway@3.0.133
  - @ai-sdk/google-vertex@3.0.142
@@ -19491,14 +19491,14 @@ The following npm packages may be included in this product:
  - @ai-sdk/openai@3.0.74
  - @ai-sdk/perplexity@3.0.36
  - @ai-sdk/provider-utils@3.0.26
- - @ai-sdk/provider-utils@3.0.31
+ - @ai-sdk/provider-utils@3.0.30
  - @ai-sdk/provider@2.0.3
  - @ai-sdk/provider@3.0.10
- - @ai-sdk/react@2.0.233
+ - @ai-sdk/react@2.0.221
  - @ai-sdk/react@3.0.210
  - @ai-sdk/togetherai@2.0.56
  - @ai-sdk/xai@3.0.96
- - ai@5.0.230
+ - ai@5.0.219
  - ai@6.0.206
  - ai@6.0.208
 
@@ -19565,34 +19565,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - @fastify/busboy@2.1.1
-
-This package contains the following license:
-
-Copyright Brian White. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
 
 -----------
 
@@ -23486,7 +23458,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - brace-expansion@2.1.4
+ - brace-expansion@2.1.2
  - isarray@2.0.5
 
 These packages each contain the following license:
@@ -27595,7 +27567,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @hono/node-server@2.1.0
+ - @hono/node-server@1.19.14
 
 This package contains the following license:
 
@@ -29372,7 +29344,6 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.19.8
- - undici@5.29.0
  - undici@6.28.0
 
 These packages each contain the following license:
@@ -36731,7 +36702,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - nanoid@5.1.16
+ - nanoid@5.1.15
 
 This package contains the following license:
 
