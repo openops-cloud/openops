@@ -41,6 +41,10 @@ const ignores = [
   'deploy/**',
   'dev/**',
   '.vscode/**',
+  // Build and release tooling, not shipped code. No Nx project covers it, so
+  // `nx lint` never reached it anyway; ignoring it here stops editors and bare
+  // `eslint .` runs from reporting on it too.
+  'tools/**',
   // Carried over from `.eslintignore`. That entry had no leading slash, so it
   // matched every package.json in the tree, which is what keeps
   // `@nx/dependency-checks` inert in server/worker and server/shared.
