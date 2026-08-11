@@ -307,7 +307,7 @@
     "zustand": "4.5.7"
   },
   "devDependencies": {
-    "@eslint/js": "8.57.1",
+    "@eslint/js": "9.39.5",
     "@faker-js/faker": "8.4.1",
     "@nx/devkit": "23.0.0",
     "@nx/esbuild": "23.0.0",
@@ -373,7 +373,7 @@
     "chromatic": "11.29.0",
     "concurrently": "8.2.2",
     "esbuild": "0.28.1",
-    "eslint": "8.57.1",
+    "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-alias": "1.1.2",
     "eslint-import-resolver-typescript": "4.4.5",

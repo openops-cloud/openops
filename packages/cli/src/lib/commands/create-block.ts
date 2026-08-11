@@ -3,8 +3,8 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import {
   nxGenerateNodeLibrary,
+  removeGeneratedEslintConfig,
   removeUnusedFiles,
-  updateEslintFile,
   updateJestConfigFile,
   updateProjectJsonConfig,
 } from '../utils/block-generators';
@@ -28,7 +28,7 @@ const setupGeneratedLibrary = async (
   await generateIndexTsFile(blockName, authType);
   await generateAuthFile(blockName, authType);
   await updateProjectJsonConfig(blockName);
-  await updateEslintFile(blockName);
+  await removeGeneratedEslintConfig(blockName);
   await updateJestConfigFile(blockName);
 
   if (createOpinionatedStructure) {

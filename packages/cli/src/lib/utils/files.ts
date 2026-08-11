@@ -59,19 +59,8 @@ export const readProjectJson = async (path: string): Promise<ProjectJson> => {
   return await readJsonFile(`${path}/project.json`);
 };
 
-export const readPackageEslint = async (path: string): Promise<any> => {
-  return await readJsonFile(`${path}/.eslintrc.json`);
-};
-
 export const readJestConfig = async (path: string): Promise<any> => {
   return await readFile(`${path}/jest.config.ts`);
-};
-
-export const writePackageEslint = async (
-  path: string,
-  eslint: any,
-): Promise<void> => {
-  return await writeJsonFile(`${path}/.eslintrc.json`, eslint);
 };
 
 export const writeJestConfig = async (
