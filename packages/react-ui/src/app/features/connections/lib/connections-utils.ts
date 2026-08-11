@@ -190,13 +190,16 @@ export const aggregateBlocksByProvider = (
   blocks: BlockMetadataModelSummary[],
 ) => {
   return Object.values(
-    blocks?.reduce((acc, block) => {
-      const key = block.auth?.authProviderKey ?? '';
-      if (!acc[key]) {
-        acc[key] = block;
-      }
-      return acc;
-    }, {} as Record<string, BlockMetadataModelSummary>) ?? {},
+    blocks?.reduce(
+      (acc, block) => {
+        const key = block.auth?.authProviderKey ?? '';
+        if (!acc[key]) {
+          acc[key] = block;
+        }
+        return acc;
+      },
+      {} as Record<string, BlockMetadataModelSummary>,
+    ) ?? {},
   );
 };
 

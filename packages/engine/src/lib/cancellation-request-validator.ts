@@ -16,9 +16,8 @@ export class CancellationRequestedError extends Error {
 export async function throwIfCancellationRequested(
   flowRunId: FlowRunId,
 ): Promise<void> {
-  const wasCancellationRequested = await wasWorkflowCancellationRequested(
-    flowRunId,
-  );
+  const wasCancellationRequested =
+    await wasWorkflowCancellationRequested(flowRunId);
 
   if (wasCancellationRequested) {
     logger.info(defaultMessage);

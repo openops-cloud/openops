@@ -112,8 +112,7 @@ export const aiAuth = BlockAuth.CustomAuth({
       providerSettings:
         Object.keys(providerSettings).length > 0 ? providerSettings : undefined,
       modelSettings: authObject['modelSettings'] as
-        | Record<string, unknown>
-        | undefined,
+        Record<string, unknown> | undefined,
     };
     const result = await validateAiProviderConfig(payload);
     if (result.valid) {

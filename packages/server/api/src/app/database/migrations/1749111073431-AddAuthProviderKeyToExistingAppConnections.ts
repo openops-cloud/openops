@@ -1,9 +1,7 @@
 import { fileBlocksUtils, logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAuthProviderKeyToExistingAppConnections1749111073431
-  implements MigrationInterface
-{
+export class AddAuthProviderKeyToExistingAppConnections1749111073431 implements MigrationInterface {
   name = 'AddAuthProviderKeyToExistingAppConnections1749111073431';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

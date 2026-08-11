@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 
 import { cn } from '../lib/cn';
 
-interface ImageWithFallbackProps
-  extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: React.ReactNode;
 }
 

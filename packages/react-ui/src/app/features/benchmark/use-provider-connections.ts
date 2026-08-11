@@ -15,8 +15,7 @@ import {
 
 function buildConnectedProvidersMap(
   groupedConnections:
-    | Record<string, AppConnectionWithoutSensitiveData[]>
-    | undefined,
+    Record<string, AppConnectionWithoutSensitiveData[]> | undefined,
 ): Record<string, boolean> {
   return Object.fromEntries(
     getEnabledProviders().map((p) => [

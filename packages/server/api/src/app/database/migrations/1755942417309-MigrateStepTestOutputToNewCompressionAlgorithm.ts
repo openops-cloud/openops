@@ -7,9 +7,7 @@ import {
 import { FileCompression } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class MigrateStepTestOutputToNewCompressionAlgorithm1755942417309
-  implements MigrationInterface
-{
+export class MigrateStepTestOutputToNewCompressionAlgorithm1755942417309 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info(
       'MigrateStepTestOutputToNewCompressionAlgorithm1755942417309: starting',

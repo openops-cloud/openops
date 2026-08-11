@@ -37,9 +37,8 @@ async function markExpiredWorkflowsAsFailed(
   expiredISOString: string,
 ): Promise<void> {
   try {
-    const expiredFlowRuns = await flowRunService.getRunningWorkflowsOlderThan(
-      expiredISOString,
-    );
+    const expiredFlowRuns =
+      await flowRunService.getRunningWorkflowsOlderThan(expiredISOString);
 
     for (const flowRun of expiredFlowRuns) {
       await flowRunService.updateStatus({

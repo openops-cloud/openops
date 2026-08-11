@@ -342,8 +342,8 @@ function extractValue(value: unknown): unknown {
     typeof value === 'object'
       ? value
       : typeof value === 'string'
-      ? parseToList(value)
-      : value;
+        ? parseToList(value)
+        : value;
 
   if (returnValue === undefined) {
     returnValue = value;

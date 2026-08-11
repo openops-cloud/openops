@@ -8,7 +8,10 @@ import { OpenOpsId } from './id-generator';
 import { Permission } from './security';
 
 export class ApplicationError extends Error {
-  constructor(public error: ApplicationErrorParams, message?: string) {
+  constructor(
+    public error: ApplicationErrorParams,
+    message?: string,
+  ) {
     super(error.code + (message ? `: ${message}` : ''));
   }
 }

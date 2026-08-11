@@ -3,9 +3,7 @@ import { AppSystemProp, system } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { authAdminUserOnTables } from './common/authenticate-tables-admin';
 
-export class MigrateTablesUserPassword1763755045436
-  implements MigrationInterface
-{
+export class MigrateTablesUserPassword1763755045436 implements MigrationInterface {
   name = 'MigrateTablesUserPassword1763755045436';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

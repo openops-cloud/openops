@@ -17,8 +17,9 @@ const statusCodeVariants = cva(
   },
 );
 
-interface StatusIconWithTextProps
-  extends VariantProps<typeof statusCodeVariants> {
+interface StatusIconWithTextProps extends VariantProps<
+  typeof statusCodeVariants
+> {
   icon: any;
   text: string;
   explanation?: string;

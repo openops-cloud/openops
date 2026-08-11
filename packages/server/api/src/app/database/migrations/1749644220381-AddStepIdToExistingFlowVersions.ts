@@ -3,9 +3,7 @@ import { logger } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddStepIdToExistingFlowVersions1749644220381
-  implements MigrationInterface
-{
+export class AddStepIdToExistingFlowVersions1749644220381 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('AddStepIdToExistingFlowVersions1749644220381: starting');
 

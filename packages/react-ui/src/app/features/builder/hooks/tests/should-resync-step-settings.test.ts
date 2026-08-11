@@ -2,7 +2,7 @@ import { FlowVersion } from '@openops/shared';
 import { shouldResyncStepSettings } from '../should-resync-step-settings';
 
 const version = (id: string, updated: string): FlowVersion =>
-  ({ id, updated } as FlowVersion);
+  ({ id, updated }) as FlowVersion;
 
 describe('shouldResyncStepSettings', () => {
   it('does not resync when the refetched version matches the current one', () => {

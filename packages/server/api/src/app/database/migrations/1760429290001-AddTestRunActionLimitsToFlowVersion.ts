@@ -3,9 +3,7 @@ import { Trigger } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { calculateTestRunActionLimits } from '../../flows/flow-version/test-run-action-limits-calculator';
 
-export class AddTestRunActionLimitsToFlowVersion1760429290001
-  implements MigrationInterface
-{
+export class AddTestRunActionLimitsToFlowVersion1760429290001 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('AddTestRunActionLimitsToFlowVersion1760429290001: starting');
 

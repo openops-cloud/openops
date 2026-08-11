@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RenameIsWorkflowToIsInternal1756377588949
-  implements MigrationInterface
-{
+export class RenameIsWorkflowToIsInternal1756377588949 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('RenameIsWorkflowToIsInternal1756377588949: starting');
 

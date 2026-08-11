@@ -47,8 +47,7 @@ type CreateActionParams<
 export class IAction<
   BlockAuth extends BlockAuthProperty,
   ActionProps extends InputPropertyMap,
-> implements ActionBase
-{
+> implements ActionBase {
   constructor(
     public readonly name: string,
     public readonly displayName: string,

@@ -58,8 +58,7 @@ export const updateProjectJsonConfig = async (blockName: string) => {
 
   projectJson.targets.build.options.buildableProjectDepsInPackageJsonType =
     'dependencies';
-  projectJson.targets.build.options.updateBuildableProjectDepsInPackageJson =
-    true;
+  projectJson.targets.build.options.updateBuildableProjectDepsInPackageJson = true;
 
   const lintFilePatterns = projectJson.targets.lint?.options?.lintFilePatterns;
 

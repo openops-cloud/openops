@@ -25,9 +25,8 @@ export async function getFeatureFlag<T>(
   engineToken: string,
   flagId: FlagId,
 ): Promise<T> {
-  let featureFlags = await cacheWrapper.getSerializedObject<
-    Record<string, unknown>
-  >(cacheKey);
+  let featureFlags =
+    await cacheWrapper.getSerializedObject<Record<string, unknown>>(cacheKey);
 
   if (featureFlags) {
     return featureFlags[flagId] as T;

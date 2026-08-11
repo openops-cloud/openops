@@ -15,11 +15,10 @@ import {
 } from '@/app/features/folders/component/move-to-folder-dialog';
 import { flowsApi } from '../lib/flows-api';
 
-interface MoveFlowDialogProps
-  extends Pick<
-    MoveToFolderDialogProps<PopulatedFlow>,
-    'children' | 'onMoveTo'
-  > {
+interface MoveFlowDialogProps extends Pick<
+  MoveToFolderDialogProps<PopulatedFlow>,
+  'children' | 'onMoveTo'
+> {
   flow: Flow;
   flowVersion: FlowVersion;
 }

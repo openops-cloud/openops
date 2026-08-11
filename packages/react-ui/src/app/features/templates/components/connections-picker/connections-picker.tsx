@@ -125,7 +125,7 @@ const ConnectionsPicker = ({
 
         const shouldPrefill = integration.auth?.required ?? false;
         connections[integration.name] =
-          usedConnection ?? (shouldPrefill ? options[0] ?? null : null);
+          usedConnection ?? (shouldPrefill ? (options[0] ?? null) : null);
       });
 
       setSelectedConnections(connections);

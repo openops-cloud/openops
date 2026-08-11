@@ -27,8 +27,7 @@ export const onActionReceived = async ({
   context: any;
 }) => {
   const resumePayload = context.resumePayload?.queryParams as unknown as
-    | (InteractionPayload & Record<string, string>)
-    | undefined;
+    (InteractionPayload & Record<string, string>) | undefined;
   const isResumedDueToButtonClicked = !!resumePayload?.button;
 
   if (!isResumedDueToButtonClicked) {

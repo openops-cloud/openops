@@ -1,21 +1,12 @@
 {
   "extends": "../../.eslintrc.json",
-  "ignorePatterns": [
-    "!**/*"
-  ],
+  "ignorePatterns": ["!**/*"],
   "overrides": [
     {
-      "files": [
-        "*.ts",
-        "*.tsx",
-        "*.js",
-        "*.jsx"
-      ],
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {},
       "parserOptions": {
-        "project": [
-          "packages/openops/tsconfig.*?.json"
-        ]
+        "project": ["packages/openops/tsconfig.*?.json"]
       }
     }
   ]

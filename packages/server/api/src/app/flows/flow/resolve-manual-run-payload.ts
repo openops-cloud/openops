@@ -58,7 +58,7 @@ export async function resolveManualPayload(
 
         const payload =
           result?.success && Array.isArray(result.output)
-            ? result.output[0] ?? {}
+            ? (result.output[0] ?? {})
             : {};
 
         return {

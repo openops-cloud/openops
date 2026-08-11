@@ -1,13 +1,9 @@
 {
-  "inputs": [
-    "./package.json"
-  ],
+  "inputs": ["./package.json"],
   "output": "./THIRD_PARTY_LICENSES.txt",
   "lineEnding": "lf",
   "ci": true,
-  "append": [
-    "./THIRD_PARTY_LICENSES_ADDITIONAL.txt"
-  ],
+  "append": ["./THIRD_PARTY_LICENSES_ADDITIONAL.txt"],
   "replace": {
     "sax": "./node_modules/sax/LICENSE",
     "mailsplit": "./node_modules/mailsplit/LICENSE.MIT",

@@ -89,20 +89,23 @@ const PublicFlowTemplateFilterSidebarWrapper = ({
   const categoryLogos = useMemo(() => {
     if (!categories || !cloudBlocks) return {} as Record<string, string>;
 
-    return categories.reduce((acc, category: TemplateSidebarCategory) => {
-      const block = cloudBlocks.find((block) => {
-        const normalizedName = category.name.toLowerCase();
+    return categories.reduce(
+      (acc, category: TemplateSidebarCategory) => {
+        const block = cloudBlocks.find((block) => {
+          const normalizedName = category.name.toLowerCase();
 
-        return (
-          block.name.includes(normalizedName) ||
-          block.displayName.toLowerCase().includes(normalizedName)
-        );
-      });
-      if (block) {
-        acc[category.name] = block.logoUrl;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+          return (
+            block.name.includes(normalizedName) ||
+            block.displayName.toLowerCase().includes(normalizedName)
+          );
+        });
+        if (block) {
+          acc[category.name] = block.logoUrl;
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   }, [cloudBlocks, categories]);
 
   const blocksWithTemplates = blocks?.filter((block) =>

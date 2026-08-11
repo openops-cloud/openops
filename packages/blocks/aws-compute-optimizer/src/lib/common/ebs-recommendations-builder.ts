@@ -18,9 +18,10 @@ import {
 } from './get-recommendations';
 import { RecommendationsBuilder } from './recommendations-builder';
 
-export class EbsRecommendationsBuilder
-  implements RecommendationsBuilder<EBSFinding, VolumeRecommendation>
-{
+export class EbsRecommendationsBuilder implements RecommendationsBuilder<
+  EBSFinding,
+  VolumeRecommendation
+> {
   recommendationType: any;
   findingType: EBSFinding;
   credentials: any;

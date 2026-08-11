@@ -3,9 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 import { openopsTables } from '../../openops-tables';
 import { authAdminUserOnTables } from './common/authenticate-tables-admin';
 
-export class AddTablesDatabaseTokenToProject1763394159990
-  implements MigrationInterface
-{
+export class AddTablesDatabaseTokenToProject1763394159990 implements MigrationInterface {
   name = 'AddTablesDatabaseTokenToProject1763394159990';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

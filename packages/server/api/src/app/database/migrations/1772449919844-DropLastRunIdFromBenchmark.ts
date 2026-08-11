@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class DropLastRunIdFromBenchmark1772449919844
-  implements MigrationInterface
-{
+export class DropLastRunIdFromBenchmark1772449919844 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('DropLastRunIdFromBenchmark1772449919844: starting');
 

@@ -24,9 +24,8 @@ export async function seedAnalyticsDashboards(): Promise<void> {
 
   const { access_token } = await authenticateOpenOpsAnalyticsAdmin();
 
-  const dbConnection = await getOrCreateOpenOpsTablesDatabaseConnection(
-    access_token,
-  );
+  const dbConnection =
+    await getOrCreateOpenOpsTablesDatabaseConnection(access_token);
 
   const homepage = await createOrGetDashboard(
     access_token,

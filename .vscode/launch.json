@@ -1,33 +1,27 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "backend",
-            "port": 9229,
-            "request": "attach",
-            "skipFiles": [
-                "<node_internals>/**",
-                "**/node_modules/**"
-            ],
-            "type": "node",
-            "localRoot": "${workspaceFolder}/packages/server/api/",
-            "remoteRoot": "/usr/src/app",
-            "restart": true,
-            "autoAttachChildProcesses": false
-        },
-        {
-            "name": "engine",
-            "port": 9230,
-            "request": "attach",
-            "skipFiles": [
-                "<node_internals>/**",
-                "**/node_modules/**"
-            ],
-            "type": "node",
-            "localRoot": "${workspaceFolder}/packages/engine",
-            "remoteRoot": "/usr/src/app",
-            "restart": true,
-            "autoAttachChildProcesses": false
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "backend",
+      "port": 9229,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "type": "node",
+      "localRoot": "${workspaceFolder}/packages/server/api/",
+      "remoteRoot": "/usr/src/app",
+      "restart": true,
+      "autoAttachChildProcesses": false
+    },
+    {
+      "name": "engine",
+      "port": 9230,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "type": "node",
+      "localRoot": "${workspaceFolder}/packages/engine",
+      "remoteRoot": "/usr/src/app",
+      "restart": true,
+      "autoAttachChildProcesses": false
+    }
+  ]
 }

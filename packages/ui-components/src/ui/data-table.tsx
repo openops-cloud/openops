@@ -313,13 +313,17 @@ export function DataTable<
       const filterNames = (filters ?? []).map((filter) => filter.accessorKey);
       const paramsObject = filterNames
         .map((key) => [key, params.getAll(key)] as const)
-        .reduce((acc, [key, values]) => {
-          const value = values.length === 1 ? values?.[0] || undefined : values;
-          if (!value) {
-            return acc;
-          }
-          return { ...acc, [key]: value };
-        }, {} as FilterRecord<Keys, F>);
+        .reduce(
+          (acc, [key, values]) => {
+            const value =
+              values.length === 1 ? values?.[0] || undefined : values;
+            if (!value) {
+              return acc;
+            }
+            return { ...acc, [key]: value };
+          },
+          {} as FilterRecord<Keys, F>,
+        );
 
       const response = await fetchData(paramsObject, {
         cursor: params.get(DATA_TABLE_SEARCH_PARAM.CURSOR) ?? undefined,
@@ -500,8 +504,7 @@ export function DataTable<
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const meta = header.column.columnDef.meta as
-                    | { className?: string }
-                    | undefined;
+                    { className?: string } | undefined;
 
                   return (
                     <TableHead key={header.id} className={meta?.className}>
@@ -540,8 +543,7 @@ export function DataTable<
                   >
                     {row.getVisibleCells().map((cell) => {
                       const meta = cell.column.columnDef.meta as
-                        | { className?: string }
-                        | undefined;
+                        { className?: string } | undefined;
                       return (
                         <TableCell
                           key={cell.id}
