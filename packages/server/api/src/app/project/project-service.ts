@@ -17,7 +17,7 @@ import {
   User,
   UserId,
 } from '@openops/shared';
-import { IsNull } from 'typeorm';
+import { In, IsNull } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
 import { openopsTables } from '../openops-tables';
 import { ProjectEntity } from './project-entity';
@@ -94,6 +94,16 @@ export const projectService = {
     });
 
     return projects.map((project) => project.id);
+  },
+
+  async getManyByIds(projectIds: ProjectId[]): Promise<Project[]> {
+    if (projectIds.length === 0) {
+      return [];
+    }
+
+    return projectRepo().find({
+      where: { id: In(projectIds), deleted: IsNull() },
+    });
   },
 
   async getOneOrThrow(projectId: ProjectId): Promise<Project> {

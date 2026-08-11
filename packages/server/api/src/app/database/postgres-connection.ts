@@ -39,6 +39,7 @@ import { AddBenchmarkAndBenchmarkFlowTables1770297289194 } from './migrations/17
 import { DropLastRunIdFromBenchmark1772449919844 } from './migrations/1772449919844-DropLastRunIdFromBenchmark';
 import { AddIsCleanupToBenchmarkFlow1773046640936 } from './migrations/1773046640936-AddIsCleanupToBenchmarkFlow';
 import { FixFolderUniqueConstraint1776097737024 } from './migrations/1776097737024-FixFolderUniqueConstraint';
+import { CreateOAuthTables1786355547856 } from './migrations/1786355547856-CreateOAuthTables';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -90,6 +91,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     DropLastRunIdFromBenchmark1772449919844,
     AddIsCleanupToBenchmarkFlow1773046640936,
     FixFolderUniqueConstraint1776097737024,
+    CreateOAuthTables1786355547856,
   ];
 };
 
