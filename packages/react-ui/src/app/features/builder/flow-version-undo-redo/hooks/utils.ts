@@ -46,9 +46,8 @@ const processMoveAction = async (
 
   // Retrieve the operation from the source stack's top
   const operationKey = createKey(moveAction.from, flowId, metadata[fromTopKey]);
-  const operation = await localforage.getItem<FlowVersionUndoRedoHistoryItem>(
-    operationKey,
-  );
+  const operation =
+    await localforage.getItem<FlowVersionUndoRedoHistoryItem>(operationKey);
 
   if (operation) {
     // Remove the operation from the source stack's top

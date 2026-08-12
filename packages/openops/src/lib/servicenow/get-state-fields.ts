@@ -33,7 +33,7 @@ export async function getServiceNowStateFields(
         const internalType =
           typeof f.internal_type === 'string'
             ? f.internal_type
-            : f.internal_type?.value ?? '';
+            : (f.internal_type?.value ?? '');
         return (
           internalType === 'choice' || f.choice === '1' || f.choice === '3'
         );
@@ -44,7 +44,7 @@ export async function getServiceNowStateFields(
         internal_type:
           typeof f.internal_type === 'string'
             ? f.internal_type
-            : f.internal_type?.value ?? '',
+            : (f.internal_type?.value ?? ''),
       }));
   } catch (error) {
     logger.warn('Error fetching ServiceNow state fields', { error });

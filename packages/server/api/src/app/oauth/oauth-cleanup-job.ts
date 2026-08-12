@@ -85,9 +85,8 @@ export const oauthCleanupJobHandler = async (): Promise<void> => {
   const authorizationCodes = await codeRepo().delete({
     expiresAt: earlierThan(nowDate),
   });
-  const pendingAuthorizations = await pendingAuthorizationService.deleteExpired(
-    nowDate,
-  );
+  const pendingAuthorizations =
+    await pendingAuthorizationService.deleteExpired(nowDate);
   // Expiry is the only anchor, revoked rows included: keeping a rotated token until it
   // could no longer be used anyway is what lets reuse detection still recognise a replay
   // as a compromise rather than a plain `invalid refresh token`.

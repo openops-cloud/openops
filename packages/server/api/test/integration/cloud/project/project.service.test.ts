@@ -240,9 +240,8 @@ describe('Project Service', () => {
     it('should return null when organization does not exist', async () => {
       const nonExistentOrgId = openOpsId();
 
-      const result = await projectService.getOneForOrganization(
-        nonExistentOrgId,
-      );
+      const result =
+        await projectService.getOneForOrganization(nonExistentOrgId);
 
       expect(result).toBeNull();
     });

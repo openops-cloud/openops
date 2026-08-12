@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class FixFolderUniqueConstraint1776097737024
-  implements MigrationInterface
-{
+export class FixFolderUniqueConstraint1776097737024 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('FixFolderUniqueConstraint1776097737024: starting');
 

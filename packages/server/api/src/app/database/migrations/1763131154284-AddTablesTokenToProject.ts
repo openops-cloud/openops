@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddTablesTokenToProject1763131154284
-  implements MigrationInterface
-{
+export class AddTablesTokenToProject1763131154284 implements MigrationInterface {
   name = 'AddTablesTokenToProject1763131154284';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddBenchmarkAndBenchmarkFlowTables1770297289194
-  implements MigrationInterface
-{
+export class AddBenchmarkAndBenchmarkFlowTables1770297289194 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('AddBenchmarkAndBenchmarkFlowTables1770297289194: starting');
 

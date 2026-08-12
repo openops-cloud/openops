@@ -70,16 +70,16 @@ export type AppConnectionValue<
 > = T extends AppConnectionType.SECRET_TEXT
   ? SecretTextConnectionValue
   : T extends AppConnectionType.BASIC_AUTH
-  ? BasicAuthConnectionValue
-  : T extends AppConnectionType.CLOUD_OAUTH2
-  ? CloudOAuth2ConnectionValue
-  : T extends AppConnectionType.PLATFORM_OAUTH2
-  ? PlatformOAuth2ConnectionValue
-  : T extends AppConnectionType.OAUTH2
-  ? OAuth2ConnectionValueWithApp
-  : T extends AppConnectionType.CUSTOM_AUTH
-  ? CustomAuthConnectionValue
-  : never;
+    ? BasicAuthConnectionValue
+    : T extends AppConnectionType.CLOUD_OAUTH2
+      ? CloudOAuth2ConnectionValue
+      : T extends AppConnectionType.PLATFORM_OAUTH2
+        ? PlatformOAuth2ConnectionValue
+        : T extends AppConnectionType.OAUTH2
+          ? OAuth2ConnectionValueWithApp
+          : T extends AppConnectionType.CUSTOM_AUTH
+            ? CustomAuthConnectionValue
+            : never;
 
 export type AppConnection<Type extends AppConnectionType = AppConnectionType> =
   BaseModel<AppConnectionId> & {

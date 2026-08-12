@@ -61,9 +61,8 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       const { flowVersionId } = request.params;
       const updateData = request.body;
       try {
-        const flowVersion = await flowVersionService.getOneOrThrow(
-          flowVersionId,
-        );
+        const flowVersion =
+          await flowVersionService.getOneOrThrow(flowVersionId);
         if (flowVersion.flowId !== updateData.flowId) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
@@ -233,9 +232,8 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       const { flowVersionId } = request.params;
       const { stepId, input, output, success } = request.body;
       try {
-        const flowVersion = await flowVersionService.getOneOrThrow(
-          flowVersionId,
-        );
+        const flowVersion =
+          await flowVersionService.getOneOrThrow(flowVersionId);
 
         await assertFlowVersionBelongsToProject(
           flowVersion,

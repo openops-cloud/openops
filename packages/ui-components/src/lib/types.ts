@@ -31,8 +31,7 @@ export type BlockStepMetadataWithSuggestions = BlockStepMetadata &
   Pick<BlockMetadataModelSummary, 'suggestedActions' | 'suggestedTriggers'>;
 
 export type StepMetadataWithSuggestions =
-  | BlockStepMetadataWithSuggestions
-  | PrimitiveStepMetadata;
+  BlockStepMetadataWithSuggestions | PrimitiveStepMetadata;
 
 export type StepMetadata = BlockStepMetadata | PrimitiveStepMetadata;
 
@@ -68,8 +67,4 @@ export type HandleSelectCallback = (
 ) => void;
 
 export type BenchmarkRunPhase =
-  | 'idle'
-  | 'running'
-  | 'failed'
-  | 'succeeded'
-  | 'succeeded_with_failures';
+  'idle' | 'running' | 'failed' | 'succeeded' | 'succeeded_with_failures';

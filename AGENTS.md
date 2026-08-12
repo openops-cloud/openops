@@ -260,7 +260,7 @@ Run "npx nx lint" to verify code style before committing.
   - Newline at end of file
 - **Linting:** Use ESLint as configured in each package
 - **Formatting:** Follow Prettier rules if configured
-- Respect `.editorconfig`, `.eslintrc`, `.prettierrc`, and other config files
+- Respect `.editorconfig`, `eslint.config.mjs`, `.prettierrc`, and other config files
 
 ### Naming Conventions
 

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAuthProviderKeyToAppConnectionTable1749066895522
-  implements MigrationInterface
-{
+export class AddAuthProviderKeyToAppConnectionTable1749066895522 implements MigrationInterface {
   name = 'AddAuthProviderKeyToAppConnectionTable1749066895522';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

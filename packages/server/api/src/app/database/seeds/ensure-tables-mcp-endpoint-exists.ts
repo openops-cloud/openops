@@ -7,9 +7,8 @@ export const ensureTablesMcpEndpointExists = async (): Promise<void> => {
   await applyToEachTablesDatabase(async (tablesContext): Promise<void> => {
     const tokenOrResolver = await resolveTokenProvider(tablesContext);
 
-    const mcpEndpoints = await openopsTables.getMcpEndpointList(
-      tokenOrResolver,
-    );
+    const mcpEndpoints =
+      await openopsTables.getMcpEndpointList(tokenOrResolver);
 
     const endpointExists = mcpEndpoints.some(
       (endpoint) => endpoint.workspace_id === tablesContext.tablesWorkspaceId,

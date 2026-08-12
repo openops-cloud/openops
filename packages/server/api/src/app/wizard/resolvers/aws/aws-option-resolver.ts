@@ -46,8 +46,7 @@ export async function getConnectionAccounts(
   });
 
   const props = (connection.value as CustomAuthConnectionValue)?.props as
-    | AwsAuthProps
-    | undefined;
+    AwsAuthProps | undefined;
   const roles = props?.roles;
   if (!roles?.length) {
     return [];

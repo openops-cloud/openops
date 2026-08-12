@@ -49,8 +49,7 @@ export const getRecommendationsAction = createAction({
         : ([parsedAccounts] as SelectedAccount[]);
 
       const recommendationTypes = context.propsValue.recommendationTypes as
-        | string[]
-        | undefined;
+        string[] | undefined;
 
       const props = {
         ...context.propsValue,

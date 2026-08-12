@@ -113,7 +113,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     },
     async (request) => {
       const { flowId, projectId, payloads } = request.body;
-      const savePayloads = payloads.map((payload) =>
+      payloads.forEach((payload) =>
         rejectedPromiseHandler(
           triggerEventService.saveEvent({
             flowId,
@@ -123,7 +123,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
           }),
         ),
       );
-      rejectedPromiseHandler(Promise.all(savePayloads));
       return {};
     },
   );

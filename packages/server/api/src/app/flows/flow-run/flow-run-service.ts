@@ -464,9 +464,9 @@ export const flowRunService = {
 
       const stateToPersist = hasSteps
         ? executionState
-        : (await inFlightRunStateCache.get(flowRunId)) ??
+        : ((await inFlightRunStateCache.get(flowRunId)) ??
           executionState ??
-          null;
+          null);
 
       const logFileId = await updateLogs({
         logsFileId: flowRun.logsFileId || null,

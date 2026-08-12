@@ -23,7 +23,8 @@ const checkboxVariants = cva('flex items-center justify-center rounded-xs', {
 });
 
 export interface SelectAllCheckboxProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof checkboxVariants> {
   id?: string;
   selectedCount: number;

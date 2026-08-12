@@ -1,8 +1,0 @@
-node_modules
-/deploy
-package.json
-/.nx
-/cache
-/dev
-/dist
-/.vscode

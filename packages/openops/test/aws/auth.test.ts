@@ -64,9 +64,8 @@ async function reimportAuthWithImplicitRole() {
   mockSystem.getBoolean.mockReturnValue(true);
   jest.resetModules();
   mockSystem.getBoolean.mockReturnValue(true);
-  const { amazonAuth: freshAmazonAuth } = await import(
-    '../../src/lib/aws/auth'
-  );
+  const { amazonAuth: freshAmazonAuth } =
+    await import('../../src/lib/aws/auth');
   return freshAmazonAuth;
 }
 

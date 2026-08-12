@@ -261,7 +261,7 @@ describe('clientsService', () => {
         grantTypes,
         tokenEndpointAuthMethod: 'none',
         clientSecretHash: null,
-      } as OAuthClient);
+      }) as OAuthClient;
 
     it('allows a grant type the client registered', () => {
       expect(() =>
@@ -419,9 +419,8 @@ describe('clientsService', () => {
         'basic ',
       );
 
-      const client = await clientsService.authenticateResourceServerClient(
-        header,
-      );
+      const client =
+        await clientsService.authenticateResourceServerClient(header);
 
       expect(client.id).toBe(RS_CLIENT_ID);
     });
@@ -437,9 +436,8 @@ describe('clientsService', () => {
         `${RS_CLIENT_ID}:${encodeURIComponent(secret)}`,
       ).toString('base64')}`;
 
-      const client = await clientsService.authenticateResourceServerClient(
-        header,
-      );
+      const client =
+        await clientsService.authenticateResourceServerClient(header);
 
       expect(client.id).toBe(RS_CLIENT_ID);
     });

@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitializePostgresSchema1740463047000
-  implements MigrationInterface
-{
+export class InitializePostgresSchema1740463047000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const userTableExistsQueryResponse: { exists: boolean }[] =
       await queryRunner.query(

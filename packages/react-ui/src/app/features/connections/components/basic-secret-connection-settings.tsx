@@ -6,7 +6,7 @@ import {
   FormLabel,
   Input,
 } from '@openops/components/ui';
-import { Static, Type } from '@sinclair/typebox';
+import { Static } from '@sinclair/typebox';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -19,10 +19,9 @@ type BasicAuthConnectionSettingsProps = {
 
 const BasicAuthConnectionSettings = React.memo(
   ({ authProperty }: BasicAuthConnectionSettingsProps) => {
-    const forSchema = Type.Object({
-      request: UpsertBasicAuthRequest,
-    });
-    const form = useFormContext<Static<typeof forSchema>>();
+    const form = useFormContext<{
+      request: Static<typeof UpsertBasicAuthRequest>;
+    }>();
 
     return (
       <>

@@ -183,10 +183,10 @@ export const formUtils = {
         const actionName = selectedStep?.settings?.actionName;
         const requireAuth = isNil(actionName)
           ? false
-          : block?.actions?.[actionName]?.requireAuth ?? false;
+          : (block?.actions?.[actionName]?.requireAuth ?? false);
         const actionPropsWithoutAuth =
           actionName !== undefined
-            ? block?.actions?.[actionName]?.props ?? {}
+            ? (block?.actions?.[actionName]?.props ?? {})
             : {};
         const props = addAuthToBlockProps(
           actionPropsWithoutAuth,
@@ -214,7 +214,7 @@ export const formUtils = {
         const triggerName = selectedStep?.settings?.triggerName;
         const triggerPropsWithoutAuth =
           triggerName !== undefined
-            ? block?.triggers?.[triggerName]?.props ?? {}
+            ? (block?.triggers?.[triggerName]?.props ?? {})
             : {};
         const props = addAuthToBlockProps(
           triggerPropsWithoutAuth,

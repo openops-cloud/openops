@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddColumnForStartupTemplates1741016911542
-  implements MigrationInterface
-{
+export class AddColumnForStartupTemplates1741016911542 implements MigrationInterface {
   name = 'AddColumnForStartupTemplates1741016911542';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

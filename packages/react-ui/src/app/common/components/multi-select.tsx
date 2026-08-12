@@ -264,8 +264,9 @@ const MultiSelectTrigger = React.forwardRef<
 
 MultiSelectTrigger.displayName = 'MultiSelectTrigger';
 
-interface MultiSelectValueProps
-  extends ComponentPropsWithoutRef<typeof Primitive.div> {
+interface MultiSelectValueProps extends ComponentPropsWithoutRef<
+  typeof Primitive.div
+> {
   placeholder?: string;
   maxDisplay?: number;
   maxItemLength?: number;
@@ -519,7 +520,7 @@ const MultiSelectItem = React.forwardRef<
 
     const disabled = Boolean(
       disabledProp ||
-        (!selected && maxCount && contextValue.length >= maxCount),
+      (!selected && maxCount && contextValue.length >= maxCount),
     );
 
     const handleClick = () => {

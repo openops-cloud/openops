@@ -73,8 +73,7 @@ async function executeStep(
   input: ExecuteStepOperation,
 ): Promise<ExecuteActionResponse> {
   const step = flowHelper.getStep(input.flowVersion, input.stepName) as
-    | Action
-    | undefined;
+    Action | undefined;
 
   if (isNil(step) || !Object.values(ActionType).includes(step.type)) {
     throw new Error('Step not found or not supported');

@@ -4,7 +4,10 @@ import axiosRetry from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
 
 export class ApplicationAxiosError extends Error {
-  constructor(public error: AxiosError, message?: string) {
+  constructor(
+    public error: AxiosError,
+    message?: string,
+  ) {
     super(message);
   }
 }

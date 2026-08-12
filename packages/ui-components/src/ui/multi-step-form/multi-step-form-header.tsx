@@ -47,8 +47,7 @@ const MultiStepFormTitle = React.forwardRef<
 });
 MultiStepFormTitle.displayName = 'MultiStepFormTitle';
 
-interface MultiStepFormCloseProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MultiStepFormCloseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onClose?: () => void;
 }
 

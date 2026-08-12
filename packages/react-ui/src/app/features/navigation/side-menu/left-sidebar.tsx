@@ -17,8 +17,9 @@ import {
 import * as ResizablePrimitive from 'react-resizable-panels';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
-interface ResizablePanelProps
-  extends ComponentProps<typeof ResizablePrimitive.Panel> {
+interface ResizablePanelProps extends ComponentProps<
+  typeof ResizablePrimitive.Panel
+> {
   className?: string;
 }
 

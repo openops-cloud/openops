@@ -88,8 +88,7 @@ export const ec2GetRecommendationsAction = createAction({
   async run(context) {
     try {
       const accounts = context.propsValue['accounts']['accounts'] as unknown as
-        | string[]
-        | undefined;
+        string[] | undefined;
       const findingType = getFindingType(context);
       const resourceArns = context.propsValue.filterProperty['resourceARNs'];
       const partial = context.propsValue.allowPartialResults === true;

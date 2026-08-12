@@ -31,8 +31,7 @@ export const getRecommendationsSummaryAction = createAction({
   async run(context) {
     try {
       const accounts = context.propsValue['accounts']['accounts'] as unknown as
-        | string[]
-        | undefined;
+        string[] | undefined;
       const regions = convertToRegionsArrayWithValidation(
         context.propsValue.regions,
       );

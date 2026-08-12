@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddFlowStepTestOutputTable1746454781866
-  implements MigrationInterface
-{
+export class AddFlowStepTestOutputTable1746454781866 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('AddFlowStepTestOutputTable1746454781866: starting');
 
