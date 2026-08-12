@@ -118,7 +118,7 @@ export async function getRecommendations({
   // The rightsizing API wraps recommendations as { result: [...] }; merge the
   // arrays across chunks and keep the shape the API responded with.
   const merged = responses.flatMap((response) =>
-    Array.isArray(response) ? response : response?.result ?? [],
+    Array.isArray(response) ? response : (response?.result ?? []),
   );
   // When chunked, apply the limit after merging; this truncates results in
   // chunk request order (and whatever order the API returns within each

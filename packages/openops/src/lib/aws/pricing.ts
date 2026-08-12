@@ -15,9 +15,7 @@ import { getAwsClient } from './get-client';
 
 // https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html#price-list-query-api-endpoints
 export type SupportedPricingRegion =
-  | 'us-east-1'
-  | 'eu-central-1'
-  | 'ap-south-1';
+  'us-east-1' | 'eu-central-1' | 'ap-south-1';
 
 export async function getServices(
   credentials: any,

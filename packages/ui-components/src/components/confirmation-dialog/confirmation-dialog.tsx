@@ -1,4 +1,6 @@
 import { t } from 'i18next';
+import type { ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 import { Button, ButtonProps } from '../../ui/button';
 import {
   Dialog,
@@ -17,19 +19,16 @@ type ConfirmationDialogProps = {
   className?: string;
   titleClassName?: string;
   descriptionClassName?: string;
-  /**
-   * Styling for the confirm action. Defaults to the primary button; pass
-   * `destructive` when confirming destroys something, so the dialog matches the
-   * control that opened it.
-   */
-  confirmButtonVariant?: ButtonProps['variant'];
+  /** Renders beside the title and description (e.g. warning icon) for modal layouts that need a leading visual. */
+  headerLeading?: ReactNode;
   children?: React.ReactNode;
 };
 
 export type ConfirmationDialogContent = {
   title: string;
-  description: string;
+  description: ReactNode;
   confirmButtonText?: string;
+  confirmButtonVariant?: ButtonProps['variant'];
   cancelButtonText?: string;
 };
 
@@ -39,22 +38,43 @@ const ConfirmationDialog = ({
   title,
   description,
   confirmButtonText,
+  confirmButtonVariant,
   cancelButtonText,
   onConfirm,
   onCancel,
   titleClassName,
   descriptionClassName,
-  confirmButtonVariant,
+  headerLeading,
+  className,
   children,
 }: ConfirmationDialogProps & ConfirmationDialogContent) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader className="mb-0">
-          <DialogTitle className={titleClassName}>{title}</DialogTitle>
-          <DialogDescription className={descriptionClassName}>
-            {description}
-          </DialogDescription>
+      <DialogContent className={cn(className)}>
+        <DialogHeader
+          className={cn(
+            'mb-0',
+            headerLeading != null && 'gap-0 space-y-0 sm:text-left',
+          )}
+        >
+          {headerLeading != null ? (
+            <div className="flex w-full items-start gap-4">
+              <div className="shrink-0">{headerLeading}</div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1 text-left">
+                <DialogTitle className={titleClassName}>{title}</DialogTitle>
+                <DialogDescription className={descriptionClassName}>
+                  {description}
+                </DialogDescription>
+              </div>
+            </div>
+          ) : (
+            <>
+              <DialogTitle className={titleClassName}>{title}</DialogTitle>
+              <DialogDescription className={descriptionClassName}>
+                {description}
+              </DialogDescription>
+            </>
+          )}
         </DialogHeader>
         {children}
         <DialogFooter>

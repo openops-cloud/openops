@@ -41,11 +41,9 @@ export const forwardEmailAction = createAction({
     const { messageId, comment } = context.propsValue;
     const recipients = context.propsValue.recipients as string[];
     const ccRecipients = context.propsValue.ccRecipients as
-      | string[]
-      | undefined;
+      string[] | undefined;
     const bccRecipients = context.propsValue.bccRecipients as
-      | string[]
-      | undefined;
+      string[] | undefined;
 
     const client = getMicrosoftGraphClient(context.auth.access_token);
 

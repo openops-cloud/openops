@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddProviderSettingsAndConstraintForAiConfig1745309649736
-  implements MigrationInterface
-{
+export class AddProviderSettingsAndConstraintForAiConfig1745309649736 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info(
       'AddProviderSettingsAndConstraintForAiConfig1745309649736: starting',

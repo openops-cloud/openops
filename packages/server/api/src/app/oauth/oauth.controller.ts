@@ -15,36 +15,36 @@ import {
   readParam,
   requireParam,
   validateAuthorizeRequest,
-} from './authorize-validation';
-import { listAvailableProjects } from './available-projects';
-import { stripTrailingSlashes } from './canonical-url';
-import { clientsService, TOKEN_EXCHANGE_GRANT } from './clients.service';
-import { grantsService } from './grants.service';
-import { oauthConfig } from './oauth-config';
-import { invalidRequest, unsupportedGrantType } from './oauth-errors';
-import { OAuthClient } from './oauth-model';
-import { pendingAuthorizationService } from './pending-authorization.service';
-import { resolveResource } from './resource-registry';
-import { exchangeToken } from './token-exchange';
-import { tokensService } from './tokens.service';
+} from './authorization/authorize-validation';
+import { pendingAuthorizationService } from './authorization/pending-authorization.service';
+import {
+  clientsService,
+  TOKEN_EXCHANGE_GRANT,
+} from './clients/clients.service';
+import { grantsService } from './clients/grants.service';
+import { stripTrailingSlashes } from './common/canonical-url';
+import { invalidRequest, unsupportedGrantType } from './common/oauth-errors';
+import { oauthConfig } from './config/oauth-config';
+import { resolveResource } from './discovery/resource-registry';
+import { listAvailableProjects } from './projects/available-projects';
+import { OAuthClient } from './storage/oauth-model';
+import { exchangeToken } from './tokens/token-exchange';
+import { tokensService } from './tokens/tokens.service';
 
 const REGISTRATION_RATE_LIMIT: RateLimitOptions = {
   max: 10,
   timeWindow: '1 minute',
 };
 
-// Refresh is a routine background operation for connected agents, so this ceiling
-// is well above normal use while still bounding brute-force attempts.
+// Refresh is a routine background operation for connected agents, so this sits well above
+// normal use while still bounding brute-force attempts.
 const TOKEN_RATE_LIMIT: RateLimitOptions = {
   max: 120,
   timeWindow: '1 minute',
 };
 
-/**
- * Required on the consent decision. A cross-site form post cannot set a custom
- * header, which — together with the single-use pending record — keeps a third
- * party from driving the decision on a logged-in user's behalf.
- */
+// A cross-site form post cannot set a custom header, so requiring this on the decision
+// keeps a third party from driving it on a logged-in user's behalf.
 const CONSENT_HEADER = 'x-openops-consent';
 
 function buildRedirectUrl(
@@ -70,7 +70,7 @@ function renderAuthorizeError(
   error: string,
   description: string,
 ): FastifyReply {
-  return reply
+  return noStore(reply)
     .status(StatusCodes.BAD_REQUEST)
     .type('text/html')
     .send(
@@ -92,10 +92,6 @@ function noStore(reply: FastifyReply): FastifyReply {
   return reply.header('Cache-Control', 'no-store').header('Pragma', 'no-cache');
 }
 
-/**
- * The consent screen is a dialog over the page that lists connected applications, so
- * the user decides in the same place they later review and revoke what they granted.
- */
 function getConsentUrl(requestId: string): string {
   const frontendUrl = stripTrailingSlashes(
     system.getOrThrow<string>(SharedSystemProp.FRONTEND_URL),
@@ -154,9 +150,8 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
       }
 
       if (validation.kind === 'redirect_error') {
-        // Reached only once the client and its redirect_uri are known good, so
-        // this cannot be pointed at an unregistered destination. `state` is echoed
-        // verbatim; anything oversized was already refused above.
+        // Reached only once the client and its redirect_uri are known good, so this
+        // cannot be pointed at an unregistered destination.
         return reply.redirect(
           buildRedirectUrl(validation.redirectUri, {
             error: validation.error,
@@ -194,13 +189,13 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
     async (request) => {
       const { requestId } = request.params as { requestId: string };
       const pending = await pendingAuthorizationService.get(requestId);
-      // Read from storage, never from the request: the displayed name is what the
-      // user bases their decision on, so it must not be attacker-supplied.
+      // Read from storage, never the request: the user bases their decision on this name,
+      // so it must not be attacker-supplied.
       const client = await clientsService.getClientOrThrow(pending.clientId);
       const resource = resolveResource(pending.resource);
 
-      // No project is reported. A connection is not confined to one, so naming the
-      // project it happens to start in would read as a limit that does not exist.
+      // No project: a connection is not confined to one, so naming where it starts would
+      // read as a limit that does not exist.
       return {
         requestId,
         clientName: client.clientName,
@@ -231,8 +226,6 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
       const { requestId } = request.params as { requestId: string };
       const { approve } = request.body as { approve: boolean };
 
-      // Single-use: claiming the record here is what prevents a decision from
-      // being replayed into a second authorization code.
       const pending = await pendingAuthorizationService.consume(requestId);
 
       if (!approve) {
@@ -333,9 +326,8 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
     '/projects',
     {
       config: {
-        // SERVICE as well as USER: this is the one route a connection itself calls, to
-        // find out where it may switch to. Nothing here is project data — only the
-        // names of projects the caller already has access to.
+        // SERVICE as well as USER: the one route a connection itself calls, to find out
+        // where it may switch to. It returns no project data, only names.
         security: getUnscopedRoutePolicy([
           PrincipalType.USER,
           PrincipalType.SERVICE,

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddProviderToAppConnectionTable1748356358053
-  implements MigrationInterface
-{
+export class AddProviderToAppConnectionTable1748356358053 implements MigrationInterface {
   name = 'AddProviderToAppConnectionTable1748356358053';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -1,19 +1,14 @@
 /*
- * Route-level behaviour of the OAuth endpoints.
+ * The HTTP contract, which only appears once the real app is running: which principal each
+ * route admits, the anti-CSRF header, cache headers, the RFC 6749 error envelope and the
+ * open-redirect boundary. `securityHandlerChain` is a global `preHandler` registered by
+ * `setupApp`, so a hand-built Fastify instance would enforce none of it.
  *
- * Everything else about this module is covered by unit tests against the services. What
- * only appears once the real app is running is the HTTP contract: which principal each
- * route admits, the anti-CSRF header, cache headers, the RFC 6749 error envelope, and the
- * open-redirect boundary on `/authorize`. `securityHandlerChain` is a global `preHandler`
- * registered by `setupApp`, so a hand-built Fastify instance would enforce none of it and
- * these assertions would pass while testing nothing.
- *
- * The boot guard refuses SQLite because the migration is Postgres-only — but this
- * environment sets `OPS_DB_SYNCHRONIZE_SCHEMA`, so TypeORM builds the tables from the
- * entities and the premise does not hold here. The guard is stubbed for that reason
- * alone; it has its own tests in `test/unit/oauth/oauth-config-validation.test.ts`.
+ * The boot guard refuses SQLite because the migration is Postgres-only, but this
+ * environment synchronises the schema from the entities, so it is stubbed here. It has its
+ * own tests in `test/unit/oauth/config/oauth-config-validation.test.ts`.
  */
-jest.mock('../../../../src/app/oauth/oauth-config-validation', () => ({
+jest.mock('../../../../src/app/oauth/config/oauth-config-validation', () => ({
   validateOAuthConfiguration: jest.fn(),
 }));
 
@@ -47,13 +42,8 @@ function authorizeUrl(params: Record<string, string>): string {
   return `/v1/oauth/authorize?${new URLSearchParams(params).toString()}`;
 }
 
-/*
- * Set for this suite only, and put back afterwards.
- *
- * Jest reuses a worker across files, so `process.env` outlives this one. Leaving OAuth
- * enabled would make a later suite boot the module with the real config guard — which
- * refuses SQLite — and fail for reasons that have nothing to do with it.
- */
+// Set for this suite only and put back afterwards: Jest reuses a worker across files, so
+// leaving OAuth enabled would fail a later suite on the SQLite config guard.
 const OVERRIDES: Record<string, string> = {
   OPS_OAUTH_ENABLED: 'true',
   OPS_OAUTH_ISSUER_URL: 'http://localhost:3000',
@@ -80,7 +70,7 @@ afterAll(async () => {
 
   for (const [key, value] of previousEnv) {
     if (value === undefined) {
-      delete process.env[key];
+      Reflect.deleteProperty(process.env, key);
     } else {
       process.env[key] = value;
     }
@@ -98,8 +88,7 @@ describe('OAuth routes', () => {
         headers: { authorization: `Bearer ${token}` },
       });
 
-      // Managing connections is something a user does in a browser. A connection must
-      // not be able to enumerate — or revoke — its siblings.
+      // A connection must not be able to enumerate or revoke its siblings.
       expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
     });
 
@@ -124,8 +113,8 @@ describe('OAuth routes', () => {
         headers: { authorization: `Bearer ${token}` },
       });
 
-      // The one route a connection calls about itself, to learn where it may switch to.
-      // Deliberately open to SERVICE; the two above are deliberately not.
+      // The one route a connection calls about itself, so SERVICE is admitted here and
+      // refused on the two above.
       expect(response.statusCode).not.toBe(StatusCodes.FORBIDDEN);
     });
 
@@ -150,8 +139,8 @@ describe('OAuth routes', () => {
         body: { approve: true },
       });
 
-      // A cross-site form post cannot set a custom header. Losing this check would make
-      // consent forgeable against a signed-in user, which is audit finding H3.
+      // A cross-site form post cannot set a custom header, so losing this check would make
+      // consent forgeable against a signed-in user.
       expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
       expect(response.json()).toMatchObject({
         error: 'invalid_request',
@@ -172,8 +161,7 @@ describe('OAuth routes', () => {
         body: { approve: true },
       });
 
-      // Proves the assertion above is about the header and not about the route rejecting
-      // everything: the failure has moved on to the unusable request id.
+      // Proves the test above is about the header, not the route rejecting everything.
       expect(response.json().error_description).not.toContain(
         'x-openops-consent',
       );
@@ -189,8 +177,7 @@ describe('OAuth routes', () => {
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
       });
 
-      // Clients branch on `error` to decide whether to retry, re-authorize, or discard a
-      // stored credential, so these routes must not use the application envelope.
+      // Clients branch on `error`, so these routes must not use the application envelope.
       expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
       expect(response.json()).toMatchObject({
         error: 'unsupported_grant_type',
@@ -227,9 +214,28 @@ describe('OAuth routes', () => {
       });
 
       // Redirecting here would hand an attacker an open redirect on an endpoint whose
-      // whole job is to send browsers somewhere — audit finding H4.
+      // whole job is to send browsers somewhere.
       expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
       expect(response.headers.location).toBeUndefined();
+    });
+
+    it('keeps rendered authorize errors out of caches', async () => {
+      const response = await app!.inject({
+        method: 'GET',
+        url: authorizeUrl({
+          client_id: 'not-a-registered-client',
+          redirect_uri: REGISTERED_REDIRECT,
+          response_type: 'code',
+          code_challenge: CODE_CHALLENGE,
+          code_challenge_method: 'S256',
+          resource: 'http://localhost:3020/mcp',
+        }),
+      });
+
+      // A public endpoint whose error page echoes request-derived text; an intermediary
+      // must not serve it to anyone else.
+      expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response.headers['cache-control']).toContain('no-store');
     });
 
     it('renders an error for an unknown client instead of redirecting', async () => {
@@ -264,8 +270,6 @@ describe('OAuth routes', () => {
         }),
       });
 
-      // The counterpart to the two above: a good request does redirect, and to the
-      // consent surface rather than back to the client.
       expect(response.statusCode).toBe(StatusCodes.MOVED_TEMPORARILY);
       expect(response.headers.location).toContain('/settings/connected-apps');
       expect(response.headers.location).toContain('request_id=');
@@ -318,8 +322,7 @@ describe('OAuth routes', () => {
       ).json();
 
       // Each with the method a client would really use: a 404 here means the document
-      // promises something the server does not answer, which fails in a way that is very
-      // hard to diagnose from outside. This is audit finding L4.
+      // promises something the server does not answer.
       const probes: [string, 'GET' | 'POST'][] = [
         [metadata.authorization_endpoint, 'GET'],
         [metadata.token_endpoint, 'POST'],
@@ -353,8 +356,6 @@ describe('OAuth routes', () => {
         url: new URL(metadata.jwks_uri).pathname,
       });
 
-      // A real key, reachable where the metadata says it is — the spike advertised a
-      // `jwks_uri` that served nothing, which is audit finding M4.
       expect(response.statusCode).toBe(StatusCodes.OK);
       expect(response.json().keys[0]).toMatchObject({
         kty: 'RSA',

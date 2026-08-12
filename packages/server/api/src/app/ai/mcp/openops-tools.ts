@@ -94,9 +94,8 @@ export async function getOpenOpsTools(
 
   const routesPath = await getRouteListPath(app);
 
-  const serviceToken = await accessTokenManager.generateServiceToken(
-    userAuthToken,
-  );
+  const serviceToken =
+    await accessTokenManager.generateServiceToken(userAuthToken);
 
   const openopsClient = await createMCPClient({
     transport: new StdioClientTransport({

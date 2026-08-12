@@ -63,9 +63,8 @@ export async function callEngine<Result extends EngineHelperResult>(
 
   try {
     if (shouldUseCache(operation) && requestKey) {
-      engineResult = await cacheWrapper.getSerializedObject<unknown>(
-        requestKey,
-      );
+      engineResult =
+        await cacheWrapper.getSerializedObject<unknown>(requestKey);
 
       if (engineResult) {
         return parseEngineResponse(engineResult);

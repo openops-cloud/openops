@@ -1,37 +1,32 @@
 {
-    "cSpell.words": [
-        "OpenOps",
-        "Fastify",
-        "mpim",
-        "sendgrid"
-    ],
-    "eslint.workingDirectories": [
-        { "pattern": "./packages/*" },
-        {
-            "pattern": "./packages/server/*"
-        },
-        {
-            "pattern": "./packages/blocks/*"
-        },
-    ],
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
+  "cSpell.words": ["OpenOps", "Fastify", "mpim", "sendgrid"],
+  "eslint.workingDirectories": [
+    { "pattern": "./packages/*" },
+    {
+      "pattern": "./packages/server/*"
     },
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "javascript.preferences.importModuleSpecifier": "project-relative",
-    "search.exclude": {
-        "**/.git": true,
-        "**/node_modules": true,
-        "**/.nx": true,
-        "**/cache": true,
-        "**/dev": true,
-        "**/dist": true,
-    },
-    "jest.runMode": {
-        "type": "watch",
-        "deferred": true
-    },
-    "jest.jestCommandLine": "/workspace/node_modules/.bin/jest",
+    {
+      "pattern": "./packages/blocks/*"
+    }
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "javascript.preferences.importModuleSpecifier": "project-relative",
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.nx": true,
+    "**/cache": true,
+    "**/dev": true,
+    "**/dist": true
+  },
+  "jest.runMode": {
+    "type": "watch",
+    "deferred": true
+  },
+  "jest.jestCommandLine": "/workspace/node_modules/.bin/jest"
 }

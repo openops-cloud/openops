@@ -54,8 +54,7 @@ const AiSettingsPage = () => {
       onError: (error: AxiosError) => {
         let message = '';
         const apError = error.response?.data as
-          | ApplicationErrorParams
-          | undefined;
+          ApplicationErrorParams | undefined;
         if (
           apError?.code ===
           ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
@@ -63,8 +62,7 @@ const AiSettingsPage = () => {
           message = t('Base URL is required for OpenAI-compatible providers');
         } else if (error.response?.status === 400) {
           const data = error.response?.data as
-            | { errorMessage?: string }
-            | undefined;
+            { errorMessage?: string } | undefined;
           message = data?.errorMessage ?? error.message;
         } else {
           message = error.message;

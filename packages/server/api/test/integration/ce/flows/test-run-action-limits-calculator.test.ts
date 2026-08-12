@@ -313,7 +313,9 @@ describe('shouldRecalculateTestRunActionLimits', () => {
       shouldRecalculateTestRunActionLimits({
         type: FlowOperationType.ADD_ACTION,
         request: {},
-      } as unknown as Parameters<typeof shouldRecalculateTestRunActionLimits>[0]),
+      } as unknown as Parameters<
+        typeof shouldRecalculateTestRunActionLimits
+      >[0]),
     ).toBe(true);
   });
 
@@ -322,7 +324,9 @@ describe('shouldRecalculateTestRunActionLimits', () => {
       shouldRecalculateTestRunActionLimits({
         type: FlowOperationType.CHANGE_NAME,
         request: {},
-      } as unknown as Parameters<typeof shouldRecalculateTestRunActionLimits>[0]),
+      } as unknown as Parameters<
+        typeof shouldRecalculateTestRunActionLimits
+      >[0]),
     ).toBe(false);
   });
 });

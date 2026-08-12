@@ -1,6 +1,5 @@
 export type PromiseResult<T> =
-  | { status: 'fulfilled'; value: T }
-  | { status: 'rejected'; reason: unknown };
+  { status: 'fulfilled'; value: T } | { status: 'rejected'; reason: unknown };
 
 export async function promisePool<T>(
   tasks: (() => Promise<T>)[],

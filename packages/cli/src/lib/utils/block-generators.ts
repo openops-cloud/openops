@@ -5,10 +5,8 @@ import nodePath from 'node:path';
 import { exec } from '../utils/exec';
 import {
   readJestConfig,
-  readPackageEslint,
   readProjectJson,
   writeJestConfig,
-  writePackageEslint,
   writeProjectJson,
 } from '../utils/files';
 
@@ -58,8 +56,7 @@ export const updateProjectJsonConfig = async (blockName: string) => {
 
   projectJson.targets.build.options.buildableProjectDepsInPackageJsonType =
     'dependencies';
-  projectJson.targets.build.options.updateBuildableProjectDepsInPackageJson =
-    true;
+  projectJson.targets.build.options.updateBuildableProjectDepsInPackageJson = true;
 
   const lintFilePatterns = projectJson.targets.lint?.options?.lintFilePatterns;
 
@@ -78,15 +75,18 @@ export const updateProjectJsonConfig = async (blockName: string) => {
   await writeProjectJson(`packages/blocks/${blockName}`, projectJson);
 };
 
-export const updateEslintFile = async (blockName: string) => {
-  const eslintFile = await readPackageEslint(`packages/blocks/${blockName}`);
-  const ruleIndex = eslintFile.overrides.findIndex(
-    (rule: any) => rule.files[0] == '*.json',
-  );
-  if (ruleIndex !== -1) {
-    eslintFile.overrides.splice(ruleIndex, 1);
+export const removeGeneratedEslintConfig = async (blockName: string) => {
+  // Blocks inherit the workspace flat config, so whatever ESLint config the Nx
+  // generator emitted is redundant. Every filename it might produce is removed,
+  // since its output depends on the config style it detects.
+  const path = `packages/blocks/${blockName}`;
+  for (const file of [
+    'eslint.config.mjs',
+    'eslint.config.js',
+    '.eslintrc.json',
+  ]) {
+    await rm(nodePath.join(path, file), { force: true });
   }
-  await writePackageEslint(`packages/blocks/${blockName}`, eslintFile);
 };
 
 export const updateJestConfigFile = async (blockName: string) => {

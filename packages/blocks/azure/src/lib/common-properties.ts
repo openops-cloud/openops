@@ -99,8 +99,7 @@ export function createSubscriptionDynamicProperty(
     props: async ({ auth, useHostSession }) => {
       try {
         const useHost = useHostSession?.['useHostSessionCheckbox'] as
-          | boolean
-          | undefined;
+          boolean | undefined;
 
         if (!auth && !useHost) {
           return {
@@ -116,9 +115,8 @@ export function createSubscriptionDynamicProperty(
         if (useHost) {
           dropdown = await getSubscriptionsDropdown(auth, config);
         } else {
-          const staticDropdown = await getAzureSubscriptionsStaticDropdown(
-            auth,
-          );
+          const staticDropdown =
+            await getAzureSubscriptionsStaticDropdown(auth);
           dropdown = createSubscriptionDropdown(config, staticDropdown.options);
         }
 

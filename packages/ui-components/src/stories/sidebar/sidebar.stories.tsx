@@ -142,8 +142,8 @@ const SidebarWrapper = ({
   const footer = isAiEnabled
     ? AiFooter(isMinimized, cloudConfigOverride)
     : isFullCatalog
-    ? FooterWrapperConnectedToCloud
-    : FooterWrapperNotConnectedToCloud;
+      ? FooterWrapperConnectedToCloud
+      : FooterWrapperNotConnectedToCloud;
 
   let MenuFooterWrapped: React.ReactNode;
   if (cloudConfigOverride) {

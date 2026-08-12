@@ -97,9 +97,8 @@ async function migrateJob(job: Job<ScheduledJobData>): Promise<void> {
   if (modifiedJobData.schemaVersion === 4) {
     modifiedJobData.schemaVersion = 5;
 
-    modifiedJobData = await addTriggerStrategyForRepeatableJobType(
-      modifiedJobData,
-    );
+    modifiedJobData =
+      await addTriggerStrategyForRepeatableJobType(modifiedJobData);
 
     await job.updateData(modifiedJobData);
   }

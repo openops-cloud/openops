@@ -107,8 +107,7 @@ export const blockEngineUtil = {
     step: Action | Trigger,
   ): Promise<BlockPackage> {
     const blockSettings = step.settings as
-      | BlockTriggerSettings
-      | BlockActionSettings;
+      BlockTriggerSettings | BlockActionSettings;
     const { blockName, blockVersion, blockType, packageType } = blockSettings;
     return this.getExactBlockVersion(engineToken, {
       blockName,

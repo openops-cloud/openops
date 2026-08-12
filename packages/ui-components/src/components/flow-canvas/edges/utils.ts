@@ -40,8 +40,7 @@ export const getBranchNodeId = (
 ): string | undefined => {
   const splitEdgeTargetNode = nodes.find((node) => node.id === targetNodeId);
   const branchNodeId = splitEdgeTargetNode?.data?.branchNodeId as
-    | string
-    | undefined;
+    string | undefined;
 
   return branchNodeId;
 };

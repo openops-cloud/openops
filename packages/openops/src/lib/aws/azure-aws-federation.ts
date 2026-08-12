@@ -23,9 +23,8 @@ export async function assumeTargetRoleViaAzureFederation(
   externalId?: string,
   endpoint?: string | undefined | null,
 ): Promise<Credentials | undefined> {
-  const sourceCredentials = await getAwsCredentialsFromAzureIdentity(
-    defaultRegion,
-  );
+  const sourceCredentials =
+    await getAwsCredentialsFromAzureIdentity(defaultRegion);
 
   if (!sourceCredentials?.AccessKeyId || !sourceCredentials.SecretAccessKey) {
     throw new Error('Failed to get AWS credentials from Azure identity');

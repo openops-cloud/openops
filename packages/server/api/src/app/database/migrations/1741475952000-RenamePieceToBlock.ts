@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RenamePieceToBlockMigration1741475952000
-  implements MigrationInterface
-{
+export class RenamePieceToBlockMigration1741475952000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('RenamePieceToBlockMigration1741475952000: starting');
 

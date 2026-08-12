@@ -12,9 +12,7 @@ export enum StepOutputStatus {
 }
 
 export type StepRetryMetadataType =
-  | 'AZURE_429'
-  | 'HTTP_429'
-  | 'HTTP_CLIENT_ERROR';
+  'AZURE_429' | 'HTTP_429' | 'HTTP_CLIENT_ERROR';
 
 export type StepRetryMetadata = {
   type: StepRetryMetadataType;

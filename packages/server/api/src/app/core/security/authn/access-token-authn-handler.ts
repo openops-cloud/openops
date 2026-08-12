@@ -25,10 +25,9 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 
   /**
-   * An explicit `Authorization` header wins over the session cookie. A caller
-   * that presents a bearer token is stating which identity it wants to act as,
-   * and silently preferring an ambient cookie would authenticate it as somebody
-   * else — including with a different token audience.
+   * An explicit `Authorization` header wins over the session cookie: a caller presenting a
+   * bearer token states which identity it wants, and preferring an ambient cookie would
+   * authenticate it as somebody else.
    */
   private getAccessToken(request: FastifyRequest): string | undefined {
     const header = request.headers[AccessTokenAuthnHandler.HEADER_NAME];

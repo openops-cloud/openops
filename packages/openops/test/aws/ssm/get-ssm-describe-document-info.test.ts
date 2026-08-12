@@ -2,11 +2,12 @@ import { BlockPropValueSchema } from '@openops/blocks-framework';
 import { getSsmDescribeDocumentInfo } from '../../../src/lib/aws/ssm/get-ssm-describe-document-info';
 
 jest.mock('@aws-sdk/client-ssm', () => {
-  const DescribeDocumentCommand = jest
-    .fn()
-    .mockImplementation(function (this: any, input: any) {
-      this.input = input;
-    });
+  const DescribeDocumentCommand = jest.fn().mockImplementation(function (
+    this: any,
+    input: any,
+  ) {
+    this.input = input;
+  });
   return {
     DescribeDocumentCommand,
     SSMClient: jest.fn(),

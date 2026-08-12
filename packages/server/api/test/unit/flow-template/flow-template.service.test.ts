@@ -220,9 +220,8 @@ describe('flowTemplateService', () => {
       const insertResult = { id: 'some-flow-id' };
       mockedRepo.save = jest.fn().mockResolvedValue(insertResult);
 
-      const result = await flowTemplateService.createFlowTemplate(
-        requestOptions,
-      );
+      const result =
+        await flowTemplateService.createFlowTemplate(requestOptions);
 
       expect(flowServiceMock.getOnePopulatedOrThrow).toHaveBeenCalledWith({
         id: requestOptions.flowId,

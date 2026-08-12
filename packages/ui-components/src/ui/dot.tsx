@@ -14,7 +14,8 @@ const dotVariants = cva('size-2 rounded-full', {
 });
 
 interface DotProps
-  extends VariantProps<typeof dotVariants>,
+  extends
+    VariantProps<typeof dotVariants>,
     React.HTMLAttributes<HTMLDivElement> {
   animation?: boolean;
 }

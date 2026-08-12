@@ -150,18 +150,16 @@ export async function loadBlockMetadataFromFolder(
       `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
 
     if (!bypassCache) {
-      let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
-        cacheKey,
-      );
+      let blockMetadata =
+        await cacheWrapper.getSerializedObject<BlockMetadata>(cacheKey);
       if (blockMetadata) {
         return blockMetadata;
       }
 
       lock = await memoryLock.acquire(`${cacheKey}`);
 
-      blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
-        cacheKey,
-      );
+      blockMetadata =
+        await cacheWrapper.getSerializedObject<BlockMetadata>(cacheKey);
       if (blockMetadata) {
         return blockMetadata;
       }

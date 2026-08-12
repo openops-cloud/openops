@@ -1,11 +1,11 @@
 {
-    "name": "@openops/cli",
-    "version": "1.0.0",
-    "bin": {
-        "blocks-cli":"../../dist/cli/src/index.js"
-    },
-    "scripts": {
-        "start": "ts-node src/index.ts",
-        "build": "tsc"
-      }
+  "name": "@openops/cli",
+  "version": "1.0.0",
+  "bin": {
+    "blocks-cli": "../../dist/cli/src/index.js"
+  },
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
   }
+}

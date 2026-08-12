@@ -6,11 +6,10 @@ import { cn } from '../lib/cn';
 import { Button } from './button';
 import { Input } from './input';
 
-export interface NumericInputProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    'type' | 'onChange'
-  > {
+export interface NumericInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'onChange'
+> {
   value?: number;
   onChange?: (value: number | undefined) => void;
   min?: number;

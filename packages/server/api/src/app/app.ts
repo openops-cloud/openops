@@ -53,8 +53,8 @@ import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
 import { systemJobsSchedule } from './helper/system-jobs';
+import { oauthConfig } from './oauth/config/oauth-config';
 import { registerOAuthCleanupHandler } from './oauth/oauth-cleanup-job';
-import { oauthConfig } from './oauth/oauth-config';
 import { oauthModule } from './oauth/oauth.module';
 import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
@@ -228,8 +228,8 @@ export const setupApp = async (
   await app.register(blockVariableModule);
   await app.register(benchmarkModule);
 
-  // Unconditional: the cleanup schedule lives in Redis and survives OAuth being turned
-  // back off, so the handler has to exist even then. It no-ops while disabled.
+  // Unconditional: the schedule lives in Redis and survives OAuth being turned off, so
+  // the handler must exist even then. It no-ops while disabled.
   registerOAuthCleanupHandler();
 
   if (oauthConfig.isEnabled()) {

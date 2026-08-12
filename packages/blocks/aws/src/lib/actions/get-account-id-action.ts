@@ -20,8 +20,7 @@ export const getAccountIdAction = createAction({
   async run(context) {
     if (context.auth.roles && context.auth.roles.length > 0) {
       const accounts = context.propsValue['accounts']['accounts'] as unknown as
-        | string[]
-        | undefined;
+        string[] | undefined;
       const roles = context.auth.roles.filter(
         (role: any) =>
           accounts?.length &&

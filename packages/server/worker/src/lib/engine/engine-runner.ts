@@ -30,8 +30,7 @@ export type EngineHelperTriggerResult<
 > = ExecuteTriggerResponse<T>;
 
 export type EngineHelperPropResult =
-  | DropdownState<unknown>
-  | Record<string, DynamicPropsValue>;
+  DropdownState<unknown> | Record<string, DynamicPropsValue>;
 
 export type EngineHelperActionResult = ExecuteActionResponse;
 

@@ -97,9 +97,9 @@ type OneTimeJobAddParams<JT extends JobType.ONE_TIME> = BaseAddParams<
 export type AddParams<JT extends JobType> = JT extends JobType.ONE_TIME
   ? OneTimeJobAddParams<JT>
   : JT extends JobType.REPEATING
-  ? RepeatingJobAddParams<JT> | RenewWebhookJobAddParams<JT>
-  : JT extends JobType.DELAYED
-  ? DelayedJobAddParams<JT>
-  : JT extends JobType.WEBHOOK
-  ? WebhookJobAddParams<JT>
-  : never;
+    ? RepeatingJobAddParams<JT> | RenewWebhookJobAddParams<JT>
+    : JT extends JobType.DELAYED
+      ? DelayedJobAddParams<JT>
+      : JT extends JobType.WEBHOOK
+        ? WebhookJobAddParams<JT>
+        : never;

@@ -10,9 +10,6 @@ node_modules
 /tmp
 /.nx
 /cache
-# The engine resolves its code cache relative to the working directory, so running a
-# server from inside its own package writes one there too. Needs `**/` because a pattern
-# with an interior slash is anchored to this file's directory.
 **/cache/codes/
 /packages/ui-components/storybook-static
 

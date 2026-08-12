@@ -176,8 +176,8 @@ const DataSelector = ({
             dataSelectorSize === DataSelectorSizeState.COLLAPSED
               ? '0px'
               : dataSelectorSize === DataSelectorSizeState.DOCKED
-              ? '450px'
-              : `${parentHeight - 180}px`,
+                ? '450px'
+                : `${parentHeight - 180}px`,
           width:
             dataSelectorSize !== DataSelectorSizeState.EXPANDED
               ? '450px'

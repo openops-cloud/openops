@@ -102,8 +102,7 @@ export type ResumeExecuteFlowOperation =
   } & ExecutionState;
 
 export type ExecuteFlowOperation =
-  | BeginExecuteFlowOperation
-  | ResumeExecuteFlowOperation;
+  BeginExecuteFlowOperation | ResumeExecuteFlowOperation;
 
 export type ExecuteTriggerOperation<HT extends TriggerHookType> =
   BaseEngineOperation & {
@@ -178,14 +177,14 @@ export type ExecuteTriggerResponse<H extends TriggerHookType> =
   H extends TriggerHookType.RUN
     ? ExecuteTestOrRunTriggerResponse
     : H extends TriggerHookType.HANDSHAKE
-    ? ExecuteHandshakeTriggerResponse
-    : H extends TriggerHookType.TEST
-    ? ExecuteTestOrRunTriggerResponse
-    : H extends TriggerHookType.RENEW
-    ? Record<string, never>
-    : H extends TriggerHookType.ON_DISABLE
-    ? Record<string, never>
-    : ExecuteOnEnableTriggerResponse;
+      ? ExecuteHandshakeTriggerResponse
+      : H extends TriggerHookType.TEST
+        ? ExecuteTestOrRunTriggerResponse
+        : H extends TriggerHookType.RENEW
+          ? Record<string, never>
+          : H extends TriggerHookType.ON_DISABLE
+            ? Record<string, never>
+            : ExecuteOnEnableTriggerResponse;
 
 export type ExecuteActionResponse = {
   success: boolean;

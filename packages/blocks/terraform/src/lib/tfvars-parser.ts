@@ -7,11 +7,7 @@ const messageInvalidFile =
   'The provided file is not a valid Terraform variables file (tfvars).';
 
 type TerraformVariableType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'array'
-  | 'object';
+  'string' | 'number' | 'boolean' | 'array' | 'object';
 
 export type TerraformVariable = {
   name: string;

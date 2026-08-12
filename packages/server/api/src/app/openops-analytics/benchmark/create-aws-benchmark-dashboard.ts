@@ -26,9 +26,8 @@ export async function createAwsBenchmarkDashboard(): Promise<void> {
 
   const { access_token } = await authenticateOpenOpsAnalyticsAdmin();
 
-  const dbConnection = await getOrCreateOpenOpsTablesDatabaseConnection(
-    access_token,
-  );
+  const dbConnection =
+    await getOrCreateOpenOpsTablesDatabaseConnection(access_token);
 
   const organization = await organizationService.getOldestOrganization();
   assertNotNullOrUndefined(organization, 'Organization not found');
