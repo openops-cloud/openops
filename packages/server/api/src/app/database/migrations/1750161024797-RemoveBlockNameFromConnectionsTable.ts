@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RemoveBlockNameFromConnectionsTable1750161024797
-  implements MigrationInterface
-{
+export class RemoveBlockNameFromConnectionsTable1750161024797 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('RemoveBlockNameFromConnectionsTable1750161024797: starting');
 

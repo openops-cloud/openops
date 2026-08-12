@@ -54,8 +54,9 @@ const orientationConfig = {
   },
 };
 
-interface SortableProps<TData extends { id: UniqueIdentifier }>
-  extends DndContextProps {
+interface SortableProps<
+  TData extends { id: UniqueIdentifier },
+> extends DndContextProps {
   /**
    * An array of data items that the sortable component will render.
    * @example
@@ -187,8 +188,9 @@ const dropAnimationOpts: DropAnimation = {
   }),
 };
 
-interface SortableOverlayProps
-  extends React.ComponentPropsWithRef<typeof DragOverlay> {
+interface SortableOverlayProps extends React.ComponentPropsWithRef<
+  typeof DragOverlay
+> {
   activeId?: UniqueIdentifier | null;
 }
 

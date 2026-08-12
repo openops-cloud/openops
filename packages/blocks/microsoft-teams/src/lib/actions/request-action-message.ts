@@ -114,8 +114,7 @@ export const requestActionMessageAction = createAction({
       };
 
     let finalChatOrChannel: ChatOption | ChannelOption = chatOrChannel as
-      | ChatOption
-      | ChannelOption;
+      ChatOption | ChannelOption;
 
     if (typeof chatOrChannel === 'string') {
       if (isEmail(chatOrChannel)) {

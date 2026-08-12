@@ -3,9 +3,7 @@ import { encryptUtils, fileCompressor, logger } from '@openops/server-shared';
 import { FileCompression, openOpsId } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866
-  implements MigrationInterface
-{
+export class AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info(
       'AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866: starting',

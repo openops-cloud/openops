@@ -19,9 +19,8 @@ export async function listAvailableProjects(
     return [];
   }
 
-  const memberships = await getOAuthProjectMembershipService().listForUser(
-    user,
-  );
+  const memberships =
+    await getOAuthProjectMembershipService().listForUser(user);
 
   // One query rather than one per membership: agents poll this to decide where to switch.
   const projects = await projectService.getManyByIds(

@@ -96,9 +96,8 @@ async function insertBenchmarkRecords(params: {
       deletedAt: null as string | null,
     };
 
-    const savedBenchmark = await benchmarkRepo(entityManager).save(
-      benchmarkRow,
-    );
+    const savedBenchmark =
+      await benchmarkRepo(entityManager).save(benchmarkRow);
 
     const benchmarkFlowRows = workflows.map((w) => ({
       id: openOpsId(),

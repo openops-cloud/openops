@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class MoveTablesWorkspaceIdFromOrganizationToProject1760500000000
-  implements MigrationInterface
-{
+export class MoveTablesWorkspaceIdFromOrganizationToProject1760500000000 implements MigrationInterface {
   name = 'MoveTablesWorkspaceIdFromOrganizationToProject1760500000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

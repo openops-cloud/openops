@@ -3,11 +3,12 @@ import { DocumentOwner } from '../../../src/lib/aws/ssm/document-owner';
 import { getSsmDocuments } from '../../../src/lib/aws/ssm/get-ssm-documents';
 
 jest.mock('@aws-sdk/client-ssm', () => {
-  const ListDocumentsCommand = jest
-    .fn()
-    .mockImplementation(function (this: any, input: any) {
-      this.input = input;
-    });
+  const ListDocumentsCommand = jest.fn().mockImplementation(function (
+    this: any,
+    input: any,
+  ) {
+    this.input = input;
+  });
   return {
     ListDocumentsCommand,
     SSMClient: jest.fn(),

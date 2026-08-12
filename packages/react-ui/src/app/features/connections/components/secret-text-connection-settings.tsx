@@ -5,7 +5,7 @@ import {
   FormLabel,
   Input,
 } from '@openops/components/ui';
-import { Static, Type } from '@sinclair/typebox';
+import { Static } from '@sinclair/typebox';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -18,11 +18,9 @@ type SecretTextConnectionSettingsProps = {
 
 const SecretTextConnectionSettings = React.memo(
   ({ authProperty }: SecretTextConnectionSettingsProps) => {
-    const formSchema = Type.Object({
-      request: UpsertSecretTextRequest,
-    });
-
-    const form = useFormContext<Static<typeof formSchema>>();
+    const form = useFormContext<{
+      request: Static<typeof UpsertSecretTextRequest>;
+    }>();
 
     return (
       <FormField

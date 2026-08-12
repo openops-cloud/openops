@@ -122,8 +122,7 @@ async function getAnomalies({
   toDate: string;
   limit: number;
   additionalFilters:
-    | { fieldName: string; operator: string; value: string }[]
-    | undefined;
+    { fieldName: string; operator: string; value: string }[] | undefined;
 }) {
   let query = `usage_day:between:${fromDate}-${toDate}`;
 

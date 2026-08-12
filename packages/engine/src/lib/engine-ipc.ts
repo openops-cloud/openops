@@ -5,8 +5,7 @@ import { logger } from '@openops/server-shared';
  * channel once an operation completes.
  */
 export type ParentMessage =
-  | { type: 'result'; resultKey: string }
-  | { type: 'error'; message: string };
+  { type: 'result'; resultKey: string } | { type: 'error'; message: string };
 
 /**
  * Sends a message to the worker and invokes `callback` once the IPC channel has

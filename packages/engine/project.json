@@ -26,8 +26,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/engine/**/*.{ts,js,json}"],
-        "ignorePath": "packages/engine/.eslintignore"
+        "lintFilePatterns": ["packages/engine/**/*.{ts,js,json}"]
       }
     },
     "test": {

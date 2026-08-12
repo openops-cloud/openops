@@ -20,9 +20,8 @@ export async function getServiceNowTables(
   };
 
   if (options?.search) {
-    queryParams[
-      'sysparm_query'
-    ] = `nameLIKE${options.search}^ORlabelLIKE${options.search}`;
+    queryParams['sysparm_query'] =
+      `nameLIKE${options.search}^ORlabelLIKE${options.search}`;
   } else if (options?.query) {
     queryParams['sysparm_query'] = options.query;
   }

@@ -176,8 +176,7 @@ export const httpSendRequestAction = createAction({
 
     const headersArray =
       (context.auth?.headers as
-        | Array<{ key?: string; value?: string }>
-        | undefined) ?? [];
+        Array<{ key?: string; value?: string }> | undefined) ?? [];
     const authHeaders: HttpHeaders = {};
     for (const item of headersArray) {
       if (item.key && item.value) {

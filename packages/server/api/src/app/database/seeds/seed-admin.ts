@@ -31,8 +31,7 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     let { organization, project } = await resolveUserOrganizationContext(user);
     let tablesWorkspaceContext:
-      | TablesWorkspaceContext<EncryptedObject>
-      | undefined = undefined;
+      TablesWorkspaceContext<EncryptedObject> | undefined = undefined;
     if (project) {
       tablesWorkspaceContext = {
         databaseToken: project.tablesDatabaseToken,

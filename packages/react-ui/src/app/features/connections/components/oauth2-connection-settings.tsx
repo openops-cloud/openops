@@ -129,7 +129,7 @@ const OAuth2ConnectionSettings = ({
       'request.value.client_id',
       currentOAuth2Type === AppConnectionType.OAUTH2
         ? ''
-        : predefinedClientId ?? '',
+        : (predefinedClientId ?? ''),
       { shouldValidate: true },
     );
     form.setValue('request.value.grant_type', authProperty.grantType, {

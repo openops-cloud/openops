@@ -2,9 +2,7 @@ import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { applyUpdateToFlowVersion } from './common/apply-update-to-flow-version';
 
-export class UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771
-  implements MigrationInterface
-{
+export class UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info(
       'UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771: starting',

@@ -30,7 +30,8 @@ const listItemVariants = cva('flex items-center px-4 py-3 min-h-[49px]', {
 });
 
 interface ListItemProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof listItemVariants> {
   children: React.ReactNode;
 }

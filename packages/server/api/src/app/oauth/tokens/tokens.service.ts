@@ -52,9 +52,8 @@ async function loadActiveUserOrThrow(userId: string): Promise<User> {
 }
 
 async function resolveDefaultProjectId(user: User): Promise<string> {
-  const membership = await getOAuthProjectMembershipService().getDefaultForUser(
-    user,
-  );
+  const membership =
+    await getOAuthProjectMembershipService().getDefaultForUser(user);
 
   if (isNil(membership)) {
     throw invalidGrant('the user has no accessible project');

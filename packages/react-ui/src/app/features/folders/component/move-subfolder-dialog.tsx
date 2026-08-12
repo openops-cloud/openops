@@ -9,8 +9,10 @@ import {
   MoveToFolderFormSchema,
 } from './move-to-folder-dialog';
 
-interface MoveSubfolderDialogProps
-  extends Pick<MoveToFolderDialogProps<Folder>, 'children' | 'onMoveTo'> {
+interface MoveSubfolderDialogProps extends Pick<
+  MoveToFolderDialogProps<Folder>,
+  'children' | 'onMoveTo'
+> {
   folder: FolderItem;
 }
 

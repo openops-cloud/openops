@@ -31,9 +31,8 @@ describe('authenticationController analytics routes', () => {
     post: jest.Mock;
     get: jest.Mock;
   }> => {
-    const { authenticationController } = await import(
-      '../../../src/app/authentication/authentication.controller'
-    );
+    const { authenticationController } =
+      await import('../../../src/app/authentication/authentication.controller');
 
     const appMock = {
       post: jest.fn().mockReturnThis(),

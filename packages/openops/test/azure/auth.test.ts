@@ -81,9 +81,8 @@ describe('authenticateUserWithAzure', () => {
     async (hostSessionValue: boolean | undefined, result: boolean) => {
       systemMock.getBoolean.mockReturnValue(hostSessionValue);
       jest.resetModules();
-      const { azureAuth: freshAzureAuth } = await import(
-        '../../src/lib/azure/auth'
-      );
+      const { azureAuth: freshAzureAuth } =
+        await import('../../src/lib/azure/auth');
       expect(freshAzureAuth.required).toBe(result);
     },
   );

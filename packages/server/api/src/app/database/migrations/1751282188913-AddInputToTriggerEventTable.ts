@@ -1,9 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddInputToTriggerEventTable1751282188913
-  implements MigrationInterface
-{
+export class AddInputToTriggerEventTable1751282188913 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info('AddInputToTriggerEventTable1751282188913: starting');
 

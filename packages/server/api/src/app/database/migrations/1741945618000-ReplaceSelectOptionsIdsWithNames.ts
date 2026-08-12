@@ -12,9 +12,7 @@ const mappingOfSelectOptionsIdToValuesInEveryTable = new Map<
   Map<string, Map<number, string>>
 >();
 
-export class ReplaceSelectOptionsIdsWithNames1741945618000
-  implements MigrationInterface
-{
+export class ReplaceSelectOptionsIdsWithNames1741945618000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const workflows = await queryRunner.query(
       'SELECT "id", "trigger" FROM "flow_version"',

@@ -207,8 +207,10 @@ export const convertPropValueToMondayColumnValue = (
     case MondayColumnType.HOUR: {
       const [hour, minute] = propValue.split(':');
       return {
-        hour: Number(hour) ?? 0,
-        minute: Number(minute) ?? 0,
+        // `??` never fired here: Number() returns NaN, not nullish, so a
+        // malformed value propagated NaN instead of falling back to 0.
+        hour: Number(hour) || 0,
+        minute: Number(minute) || 0,
       };
     }
     case MondayColumnType.LINK:

@@ -64,12 +64,15 @@ export function parseArn(arn: string): {
 }
 
 export function groupARNsByAccount(arns: string[]): Record<string, string[]> {
-  return arns.reduce((acc, arn) => {
-    const { accountId } = parseArn(arn);
-    if (!acc[accountId]) {
-      acc[accountId] = [];
-    }
-    acc[accountId].push(arn);
-    return acc;
-  }, {} as Record<string, string[]>);
+  return arns.reduce(
+    (acc, arn) => {
+      const { accountId } = parseArn(arn);
+      if (!acc[accountId]) {
+        acc[accountId] = [];
+      }
+      acc[accountId].push(arn);
+      return acc;
+    },
+    {} as Record<string, string[]>,
+  );
 }

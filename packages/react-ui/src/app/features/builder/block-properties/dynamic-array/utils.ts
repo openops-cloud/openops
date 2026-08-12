@@ -51,10 +51,13 @@ export const getDynamicInput = (
 
   const dynamicProps = Object.entries(arrayContext?.properties?.dynamic || {})
     .filter(([, prop]) => isDynamicProperty(prop))
-    .reduce((acc, [key, prop]) => {
-      acc[key] = prop;
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc, [key, prop]) => {
+        acc[key] = prop;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
   if (Object.keys(dynamicProps).includes(propertyName)) {
     const index = extractIndex(inputName) ?? 0;

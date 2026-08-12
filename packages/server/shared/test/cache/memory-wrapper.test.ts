@@ -43,16 +43,18 @@ describe('memoryWrapper', () => {
 
   test('setSerializedObject and getSerializedObject should store and retrieve a serialized object', async () => {
     await memoryWrapper.setSerializedObject(serializedObjectKey, testObject);
-    const result = await memoryWrapper.getSerializedObject<typeof testObject>(
-      serializedObjectKey,
-    );
+    const result =
+      await memoryWrapper.getSerializedObject<typeof testObject>(
+        serializedObjectKey,
+      );
     expect(result).toEqual(testObject);
   });
 
   test('getSerializedObject should return null for a non-existent key', async () => {
-    const result = await memoryWrapper.getSerializedObject<typeof testObject>(
-      'nonExistentKey',
-    );
+    const result =
+      await memoryWrapper.getSerializedObject<typeof testObject>(
+        'nonExistentKey',
+      );
     expect(result).toBeNull();
   });
 

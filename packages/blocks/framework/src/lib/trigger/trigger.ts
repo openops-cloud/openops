@@ -108,8 +108,7 @@ export class ITrigger<
   TS extends TriggerStrategy,
   BlockAuth extends BlockAuthProperty,
   TriggerProps extends InputPropertyMap,
-> implements TriggerBase
-{
+> implements TriggerBase {
   constructor(
     public readonly name: string,
     public readonly displayName: string,

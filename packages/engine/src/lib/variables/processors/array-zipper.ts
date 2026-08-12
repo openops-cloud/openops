@@ -13,10 +13,13 @@ function constructResultForIndex(
   props: Record<string, unknown>,
   index: number,
 ): Record<string, unknown> {
-  return Object.entries(props).reduce((result, [key, value]) => {
-    result[key] = Array.isArray(value) ? value[index] : value;
-    return result;
-  }, {} as Record<string, unknown>);
+  return Object.entries(props).reduce(
+    (result, [key, value]) => {
+      result[key] = Array.isArray(value) ? value[index] : value;
+      return result;
+    },
+    {} as Record<string, unknown>,
+  );
 }
 
 export const arrayZipperProcessor: ProcessorFn = (_property, value) => {

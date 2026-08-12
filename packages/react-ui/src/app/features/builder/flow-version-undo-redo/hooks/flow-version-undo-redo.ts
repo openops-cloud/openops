@@ -96,7 +96,7 @@ const useFlowVersionUndoRedo = (): FlowVersionUndoRedo => {
 
         centerWorkflowViewOntoStep(stateToApply.spotlightStepName);
       }
-    } catch (error) {
+    } catch {
       toast(UNSAVED_CHANGES_TOAST);
     } finally {
       isBulkActionInProgress.current = false; // Unlock the processing

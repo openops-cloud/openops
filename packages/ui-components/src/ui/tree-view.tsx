@@ -96,8 +96,8 @@ const TreeViewItem = forwardRef<
             level === 1 && !isBranch
               ? xPadding
               : level
-              ? levelPadding * (level - 1) + xPadding
-              : levelPadding,
+                ? levelPadding * (level - 1) + xPadding
+                : levelPadding,
           ...props.style,
         }}
         data-treeview-is-branch={isBranch}
