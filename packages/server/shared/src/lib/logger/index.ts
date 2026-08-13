@@ -11,6 +11,8 @@ function initLogger(): Logger {
     const level = system.get<Level>(SharedSystemProp.LOG_LEVEL) ?? 'info';
     const numericLevel = pino.levels.values[level] ?? 30;
     const pretty = system.getBoolean(SharedSystemProp.LOG_PRETTY) ?? false;
+    const dualLoggingEnabled =
+      system.getBoolean(SharedSystemProp.DUAL_LOGGING_ENABLED) ?? false;
 
     let transport: TransportSingleOptions | undefined = undefined;
     if (pretty) {
@@ -61,6 +63,11 @@ function initLogger(): Logger {
 
           if (logzioLogger) {
             logzioLogger.log(logEvent);
+
+            if (dualLoggingEnabled) {
+              console.log(JSON.stringify(logEvent));
+            }
+
             return null;
           }
 
