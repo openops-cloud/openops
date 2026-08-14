@@ -11,6 +11,8 @@ function initLogger(): Logger {
     const level = system.get<Level>(SharedSystemProp.LOG_LEVEL) ?? 'info';
     const numericLevel = pino.levels.values[level] ?? 30;
     const pretty = system.getBoolean(SharedSystemProp.LOG_PRETTY) ?? false;
+    const dualLoggingEnabled =
+      system.getBoolean(SharedSystemProp.DUAL_LOGGING_ENABLED) ?? false;
 
     let transport: TransportSingleOptions | undefined = undefined;
     if (pretty) {
@@ -61,6 +63,11 @@ function initLogger(): Logger {
 
           if (logzioLogger) {
             logzioLogger.log(logEvent);
+
+            if (logEvent.message && dualLoggingEnabled) {
+              writeFilteredLog(logEvent);
+            }
+
             return null;
           }
 
@@ -83,6 +90,17 @@ function initLogger(): Logger {
   } catch (error) {
     console.error('Failed to initialize logger', error);
     return pino({ level: 'info' });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function writeFilteredLog(logEvent: any): void {
+  const shouldDiscard =
+    logEvent.message.includes('/v1/health') ||
+    logEvent.message.includes('/v1/worker-machines/heartbeat');
+
+  if (!shouldDiscard) {
+    console.log(JSON.stringify(logEvent));
   }
 }
 
