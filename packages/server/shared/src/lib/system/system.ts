@@ -61,6 +61,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LOG_LEVEL]: 'info',
   [SharedSystemProp.LOG_PRETTY]: 'false',
   [SharedSystemProp.LOG_REDACTION]: 'true',
+  [SharedSystemProp.DUAL_LOGGING_ENABLED]: 'false',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
   [SharedSystemProp.BLOCKS_DEV_MODE_ENABLED]: 'false',
