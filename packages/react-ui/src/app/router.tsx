@@ -46,6 +46,10 @@ import GeneralPage from './routes/settings/general';
 import { SignInPage } from './routes/sign-in';
 import { SignUpPage } from './routes/sign-up';
 
+const ConnectedAppsPage = lazy(
+  () => import('@/app/routes/settings/connected-apps'),
+);
+
 const SettingsRerouter = () => {
   const { hash } = useLocation();
   const fragmentWithoutHash = hash.slice(1).toLowerCase();
@@ -289,6 +293,24 @@ const createRoutes = ({
     ];
     routes.push(...regularLoginRoutes);
   }
+
+  routes.push({
+    path: 'settings/connected-apps',
+    element: (
+      <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
+        <ProjectSettingsLayout>
+          <OpsErrorBoundary>
+            <PageTitle title="Connected apps">
+              <Suspense>
+                <ConnectedAppsPage />
+              </Suspense>
+            </PageTitle>
+          </OpsErrorBoundary>
+        </ProjectSettingsLayout>
+      </RouteWrapper>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  });
 
   const redirectRoutes = [
     {

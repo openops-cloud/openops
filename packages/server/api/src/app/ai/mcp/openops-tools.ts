@@ -2,6 +2,7 @@ import { createMCPClient } from '@ai-sdk/mcp';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import {
   AppSystemProp,
+  logger,
   networkUtls,
   SharedSystemProp,
   system,
@@ -33,38 +34,51 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
-function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const filteredPaths: Record<string, any> = {};
+/**
+ * The MCP server takes its allow-list as a file and reads the OpenAPI document from
+ * the API itself, so this writes `INCLUDED_PATHS` out in the shape it expects. Writing
+ * it rather than shipping a copy alongside the MCP server keeps this the only place
+ * the chat's exposed surface is declared.
+ *
+ * Entries the running API does not serve are dropped, which is what the old schema
+ * filter did implicitly. It matters more now: the MCP server refuses to start on an
+ * operation it cannot find, so passing a stale entry through would cost every tool
+ * rather than the one that drifted.
+ */
+function buildRouteList(schema: OpenAPI.Document): string {
+  const available = schema.paths ?? {};
 
-  for (const [path, pathItem] of Object.entries(schema.paths ?? {})) {
-    if (!INCLUDED_PATHS[path]) continue;
+  const routes = Object.entries(INCLUDED_PATHS)
+    .map(([path, methods]) => {
+      const pathItem = available[path];
+      const served = pathItem
+        ? methods.filter((method) => method in pathItem)
+        : [];
 
-    filteredPaths[path] = {};
-    for (const [method, op] of Object.entries(pathItem)) {
-      if (INCLUDED_PATHS[path].includes(method.toLowerCase())) {
-        filteredPaths[path][method] = op;
+      if (served.length !== methods.length) {
+        logger.warn('Skipping MCP operations the API does not expose', {
+          path,
+          requested: methods,
+          served,
+        });
       }
-    }
-  }
 
-  return { ...schema, paths: filteredPaths };
+      return { path, methods: served };
+    })
+    .filter((route) => route.methods.length > 0);
+
+  return JSON.stringify({ routes });
 }
 
-let cachedSchemaPath: string | undefined;
+let cachedRoutesPath: string | undefined;
 
-async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
-  if (!cachedSchemaPath) {
-    const openApiSchema = app.swagger();
-    const filteredSchema = filterOpenApiSchema(openApiSchema);
-    cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
-    await fs.writeFile(
-      cachedSchemaPath,
-      JSON.stringify(filteredSchema),
-      'utf-8',
-    );
+async function getRouteListPath(app: FastifyInstance): Promise<string> {
+  if (!cachedRoutesPath) {
+    const routesPath = path.join(os.tmpdir(), 'openops-mcp-routes.json');
+    await fs.writeFile(routesPath, buildRouteList(app.swagger()), 'utf-8');
+    cachedRoutesPath = routesPath;
   }
-  return cachedSchemaPath;
+  return cachedRoutesPath;
 }
 
 export async function getOpenOpsTools(
@@ -78,7 +92,7 @@ export async function getOpenOpsTools(
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
-  const tempSchemaPath = await getOpenApiSchemaPath(app);
+  const routesPath = await getRouteListPath(app);
 
   const serviceToken =
     await accessTokenManager.generateServiceToken(userAuthToken);
@@ -88,9 +102,12 @@ export async function getOpenOpsTools(
       command: pythonPath,
       args: [serverPath],
       env: {
-        OPENAPI_SCHEMA_PATH: tempSchemaPath,
+        // stdio: the server acts as one service principal, so the token is passed
+        // in rather than obtained per request as it is over HTTP.
+        MCP_TRANSPORT: 'stdio',
         AUTH_TOKEN: serviceToken,
-        API_BASE_URL: networkUtls.getInternalApiUrl(),
+        OPENOPS_MCP_ROUTES: routesPath,
+        OPENOPS_API_URL: networkUtls.getInternalApiUrl(),
         OPENOPS_MCP_SERVER_PATH: basePath,
         LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
         ENVIRONMENT:

@@ -205,7 +205,7 @@ All user-facing strings must use i18n — no hardcoded copy.
 
 Use `ApplicationError` with typed `ErrorCode` from `@openops/shared`:
 
-~~~typescript
+```typescript
 import { ApplicationError, ErrorCode } from '@openops/shared';
 
 try {
@@ -222,7 +222,7 @@ try {
   }
   throw err;
 }
-~~~
+```
 
 The Fastify error handler in `packages/server/api/src/app/helper/error-handler.ts` maps `ErrorCode` values to HTTP status codes automatically.
 
