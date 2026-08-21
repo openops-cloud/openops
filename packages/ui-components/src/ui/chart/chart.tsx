@@ -8,6 +8,13 @@ import { cn } from '../../lib/cn';
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: '', dark: '.dark' } as const;
 
+// Recharts defaults differ per element (Bar 400ms, Pie 800ms, Line 1500ms),
+// so charts rendered side by side finish their transitions at different
+// times. Chart wrappers share this duration so filter changes animate at
+// the same pace across a page (currently applied to BarChart and DonutChart).
+export const CHART_ANIMATION_DURATION_MS = 800;
+export const CHART_ANIMATION_EASING = 'ease' as const;
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode;

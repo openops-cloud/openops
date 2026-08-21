@@ -8,6 +8,8 @@ import {
   YAxis,
 } from 'recharts';
 import {
+  CHART_ANIMATION_DURATION_MS,
+  CHART_ANIMATION_EASING,
   ChartConfig,
   ChartContainer,
   ChartLegend,
@@ -97,6 +99,10 @@ export function BarChart({
             tick={{
               fill: 'hsl(var(--foreground))',
             }}
+            // recharts reserves 30px for the axis by default, which is not
+            // enough for the 20px tickMargin plus the label text — the
+            // bottom few pixels of every label get clipped by the svg edge.
+            height={40}
           />
         )}
         <YAxis
@@ -133,6 +139,8 @@ export function BarChart({
             radius={bar.radius ?? 4}
             stackId={bar.stackId}
             hide={hiddenKeys.has(bar.dataKey)}
+            animationDuration={CHART_ANIMATION_DURATION_MS}
+            animationEasing={CHART_ANIMATION_EASING}
           />
         ))}
       </RechartsBarChart>
