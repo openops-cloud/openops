@@ -91,7 +91,12 @@ export function DonutChart({
 
   return (
     <ChartContainer config={config} className={className}>
-      <RechartsPieChart accessibilityLayer>
+      <RechartsPieChart
+        accessibilityLayer
+        onMouseLeave={
+          onSliceHover && !isEmpty ? () => onSliceHover(null) : undefined
+        }
+      >
         {showTooltip && !isEmpty && (
           <ChartTooltip
             cursor={false}
@@ -111,9 +116,6 @@ export function DonutChart({
               ? (entry: { name: string; value: number }) =>
                   onSliceHover({ name: entry.name, value: entry.value })
               : undefined
-          }
-          onMouseLeave={
-            onSliceHover && !isEmpty ? () => onSliceHover(null) : undefined
           }
           label={
             showLegend && !isEmpty
