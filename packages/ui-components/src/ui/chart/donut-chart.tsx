@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Pie, PieChart as RechartsPieChart } from 'recharts';
 import {
+  CHART_ANIMATION_DURATION_MS,
+  CHART_ANIMATION_EASING,
   ChartConfig,
   ChartContainer,
   ChartTooltip,
@@ -65,6 +67,7 @@ export type DonutChartProps = {
   outerRadius?: number;
   showTooltip?: boolean;
   showLegend?: boolean;
+  onSliceHover?: (slice: { name: string; value: number } | null) => void;
   className?: string;
 };
 
@@ -75,6 +78,7 @@ export function DonutChart({
   outerRadius = 90,
   showTooltip = true,
   showLegend = true,
+  onSliceHover,
   className,
 }: DonutChartProps): React.JSX.Element {
   const isEmpty = data.every((entry) => !entry.value);
@@ -87,7 +91,12 @@ export function DonutChart({
 
   return (
     <ChartContainer config={config} className={className}>
-      <RechartsPieChart accessibilityLayer>
+      <RechartsPieChart
+        accessibilityLayer
+        onMouseLeave={
+          onSliceHover && !isEmpty ? () => onSliceHover(null) : undefined
+        }
+      >
         {showTooltip && !isEmpty && (
           <ChartTooltip
             cursor={false}
@@ -100,6 +109,14 @@ export function DonutChart({
           nameKey="name"
           innerRadius={innerRadius}
           outerRadius={outerRadius}
+          animationDuration={CHART_ANIMATION_DURATION_MS}
+          animationEasing={CHART_ANIMATION_EASING}
+          onMouseEnter={
+            onSliceHover && !isEmpty
+              ? (entry: { name: string; value: number }) =>
+                  onSliceHover({ name: entry.name, value: entry.value })
+              : undefined
+          }
           label={
             showLegend && !isEmpty
               ? (props) => (
