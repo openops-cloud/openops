@@ -1,0 +1,136 @@
+import { ConnectedAppsList } from '@/app/features/oauth/components/connected-apps-list';
+import { ConsentDialog } from '@/app/features/oauth/components/consent-dialog';
+import { useConnectedApps } from '@/app/features/oauth/hooks/use-connected-apps';
+import { useOAuthConsent } from '@/app/features/oauth/hooks/use-oauth-consent';
+import { ConnectedApp } from '@/app/features/oauth/lib/oauth-api';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  ConfirmationDialog,
+  LoadingSpinner,
+} from '@openops/components/ui';
+import { t } from 'i18next';
+import { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+const REQUEST_ID_PARAM = 'request_id';
+
+const PageError = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
+  <Alert variant="destructive" className="flex-col items-start gap-2">
+    <AlertTitle>{title}</AlertTitle>
+    <AlertDescription>{description}</AlertDescription>
+  </Alert>
+);
+
+const ConnectedAppsPage = () => {
+  const [searchParams] = useSearchParams();
+  const requestId = searchParams.get(REQUEST_ID_PARAM);
+
+  const consent = useOAuthConsent(requestId);
+  const { apps, isLoading, loadError, revoke, revokingId, revokeError } =
+    useConnectedApps();
+
+  const [appToRevoke, setAppToRevoke] = useState<ConnectedApp | null>(null);
+
+  const confirmRevoke = useCallback(() => {
+    if (appToRevoke) {
+      revoke(appToRevoke.id);
+      setAppToRevoke(null);
+    }
+  }, [appToRevoke, revoke]);
+
+  const cancelRevoke = useCallback(() => setAppToRevoke(null), []);
+
+  return (
+    // Same shape as the other settings routes, so the page title and description read
+    // the same wherever you land (see `routes/settings/ai`).
+    <div className="flex w-full flex-col items-center justify-center gap-4">
+      <div className="mx-auto w-full flex flex-col gap-4">
+        <h1 className="text-[24px] font-bold">{t('Connected apps')}</h1>
+        <p className="text-base font-normal">
+          {t(
+            'AI agents and other applications you have allowed to act in OpenOps on your behalf. Disconnecting one takes effect immediately and does not affect the others.',
+          )}
+        </p>
+
+        {/* A pending request that cannot be read is almost always expired, already
+            answered, or a reloaded page — the single-use record is gone either way. */}
+        {requestId && consent.loadError && (
+          <PageError
+            title={t('This authorization request cannot be completed')}
+            description={t(
+              'It has expired or has already been used. Start the connection again from the application you were using.',
+            )}
+          />
+        )}
+
+        {consent.decisionError && (
+          <PageError
+            title={t('Your decision could not be recorded')}
+            description={t(
+              'Start the connection again from the application you were using.',
+            )}
+          />
+        )}
+
+        {loadError && (
+          <PageError
+            title={t('Connected apps could not be loaded')}
+            description={t('Reload the page to try again.')}
+          />
+        )}
+
+        {revokeError && (
+          <PageError
+            title={t('The application could not be disconnected')}
+            description={t('Reload the page and try again.')}
+          />
+        )}
+
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <LoadingSpinner size={24} />
+          </div>
+        ) : (
+          <ConnectedAppsList
+            apps={apps ?? []}
+            onRevoke={setAppToRevoke}
+            revokingId={revokingId}
+          />
+        )}
+      </div>
+
+      {consent.request && (
+        <ConsentDialog
+          request={consent.request}
+          onApprove={consent.approve}
+          onDeny={consent.deny}
+          isDeciding={consent.isDeciding}
+        />
+      )}
+
+      <ConfirmationDialog
+        isOpen={appToRevoke !== null}
+        onOpenChange={(open) => !open && cancelRevoke()}
+        title={t('Disconnect this application?')}
+        description={t(
+          'It will immediately lose access to OpenOps and will have to be authorized again to reconnect.',
+        )}
+        confirmButtonText={t('Disconnect')}
+        confirmButtonVariant="destructive"
+        onConfirm={confirmRevoke}
+        onCancel={cancelRevoke}
+      />
+    </div>
+  );
+};
+
+ConnectedAppsPage.displayName = 'ConnectedAppsPage';
+export { ConnectedAppsPage };

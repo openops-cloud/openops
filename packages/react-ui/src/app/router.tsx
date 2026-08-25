@@ -21,6 +21,7 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
+import ConnectedAppsPage from '@/app/routes/settings/connected-apps';
 import { FlagId } from '@openops/shared';
 import { lazy, Suspense } from 'react';
 import {
@@ -150,6 +151,21 @@ const createRoutes = ({
             <OpsErrorBoundary>
               <PageTitle title="Appearance">
                 <AppearancePage />
+              </PageTitle>
+            </OpsErrorBoundary>
+          </ProjectSettingsLayout>
+        </RouteWrapper>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    },
+    {
+      path: 'settings/connected-apps',
+      element: (
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
+          <ProjectSettingsLayout>
+            <OpsErrorBoundary>
+              <PageTitle title="Connected apps">
+                <ConnectedAppsPage />
               </PageTitle>
             </OpsErrorBoundary>
           </ProjectSettingsLayout>
