@@ -28,7 +28,7 @@ export const useOAuthConsent = (requestId: string | null): UseOAuthConsent => {
   } = useQuery({
     queryKey: [QueryKeys.oauthConsentRequest, requestId],
     queryFn: () => oauthApi.getConsentRequest(requestId as string),
-    enabled: requestId !== null,
+    enabled: Boolean(requestId),
     retry: false,
     staleTime: Infinity,
     refetchOnWindowFocus: false,

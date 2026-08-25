@@ -31,7 +31,7 @@ const PageError = ({
 
 const ConnectedAppsPage = () => {
   const [searchParams] = useSearchParams();
-  const requestId = searchParams.get(REQUEST_ID_PARAM);
+  const requestId = searchParams.get(REQUEST_ID_PARAM) || null;
 
   const consent = useOAuthConsent(requestId);
   const { apps, isLoading, loadError, revoke, revokingId, revokeError } =

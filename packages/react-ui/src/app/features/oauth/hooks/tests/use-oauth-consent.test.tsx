@@ -57,6 +57,13 @@ describe('useOAuthConsent', () => {
     expect(mockedGetConsentRequest).not.toHaveBeenCalled();
   });
 
+  it('treats a blank id as no id, rather than asking for an empty one', async () => {
+    const { result } = render('');
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(mockedGetConsentRequest).not.toHaveBeenCalled();
+  });
+
   it('sends the browser to the redirect the server returned when approving', async () => {
     const { result } = render('req-1');
     await waitFor(() => expect(result.current.request).toEqual(REQUEST));
