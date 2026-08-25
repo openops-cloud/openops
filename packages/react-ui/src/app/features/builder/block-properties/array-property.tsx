@@ -12,7 +12,7 @@ import {
 import { DragHandleDots2Icon } from '@radix-ui/react-icons';
 import { t } from 'i18next';
 import { Plus, TrashIcon } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import { ArrayPropertiesProvider } from '@/app/features/builder/block-properties/dynamic-array/array-properties-context';
@@ -36,6 +36,8 @@ type ArrayPropertyProps = {
   useMentionTextInput: boolean;
   arrayProperty: ArrayProperty<boolean>;
   disabled: boolean;
+  /** Rendered beside the "Add Item" button. */
+  extraActions?: ReactNode;
 };
 
 const ArrayBlockProperty = ({
@@ -43,6 +45,7 @@ const ArrayBlockProperty = ({
   useMentionTextInput,
   disabled,
   arrayProperty,
+  extraActions,
 }: ArrayPropertyProps) => {
   const form = useFormContext();
 
@@ -258,16 +261,21 @@ const ArrayBlockProperty = ({
         )}
       </div>
       {!disabled && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-2"
-          onClick={appendNewArrayItem}
-          type="button"
-          data-testid="appendNewArrayItemButton"
+        <div
+          className="mt-2 flex flex-wrap items-center gap-2"
+          data-testid="arrayPropertyFooter"
         >
-          <TextWithIcon icon={<Plus size={18} />} text={t('Add Item')} />
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={appendNewArrayItem}
+            type="button"
+            data-testid="appendNewArrayItemButton"
+          >
+            <TextWithIcon icon={<Plus size={18} />} text={t('Add Item')} />
+          </Button>
+          {extraActions}
+        </div>
       )}
     </ArrayPropertiesProvider>
   );

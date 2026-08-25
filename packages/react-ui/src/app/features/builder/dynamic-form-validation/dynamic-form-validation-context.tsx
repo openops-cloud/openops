@@ -44,6 +44,12 @@ export type DynamicFormValidationContextState = {
     newFieldPropertyMap: BlockPropertyMap,
     currentLastIndex: number,
   ) => void;
+  addArrayItemsToSchema: (
+    arrayKey: string,
+    newFieldPropertyMap: BlockPropertyMap,
+    previousArrayLength: number,
+    count: number,
+  ) => void;
 };
 
 const DynamicFormValidationContext = createContext<
@@ -161,6 +167,50 @@ export const DynamicFormValidationProvider = ({
     [],
   );
 
+  // Batched variant of addArrayItemToSchema: appends `count` item schemas in a
+  // single functional update instead of cloning the schema once per item.
+  const addArrayItemsToSchema = useCallback(
+    (
+      arrayKey: string,
+      newFieldPropertyMap: BlockPropertyMap,
+      previousArrayLength: number,
+      count: number,
+    ) => {
+      if (count <= 0) {
+        return;
+      }
+      setFormSchema((prevSchema: any) => {
+        if (!prevSchema) return null;
+
+        const transformedArrayKey = getTransformedKey(
+          arrayKey,
+          numberReplacement,
+          stringReplacement,
+        );
+        const schemaWithUpdatedArrayProps = updateArraySchemaItemsCount(
+          transformedArrayKey,
+          prevSchema,
+          previousArrayLength + count,
+        );
+
+        const arrayItemSchema = formUtils.buildSchema(newFieldPropertyMap);
+        const itemsPath = `${transformedArrayKey}${arrayItemsKey}`;
+        const existingItems: unknown[] =
+          get(schemaWithUpdatedArrayProps, itemsPath) ?? [];
+        const newItems = Array.from({ length: count }, () =>
+          cloneDeep(arrayItemSchema),
+        );
+        set(schemaWithUpdatedArrayProps, itemsPath, [
+          ...existingItems.slice(0, previousArrayLength),
+          ...newItems,
+        ]);
+
+        return schemaWithUpdatedArrayProps;
+      });
+    },
+    [],
+  );
+
   const removeArrayItemFromSchema = useCallback(
     (
       arrayKey: string,
@@ -203,6 +253,7 @@ export const DynamicFormValidationProvider = ({
         updateFormSchema,
         initArraySchema,
         addArrayItemToSchema,
+        addArrayItemsToSchema,
         removeArrayItemFromSchema,
       }}
     >
