@@ -22,7 +22,6 @@ import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-head
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
 import ConnectedAppsPage from '@/app/routes/settings/connected-apps';
-import { FlagId } from '@openops/shared';
 import { lazy, Suspense } from 'react';
 import {
   OpsErrorBoundary,
@@ -424,32 +423,28 @@ const createRoutes = ({
 };
 
 const ApplicationRouter = () => {
-  const { data: isConnectedAppsEnabled } = flagsHooks.useFlag<
-    boolean | undefined
-  >(FlagId.CONNECTED_APPS_ENABLED);
+  const { data: flags } = flagsHooks.useFlags();
 
-  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
-    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
+  const isConnectedAppsEnabled = Boolean(flags?.CONNECTED_APPS_ENABLED);
+  const isCloudConnectionPageEnabled = Boolean(
+    flags?.CLOUD_CONNECTION_PAGE_ENABLED,
   );
 
-  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
-    FlagId.SHOW_DEMO_HOME_PAGE,
-  );
-
-  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
-    FlagId.FEDERATED_LOGIN_ENABLED,
-  );
+  const isDemoHomePage = Boolean(flags?.SHOW_DEMO_HOME_PAGE);
+  const isFederatedLogin = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
 
   const router = createBrowserRouter([
     {
       path: '/',
       element: <GlobalLayout />,
-      children: createRoutes({
-        isConnectedAppsEnabled,
-        isCloudConnectionPageEnabled,
-        isDemoHomePage,
-        isFederatedLogin,
-      }),
+      children: [
+        ...createRoutes({
+          isConnectedAppsEnabled,
+          isCloudConnectionPageEnabled,
+          isDemoHomePage,
+          isFederatedLogin,
+        }),
+      ],
     },
   ]);
   return <RouterProvider router={router}></RouterProvider>;
