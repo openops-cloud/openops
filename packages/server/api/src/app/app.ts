@@ -53,6 +53,7 @@ import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
 import { systemJobsSchedule } from './helper/system-jobs';
+import { mcpModule } from './mcp/mcp.module';
 import { oauthConfig } from './oauth/config/oauth-config';
 import { registerOAuthCleanupHandler } from './oauth/oauth-cleanup-job';
 import { oauthModule } from './oauth/oauth.module';
@@ -225,6 +226,7 @@ export const setupApp = async (
   await app.register(userInfoModule);
   await app.register(userSettingsModule);
   await app.register(aiModule);
+  await app.register(mcpModule);
   await app.register(blockVariableModule);
   await app.register(benchmarkModule);
 

@@ -21,7 +21,7 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
-import { FlagId } from '@openops/shared';
+import ConnectedAppsPage from '@/app/routes/settings/connected-apps';
 import { lazy, Suspense } from 'react';
 import {
   OpsErrorBoundary,
@@ -57,12 +57,14 @@ const SettingsRerouter = () => {
 };
 
 interface CreateRoutesParams {
+  isConnectedAppsEnabled: boolean | null | undefined;
   isCloudConnectionPageEnabled: any;
   isDemoHomePage: any;
   isFederatedLogin: boolean | null | undefined;
 }
 
 const createRoutes = ({
+  isConnectedAppsEnabled,
   isCloudConnectionPageEnabled,
   isDemoHomePage,
   isFederatedLogin,
@@ -310,6 +312,24 @@ const createRoutes = ({
   ];
   routes.push(...redirectRoutes);
 
+  if (isConnectedAppsEnabled) {
+    routes.push({
+      path: 'settings/connected-apps',
+      element: (
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
+          <ProjectSettingsLayout>
+            <OpsErrorBoundary>
+              <PageTitle title="Connected apps">
+                <ConnectedAppsPage />
+              </PageTitle>
+            </OpsErrorBoundary>
+          </ProjectSettingsLayout>
+        </RouteWrapper>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    });
+  }
+
   if (isCloudConnectionPageEnabled) {
     const CloudConnectionPage = lazy(
       () => import('@/app/routes/cloud-connection'),
@@ -403,27 +423,28 @@ const createRoutes = ({
 };
 
 const ApplicationRouter = () => {
-  const { data: isCloudConnectionPageEnabled } = flagsHooks.useFlag<any>(
-    FlagId.CLOUD_CONNECTION_PAGE_ENABLED,
+  const { data: flags } = flagsHooks.useFlags();
+
+  const isConnectedAppsEnabled = Boolean(flags?.CONNECTED_APPS_ENABLED);
+  const isCloudConnectionPageEnabled = Boolean(
+    flags?.CLOUD_CONNECTION_PAGE_ENABLED,
   );
 
-  const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
-    FlagId.SHOW_DEMO_HOME_PAGE,
-  );
-
-  const { data: isFederatedLogin } = flagsHooks.useFlag<boolean | undefined>(
-    FlagId.FEDERATED_LOGIN_ENABLED,
-  );
+  const isDemoHomePage = Boolean(flags?.SHOW_DEMO_HOME_PAGE);
+  const isFederatedLogin = Boolean(flags?.FEDERATED_LOGIN_ENABLED);
 
   const router = createBrowserRouter([
     {
       path: '/',
       element: <GlobalLayout />,
-      children: createRoutes({
-        isCloudConnectionPageEnabled,
-        isDemoHomePage,
-        isFederatedLogin,
-      }),
+      children: [
+        ...createRoutes({
+          isConnectedAppsEnabled,
+          isCloudConnectionPageEnabled,
+          isDemoHomePage,
+          isFederatedLogin,
+        }),
+      ],
     },
   ]);
   return <RouterProvider router={router}></RouterProvider>;
