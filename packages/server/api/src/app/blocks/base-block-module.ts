@@ -234,7 +234,7 @@ const ListCategoriesRequest = {
 const OptionsBlockRequest = {
   config: {
     security: getProjectScopedRoutePolicy({
-      allowedPrincipals: [PrincipalType.USER],
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FLOW,
     }),
   },

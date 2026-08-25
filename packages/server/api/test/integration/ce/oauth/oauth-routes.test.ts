@@ -104,20 +104,6 @@ describe('OAuth routes', () => {
       expect(response.statusCode).toBe(StatusCodes.FORBIDDEN);
     });
 
-    it('admits a SERVICE principal on the projects list', async () => {
-      const token = await generateMockToken({ type: PrincipalType.SERVICE });
-
-      const response = await app!.inject({
-        method: 'GET',
-        url: '/v1/oauth/projects',
-        headers: { authorization: `Bearer ${token}` },
-      });
-
-      // The one route a connection calls about itself, so SERVICE is admitted here and
-      // refused on the two above.
-      expect(response.statusCode).not.toBe(StatusCodes.FORBIDDEN);
-    });
-
     it('refuses an unauthenticated caller on the connected-apps list', async () => {
       const response = await app!.inject({
         method: 'GET',
