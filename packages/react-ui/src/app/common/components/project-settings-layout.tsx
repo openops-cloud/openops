@@ -3,7 +3,6 @@ import { t } from 'i18next';
 import { Plug, Settings, Sparkles, SunMoon } from 'lucide-react';
 
 import SidebarLayout from '@/app/common/components/sidebar-layout';
-import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 
 const iconSize = 20;
