@@ -234,7 +234,9 @@ const ListCategoriesRequest = {
 const OptionsBlockRequest = {
   config: {
     security: getProjectScopedRoutePolicy({
-      allowedPrincipals: [PrincipalType.USER],
+      // SERVICE as well as USER: this is in the chat and agent MCP profiles, and an
+      // agent resolving dynamic block properties is doing the same read a user does.
+      allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
       permission: Permission.READ_FLOW,
     }),
   },
