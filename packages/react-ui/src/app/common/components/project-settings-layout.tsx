@@ -7,32 +7,6 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 
 const iconSize = 20;
 
-const baseNavItems = [
-  {
-    title: t('General'),
-    href: '/settings/general',
-    icon: <Settings size={iconSize} />,
-  },
-];
-
-const appearanceNavItem = {
-  title: t('Appearance'),
-  href: '/settings/appearance',
-  icon: <SunMoon size={iconSize} />,
-};
-
-const aiNavItem = {
-  title: t('OpenOps AI'),
-  href: '/settings/ai',
-  icon: <Sparkles size={iconSize} />,
-};
-
-const connectedAppsNavItem = {
-  title: t('Connected apps'),
-  href: '/settings/connected-apps',
-  icon: <Plug size={iconSize} />,
-};
-
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -40,19 +14,58 @@ interface SettingsLayoutProps {
 export default function ProjectSettingsLayout({
   children,
 }: SettingsLayoutProps) {
-  const showAppearanceSettings = flagsHooks.useFlag(
-    FlagId.DARK_THEME_ENABLED,
-  ).data;
-  const showConnectedApps = flagsHooks.useFlag(
-    FlagId.CONNECTED_APPS_ENABLED,
-  ).data;
+  const showAppearanceSettings = Boolean(
+    flagsHooks.useFlag(FlagId.DARK_THEME_ENABLED).data,
+  );
 
-  const sidebarNavItems = [
-    ...baseNavItems,
-    ...(showAppearanceSettings ? [appearanceNavItem] : []),
-    aiNavItem,
-    ...(showConnectedApps ? [connectedAppsNavItem] : []),
-  ];
+  const showConnectedApps = Boolean(
+    flagsHooks.useFlag(FlagId.CONNECTED_APPS_ENABLED).data,
+  );
+
+  const sidebarNavItems = buildSettingsNavItems({
+    showAppearanceSettings,
+    showConnectedApps,
+  });
 
   return <SidebarLayout items={sidebarNavItems}>{children}</SidebarLayout>;
+}
+
+export function buildSettingsNavItems({
+  showAppearanceSettings,
+  showConnectedApps,
+}: {
+  showAppearanceSettings: boolean;
+  showConnectedApps: boolean;
+}) {
+  const items = [
+    {
+      title: t('General'),
+      href: '/settings/general',
+      icon: <Settings size={iconSize} />,
+    },
+  ];
+
+  if (showAppearanceSettings) {
+    items.push({
+      title: t('Appearance'),
+      href: '/settings/appearance',
+      icon: <SunMoon size={iconSize} />,
+    });
+  }
+
+  items.push({
+    title: t('OpenOps AI'),
+    href: '/settings/ai',
+    icon: <Sparkles size={iconSize} />,
+  });
+
+  if (showConnectedApps) {
+    items.push({
+      title: t('Connected apps'),
+      href: '/settings/connected-apps',
+      icon: <Plug size={iconSize} />,
+    });
+  }
+
+  return items;
 }
