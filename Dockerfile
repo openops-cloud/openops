@@ -17,7 +17,7 @@ RUN <<-```
     git clone https://github.com/openops-cloud/openops-mcp .
     git checkout b7b3e8a0950f5bcc458f3dd38a4f23e4eb5c9c1a
     source $HOME/.local/bin/env
-    uv venv && . .venv/bin/activate && uv pip install --no-cache-dir -r requirements.txt
+    uv sync --frozen --no-dev --no-install-project
 ```
 
 # Build MCP: aws-cost
