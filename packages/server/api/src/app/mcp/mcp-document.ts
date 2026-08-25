@@ -3,10 +3,12 @@ import { McpProfile } from './mcp-profile';
 
 export const MCP_EXTENSION_KEY = 'x-openops-mcp';
 
+export type McpDocument = Record<string, unknown>;
+
 export function buildMcpDocument(
   document: OpenAPI.Document,
   profile: McpProfile,
-): OpenAPI.Document {
+): McpDocument {
   const paths: Record<string, Record<string, unknown>> = {};
 
   for (const [path, operations] of Object.entries(document.paths ?? {})) {
@@ -19,7 +21,7 @@ export function buildMcpDocument(
     const selected: Record<string, unknown> = {};
 
     for (const [method, operation] of Object.entries(operations)) {
-      if (allowedMethods.includes(method.toLowerCase())) {
+      if (allowedMethods.some((allowed) => allowed === method.toLowerCase())) {
         selected[method] = operation;
       }
     }
@@ -29,13 +31,11 @@ export function buildMcpDocument(
     }
   }
 
-  const served: Record<string, unknown> = {
+  return {
     ...document,
     paths,
     [MCP_EXTENSION_KEY]: { multiProject: profile.multiProject },
   };
-
-  return served as unknown as OpenAPI.Document;
 }
 
 export function findMissingOperations(

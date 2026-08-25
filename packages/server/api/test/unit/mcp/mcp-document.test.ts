@@ -32,7 +32,10 @@ describe('buildMcpDocument', () => {
   it('keeps only the methods the profile names', () => {
     const document = buildMcpDocument(DOCUMENT, PROFILE);
 
-    expect(Object.keys(document.paths?.['/v1/flows/'] ?? {})).toEqual(['get']);
+    expect(Object.keys(document.paths ?? {})).toContain('/v1/flows/');
+    expect(
+      Object.keys((document.paths as Record<string, object>)['/v1/flows/']),
+    ).toEqual(['get']);
   });
 
   it('drops paths the profile does not name', () => {
@@ -48,12 +51,9 @@ describe('buildMcpDocument', () => {
     const document = buildMcpDocument(DOCUMENT, PROFILE);
 
     expect(document.info).toEqual({ title: 'OpenOps', version: '0.0.0' });
-    // `components` sits on the v3 half of the OpenAPI.Document union only.
-    expect((document as unknown as Record<string, unknown>).components).toEqual(
-      {
-        schemas: { flow: { type: 'object' } },
-      },
-    );
+    expect(document.components).toEqual({
+      schemas: { flow: { type: 'object' } },
+    });
   });
 
   it('declares the profile capability so the MCP server needs no edition config', () => {
@@ -63,12 +63,8 @@ describe('buildMcpDocument', () => {
       multiProject: true,
     });
 
-    expect(
-      (single as unknown as Record<string, unknown>)[MCP_EXTENSION_KEY],
-    ).toEqual({ multiProject: false });
-    expect(
-      (multi as unknown as Record<string, unknown>)[MCP_EXTENSION_KEY],
-    ).toEqual({ multiProject: true });
+    expect(single[MCP_EXTENSION_KEY]).toEqual({ multiProject: false });
+    expect(multi[MCP_EXTENSION_KEY]).toEqual({ multiProject: true });
   });
 
   it('does not mutate the document it was given', () => {

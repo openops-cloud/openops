@@ -7,8 +7,10 @@ import { mcpController } from './mcp.controller';
 
 export const mcpModule: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('onReady', async () => {
+    const document = app.swagger();
+
     for (const [name, profile] of Object.entries(getMcpProfiles())) {
-      const missing = findMissingOperations(app.swagger(), profile);
+      const missing = findMissingOperations(document, profile);
 
       if (missing.length > 0) {
         logger.error('MCP profile names operations the API does not expose', {

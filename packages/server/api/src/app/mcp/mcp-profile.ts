@@ -1,15 +1,16 @@
 export type McpProfileName = 'chat' | 'agent';
 
+export type HttpMethod =
+  'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace';
+
 export type McpProfile = {
-  /** Allowed HTTP methods per path, lower-cased the way OpenAPI keys operations. */
-  operations: Record<string, string[]>;
-  /** Whether agents on this profile may act in more than one project. */
+  operations: Record<string, HttpMethod[]>;
   multiProject: boolean;
 };
 
 export type McpProfiles = Record<McpProfileName, McpProfile>;
 
-const CHAT_OPERATIONS: Record<string, string[]> = {
+const CHAT_OPERATIONS: Record<string, HttpMethod[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
   '/v1/flows/': ['get'],
