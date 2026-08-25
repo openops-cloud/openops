@@ -26,7 +26,6 @@ import { stripTrailingSlashes } from './common/canonical-url';
 import { invalidRequest, unsupportedGrantType } from './common/oauth-errors';
 import { oauthConfig } from './config/oauth-config';
 import { resolveResource } from './discovery/resource-registry';
-import { listAvailableProjects } from './projects/available-projects';
 import { OAuthClient } from './storage/oauth-model';
 import { exchangeToken } from './tokens/token-exchange';
 import { tokensService } from './tokens/tokens.service';
@@ -319,32 +318,6 @@ export const oauthController: FastifyPluginAsyncTypebox = async (app) => {
 
       // RFC 7009 §2.2: an unknown token is not an error.
       return noStore(reply).status(StatusCodes.OK).send({});
-    },
-  );
-
-  app.get(
-    '/projects',
-    {
-      config: {
-        // SERVICE as well as USER: the one route a connection itself calls, to find out
-        // where it may switch to. It returns no project data, only names.
-        security: getUnscopedRoutePolicy([
-          PrincipalType.USER,
-          PrincipalType.SERVICE,
-        ]),
-      },
-      schema: {
-        description:
-          'The projects the caller may act in, and which one they are acting in now.',
-      },
-    },
-    async (request) => {
-      const projects = await listAvailableProjects(request.principal.id);
-
-      return {
-        data: projects,
-        currentProjectId: request.principal.projectId,
-      };
     },
   );
 
