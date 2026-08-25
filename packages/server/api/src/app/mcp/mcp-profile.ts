@@ -9,7 +9,6 @@ export type McpProfile = {
 
 export type McpProfiles = Record<McpProfileName, McpProfile>;
 
-/** Read-mostly: the chat reasons about flows that exist, it does not author them. */
 const CHAT_OPERATIONS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
@@ -31,6 +30,5 @@ const CHAT_OPERATIONS: Record<string, string[]> = {
 
 export const communityMcpProfiles: McpProfiles = {
   chat: { operations: CHAT_OPERATIONS, multiProject: false },
-  // One project per organization in this edition, so an agent has nowhere to switch to.
   agent: { operations: CHAT_OPERATIONS, multiProject: false },
 };

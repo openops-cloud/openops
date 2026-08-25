@@ -3,10 +3,6 @@ import { McpProfile } from './mcp-profile';
 
 export const MCP_EXTENSION_KEY = 'x-openops-mcp';
 
-/**
- * Reduce the document to one profile's operations. The MCP server consumes this instead of
- * holding a second allow-list, so the two cannot disagree.
- */
 export function buildMcpDocument(
   document: OpenAPI.Document,
   profile: McpProfile,
@@ -33,8 +29,6 @@ export function buildMcpDocument(
     }
   }
 
-  // A record because `OpenAPI.Document` is a v2|v3 union that admits neither a vendor
-  // extension key nor a rebuilt `paths`.
   const served: Record<string, unknown> = {
     ...document,
     paths,
@@ -44,8 +38,6 @@ export function buildMcpDocument(
   return served as unknown as OpenAPI.Document;
 }
 
-/** Operations a profile names that the document does not contain — a typo, or another
- * edition's path. */
 export function findMissingOperations(
   document: OpenAPI.Document,
   profile: McpProfile,

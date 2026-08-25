@@ -1,4 +1,3 @@
-// Module augmentation for `app.swagger()`; not reliable transitively.
 import { createMCPClient } from '@ai-sdk/mcp';
 import '@fastify/swagger';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
@@ -21,8 +20,6 @@ let cachedSchemaPath: string | undefined;
 
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
   if (!cachedSchemaPath) {
-    // A file rather than the HTTP endpoint the hosted server reads: a process is spawned
-    // per chat request, so a self-call per spawn would cost more than a write.
     const document = buildMcpDocument(app.swagger(), getMcpProfiles().chat);
 
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
@@ -52,8 +49,6 @@ export async function getOpenOpsTools(
       command: pythonPath,
       args: [serverPath],
       env: {
-        // Explicit, so a .env in the server's checkout configured for the hosted http
-        // transport cannot hijack a process spawned to speak stdio.
         MCP_TRANSPORT: 'stdio',
         OPENOPS_API_OPENAPI_PATH: tempSchemaPath,
         AUTH_TOKEN: serviceToken,

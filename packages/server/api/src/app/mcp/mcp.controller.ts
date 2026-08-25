@@ -1,4 +1,3 @@
-// Module augmentation for `app.swagger()`; not reliable transitively.
 import '@fastify/swagger';
 import {
   FastifyPluginAsyncTypebox,
@@ -15,7 +14,6 @@ const DEFAULT_PROFILE: McpProfileName = 'agent';
 
 const McpDocumentRequest = {
   config: {
-    // The MCP server holds no credential at startup, and this exposes shape, not data.
     security: PUBLIC_ROUTE_POLICY,
   },
   schema: {
