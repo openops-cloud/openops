@@ -12,7 +12,7 @@ export function buildMcpDocument(
   const paths: Record<string, Record<string, unknown>> = {};
 
   for (const [path, operations] of Object.entries(document.paths ?? {})) {
-    const allowedMethods = profile.operations[path];
+    const allowedMethods: string[] | undefined = profile.operations[path];
 
     if (!allowedMethods || !operations) {
       continue;
@@ -21,7 +21,7 @@ export function buildMcpDocument(
     const selected: Record<string, unknown> = {};
 
     for (const [method, operation] of Object.entries(operations)) {
-      if (allowedMethods.some((allowed) => allowed === method.toLowerCase())) {
+      if (allowedMethods.includes(method.toLowerCase())) {
         selected[method] = operation;
       }
     }
