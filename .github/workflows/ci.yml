@@ -134,9 +134,13 @@ jobs:
             key: server-api-unit
             target: test-unit
             include: server-api
-          - name: Server API Integration Tests
-            key: server-api-integration
+          - name: Server API Integration Tests (Cloud)
+            key: server-api-integration-cloud
+            target: test-integration-cloud
             include: server-api
+          - name: Server API Integration Tests (CE)
+            key: server-api-integration-ce
+            target: test-integration-ce
           - name: Engine and Libraries
             key: others
             exclude: ui-*,*-ui,blocks-*,server-api
