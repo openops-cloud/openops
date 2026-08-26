@@ -24,6 +24,7 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
         const diff = schedule.date.diff(dayjs(), 'milliseconds');
         if (diff > 0) {
           const timeout = setTimeout(() => {
+            scheduled.set(key, () => undefined);
             jobHandler(job.data).catch(logger.error);
           }, diff);
           scheduled.set(key, () => clearTimeout(timeout));
