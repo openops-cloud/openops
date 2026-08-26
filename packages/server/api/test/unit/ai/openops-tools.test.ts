@@ -185,6 +185,8 @@ describe('getOpenOpsTools', () => {
         get: { operationId: 'getAppConnectionsMetadata' },
       },
     },
+    // The chat profile cannot switch project: its token is minted for one per request.
+    'x-openops-mcp': { multiProject: false },
   };
 
   const mockApp = {
@@ -208,7 +210,7 @@ describe('getOpenOpsTools', () => {
     networkUtlsMock.getInternalApiUrl.mockReturnValue(mockApiBaseUrl);
   });
 
-  it('should write the filtered OpenAPI schema to a file once and reuse it later', async () => {
+  it('should write the chat profile document to a file once and reuse it later', async () => {
     const mockClient = {
       tools: jest.fn().mockResolvedValue(mockTools),
     };
@@ -247,9 +249,10 @@ describe('getOpenOpsTools', () => {
       command: `${mockBasePath}/.venv/bin/python`,
       args: [`${mockBasePath}/main.py`],
       env: expect.objectContaining({
-        OPENAPI_SCHEMA_PATH: expect.any(String),
+        MCP_TRANSPORT: 'stdio',
+        OPENOPS_API_OPENAPI_PATH: expect.any(String),
         AUTH_TOKEN: 'auth-service-token',
-        API_BASE_URL: mockApiBaseUrl,
+        OPENOPS_API_URL: mockApiBaseUrl,
         OPENOPS_MCP_SERVER_PATH: mockBasePath,
         LOGZIO_TOKEN: 'test-logzio-token',
         ENVIRONMENT: 'test-environment',

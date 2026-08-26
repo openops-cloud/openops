@@ -20,7 +20,6 @@ export type OAuthProjectMembershipService = {
     user: User,
     projectId: string,
   ): Promise<OAuthProjectMembership | null>;
-  listForUser(user: User): Promise<OAuthProjectMembership[]>;
 };
 
 // One project per organization and no role model in this edition.
@@ -56,23 +55,5 @@ export const oauthProjectMembershipService: OAuthProjectMembershipService = {
       organizationId: project.organizationId,
       projectRole: PROJECT_ROLE,
     };
-  },
-
-  async listForUser(user: User): Promise<OAuthProjectMembership[]> {
-    // Same rule as `getForUser`: listing less than that allows would tell a client it
-    // may act in one place while the token endpoint switched it to another.
-    if (isNil(user.organizationId)) {
-      return [];
-    }
-
-    const projectIds = await projectService.getProjectIdsByOrganizationId(
-      user.organizationId,
-    );
-
-    return projectIds.map((projectId) => ({
-      projectId,
-      organizationId: user.organizationId as string,
-      projectRole: PROJECT_ROLE,
-    }));
   },
 };
