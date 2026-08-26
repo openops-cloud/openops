@@ -31,10 +31,10 @@ describe('webhookController /:flowId/sync route', () => {
     });
   });
 
-  it('passes respondOnPause=true to the handler', async () => {
+  it('passes respondOnPause=true to the handler for waitUntil=paused', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?respondOnPause=true',
+      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?waitUntil=paused',
     });
 
     expect(response.statusCode).toBe(200);
@@ -48,7 +48,7 @@ describe('webhookController /:flowId/sync route', () => {
   });
 
   it.each([
-    ['respondOnPause=false', false],
+    ['waitUntil=completed', false],
     ['', false],
   ])(
     'passes respondOnPause=false to the handler for query "%s"',
@@ -70,20 +70,23 @@ describe('webhookController /:flowId/sync route', () => {
     },
   );
 
-  it('rejects a non-boolean respondOnPause value with 400 without invoking the handler', async () => {
+  it.each(['banana', 'true', 'PAUSED'])(
+    'rejects waitUntil=%s with 400 without invoking the handler',
+    async (value) => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?waitUntil=${value}`,
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(mockHandleWebhook).not.toHaveBeenCalled();
+    },
+  );
+
+  it('still accepts arbitrary caller query params alongside waitUntil', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?respondOnPause=banana',
-    });
-
-    expect(response.statusCode).toBe(400);
-    expect(mockHandleWebhook).not.toHaveBeenCalled();
-  });
-
-  it('still accepts arbitrary caller query params alongside respondOnPause', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?respondOnPause=true&customerId=42&source=zapier',
+      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?waitUntil=paused&customerId=42&source=zapier',
     });
 
     expect(response.statusCode).toBe(200);
@@ -92,10 +95,10 @@ describe('webhookController /:flowId/sync route', () => {
     );
   });
 
-  it('does not enable respondOnPause on the async route', async () => {
+  it('ignores waitUntil on the async route', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa?respondOnPause=true',
+      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa?waitUntil=paused',
     });
 
     expect(response.statusCode).toBe(200);
