@@ -128,7 +128,9 @@ describe('CreateEditConnectionDialogContent bulk AWS accounts', () => {
       target: { value: 'OpenOpsRole' },
     });
     fireEvent.change(screen.getByTestId('awsBulkAccountIdsInput'), {
-      target: { value: '111122223333 444455556666 111122223333 98765432109' },
+      target: {
+        value: '111122223333\n444455556666\n111122223333\n98765432109',
+      },
     });
     fireEvent.click(screen.getByTestId('awsBulkAddAccountsButton'));
 

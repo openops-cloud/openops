@@ -19,6 +19,7 @@ const formatBulkAddSummary = ({
   added,
   invalid,
   duplicates,
+  duplicateAliases,
 }: BulkAddResult): string => {
   const parts = [t('Added {n} account(s).', { n: added })];
   if (invalid.length > 0) {
@@ -34,6 +35,14 @@ const formatBulkAddSummary = ({
       t('Skipped {n} already-listed account(s): {ids}.', {
         n: duplicates.length,
         ids: duplicates.join(', '),
+      }),
+    );
+  }
+  if (duplicateAliases.length > 0) {
+    parts.push(
+      t('Skipped {n} duplicate alias(es): {ids}.', {
+        n: duplicateAliases.length,
+        ids: duplicateAliases.join(', '),
       }),
     );
   }

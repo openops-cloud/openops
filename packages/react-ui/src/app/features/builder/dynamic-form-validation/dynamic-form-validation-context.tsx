@@ -167,8 +167,10 @@ export const DynamicFormValidationProvider = ({
     [],
   );
 
-  // Batched variant of addArrayItemToSchema: appends `count` item schemas in a
-  // single functional update instead of cloning the schema once per item.
+  // Batched variant of addArrayItemToSchema: writes `count` item schemas at
+  // indices previousArrayLength..previousArrayLength+count-1 in a single
+  // functional update. Like N single calls, it never removes existing item
+  // schemas; it only grows the tuple's min/max items.
   const addArrayItemsToSchema = useCallback(
     (
       arrayKey: string,
@@ -194,16 +196,18 @@ export const DynamicFormValidationProvider = ({
         );
 
         const arrayItemSchema = formUtils.buildSchema(newFieldPropertyMap);
-        const itemsPath = `${transformedArrayKey}${arrayItemsKey}`;
-        const existingItems: unknown[] =
-          get(schemaWithUpdatedArrayProps, itemsPath) ?? [];
-        const newItems = Array.from({ length: count }, () =>
-          cloneDeep(arrayItemSchema),
-        );
-        set(schemaWithUpdatedArrayProps, itemsPath, [
-          ...existingItems.slice(0, previousArrayLength),
-          ...newItems,
-        ]);
+        for (let i = 0; i < count; i++) {
+          const transformedArrayItemKey = getTransformedKey(
+            `${arrayKey}.${previousArrayLength + i}`,
+            numberReplacement,
+            stringReplacement,
+          );
+          set(
+            schemaWithUpdatedArrayProps,
+            transformedArrayItemKey,
+            cloneDeep(arrayItemSchema),
+          );
+        }
 
         return schemaWithUpdatedArrayProps;
       });

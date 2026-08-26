@@ -125,7 +125,7 @@ describe('AwsBulkRolesPanel', () => {
     expect(getAddButton()).toHaveTextContent('Add 0 account(s)');
 
     fireEvent.change(getTextarea(), {
-      target: { value: '111122223333, 444455556666\n777788889999 bad' },
+      target: { value: '111122223333\n444455556666\n777788889999\nbad' },
     });
 
     expect(getAddButton()).toHaveTextContent('Add 3 account(s)');
@@ -178,7 +178,7 @@ describe('AwsBulkRolesPanel', () => {
     );
 
     fireEvent.change(getTextarea(), {
-      target: { value: '111122223333 98765432109 444455556666' },
+      target: { value: '111122223333\n98765432109\n444455556666' },
     });
 
     // No hint text about invalid / duplicate ids while typing; only the count.
@@ -212,7 +212,10 @@ describe('AwsBulkRolesPanel', () => {
       target: { value: 'payoneer-openops' },
     });
     fireEvent.change(getTextarea(), {
-      target: { value: '111122223333\n444455556666, 111122223333' },
+      target: {
+        value:
+          '111122223333 prod-eu\n444455556666\n111122223333\n123412341234 existing',
+      },
     });
 
     fireEvent.click(getAddButton());
@@ -227,7 +230,7 @@ describe('AwsBulkRolesPanel', () => {
       {
         assumeRoleArn: 'arn:aws:iam::111122223333:role/OpenOpsRole',
         assumeRoleExternalId: 'payoneer-openops',
-        accountName: '111122223333',
+        accountName: 'prod-eu',
       },
       {
         assumeRoleArn: 'arn:aws:iam::444455556666:role/OpenOpsRole',
@@ -246,10 +249,12 @@ describe('AwsBulkRolesPanel', () => {
     );
 
     expect(getTextarea().value).toBe('');
+    // The alias "existing" is already used by the pre-existing role, so that entry is skipped.
     expect(onAccountsAdded).toHaveBeenCalledWith({
       added: 2,
       invalid: [],
       duplicates: ['111122223333'],
+      duplicateAliases: ['existing'],
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -316,7 +321,7 @@ describe('AwsBulkRolesPanel', () => {
     expect(screen.getAllByTestId(/^observedRole/)).toHaveLength(1);
 
     fireEvent.change(getTextarea(), {
-      target: { value: '111122223333 444455556666' },
+      target: { value: '111122223333\n444455556666' },
     });
     fireEvent.click(getAddButton());
 

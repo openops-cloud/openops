@@ -83,6 +83,31 @@ describe('addArrayItemsToSchema', () => {
     );
   });
 
+  it('never removes existing item schemas, even stale ones beyond the value count', () => {
+    // Schema initialised for 5 items while the form only holds 1 (simulated drift).
+    const batched = setup(5);
+    const single = setup(5);
+
+    act(() => {
+      batched.result.current.addArrayItemsToSchema(
+        'roles',
+        itemProperties,
+        1,
+        2,
+      );
+      single.result.current.addArrayItemToSchema('roles', itemProperties, 1);
+      single.result.current.addArrayItemToSchema('roles', itemProperties, 2);
+    });
+
+    const roles = getRolesSchema(batched.result.current.formSchema);
+    // Indices 1 and 2 are written in place; the stale 4th/5th schemas are not truncated.
+    // (A replace-from-index implementation would leave only 3 items here.)
+    expect(roles.items).toHaveLength(5);
+    expect(roles.minItems).toBe(3);
+    expect(roles.maxItems).toBe(3);
+    expect(roles).toEqual(getRolesSchema(single.result.current.formSchema));
+  });
+
   it('is a no-op for a non-positive count', () => {
     const view = setup(2);
     const before = view.result.current.formSchema;

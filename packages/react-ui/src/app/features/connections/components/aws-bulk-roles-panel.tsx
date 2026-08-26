@@ -22,12 +22,14 @@ type BulkRoleItem = {
   accountName: string;
 };
 
-type WatchedRole = { assumeRoleArn?: unknown } | undefined;
+type WatchedRole =
+  { assumeRoleArn?: unknown; accountName?: unknown } | undefined;
 
 export type BulkAddResult = {
   added: number;
   invalid: string[];
   duplicates: string[];
+  duplicateAliases: string[];
 };
 
 type AwsBulkRolesPanelProps = {
@@ -60,20 +62,24 @@ const AwsBulkRolesPanel = ({
 
   const [accountIdsText, setAccountIdsText] = useState('');
 
-  const existingAccountIds = useMemo(() => {
+  const { existingAccountIds, existingAliases } = useMemo(() => {
     const ids = new Set<string>();
+    const aliases = new Set<string>();
     (watchedRoles ?? []).forEach((role) => {
       const accountId = accountIdFromRoleArn(role?.assumeRoleArn);
       if (accountId) {
         ids.add(accountId);
       }
+      if (typeof role?.accountName === 'string' && role.accountName.trim()) {
+        aliases.add(role.accountName.trim());
+      }
     });
-    return ids;
+    return { existingAccountIds: ids, existingAliases: aliases };
   }, [watchedRoles]);
 
-  const { valid, invalid, duplicates } = useMemo(
-    () => parseAccountIds(accountIdsText, existingAccountIds),
-    [accountIdsText, existingAccountIds],
+  const { valid, invalid, duplicates, duplicateAliases } = useMemo(
+    () => parseAccountIds(accountIdsText, existingAccountIds, existingAliases),
+    [accountIdsText, existingAccountIds, existingAliases],
   );
 
   const trimmedRoleName = roleName.trim();
@@ -84,10 +90,11 @@ const AwsBulkRolesPanel = ({
       return;
     }
     const trimmedExternalId = externalId.trim();
-    const items: BulkRoleItem[] = valid.map((accountId) => ({
-      assumeRoleArn: buildRoleArn(accountId, trimmedRoleName),
+    const items: BulkRoleItem[] = valid.map(({ id, alias }) => ({
+      assumeRoleArn: buildRoleArn(id, trimmedRoleName),
       assumeRoleExternalId: trimmedExternalId || null,
-      accountName: accountId,
+      // Alias defaults to the account id, which is what the Accounts dropdown shows.
+      accountName: alias || id,
     }));
 
     const currentRoles =
@@ -105,7 +112,12 @@ const AwsBulkRolesPanel = ({
     );
 
     setAccountIdsText('');
-    onAccountsAdded?.({ added: items.length, invalid, duplicates });
+    onAccountsAdded?.({
+      added: items.length,
+      invalid,
+      duplicates,
+      duplicateAliases,
+    });
     onClose();
   }, [
     canAdd,
@@ -113,6 +125,7 @@ const AwsBulkRolesPanel = ({
     valid,
     invalid,
     duplicates,
+    duplicateAliases,
     trimmedRoleName,
     form,
     addArrayItemsToSchema,
@@ -145,7 +158,9 @@ const AwsBulkRolesPanel = ({
       <div className="flex flex-col gap-2">
         <Label htmlFor={ACCOUNT_IDS_INPUT_ID}>{t('Account IDs')}</Label>
         <span className="text-xs text-muted-foreground">
-          {t('One per line, or comma / space separated')}
+          {t(
+            'One account per line: the account ID, optionally followed by an alias (e.g. 123456789012 prod-eu).',
+          )}
         </span>
         <Textarea
           id={ACCOUNT_IDS_INPUT_ID}
