@@ -486,7 +486,7 @@ describe('Engine Controller - update-run endpoint', () => {
           'test-handler-id',
           {
             status: StatusCodes.OK,
-            body: { message: 'The flow is paused' },
+            body: pauseMetadata.response,
             headers: {},
           },
         );
@@ -500,6 +500,39 @@ describe('Engine Controller - update-run endpoint', () => {
             executionCorrelationId: 'pause-correlation-id',
           },
         });
+      });
+
+      it('should publish a default paused message when the pause metadata has no response', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
+            progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE,
+            runDetails: {
+              ...baseRequest.body.runDetails,
+              status: FlowRunStatus.PAUSED,
+              pauseMetadata: {
+                executionCorrelationId: 'pause-correlation-id',
+              },
+            },
+          },
+        };
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).toHaveBeenCalledWith(
+          'test-run-id',
+          'test-handler-id',
+          {
+            status: StatusCodes.OK,
+            body: { message: 'The flow is paused' },
+            headers: {},
+          },
+        );
       });
 
       it('should publish webhook response with status 500 on FAILED status', async () => {

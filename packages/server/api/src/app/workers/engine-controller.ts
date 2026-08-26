@@ -344,9 +344,11 @@ async function getFlowResponse(
 ): Promise<EngineHttpResponse> {
   switch (result.status) {
     case FlowRunStatus.PAUSED:
+      // A block may provide the body to return while paused via
+      // pauseMetadata.response; fall back to a generic message otherwise.
       return {
         status: StatusCodes.OK,
-        body: {
+        body: result.pauseMetadata?.response ?? {
           message: 'The flow is paused',
         },
         headers: {},
