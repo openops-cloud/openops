@@ -1,5 +1,5 @@
 import { encryptUtils } from '@openops/server-shared';
-import { UserStatus } from '@openops/shared';
+import { openOpsId, UserStatus } from '@openops/shared';
 import { IsNull } from 'typeorm';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { pendingAuthorizationService } from '../../../../src/app/oauth/authorization/pending-authorization.service';
@@ -115,6 +115,18 @@ beforeAll(async () => {
     organizationId: organization.id,
   });
   await repo('project').save(project);
+
+  // Redeeming a code resolves the user's default project. This edition reads that from the
+  // organization; the enterprise one reads project_users, so seed it where the table exists.
+  if (databaseConnection().hasMetadata('project_users')) {
+    await repo('project_users').save({
+      id: openOpsId(),
+      userId: user.id,
+      projectId: project.id,
+      projectRole: 'ADMIN',
+      defaultProject: true,
+    });
+  }
 
   userId = user.id;
   projectId = project.id;
