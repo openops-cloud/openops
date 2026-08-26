@@ -15,13 +15,11 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
       }>,
       reply,
     ) => {
-      const respondOnPause = request.query.waitUntil === 'paused';
-
       const response = await handleWebhook({
         request,
         flowId: request.params.flowId,
         async: false,
-        respondOnPause,
+        waitUntil: request.query.waitUntil,
       });
 
       await reply

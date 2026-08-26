@@ -31,7 +31,7 @@ describe('webhookController /:flowId/sync route', () => {
     });
   });
 
-  it('passes respondOnPause=true to the handler for waitUntil=paused', async () => {
+  it('passes waitUntil=paused through to the handler', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync?waitUntil=paused',
@@ -42,12 +42,12 @@ describe('webhookController /:flowId/sync route', () => {
       expect.objectContaining({
         flowId: 'aaaaaaaaaaaaaaaaaaaaa',
         async: false,
-        respondOnPause: true,
+        waitUntil: 'paused',
       }),
     );
   });
 
-  it('passes respondOnPause=false to the handler when waitUntil is omitted', async () => {
+  it('passes an undefined waitUntil to the handler when it is omitted', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync',
@@ -57,7 +57,7 @@ describe('webhookController /:flowId/sync route', () => {
     expect(mockHandleWebhook).toHaveBeenCalledWith(
       expect.objectContaining({
         async: false,
-        respondOnPause: false,
+        waitUntil: undefined,
       }),
     );
   });
@@ -83,7 +83,7 @@ describe('webhookController /:flowId/sync route', () => {
 
     expect(response.statusCode).toBe(200);
     expect(mockHandleWebhook).toHaveBeenCalledWith(
-      expect.objectContaining({ respondOnPause: true }),
+      expect.objectContaining({ waitUntil: 'paused' }),
     );
   });
 
@@ -96,6 +96,6 @@ describe('webhookController /:flowId/sync route', () => {
     expect(response.statusCode).toBe(200);
     const callArgs = mockHandleWebhook.mock.calls[0][0];
     expect(callArgs.async).toBe(true);
-    expect(callArgs.respondOnPause ?? false).toBe(false);
+    expect(callArgs.waitUntil).toBeUndefined();
   });
 });
