@@ -47,30 +47,22 @@ describe('webhookController /:flowId/sync route', () => {
     );
   });
 
-  it.each([
-    ['waitUntil=completed', false],
-    ['', false],
-  ])(
-    'passes respondOnPause=false to the handler for query "%s"',
-    async (query, expected) => {
-      const response = await app.inject({
-        method: 'POST',
-        url: `/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync${
-          query ? `?${query}` : ''
-        }`,
-      });
+  it('passes respondOnPause=false to the handler when waitUntil is omitted', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/webhooks/aaaaaaaaaaaaaaaaaaaaa/sync',
+    });
 
-      expect(response.statusCode).toBe(200);
-      expect(mockHandleWebhook).toHaveBeenCalledWith(
-        expect.objectContaining({
-          async: false,
-          respondOnPause: expected,
-        }),
-      );
-    },
-  );
+    expect(response.statusCode).toBe(200);
+    expect(mockHandleWebhook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        async: false,
+        respondOnPause: false,
+      }),
+    );
+  });
 
-  it.each(['banana', 'true', 'PAUSED'])(
+  it.each(['completed', 'banana', 'true', 'PAUSED'])(
     'rejects waitUntil=%s with 400 without invoking the handler',
     async (value) => {
       const response = await app.inject({

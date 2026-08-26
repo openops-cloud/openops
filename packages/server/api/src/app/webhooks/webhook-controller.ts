@@ -15,8 +15,7 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
       }>,
       reply,
     ) => {
-      const respondOnPause =
-        request.query.waitUntil === SyncWebhookWaitUntil.PAUSED;
+      const respondOnPause = request.query.waitUntil === 'paused';
 
       const response = await handleWebhook({
         request,
@@ -82,16 +81,11 @@ const WEBHOOK_PARAMS = {
   },
 };
 
-enum SyncWebhookWaitUntil {
-  COMPLETED = 'completed',
-  PAUSED = 'paused',
-}
-
 const SyncWebhookQueryParams = Type.Object({
   waitUntil: Type.Optional(
-    Type.Enum(SyncWebhookWaitUntil, {
+    Type.Literal('paused', {
       description:
-        'How long to hold the request before responding. `completed` (default) waits for the flow to reach a terminal state. `paused` responds as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first.',
+        'Respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first. Omit to wait for the flow to complete.',
     }),
   ),
 });
@@ -103,7 +97,7 @@ const SyncWebhookRequest = {
     ...WEBHOOK_PARAMS.schema,
     querystring: SyncWebhookQueryParams,
     description:
-      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result. Supports an optional `waitUntil` query parameter: `completed` (default) waits for a terminal state, `paused` responds as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first.',
+      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result. Supports an optional `waitUntil=paused` query parameter to respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first; omit it to wait for the flow to complete.',
   },
 };
 
