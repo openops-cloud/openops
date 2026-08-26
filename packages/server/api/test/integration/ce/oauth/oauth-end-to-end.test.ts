@@ -6,7 +6,7 @@
  * Every step has unit coverage, and `oauth-consumption` covers what happens when a step is
  * replayed or raced. Neither shows that the steps fit together, which is the failure this
  * catches: a claim renamed, an audience that no longer matches, a grant the exchange cannot
- * resolve. `tools/oauth-flow.sh` walked this by hand, and nothing ran it.
+ * resolve.
  *
  * The boot guard refuses SQLite because the migration is Postgres-only, but this environment
  * synchronises the schema from the entities, so it is stubbed here.

@@ -1,18 +1,12 @@
 import { isNil, User } from '@openops/shared';
 import { projectService } from '../../project/project-service';
 
-// `projectRole` is a plain string because the role model is an enterprise concern; this
-// edition reports the same value the session login path does.
 export type OAuthProjectMembership = {
   projectId: string;
   organizationId: string;
   projectRole: string;
 };
 
-/**
- * Behind a factory (`project-membership-factory.ts`) so an edition with real
- * multi-project membership can answer these without the OAuth code changing.
- */
 export type OAuthProjectMembershipService = {
   getDefaultForUser(user: User): Promise<OAuthProjectMembership | null>;
   /** Re-checked on every OAuth request, so losing access takes effect before expiry. */
@@ -22,7 +16,7 @@ export type OAuthProjectMembershipService = {
   ): Promise<OAuthProjectMembership | null>;
 };
 
-// One project per organization and no role model in this edition.
+// One project per organization and no role model
 const PROJECT_ROLE = 'ADMIN';
 
 export const oauthProjectMembershipService: OAuthProjectMembershipService = {
