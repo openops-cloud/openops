@@ -4,7 +4,10 @@ import cron from 'node-cron';
 import { SystemJobSchedule } from './common';
 import { systemJobHandlers } from './job-handlers';
 
-const scheduled: Record<string, boolean> = {};
+// Every scheduled job holds a live timer whose closure reaches the whole
+// application graph, so the timer must be cancellable: an app that shuts down
+// without cancelling leaks its entire module graph.
+const scheduled = new Map<string, () => void>();
 
 export const memorySystemJobSchedulerService: SystemJobSchedule = {
   async init(): Promise<void> {
@@ -12,7 +15,7 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
   },
   async upsertJob({ job, schedule }): Promise<void> {
     const key = job.jobId ?? job.name;
-    if (scheduled[key]) {
+    if (scheduled.has(key)) {
       return;
     }
     const jobHandler = systemJobHandlers.getJobHandler(job.name);
@@ -20,26 +23,34 @@ export const memorySystemJobSchedulerService: SystemJobSchedule = {
       case 'one-time': {
         const diff = schedule.date.diff(dayjs(), 'milliseconds');
         if (diff > 0) {
-          setTimeout(() => {
+          const timeout = setTimeout(() => {
+            scheduled.set(key, () => undefined);
             jobHandler(job.data).catch(logger.error);
           }, diff);
+          scheduled.set(key, () => clearTimeout(timeout));
+        } else {
+          scheduled.set(key, () => undefined);
         }
         break;
       }
       case 'repeated': {
         const cronExpression = schedule.cron;
-        cron.schedule(cronExpression, () => {
+        const task = cron.schedule(cronExpression, () => {
           jobHandler(job.data).catch(logger.error);
         });
+        scheduled.set(key, () => task.stop());
         break;
       }
     }
-    scheduled[key] = true;
   },
   async removeJob(jobId: string): Promise<void> {
-    scheduled[jobId] = false;
+    scheduled.get(jobId)?.();
+    scheduled.delete(jobId);
   },
   async close(): Promise<void> {
-    //
+    for (const cancel of scheduled.values()) {
+      cancel();
+    }
+    scheduled.clear();
   },
 };
