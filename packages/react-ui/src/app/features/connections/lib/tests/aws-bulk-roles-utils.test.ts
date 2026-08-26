@@ -193,11 +193,11 @@ describe('accountIdFromRoleArn', () => {
   });
 
   it('returns undefined for non-role ARNs and non-strings', () => {
-    expect(accountIdFromRoleArn('arn:aws:iam::111122223333:user/bob')).toBe(
-      undefined,
-    );
-    expect(accountIdFromRoleArn('not-an-arn')).toBe(undefined);
-    expect(accountIdFromRoleArn(null)).toBe(undefined);
-    expect(accountIdFromRoleArn(undefined)).toBe(undefined);
+    expect(
+      accountIdFromRoleArn('arn:aws:iam::111122223333:user/bob'),
+    ).toBeUndefined();
+    expect(accountIdFromRoleArn('not-an-arn')).toBeUndefined();
+    expect(accountIdFromRoleArn(null)).toBeUndefined();
+    expect(accountIdFromRoleArn(undefined)).toBeUndefined();
   });
 });

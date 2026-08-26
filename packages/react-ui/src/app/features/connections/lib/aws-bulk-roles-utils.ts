@@ -5,7 +5,8 @@ const ROLE_ARN_ACCOUNT_ID_REGEX = /^arn:aws[a-z-]*:iam::(\d{12}):role\/.+$/;
 
 // One entry per line: the first token is the account id, anything after the
 // separators (spaces, commas, semicolons, tabs) is the optional alias.
-const LINE_ENTRY_REGEX = /^([^\s,;]+)[\s,;]*(.*)$/;
+const SEPARATOR_REGEX = /[\s,;]/;
+const LEADING_SEPARATORS_REGEX = /^[\s,;]+/;
 
 export type AccountEntry = {
   id: string;
@@ -32,8 +33,18 @@ export function parseAccountEntries(text: string): AccountEntry[] {
     if (line === '') {
       continue;
     }
-    const [, id = '', alias = ''] = LINE_ENTRY_REGEX.exec(line) ?? [];
-    entries.push({ id, alias: alias.trim() });
+    const separatorIndex = line.search(SEPARATOR_REGEX);
+    if (separatorIndex === -1) {
+      entries.push({ id: line, alias: '' });
+      continue;
+    }
+    entries.push({
+      id: line.slice(0, separatorIndex),
+      alias: line
+        .slice(separatorIndex)
+        .replace(LEADING_SEPARATORS_REGEX, '')
+        .trim(),
+    });
   }
 
   return entries;
