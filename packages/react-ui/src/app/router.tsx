@@ -21,7 +21,6 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
-import ConnectedAppsPage from '@/app/routes/settings/connected-apps';
 import { lazy, Suspense } from 'react';
 import {
   OpsErrorBoundary,
@@ -45,6 +44,10 @@ import AppearancePage from './routes/settings/appearance';
 import GeneralPage from './routes/settings/general';
 import { SignInPage } from './routes/sign-in';
 import { SignUpPage } from './routes/sign-up';
+
+const ConnectedAppsPage = lazy(
+  () => import('@/app/routes/settings/connected-apps'),
+);
 
 const SettingsRerouter = () => {
   const { hash } = useLocation();
@@ -320,7 +323,9 @@ const createRoutes = ({
           <ProjectSettingsLayout>
             <OpsErrorBoundary>
               <PageTitle title="Connected apps">
-                <ConnectedAppsPage />
+                <Suspense>
+                  <ConnectedAppsPage />
+                </Suspense>
               </PageTitle>
             </OpsErrorBoundary>
           </ProjectSettingsLayout>
