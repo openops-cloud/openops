@@ -25,7 +25,7 @@ RUN <<-```
     az extension add --name resource-graph --only-show-errors || true
     az extension add --name costmanagement --only-show-errors || true
     az extension add --name billing-benefits --only-show-errors || true
-    az extension add --name quotas --only-show-errors || true
+    az extension add --name quota --only-show-errors || true
     az extension add --name ssh --only-show-errors || true
 ```
 
