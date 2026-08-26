@@ -184,8 +184,8 @@ beforeAll(async () => {
   });
   await repo('project').save(project);
 
-  // Redeeming a code resolves the user's default project. This edition reads that from the
-  // organization; the enterprise one reads project_users, so seed it where the table exists.
+  // Redeeming a code resolves the user's default project. The lookup reads membership from
+  // project_users when that table is part of the schema, so seed a row where it exists.
   if (databaseConnection().hasMetadata('project_users')) {
     await repo('project_users').save({
       id: openOpsId(),

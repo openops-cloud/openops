@@ -213,13 +213,14 @@ Redeeming a code has to decide which project the connection starts in, and every
 to confirm the user still has that project. Both go through
 `projects/project-membership-factory.ts`.
 
-In this edition the answer is simple: one project per organization, and a user reaches it
-through their organization. There is no role model here, so membership reports `ADMIN`, which
-is what the browser login path reports too.
+The answer is simple: one project per organization, and a user reaches it through their
+organization. There is no separate role model, so membership reports `ADMIN` — the same value
+the browser login path reports.
 
-It sits behind a factory rather than being called directly so that an edition with a real
-multi-project membership model can answer the same two questions — _what is this user's
-default project_ and _may this user reach this one_ — without any of the OAuth code changing.
+The factory is there so those two questions — _what is this user's default project_ and _may
+this user reach this one_ — have exactly one place they are answered. Code redemption,
+refresh, token exchange and request authentication all ask it rather than resolving a project
+themselves, which is what keeps four code paths from drifting apart on who may reach what.
 
 ## Cleanup
 
