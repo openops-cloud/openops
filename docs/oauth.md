@@ -18,9 +18,10 @@ The agent knows one thing to begin with: the URL of the OpenOps API. From there:
 1. It reads `/.well-known/oauth-authorization-server` and learns the endpoints.
 2. It registers itself at `POST /v1/oauth/register` (RFC 7591). Nobody provisions a client
    by hand — the whole point is that an agent the operator has never heard of can connect.
-3. It opens `GET /v1/oauth/authorize` in the user's browser. The server validates the
-   request, stores the validated parameters, and redirects to the consent screen under
-   `/settings/connected-apps` carrying nothing but an opaque request id.
+3. It opens `GET /v1/oauth/authorize` in the user's browser, naming the resource it wants
+   a token for. The server validates the request, stores the validated parameters, and
+   redirects to the consent screen under `/settings/connected-apps` carrying nothing but an
+   opaque request id.
 4. The user, logged in, sees who is asking and approves. The browser gets back a redirect
    URL with an authorization code in it.
 5. The agent redeems the code at `POST /v1/oauth/token` with its PKCE verifier and receives
@@ -35,6 +36,38 @@ from driving the approval on a logged-in user's behalf.
 Everything the token endpoint re-checks later — redirect URI, PKCE challenge, resource, scope
 — is copied from the record written in step 3. The browser round-trip carries only the id, so
 there is nothing in it to tamper with.
+
+`resource` is not optional. It is an RFC 8707 resource indicator naming which of the two
+resources the token is for, and a request without one is refused with `invalid_target`.
+`scope` may be omitted, in which case it defaults to everything that resource offers;
+anything asked for beyond that is refused with `invalid_scope`.
+
+Redirect URIs must be `https`, with one exception: `http` on loopback, because a native
+client has nowhere else to listen. Matching is exact, again with one loopback exception —
+the port is ignored, since these clients bind an ephemeral one at request time (RFC 8252
+§7.3). Fragments and userinfo are rejected outright, the latter because the value ends up in
+a `Location` header.
+
+Every redirect back to the client carries an `iss` parameter (RFC 9207) so a client talking
+to more than one authorization server can tell which answered.
+
+## Endpoints
+
+| Endpoint                                      | Auth   | Purpose                                         |
+| --------------------------------------------- | ------ | ----------------------------------------------- |
+| `GET /.well-known/oauth-authorization-server` | public | RFC 8414 metadata, also served at the OIDC path |
+| `GET /v1/oauth/jwks.json`                     | public | Public keys for verifying tokens                |
+| `POST /v1/oauth/register`                     | public | Dynamic client registration (RFC 7591)          |
+| `GET /v1/oauth/authorize`                     | public | Start the flow; redirects to the consent screen |
+| `GET /v1/oauth/requests/:id`                  | user   | What the consent screen renders                 |
+| `POST /v1/oauth/requests/:id/decision`        | user   | Approve or deny                                 |
+| `POST /v1/oauth/token`                        | varies | Code redemption, refresh, and token exchange    |
+| `POST /v1/oauth/revoke`                       | public | Revoke a refresh token (RFC 7009)               |
+| `GET /v1/oauth/grants`                        | user   | The user's connected applications               |
+| `DELETE /v1/oauth/grants/:id`                 | user   | Disconnect one                                  |
+
+The token endpoint is public for the two grants a public client uses, and requires HTTP Basic
+credentials for token exchange, which only the resource server may call.
 
 ## Two audiences
 
@@ -80,11 +113,11 @@ Access tokens are signed JWTs (RS256) with these claims beyond the registered on
 - `scope`
 
 `project_id` is signed into the token rather than looked up per request. A token can then
-only ever act on the project it was minted for, and there is no second source of truth to
-disagree with the claim. The cost is that changing project means getting a new token, which
-is deliberate.
+only ever act on the project it was minted for, and no stored state can disagree with the
+claim. The trade is that the project is fixed for the life of the token — a token cannot be
+redirected at another one, only replaced.
 
-## What is re-checked, and why it has to be
+## What is re-checked on every request
 
 Self-contained tokens buy a lot — no database round-trip to validate a signature, no shared
 session store, any replica can serve any request. What they cost is immediacy: a token stays
@@ -97,9 +130,13 @@ So every OAuth request that reaches the API re-reads the things that can change
 - the user still exists and is still `ACTIVE`
 - the user still has access to the project in the claim
 
-Revoking a connection therefore takes effect on the next request, not on the next token.
-Access token TTL still bounds the worst case for anything not on that list, which is why the
-allowed range is 60 seconds to one hour rather than something more generous.
+Revoking a connection therefore takes effect on the next request rather than on the next
+token — with one caveat. The grant lookup is cached in-process for 60 seconds to keep it off
+the hot path, so the replica that handled the revocation drops its entry at once while any
+other replica can still be up to a minute behind. Deactivating a user has the same shape.
+
+Access token TTL bounds the worst case for anything not re-read at all, which is why the
+allowed range stops at one hour rather than somewhere more generous.
 
 ## Secrets at rest
 
@@ -121,7 +158,7 @@ been rotated means either a replay or a stolen token racing the real client, and
 server there is no way to tell which — so the entire token family is revoked and the user has
 to reconnect.
 
-The ordering in `rotateRefreshToken` matters more than it looks. Client mismatch and expiry
+The ordering in `rotateRefreshToken` matters more than it might appear. Client mismatch and expiry
 are judged _before_ the token is consumed, because revoking on the way in would let a single
 malformed request destroy a working credential, and the client's perfectly reasonable retry
 would then look like an attack. The consume itself is a conditional `UPDATE ... WHERE
@@ -131,6 +168,25 @@ The same trick claims authorization codes.
 One more wrinkle: when the conditional update finds nothing, the code checks whether the
 grant was revoked before concluding reuse. Otherwise a user revoking their own connection
 would see their next refresh reported as a compromise.
+
+## Managing connections
+
+Each approval creates a grant — one row per connection, which is what
+`/settings/connected-apps` lists and what the `grant_id` claim points at. A user may connect
+the same agent more than once; nothing is unique on client and user together, because two
+laptops running the same tool are two connections.
+
+Disconnecting one marks the grant revoked and revokes every refresh token belonging to it in
+the same step. Doing both matters: leaving the tokens alone would let the client keep minting
+access tokens by refreshing. Other connections the same user has to the same client are left
+running.
+
+The `lastUsedAt` shown against each connection is written at most once a minute per grant, so
+it is accurate to the minute rather than to the request.
+
+`POST /v1/oauth/revoke` does the same thing from the client side, given any refresh token
+belonging to the connection. Per RFC 7009 §2.2 an unknown token is not an error, so this
+always returns `200` and cannot be used to test whether a token exists.
 
 ## Signing keys
 
@@ -193,6 +249,22 @@ OAuth off would otherwise log a missing-handler error every hour forever.
 Both URLs must use `https` unless they point at loopback, and neither may carry a query
 string or fragment.
 
+Some limits are not operator-tunable, because getting them wrong has no upside:
+
+|                                        |                |
+| -------------------------------------- | -------------- |
+| Authorization code lifetime            | 60 seconds     |
+| Pending authorization lifetime         | 10 minutes     |
+| Registration rate limit                | 10 per minute  |
+| Token, authorize and revoke rate limit | 120 per minute |
+| Signing key cache                      | 5 minutes      |
+| Unused client retention                | 30 days        |
+| Idle grant retention                   | 30 days        |
+
+The token rate limit sits well above normal use because refreshing is routine background
+work for a connected agent, while still bounding how fast a stolen code or token can be
+guessed at.
+
 Configuration is validated before any route is served. A value that is merely wrong rather
 than malformed is the dangerous case — it produces a server that looks healthy while a
 guarantee is quietly gone — so those checks fail the boot.
@@ -205,8 +277,8 @@ support would mislead clients that branch on those fields.
 
 **No confidential clients through registration.** Anyone who can reach the API can register,
 so registered clients are public clients restricted to `authorization_code` and
-`refresh_token`, and PKCE is mandatory (S256 only). The only confidential client is the resource server,
-created from configuration at boot rather than over the network.
+`refresh_token`, and PKCE is mandatory (S256 only). The only confidential client is the
+resource server, created from configuration at boot rather than over the network.
 
 **No introspection endpoint.** Tokens are self-contained and verifiable from the JWKS.
 
