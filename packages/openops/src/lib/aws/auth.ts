@@ -172,12 +172,31 @@ const ROLE_VALIDATION_BATCH_SIZE = 5;
 
 type ValidationResult = { valid: true } | { valid: false; error: string };
 
+type RoleFailure = { role: Role; errorMessage: string };
+
 function extractErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
-function formatRoleValidationError(role: Role, errorMessage: string): string {
-  return `role "${role.assumeRoleArn}" (${role.accountName}): ${errorMessage}`;
+function getRoleAccountId(role: Role): string {
+  try {
+    return parseArn(role.assumeRoleArn).accountId;
+  } catch {
+    return role.accountName;
+  }
+}
+
+function formatRoleFailures(
+  failures: RoleFailure[],
+  totalRoles: number,
+): string {
+  return [
+    `${failures.length} of ${totalRoles} roles could not be assumed:`,
+    ...failures.map(
+      ({ role, errorMessage }) =>
+        `- ${getRoleAccountId(role)} (${role.assumeRoleArn}): ${errorMessage}`,
+    ),
+  ].join('\n');
 }
 
 async function validateRoleBatch(
@@ -186,7 +205,7 @@ async function validateRoleBatch(
   secretAccessKey: string,
   defaultRegion: string,
   endpoint?: string | undefined | null,
-): Promise<ValidationResult> {
+): Promise<RoleFailure[]> {
   const results = await Promise.allSettled(
     roles.map((role) =>
       assumeRole(
@@ -200,19 +219,17 @@ async function validateRoleBatch(
     ),
   );
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
+  const failures: RoleFailure[] = [];
+  results.forEach((result, i) => {
     if (result.status === 'rejected') {
-      const role = roles[i];
-      const errorMessage = extractErrorMessage(result.reason);
-      return {
-        valid: false,
-        error: formatRoleValidationError(role, errorMessage),
-      };
+      failures.push({
+        role: roles[i],
+        errorMessage: extractErrorMessage(result.reason),
+      });
     }
-  }
+  });
 
-  return { valid: true };
+  return failures;
 }
 
 async function validateRequiredFields(auth: any): Promise<ValidationResult> {
@@ -257,21 +274,27 @@ async function validateRoleAssumptions(auth: any): Promise<ValidationResult> {
   const accessKeyId = auth.accessKeyId || '';
   const secretAccessKey = auth.secretAccessKey || '';
   const roles = auth.roles as Role[];
+  const failures: RoleFailure[] = [];
 
   for (let i = 0; i < roles.length; i += ROLE_VALIDATION_BATCH_SIZE) {
     const batch = roles.slice(i, i + ROLE_VALIDATION_BATCH_SIZE);
 
-    const result = await validateRoleBatch(
-      batch,
-      accessKeyId,
-      secretAccessKey,
-      auth.defaultRegion,
-      auth.endpoint,
+    failures.push(
+      ...(await validateRoleBatch(
+        batch,
+        accessKeyId,
+        secretAccessKey,
+        auth.defaultRegion,
+        auth.endpoint,
+      )),
     );
+  }
 
-    if (!result.valid) {
-      return result;
-    }
+  if (failures.length > 0) {
+    return {
+      valid: false,
+      error: formatRoleFailures(failures, roles.length),
+    };
   }
 
   return { valid: true };

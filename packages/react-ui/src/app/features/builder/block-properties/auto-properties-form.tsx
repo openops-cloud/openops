@@ -42,6 +42,8 @@ type AutoFormProps = {
   markdownVariables?: Record<string, string>;
   useMentionTextInput: boolean;
   disabled?: boolean;
+  /** Extra footer actions for ARRAY properties, keyed by property name. */
+  arrayExtraActions?: Record<string, React.ReactNode>;
 };
 
 const AutoPropertiesFormComponent = React.memo(
@@ -52,6 +54,7 @@ const AutoPropertiesFormComponent = React.memo(
     prefixValue,
     disabled,
     useMentionTextInput,
+    arrayExtraActions,
   }: AutoFormProps) => {
     const form = useFormContext();
     const { theme } = useTheme();
@@ -76,6 +79,7 @@ const AutoPropertiesFormComponent = React.memo(
                   useMentionTextInput: useMentionTextInput,
                   disabled: disabled ?? false,
                   theme,
+                  arrayExtraActions,
                 })
               }
             />
@@ -96,6 +100,7 @@ type selectFormComponentForPropertyParams = {
   useMentionTextInput: boolean;
   disabled: boolean;
   theme: Theme;
+  arrayExtraActions?: Record<string, React.ReactNode>;
 };
 
 const selectFormComponentForProperty = ({
@@ -108,6 +113,7 @@ const selectFormComponentForProperty = ({
   useMentionTextInput,
   disabled,
   theme,
+  arrayExtraActions,
 }: selectFormComponentForPropertyParams) => {
   switch (property.type) {
     case PropertyType.ARRAY:
@@ -125,6 +131,7 @@ const selectFormComponentForProperty = ({
             arrayProperty={property}
             inputName={inputName}
             useMentionTextInput={useMentionTextInput}
+            extraActions={arrayExtraActions?.[propertyName]}
           ></ArrayBlockProperty>
         </AutoFormFieldWrapper>
       );
