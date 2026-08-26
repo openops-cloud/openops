@@ -286,6 +286,6 @@ describe('the external agent flow, end to end', () => {
       },
     });
 
+    expect(response.statusCode).toBe(StatusCodes.UNAUTHORIZED);
     expect(response.json().error).toBe('invalid_client');
-  });
 });
