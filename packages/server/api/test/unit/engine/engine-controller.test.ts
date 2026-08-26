@@ -408,6 +408,28 @@ describe('Engine Controller - update-run endpoint', () => {
         expect(webhookResponseWatcher.publish).not.toHaveBeenCalled();
       });
 
+      it('should not publish for PAUSED status with WEBHOOK_RESPONSE', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
+            progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE,
+            runDetails: {
+              ...baseRequest.body.runDetails,
+              status: FlowRunStatus.PAUSED,
+            },
+          },
+        };
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).not.toHaveBeenCalled();
+      });
+
       it('should not publish when executionCorrelationId is null', async () => {
         const request = {
           ...baseRequest,
@@ -430,6 +452,92 @@ describe('Engine Controller - update-run endpoint', () => {
         );
 
         expect(webhookResponseWatcher.publish).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('WEBHOOK_RESPONSE_ON_PAUSE handling', () => {
+      it('should publish webhook response and still pause the run on PAUSED status', async () => {
+        const pauseMetadata = {
+          response: { message: 'Paused for input' },
+          executionCorrelationId: 'pause-correlation-id',
+        };
+
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
+            progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE,
+            runDetails: {
+              ...baseRequest.body.runDetails,
+              status: FlowRunStatus.PAUSED,
+              pauseMetadata,
+            },
+          },
+        };
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).toHaveBeenCalledWith(
+          'test-run-id',
+          'test-handler-id',
+          {
+            status: StatusCodes.OK,
+            body: { message: 'The flow is paused' },
+            headers: {},
+          },
+        );
+
+        expect(flowRunService.pause).toHaveBeenCalledWith({
+          flowRunId: 'test-run-id',
+          pauseMetadata: {
+            ...pauseMetadata,
+            progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE,
+            handlerId: 'test-handler-id',
+            executionCorrelationId: 'pause-correlation-id',
+          },
+        });
+      });
+
+      it('should publish webhook response with status 500 on FAILED status', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
+            progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE,
+            runDetails: {
+              ...baseRequest.body.runDetails,
+              status: FlowRunStatus.FAILED,
+              error: { message: 'Test error' },
+            },
+          },
+        };
+
+        (flowRunService.updateStatus as jest.Mock).mockResolvedValue({
+          ...mockPopulatedRun,
+          status: FlowRunStatus.FAILED,
+        });
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).toHaveBeenCalledWith(
+          'test-run-id',
+          'test-handler-id',
+          {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            body: {
+              message: 'The flow has failed and there is no response returned',
+            },
+            headers: {},
+          },
+        );
       });
     });
 

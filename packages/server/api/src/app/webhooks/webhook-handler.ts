@@ -78,10 +78,12 @@ export async function handleWebhook({
   request,
   flowId,
   async,
+  respondOnPause = false,
 }: {
   request: FastifyRequest;
   flowId: string;
   async: boolean;
+  respondOnPause?: boolean;
 }): Promise<EngineHttpResponse> {
   const result = await getFlowOrThrow(flowId);
   if (!result.success) {
@@ -112,7 +114,9 @@ export async function handleWebhook({
   }
 
   const flowRunId = await flowRunService.start({
-    progressUpdateType: ProgressUpdateType.WEBHOOK_RESPONSE,
+    progressUpdateType: respondOnPause
+      ? ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE
+      : ProgressUpdateType.WEBHOOK_RESPONSE,
     triggerSource: FlowRunTriggerSource.TRIGGERED,
     flowVersionId: flow.publishedVersionId,
     environment: RunEnvironment.PRODUCTION,

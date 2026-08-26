@@ -1,5 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { PUBLIC_ROUTE_POLICY, WebhookUrlParams } from '@openops/shared';
+import { Static, Type } from '@sinclair/typebox';
 import { FastifyRequest } from 'fastify';
 import { handleWebhook, handleWebhookSimulation } from './webhook-handler';
 
@@ -7,11 +8,20 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
   app.all(
     '/:flowId/sync',
     SyncWebhookRequest,
-    async (request: FastifyRequest<{ Params: WebhookUrlParams }>, reply) => {
+    async (
+      request: FastifyRequest<{
+        Params: WebhookUrlParams;
+        Querystring: SyncWebhookQueryParams;
+      }>,
+      reply,
+    ) => {
+      const respondOnPause = request.query.respondOnPause ?? false;
+
       const response = await handleWebhook({
         request,
         flowId: request.params.flowId,
         async: false,
+        respondOnPause,
       });
 
       await reply
@@ -71,12 +81,23 @@ const WEBHOOK_PARAMS = {
   },
 };
 
+const SyncWebhookQueryParams = Type.Object({
+  respondOnPause: Type.Optional(
+    Type.Boolean({
+      description:
+        'When true, the response is sent as soon as the flow pauses (e.g. a step waiting for user action), instead of waiting for the flow to reach a terminal state.',
+    }),
+  ),
+});
+type SyncWebhookQueryParams = Static<typeof SyncWebhookQueryParams>;
+
 const SyncWebhookRequest = {
   ...WEBHOOK_PARAMS,
   schema: {
     ...WEBHOOK_PARAMS.schema,
+    querystring: SyncWebhookQueryParams,
     description:
-      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result.',
+      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result. Supports an optional `respondOnPause=true` query parameter to respond as soon as the flow pauses (e.g. waiting on a sub-flow) instead of waiting for the flow to reach a terminal state.',
   },
 };
 
