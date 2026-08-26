@@ -43,7 +43,7 @@ import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ArrowLeft, Info } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import {
@@ -51,10 +51,15 @@ import {
   createDefaultValues,
   formatErrorObjectToString,
 } from '../lib/connections-utils';
+import { AwsBulkRoles } from './aws-bulk-roles';
 import { BasicAuthConnectionSettings } from './basic-secret-connection-settings';
 import { CustomAuthConnectionSettings } from './custom-auth-connection-settings';
 import { OAuth2ConnectionSettings } from './oauth2-connection-settings';
 import { SecretTextConnectionSettings } from './secret-text-connection-settings';
+
+const AWS_AUTH_PROVIDER_KEY = 'AWS';
+const AWS_ROLES_FIELD_NAME = 'request.value.props.roles';
+const LARGE_ROLE_COUNT_THRESHOLD = 50;
 
 class ConnectionNameAlreadyExists extends Error {
   constructor() {
@@ -127,9 +132,28 @@ const CreateEditConnectionDialogContent = ({
 
   const roles = useWatch({
     control: form.control,
-    name: 'request.value.props.roles',
+    name: AWS_ROLES_FIELD_NAME,
   });
-  const hasRoles = authProviderKey === 'AWS' && roles && roles.length > 0;
+  const isAws = authProviderKey === AWS_AUTH_PROVIDER_KEY;
+  const rolesCount = Array.isArray(roles) ? roles.length : 0;
+  const hasRoles = isAws && rolesCount > 0;
+
+  // Memoized: CustomAuthConnectionSettings is React.memo, so a fresh object per
+  // render would re-render the whole auth form on every dialog render.
+  const arrayExtraActions = useMemo(
+    () =>
+      isAws && auth
+        ? {
+            roles: (
+              <AwsBulkRoles
+                authProperty={auth as CustomAuthProperty<any>}
+                rolesFieldName={AWS_ROLES_FIELD_NAME}
+              />
+            ),
+          }
+        : undefined,
+    [isAws, auth],
+  );
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -297,6 +321,7 @@ const CreateEditConnectionDialogContent = ({
             {auth?.type === PropertyType.CUSTOM_AUTH && (
               <CustomAuthConnectionSettings
                 authProperty={auth as CustomAuthProperty<any>}
+                arrayExtraActions={arrayExtraActions}
               />
             )}
             {auth?.type === PropertyType.OAUTH2 && (
@@ -310,9 +335,13 @@ const CreateEditConnectionDialogContent = ({
               <div className="w-full p-4 flex items-center gap-3 bg-blueAccent/10 text-blueAccent-300 rounded-sm mb-4 text-sm">
                 <Info className="shrink-0 w-4 h-4" />
                 <span>
-                  {t(
-                    'Validating AWS roles may take 10-30 seconds. We will verify access to all configured roles.',
-                  )}
+                  {rolesCount > LARGE_ROLE_COUNT_THRESHOLD
+                    ? t(
+                        'Validating AWS roles may take a minute or more. We will verify access to all configured roles.',
+                      )
+                    : t(
+                        'Validating AWS roles may take 10-30 seconds. We will verify access to all configured roles.',
+                      )}
                 </span>
               </div>
             )}

@@ -290,7 +290,8 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole',
+          '1 of 1 roles could not be assumed:\n' +
+          '- 111111111111 (arn:aws:iam::111111111111:role/ProductionRole): User: arn:aws:iam::123456789012:user/ops is not authorized to perform: sts:AssumeRole',
       });
     });
 
@@ -316,9 +317,105 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'role "arn:aws:iam::222222222222:role/StagingRole" (Staging): External ID mismatch',
+          '1 of 2 roles could not be assumed:\n' +
+          '- 222222222222 (arn:aws:iam::222222222222:role/StagingRole): External ID mismatch',
       });
       expect(mockAssumeRole).toHaveBeenCalledTimes(2);
+    });
+
+    test('should report both failures when two roles fail in the same batch', async () => {
+      mockSuccessfulAccountId();
+      mockAssumeRole
+        .mockRejectedValueOnce(new Error('AccessDenied'))
+        .mockResolvedValueOnce({ AccessKeyId: 'ASIATEMP' })
+        .mockRejectedValueOnce(new Error('NoSuchEntity'));
+
+      const result = await amazonAuth.validate!({
+        auth: createAuthObject({
+          roles: [
+            createRole('111111111111', 'Production'),
+            createRole('222222222222', 'Staging'),
+            createRole('333333333333', 'Dev'),
+          ],
+        }),
+      });
+
+      expect(result).toEqual({
+        valid: false,
+        error:
+          '2 of 3 roles could not be assumed:\n' +
+          '- 111111111111 (arn:aws:iam::111111111111:role/ProductionRole): AccessDenied\n' +
+          '- 333333333333 (arn:aws:iam::333333333333:role/DevRole): NoSuchEntity',
+      });
+      expect(mockAssumeRole).toHaveBeenCalledTimes(3);
+    });
+
+    test('should keep validating later batches and report failures across batches', async () => {
+      mockSuccessfulAccountId();
+      const roles = Array.from({ length: 7 }, (_, i) =>
+        createRole(String(i + 1).repeat(12), `Account${i + 1}`),
+      );
+      mockAssumeRole.mockImplementation((_k, _s, _r, arn: string) => {
+        if (arn === roles[0].assumeRoleArn || arn === roles[6].assumeRoleArn) {
+          return Promise.reject(new Error(`cannot assume ${arn}`));
+        }
+        return Promise.resolve({ AccessKeyId: 'ASIATEMP' });
+      });
+
+      const result = await amazonAuth.validate!({
+        auth: createAuthObject({ roles }),
+      });
+
+      expect(mockAssumeRole).toHaveBeenCalledTimes(7);
+      expect(result).toEqual({
+        valid: false,
+        error:
+          '2 of 7 roles could not be assumed:\n' +
+          '- 111111111111 (arn:aws:iam::111111111111:role/Account1Role): cannot assume arn:aws:iam::111111111111:role/Account1Role\n' +
+          '- 777777777777 (arn:aws:iam::777777777777:role/Account7Role): cannot assume arn:aws:iam::777777777777:role/Account7Role',
+      });
+    });
+
+    test('should report every failing role without truncation', async () => {
+      mockSuccessfulAccountId();
+      mockAssumeRole.mockRejectedValue(new Error('AccessDenied'));
+      const roles = Array.from({ length: 13 }, (_, i) =>
+        createRole(String(100000000000 + i), `Account${i}`),
+      );
+
+      const result = await amazonAuth.validate!({
+        auth: createAuthObject({ roles }),
+      });
+
+      expect(result.valid).toBe(false);
+      const lines = (result as { error: string }).error.split('\n');
+      expect(lines[0]).toBe('13 of 13 roles could not be assumed:');
+      expect(lines.filter((line) => line.startsWith('- '))).toHaveLength(13);
+      expect(lines).toHaveLength(14);
+      expect(lines[13]).toContain('100000000012');
+    });
+
+    test('should fall back to the account alias when the ARN cannot be parsed', async () => {
+      mockSuccessfulAccountId();
+      mockAssumeRole.mockRejectedValue(new Error('AccessDenied'));
+
+      const result = await amazonAuth.validate!({
+        auth: createAuthObject({
+          roles: [
+            {
+              assumeRoleArn: 'not-a-valid-arn',
+              accountName: 'Broken',
+            },
+          ],
+        }),
+      });
+
+      expect(result).toEqual({
+        valid: false,
+        error:
+          '1 of 1 roles could not be assumed:\n' +
+          '- Broken (not-a-valid-arn): AccessDenied',
+      });
     });
 
     test('should validate roles using implicit role credentials when no explicit credentials provided', async () => {
@@ -372,7 +469,8 @@ describe('AWS Auth Validation', () => {
       expect(result).toEqual({
         valid: false,
         error:
-          'role "arn:aws:iam::111111111111:role/ProductionRole" (Production): Unknown error',
+          '1 of 1 roles could not be assumed:\n' +
+          '- 111111111111 (arn:aws:iam::111111111111:role/ProductionRole): Unknown error',
       });
     });
   });

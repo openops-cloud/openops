@@ -44,6 +44,12 @@ export type DynamicFormValidationContextState = {
     newFieldPropertyMap: BlockPropertyMap,
     currentLastIndex: number,
   ) => void;
+  addArrayItemsToSchema: (
+    arrayKey: string,
+    newFieldPropertyMap: BlockPropertyMap,
+    previousArrayLength: number,
+    count: number,
+  ) => void;
 };
 
 const DynamicFormValidationContext = createContext<
@@ -161,6 +167,54 @@ export const DynamicFormValidationProvider = ({
     [],
   );
 
+  // Batched variant of addArrayItemToSchema: writes `count` item schemas at
+  // indices previousArrayLength..previousArrayLength+count-1 in a single
+  // functional update. Like N single calls, it never removes existing item
+  // schemas; it only grows the tuple's min/max items.
+  const addArrayItemsToSchema = useCallback(
+    (
+      arrayKey: string,
+      newFieldPropertyMap: BlockPropertyMap,
+      previousArrayLength: number,
+      count: number,
+    ) => {
+      if (count <= 0) {
+        return;
+      }
+      setFormSchema((prevSchema: any) => {
+        if (!prevSchema) return null;
+
+        const transformedArrayKey = getTransformedKey(
+          arrayKey,
+          numberReplacement,
+          stringReplacement,
+        );
+        const schemaWithUpdatedArrayProps = updateArraySchemaItemsCount(
+          transformedArrayKey,
+          prevSchema,
+          previousArrayLength + count,
+        );
+
+        const arrayItemSchema = formUtils.buildSchema(newFieldPropertyMap);
+        for (let i = 0; i < count; i++) {
+          const transformedArrayItemKey = getTransformedKey(
+            `${arrayKey}.${previousArrayLength + i}`,
+            numberReplacement,
+            stringReplacement,
+          );
+          set(
+            schemaWithUpdatedArrayProps,
+            transformedArrayItemKey,
+            cloneDeep(arrayItemSchema),
+          );
+        }
+
+        return schemaWithUpdatedArrayProps;
+      });
+    },
+    [],
+  );
+
   const removeArrayItemFromSchema = useCallback(
     (
       arrayKey: string,
@@ -203,6 +257,7 @@ export const DynamicFormValidationProvider = ({
         updateFormSchema,
         initArraySchema,
         addArrayItemToSchema,
+        addArrayItemsToSchema,
         removeArrayItemFromSchema,
       }}
     >
