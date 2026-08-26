@@ -13,6 +13,9 @@ RUN <<-```
 ```
 
 # Install Azure CLI (needs compiler for native deps)
+# AZURE_EXTENSION_DIR must be set *before* `az extension add`, otherwise the
+# extensions land in /root/.azure/cliextensions and are not copied to the final stage.
+ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 RUN <<-```
     set -ex
     pip3 install --no-cache-dir --break-system-packages azure-cli==2.74.0
