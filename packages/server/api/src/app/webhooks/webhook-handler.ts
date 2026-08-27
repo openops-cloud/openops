@@ -74,23 +74,20 @@ export async function handleWebhookSimulation(
   };
 }
 
-/**
- * How long a synchronous webhook request is held before responding.
- * `paused`: respond as soon as the flow pauses or completes, whichever first.
- * Omitted: respond once the flow reaches a terminal state.
- */
-export type WebhookWaitUntil = 'paused';
-
 export async function handleWebhook({
   request,
   flowId,
   async,
-  waitUntil,
+  allowPauseResponse = false,
 }: {
   request: FastifyRequest;
   flowId: string;
   async: boolean;
-  waitUntil?: WebhookWaitUntil;
+  /**
+   * When true, the synchronous response is sent as soon as the flow pauses
+   * (or completes, whichever comes first) instead of only on completion.
+   */
+  allowPauseResponse?: boolean;
 }): Promise<EngineHttpResponse> {
   const result = await getFlowOrThrow(flowId);
   if (!result.success) {
@@ -121,10 +118,9 @@ export async function handleWebhook({
   }
 
   const flowRunId = await flowRunService.start({
-    progressUpdateType:
-      waitUntil === 'paused'
-        ? ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE
-        : ProgressUpdateType.WEBHOOK_RESPONSE,
+    progressUpdateType: allowPauseResponse
+      ? ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE
+      : ProgressUpdateType.WEBHOOK_RESPONSE,
     triggerSource: FlowRunTriggerSource.TRIGGERED,
     flowVersionId: flow.publishedVersionId,
     environment: RunEnvironment.PRODUCTION,

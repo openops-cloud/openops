@@ -69,12 +69,12 @@ describe('webhook-handler handleWebhook', () => {
       isMultipart: () => false,
     }) as unknown as FastifyRequest;
 
-  it('uses WEBHOOK_RESPONSE_ON_PAUSE when waitUntil is paused', async () => {
+  it('uses WEBHOOK_RESPONSE_ON_PAUSE when allowPauseResponse is true', async () => {
     await handleWebhook({
       request: buildRequest(),
       flowId,
       async: false,
-      waitUntil: 'paused',
+      allowPauseResponse: true,
     });
 
     expect(mockFlowRunServiceStart).toHaveBeenCalledWith(
@@ -84,7 +84,7 @@ describe('webhook-handler handleWebhook', () => {
     );
   });
 
-  it('uses WEBHOOK_RESPONSE when waitUntil is omitted', async () => {
+  it('uses WEBHOOK_RESPONSE when allowPauseResponse is omitted', async () => {
     await handleWebhook({
       request: buildRequest(),
       flowId,

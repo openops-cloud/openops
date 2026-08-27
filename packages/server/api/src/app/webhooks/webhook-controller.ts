@@ -19,7 +19,7 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
         request,
         flowId: request.params.flowId,
         async: false,
-        waitUntil: request.query.waitUntil,
+        allowPauseResponse: request.query.allowPauseResponse,
       });
 
       await reply
@@ -80,10 +80,10 @@ const WEBHOOK_PARAMS = {
 };
 
 const SyncWebhookQueryParams = Type.Object({
-  waitUntil: Type.Optional(
-    Type.Literal('paused', {
+  allowPauseResponse: Type.Optional(
+    Type.Boolean({
       description:
-        'Respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first. Omit to wait for the flow to complete.',
+        'When true, respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first. Defaults to false: wait for the flow to complete.',
     }),
   ),
 });
@@ -95,7 +95,7 @@ const SyncWebhookRequest = {
     ...WEBHOOK_PARAMS.schema,
     querystring: SyncWebhookQueryParams,
     description:
-      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result. Supports an optional `waitUntil=paused` query parameter to respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first; omit it to wait for the flow to complete.',
+      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result. Supports an optional `allowPauseResponse=true` query parameter to respond as soon as the flow pauses (e.g. a step waiting for user action) or completes, whichever comes first; omit it to wait for the flow to complete.',
   },
 };
 
