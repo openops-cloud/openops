@@ -11,6 +11,30 @@ See the [getting started guide](https://docs.openops.com/getting-started/deploym
 
 # Connections
 
+## Redis configuration
+
+OpenOps supports Redis over TLS for deployments where Redis is not running on the
+same private Docker network. The application and worker accept the following
+environment variables (prefixed with `OPS_` in the deployment environment):
+
+| Variable | Description |
+| --- | --- |
+| `OPS_REDIS_URL` | Complete ioredis connection URL. When set, it takes precedence over the host/port settings. |
+| `OPS_REDIS_HOST` | Redis hostname, used when `OPS_REDIS_URL` is not set. |
+| `OPS_REDIS_PORT` | Redis port, used with `OPS_REDIS_HOST`. |
+| `OPS_REDIS_USE_SSL` | Set to `true` to enable TLS when using host/port settings. |
+| `OPS_REDIS_USER` | Optional Redis username. |
+| `OPS_REDIS_PASSWORD` | Redis password or auth token. Store it in the deployment secret store rather than committing it to an environment file. |
+| `OPS_REDIS_DB` | Redis database number; defaults to `0`. |
+
+For an ElastiCache deployment with transit encryption required, use
+`OPS_REDIS_USE_SSL=true` together with `OPS_REDIS_HOST`, `OPS_REDIS_PORT`, and
+`OPS_REDIS_PASSWORD`. Alternatively, set `OPS_REDIS_URL` to an appropriate `rediss://`
+URL. Do not enable a plaintext fallback when the Redis service requires TLS.
+
+These settings are also passed to the workflow engine processes spawned by the worker,
+so the app, worker, and engine use the same Redis configuration.
+
 ## Azure
 
 To use the Azure CLI block, you need to create a connection to Azure. If you use the OpenOps platform to create the connection, you will have to use a service principal.
