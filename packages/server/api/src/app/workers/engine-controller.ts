@@ -156,10 +156,9 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     }
 
     if (
-      progressUpdateType === ProgressUpdateType.WEBHOOK_RESPONSE &&
       workerHandlerId &&
       executionCorrelationId &&
-      isFlowStateTerminal(runDetails.status)
+      shouldPublishWebhookResponse(progressUpdateType, runDetails.status)
     ) {
       await webhookResponseWatcher.publish(
         runId,
@@ -326,10 +325,34 @@ function getExecutionState(
   };
 }
 
+function shouldPublishWebhookResponse(
+  progressUpdateType: ProgressUpdateType,
+  status: FlowRunStatus,
+): boolean {
+  switch (progressUpdateType) {
+    case ProgressUpdateType.WEBHOOK_RESPONSE:
+      return isFlowStateTerminal(status);
+    case ProgressUpdateType.WEBHOOK_RESPONSE_ON_PAUSE:
+      return isFlowStateTerminal(status) || status === FlowRunStatus.PAUSED;
+    default:
+      return false;
+  }
+}
+
 async function getFlowResponse(
   result: FlowRunResponse,
 ): Promise<EngineHttpResponse> {
   switch (result.status) {
+    case FlowRunStatus.PAUSED:
+      // A block may provide the body to return while paused via
+      // pauseMetadata.response; fall back to a generic message otherwise.
+      return {
+        status: StatusCodes.OK,
+        body: result.pauseMetadata?.response ?? {
+          message: 'The flow is paused',
+        },
+        headers: {},
+      };
     case FlowRunStatus.STOPPED:
       return {
         status: result.stopResponse?.status ?? StatusCodes.OK,

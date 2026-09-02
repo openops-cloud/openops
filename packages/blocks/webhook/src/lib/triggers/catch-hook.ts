@@ -15,8 +15,10 @@ This URL triggers the flow and **does NOT** generate sample data.
 <br>
 **Synchronous Requests:**
 
-If you expect a response from this webhook, add /sync to the end of the URL.
-If it takes more than 30 seconds, it will return a 408 Request Timeout response.
+If you expect a response from this webhook, append one of the following to the URL above:
+
+- To wait for the flow to finish and return its response, append \`/sync\`
+- To get a response as soon as the flow pauses (e.g. a step that waits for user action) or finishes, whichever comes first, append \`/sync?allowPauseResponse=true\`
 
 To return data, add an HTTP step to your flow with the Return Response action.
 `;
