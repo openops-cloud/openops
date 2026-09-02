@@ -177,7 +177,7 @@
     "date-fns": "3.6.0",
     "dayjs": "1.11.21",
     "decimal.js": "10.6.0",
-    "deepmerge-ts": "8.0.1",
+    "deepmerge-ts": "8.0.2",
     "dompurify": "3.4.13",
     "dotenv": "16.6.1",
     "embla-carousel-react": "8.6.0",
