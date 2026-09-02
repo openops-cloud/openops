@@ -306,7 +306,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
-    "@faker-js/faker": "8.4.1",
+    "@faker-js/faker": "10.5.0",
     "@nx/devkit": "23.1.1",
     "@nx/esbuild": "23.1.1",
     "@nx/eslint": "23.1.1",
