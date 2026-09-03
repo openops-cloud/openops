@@ -35,10 +35,10 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund && npm prune --omit=dev
 
 # Strip Azure CLI caches and test files
-RUN find /usr/local/lib/python3.11/dist-packages -type d \
+RUN find /usr/local/lib/python3.13/dist-packages -type d \
     \( -name __pycache__ -o -name tests -o -name test -o -name samples \) \
     -exec rm -rf {} + 2>/dev/null; \
-    find /usr/local/lib/python3.11/dist-packages -name "*.pyc" -delete 2>/dev/null; \
+    find /usr/local/lib/python3.13/dist-packages -name "*.pyc" -delete 2>/dev/null; \
     true
 
 # ---- Final stage: runtime only ----
@@ -87,7 +87,7 @@ RUN <<-```
 ```
 
 # Copy Azure CLI from builder (pip-installed packages + extensions)
-COPY --from=builder /usr/local/lib/python3.11/dist-packages /usr/local/lib/python3.11/dist-packages
+COPY --from=builder /usr/local/lib/python3.13/dist-packages /usr/local/lib/python3.13/dist-packages
 COPY --from=builder /usr/local/bin/az /usr/local/bin/az
 COPY --from=builder /opt/azure /opt/azure
 ENV AZURE_CONFIG_DIR="/tmp/azure"
