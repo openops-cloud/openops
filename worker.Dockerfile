@@ -5,9 +5,7 @@ ARG TARGETARCH
 
 RUN <<-```
     set -ex
-    apt-get update
-    apt-get upgrade -y
-    apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       make gcc g++ python3 python3-pip python3-dev \
       libffi-dev libssl-dev \
       git curl unzip tar gzip gnupg ca-certificates
@@ -57,9 +55,7 @@ ENV OPS_CONTAINER_TYPE=WORKER
 # Runtime dependencies only
 RUN <<-```
     set -ex
-    apt-get update
-    apt-get upgrade -y
-    apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       bash findutils python3 procps \
       libffi8 libssl3 libstdc++6 \
       git curl tar gzip ca-certificates
