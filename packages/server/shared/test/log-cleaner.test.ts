@@ -134,6 +134,33 @@ describe('log-cleaner', () => {
     });
   });
 
+  it('should stringify a URL instance without failing on its unbound toJSON', () => {
+    const logEvent = {
+      event: {
+        url: new URL('https://example.com/api/resume?actionType=button'),
+      },
+    };
+
+    const result = cleanLogEvent(logEvent);
+
+    expect(JSON.parse(result.event.url)).toMatchObject({
+      href: 'https://example.com/api/resume?actionType=button',
+      hostname: 'example.com',
+      pathname: '/api/resume',
+      search: '?actionType=button',
+    });
+  });
+
+  it('should drop function values instead of copying them', () => {
+    const logEvent = {
+      event: { objectWithFunction: { key: 'value', fn: () => 'ignored' } },
+    };
+
+    const result = cleanLogEvent(logEvent);
+
+    expect(result.event.objectWithFunction).toBe('{"key":"value"}');
+  });
+
   describe('sensitive data redaction', () => {
     const originalEnv = process.env['OPS_LOG_REDACTION'];
 

@@ -1,5 +1,5 @@
 # ---- Builder stage: native addons and MCP dependencies ----
-FROM node:24.19.0-alpine3.24 AS builder
+FROM node:24.20.0-alpine3.24 AS builder
 
 RUN <<-```
     set -ex
@@ -40,7 +40,7 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund && npm prune --omit=dev
 
 # ---- Final stage: runtime only ----
-FROM node:24.19.0-alpine3.24
+FROM node:24.20.0-alpine3.24
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
