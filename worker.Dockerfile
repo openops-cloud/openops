@@ -1,5 +1,5 @@
 # ---- Builder stage: native addons and CLI tools that need compilers ----
-FROM node:24.16.0-bookworm-slim AS builder
+FROM node:24.19.0-bookworm-slim AS builder
 
 ARG TARGETARCH
 
@@ -42,7 +42,7 @@ RUN find /usr/local/lib/python3.11/dist-packages -type d \
     true
 
 # ---- Final stage: runtime only ----
-FROM node:24.16.0-bookworm-slim
+FROM node:24.19.0-bookworm-slim
 
 ARG TARGETARCH
 
