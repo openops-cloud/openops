@@ -2,7 +2,7 @@ export default {
   displayName: 'ui-kit',
   preset: '../../jest.preset.js',
   setupFiles: ['../../jest.env.js', './setup-tests.ts'],
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|remark-gfm)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(lodash-es|remark-gfm|nanoid)/)'],
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
     '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/react/babel'] }],
