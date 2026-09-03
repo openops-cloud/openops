@@ -7,7 +7,7 @@ const nxPreset = require('@nx/jest/preset').default;
  */
 const esmOnlyDependencies = ['lodash-es', 'nanoid'];
 const esmOnlyDependencyGroup = esmOnlyDependencies.join('|');
-const esmOnlyDependencyPath = `node_modules[/\\\\](?:${esmOnlyDependencyGroup})[/\\\\]`;
+const esmOnlyDependencyPath = String.raw`node_modules[/\\](?:${esmOnlyDependencyGroup})[/\\]`;
 
 module.exports = {
   ...nxPreset,
@@ -22,7 +22,7 @@ module.exports = {
    */
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
   transformIgnorePatterns: [
-    `^(?!.*${esmOnlyDependencyPath}).+\\.js$`,
+    String.raw`^(?!.*${esmOnlyDependencyPath}).+\.js$`,
     `node_modules/(?!(${esmOnlyDependencyGroup})/)`,
   ],
   setupFilesAfterEnv: [__dirname + '/jest.setup.js'],
