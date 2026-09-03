@@ -52,6 +52,7 @@ import { flowModule } from './flows/flow.module';
 import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
+import { normalizeClientIp } from './helper/client-ip';
 import { systemJobsSchedule } from './helper/system-jobs';
 import { mcpModule } from './mcp/mcp.module';
 import { oauthConfig } from './oauth/config/oauth-config';
@@ -140,7 +141,7 @@ export const setupApp = async (
       requestId: request.id,
       requestMethod: request.method,
       requestPath: request.url,
-      clientIp: request.ip,
+      clientIp: normalizeClientIp(request.ip),
     }),
   });
 
