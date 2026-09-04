@@ -163,13 +163,13 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     url.searchParams.set('actionType', payload.actions[0].type);
     url.searchParams.set('userName', payload.user.name);
     logger.debug(`Before calling webhook to resume the workflow.`, {
-      url,
+      url: url.toString(),
     });
 
     await axios.get(url.toString());
 
     logger.debug(`After calling webhook to resume the workflow.`, {
-      url,
+      url: url.toString(),
     });
   }
 

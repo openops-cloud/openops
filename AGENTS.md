@@ -44,7 +44,7 @@ Other important files:
 
 ### Prerequisites
 
-- Node v24.19.0 (pinned in `.nvmrc`)
+- Node v24.20.0 (pinned in `.nvmrc`)
 - Docker (for Postgres, Redis, OpenOps Tables, Analytics)
 
 ### First-time setup

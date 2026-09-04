@@ -60,6 +60,12 @@ const redactSensitiveFields = (obj: any, visited = new WeakSet()): any => {
 
     const redacted: any = {};
     for (const key in obj) {
+      // Copying a function off a native object (e.g. URL.prototype.toJSON)
+      // detaches it from its receiver and makes JSON.stringify throw.
+      if (typeof obj[key] === 'function') {
+        continue;
+      }
+
       if (isSensitiveField(key)) {
         redacted[key] = REDACTED;
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
