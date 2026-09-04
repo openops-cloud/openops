@@ -4,20 +4,11 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const xaiModels = [
-  'grok-2-vision',
-  'grok-2-vision-1212',
-  'grok-2-vision-latest',
-  'grok-3',
-  'grok-3-latest',
-  'grok-3-mini-latest',
-  'grok-4',
-  'grok-4-0709',
-  'grok-4-1-fast-non-reasoning',
-  'grok-4-1-fast-reasoning',
-  'grok-4-fast-non-reasoning',
-  'grok-4-fast-reasoning',
-  'grok-4-latest',
-  'grok-code-fast-1',
+  'grok-4.20-reasoning',
+  'grok-4.3',
+  'grok-4.5',
+  'grok-4.6',
+  'grok-latest',
 ];
 
 function createLanguageModel(params: {
