@@ -225,7 +225,6 @@ export const AI_SDK_CONFIGS: Partial<Record<AiProviderEnum, AiSdkConfig>> = {
       'gpt-5.4-mini-2026-03-17',
       'gpt-5.4-nano',
       'gpt-5.4-nano-2026-03-17',
-      'gpt-5.6-luna',
       'o1-mini',
       'o1-mini-2024-09-12',
       'o1-preview',
