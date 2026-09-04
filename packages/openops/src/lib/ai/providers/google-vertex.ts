@@ -5,20 +5,15 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleVertexModels = [
-  'claude-3-5-sonnet-v2@20241022',
-  'claude-3-5-sonnet@20240620',
-  'claude-3-7-sonnet@20250219',
-  'claude-opus-4-1@20250805',
+  'claude-fable-5',
   'claude-opus-4-5@20251101',
   'claude-opus-4-6',
-  'claude-opus-4@20250514',
+  'claude-opus-4-7',
+  'claude-opus-4-8',
   'claude-sonnet-4-5@20250929',
   'claude-sonnet-4-6',
-  'claude-sonnet-4@20250514',
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-001',
+  'claude-sonnet-5',
   'gemini-2.0-flash-exp',
-  'gemini-2.0-flash-lite',
   'gemini-2.0-pro-exp-02-05',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
@@ -28,6 +23,11 @@ const googleVertexModels = [
   'gemini-3-pro-preview',
   'gemini-3.1-flash-lite-preview',
   'gemini-3.1-pro-preview',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.6-flash',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
 ];
 
 function safeParseJson(value: string): Record<string, unknown> | null {

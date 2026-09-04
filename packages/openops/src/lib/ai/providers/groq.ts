@@ -4,18 +4,9 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const groqModels = [
-  'deepseek-r1-distill-llama-70b',
-  'deepseek-r1-distill-qwen-32b',
-  'gemma2-9b-it',
-  'llama-3.1-8b-instant',
-  'llama-3.3-70b-versatile',
-  'meta-llama/llama-4-maverick-17b-128e-instruct',
-  'meta-llama/llama-4-scout-17b-16e-instruct',
-  'moonshotai/kimi-k2-instruct-0905',
   'openai/gpt-oss-120b',
   'openai/gpt-oss-20b',
-  'qwen-2.5-32b',
-  'qwen/qwen3-32b',
+  'qwen/qwen3.6-27b',
 ];
 
 function createLanguageModel(params: {
