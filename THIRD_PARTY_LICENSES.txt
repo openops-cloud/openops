@@ -214,7 +214,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - snowflake-sdk@2.4.3
+ - snowflake-sdk@3.3.0
 
 This package contains the following license:
 
@@ -4124,16 +4124,10 @@ The following npm packages may be included in this product:
  - @aws-sdk/client-pricing@3.1075.0
  - @aws-sdk/client-rds@3.1075.0
  - @aws-sdk/client-resource-groups-tagging-api@3.1075.0
- - @aws-sdk/client-s3@3.1051.0
  - @aws-sdk/client-s3@3.1075.0
  - @aws-sdk/client-ssm@3.1075.0
- - @aws-sdk/client-sts@3.1051.0
  - @aws-sdk/client-sts@3.1075.0
- - @aws-sdk/middleware-bucket-endpoint@3.972.27
- - @aws-sdk/middleware-expect-continue@3.972.23
- - @aws-sdk/middleware-location-constraint@3.972.20
  - @aws-sdk/middleware-sdk-rds@3.972.37
- - @aws-sdk/middleware-ssec@3.972.20
 
 These packages each contain the following license:
 
@@ -15406,7 +15400,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - toml@3.0.0
+ - toml@5.0.0
 
 This package contains the following license:
 
