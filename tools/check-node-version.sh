@@ -21,7 +21,7 @@ for file in "${DOCKERFILES[@]}"; do
   done < <(sed -nE 's/^FROM node:([0-9]+\.[0-9]+\.[0-9]+)[-[:space:]].*/\1/p' "$file")
 done
 
-if [ ${#FOUND[@]} -eq 0 ]; then
+if [[ ${#FOUND[@]} -eq 0 ]]; then
   echo "error: no pinned 'FROM node:<x.y.z>-<variant>' found in ${DOCKERFILES[*]}" >&2
   exit 1
 fi
@@ -30,22 +30,22 @@ fi
 DOCKER_VERSION="${FOUND[0]#*:}"
 MISMATCHED=0
 for entry in "${FOUND[@]}"; do
-  [ "${entry#*:}" = "$DOCKER_VERSION" ] || MISMATCHED=1
+  [[ "${entry#*:}" == "$DOCKER_VERSION" ]] || MISMATCHED=1
 done
 
-if [ "$MISMATCHED" -eq 1 ]; then
+if [[ "$MISMATCHED" -eq 1 ]]; then
   echo "error: Dockerfiles disagree on the Node version:" >&2
   printf '  %s\n' "${FOUND[@]}" >&2
   echo "Pin every stage to the same version, then re-run this check." >&2
   exit 1
 fi
 
-if [ "$NVMRC_VERSION" = "$DOCKER_VERSION" ]; then
+if [[ "$NVMRC_VERSION" == "$DOCKER_VERSION" ]]; then
   echo "Node version is in sync: $DOCKER_VERSION (.nvmrc, ${DOCKERFILES[*]})"
   exit 0
 fi
 
-if [ "${1:-}" = "--fix" ]; then
+if [[ "${1:-}" == "--fix" ]]; then
   echo "v$DOCKER_VERSION" > .nvmrc
   echo "Updated .nvmrc from $NVMRC_VERSION to $DOCKER_VERSION to match ${DOCKERFILES[*]}"
   exit 0
