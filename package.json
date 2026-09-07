@@ -138,7 +138,7 @@
     "@tiptap/pm": "3.31.3",
     "@tiptap/react": "3.31.3",
     "@tiptap/starter-kit": "3.31.3",
-    "@tiptap/suggestion": "3.31.2",
+    "@tiptap/suggestion": "3.31.3",
     "@types/jsonwebtoken": "9.0.10",
     "@types/mailparser": "3.4.6",
     "@types/node": "20.17.1",
