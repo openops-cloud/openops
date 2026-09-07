@@ -275,7 +275,7 @@
     "shade-generator": "1.2.7",
     "shell-quote": "1.10.0",
     "showdown": "2.1.0",
-    "snowflake-sdk": "2.4.3",
+    "snowflake-sdk": "3.3.0",
     "socket.io": "4.8.3",
     "socket.io-client": "4.8.3",
     "sqlite3": "6.0.1",
@@ -454,6 +454,7 @@
     "uuid": "$uuid",
     "form-data": "$form-data",
     "tmp": "0.2.7",
-    "dompurify": "$dompurify"
+    "dompurify": "$dompurify",
+    "toml": "5.0.0"
   }
 }
