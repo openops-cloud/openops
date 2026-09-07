@@ -19480,7 +19480,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm packages may be included in this product:
 
- - @ai-sdk/anthropic@2.0.101
  - @ai-sdk/anthropic@3.0.116
  - @ai-sdk/azure@3.0.116
  - @ai-sdk/cerebras@2.0.80
@@ -19489,19 +19488,15 @@ The following npm packages may be included in this product:
  - @ai-sdk/deepseek@2.0.62
  - @ai-sdk/gateway@3.0.189
  - @ai-sdk/gateway@4.0.73
- - @ai-sdk/google-vertex@3.0.173
- - @ai-sdk/google@2.0.96
+ - @ai-sdk/google-vertex@4.0.197
  - @ai-sdk/google@3.0.121
  - @ai-sdk/groq@3.0.64
  - @ai-sdk/mcp@1.0.78
  - @ai-sdk/mcp@2.0.43
  - @ai-sdk/mistral@3.0.63
- - @ai-sdk/openai-compatible@1.0.53
  - @ai-sdk/openai-compatible@2.0.74
  - @ai-sdk/openai@3.0.109
  - @ai-sdk/perplexity@3.0.59
- - @ai-sdk/provider-utils@3.0.36
- - @ai-sdk/provider@2.0.3
  - @ai-sdk/provider@3.0.15
  - @ai-sdk/provider@4.0.10
  - @ai-sdk/react@3.0.280
@@ -19574,34 +19569,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - @fastify/busboy@2.1.1
-
-This package contains the following license:
-
-Copyright Brian White. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
 
 -----------
 
@@ -29477,7 +29444,6 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.19.8
- - undici@5.29.0
  - undici@6.28.0
  - undici@7.29.0
 
