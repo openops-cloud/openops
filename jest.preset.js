@@ -5,7 +5,7 @@ const nxPreset = require('@nx/jest/preset').default;
  * registry, so these have to be handed to the transformer instead of being
  * skipped along with the rest of node_modules.
  */
-const esmOnlyDependencies = ['lodash-es', 'nanoid'];
+const esmOnlyDependencies = ['@faker-js/faker', 'lodash-es', 'nanoid'];
 const esmOnlyDependencyGroup = esmOnlyDependencies.join('|');
 const esmOnlyDependencyPath = String.raw`node_modules[/\\](?:${esmOnlyDependencyGroup})[/\\]`;
 
