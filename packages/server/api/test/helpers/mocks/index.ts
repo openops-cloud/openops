@@ -151,7 +151,7 @@ export const createMockBlockMetadata = (
     updated: blockMetadata?.updated ?? faker.date.recent().toISOString(),
     name: blockMetadata?.name ?? faker.lorem.word(),
     displayName: blockMetadata?.displayName ?? faker.lorem.word(),
-    logoUrl: blockMetadata?.logoUrl ?? faker.image.urlPlaceholder(),
+    logoUrl: blockMetadata?.logoUrl ?? faker.image.url(),
     description: blockMetadata?.description ?? faker.lorem.sentence(),
     projectId: blockMetadata?.projectId,
     directoryPath: blockMetadata?.directoryPath,
