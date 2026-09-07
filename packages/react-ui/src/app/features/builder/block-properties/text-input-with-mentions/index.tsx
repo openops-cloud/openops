@@ -154,7 +154,9 @@ export const TextInputWithMentions = ({
             stepsMetadata,
           ),
         };
-        editor.commands.setContent(newContent, false);
+        editor.commands.setContent(newContent, {
+          emitUpdate: false,
+        });
       }
     }
   }, [editor, initialValue, steps, stepsMetadata]);
