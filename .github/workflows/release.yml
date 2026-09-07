@@ -25,7 +25,7 @@ jobs:
       - name: Get next version
         if: inputs.version == ''
         id: semver
-        uses: flatherskevin/semver-action@9fb0c115a0bede9fa0743f4823b4182040a4983a
+        uses: flatherskevin/semver-action@9fb0c115a0bede9fa0743f4823b4182040a4983a # 1.1.5
         with:
           incrementLevel: patch
           source: tags
