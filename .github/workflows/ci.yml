@@ -114,9 +114,40 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
+  check-node-version:
+    name: Check Node Version
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout for Dependabot PR
+        if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Checkout for others
+        if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
+        uses: actions/checkout@v7.0.1
+      # Dependabot bumps the node base images but never .nvmrc, so on its own
+      # branches we sync .nvmrc and push it back into the PR.
+      - name: Check .nvmrc matches the Dockerfile node images
+        run: |
+          if ! ./tools/check-node-version.sh; then
+            echo "Run './tools/check-node-version.sh --fix' to sync .nvmrc with the Dockerfiles." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+      - name: Sync .nvmrc for dependabot
+        if: failure() && startsWith(github.head_ref, 'dependabot/')
+        run: ./tools/check-node-version.sh --fix
+      - name: Commit changes for dependabot
+        if: failure() && startsWith(github.head_ref, 'dependabot/')
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        with:
+          file_pattern: .nvmrc
+          commit_message: Sync .nvmrc with the Dockerfile node version
   test:
     strategy:
       matrix:
@@ -170,7 +201,7 @@ jobs:
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
         continue-on-error: false
-        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_minutes: 10
           max_attempts: 3
