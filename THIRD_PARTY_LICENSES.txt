@@ -28981,7 +28981,7 @@ The following npm packages may be included in this product:
  - @tiptap/pm@3.31.3
  - @tiptap/react@3.31.3
  - @tiptap/starter-kit@3.31.3
- - @tiptap/suggestion@3.31.2
+ - @tiptap/suggestion@3.31.3
 
 These packages each contain the following license:
 
