@@ -33,6 +33,7 @@ const openAiModels = [
   'gpt-5.6-luna',
   'gpt-5.6-sol',
   'gpt-5.6-terra',
+  'gpt-6-astra',
 ];
 
 function createLanguageModel(params: {
