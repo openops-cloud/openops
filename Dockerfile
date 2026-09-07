@@ -7,8 +7,9 @@ RUN <<-```
     yarn config set python /usr/bin/python3
 ```
 
-# Install uv once for all MCP venvs
-RUN wget -qO- https://astral.sh/uv/install.sh | sh
+# Install uv to a deterministic location
+RUN wget -qO- https://astral.sh/uv/install.sh \
+    | env UV_UNMANAGED_INSTALL=/usr/local/bin sh
 
 # Build MCP: openops-mcp
 WORKDIR /root/.mcp/openops-mcp
@@ -16,7 +17,6 @@ RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
     git checkout b7b3e8a0950f5bcc458f3dd38a4f23e4eb5c9c1a
-    source $HOME/.local/bin/env
     uv sync --frozen --no-dev --no-install-project
 ```
 
@@ -26,7 +26,6 @@ RUN <<-```
     set -ex
     git clone --depth 1 --branch 2025.10.20251006150229 https://github.com/awslabs/mcp.git .
     rm -rf .git
-    source $HOME/.local/bin/env
     python3 -m venv .venv
     . .venv/bin/activate
     pip install --no-cache-dir ./src/cost-explorer-mcp-server
