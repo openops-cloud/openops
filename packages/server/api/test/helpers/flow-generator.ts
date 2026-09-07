@@ -67,7 +67,7 @@ function randomizeTriggerMetadata(trigger: Trigger): Trigger {
       inputUiInfo: {
         server: faker.internet.url(),
         port: faker.color.cmyk(),
-        username: faker.internet.userName(),
+        username: faker.internet.username(),
         password: faker.internet.password(),
       },
     },
