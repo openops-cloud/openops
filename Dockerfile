@@ -7,31 +7,53 @@ RUN <<-```
     yarn config set python /usr/bin/python3
 ```
 
-# Install uv once for all MCP venvs
-RUN wget -qO- https://astral.sh/uv/install.sh | sh
+# Install uv to a deterministic location
+RUN wget -qO- https://astral.sh/uv/install.sh \
+    | env UV_UNMANAGED_INSTALL=/usr/local/bin sh
+
+ENV UV_PYTHON_DOWNLOADS=never
 
 # Build MCP: openops-mcp
 WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
-    git checkout b7b3e8a0950f5bcc458f3dd38a4f23e4eb5c9c1a
-    source $HOME/.local/bin/env
-    uv sync --frozen --no-dev --no-install-project
+    git checkout ad6085759ef2cc3073113ee97a3d457f66dde6f6
+    
+    uv sync \
+        --frozen \
+        --no-dev \
+        --no-install-project \
+        --python /usr/bin/python3
 ```
 
 # Build MCP: aws-cost
+#
+# mcp and fastmcp MUST stay pinned. The awslabs servers declare both with no upper bound, so
+# the git tag above pins their source while their dependencies still resolve fresh from PyPI
+# on every rebuild. mcp 2.0 renamed FastMCP to MCPServer, so a rebuild silently picked up
+# mcp 2.x and all three servers died on startup with
+# "ModuleNotFoundError: No module named 'mcp.server.fastmcp'" — which surfaced as the AI
+# assistant hanging until nginx cut the stream, not as a build failure.
 WORKDIR /root/.mcp/aws-cost
 RUN <<-```
     set -ex
-    git clone --depth 1 --branch 2025.10.20251006150229 https://github.com/awslabs/mcp.git .
+    git clone --depth 1 --branch 2025.10.20251006150229 \
+        --filter=blob:none --sparse https://github.com/awslabs/mcp.git .
+    git sparse-checkout set \
+        src/cost-explorer-mcp-server \
+        src/aws-pricing-mcp-server \
+        src/billing-cost-management-mcp-server
     rm -rf .git
-    source $HOME/.local/bin/env
-    python3 -m venv .venv
-    . .venv/bin/activate
-    pip install --no-cache-dir ./src/cost-explorer-mcp-server
-    pip install --no-cache-dir ./src/aws-pricing-mcp-server
-    pip install --no-cache-dir ./src/billing-cost-management-mcp-server
+
+    printf 'mcp==1.30.0\nfastmcp==2.14.7\n' > constraints.txt
+
+    uv venv --python /usr/bin/python3 .venv
+    VIRTUAL_ENV=.venv uv pip install --no-cache --compile-bytecode \
+        --constraint constraints.txt \
+        ./src/cost-explorer-mcp-server \
+        ./src/aws-pricing-mcp-server \
+        ./src/billing-cost-management-mcp-server
 ```
 
 # Install node_modules (needs native build tools for some packages)

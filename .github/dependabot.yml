@@ -1,47 +1,181 @@
 version: 2
+
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  # ---------------------------------------------------------------------------
+  # npm
+  #
+  # Only the root manifest declares dependencies; every packages/**/package.json
+  # is an Nx project stub, so "/" covers the whole monorepo.
+  #
+  # Groups are evaluated top-down and the first match wins, so families are
+  # listed before the production/development catch-alls.
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: 'npm'
+    directory: '/'
+    # Mondays and Thursdays - cron cannot express "every 3 days", and a
+    # day-of-month step (*/3) breaks at month boundaries. This gives regular
+    # 3- and 4-day gaps. Docker and Actions stay weekly; they produce far
+    # fewer updates and every run costs a full CI cycle.
     schedule:
-      interval: "weekly"
+      interval: 'cron'
+      cronjob: '0 6 * * 1,4'
+      timezone: 'Europe/Prague'
+    open-pull-requests-limit: 12
     commit-message:
-      prefix: ""
+      prefix: ''
+    # cooldown applies to version updates only - security updates are never held back.
     cooldown:
       default-days: 5
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 14
+      semver-major-days: 14
+      semver-minor-days: 5
+      semver-patch-days: 3
     groups:
-      react:
-        dependency-type: production
+      # One PR per run for all advisories instead of one PR per advisory.
+      # Without applies-to, groups cover version updates only and every
+      # security fix - including transitive ones - arrives as its own PR.
+      security:
+        applies-to: security-updates
         patterns:
-          - @radix-ui/*
-          - react-*
+          - '*'
+
+      ai-sdk:
+        patterns:
+          - 'ai'
+          - '@ai-sdk/*'
+      radix-ui:
+        patterns:
+          - '@radix-ui/*'
+      # Listed before the react group so react-i18next travels with i18next.
+      i18next:
+        patterns:
+          - 'i18next'
+          - 'i18next-*'
+          - 'react-i18next'
+      # `react-*` does not match `react` itself, which previously fell through
+      # to the production catch-all. The @types packages are included so they
+      # move with the runtime packages instead of in a separate PR.
+      react:
+        patterns:
+          - 'react'
+          - 'react-*'
+          - '@types/react'
+          - '@types/react-dom'
+      tiptap:
+        patterns:
+          - '@tiptap/*'
       aws:
         patterns:
-          - @aws-sdk/*
+          - '@aws-sdk/*'
       fastify:
-        dependency-type: production
         patterns:
-          - @fastify/*
-          - fastify
-          - fastify-*
+          - 'fastify'
+          - 'fastify-*'
+          - '@fastify/*'
+      opentelemetry:
+        patterns:
+          - '@opentelemetry/*'
+      nx:
+        patterns:
+          - 'nx'
+          - '@nx/*'
+      eslint:
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@eslint/*'
+          - '@typescript-eslint/*'
+          - 'typescript-eslint'
+          - 'jsonc-eslint-parser'
+      storybook:
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
+      jest:
+        patterns:
+          - 'jest'
+          - 'jest-*'
+          - 'ts-jest'
+          - 'babel-jest'
+          - '@types/jest'
+      vite:
+        patterns:
+          - 'vite'
+          - 'vite-*'
+          - '@vitejs/*'
+      types:
+        patterns:
+          - '@types/*'
+
+      # Catch-alls are limited to minor/patch so a single breaking major
+      # cannot block an otherwise-mergeable batch. Majors outside the
+      # families above get their own PR and their own review.
       production-dependencies:
-        dependency-type: "production"
+        dependency-type: 'production'
+        update-types:
+          - 'minor'
+          - 'patch'
       development-dependencies:
-        dependency-type: "development"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+        dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  # ---------------------------------------------------------------------------
+  # Docker
+  #
+  # Covers Dockerfile and worker.Dockerfile - Dependabot matches any filename
+  # containing "dockerfile", so both are picked up by "/". compose.yaml is not
+  # scanned by this ecosystem, and .devcontainer/Dockerfile pins its base image
+  # through an ARG, which Dependabot cannot resolve.
+  #
+  # Dependabot never updates .nvmrc, so the check-node-version job in ci.yml
+  # syncs it from these Dockerfiles and pushes the change back into the PR.
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: 'docker'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 5
     commit-message:
-      prefix: ""
+      prefix: ''
     cooldown:
       default-days: 5
-      semver-major-days: 30
-      semver-minor-days: 14
-      semver-patch-days: 14
+      semver-major-days: 14
+      semver-minor-days: 5
+      semver-patch-days: 3
     groups:
+      docker-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
+      # Both Dockerfiles must stay on the same node version, so they are
+      # always updated together in a single PR.
+      docker:
+        patterns:
+          - '*'
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ''
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+      semver-minor-days: 5
+      semver-patch-days: 3
+    groups:
+      actions-security:
+        applies-to: security-updates
+        patterns:
+          - '*'
       actions:
         patterns:
-          - "*"
+          - '*'
