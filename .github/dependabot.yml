@@ -139,11 +139,10 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: ''
+    # Docker and Actions support default-days only; semver-*-days is rejected
+    # for these ecosystems and invalidates the entire file.
     cooldown:
       default-days: 5
-      semver-major-days: 14
-      semver-minor-days: 5
-      semver-patch-days: 3
     groups:
       docker-security:
         applies-to: security-updates
@@ -166,11 +165,10 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: ''
+    # Docker and Actions support default-days only; semver-*-days is rejected
+    # for these ecosystems and invalidates the entire file.
     cooldown:
       default-days: 5
-      semver-major-days: 14
-      semver-minor-days: 5
-      semver-patch-days: 3
     groups:
       actions-security:
         applies-to: security-updates
