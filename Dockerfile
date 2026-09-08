@@ -18,7 +18,7 @@ WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
-    git checkout b7b3e8a0950f5bcc458f3dd38a4f23e4eb5c9c1a
+    git checkout ad6085759ef2cc3073113ee97a3d457f66dde6f6
     
     uv sync \
         --frozen \
