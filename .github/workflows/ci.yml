@@ -279,7 +279,7 @@ jobs:
       # someone pushes themselves still publishes.
       - name: Azure login
         if: ${{ vars.ACR_NAME && github.actor != 'dependabot[bot]' }}
-        uses: azure/login@v3.0.2
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ secrets.AZURE_ACR_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -346,7 +346,7 @@ jobs:
       id-token: write
     steps:
       - name: Azure login
-        uses: azure/login@v3.0.2
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ secrets.AZURE_ACR_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
