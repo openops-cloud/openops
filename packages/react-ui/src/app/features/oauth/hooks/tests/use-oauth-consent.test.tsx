@@ -1,11 +1,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
+import { navigateToExternalUrl } from '../../lib/browser-navigation';
 import { oauthApi, OAuthConsentRequest } from '../../lib/oauth-api';
 import { useOAuthConsent } from '../use-oauth-consent';
 
 jest.mock('../../lib/oauth-api', () => ({
   oauthApi: { getConsentRequest: jest.fn(), decide: jest.fn() },
+}));
+
+// jsdom does not allow window.location to be replaced, so navigation is mocked at
+// the module boundary instead.
+jest.mock('../../lib/browser-navigation', () => ({
+  navigateToExternalUrl: jest.fn(),
 }));
 
 const mockedGetConsentRequest = oauthApi.getConsentRequest as jest.Mock;
@@ -16,7 +23,7 @@ const REQUEST: OAuthConsentRequest = {
   clientName: 'Claude Code',
 };
 
-const assign = jest.fn();
+const assign = navigateToExternalUrl as jest.Mock;
 
 // Deliberately left at react-query's defaults, which retry failed queries. The hook is
 // responsible for opting out, so overriding it here would hide that.
@@ -28,13 +35,6 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 
 const render = (requestId: string | null) =>
   renderHook(() => useOAuthConsent(requestId), { wrapper });
-
-beforeAll(() => {
-  Object.defineProperty(window, 'location', {
-    value: { assign },
-    writable: true,
-  });
-});
 
 beforeEach(() => {
   jest.clearAllMocks();

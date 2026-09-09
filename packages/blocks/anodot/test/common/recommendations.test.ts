@@ -43,7 +43,7 @@ describe('getAnodotRecommendations', () => {
     );
 
     expect(result).toEqual(['some info']);
-    expect(makeHttpRequestMock).toBeCalledTimes(1);
+    expect(makeHttpRequestMock).toHaveBeenCalledTimes(1);
     expect(makeHttpRequestMock).toHaveBeenCalledWith(
       'POST',
       'apiUrl/v2/recommendations/list',
@@ -54,7 +54,7 @@ describe('getAnodotRecommendations', () => {
         sort: [{ by: 'savings', order: 'desc' }],
       },
     );
-    expect(createAnodotAuthHeadersMock).toBeCalledTimes(1);
+    expect(createAnodotAuthHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAnodotAuthHeadersMock).toHaveBeenCalledWith(
       'authToken',
       'accountApiKey',
@@ -71,7 +71,7 @@ describe('getAnodotRecommendations', () => {
     ).rejects.toThrow('some error');
 
     expect(makeHttpRequestMock).not.toHaveBeenCalled();
-    expect(createAnodotAuthHeadersMock).toBeCalledTimes(1);
+    expect(createAnodotAuthHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAnodotAuthHeadersMock).toHaveBeenCalledWith(
       'authToken',
       'accountApiKey',
@@ -109,7 +109,7 @@ describe('getAnodotRecommendations', () => {
       'some recommendation 3',
       'some recommendation 4',
     ]);
-    expect(makeHttpRequestMock).toBeCalledTimes(3);
+    expect(makeHttpRequestMock).toHaveBeenCalledTimes(3);
     expect(makeHttpRequestMock).toHaveBeenNthCalledWith(
       1,
       'POST',
@@ -145,7 +145,7 @@ describe('getAnodotRecommendations', () => {
         sort: [{ by: 'savings', order: 'desc' }],
       },
     );
-    expect(createAnodotAuthHeadersMock).toBeCalledTimes(1);
+    expect(createAnodotAuthHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAnodotAuthHeadersMock).toHaveBeenCalledWith(
       'authToken',
       'accountApiKey',
@@ -177,7 +177,7 @@ describe('setUserStatusForRecommendation', () => {
     );
 
     expect(result).toEqual('mock result');
-    expect(makeHttpRequestMock).toBeCalledTimes(1);
+    expect(makeHttpRequestMock).toHaveBeenCalledTimes(1);
     expect(makeHttpRequestMock).toHaveBeenCalledWith(
       'POST',
       'apiUrl/v2/recommendations/user-action',
@@ -193,7 +193,7 @@ describe('setUserStatusForRecommendation', () => {
         },
       },
     );
-    expect(createAnodotAuthHeadersMock).toBeCalledTimes(1);
+    expect(createAnodotAuthHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAnodotAuthHeadersMock).toHaveBeenCalledWith(
       'authToken',
       'accountApiKey',
@@ -217,7 +217,7 @@ describe('setUserStatusForRecommendation', () => {
     ).rejects.toThrow('some error');
 
     expect(makeHttpRequestMock).not.toHaveBeenCalled();
-    expect(createAnodotAuthHeadersMock).toBeCalledTimes(1);
+    expect(createAnodotAuthHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAnodotAuthHeadersMock).toHaveBeenCalledWith(
       'authToken',
       'accountApiKey',

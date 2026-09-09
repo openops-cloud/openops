@@ -408,6 +408,6 @@ describe('getRoleForAccount tests', () => {
         },
         '4',
       ),
-    ).toThrowError('Role not found for account');
+    ).toThrow('Role not found for account');
   });
 });

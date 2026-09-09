@@ -50,13 +50,13 @@ describe('describeRdsSnapshots', () => {
       filters,
     );
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(2);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(2);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       'credentials',
       'some-region1',
     );
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       'credentials',
       'some-region2',
@@ -103,13 +103,13 @@ describe('describeRdsInstances', () => {
       filters,
     );
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(2);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(2);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       'credentials',
       'some-region1',
     );
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       'credentials',
       'some-region2',

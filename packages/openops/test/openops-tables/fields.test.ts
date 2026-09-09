@@ -44,13 +44,13 @@ describe('getFields', () => {
       description: 'field description',
       read_only: false,
     });
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/fields/table/1/?user_field_names=true',
       'some header',
       undefined,
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 
@@ -99,13 +99,13 @@ describe('getFields', () => {
         read_only: false,
       },
     ]);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/fields/table/1/?user_field_names=true',
       'some header',
       undefined,
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });
@@ -167,6 +167,6 @@ describe('getPrimaryKeyFieldFromFields', () => {
 
     expect(() => {
       getPrimaryKeyFieldFromFields(fields);
-    }).toThrowError('Primary key field not found');
+    }).toThrow('Primary key field not found');
   });
 });

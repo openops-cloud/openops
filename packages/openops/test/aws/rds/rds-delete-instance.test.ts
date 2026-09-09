@@ -59,8 +59,8 @@ describe('delete RDS instance', () => {
       );
       expect(result).toMatchObject({ InstanceId: 'some InstanceId' });
 
-      expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
-      expect(awsClientMock.getAwsClient).toBeCalledWith(
+      expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+      expect(awsClientMock.getAwsClient).toHaveBeenCalledWith(
         RDS.RDS,
         credentials,
         'some-region1',
@@ -108,13 +108,13 @@ describe('delete RDS instance', () => {
     );
     expect(result).toStrictEqual({ InstanceId: 'some InstanceId' });
     expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
       expect.any(Function),
       300,
       2000,
       `Instance deletion timed out`,
     );
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
     expect(describeRdsInstancesMock.describeRdsInstances).toHaveBeenCalledTimes(
       1,
     );
@@ -132,6 +132,6 @@ describe('delete RDS instance', () => {
     expect(
       describeRdsInstancesMock.describeRdsInstances,
     ).not.toHaveBeenCalled();
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
   });
 });

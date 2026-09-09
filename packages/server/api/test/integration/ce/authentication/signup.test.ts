@@ -129,7 +129,7 @@ describe('Sign up Endpoint', () => {
     expect(responseBody?.email).toBe(mockSignUpRequest.email);
     expect(responseBody?.organizationId).toBeDefined();
     expect(responseBody?.projectId).toHaveLength(21);
-    expect(authUserMock).toBeCalledTimes(1);
+    expect(authUserMock).toHaveBeenCalledTimes(1);
   });
 
   it('Fails as the request was not made by the admin', async () => {

@@ -63,7 +63,7 @@ describe('createSnapshot tests', () => {
 
     expect(result).toEqual({ SnapshotId: 'volumeId1', State: 'completed' });
     expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
       expect.any(Function),
       300,
       2000,
@@ -80,7 +80,7 @@ describe('createSnapshot tests', () => {
       SnapshotIds: ['volumeId1'],
       DryRun: false,
     });
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should throw if wait for timeout throws', async () => {
@@ -114,7 +114,7 @@ describe('createSnapshot tests', () => {
         dryRun: false,
       }),
     ).rejects.toThrow('Snapshot creation timed out');
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should throw when snapshot creation status is error', async () => {
@@ -129,8 +129,8 @@ describe('createSnapshot tests', () => {
         dryRun: false,
       }),
     ).rejects.toThrow('Snapshot creation failed with error: mock Error');
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
   });
 
   test('should throw when describe Snapshot returns with error state', async () => {
@@ -164,7 +164,7 @@ describe('createSnapshot tests', () => {
       SnapshotIds: ['volumeId1'],
       DryRun: true,
     });
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should not wait for if no number is provided', async () => {
@@ -187,7 +187,7 @@ describe('createSnapshot tests', () => {
     })) as any;
     expect(result).toStrictEqual({ SnapshotId: 'volumeId1' });
     expect(describeSnapshotMock).not.toHaveBeenCalled();
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 });

@@ -32,7 +32,7 @@ describe('handleCliError', () => {
 
     expect(() => {
       handleCliError({ provider, command, error });
-    }).toThrowError(
+    }).toThrow(
       `An error occurred while running AWS CLI command: Error: Something went wrong`,
     );
 

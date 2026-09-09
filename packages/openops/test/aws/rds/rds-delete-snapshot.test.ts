@@ -55,8 +55,8 @@ describe('deleteSnapshot', () => {
       'some snapshotId',
     );
 
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(awsClientMock.getAwsClient).toBeCalledWith(
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       credentials,
       'some-region1',
@@ -98,13 +98,13 @@ describe('deleteSnapshot', () => {
     );
     expect(result).toStrictEqual({ SnapshotId: 'some snapshotId' });
     expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
       expect.any(Function),
       300,
       2000,
       `Snapshot deletion timed out`,
     );
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
     expect(describeRdsSnapshotsMock.describeRdsSnapshots).toHaveBeenCalledTimes(
       1,
     );
@@ -121,6 +121,6 @@ describe('deleteSnapshot', () => {
     expect(
       describeRdsSnapshotsMock.describeRdsSnapshots,
     ).not.toHaveBeenCalled();
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
   });
 });

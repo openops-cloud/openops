@@ -87,7 +87,7 @@
         "jestConfig": "packages/server/api/jest.config.ts",
         "passWithNoTests": false,
         "bail": true,
-        "testPathPattern": ["packages/server/api/test/unit"]
+        "testPathPatterns": ["packages/server/api/test/unit"]
       }
     },
     "test-ce": {
@@ -98,7 +98,7 @@
         "passWithNoTests": false,
         "bail": true,
         "testTimeout": 15000,
-        "testPathPattern": ["packages/server/api/test/integration/ce"]
+        "testPathPatterns": ["packages/server/api/test/integration/ce"]
       }
     },
     "test-cloud": {
@@ -108,7 +108,7 @@
         "jestConfig": "packages/server/api/jest.config.ts",
         "passWithNoTests": false,
         "bail": true,
-        "testPathPattern": ["packages/server/api/test/integration/cloud"]
+        "testPathPatterns": ["packages/server/api/test/integration/cloud"]
       }
     },
     "test-integration-setup": {

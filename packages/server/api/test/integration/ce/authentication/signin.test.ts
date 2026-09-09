@@ -104,7 +104,7 @@ describe('Sign in Endpoint', () => {
     expect(responseBody?.email).toBe(mockEmail);
     expect(responseBody?.organizationId).toBe(mockOrganization.id);
     expect(responseBody?.projectId).toBe(mockProject.id);
-    expect(authUserMock).toBeCalledTimes(1);
+    expect(authUserMock).toHaveBeenCalledTimes(1);
   });
 
   it("Fails if password doesn't match", async () => {
