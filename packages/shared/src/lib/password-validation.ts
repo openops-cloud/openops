@@ -22,16 +22,7 @@ type ValidationRule = {
   condition: (password: string) => boolean;
 };
 
-const validationMessages = {
-  minLength: t(`Password must be at least ${MIN_LENGTH} characters long`),
-  maxLength: t(`Password can't be more than ${MAX_LENGTH} characters long`),
-  specialCharacter: t('Password must contain at least one special character'),
-  lowercase: t('Password must contain at least one lowercase letter'),
-  uppercase: t('Password must contain at least one uppercase letter'),
-  number: t('Password must contain at least one number'),
-};
-
-const passwordRules: ValidationRule[] = [
+const getPasswordRules = (): ValidationRule[] => [
   {
     label: t('8-64 Characters'),
     condition: (password: string) =>
@@ -57,17 +48,22 @@ const passwordRules: ValidationRule[] = [
 
 const passwordValidation = {
   hasSpecialCharacter: (value: string) =>
-    SPECIAL_CHARACTER_REGEX.test(value) || validationMessages.specialCharacter,
+    SPECIAL_CHARACTER_REGEX.test(value) ||
+    t('Password must contain at least one special character'),
   minLength: (value: string) =>
-    value.length >= MIN_LENGTH || validationMessages.minLength,
+    value.length >= MIN_LENGTH ||
+    t(`Password must be at least ${MIN_LENGTH} characters long`),
   maxLength: (value: string) =>
-    value.length <= MAX_LENGTH || validationMessages.maxLength,
+    value.length <= MAX_LENGTH ||
+    t(`Password can't be more than ${MAX_LENGTH} characters long`),
   hasLowercaseCharacter: (value: string) =>
-    LOWERCASE_REGEX.test(value) || validationMessages.lowercase,
+    LOWERCASE_REGEX.test(value) ||
+    t('Password must contain at least one lowercase letter'),
   hasUppercaseCharacter: (value: string) =>
-    UPPERCASE_REGEX.test(value) || validationMessages.uppercase,
+    UPPERCASE_REGEX.test(value) ||
+    t('Password must contain at least one uppercase letter'),
   hasNumber: (value: string) =>
-    NUMBER_REGEX.test(value) || validationMessages.number,
+    NUMBER_REGEX.test(value) || t('Password must contain at least one number'),
 };
 
 const assertValidPassword = (password: string): void => {
@@ -96,4 +92,4 @@ const assertValidPassword = (password: string): void => {
   }
 };
 
-export { assertValidPassword, passwordRules, passwordValidation };
+export { assertValidPassword, getPasswordRules, passwordValidation };
