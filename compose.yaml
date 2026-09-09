@@ -3,7 +3,7 @@ services:
   tables:
     container_name: tables
     restart: unless-stopped
-    image: public.ecr.aws/openops/openops-tables:0.2.21
+    image: openops.azurecr.io/openops-tables:0.2.22
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
       BASEROW_PRIVATE_URL: http://localhost:3001
@@ -77,7 +77,7 @@ services:
   analytics:
     container_name: analytics
     restart: unless-stopped
-    image: public.ecr.aws/openops/openops-analytics:0.14.7
+    image: openops.azurecr.io/openops-analytics:0.14.8
     ports: ['8088:8088']
     environment:
       DATABASE_DIALECT: 'postgresql'
