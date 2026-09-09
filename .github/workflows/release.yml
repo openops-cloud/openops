@@ -9,7 +9,7 @@ on:
         description: Override the version, for example if you want to increment minor or major version
       github_release:
         type: boolean
-        description: Create a GitHub release and update latest tag on ECR
+        description: Create a GitHub release and update latest tag on ACR
         default: true
       deploy_to_test:
         type: boolean
