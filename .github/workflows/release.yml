@@ -43,13 +43,17 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    # The release identity's federated credentials are scoped to this environment rather than to a
+    # branch, so a release runs from any branch - and the environment is where an approval gate
+    # for the public registry belongs. Without it the OIDC subject does not match.
+    environment: release
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
     steps:
       - name: Azure login
         uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
-          client-id: ${{ secrets.AZURE_ACR_CLIENT_ID }}
+          client-id: ${{ secrets.AZURE_ACR_RELEASE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Import the image into the public ACR

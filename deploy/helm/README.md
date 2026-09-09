@@ -7,7 +7,7 @@ The Helm chart has moved to its own repository:
 ## Install
 
 ```
-helm install openops oci://public.ecr.aws/openops/helm --version <VERSION>
+helm install openops oci://openops.azurecr.io/helm/openops --version <VERSION>
 ```
 
 See the [helm-chart repo](https://github.com/openops-cloud/helm-chart) for full documentation, configuration options, and deployment guides.
