@@ -1,8 +1,10 @@
+import { getPasswordRules } from '@openops/shared';
 import { Check, X } from 'lucide-react';
-
-import { passwordRules } from '@openops/shared';
+import { useMemo } from 'react';
 
 const PasswordValidator = ({ password }: { password: string }) => {
+  const passwordRules = useMemo(() => getPasswordRules(), []);
+
   return (
     <>
       {passwordRules.map((rule, index) => {
