@@ -17,14 +17,14 @@ services:
       openops-analytics:
         condition: service_healthy
   openops-app:
-    image: public.ecr.aws/openops/openops-app:${OPS_VERSION:-latest}
+    image: openops.azurecr.io/openops-app:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.2.21
-      OPS_ANALYTICS_VERSION: 0.14.7
+      OPS_OPENOPS_TABLES_VERSION: 0.2.22
+      OPS_ANALYTICS_VERSION: 0.14.8
       OPS_WORKER_URL: http://openops-worker:3000
     depends_on:
       openops-tables:
@@ -36,7 +36,7 @@ services:
       postgres:
         condition: service_healthy
   openops-worker:
-    image: public.ecr.aws/openops/openops-worker:${OPS_VERSION:-latest}
+    image: openops.azurecr.io/openops-worker:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
     environment:
@@ -50,7 +50,7 @@ services:
     depends_on:
       - openops-app
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.2.21
+    image: openops.azurecr.io/openops-tables:0.2.22
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
@@ -89,7 +89,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.14.7
+    image: openops.azurecr.io/openops-analytics:0.14.8
     restart: unless-stopped
     environment:
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
