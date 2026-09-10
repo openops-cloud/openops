@@ -76,8 +76,8 @@ describe('initiateRdsSnapshotCreation', () => {
       snapshotId: 'some snapshotId',
     });
 
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(awsClientMock.getAwsClient).toBeCalledWith(
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       credentials,
       'some-region1',
@@ -121,8 +121,8 @@ describe('initiateRdsSnapshotCreation', () => {
         tags: inputTags,
       });
 
-      expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
-      expect(awsClientMock.getAwsClient).toBeCalledWith(
+      expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+      expect(awsClientMock.getAwsClient).toHaveBeenCalledWith(
         RDS.RDS,
         credentials,
         'some-region1',
@@ -156,8 +156,8 @@ describe('initiateRdsSnapshotCreation', () => {
       tags,
     });
 
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(awsClientMock.getAwsClient).toBeCalledWith(
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledWith(
       RDS.RDS,
       credentials,
       'some-region1',
@@ -203,7 +203,7 @@ describe('initiateRdsSnapshotCreation', () => {
       });
 
       expect(sendMock).toHaveBeenCalledTimes(1);
-      expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
+      expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
       expect(createDBSnapshotCommandMock).toHaveBeenCalledWith({
         DBInstanceIdentifier: 'some instance id',
         DBSnapshotIdentifier: `some instance id-${fakeTime}`,
@@ -232,13 +232,13 @@ describe('initiateRdsSnapshotCreation', () => {
       SnapshotId: 'some snapshotId',
     });
     expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
       expect.any(Function),
       300,
       2000,
       `Snapshot creation timed out`,
     );
-    expect(awsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(awsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
     expect(describeRdsSnapshotsMock.describeRdsSnapshots).toHaveBeenCalledTimes(
       1,
     );
@@ -259,6 +259,6 @@ describe('initiateRdsSnapshotCreation', () => {
     expect(
       describeRdsSnapshotsMock.describeRdsSnapshots,
     ).not.toHaveBeenCalled();
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
   });
 });

@@ -88,7 +88,7 @@ describe('ec2-instance-state-manager', () => {
         stopInstance('some creds', 'instance-id', 'region', false, undefined),
       ).rejects.toThrow('some error');
 
-      expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+      expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
     });
 
     test('should wait for instance state change if wait for is set', async () => {
@@ -102,7 +102,7 @@ describe('ec2-instance-state-manager', () => {
       await stopInstance('some creds', 'instance-id', 'region', false, 10);
 
       expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-      expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+      expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
         expect.any(Function),
         300,
         10,
@@ -169,7 +169,7 @@ describe('ec2-instance-state-manager', () => {
         startInstance('some creds', 'instance-id', 'region', false, undefined),
       ).rejects.toThrow('some error');
 
-      expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+      expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
     });
 
     test('should wait for instance state change if wait for is set', async () => {
@@ -183,7 +183,7 @@ describe('ec2-instance-state-manager', () => {
       await startInstance('some creds', 'instance-id', 'region', false, 10);
 
       expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-      expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+      expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
         expect.any(Function),
         300,
         10,

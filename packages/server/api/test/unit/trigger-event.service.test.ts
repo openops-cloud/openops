@@ -262,9 +262,9 @@ describe('triggerEventService.test', () => {
       },
     });
 
-    await expect(
-      triggerEventService.test({ projectId, flow }),
-    ).rejects.toThrowError('TEST_TRIGGER_FAILED');
+    await expect(triggerEventService.test({ projectId, flow })).rejects.toThrow(
+      'TEST_TRIGGER_FAILED',
+    );
   });
 
   it('returns empty page for EMPTY trigger', async () => {

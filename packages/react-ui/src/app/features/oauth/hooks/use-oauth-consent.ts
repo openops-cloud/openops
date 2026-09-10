@@ -1,6 +1,7 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { navigateToExternalUrl } from '../lib/browser-navigation';
 import { oauthApi, OAuthConsentRequest } from '../lib/oauth-api';
 
 type UseOAuthConsent = {
@@ -44,7 +45,7 @@ export const useOAuthConsent = (requestId: string | null): UseOAuthConsent => {
     onSuccess: ({ redirectTo }) => {
       // A full navigation, not a router push: the destination belongs to the client
       // that started the flow. The server only ever returns a registered redirect URI.
-      window.location.assign(redirectTo);
+      navigateToExternalUrl(redirectTo);
     },
   });
 

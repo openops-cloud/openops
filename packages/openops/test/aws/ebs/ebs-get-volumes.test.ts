@@ -59,13 +59,13 @@ describe('getEbsVolumes', () => {
       filters,
     );
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(2);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(2);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       EC2.EC2,
       CREDENTIALS,
       'some-region1',
     );
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       EC2.EC2,
       CREDENTIALS,
       'some-region2',
@@ -130,8 +130,8 @@ describe('getEbsVolumes', () => {
       filters,
     );
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       EC2.EC2,
       CREDENTIALS,
       'some-region1',

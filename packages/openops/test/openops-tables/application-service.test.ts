@@ -45,12 +45,12 @@ describe('getDefaultDatabaseId', () => {
     const result = await getDefaultDatabaseId('token');
 
     expect(result).toBe(1);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/applications/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 
@@ -69,15 +69,15 @@ describe('getDefaultDatabaseId', () => {
     makeOpenOpsTablesGetMock.mockResolvedValue(mockApplications);
     createAxiosHeadersMock.mockReturnValue('some header');
 
-    await expect(getDefaultDatabaseId('token')).rejects.toThrowError(
+    await expect(getDefaultDatabaseId('token')).rejects.toThrow(
       'Default database not found',
     );
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/applications/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });

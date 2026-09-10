@@ -34,7 +34,7 @@ describe('waitForConditionWithTimeout', () => {
       await Promise.resolve();
     }
 
-    await expect(promise).rejects.toThrowError('Timed out after 1 seconds. ');
+    await expect(promise).rejects.toThrow('Timed out after 1 seconds. ');
     expect(condition).toHaveBeenCalled();
   });
 
@@ -54,7 +54,7 @@ describe('waitForConditionWithTimeout', () => {
       await Promise.resolve();
     }
 
-    await expect(promise).rejects.toThrowError(
+    await expect(promise).rejects.toThrow(
       `Timed out after 1 seconds. With message: Custom timeout message.`,
     );
     expect(condition).toHaveBeenCalled();

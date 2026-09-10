@@ -33,8 +33,8 @@ describe('deleteInstances', () => {
       false,
     );
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       EC2.EC2,
       credentials,
       'some-region1',
@@ -60,8 +60,8 @@ describe('deleteInstances', () => {
         true,
       ),
     ).rejects.toThrow('some error');
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(getAwsClientMock.getAwsClient).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledWith(
       EC2.EC2,
       credentials,
       'some-region1',

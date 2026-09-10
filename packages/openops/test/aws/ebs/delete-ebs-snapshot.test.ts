@@ -65,7 +65,7 @@ describe('deleteSnapshot tests', () => {
       message: 'Snapshot deleted',
     });
     expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledWith(
       expect.any(Function),
       300,
       2000,
@@ -81,7 +81,7 @@ describe('deleteSnapshot tests', () => {
       SnapshotIds: ['volumeId1'],
       DryRun: false,
     });
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should throw if wait for timeout throws', async () => {
@@ -116,7 +116,7 @@ describe('deleteSnapshot tests', () => {
     await expect(
       deleteEbsSnapshot(credentials, 'region1', 'volumeId1', false, 10),
     ).rejects.toThrow('Snapshot deletion timed out');
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should throw when describe Snapshot returns with error state', async () => {
@@ -151,7 +151,7 @@ describe('deleteSnapshot tests', () => {
       SnapshotIds: ['volumeId1'],
       DryRun: true,
     });
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 
   test('should not wait for if no number is provided', async () => {
@@ -184,7 +184,7 @@ describe('deleteSnapshot tests', () => {
       snapshotId: 'volumeId1',
     });
     expect(describeSnapshotMock).not.toHaveBeenCalled();
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
+    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
   });
 });

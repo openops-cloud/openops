@@ -33,8 +33,8 @@ describe('delete ebs volume tests', () => {
     );
     expect(result).toEqual({});
 
-    expect(getAwsClientMock.getAwsClient).toBeCalledTimes(1);
-    expect(deleteVolumeMock).toBeCalledWith(
+    expect(getAwsClientMock.getAwsClient).toHaveBeenCalledTimes(1);
+    expect(deleteVolumeMock).toHaveBeenCalledWith(
       expect.objectContaining({ DryRun: false, VolumeId: 'volume1' }),
     );
   });
@@ -46,7 +46,7 @@ describe('delete ebs volume tests', () => {
 
       await deleteEbsVolume(credentials, 'region1', 'volume1', dryRun);
 
-      expect(deleteVolumeMock).toBeCalledWith(
+      expect(deleteVolumeMock).toHaveBeenCalledWith(
         expect.objectContaining({ DryRun: dryRun, VolumeId: 'volume1' }),
       );
     },

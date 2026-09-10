@@ -85,9 +85,9 @@ describe('getRows', () => {
     });
 
     expect(result).toStrictEqual([{ id: 1, order: 1234 }]);
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
   });
 
   test('Should get rows', async () => {
@@ -103,12 +103,12 @@ describe('getRows', () => {
 
     expect(result[0].id).toBe(1);
     expect(result[0].order).toBe(1234);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 
@@ -135,12 +135,12 @@ describe('getRows', () => {
     expect(result[0].id).toBe(1);
     expect(result[0].order).toBe(1234);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true&filter__name1__boolean=value+field+1&filter__name2__equal=2&filter_type=AND',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 
@@ -167,12 +167,12 @@ describe('getRows', () => {
       { id: 3, order: 5 },
       { id: 2, order: 4321 },
     ]);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });
@@ -197,9 +197,9 @@ describe('update row', () => {
     });
 
     expect(result).toBe('mock result');
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesPatchMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledTimes(1);
   });
 
   test('Should update row with usernames', async () => {
@@ -218,13 +218,13 @@ describe('update row', () => {
 
     expect(result).toBe('mock result');
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesPatchMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });
@@ -248,9 +248,9 @@ describe('add row', () => {
     });
 
     expect(result).toBe('mock result');
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(1);
   });
 
   test('Should add row with usernames', async () => {
@@ -268,13 +268,13 @@ describe('add row', () => {
 
     expect(result).toBe('mock result');
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });
@@ -302,10 +302,10 @@ describe('batchCreateRows', () => {
     });
 
     expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(3);
     expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
       1,
       'api/database/rows/table/1/batch/?user_field_names=true',
@@ -353,8 +353,8 @@ describe('batchUpdateRows', () => {
     });
 
     expect(result).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
     expect(makeOpenOpsTablesPatchMock).toHaveBeenCalledTimes(3);
     expect(makeOpenOpsTablesPatchMock).toHaveBeenNthCalledWith(
@@ -420,9 +420,9 @@ describe('delete row', () => {
     });
 
     expect(result).toBe('mock result');
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesDeleteMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledTimes(1);
   });
 
   test('Should delete row', async () => {
@@ -437,12 +437,12 @@ describe('delete row', () => {
 
     expect(result).toBe('mock result');
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesDeleteMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
   });
 });
@@ -469,9 +469,9 @@ describe('batchDeleteRows', () => {
       rowIds: [1, 2, 3],
     });
 
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
       'api/database/rows/table/5/batch-delete/',
       { items: [1, 2, 3] },
@@ -492,10 +492,10 @@ describe('batchDeleteRows', () => {
       rowIds,
     });
 
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(3);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(3);
     expect(makeOpenOpsTablesPostMock).toHaveBeenNthCalledWith(
       1,
       'api/database/rows/table/5/batch-delete/',
@@ -532,9 +532,9 @@ describe('truncateTable', () => {
     });
 
     expect(result).toStrictEqual({ count: 42 });
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
       'api/database/rows/table/158/truncate/',
       {},
@@ -594,8 +594,8 @@ describe('truncateTable', () => {
       }),
     ).rejects.toThrow('database error');
 
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -615,9 +615,9 @@ describe('batchTableAggregations', () => {
     });
 
     expect(result).toStrictEqual({ '1': { count: 5 } });
-    expect(acquireMock).toBeCalledTimes(1);
-    expect(releaseMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+    expect(acquireMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesPostMock).toHaveBeenCalledWith(
       'api/database/rows/batch-aggregations/',
       { table_ids: [1], filters: [], aggregations: [{ type: 'count' }] },
@@ -776,12 +776,12 @@ describe('getRowByPrimaryKeyValue', () => {
       );
 
       expect(result).toStrictEqual({ id: 1, order: 1234 });
-      expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+      expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
       );
-      expect(createAxiosHeadersMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
     },
   );
@@ -813,12 +813,12 @@ describe('getRowByPrimaryKeyValue', () => {
         ),
       ).rejects.toThrow('More than one row found with given primary key');
 
-      expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+      expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
       );
-      expect(createAxiosHeadersMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
     },
   );

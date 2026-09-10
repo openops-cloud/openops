@@ -42,12 +42,12 @@ describe('get table names', () => {
 
     expect(result[0]).toBe('table name 1');
     expect(result[1]).toBe('table name 2');
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -66,12 +66,12 @@ describe('get table names', () => {
     const result = await getTableNames(mockTablesServerContext);
 
     expect(result).toStrictEqual(['table name', 'table name2', 'table name3']);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -91,12 +91,12 @@ describe('get table names', () => {
     const result = await getTableNames(mockTablesServerContext);
 
     expect(result).toStrictEqual(['table name', 'table name3', 'Table Name']);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -121,12 +121,12 @@ describe('get table id by table name', () => {
     );
 
     expect(result).toBe(1);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -140,12 +140,12 @@ describe('get table id by table name', () => {
       getTableIdByTableName('table name 2', mockTablesServerContext),
     ).rejects.toThrow("Table 'table name 2' not found");
 
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -165,12 +165,12 @@ describe('get table id by table name', () => {
     );
 
     expect(result).toBe(1);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -192,12 +192,12 @@ describe('get table by id', () => {
     const result = await getTableById(2, mockTablesServerContext);
 
     expect(result).toStrictEqual({ id: 2, name: 'table name 2' });
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -212,8 +212,8 @@ describe('get table by id', () => {
     const result = await getTableById(99, mockTablesServerContext);
 
     expect(result).toBeUndefined();
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -232,12 +232,12 @@ describe('get table by table name', () => {
     const result = await getTableByName('table name', mockTablesServerContext);
 
     expect(result).toStrictEqual({ id: 1, name: 'table name' });
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -250,12 +250,12 @@ describe('get table by table name', () => {
     const result = await getTableByName('table name1', mockTablesServerContext);
 
     expect(result).toBe(undefined);
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
@@ -272,12 +272,12 @@ describe('get table by table name', () => {
     const result = await getTableByName('table name', mockTablesServerContext);
 
     expect(result).toStrictEqual({ id: 1, name: 'table name' });
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/tables/database/1/',
       'some header',
     );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
+    expect(createAxiosHeadersMock).toHaveBeenCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith({
       getToken: expect.any(Function),
     });
