@@ -24829,8 +24829,8 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @parcel/watcher-linux-x64-glibc@2.5.6
- - @parcel/watcher@2.5.6
+ - @parcel/watcher-linux-x64-glibc@2.6.0
+ - @parcel/watcher@2.6.0
 
 These packages each contain the following license:
 
