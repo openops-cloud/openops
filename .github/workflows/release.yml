@@ -170,7 +170,7 @@ jobs:
         run: |
           gh workflow run deploy-release.yml -R openops-cloud/devops -r main \
             -f release_version=${VERSION} \
-            -f environment=release-test
+            -f environment=dev-oss
   trigger-docs-update:
     name: Trigger docs update
     needs: [get-version, create-release]
