@@ -1,6 +1,7 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { AwsCredentials } from './auth';
 import { getAwsCredentialsFromAzureIdentity } from './azure-aws-federation';
+import { getAwsCredentialsFromWebIdentityToken } from './web-identity-federation';
 
 type AwsClientConfig = {
   region: string;
@@ -39,6 +40,8 @@ export function getAwsClient<T>(
     system.getBoolean(SharedSystemProp.AWS_USE_AZURE_MANAGED_IDENTITY)
   ) {
     config.credentials = createAzureManagedIdentityCredentialsProvider(region);
+  } else if (system.get(SharedSystemProp.AWS_WEB_IDENTITY_TOKEN_FILE)) {
+    config.credentials = createWebIdentityCredentialsProvider(region);
   }
 
   if (credentials.endpoint) {
@@ -53,6 +56,28 @@ function createStaticCredentials(credentials: AwsCredentials): AwsCredentials {
     accessKeyId: credentials.accessKeyId,
     secretAccessKey: credentials.secretAccessKey,
     sessionToken: credentials.sessionToken,
+  };
+}
+
+function createWebIdentityCredentialsProvider(
+  region: string,
+): () => Promise<CachedAwsCredentials> {
+  // Unlike the Azure provider below, no cache here: the exchange itself memoises.
+  return async () => {
+    const stsCredentials = await getAwsCredentialsFromWebIdentityToken(region);
+
+    if (!stsCredentials?.AccessKeyId || !stsCredentials?.SecretAccessKey) {
+      throw new Error(
+        'Failed to obtain AWS credentials from the web identity token',
+      );
+    }
+
+    return {
+      accessKeyId: stsCredentials.AccessKeyId,
+      secretAccessKey: stsCredentials.SecretAccessKey,
+      sessionToken: stsCredentials.SessionToken,
+      expiration: stsCredentials.Expiration,
+    };
   };
 }
 

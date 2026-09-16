@@ -1,9 +1,13 @@
-const mockSystem = { getBoolean: jest.fn().mockReturnValue(false) };
+const mockSystem = {
+  getBoolean: jest.fn().mockReturnValue(false),
+  get: jest.fn().mockReturnValue(undefined),
+};
 jest.mock('@openops/server-shared', () => ({
   system: mockSystem,
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
     AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
+    AWS_WEB_IDENTITY_TOKEN_FILE: 'AWS_WEB_IDENTITY_TOKEN_FILE',
   },
 }));
 
@@ -11,8 +15,13 @@ jest.mock('../../src/lib/aws/azure-aws-federation', () => ({
   getAwsCredentialsFromAzureIdentity: jest.fn(),
 }));
 
+jest.mock('../../src/lib/aws/web-identity-federation', () => ({
+  getAwsCredentialsFromWebIdentityToken: jest.fn(),
+}));
+
 import { getAwsCredentialsFromAzureIdentity } from '../../src/lib/aws/azure-aws-federation';
 import { getAwsClient } from '../../src/lib/aws/get-client';
+import { getAwsCredentialsFromWebIdentityToken } from '../../src/lib/aws/web-identity-federation';
 
 class MockServiceClient {
   constructor(public config: any) {}
@@ -137,6 +146,50 @@ describe('getClient', () => {
       expect(getAwsCredentialsFromAzureIdentity).toHaveBeenCalledWith(region);
     } finally {
       mockSystem.getBoolean.mockReturnValue(false);
+    }
+  });
+  test('should use the web identity token file when configured', async () => {
+    mockSystem.getBoolean.mockImplementation((prop) => {
+      return prop === 'AWS_ENABLE_IMPLICIT_ROLE';
+    });
+    mockSystem.get.mockImplementation((prop) => {
+      return prop === 'AWS_WEB_IDENTITY_TOKEN_FILE'
+        ? '/var/run/secrets/aws/token'
+        : undefined;
+    });
+
+    // This file does not clear mocks between tests, and an earlier one exercises
+    // the Azure branch -- so reset it before asserting it stays untouched here.
+    (getAwsCredentialsFromAzureIdentity as jest.Mock).mockClear();
+
+    (getAwsCredentialsFromWebIdentityToken as jest.Mock).mockResolvedValue({
+      AccessKeyId: 'web-identity-key',
+      SecretAccessKey: 'web-identity-secret',
+      SessionToken: 'web-identity-token',
+    });
+
+    try {
+      const client = getAwsClient(
+        MockServiceClient,
+        { accessKeyId: '', secretAccessKey: '' },
+        region,
+      );
+      expect(typeof client.config.credentials).toBe('function');
+
+      const result = await client.config.credentials();
+      expect(result).toEqual({
+        accessKeyId: 'web-identity-key',
+        secretAccessKey: 'web-identity-secret',
+        sessionToken: 'web-identity-token',
+        expiration: undefined,
+      });
+      expect(getAwsCredentialsFromWebIdentityToken).toHaveBeenCalledWith(
+        region,
+      );
+      expect(getAwsCredentialsFromAzureIdentity).not.toHaveBeenCalled();
+    } finally {
+      mockSystem.getBoolean.mockReturnValue(false);
+      mockSystem.get.mockReturnValue(undefined);
     }
   });
 });

@@ -68,7 +68,7 @@ export async function getAwsCredentialsFromAzureIdentity(
   });
 
   const federationRoleArn = system.getOrThrow<string>(
-    SharedSystemProp.AWS_AZURE_FEDERATION_ROLE_ARN,
+    SharedSystemProp.AWS_FEDERATION_ROLE_ARN,
   );
 
   const command = new AssumeRoleWithWebIdentityCommand({
