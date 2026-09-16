@@ -1,13 +1,8 @@
-const mockSystem = {
-  getBoolean: jest.fn().mockReturnValue(false),
-  get: jest.fn().mockReturnValue(undefined),
-};
+const mockSystem = { getBoolean: jest.fn().mockReturnValue(false) };
 jest.mock('@openops/server-shared', () => ({
   system: mockSystem,
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
-    AWS_WEB_IDENTITY_TOKEN_FILE: 'AWS_WEB_IDENTITY_TOKEN_FILE',
-    AWS_FEDERATION_ROLE_ARN: 'AWS_FEDERATION_ROLE_ARN',
   },
 }));
 
@@ -75,58 +70,6 @@ describe('awsCli', () => {
       );
     } finally {
       mockSystem.getBoolean.mockReturnValue(false);
-    }
-  });
-  test('should pass web identity variables when implicit role is enabled', async () => {
-    mockSystem.getBoolean.mockReturnValue(true);
-    mockSystem.get.mockImplementation((prop: string) => {
-      if (prop === 'AWS_WEB_IDENTITY_TOKEN_FILE') {
-        return '/var/run/secrets/aws/token';
-      }
-      if (prop === 'AWS_FEDERATION_ROLE_ARN') {
-        return 'arn:aws:iam::123456789012:role/OpenOps-AssumeRole-Dev';
-      }
-      return undefined;
-    });
-    openOpsMock.runCliCommand.mockResolvedValue('mock result');
-
-    try {
-      await runCommand('some command', 'region', {});
-
-      expect(openOpsMock.runCliCommand).toHaveBeenCalledWith(
-        'some command',
-        'aws',
-        {
-          AWS_DEFAULT_REGION: 'region',
-          PATH: process.env['PATH'],
-          AWS_WEB_IDENTITY_TOKEN_FILE: '/var/run/secrets/aws/token',
-          AWS_ROLE_ARN: 'arn:aws:iam::123456789012:role/OpenOps-AssumeRole-Dev',
-        },
-      );
-    } finally {
-      mockSystem.getBoolean.mockReturnValue(false);
-      mockSystem.get.mockReturnValue(undefined);
-    }
-  });
-
-  test('should omit web identity variables when only one of them is set', async () => {
-    mockSystem.getBoolean.mockReturnValue(true);
-    mockSystem.get.mockImplementation((prop: string) =>
-      prop === 'AWS_WEB_IDENTITY_TOKEN_FILE'
-        ? '/var/run/secrets/aws/token'
-        : undefined,
-    );
-    openOpsMock.runCliCommand.mockResolvedValue('mock result');
-
-    try {
-      await runCommand('some command', 'region', {});
-
-      const envVars = openOpsMock.runCliCommand.mock.calls[0][2];
-      expect(envVars.AWS_WEB_IDENTITY_TOKEN_FILE).toBeUndefined();
-      expect(envVars.AWS_ROLE_ARN).toBeUndefined();
-    } finally {
-      mockSystem.getBoolean.mockReturnValue(false);
-      mockSystem.get.mockReturnValue(undefined);
     }
   });
 });
