@@ -268,7 +268,15 @@ const ENGINE_ALLOWED_ENV_KEYS = new Set([
   'OPS_ENABLE_HOST_SESSION',
   'OPS_AWS_ENABLE_IMPLICIT_ROLE',
   'OPS_AWS_USE_AZURE_MANAGED_IDENTITY',
-  'OPS_AWS_AZURE_FEDERATION_ROLE_ARN',
+  'OPS_AWS_FEDERATION_ROLE_ARN',
+  'OPS_AWS_WEB_IDENTITY_TOKEN_FILE',
+  // Injected by IRSA on EKS, where the AWS SDK's own default credential chain
+  // reads them straight from the environment. The engine -- where the AWS
+  // blocks actually run -- gets a filtered env, so without these that path
+  // finds nothing. Both are pointers rather than secrets: a file path and a
+  // role ARN.
+  'AWS_WEB_IDENTITY_TOKEN_FILE',
+  'AWS_ROLE_ARN',
   'OPS_ENABLE_HOST_VALIDATION',
   'OPS_SMTP_ALLOWED_PORTS',
   'OPS_AZURE_API_VERSION',

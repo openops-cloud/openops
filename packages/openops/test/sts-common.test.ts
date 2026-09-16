@@ -43,13 +43,16 @@ jest.mock('../src/lib/aws/azure-aws-federation', () => ({
 }));
 
 const mockSystemGetBoolean = jest.fn();
+const mockSystemGet = jest.fn();
 jest.mock('@openops/server-shared', () => ({
   SharedSystemProp: {
     AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
     AWS_USE_AZURE_MANAGED_IDENTITY: 'AWS_USE_AZURE_MANAGED_IDENTITY',
+    AWS_WEB_IDENTITY_TOKEN_FILE: 'AWS_WEB_IDENTITY_TOKEN_FILE',
   },
   system: {
     getBoolean: (...args: any[]) => mockSystemGetBoolean(...args),
+    get: (...args: any[]) => mockSystemGet(...args),
   },
 }));
 
