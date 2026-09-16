@@ -165,9 +165,6 @@ export enum SharedSystemProp {
 
   AWS_ENABLE_IMPLICIT_ROLE = 'AWS_ENABLE_IMPLICIT_ROLE',
   AWS_USE_AZURE_MANAGED_IDENTITY = 'AWS_USE_AZURE_MANAGED_IDENTITY',
-  // The AWS role a deployment federates into, whichever mechanism proves its
-  // identity: an Azure managed identity on a compose VM, or a Kubernetes
-  // service account token on AKS.
   AWS_FEDERATION_ROLE_ARN = 'AWS_FEDERATION_ROLE_ARN',
   AWS_WEB_IDENTITY_TOKEN_FILE = 'AWS_WEB_IDENTITY_TOKEN_FILE',
 

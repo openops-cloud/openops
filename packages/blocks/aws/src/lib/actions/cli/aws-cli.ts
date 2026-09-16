@@ -28,13 +28,8 @@ export async function runCommand(
     );
   } else {
     // runCliCommand replaces the environment rather than extending it, so
-    // anything the CLI needs in order to authenticate has to be named here. It
-    // understands the standard web identity variables and performs the exchange
-    // itself, so pass them through: from our own settings on AKS, or from what
-    // IRSA injected on EKS.
-    //
-    // The Azure managed identity path has no equivalent -- the CLI cannot
-    // consume an IMDS token -- so this action still needs static keys there.
+    // anything the CLI authenticates with has to be named here. No equivalent
+    // for the Azure path: the CLI cannot consume an IMDS token.
     const webIdentityTokenFile =
       system.get(SharedSystemProp.AWS_WEB_IDENTITY_TOKEN_FILE) ??
       process.env['AWS_WEB_IDENTITY_TOKEN_FILE'];

@@ -270,11 +270,8 @@ const ENGINE_ALLOWED_ENV_KEYS = new Set([
   'OPS_AWS_USE_AZURE_MANAGED_IDENTITY',
   'OPS_AWS_FEDERATION_ROLE_ARN',
   'OPS_AWS_WEB_IDENTITY_TOKEN_FILE',
-  // Injected by IRSA on EKS, where the AWS SDK's own default credential chain
-  // reads them straight from the environment. The engine -- where the AWS
-  // blocks actually run -- gets a filtered env, so without these that path
-  // finds nothing. Both are pointers rather than secrets: a file path and a
-  // role ARN.
+  // Not OPS_-prefixed because IRSA sets them on EKS; the AWS SDK reads them by
+  // these exact names.
   'AWS_WEB_IDENTITY_TOKEN_FILE',
   'AWS_ROLE_ARN',
   'OPS_ENABLE_HOST_VALIDATION',

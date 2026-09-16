@@ -41,10 +41,6 @@ export function getAwsClient<T>(
   ) {
     config.credentials = createAzureManagedIdentityCredentialsProvider(region);
   } else if (system.get(SharedSystemProp.AWS_WEB_IDENTITY_TOKEN_FILE)) {
-    // The path being set is the switch: there is no separate flag to disagree
-    // with it. Left unset -- on EKS, or with no federation configured at all --
-    // credentials stay undefined here and the AWS SDK's default chain resolves
-    // them instead.
     config.credentials = createWebIdentityCredentialsProvider(region);
   }
 
@@ -66,8 +62,7 @@ function createStaticCredentials(credentials: AwsCredentials): AwsCredentials {
 function createWebIdentityCredentialsProvider(
   region: string,
 ): () => Promise<CachedAwsCredentials> {
-  // No cache layer here: getAwsCredentialsFromWebIdentityToken already memoises
-  // the exchange and refreshes ahead of expiry.
+  // Unlike the Azure provider below, no cache here: the exchange itself memoises.
   return async () => {
     const stsCredentials = await getAwsCredentialsFromWebIdentityToken(region);
 

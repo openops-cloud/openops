@@ -19,14 +19,8 @@ export function clearWebIdentityFederationCache(): void {
 /**
  * Exchanges a Kubernetes projected service account token for AWS credentials.
  *
- * The cluster's OIDC issuer signs the token and AWS verifies it against an IAM
- * identity provider, so no secret is stored on the host. Used on AKS, where the
- * token is projected by the chart. On EKS the AWS SDK's own default credential
- * chain does the same exchange from the variables IRSA injects, so this is not
- * involved there.
- *
- * AssumeRoleWithWebIdentity is an unsigned call, which is what lets it run with
- * no AWS credentials to start from.
+ * Used on AKS. EKS never reaches here: IRSA sets the standard web identity
+ * variables and the AWS SDK's own credential chain does the same exchange.
  */
 export async function getAwsCredentialsFromWebIdentityToken(
   defaultRegion: string,
@@ -45,8 +39,7 @@ export async function getAwsCredentialsFromWebIdentityToken(
     SharedSystemProp.AWS_FEDERATION_ROLE_ARN,
   );
 
-  // Read on every refresh rather than held in memory: the kubelet rewrites this
-  // file well before the token inside it expires.
+  // Re-read on every refresh: the kubelet rotates this file.
   const webIdentityToken = (await readFile(tokenFile, 'utf8')).trim();
 
   const client = new STSClient({ region: defaultRegion });
