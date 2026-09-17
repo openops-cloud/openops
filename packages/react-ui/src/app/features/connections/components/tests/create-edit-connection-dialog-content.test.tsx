@@ -143,4 +143,36 @@ describe('CreateEditConnectionDialogContent bulk AWS accounts', () => {
     fireEvent.click(screen.getByTestId('awsBulkRolesTrigger'));
     expect(screen.queryByTestId('awsBulkRolesSummary')).not.toBeInTheDocument();
   });
+
+  const bulkAddTwoAccounts = () => {
+    fireEvent.click(screen.getByTestId('awsBulkRolesTrigger'));
+    fireEvent.change(screen.getByTestId('awsBulkRoleNameInput'), {
+      target: { value: 'OpenOpsRole' },
+    });
+    fireEvent.change(screen.getByTestId('awsBulkAccountIdsInput'), {
+      target: { value: '111122223333\n444455556666' },
+    });
+    fireEvent.click(screen.getByTestId('awsBulkAddAccountsButton'));
+    expect(screen.getByTestId('awsBulkRolesSummary')).toHaveTextContent(
+      'Added 2 account(s).',
+    );
+  };
+
+  it('clears the bulk summary when a single role is added afterwards', () => {
+    renderDialog('AWS');
+    bulkAddTwoAccounts();
+
+    fireEvent.click(screen.getByTestId('appendNewArrayItemButton'));
+
+    expect(screen.queryByTestId('awsBulkRolesSummary')).not.toBeInTheDocument();
+  });
+
+  it('clears the bulk summary when a role is removed afterwards', () => {
+    renderDialog('AWS');
+    bulkAddTwoAccounts();
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+
+    expect(screen.queryByTestId('awsBulkRolesSummary')).not.toBeInTheDocument();
+  });
 });

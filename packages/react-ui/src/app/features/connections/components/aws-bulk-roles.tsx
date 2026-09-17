@@ -77,12 +77,18 @@ const AwsBulkRoles = ({ authProperty, rolesFieldName }: AwsBulkRolesProps) => {
   const closePanel = useCallback(() => setOpen(false), []);
   const handleAccountsAdded = useCallback((result: BulkAddResult) => {
     setSummary(result);
-    scrollToLastRolePending.current = true;
+    scrollToLastRolePending.current = result.added > 0;
   }, []);
 
   // Bulk-append remounts the role cards, so scroll once the new length has rendered.
+  // Any other change to the roles list (single add / remove) makes the last bulk
+  // summary stale, so drop it instead of leaving an outdated count on screen.
   useEffect(() => {
-    if (!scrollToLastRolePending.current || rolesCount === 0) {
+    if (!scrollToLastRolePending.current) {
+      setSummary(null);
+      return;
+    }
+    if (rolesCount === 0) {
       return;
     }
     scrollToLastRolePending.current = false;
