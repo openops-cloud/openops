@@ -455,6 +455,7 @@
     "form-data": "$form-data",
     "tmp": "0.2.7",
     "dompurify": "$dompurify",
-    "toml": "5.0.0"
+    "toml": "5.0.0",
+    "nwsapi": "2.2.24"
   }
 }
