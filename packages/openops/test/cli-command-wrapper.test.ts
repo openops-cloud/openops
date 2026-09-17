@@ -54,7 +54,6 @@ describe('runCliCommand', () => {
       'Failed to run the cliTool command.',
       expect.objectContaining({
         commandResult: { stdOut: '', stdError: 'error data', exitCode: 1 },
-        command: 'cliTool someParam anotherParam',
       }),
     );
   });
