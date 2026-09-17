@@ -15284,13 +15284,11 @@ The complete list of contributors can be found at:
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - nodemailer@10.0.0
- - nodemailer@9.0.1
- - nodemailer@9.1.1
+ - nodemailer@10.0.10
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright (c) 2011-2023 Andris Reinman
 
@@ -15855,8 +15853,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - libmime@5.3.8
- - libmime@5.4.3
+ - libmime@5.4.1
+ - libmime@5.4.4
 
 These packages each contain the following license:
 
@@ -16895,7 +16893,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - mailparser@3.9.22
+ - mailparser@3.9.28
 
 This package contains the following license:
 
@@ -16948,7 +16946,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - imapflow@1.4.2
+ - imapflow@1.6.0
 
 This package contains the following license:
 
@@ -23092,8 +23090,8 @@ THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @zone-eu/mailsplit@5.4.12
- - @zone-eu/mailsplit@5.4.16
+ - @zone-eu/mailsplit@5.4.14
+ - @zone-eu/mailsplit@5.4.17
 
 These packages each contain the following license:
 
@@ -23181,12 +23179,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
  - encoding-japanese@2.2.0
- - encoding-japanese@2.3.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -23387,6 +23384,60 @@ copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
+The following npm package may be included in this product:
+
+ - encoding-japanese@2.4.0
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2012-present polygonplanet
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----
+
+Third-Party Licenses and Credits
+
+TypeScript declarations and type tests are based on the type definitions for
+encoding-japanese from DefinitelyTyped, licensed under the MIT License.
+
+Upstream package: @types/encoding-japanese 2.2.1
+
+The LICENSE distributed with @types/encoding-japanese states:
+
+  Copyright (c) Microsoft Corporation.
+
+The LICENSE in the DefinitelyTyped repository states:
+
+  Copyrights are respective of each contributor listed at the beginning of
+  each definition file.
+
+The contributors credited in the upstream package are:
+  rhysd (https://github.com/rhysd)
+  Piotr Błażejewicz (https://github.com/peterblazejewicz)
+
+The MIT License terms stated above apply equally to these files.
+
+-----------
+
 all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

@@ -29,6 +29,15 @@ describe('connectionErrorHandler', () => {
     });
   });
 
+  test('should return correct error message for EAUTH error code', () => {
+    const error = { code: 'EAUTH' };
+    const result = connectionErrorHandler(error);
+    expect(result).toEqual({
+      valid: false,
+      error: 'Check the username and password. Error Code: EAUTH',
+    });
+  });
+
   test('should return stringified error for error code not defined', () => {
     const error = { code: undefined };
     const result = connectionErrorHandler(error);

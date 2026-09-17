@@ -30,6 +30,11 @@ export function connectionErrorHandler(error: unknown): {
         valid: false,
         error: 'Connection to the SMTP server timed out. Error Code: ETIMEDOUT',
       };
+    case 'EAUTH':
+      return {
+        valid: false,
+        error: 'Check the username and password. Error Code: EAUTH',
+      };
     default:
       break;
   }
