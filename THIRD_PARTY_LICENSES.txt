@@ -9432,7 +9432,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - vite@8.2.2
+ - vite@8.3.0
 
 This package contains the following license:
 
