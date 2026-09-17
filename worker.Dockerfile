@@ -6,19 +6,25 @@ ARG TARGETARCH
 RUN <<-```
     set -ex
     apt-get update && apt-get install -y --no-install-recommends \
-      make gcc g++ python3 python3-pip python3-dev \
+      make gcc g++ python3 python3-pip python3-dev python3-venv \
       libffi-dev libssl-dev \
       git curl unzip tar gzip gnupg ca-certificates
     rm -rf /var/lib/apt/lists/*
 ```
 
 # Install Azure CLI (needs compiler for native deps)
+# Installed into a venv under /opt/azure so every dependency is self-contained.
+# Installing into the system interpreter is not enough: Debian ships some of
+# azure-cli's dependencies (e.g. `packaging`) in /usr/lib/python3/dist-packages,
+# so pip skips them and they never reach the final stage, breaking `az login`.
 # AZURE_EXTENSION_DIR must be set *before* `az extension add`, otherwise the
 # extensions land in /root/.azure/cliextensions and are not copied to the final stage.
 ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 RUN <<-```
     set -ex
-    pip3 install --no-cache-dir --break-system-packages azure-cli==2.74.0
+    python3 -m venv /opt/azure/venv
+    /opt/azure/venv/bin/pip install --no-cache-dir azure-cli==2.74.0
+    ln -sf /opt/azure/venv/bin/az /usr/local/bin/az
     mkdir -p /opt/azure/config/cliextensions
     az config set extension.use_dynamic_install=yes_without_prompt
     az extension add --name reservation --only-show-errors || true
@@ -35,10 +41,10 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund && npm prune --omit=dev
 
 # Strip Azure CLI caches and test files
-RUN find /usr/local/lib/python3.13/dist-packages -type d \
+RUN find /opt/azure/venv/lib -type d \
     \( -name __pycache__ -o -name tests -o -name test -o -name samples \) \
     -exec rm -rf {} + 2>/dev/null; \
-    find /usr/local/lib/python3.13/dist-packages -name "*.pyc" -delete 2>/dev/null; \
+    find /opt/azure/venv/lib -name "*.pyc" -delete 2>/dev/null; \
     true
 
 # ---- Final stage: runtime only ----
@@ -86,10 +92,9 @@ RUN <<-```
     rm /tmp/hcledit.tar.gz
 ```
 
-# Copy Azure CLI from builder (pip-installed packages + extensions)
-COPY --from=builder /usr/local/lib/python3.13/dist-packages /usr/local/lib/python3.13/dist-packages
-COPY --from=builder /usr/local/bin/az /usr/local/bin/az
+# Copy Azure CLI from builder (self-contained venv + extensions)
 COPY --from=builder /opt/azure /opt/azure
+RUN ln -sf /opt/azure/venv/bin/az /usr/local/bin/az
 ENV AZURE_CONFIG_DIR="/tmp/azure"
 ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 
