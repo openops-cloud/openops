@@ -1,6 +1,6 @@
 import { Property, createAction } from '@openops/blocks-framework';
 import mime from 'mime-types';
-import { Attachment, Headers } from 'nodemailer/lib/mailer';
+import type { Attachment, Mail } from 'nodemailer';
 import { smtpAuth } from '../..';
 import { smtpCommon } from '../common';
 
@@ -108,7 +108,7 @@ export const sendEmail = createAction({
       text: propsValue.body_type === 'plain_text' ? propsValue.body : undefined,
       html: propsValue.body_type === 'html' ? propsValue.body : undefined,
       attachments: attachment ? attachment_data : undefined,
-      headers: propsValue.customHeaders as Headers,
+      headers: propsValue.customHeaders as Mail.Headers,
     });
 
     return info;
