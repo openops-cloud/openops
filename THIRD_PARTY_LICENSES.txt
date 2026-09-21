@@ -19542,6 +19542,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/deepseek@2.0.62
  - @ai-sdk/gateway@3.0.189
  - @ai-sdk/gateway@4.0.73
+ - @ai-sdk/gateway@4.0.75
  - @ai-sdk/google-vertex@4.0.197
  - @ai-sdk/google@3.0.121
  - @ai-sdk/groq@3.0.64
@@ -19559,6 +19560,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/xai@3.0.130
  - ai@6.0.277
  - ai@7.0.91
+ - ai@7.0.93
 
 These packages each contain the following license:
 
