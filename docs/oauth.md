@@ -382,6 +382,14 @@ the advertised resource and the actual audience disagree. And `OPS_MCP_RESOURCE_
 equal `OPENOPS_MCP_RESOURCE_URL` there, exactly. Sharing a host is fine, since audiences are
 compared with their path — `/api` and `/mcp` are distinct.
 
+In the docker compose deployment (`deploy/docker-compose`) the two public values, issuer and
+resource URL, derive from `OPS_PUBLIC_URL` in `.env.defaults`, while `OPENOPS_API_URL` is the
+internal `http://openops-app/api`. The MCP server runs as the `openops-mcp` service behind the
+`mcp` compose profile. The gateway nginx routes `/mcp` and `/.well-known/oauth-protected-resource`
+to that service and the authorization-server discovery paths to the API; without the latter, the
+catch-all would answer discovery requests with the frontend's `index.html`. Set
+`OPS_OAUTH_ENABLED=true` and `COMPOSE_PROFILES=mcp` in `.env`, then `docker compose up -d`.
+
 ## Cleanup
 
 An hourly system job (`oauth-cleanup-job.ts`) deletes expired authorization codes and pending

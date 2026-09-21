@@ -26,6 +26,12 @@ services:
       OPS_OPENOPS_TABLES_VERSION: 0.2.22
       OPS_ANALYTICS_VERSION: 0.14.8
       OPS_WORKER_URL: http://openops-worker:3000
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO /dev/null http://127.0.0.1/api/v1/health']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -47,8 +53,44 @@ services:
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:3000/v1/health']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
-      - openops-app
+      openops-app:
+        condition: service_healthy
+  openops-mcp:
+    image: openops.azurecr.io/openops-mcp:0.2.0
+    restart: unless-stopped
+    environment:
+      OPENOPS_API_URL: http://openops-app/api
+      OPENOPS_MCP_PROFILE: agent
+      OPENOPS_MCP_ISSUER: ${OPS_OAUTH_ISSUER_URL:-}
+      OPENOPS_MCP_RESOURCE_URL: ${OPS_MCP_RESOURCE_URL:-}
+      OPENOPS_MCP_CLIENT_SECRET: ${OPS_OAUTH_RS_CLIENT_SECRET:-}
+      LOG_LEVEL: ${OPS_LOG_LEVEL:-info}
+      LOGZIO_TOKEN: ${OPS_LOGZIO_TOKEN:-}
+      ENVIRONMENT: ${OPS_ENVIRONMENT_NAME:-docker-compose}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:3020/.well-known/oauth-protected-resource/mcp', timeout=3).status == 200 else 1)",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      openops-app:
+        condition: service_healthy
+    profiles:
+      - mcp
   openops-tables:
     image: openops.azurecr.io/openops-tables:0.2.22
     restart: unless-stopped

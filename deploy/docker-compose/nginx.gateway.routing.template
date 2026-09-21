@@ -82,6 +82,55 @@ location ~ ^/api/v1/webhooks/[^/]+/sync$ {
     send_timeout          ${NGINX_WEBHOOK_SYNC_TIMEOUT};
 }
 
+# MCP server for external agents (compose profile "mcp"). proxy_pass through a variable
+# with Docker's DNS so nginx starts even when the profile is off. The /mcp prefix must not
+# be stripped: the MCP server derives its OAuth resource identifier from it.
+location /mcp {
+    resolver 127.0.0.11 valid=30s;
+    set $openops_mcp http://openops-mcp:3020;
+    proxy_pass $openops_mcp;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # --- MCP streaming-specific settings ---
+    proxy_buffering off;
+    proxy_cache off;
+    chunked_transfer_encoding on;
+    proxy_read_timeout ${NGINX_WEBHOOK_SYNC_TIMEOUT};
+}
+
+location /.well-known/oauth-protected-resource {
+    resolver 127.0.0.11 valid=30s;
+    set $openops_mcp http://openops-mcp:3020;
+    proxy_pass $openops_mcp;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+# OAuth authorization server discovery (RFC 8414 and the OpenID path) for the API issuer
+# ${OPS_PUBLIC_URL}/api. Without these the catch-all serves the frontend's index.html.
+# The API registers both the bare path and the "/api"-suffixed variant.
+location /.well-known/oauth-authorization-server {
+    proxy_pass http://openops-app/api/.well-known/oauth-authorization-server;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location /.well-known/openid-configuration {
+    proxy_pass http://openops-app/api/.well-known/openid-configuration;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
 location /.well-known/acme-challenge/ {
     root /etc/nginx/tls/acme;
 }
