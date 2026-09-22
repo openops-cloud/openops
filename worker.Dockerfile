@@ -33,6 +33,7 @@ RUN <<-```
     az extension add --name billing-benefits --only-show-errors || true
     az extension add --name quota --only-show-errors || true
     az extension add --name ssh --only-show-errors || true
+    az extension add --name bastion --only-show-errors || true
 ```
 
 # Install node_modules (needs gcc/g++ for native addons like isolated-vm)

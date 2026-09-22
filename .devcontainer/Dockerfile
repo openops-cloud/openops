@@ -50,6 +50,7 @@ RUN <<-```
   az extension add --name billing-benefits --only-show-errors || true
   az extension add --name quota --only-show-errors || true
   az extension add --name ssh --only-show-errors || true
+  az extension add --name bastion --only-show-errors || true
 
   # Install Google Cloud CLI
   curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-571.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
