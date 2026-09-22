@@ -63,7 +63,7 @@ services:
       openops-app:
         condition: service_healthy
   openops-mcp:
-    image: openops.azurecr.io/openops-mcp:0.2.0
+    image: openops.azurecr.io/openops-mcp:0.2.1
     restart: unless-stopped
     environment:
       OPENOPS_API_URL: http://openops-app/api
