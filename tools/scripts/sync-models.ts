@@ -278,7 +278,7 @@ export const AI_SDK_CONFIGS: Partial<Record<AiProviderEnum, AiSdkConfig>> = {
   [AiProviderEnum.XAI]: {
     package: 'xai',
     providerFile: 'xai',
-    typeSources: [{ typeName: 'XaiChatModelId' }],
+    typeSources: [{ typeName: 'XaiResponsesModelId' }],
     excludedModels: [
       'grok-3-mini',
       'grok-3-mini-fast',

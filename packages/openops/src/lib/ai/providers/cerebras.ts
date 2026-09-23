@@ -3,14 +3,7 @@ import { createCerebras } from '@ai-sdk/cerebras';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
-const cerebrasModels = [
-  'gpt-oss-120b',
-  'llama3.1-8b',
-  'qwen-3-235b-a22b-instruct-2507',
-  'qwen-3-235b-a22b-thinking-2507',
-  'zai-glm-4.6',
-  'zai-glm-4.7',
-];
+const cerebrasModels = ['gemma-4-31b', 'gpt-oss-120b'];
 
 function createLanguageModel(params: {
   apiKey: string;
