@@ -4,11 +4,20 @@ import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const mistralModels = [
+  'glm-5-2',
+  'magistral-medium-latest',
+  'magistral-small-latest',
   'ministral-3b-latest',
   'ministral-8b-latest',
+  'mistral-large-2512',
   'mistral-large-latest',
+  'mistral-medium-2604',
+  'mistral-medium-3-5',
+  'mistral-medium-3.5',
   'mistral-medium-latest',
+  'mistral-small-2603',
   'mistral-small-latest',
+  'zai-glm-5-2',
 ];
 
 function createLanguageModel(params: {
