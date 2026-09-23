@@ -320,6 +320,7 @@ const NON_CHAT_KEYWORDS = [
   'nano-banana',
   'veo',
   '-image',
+  'vision',
 ];
 
 const PROVIDERS_DIR = path.join(
