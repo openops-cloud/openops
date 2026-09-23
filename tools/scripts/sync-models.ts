@@ -193,6 +193,25 @@ export const AI_SDK_CONFIGS: Partial<Record<AiProviderEnum, AiSdkConfig>> = {
       'open-mistral-7b',
       'open-mixtral-8x7b',
       'open-mixtral-8x22b',
+      'codestral-2508',
+      'codestral-latest',
+      'labs-leanstral-1-5',
+      'labs-leanstral-1-5-1',
+      'ministral-14b-2512',
+      'ministral-14b-latest',
+      'ministral-3b-2512',
+      'ministral-3b-latest',
+      'ministral-8b-2512',
+      'ministral-8b-latest',
+      'mistral-code-fim-latest',
+      'mistral-code-latest',
+      'mistral-medium',
+      'mistral-medium-3',
+      'mistral-vibe-cli-fast',
+      'mistral-vibe-cli-latest',
+      'mistral-vibe-cli-with-tools',
+      'voxtral-small-2507',
+      'voxtral-small-latest',
     ],
   },
   [AiProviderEnum.OPENAI]: {
@@ -273,12 +292,13 @@ export const AI_SDK_CONFIGS: Partial<Record<AiProviderEnum, AiSdkConfig>> = {
       'mistralai/Mixtral-8x7B-Instruct-v0.1',
       'Qwen/QwQ-32B-Preview',
       'upstage/SOLAR-10.7B-Instruct-v1.0',
+      'deepseek-ai/DeepSeek-V4-Flash-0731',
     ],
   },
   [AiProviderEnum.XAI]: {
     package: 'xai',
     providerFile: 'xai',
-    typeSources: [{ typeName: 'XaiChatModelId' }],
+    typeSources: [{ typeName: 'XaiResponsesModelId' }],
     excludedModels: [
       'grok-3-mini',
       'grok-3-mini-fast',
@@ -302,6 +322,7 @@ const NON_CHAT_KEYWORDS = [
   'nano-banana',
   'veo',
   '-image',
+  'vision',
 ];
 
 const PROVIDERS_DIR = path.join(
