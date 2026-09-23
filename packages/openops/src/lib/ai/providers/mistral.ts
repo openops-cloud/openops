@@ -7,8 +7,6 @@ const mistralModels = [
   'glm-5-2',
   'magistral-medium-latest',
   'magistral-small-latest',
-  'ministral-3b-latest',
-  'ministral-8b-latest',
   'mistral-large-2512',
   'mistral-large-latest',
   'mistral-medium-2604',
