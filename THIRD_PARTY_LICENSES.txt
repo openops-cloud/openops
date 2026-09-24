@@ -8581,7 +8581,7 @@ The following npm packages may be included in this product:
 
  - marked@14.0.0
  - marked@16.4.2
- - marked@4.3.0
+ - marked@18.0.12
 
 These packages each contain the following license:
 
