@@ -11764,7 +11764,7 @@ Repository: https://github.com/sveltejs/zimmerframe
 
 The following npm package may be included in this product:
 
- - node-cron@3.0.3
+ - node-cron@4.6.0
 
 This package contains the following license:
 
