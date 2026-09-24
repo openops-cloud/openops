@@ -371,7 +371,7 @@
     "chromatic": "11.29.0",
     "concurrently": "8.2.2",
     "esbuild": "0.28.2",
-    "eslint": "9.39.5",
+    "eslint": "10.10.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-alias": "1.1.2",
     "eslint-import-resolver-typescript": "4.4.5",
