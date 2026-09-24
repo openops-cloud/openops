@@ -374,9 +374,6 @@ function sendMessageToStream(
           type: 'reasoning-delta',
           id: (message as any).id,
           delta: (message as any).text ?? '',
-          ...((message as any).providerMetadata
-            ? { providerMetadata: (message as any).providerMetadata }
-            : {}),
         })}`,
       );
       break;

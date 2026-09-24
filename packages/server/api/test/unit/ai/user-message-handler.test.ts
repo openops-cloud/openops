@@ -229,12 +229,7 @@ describe('User Message Handler', () => {
       );
       expect(reasoningChunks).toEqual([
         { type: 'reasoning-start', id: '0' },
-        {
-          type: 'reasoning-delta',
-          id: '0',
-          delta: 'thinking about it',
-          providerMetadata: { anthropic: { signature: 'sig' } },
-        },
+        { type: 'reasoning-delta', id: '0', delta: 'thinking about it' },
         { type: 'reasoning-end', id: '0' },
       ]);
 
