@@ -224,17 +224,21 @@ describe('User Message Handler', () => {
         .filter((chunk) => chunk.startsWith('data: {'))
         .map((chunk) => JSON.parse(chunk.slice('data: '.length)));
 
-      const reasoningDelta = dataLines.find(
-        (chunk) => chunk.type === 'reasoning-delta',
+      const reasoningChunks = dataLines.filter((chunk) =>
+        String(chunk.type).startsWith('reasoning-'),
       );
-      expect(reasoningDelta).toEqual({
-        type: 'reasoning-delta',
-        id: '0',
-        delta: 'thinking about it',
-        providerMetadata: { anthropic: { signature: 'sig' } },
-      });
+      expect(reasoningChunks).toEqual([
+        { type: 'reasoning-start', id: '0' },
+        {
+          type: 'reasoning-delta',
+          id: '0',
+          delta: 'thinking about it',
+          providerMetadata: { anthropic: { signature: 'sig' } },
+        },
+        { type: 'reasoning-end', id: '0' },
+      ]);
 
-      const schema = await uiMessageChunkSchema();
+      const schema = uiMessageChunkSchema();
       for (const chunk of dataLines) {
         const result = await safeValidateTypes({ value: chunk, schema });
         expect(result.success).toBe(true);
