@@ -30633,8 +30633,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - @langfuse/core@4.6.1
+ - @langfuse/core@5.11.1
  - @langfuse/otel@4.6.1
- - @langfuse/tracing@4.6.1
+ - @langfuse/tracing@5.11.1
 
 These packages each contain the following license:
 
