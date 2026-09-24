@@ -334,7 +334,7 @@
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
     "@trumbitta/nx-plugin-unused-deps": "1.12.1",
-    "@types/bcrypt": "5.0.2",
+    "@types/bcrypt": "6.0.0",
     "@types/color": "3.0.7",
     "@types/contrast-color": "1.0.3",
     "@types/is-base64": "1.1.3",
