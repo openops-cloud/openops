@@ -358,6 +358,36 @@ function sendMessageToStream(
         })}`,
       );
       break;
+    // The SDK's full stream carries reasoning text under `text`; the UI stream
+    // protocol (and the client's chunk schema) requires it under `delta`.
+    case 'reasoning-start':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'reasoning-start',
+          id: (message as any).id,
+        })}`,
+      );
+      break;
+    case 'reasoning-delta':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'reasoning-delta',
+          id: (message as any).id,
+          delta: (message as any).text ?? '',
+          ...((message as any).providerMetadata
+            ? { providerMetadata: (message as any).providerMetadata }
+            : {}),
+        })}`,
+      );
+      break;
+    case 'reasoning-end':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'reasoning-end',
+          id: (message as any).id,
+        })}`,
+      );
+      break;
     case 'tool-input-start':
       responseStream.write(
         `data: ${JSON.stringify({

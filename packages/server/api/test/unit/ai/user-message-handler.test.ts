@@ -1,6 +1,13 @@
+import { safeValidateTypes } from '@ai-sdk/provider-utils';
 import { logger } from '@openops/server-shared';
 import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
-import { LanguageModel, ModelMessage, TextStreamPart, ToolSet } from 'ai';
+import {
+  LanguageModel,
+  ModelMessage,
+  TextStreamPart,
+  ToolSet,
+  uiMessageChunkSchema,
+} from 'ai';
 import { FastifyInstance } from 'fastify';
 import { ServerResponse } from 'node:http';
 import { handleUserMessage } from '../../../src/app/ai/chat/user-message-handler';
@@ -190,6 +197,48 @@ describe('User Message Handler', () => {
 
       expect(mockServerResponse.write).toHaveBeenCalledWith('data: [DONE]\n\n');
       expect(mockServerResponse.end).toHaveBeenCalled();
+    });
+
+    it('should forward model reasoning parts as client-parsable reasoning chunks', async () => {
+      getLLMAsyncStream.mockImplementation(() => {
+        return (async function* (): AsyncGenerator<
+          TextStreamPart<ToolSet>,
+          void,
+          unknown
+        > {
+          yield { type: 'reasoning-start', id: '0' } as TextStreamPart<ToolSet>;
+          yield {
+            type: 'reasoning-delta',
+            id: '0',
+            text: 'thinking about it',
+            providerMetadata: { anthropic: { signature: 'sig' } },
+          } as TextStreamPart<ToolSet>;
+          yield { type: 'reasoning-end', id: '0' } as TextStreamPart<ToolSet>;
+        })();
+      });
+
+      await handleUserMessage(mockParams);
+
+      const dataLines = (mockServerResponse.write as jest.Mock).mock.calls
+        .map(([chunk]) => String(chunk))
+        .filter((chunk) => chunk.startsWith('data: {'))
+        .map((chunk) => JSON.parse(chunk.slice('data: '.length)));
+
+      const reasoningDelta = dataLines.find(
+        (chunk) => chunk.type === 'reasoning-delta',
+      );
+      expect(reasoningDelta).toEqual({
+        type: 'reasoning-delta',
+        id: '0',
+        delta: 'thinking about it',
+        providerMetadata: { anthropic: { signature: 'sig' } },
+      });
+
+      const schema = await uiMessageChunkSchema();
+      for (const chunk of dataLines) {
+        const result = await safeValidateTypes({ value: chunk, schema });
+        expect(result.success).toBe(true);
+      }
     });
 
     it('should handle errors during processing', async () => {
