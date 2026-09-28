@@ -1,5 +1,5 @@
 # ---- Builder stage: native addons and CLI tools that need compilers ----
-FROM node:24.20.0-trixie-slim AS builder
+FROM node:26.10.0-trixie-slim AS builder
 
 ARG TARGETARCH
 
@@ -49,7 +49,7 @@ RUN find /opt/azure/venv/lib -type d \
     true
 
 # ---- Final stage: runtime only ----
-FROM node:24.20.0-trixie-slim
+FROM node:26.10.0-trixie-slim
 
 ARG TARGETARCH
 
