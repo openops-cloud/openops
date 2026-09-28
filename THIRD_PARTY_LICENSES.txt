@@ -8582,7 +8582,6 @@ The following npm packages may be included in this product:
 
  - marked@14.0.0
  - marked@16.4.2
- - marked@4.3.0
 
 These packages each contain the following license:
 
@@ -9434,7 +9433,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - vite@8.3.0
+ - vite@8.3.1
 
 This package contains the following license:
 
@@ -28928,7 +28927,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - rolldown@1.2.7
+ - rolldown@1.2.11
 
 This package contains the following license:
 
@@ -28962,7 +28961,7 @@ The licenses of externally maintained libraries from which parts of the Software
 
 The following npm package may be included in this product:
 
- - @oxc-project/types@0.148.0
+ - @oxc-project/types@0.151.0
 
 This package contains the following license:
 
