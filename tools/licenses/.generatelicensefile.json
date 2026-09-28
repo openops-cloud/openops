@@ -5,7 +5,7 @@
   "ci": true,
   "append": ["./THIRD_PARTY_LICENSES_ADDITIONAL.txt"],
   "replace": {
-    "sax": "./node_modules/sax/LICENSE.md",
+    "sax": "./node_modules/sax/LICENSE",
     "mailsplit": "./node_modules/mailsplit/LICENSE.MIT",
     "import-in-the-middle": "./node_modules/import-in-the-middle/LICENSE",
     "type-fest": "https://raw.githubusercontent.com/sindresorhus/type-fest/refs/heads/main/license-mit",
