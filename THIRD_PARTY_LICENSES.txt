@@ -29362,7 +29362,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @assistant-ui/ai-sdk@0.0.4
- - @assistant-ui/core@0.3.21
+ - @assistant-ui/core@0.3.17
  - @assistant-ui/react-ai-sdk@1.4.9
  - @assistant-ui/react-markdown@0.14.14
  - @assistant-ui/react@0.15.18
@@ -30894,14 +30894,16 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @fastify/busboy@3.2.2
+ - @fastify/busboy@3.2.0
 
 This package contains the following license:
 
 MIT License
 
 Copyright Brian White. All rights reserved.
-Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
+Copyright (c) 2021-present The Fastify team
+
+The Fastify team members are listed at https://github.com/fastify/fastify#team.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
