@@ -31,7 +31,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @aws/lambda-invoke-store@0.2.4
+ - @aws/lambda-invoke-store@0.3.0
 
 This package contains the following license:
 
@@ -429,9 +429,9 @@ The following npm packages may be included in this product:
  - @aws-crypto/supports-web-crypto@5.2.0
  - @chevrotain/types@11.1.2
  - dompurify@3.4.13
- - gaxios@7.1.5
+ - gaxios@7.3.1
  - gcp-metadata@8.1.2
- - google-auth-library@10.7.0
+ - google-auth-library@10.9.1
  - google-logging-utils@1.1.3
  - long@5.3.2
 
@@ -1371,12 +1371,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - statuses@2.0.1
  - statuses@2.0.2
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
@@ -1434,12 +1433,11 @@ THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - http-errors@2.0.0
  - http-errors@2.0.1
 
-These packages each contain the following license:
+This package contains the following license:
 
 The MIT License (MIT)
 
@@ -1726,9 +1724,9 @@ The following npm packages may be included in this product:
  - @opentelemetry/sdk-metrics@2.8.0
  - @opentelemetry/sdk-trace-base@2.8.0
  - @opentelemetry/sdk-trace-node@2.8.0
- - @opentelemetry/semantic-conventions@1.41.1
+ - @opentelemetry/semantic-conventions@1.43.0
  - @pkgjs/parseargs@0.11.0
- - baseline-browser-mapping@2.11.25
+ - baseline-browser-mapping@2.11.26
  - logzio-nodejs@2.5.0
 
 These packages each contain the following license:
@@ -1939,7 +1937,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - import-in-the-middle@3.2.0
+ - import-in-the-middle@3.5.1
 
 This package contains the following license:
 
@@ -3903,13 +3901,11 @@ https://github.com/fastify/website
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - @aws-crypto/crc32@5.2.0
- - @aws-crypto/crc32c@5.2.0
  - @aws-crypto/util@5.2.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 Apache License
                            Version 2.0, January 2004
@@ -4128,7 +4124,7 @@ The following npm packages may be included in this product:
  - @aws-sdk/client-s3@3.1075.0
  - @aws-sdk/client-ssm@3.1075.0
  - @aws-sdk/client-sts@3.1075.0
- - @aws-sdk/middleware-sdk-rds@3.972.37
+ - @aws-sdk/middleware-sdk-rds@3.972.60
 
 These packages each contain the following license:
 
@@ -4338,7 +4334,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - @aws-sdk/middleware-flexible-checksums@3.974.33
+ - @aws-sdk/middleware-flexible-checksums@3.974.56
 
 This package contains the following license:
 
@@ -4548,12 +4544,12 @@ Apache License
 
 The following npm packages may be included in this product:
 
- - @aws-sdk/checksums@3.1000.8
- - @aws-sdk/middleware-sdk-s3@3.972.54
- - @aws-sdk/signature-v4-multi-region@3.996.35
- - @smithy/core@3.26.0
- - @smithy/protocol-http@5.5.2
- - @smithy/types@4.15.0
+ - @aws-sdk/checksums@3.1001.1
+ - @aws-sdk/middleware-sdk-s3@3.972.77
+ - @aws-sdk/signature-v4-multi-region@3.996.47
+ - @smithy/core@3.35.0
+ - @smithy/protocol-http@5.6.2
+ - @smithy/types@4.19.0
 
 These packages each contain the following license:
 
@@ -5407,18 +5403,18 @@ The following npm packages may be included in this product:
  - @types/d3-fetch@3.0.7
  - @types/d3-force@3.0.10
  - @types/d3-format@3.0.4
- - @types/d3-geo@3.1.0
+ - @types/d3-geo@3.1.1
  - @types/d3-hierarchy@3.1.7
  - @types/d3-interpolate@3.0.4
  - @types/d3-path@1.0.11
  - @types/d3-polygon@3.0.2
  - @types/d3-quadtree@3.0.6
- - @types/d3-random@3.0.3
+ - @types/d3-random@3.0.4
  - @types/d3-scale-chromatic@3.1.0
  - @types/d3-scale@4.0.9
- - @types/d3-selection@3.0.11
+ - @types/d3-selection@3.0.12
  - @types/d3-shape@1.3.12
- - @types/d3-shape@3.1.8
+ - @types/d3-shape@3.2.0
  - @types/d3-time-format@4.0.3
  - @types/d3-time@3.0.4
  - @types/d3-timer@3.0.2
@@ -5431,6 +5427,7 @@ The following npm packages may be included in this product:
  - @types/geojson@7946.0.16
  - @types/hast@3.0.5
  - @types/js-cookie@3.0.6
+ - @types/json-schema@7.0.15
  - @types/jsonwebtoken@9.0.10
  - @types/mailparser@3.4.6
  - @types/mdast@4.0.4
@@ -5894,7 +5891,7 @@ defined by the Mozilla Public License, v. 2.0.
 
 The following npm package may be included in this product:
 
- - @bufbuild/protobuf@2.12.1
+ - @bufbuild/protobuf@2.15.0
 
 This package contains the following license:
 
@@ -6335,7 +6332,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - negotiator@0.6.3
- - negotiator@1.0.0
+ - negotiator@1.1.0
 
 These packages each contain the following license:
 
@@ -6433,7 +6430,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - range-parser@1.2.1
+ - range-parser@1.3.0
 
 This package contains the following license:
 
@@ -7094,7 +7091,7 @@ The following npm packages may be included in this product:
  - content-disposition@1.1.0
  - content-disposition@2.0.1
  - forwarded@0.2.0
- - media-typer@1.1.0
+ - media-typer@1.1.1
  - vary@1.1.2
 
 These packages each contain the following license:
@@ -7248,7 +7245,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - engine.io-client@6.6.6
+ - engine.io-client@6.6.7
  - socket.io@4.8.3
 
 These packages each contain the following license:
@@ -7310,7 +7307,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - engine.io@6.6.9
+ - engine.io@6.6.11
 
 This package contains the following license:
 
@@ -7338,7 +7335,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 The following npm packages may be included in this product:
 
  - content-type@1.0.5
- - content-type@2.0.0
+ - content-type@2.1.0
 
 These packages each contain the following license:
 
@@ -7765,7 +7762,6 @@ The following npm packages may be included in this product:
 
  - estree-util-is-identifier-name@3.0.0
  - mdast-util-gfm-autolink-literal@2.0.1
- - mdast-util-gfm-strikethrough@2.0.0
  - mdast-util-gfm-table@2.0.0
  - mdast-util-gfm-task-list-item@2.0.0
  - mdast-util-mdx-expression@2.0.1
@@ -8020,13 +8016,14 @@ The following npm packages may be included in this product:
  - mdast-util-find-and-replace@3.0.2
  - mdast-util-from-markdown@2.0.3
  - mdast-util-gfm-footnote@2.1.0
+ - mdast-util-gfm-strikethrough@2.0.1
  - mdast-util-gfm@3.1.0
- - mdast-util-to-markdown@2.1.2
- - micromark-core-commonmark@2.0.3
- - micromark-extension-gfm-table@2.1.1
+ - mdast-util-to-markdown@2.1.3
+ - micromark-core-commonmark@2.0.4
+ - micromark-extension-gfm-table@2.1.2
  - micromark-factory-destination@2.0.1
  - micromark-factory-label@2.0.1
- - micromark-factory-space@2.0.1
+ - micromark-factory-space@2.1.0
  - micromark-factory-title@2.0.1
  - micromark-factory-whitespace@2.0.1
  - micromark-util-character@2.1.1
@@ -8035,6 +8032,7 @@ The following npm packages may be included in this product:
  - micromark-util-combine-extensions@2.0.1
  - micromark-util-decode-numeric-character-reference@2.0.2
  - micromark-util-decode-string@2.0.1
+ - micromark-util-edit-map@1.0.0
  - micromark-util-encode@2.0.1
  - micromark-util-html-tag-name@2.0.1
  - micromark-util-normalize-identifier@2.0.1
@@ -8042,8 +8040,8 @@ The following npm packages may be included in this product:
  - micromark-util-sanitize-uri@2.0.1
  - micromark-util-subtokenize@2.1.0
  - micromark-util-symbol@2.0.1
- - micromark-util-types@2.0.2
- - micromark@4.0.2
+ - micromark-util-types@2.0.3
+ - micromark@4.0.3
  - remark-gfm@4.0.1
  - remark-rehype@11.1.2
  - vfile-message@4.0.3
@@ -8109,7 +8107,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor@7.58.9
+ - @microsoft/api-extractor@7.59.2
 
 This package contains the following license:
 
@@ -8142,7 +8140,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @microsoft/api-extractor-model@7.33.8
+ - @microsoft/api-extractor-model@7.33.13
 
 This package contains the following license:
 
@@ -8175,7 +8173,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/node-core-library@5.23.1
+ - @rushstack/node-core-library@5.24.2
 
 This package contains the following license:
 
@@ -8274,7 +8272,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/terminal@0.24.0
+ - @rushstack/terminal@0.24.5
 
 This package contains the following license:
 
@@ -8307,7 +8305,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @rushstack/ts-command-line@5.3.10
+ - @rushstack/ts-command-line@5.3.15
 
 This package contains the following license:
 
@@ -8385,11 +8383,11 @@ This package contains the following license:
 The following npm packages may be included in this product:
 
  - isexe@4.0.0
- - lru-cache@11.5.1
+ - lru-cache@11.5.3
  - minipass@7.1.3
  - path-scurry@1.11.1
  - path-scurry@2.0.2
- - tar@7.5.21
+ - tar@7.5.22
 
 These packages each contain the following license:
 
@@ -8581,7 +8579,6 @@ The following npm packages may be included in this product:
 
  - marked@14.0.0
  - marked@16.4.2
- - marked@4.3.0
 
 These packages each contain the following license:
 
@@ -8660,35 +8657,6 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - express-rate-limit@8.5.2
-
-This package contains the following license:
-
-# MIT License
-
-Copyright 2023 Nathan Friedly, Vedant K
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -9433,7 +9401,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - vite@8.3.0
+ - vite@8.3.1
 
 This package contains the following license:
 
@@ -11764,7 +11732,7 @@ Repository: https://github.com/sveltejs/zimmerframe
 
 The following npm package may be included in this product:
 
- - node-cron@3.0.3
+ - node-cron@4.6.0
 
 This package contains the following license:
 
@@ -12301,7 +12269,7 @@ END OF TERMS AND CONDITIONS
 
 The following npm package may be included in this product:
 
- - @aws-sdk/core@3.974.23
+ - @aws-sdk/core@3.978.1
 
 This package contains the following license:
 
@@ -12931,20 +12899,20 @@ Apache License
 
 The following npm packages may be included in this product:
 
- - @aws-sdk/credential-provider-env@3.972.49
- - @aws-sdk/credential-provider-ini@3.972.56
- - @aws-sdk/credential-provider-node@3.972.58
- - @aws-sdk/middleware-sdk-ec2@3.972.37
- - @aws-sdk/token-providers@3.1074.0
- - @aws-sdk/types@3.973.13
+ - @aws-sdk/credential-provider-env@3.972.72
+ - @aws-sdk/credential-provider-ini@3.973.17
+ - @aws-sdk/credential-provider-node@3.972.84
+ - @aws-sdk/middleware-sdk-ec2@3.972.60
+ - @aws-sdk/token-providers@3.1138.0
+ - @aws-sdk/types@3.974.6
  - @aws-sdk/util-arn-parser@3.972.18
- - @aws-sdk/util-locate-window@3.965.8
- - @aws-sdk/xml-builder@3.972.31
- - @smithy/credential-provider-imds@4.4.2
- - @smithy/fetch-http-handler@5.5.2
+ - @aws-sdk/util-locate-window@3.965.10
+ - @aws-sdk/xml-builder@3.972.41
+ - @smithy/credential-provider-imds@4.5.2
+ - @smithy/fetch-http-handler@5.8.0
  - @smithy/is-array-buffer@2.2.0
- - @smithy/node-http-handler@4.8.2
- - @smithy/signature-v4@5.5.2
+ - @smithy/node-http-handler@4.12.1
+ - @smithy/signature-v4@5.7.4
  - @smithy/util-buffer-from@2.2.0
  - @smithy/util-utf8@2.3.0
 
@@ -13156,9 +13124,9 @@ Apache License
 
 The following npm packages may be included in this product:
 
- - @aws-sdk/credential-provider-process@3.972.49
- - @aws-sdk/credential-provider-sso@3.972.55
- - @aws-sdk/credential-provider-web-identity@3.972.55
+ - @aws-sdk/credential-provider-process@3.972.72
+ - @aws-sdk/credential-provider-sso@3.973.16
+ - @aws-sdk/credential-provider-web-identity@3.972.78
 
 These packages each contain the following license:
 
@@ -13368,7 +13336,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - @aws-sdk/ec2-metadata-service@3.1051.0
+ - @aws-sdk/ec2-metadata-service@3.1141.0
 
 This package contains the following license:
 
@@ -13856,10 +13824,10 @@ See the LICENSE file in the root of this repository.
 The following npm packages may be included in this product:
 
  - @ai-sdk/provider-utils@4.0.50
- - @ai-sdk/provider-utils@5.0.36
- - @aws-sdk/credential-provider-http@3.972.51
- - @aws-sdk/credential-provider-login@3.972.55
- - @aws-sdk/nested-clients@3.997.23
+ - @ai-sdk/provider-utils@5.0.49
+ - @aws-sdk/credential-provider-http@3.972.74
+ - @aws-sdk/credential-provider-login@3.972.79
+ - @aws-sdk/nested-clients@3.997.46
  - @superset-ui/embedded-sdk@0.3.0
  - @superset-ui/switchboard@0.20.3
  - @swc/counter@0.1.3
@@ -13873,7 +13841,7 @@ Apache-2.0
 
 The following npm package may be included in this product:
 
- - caniuse-lite@1.0.30001810
+ - caniuse-lite@1.0.30001813
 
 This package contains the following license:
 
@@ -14922,7 +14890,6 @@ The following npm packages may be included in this product:
 
  - iconv-lite@0.4.24
  - iconv-lite@0.6.3
- - iconv-lite@0.7.2
  - iconv-lite@0.7.3
 
 These packages each contain the following license:
@@ -15219,7 +15186,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - ipaddr.js@1.9.1
- - ipaddr.js@2.4.0
+ - ipaddr.js@2.5.0
 
 These packages each contain the following license:
 
@@ -15247,8 +15214,8 @@ THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - fast-uri@3.1.7
- - fast-uri@4.1.4
+ - fast-uri@3.1.8
+ - fast-uri@4.2.1
 
 These packages each contain the following license:
 
@@ -15489,7 +15456,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @babel/parser@7.29.7
+ - @babel/parser@7.29.9
 
 This package contains the following license:
 
@@ -15691,7 +15658,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm package may be included in this product:
 
- - core-js@3.49.0
+ - core-js@3.50.0
 
 This package contains the following license:
 
@@ -16129,16 +16096,16 @@ THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - prosemirror-commands@1.7.2
- - prosemirror-dropcursor@1.8.2
+ - prosemirror-dropcursor@1.8.4
  - prosemirror-gapcursor@1.4.1
  - prosemirror-history@1.5.0
  - prosemirror-inputrules@1.5.1
  - prosemirror-keymap@1.2.3
- - prosemirror-model@1.25.11
+ - prosemirror-model@1.25.12
  - prosemirror-schema-list@1.5.1
  - prosemirror-state@1.4.4
- - prosemirror-transform@1.12.0
- - prosemirror-view@1.42.3
+ - prosemirror-transform@1.12.2
+ - prosemirror-view@1.42.6
 
 These packages each contain the following license:
 
@@ -16166,7 +16133,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fastq@1.20.1
+ - fastq@1.20.3
 
 This package contains the following license:
 
@@ -16509,7 +16476,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - cytoscape@3.34.0
+ - cytoscape@3.34.3
 
 This package contains the following license:
 
@@ -16568,7 +16535,7 @@ The following npm packages may be included in this product:
  - @protobufjs/float@1.0.2
  - @protobufjs/path@1.1.2
  - @protobufjs/pool@1.1.0
- - @protobufjs/utf8@1.1.1
+ - @protobufjs/utf8@1.1.2
 
 These packages each contain the following license:
 
@@ -16603,7 +16570,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm package may be included in this product:
 
- - prosemirror-changeset@2.4.1
+ - prosemirror-changeset@2.4.4
 
 This package contains the following license:
 
@@ -16760,7 +16727,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - style-mod@4.1.3
+ - style-mod@4.1.4
 
 This package contains the following license:
 
@@ -16865,7 +16832,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 The following npm package may be included in this product:
 
- - sass-embedded@1.100.0
+ - sass-embedded@1.105.0
 
 This package contains the following license:
 
@@ -16947,7 +16914,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - crelt@1.0.6
+ - crelt@1.0.7
 
 This package contains the following license:
 
@@ -17052,7 +17019,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - bidi-js@1.0.3
+ - bidi-js@1.1.0
 
 This package contains the following license:
 
@@ -17117,7 +17084,6 @@ DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - langfuse-core@3.38.20
  - langfuse-vercel@3.38.20
  - langfuse@3.38.20
 
@@ -17791,16 +17757,18 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @azure/core-auth@1.10.1
- - @azure/core-client@1.10.2
- - @azure/core-http-compat@2.4.0
- - @azure/core-rest-pipeline@1.24.0
- - @azure/core-tracing@1.3.1
- - @azure/core-util@1.13.1
- - @azure/core-xml@1.5.1
- - @azure/identity@4.13.1
- - @azure/logger@1.3.0
- - @typespec/ts-http-runtime@0.3.6
+ - @azure/abort-controller@2.2.0
+ - @azure/core-auth@1.11.0
+ - @azure/core-client@1.11.1
+ - @azure/core-http-compat@2.5.0
+ - @azure/core-paging@1.7.0
+ - @azure/core-rest-pipeline@1.25.0
+ - @azure/core-tracing@1.4.0
+ - @azure/core-util@1.14.0
+ - @azure/core-xml@1.6.0
+ - @azure/identity@4.13.3
+ - @azure/logger@1.4.0
+ - @typespec/ts-http-runtime@0.3.9
 
 These packages each contain the following license:
 
@@ -17851,8 +17819,8 @@ PERFORMANCE OF THIS SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @microsoft/tsdoc-config@0.18.1
- - @microsoft/tsdoc@0.16.0
+ - @microsoft/tsdoc-config@0.18.2
+ - @microsoft/tsdoc@0.17.0
 
 These packages each contain the following license:
 
@@ -18974,7 +18942,7 @@ THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - electron-to-chromium@1.5.433
+ - electron-to-chromium@1.5.439
 
 This package contains the following license:
 
@@ -19131,12 +19099,11 @@ limitations under the License.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - @posthog/types@1.390.2
  - posthog-js@1.392.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright 2020 Posthog / Hiberly, Inc.
 
@@ -19496,6 +19463,433 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
+ - @posthog/core@1.55.2
+ - @posthog/types@1.412.4
+
+These packages each contain the following license:
+
+Copyright 2020 Posthog / Hiberly, Inc.
+
+Copyright 2015 Mixpanel, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this work except in compliance with the License.
+You may obtain a copy of the License below, or at:
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+---
+
+The @posthog/core package in packages/core is licensed under the MIT License below.
+Third-party code remains subject to its respective notices in this file.
+This owning notice is preserved from posthog-js-lite, from which @posthog/core was migrated:
+https://github.com/PostHog/posthog-js-lite/blob/5fb7bee96f739b243dfea5589e2027f16629e8cd/LICENSE
+
+MIT License
+
+Copyright (c) 2022 PostHog (part of Hiberly Inc)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+packages/core/src/error-tracking/parsers/index.ts and its compiled distributions contain code
+derived from TraceKit. This license only applies to the relevant code.
+
+MIT License
+
+Copyright (c) 2013 Onur Can Cakmak onur.cakmak@gmail.com and all TraceKit contributors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files(the 'Software'), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and / or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+packages/core/src/vendor/uuidv7.ts and its compiled distributions contain code from uuidv7:
+https://github.com/LiosK/uuidv7/blob/f30b7a7faff73afbce0b27a46c638310f96912ba/src/index.ts
+
+Copyright 2021-2023 LiosK
+
+This code is licensed under the Apache License, Version 2.0, reproduced above.
+
+---
+
+Some files in this codebase contain code from getsentry/sentry-javascript.
+In such cases it is explicitly stated in the file header. This license only applies to the relevant code in such cases.
+
+MIT License
+
+Copyright (c) 2012 Functional Software, Inc. dba Sentry
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Some files in this codebase contain code from getsentry/sentry-react-native.
+In such cases it is explicitly stated in the file header. This license only applies to the relevant code in such cases.
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Sentry
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Some files in this codebase contain code from facebook/metro by Meta Platforms, Inc. and affiliates.
+In such cases it is explicitly stated in the file header. This license only applies to the relevant code in such cases. 
+
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Some files in this codebase contain code from expo/expo by 650 Industries, Inc. (aka Expo).
+In such cases it is explicitly stated in the file header. This license only applies to the relevant code in such cases. 
+
+The MIT License (MIT)
+
+Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Some files in this codebase contain code from agentcathq/agentcat-typescript-sdk (formerly MCPCat/mcpcat-typescript-sdk).
+In such cases it is explicitly stated in the file header. This license only applies to the relevant code in such cases.
+
+MIT License
+
+Copyright (c) 2025 AgentCat, Inc. (formerly MCPcat)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm packages may be included in this product:
+
  - internmap@1.0.1
  - internmap@2.0.3
 
@@ -19570,24 +19964,24 @@ The following npm packages may be included in this product:
  - @ai-sdk/deepinfra@2.0.78
  - @ai-sdk/deepseek@2.0.62
  - @ai-sdk/gateway@3.0.189
- - @ai-sdk/gateway@4.0.73
+ - @ai-sdk/gateway@4.0.96
  - @ai-sdk/google-vertex@4.0.197
  - @ai-sdk/google@3.0.121
  - @ai-sdk/groq@3.0.64
  - @ai-sdk/mcp@1.0.78
- - @ai-sdk/mcp@2.0.43
+ - @ai-sdk/mcp@2.0.60
  - @ai-sdk/mistral@3.0.63
  - @ai-sdk/openai-compatible@2.0.74
  - @ai-sdk/openai@3.0.109
  - @ai-sdk/perplexity@3.0.59
  - @ai-sdk/provider@3.0.15
- - @ai-sdk/provider@4.0.10
+ - @ai-sdk/provider@4.0.18
  - @ai-sdk/react@3.0.280
- - @ai-sdk/react@4.0.94
+ - @ai-sdk/react@4.0.121
  - @ai-sdk/togetherai@2.0.80
  - @ai-sdk/xai@3.0.130
  - ai@6.0.277
- - ai@7.0.91
+ - ai@7.0.118
 
 These packages each contain the following license:
 
@@ -19679,7 +20073,7 @@ THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - bn.js@4.12.3
+ - bn.js@4.12.5
 
 This package contains the following license:
 
@@ -19937,7 +20331,7 @@ terms above.
 
 The following npm package may be included in this product:
 
- - sass@1.101.0
+ - sass@1.105.0
 
 This package contains the following license:
 
@@ -21615,7 +22009,7 @@ xml license:
 
 The MIT License
 
-Copyright (c) 2006-2025 Lukas Renggli.
+Copyright (c) 2006-2026 Lukas Renggli.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22163,7 +22557,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @ungap/structured-clone@1.3.2
+ - @ungap/structured-clone@1.4.0
 
 This package contains the following license:
 
@@ -22211,7 +22605,7 @@ THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - ansis@4.3.1
+ - ansis@4.4.0
 
 This package contains the following license:
 
@@ -23032,7 +23426,6 @@ The following npm packages may be included in this product:
  - @msgpackr-extract/msgpackr-extract-linux-x64@3.0.4
  - @nodable/entities@3.0.0
  - @polka/url@1.0.0-next.29
- - @posthog/core@1.35.4
  - @radix-ui/primitive@1.0.0
  - @radix-ui/react-compose-refs@1.0.0
  - @radix-ui/react-context@1.0.0
@@ -23049,7 +23442,7 @@ The following npm packages may be included in this product:
  - @radix-ui/react-use-controllable-state@1.0.0
  - @radix-ui/react-use-escape-keydown@1.0.0
  - @radix-ui/react-use-layout-effect@1.0.0
- - @rolldown/binding-linux-x64-gnu@1.2.7
+ - @rolldown/binding-linux-x64-gnu@1.2.11
  - @rollup/rollup-linux-x64-gnu@4.62.2
  - @uiw/codemirror-extensions-basic-setup@4.25.10
  - @uiw/codemirror-theme-github@4.25.10
@@ -23080,6 +23473,7 @@ The following npm packages may be included in this product:
  - isarray@1.0.0
  - isomorphic-unfetch@3.1.0
  - javascript-natural-sort@0.7.1
+ - langfuse-core@3.39.2
  - node-ensure@0.0.0
  - obj-case@0.2.1
  - pg-types@2.2.0
@@ -23089,7 +23483,7 @@ The following npm packages may be included in this product:
  - react-resizable-panels@3.0.6
  - react-ripples@2.2.1
  - regenerator-runtime@0.11.1
- - sass-embedded-linux-x64@1.100.0
+ - sass-embedded-linux-x64@1.105.0
  - select@1.1.2
  - sirv@3.0.2
  - toggle-selection@1.0.6
@@ -23097,7 +23491,6 @@ The following npm packages may be included in this product:
  - typeorm@0.3.31
  - use-composed-ref@1.4.0
  - varint@6.0.0
- - xml-naming@0.1.0
 
 These packages each contain the following license:
 
@@ -23149,7 +23542,7 @@ MIT AND ISC
 The following npm packages may be included in this product:
 
  - pg-cloudflare@1.4.0
- - pg-protocol@1.15.0
+ - pg-protocol@1.16.0
  - pg@8.22.0
 
 These packages each contain the following license:
@@ -23363,7 +23756,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - header-range-parser@1.1.5
+ - header-range-parser@2.0.0
 
 This package contains the following license:
 
@@ -23428,7 +23821,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - readdirp@3.6.0
- - readdirp@5.0.0
+ - readdirp@5.1.1
 
 These packages each contain the following license:
 
@@ -23488,7 +23881,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - acorn@8.17.0
+ - acorn@8.18.0
 
 This package contains the following license:
 
@@ -23662,7 +24055,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - brace-expansion@2.1.4
+ - brace-expansion@2.1.7
  - isarray@2.0.5
 
 These packages each contain the following license:
@@ -23784,16 +24177,14 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @fastify/proxy-addr@5.1.0
+ - @fastify/proxy-addr@5.1.1
 
 This package contains the following license:
 
 MIT License
 
 Copyright (c) 2014-2016 Douglas Christopher Wilson
-Copyright (c) 2021-present The Fastify team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team.
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23817,16 +24208,14 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @fastify/forwarded@3.0.1
+ - @fastify/forwarded@3.0.2
 
 This package contains the following license:
 
 MIT License
 
 Copyright (c) 2014-2017 Douglas Christopher Wilson
-Copyright (c) 2021-present The Fastify team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team.
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23853,7 +24242,7 @@ The following npm packages may be included in this product:
  - @babel/code-frame@7.29.7
  - @babel/compat-data@7.29.7
  - @babel/core@7.29.7
- - @babel/generator@7.29.7
+ - @babel/generator@7.29.8
  - @babel/helper-annotate-as-pure@7.29.7
  - @babel/helper-compilation-targets@7.29.7
  - @babel/helper-globals@7.29.7
@@ -23871,8 +24260,8 @@ The following npm packages may be included in this product:
  - @babel/preset-react@7.29.7
  - @babel/runtime@7.29.7
  - @babel/template@7.29.7
- - @babel/traverse@7.29.7
- - @babel/types@7.29.7
+ - @babel/traverse@7.29.8
+ - @babel/types@7.29.8
 
 These packages each contain the following license:
 
@@ -24115,7 +24504,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - node-abi@3.92.0
+ - node-abi@3.96.0
 
 This package contains the following license:
 
@@ -24206,16 +24595,14 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - avvio@9.2.0
+ - avvio@9.3.0
 
 This package contains the following license:
 
 MIT License
 
 Copyright (c) 2016-2020 Matteo Collina
-Copyright (c) 2020-present The Fastify team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team.
+Copyright (c) 2020-present The Fastify team <https://github.com/fastify/fastify#team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24237,12 +24624,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - fast-json-stringify@6.4.0
  - fast-json-stringify@7.0.1
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -24391,7 +24777,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fast-xml-parser@5.10.1
+ - fast-xml-parser@5.11.1
 
 This package contains the following license:
 
@@ -24940,7 +25326,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - find-my-way@9.7.0
+ - find-my-way@9.9.0
 
 This package contains the following license:
 
@@ -25096,9 +25482,9 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @lezer/common@1.5.2
- - @lezer/highlight@1.2.3
- - @lezer/javascript@1.5.4
+ - @lezer/common@1.5.3
+ - @lezer/highlight@1.2.5
+ - @lezer/javascript@1.5.5
  - @lezer/lr@1.4.10
 
 These packages each contain the following license:
@@ -25647,16 +26033,16 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @codemirror/autocomplete@6.20.3
- - @codemirror/commands@6.10.3
+ - @codemirror/commands@6.11.1
  - @codemirror/lang-javascript@6.2.5
  - @codemirror/lang-json@6.0.2
- - @codemirror/language@6.12.3
+ - @codemirror/language@6.12.4
  - @codemirror/legacy-modes@6.5.3
  - @codemirror/lint@6.9.7
- - @codemirror/search@6.7.1
- - @codemirror/state@6.6.0
+ - @codemirror/search@6.7.2
+ - @codemirror/state@6.7.6
  - @codemirror/theme-one-dark@6.1.3
- - @codemirror/view@6.43.1
+ - @codemirror/view@6.43.13
  - codemirror@6.0.2
 
 These packages each contain the following license:
@@ -26149,7 +26535,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - milliparsec@5.1.1
+ - milliparsec@5.1.2
 
 This package contains the following license:
 
@@ -26728,7 +27114,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @azure/msal-node@5.2.5
+ - @azure/msal-node@6.0.1
 
 This package contains the following license:
 
@@ -26879,11 +27265,11 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @tinyhttp/accepts@2.3.0
- - @tinyhttp/app@3.0.7
+ - @tinyhttp/accepts@2.3.1
+ - @tinyhttp/app@3.0.11
  - @tinyhttp/content-disposition@2.2.4
  - @tinyhttp/content-type@0.1.4
- - @tinyhttp/cookie-signature@2.1.1
+ - @tinyhttp/cookie-signature@2.1.2
  - @tinyhttp/cookie@2.1.1
  - @tinyhttp/cors@2.0.1
  - @tinyhttp/encode-url@2.1.1
@@ -26891,11 +27277,11 @@ The following npm packages may be included in this product:
  - @tinyhttp/forwarded@2.1.2
  - @tinyhttp/logger@2.1.0
  - @tinyhttp/proxy-addr@3.0.1
- - @tinyhttp/req@2.2.8
- - @tinyhttp/res@2.2.11
+ - @tinyhttp/req@2.2.10
+ - @tinyhttp/res@2.2.15
  - @tinyhttp/router@2.2.5
- - @tinyhttp/send@2.2.5
- - @tinyhttp/type-is@2.2.5
+ - @tinyhttp/send@2.2.8
+ - @tinyhttp/type-is@2.2.6
  - @tinyhttp/url@2.1.1
  - @tinyhttp/vary@0.1.3
 
@@ -26945,7 +27331,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm package may be included in this product:
 
- - package-manager-detector@1.6.0
+ - package-manager-detector@1.8.0
 
 This package contains the following license:
 
@@ -27098,7 +27484,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - hono@4.13.5
+ - hono@4.13.10
 
 This package contains the following license:
 
@@ -27128,7 +27514,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @antfu/install-pkg@1.1.0
+ - @antfu/install-pkg@2.1.0
  - local-pkg@1.2.1
 
 These packages each contain the following license:
@@ -27339,7 +27725,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - colorjs.io@0.5.2
+ - colorjs.io@0.7.1
 
 This package contains the following license:
 
@@ -27401,7 +27787,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - strnum@2.4.1
+ - strnum@2.4.2
 
 This package contains the following license:
 
@@ -27552,10 +27938,10 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @floating-ui/core@1.7.5
- - @floating-ui/dom@1.7.6
- - @floating-ui/react-dom@2.1.8
- - @floating-ui/utils@0.2.11
+ - @floating-ui/core@1.8.0
+ - @floating-ui/dom@1.8.0
+ - @floating-ui/react-dom@2.1.9
+ - @floating-ui/utils@0.2.12
 
 These packages each contain the following license:
 
@@ -27648,7 +28034,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @iconify/utils@3.1.3
+ - @iconify/utils@3.1.7
 
 This package contains the following license:
 
@@ -27712,7 +28098,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @hono/node-server@2.1.0
+ - @hono/node-server@2.1.1
 
 This package contains the following license:
 
@@ -27779,36 +28165,6 @@ This package contains the following license:
 MIT License
 
 Copyright (c) 2022 ECMAScript Shims
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - @fastify/fast-json-stringify-compiler@5.0.3
-
-This package contains the following license:
-
-MIT License
-
-Copyright (c) 2022 Fastify
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28181,12 +28537,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - @fastify/ajv-compiler@4.0.5
  - @fastify/deepmerge@3.2.1
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -28217,6 +28572,8 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @fastify/accept-negotiator@2.1.0
+ - @fastify/ajv-compiler@4.0.6
+ - @fastify/fast-json-stringify-compiler@5.1.0
  - @fastify/swagger-ui@6.1.1
 
 These packages each contain the following license:
@@ -28378,7 +28735,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - toad-cache@3.7.1
+ - toad-cache@3.7.4
 
 This package contains the following license:
 
@@ -28499,36 +28856,6 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - acorn-import-attributes@1.9.5
-
-This package contains the following license:
-
-MIT License
-
-Copyright (c) 2023 Sven Sauleau
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
  - @vercel/otel@1.14.1
 
 This package contains the following license:
@@ -28559,7 +28886,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - swr@2.4.2
+ - swr@2.5.1
 
 This package contains the following license:
 
@@ -28649,7 +28976,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @marijn/find-cluster-break@1.0.2
+ - @marijn/find-cluster-break@1.0.4
 
 This package contains the following license:
 
@@ -28837,7 +29164,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - tinyexec@1.2.4
+ - tinyexec@1.3.1
 
 This package contains the following license:
 
@@ -28867,7 +29194,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - es-toolkit@1.48.1
+ - es-toolkit@1.52.0
 
 This package contains the following license:
 
@@ -28892,6 +29219,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+With the following notices:
+
+es-toolkit
+
+Parts of the test suite and compatibility layer in es-toolkit/compat are
+derived from Lodash (https://github.com/lodash/lodash).
+
+Lodash copyright notice and MIT permission notice:
+
+Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+
+Based on Underscore.js, copyright Jeremy Ashkenas,
+DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
+
+This software consists of voluntary contributions made by many
+individuals. For exact contribution history, see the revision history
+available at https://github.com/lodash/lodash
+
+The following license applies to all parts of this software except as
+documented below:
+
+====
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -28927,7 +29296,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - rolldown@1.2.7
+ - rolldown@1.2.11
 
 This package contains the following license:
 
@@ -28961,7 +29330,7 @@ The licenses of externally maintained libraries from which parts of the Software
 
 The following npm package may be included in this product:
 
- - @oxc-project/types@0.148.0
+ - @oxc-project/types@0.151.0
 
 This package contains the following license:
 
@@ -28997,10 +29366,10 @@ The following npm packages may be included in this product:
  - @assistant-ui/react-ai-sdk@1.4.9
  - @assistant-ui/react-markdown@0.14.14
  - @assistant-ui/react@0.15.18
- - @assistant-ui/store@0.3.12
- - @assistant-ui/tap@0.9.16
+ - @assistant-ui/store@0.3.15
+ - @assistant-ui/tap@0.9.19
  - assistant-cloud@0.1.43
- - assistant-stream@0.3.41
+ - assistant-stream@0.3.45
  - safe-content-frame@0.0.29
 
 These packages each contain the following license:
@@ -29032,7 +29401,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - zod@4.4.3
- - zod@4.5.4
+ - zod@4.6.5
 
 These packages each contain the following license:
 
@@ -29153,7 +29522,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fast-equals@5.4.0
+ - fast-equals@5.4.3
 
 This package contains the following license:
 
@@ -29274,7 +29643,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - eventsource-parser@3.1.0
+ - eventsource-parser@3.1.1
 
 This package contains the following license:
 
@@ -29305,8 +29674,8 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - anynum@1.0.1
- - fast-xml-builder@1.2.0
- - is-unsafe@2.0.0
+ - fast-xml-builder@1.3.1
+ - is-unsafe@2.0.2
  - xml-naming@0.3.0
 
 These packages each contain the following license:
@@ -29493,7 +29862,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - graphql@15.10.2
+ - graphql@15.10.3
 
 This package contains the following license:
 
@@ -29645,8 +30014,8 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.19.8
- - undici@6.28.1
- - undici@7.29.1
+ - undici@6.29.0
+ - undici@7.30.0
 
 These packages each contain the following license:
 
@@ -29676,7 +30045,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - use-sync-external-store@1.6.0
+ - use-sync-external-store@1.7.0
 
 This package contains the following license:
 
@@ -29706,7 +30075,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @tsconfig/node10@1.0.12
+ - @tsconfig/node10@1.0.13
  - @tsconfig/node12@1.0.11
  - @tsconfig/node14@1.0.3
  - @tsconfig/node16@1.0.4
@@ -29739,8 +30108,8 @@ SOFTWARE
 
 The following npm packages may be included in this product:
 
- - @azure/msal-browser@5.14.0
- - @azure/msal-common@16.9.0
+ - @azure/msal-browser@5.23.0
+ - @azure/msal-common@16.14.1
 
 These packages each contain the following license:
 
@@ -29930,7 +30299,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm package may be included in this product:
 
- - exsolve@1.1.0
+ - exsolve@1.1.1
 
 This package contains the following license:
 
@@ -30050,7 +30419,7 @@ IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - confbox@0.2.4
+ - confbox@0.3.1
 
 This package contains the following license:
 
@@ -30166,7 +30535,7 @@ DEALINGS IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - pkg-types@1.3.1
- - pkg-types@2.3.1
+ - pkg-types@2.3.3
 
 These packages each contain the following license:
 
@@ -30253,16 +30622,16 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @sindresorhus/is@4.6.0
- - ansi-regex@6.2.2
+ - ansi-regex@6.4.0
  - ansi-styles@6.2.3
  - bundle-name@4.1.0
  - chalk@5.6.2
  - clear-module@4.1.3
  - decompress-response@6.0.0
- - default-browser-id@5.0.1
- - default-browser@5.5.0
+ - default-browser-id@5.0.0
+ - default-browser@5.2.1
  - define-lazy-prop@3.0.0
- - dot-prop@10.1.0
+ - dot-prop@10.2.0
  - escape-string-regexp@5.0.0
  - import-fresh@3.3.1
  - is-docker@2.2.1
@@ -30270,23 +30639,22 @@ The following npm packages may be included in this product:
  - is-inside-container@1.0.0
  - is-plain-obj@4.1.0
  - is-stream@2.0.1
- - is-wsl@3.1.1
+ - is-wsl@3.1.0
  - make-dir@5.1.0
  - mimic-response@3.1.0
- - open@10.2.0
+ - open@10.1.0
  - open@7.4.2
  - p-limit@3.1.0
  - parse-json@5.2.0
- - run-applescript@7.1.0
+ - run-applescript@7.0.0
  - sort-on@7.0.0
  - string-width@5.1.2
  - strip-ansi@7.2.0
  - supports-color@8.1.1
  - tagged-tag@1.0.0
- - type-fest@5.7.0
+ - type-fest@5.10.0
  - wrap-ansi@7.0.0
  - wrap-ansi@8.1.0
- - wsl-utils@0.1.0
  - yocto-queue@0.1.0
 
 These packages each contain the following license:
@@ -30324,7 +30692,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm packages may be included in this product:
 
- - @alloc/quick-lru@5.2.0
+ - @alloc/quick-lru@5.3.0
  - ansi-regex@5.0.1
  - ansi-styles@3.2.1
  - ansi-styles@4.3.0
@@ -30496,6 +30864,36 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - express-rate-limit@8.7.0
+
+This package contains the following license:
+
+MIT License
+
+Copyright 2023 Nathan Friedly, Vedant K
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - @fastify/busboy@3.2.0
 
 This package contains the following license:
@@ -30530,7 +30928,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - @isaacs/brace-expansion@5.0.1
- - brace-expansion@5.0.9
+ - brace-expansion@5.0.12
 
 These packages each contain the following license:
 
@@ -30564,6 +30962,7 @@ The following npm packages may be included in this product:
 
  - @colors/colors@1.5.0
  - @colors/colors@1.6.0
+ - @colors/colors@1.6.1
 
 These packages each contain the following license:
 
@@ -30667,7 +31066,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - cjs-module-lexer@2.2.0
+ - cjs-module-lexer@2.2.1
 
 This package contains the following license:
 
@@ -30675,6 +31074,25 @@ MIT License
 -----------
 
 Copyright (C) 2018-2020 Guy Bedford
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - es-module-lexer@3.0.2
+
+This package contains the following license:
+
+MIT License
+-----------
+
+Copyright (C) 2018-2022 Guy Bedford
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -31699,7 +32117,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - node-releases@2.0.56
+ - node-releases@2.0.57
 
 This package contains the following license:
 
@@ -32377,7 +32795,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - is-core-module@2.16.2
+ - is-core-module@2.17.0
 
 This package contains the following license:
 
@@ -32499,7 +32917,7 @@ The following npm packages may be included in this product:
 
  - end-of-stream@1.4.5
  - pump@3.0.4
- - tar-fs@2.1.4
+ - tar-fs@2.1.5
  - tar-stream@2.2.0
 
 These packages each contain the following license:
@@ -33047,7 +33465,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @dabh/diagnostics@2.0.8
+ - @dabh/diagnostics@2.0.9
  - enabled@2.0.0
 
 These packages each contain the following license:
@@ -33291,7 +33709,7 @@ The following npm packages may be included in this product:
 
  - is-callable@1.2.7
  - is-typed-array@1.1.15
- - which-typed-array@1.1.22
+ - which-typed-array@1.1.24
 
 These packages each contain the following license:
 
@@ -33865,7 +34283,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - preact@10.29.2
+ - preact@10.29.8
 
 This package contains the following license:
 
@@ -34499,7 +34917,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - node-addon-api@7.1.1
- - node-addon-api@8.8.0
+ - node-addon-api@8.9.2
 
 These packages each contain the following license:
 
@@ -34810,7 +35228,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - nan@2.27.0
+ - nan@2.29.0
 
 This package contains the following license:
 
@@ -34859,7 +35277,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - jose@5.10.0
- - jose@6.2.3
+ - jose@6.2.12
 
 These packages each contain the following license:
 
@@ -35039,6 +35457,36 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - @azure/core-process@1.0.0
+
+This package contains the following license:
+
+The MIT License (MIT)
+
+Copyright (c) 2018 Microsoft
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - i18next-icu@2.4.3
 
 This package contains the following license:
@@ -35069,9 +35517,9 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @vue/compiler-core@3.5.38
- - @vue/compiler-dom@3.5.38
- - @vue/shared@3.5.38
+ - @vue/compiler-core@3.5.43
+ - @vue/compiler-dom@3.5.43
+ - @vue/shared@3.5.43
 
 These packages each contain the following license:
 
@@ -35465,9 +35913,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @azure/abort-controller@2.1.2
  - @azure/core-lro@2.7.2
- - @azure/core-paging@1.6.2
  - @azure/storage-blob@12.26.0
 
 These packages each contain the following license:
@@ -35679,7 +36125,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - oauth4webapi@3.8.6
+ - oauth4webapi@3.8.8
 
 This package contains the following license:
 
@@ -35740,7 +36186,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @mermaid-js/parser@1.2.0
+ - @mermaid-js/parser@1.2.1
 
 This package contains the following license:
 
@@ -36085,6 +36531,7 @@ The following npm packages may be included in this product:
  - dequal@2.0.3
  - dset@3.1.4
  - regexparam@2.0.2
+ - regexparam@3.0.0
  - totalist@3.0.1
 
 These packages each contain the following license:
@@ -36115,7 +36562,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - vscode-uri@3.1.0
+ - vscode-uri@3.2.0
 
 This package contains the following license:
 
@@ -36225,7 +36672,6 @@ The following npm packages may be included in this product:
 
  - escape-string-regexp@1.0.5
  - object-assign@4.1.1
- - pify@2.3.0
  - strip-bom@3.0.0
  - strip-json-comments@2.0.1
 
@@ -36486,7 +36932,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - browserslist@4.29.0
+ - browserslist@4.29.2
 
 This package contains the following license:
 
@@ -36603,13 +37049,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - read-cache@1.0.0
+ - read-cache@1.0.2
 
 This package contains the following license:
 
 The MIT License (MIT)
 
-Copyright 2016 Bogdan Chadkin <trysound@yandex.ru>
+Copyright 2016 Bogdan Chadkin <opensource@trysound.io>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36662,7 +37108,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - nanoid@3.3.18
+ - nanoid@3.3.19
 
 This package contains the following license:
 
@@ -36976,7 +37422,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - color-name@2.1.0
+ - color-name@2.1.1
 
 This package contains the following license:
 
@@ -37422,7 +37868,7 @@ For more information, please refer to <http://unlicense.org>
 
 The following npm package may be included in this product:
 
- - protobufjs@7.6.5
+ - protobufjs@7.6.6
 
 This package contains the following license:
 
