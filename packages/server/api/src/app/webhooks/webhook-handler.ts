@@ -175,7 +175,7 @@ type GetFlowResult =
 const getFlowOrThrow = async (flowId: FlowId): Promise<GetFlowResult> => {
   if (isNil(flowId)) {
     const errorMessage = 'Flow id is not defined.';
-    logger.error(errorMessage);
+    logger.warn(errorMessage);
 
     return {
       success: false,
@@ -190,7 +190,7 @@ const getFlowOrThrow = async (flowId: FlowId): Promise<GetFlowResult> => {
 
   if (isNil(flow)) {
     const errorMessage = `Flow with id ${flowId} was not found.`;
-    logger.error(errorMessage, {
+    logger.warn(errorMessage, {
       flowId,
     });
 
