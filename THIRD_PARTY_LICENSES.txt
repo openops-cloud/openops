@@ -13824,6 +13824,7 @@ See the LICENSE file in the root of this repository.
 The following npm packages may be included in this product:
 
  - @ai-sdk/provider-utils@4.0.50
+ - @ai-sdk/provider-utils@5.0.43
  - @ai-sdk/provider-utils@5.0.49
  - @aws-sdk/credential-provider-http@3.972.74
  - @aws-sdk/credential-provider-login@3.972.79
@@ -19964,6 +19965,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/deepinfra@2.0.78
  - @ai-sdk/deepseek@2.0.62
  - @ai-sdk/gateway@3.0.189
+ - @ai-sdk/gateway@4.0.85
  - @ai-sdk/gateway@4.0.96
  - @ai-sdk/google-vertex@4.0.197
  - @ai-sdk/google@3.0.121
@@ -19975,12 +19977,14 @@ The following npm packages may be included in this product:
  - @ai-sdk/openai@3.0.109
  - @ai-sdk/perplexity@3.0.59
  - @ai-sdk/provider@3.0.15
+ - @ai-sdk/provider@4.0.17
  - @ai-sdk/provider@4.0.18
  - @ai-sdk/react@3.0.280
  - @ai-sdk/react@4.0.121
  - @ai-sdk/togetherai@2.0.80
  - @ai-sdk/xai@3.0.130
  - ai@6.0.277
+ - ai@7.0.105
  - ai@7.0.118
 
 These packages each contain the following license:
