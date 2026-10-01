@@ -8517,7 +8517,7 @@ software or this license, under any kind of legal claim._**
 
 The following npm package may be included in this product:
 
- - axios@1.18.0
+ - axios@1.20.0
 
 This package contains the following license:
 
