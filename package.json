@@ -401,7 +401,7 @@
     "prettier-plugin-organize-imports": "4.3.0",
     "storybook": "10.6.0",
     "tailwindcss": "3.4.19",
-    "ts-jest": "29.4.13",
+    "ts-jest": "29.4.14",
     "ts-node": "10.9.2",
     "typescript": "5.5.4",
     "typescript-eslint": "8.70.1",
