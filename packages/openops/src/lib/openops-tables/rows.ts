@@ -11,6 +11,7 @@ import {
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
   makeOpenOpsTablesPut,
+  makeOpenOpsTablesRequest,
 } from '../openops-tables/requests-helpers';
 import { TokenOrResolver } from './context-helpers';
 import { createAxiosHeaders } from './create-axios-headers';
@@ -32,6 +33,20 @@ export interface BatchDeleteRowsParams extends RowParams {
 export interface GetRowsParams extends RowParams {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
+}
+
+export interface GetRowsPageParams extends RowParams {
+  filters?: { fieldName: string; value?: unknown; type: ViewFilterTypesEnum }[];
+  filterType?: FilterType;
+  search?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface RowsPage {
+  count: number;
+  hasMore: boolean;
+  results: Record<string, unknown>[];
 }
 
 export interface AddRowParams extends RowParams {
@@ -137,6 +152,81 @@ export async function getRows(getRowsParams: GetRowsParams) {
         url,
         filters: getRowsParams.filters,
         filterType: getRowsParams.filterType,
+      });
+    },
+  );
+}
+
+// Baserow takes list operators (single_select_is_any_of, ...) as comma-separated values.
+function serializeFilterValue(value: unknown): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+  if (Array.isArray(value)) {
+    return value.map(String).join(',');
+  }
+  return String(value);
+}
+
+/**
+ * Fetches a single page of rows. Unlike getRows, this never follows Baserow's `next`
+ * links, so callers that expose rows to an agent get a bounded response.
+ */
+export async function getRowsPage(
+  params: GetRowsPageParams,
+): Promise<RowsPage> {
+  if (
+    params.filters &&
+    params.filters.length > 1 &&
+    params.filterType == null
+  ) {
+    throw new Error('Filter type must be provided when filters are provided');
+  }
+
+  const query = new URLSearchParams();
+  query.append('user_field_names', 'true');
+  params.filters?.forEach((filter) => {
+    query.append(
+      buildSimpleFilterUrlParam(filter.fieldName, filter.type),
+      serializeFilterValue(filter.value),
+    );
+  });
+  if (params.filterType) {
+    query.append('filter_type', params.filterType);
+  }
+  if (params.search) {
+    query.append('search', params.search);
+  }
+  if (params.page) {
+    query.append('page', `${params.page}`);
+  }
+  if (params.size) {
+    query.append('size', `${params.size}`);
+  }
+
+  const url = `api/database/rows/table/${params.tableId}/?${query.toString()}`;
+  const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const response = await makeOpenOpsTablesRequest<{
+        count: number;
+        next: string | null;
+        results: Record<string, unknown>[];
+      }>('GET', url, undefined, authenticationHeader);
+
+      return {
+        count: response.count,
+        hasMore: response.next !== null && response.next !== undefined,
+        results: response.results,
+      };
+    },
+    (error) => {
+      logger.error('Error while getting rows page:', {
+        error,
+        url,
+        filters: params.filters,
+        filterType: params.filterType,
       });
     },
   );

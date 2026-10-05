@@ -6,7 +6,7 @@ import { MCP_EXTENSION_KEY } from '../../../src/app/mcp/mcp-document';
 import { mcpModule } from '../../../src/app/mcp/mcp.module';
 
 /**
- * A stand-in for the real API: one operation the agent profile claims, one the chat
+ * A stand-in for the real API: operations both profiles claim, one only the agent
  * profile claims, and one neither does.
  */
 async function buildApp(): Promise<FastifyInstance> {
@@ -40,6 +40,16 @@ async function buildApp(): Promise<FastifyInstance> {
       },
     },
     async () => ({}),
+  );
+  app.get(
+    '/v1/tables/',
+    {
+      schema: {
+        operationId: 'List Tables',
+        description: 'In the agent profile only',
+      },
+    },
+    async () => [],
   );
 
   await app.register(mcpModule);
@@ -87,10 +97,15 @@ describe('GET /v1/mcp/openapi.json', () => {
     }
   });
 
-  it('gives both profiles the same surface in this edition', async () => {
-    expect(Object.keys((await fetchDocument('?profile=agent')).paths)).toEqual(
-      Object.keys((await fetchDocument('?profile=chat')).paths),
+  it('gives the agent profile everything the chat has, plus Tables', async () => {
+    const agentPaths = Object.keys(
+      (await fetchDocument('?profile=agent')).paths,
     );
+    const chatPaths = Object.keys((await fetchDocument('?profile=chat')).paths);
+
+    expect(agentPaths).toEqual(expect.arrayContaining(chatPaths));
+    expect(agentPaths).toContain('/v1/tables/');
+    expect(chatPaths).not.toContain('/v1/tables/');
   });
 
   it('defaults to the agent profile, which is what an external client asks for', async () => {

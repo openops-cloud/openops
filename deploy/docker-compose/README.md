@@ -12,6 +12,10 @@ External agents such as Claude Code or Codex connect to OpenOps through the `ope
 container, which is disabled by default. It sits behind the gateway at `${OPS_PUBLIC_URL}/mcp`
 and authenticates agents with OAuth issued by the OpenOps API.
 
+Once connected, an agent can list and inspect workflows, runs, blocks and app connections, and
+read OpenOps Tables (list tables, inspect columns, query rows with filters). Access is scoped
+to the project the user authorized and follows that user's role.
+
 To enable it, in `.env`:
 
 - `OPS_PUBLIC_URL` must be `https://...` (plain `http` is only accepted for `localhost`), so
