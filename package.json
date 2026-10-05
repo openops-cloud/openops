@@ -365,7 +365,7 @@
     "autoprefixer": "10.6.1",
     "babel-jest": "30.5.2",
     "cd": "0.3.3",
-    "chromatic": "11.29.0",
+    "chromatic": "18.9.4",
     "concurrently": "8.2.2",
     "esbuild": "0.28.2",
     "eslint": "9.39.5",
