@@ -428,7 +428,7 @@ The following npm packages may be included in this product:
  - @aws-crypto/sha256-browser@5.2.0
  - @aws-crypto/supports-web-crypto@5.2.0
  - @chevrotain/types@11.1.2
- - dompurify@3.4.13
+ - dompurify@3.4.16
  - gaxios@7.3.1
  - gcp-metadata@8.1.2
  - google-auth-library@10.9.1
@@ -8517,7 +8517,7 @@ software or this license, under any kind of legal claim._**
 
 The following npm package may be included in this product:
 
- - axios@1.18.0
+ - axios@1.20.0
 
 This package contains the following license:
 
@@ -30894,16 +30894,14 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @fastify/busboy@3.2.0
+ - @fastify/busboy@3.2.2
 
 This package contains the following license:
 
 MIT License
 
 Copyright Brian White. All rights reserved.
-Copyright (c) 2021-present The Fastify team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team.
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
