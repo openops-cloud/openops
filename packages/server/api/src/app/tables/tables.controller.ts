@@ -1,5 +1,5 @@
 import {
-  FastifyPluginAsyncTypebox,
+  FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
 import {
@@ -83,7 +83,11 @@ const QueryTableRowsRequestOptions = {
   },
 };
 
-export const tablesController: FastifyPluginAsyncTypebox = async (app) => {
+export const tablesController: FastifyPluginCallbackTypebox = (
+  app,
+  _opts,
+  done,
+) => {
   app.get('/', ListTablesRequest, async (request) => {
     return tablesService.listTables(request.principal.projectId);
   });
@@ -102,4 +106,6 @@ export const tablesController: FastifyPluginAsyncTypebox = async (app) => {
       request.body,
     );
   });
+
+  done();
 };

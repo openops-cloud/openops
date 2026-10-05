@@ -68,6 +68,22 @@ async function assertFilterColumnsExist(
   }
 }
 
+type BaserowErrorBody = { error: string; detail?: unknown };
+
+function parseBaserowErrorBody(error: unknown): BaserowErrorBody | undefined {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+  try {
+    const body = JSON.parse(error.message) as Partial<BaserowErrorBody>;
+    return typeof body.error === 'string' && body.error.startsWith('ERROR_')
+      ? { error: body.error, detail: body.detail }
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * The HTTP wrapper drops the status and rethrows Baserow's JSON body as the error
  * message. Baserow 4xx bodies carry an ERROR_* code and a human-readable detail, e.g.
@@ -75,26 +91,15 @@ async function assertFilterColumnsExist(
  * validation error so an agent can correct its call instead of seeing a generic 500.
  */
 function rethrowBaserowClientError(error: unknown): never {
-  if (error instanceof Error) {
-    try {
-      const body = JSON.parse(error.message) as {
-        error?: unknown;
-        detail?: unknown;
-      };
-      if (typeof body.error === 'string' && body.error.startsWith('ERROR_')) {
-        const detail =
-          typeof body.detail === 'string'
-            ? body.detail
-            : JSON.stringify(body.detail ?? '');
-        throwValidationError(`${body.error}: ${detail}`.trim());
-      }
-    } catch (parsed) {
-      if (parsed instanceof ApplicationError) {
-        throw parsed;
-      }
-    }
+  const body = parseBaserowErrorBody(error);
+  if (!body) {
+    throw error;
   }
-  throw error;
+  const detail =
+    typeof body.detail === 'string'
+      ? body.detail
+      : JSON.stringify(body.detail ?? '');
+  return throwValidationError(`${body.error}: ${detail}`.trim());
 }
 
 // The shared operator enum uses Baserow's filter names, which are exactly the keys of
