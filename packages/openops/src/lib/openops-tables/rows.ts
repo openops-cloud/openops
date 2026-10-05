@@ -165,10 +165,13 @@ function serializeFilterValue(value: unknown): string {
   if (Array.isArray(value)) {
     return value.map(serializeFilterValue).join(',');
   }
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
+  if (typeof value === 'string') {
+    return value;
   }
-  return String(value);
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value.toString();
+  }
+  return JSON.stringify(value) ?? '';
 }
 
 /**
