@@ -2,6 +2,22 @@ import { nanoid } from 'nanoid';
 
 export const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
 
+/**
+ * The OAuth `state` is `<nonce>_<base64 origin>`. The nonce is a nanoid and may itself
+ * contain underscores, while base64 never does, so the separator is the LAST underscore.
+ * This mirrors the parsing done by the OAuth proxy.
+ */
+export function getNonceFromState(state: string | null): string | null {
+  if (!state) {
+    return null;
+  }
+  const separatorIndex = state.lastIndexOf('_');
+  if (separatorIndex > 0) {
+    return state.substring(0, separatorIndex);
+  }
+  return state;
+}
+
 let currentPopup: Window | null = null;
 let currentResolve: ((value: string | null) => void) | null = null;
 
@@ -130,8 +146,8 @@ function getCode(
         redirectUrl.startsWith(event.origin) &&
         event.data?.['code']
       ) {
-        const eventState = event.data?.['state'];
-        if (state && eventState && eventState !== state) {
+        const eventNonce = getNonceFromState(event.data?.['state']);
+        if (state && eventNonce && eventNonce !== state) {
           return;
         }
         handleCode(event.data.code);

@@ -1,16 +1,10 @@
-import { OAUTH_CHANNEL_PREFIX } from '@/app/lib/oauth2-utils';
+import {
+  getNonceFromState,
+  OAUTH_CHANNEL_PREFIX,
+} from '@/app/lib/oauth2-utils';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
-function getNonceFromState(state: string | null): string | null {
-  if (!state) return null;
-  const underscoreIndex = state.indexOf('_');
-  if (underscoreIndex > 0) {
-    return state.substring(0, underscoreIndex);
-  }
-  return state;
-}
 
 const RedirectPage: React.FC = React.memo(() => {
   const [searchParams] = useSearchParams();
