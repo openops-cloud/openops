@@ -7,7 +7,9 @@ export const OAUTH_CHANNEL_PREFIX = 'oauth2-redirect-';
  * contain underscores, while base64 never does, so the separator is the LAST underscore.
  * This mirrors the parsing done by the OAuth proxy.
  */
-export function getNonceFromState(state: string | null): string | null {
+export function getNonceFromState(
+  state: string | null | undefined,
+): string | null {
   if (!state) {
     return null;
   }
