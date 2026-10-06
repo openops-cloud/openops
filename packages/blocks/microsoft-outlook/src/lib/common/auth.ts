@@ -21,8 +21,8 @@ export const microsoftOutlookAuth = BlockAuth.OAuth2({
       defaultValue: 'common',
     }),
   },
-  authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-  tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+  authUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize',
+  tokenUrl: 'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token',
   grantType: OAuth2GrantType.AUTHORIZATION_CODE,
   extra: {
     prompt: 'select_account',
