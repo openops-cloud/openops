@@ -46,7 +46,7 @@ describe('azureResourceGraphAction', () => {
       useHostSession: { useHostSessionCheckbox: false },
       subscriptionsDropdown: {},
       query: 'resources | project *',
-      querySubscriptions: ['sub-1'],
+      querySubscriptions: { querySubscriptions: ['sub-1'] },
       limitSubscriptions: false,
       subscriptionLimit: {},
     });
@@ -79,7 +79,7 @@ describe('azureResourceGraphAction', () => {
       useHostSession: { useHostSessionCheckbox: false },
       subscriptionsDropdown: {},
       query: 'resources | project *',
-      querySubscriptions: ['sub-1'],
+      querySubscriptions: { querySubscriptions: ['sub-1'] },
       limitSubscriptions: false,
       subscriptionLimit: {},
     });
@@ -108,7 +108,7 @@ describe('azureResourceGraphAction', () => {
       useHostSession: { useHostSessionCheckbox: false },
       subscriptionsDropdown: {},
       query: 'resources | project *',
-      querySubscriptions: ['sub-1'],
+      querySubscriptions: { querySubscriptions: ['sub-1'] },
       limitSubscriptions: false,
       subscriptionLimit: {},
       maxResults: 150,
@@ -132,7 +132,7 @@ describe('azureResourceGraphAction', () => {
       useHostSession: { useHostSessionCheckbox: false },
       subscriptionsDropdown: {},
       query: 'resources | project *',
-      querySubscriptions: subs,
+      querySubscriptions: { querySubscriptions: subs },
       limitSubscriptions: false,
       subscriptionLimit: {},
     });
@@ -148,6 +148,72 @@ describe('azureResourceGraphAction', () => {
     );
   });
 
+  test('should scope the query to the subscriptions selected in the dynamic property', async () => {
+    makeHttpRequestMock.mockResolvedValue({ data: [{ id: 'resource1' }] });
+
+    // The engine passes a dynamic property as { <propertyKey>: value }
+    const context = createContext({
+      useHostSession: { useHostSessionCheckbox: false },
+      query: 'resources | project *',
+      querySubscriptions: { querySubscriptions: ['sub-1', 'sub-2'] },
+    });
+
+    await azureResourceGraphAction.run(context);
+
+    expect(makeHttpRequestMock).toHaveBeenCalledTimes(1);
+    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toEqual([
+      'sub-1',
+      'sub-2',
+    ]);
+  });
+
+  test('should accept the selection typed as JSON text in a customized input', async () => {
+    makeHttpRequestMock.mockResolvedValue({ data: [] });
+
+    const context = createContext({
+      useHostSession: { useHostSessionCheckbox: false },
+      query: 'resources | project *',
+      querySubscriptions: { querySubscriptions: '["sub-1","sub-2"]' },
+    });
+
+    await azureResourceGraphAction.run(context);
+
+    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toEqual([
+      'sub-1',
+      'sub-2',
+    ]);
+  });
+
+  test('should accept a single subscription id typed as text', async () => {
+    makeHttpRequestMock.mockResolvedValue({ data: [] });
+
+    const context = createContext({
+      useHostSession: { useHostSessionCheckbox: false },
+      query: 'resources | project *',
+      querySubscriptions: { querySubscriptions: 'sub-1' },
+    });
+
+    await azureResourceGraphAction.run(context);
+
+    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toEqual([
+      'sub-1',
+    ]);
+  });
+
+  test('should query all subscriptions when none are selected', async () => {
+    makeHttpRequestMock.mockResolvedValue({ data: [] });
+
+    const context = createContext({
+      useHostSession: { useHostSessionCheckbox: false },
+      query: 'resources | project *',
+      querySubscriptions: { querySubscriptions: [] },
+    });
+
+    await azureResourceGraphAction.run(context);
+
+    expect(makeHttpRequestMock.mock.calls[0][3].subscriptions).toBeUndefined();
+  });
+
   test('should use host session credentials', async () => {
     azureCliMock.runCommand.mockResolvedValue(
       JSON.stringify({ accessToken: 'host-token' }),
@@ -158,7 +224,7 @@ describe('azureResourceGraphAction', () => {
       useHostSession: { useHostSessionCheckbox: true },
       subscriptionsDropdown: { subDropdown: 'host-sub' },
       query: 'resources | project *',
-      querySubscriptions: ['sub-1'],
+      querySubscriptions: { querySubscriptions: ['sub-1'] },
       limitSubscriptions: false,
       subscriptionLimit: {},
     });
