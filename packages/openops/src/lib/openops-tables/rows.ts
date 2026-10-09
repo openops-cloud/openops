@@ -38,6 +38,8 @@ export interface GetRowsParams extends RowParams {
 export interface GetRowsPageParams extends RowParams {
   filters?: { fieldName: string; value?: unknown; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
+  orderBy?: { fieldName: string; direction: 'asc' | 'desc' }[];
+  includeColumns?: string[];
   search?: string;
   page?: number;
   size?: number;
@@ -45,9 +47,14 @@ export interface GetRowsPageParams extends RowParams {
 
 export interface RowsPage {
   count: number;
+  page: number;
+  size: number;
   hasMore: boolean;
-  results: Record<string, unknown>[];
+  data: Record<string, unknown>[];
 }
+
+const DEFAULT_ROWS_PAGE = 1;
+const DEFAULT_ROWS_PAGE_SIZE = 100;
 
 export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
@@ -200,15 +207,27 @@ export async function getRowsPage(
   if (params.filterType) {
     query.append('filter_type', params.filterType);
   }
+  if (params.orderBy && params.orderBy.length > 0) {
+    // Baserow: comma-separated field names, "-" prefix for descending.
+    query.append(
+      'order_by',
+      params.orderBy
+        .map((sort) =>
+          sort.direction === 'desc' ? `-${sort.fieldName}` : sort.fieldName,
+        )
+        .join(','),
+    );
+  }
+  if (params.includeColumns && params.includeColumns.length > 0) {
+    query.append('include', params.includeColumns.join(','));
+  }
   if (params.search) {
     query.append('search', params.search);
   }
-  if (params.page) {
-    query.append('page', `${params.page}`);
-  }
-  if (params.size) {
-    query.append('size', `${params.size}`);
-  }
+  const page = params.page ?? DEFAULT_ROWS_PAGE;
+  const size = params.size ?? DEFAULT_ROWS_PAGE_SIZE;
+  query.append('page', `${page}`);
+  query.append('size', `${size}`);
 
   const url = `api/database/rows/table/${params.tableId}/?${query.toString()}`;
   const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
@@ -223,8 +242,10 @@ export async function getRowsPage(
 
       return {
         count: response.count,
+        page,
+        size,
         hasMore: response.next !== null && response.next !== undefined,
-        results: response.results,
+        data: response.results,
       };
     },
     (error) => {

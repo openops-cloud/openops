@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const mockTablesService = {
   listTables: jest.fn(),
+  getTable: jest.fn(),
   listTableColumns: jest.fn(),
   queryTableRows: jest.fn(),
 };
@@ -86,6 +87,38 @@ describe('tablesController', () => {
     });
   });
 
+  describe('GET /v1/tables/:id', () => {
+    it('returns the table details', async () => {
+      const details = { id: 42, name: 'Owners', url: 'http://ui/tables?x' };
+      mockTablesService.getTable.mockResolvedValue(details);
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/v1/tables/42',
+      });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(response.json()).toEqual(details);
+      expect(mockTablesService.getTable).toHaveBeenCalledWith(projectId, 42);
+    });
+
+    it('returns 404 when the table is not in the project', async () => {
+      mockTablesService.getTable.mockRejectedValue(
+        new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: { entityType: 'table', entityId: '999' },
+        }),
+      );
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/v1/tables/999',
+      });
+
+      expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
+    });
+  });
+
   describe('GET /v1/tables/:id/columns', () => {
     it('returns the columns and passes the id as a number', async () => {
       const columns = [
@@ -140,7 +173,13 @@ describe('tablesController', () => {
   });
 
   describe('POST /v1/tables/:id/rows/query', () => {
-    const page = { count: 1, hasMore: false, results: [{ id: 1, Name: 'x' }] };
+    const page = {
+      count: 1,
+      page: 1,
+      size: 100,
+      hasMore: false,
+      data: [{ id: 1, Name: 'x' }],
+    };
 
     it('forwards the structured query to the service', async () => {
       mockTablesService.queryTableRows.mockResolvedValue(page);
@@ -148,10 +187,10 @@ describe('tablesController', () => {
         filters: [
           {
             fieldName: 'Status',
-            operator: TableRowFilterOperator.equal,
+            operator: TableRowFilterOperator.EQUAL,
             value: 'open',
           },
-          { fieldName: 'Owner', operator: TableRowFilterOperator.not_empty },
+          { fieldName: 'Owner', operator: TableRowFilterOperator.NOT_EMPTY },
         ],
         filterCombinator: TableRowFilterCombinator.AND,
         search: 'prod',
@@ -189,6 +228,38 @@ describe('tablesController', () => {
         42,
         { page: 1, size: 100 },
       );
+    });
+
+    it('forwards sort order and column selection', async () => {
+      mockTablesService.queryTableRows.mockResolvedValue(page);
+      const body = {
+        orderBy: [{ fieldName: 'Cost', direction: 'desc' }],
+        columns: ['Name', 'Cost'],
+      };
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/v1/tables/42/rows/query',
+        payload: body,
+      });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(mockTablesService.queryTableRows).toHaveBeenCalledWith(
+        projectId,
+        42,
+        { ...body, page: 1, size: 100 },
+      );
+    });
+
+    it('rejects an unknown sort direction at the schema', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/v1/tables/42/rows/query',
+        payload: { orderBy: [{ fieldName: 'Cost', direction: 'down' }] },
+      });
+
+      expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(mockTablesService.queryTableRows).not.toHaveBeenCalled();
     });
 
     it('rejects an unknown filter operator before reaching the service', async () => {

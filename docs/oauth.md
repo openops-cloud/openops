@@ -267,7 +267,8 @@ Profiles are named after their consumer:
 
 Both profiles share the same core surface here — flows, runs, blocks and app connections,
 plus retrying a run and updating a connection. The `agent` profile additionally exposes
-read-only access to OpenOps Tables (`List Tables`, `Get Table Columns`, `Query Table Rows`),
+read-only access to OpenOps Tables (`List Tables`, `Get Table`, `Get Table Columns`,
+`Query Table Rows`),
 served by `/v1/tables` and backed by the project's own Tables database token. The chat still
 reads Tables through Baserow's MCP endpoint; moving it onto the same routes is OPS-4907.
 

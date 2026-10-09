@@ -1,19 +1,29 @@
-const mockProjectRepo = {
-  findOneByOrFail: jest.fn(),
+const mockProjectService = {
+  getOneOrThrow: jest.fn(),
 };
 
 const mockGetAllTables = jest.fn();
+const mockGetTableById = jest.fn();
 const mockResolveTokenProvider = jest.fn();
 const mockGetFields = jest.fn();
 const mockGetRowsPage = jest.fn();
 
 jest.mock('../../../src/app/project/project-service', () => ({
-  projectRepo: () => mockProjectRepo,
+  projectService: mockProjectService,
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  system: {
+    ...jest.requireActual('@openops/server-shared').system,
+    getOrThrow: jest.fn(() => 'http://localhost:4200/'),
+  },
 }));
 
 jest.mock('@openops/common', () => ({
   ...jest.requireActual('@openops/common'),
   getAllTablesInDatabase: (...args: unknown[]) => mockGetAllTables(...args),
+  getTableById: (...args: unknown[]) => mockGetTableById(...args),
   resolveTokenProvider: (...args: unknown[]) =>
     mockResolveTokenProvider(...args),
   getFields: (...args: unknown[]) => mockGetFields(...args),
@@ -25,6 +35,7 @@ import {
   ErrorCode,
   TableRowFilterCombinator,
   TableRowFilterOperator,
+  TableRowSortDirection,
 } from '@openops/shared';
 import { tablesService } from '../../../src/app/tables/tables.service';
 
@@ -43,12 +54,16 @@ const tokenResolver = { getToken: () => 'db-token' };
 describe('tablesService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockProjectRepo.findOneByOrFail.mockResolvedValue(project);
+    mockProjectService.getOneOrThrow.mockResolvedValue(project);
     mockResolveTokenProvider.mockResolvedValue(tokenResolver);
-    mockGetAllTables.mockResolvedValue([
+    const tables = [
       { id: 1, name: 'Cost Data', order: 5 },
       { id: 2, name: 'Owners', order: 3 },
-    ]);
+    ];
+    mockGetAllTables.mockResolvedValue(tables);
+    mockGetTableById.mockImplementation(async (id: number) =>
+      tables.find((table) => table.id === id),
+    );
   });
 
   describe('listTables', () => {
@@ -73,14 +88,60 @@ describe('tablesService', () => {
         { id: 1, name: 'Cost Data' },
         { id: 2, name: 'Owners' },
       ]);
-      expect(mockProjectRepo.findOneByOrFail).toHaveBeenCalledWith({
-        id: projectId,
-      });
+      expect(mockProjectService.getOneOrThrow).toHaveBeenCalledWith(projectId);
       expect(mockGetAllTables).toHaveBeenCalledWith(context);
     });
   });
 
+  describe('getTable', () => {
+    it('returns the table with a UI link built from the project database id', async () => {
+      const result = await tablesService.getTable(projectId, 2);
+
+      expect(result).toEqual({
+        id: 2,
+        name: 'Owners',
+        url: 'http://localhost:4200/tables?path=/database/100/table/2',
+      });
+    });
+
+    it('refuses a table that is not in the project database', async () => {
+      await expect(
+        tablesService.getTable(projectId, 999),
+      ).rejects.toMatchObject({
+        error: {
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: { entityType: 'table', entityId: '999' },
+        },
+      });
+    });
+  });
+
   describe('listTableColumns', () => {
+    it('includes the allowed options for select columns only', async () => {
+      mockGetFields.mockResolvedValue([
+        { id: 11, name: 'Name', type: 'text', primary: true, read_only: false },
+        {
+          id: 12,
+          name: 'Status',
+          type: 'single_select',
+          primary: false,
+          read_only: false,
+          select_options: [
+            { id: 60, value: 'Created', color: 'grey' },
+            { id: 61, value: 'Done', color: 'green' },
+          ],
+        },
+      ]);
+
+      const result = await tablesService.listTableColumns(projectId, 1);
+
+      expect(result[0]).not.toHaveProperty('options');
+      expect(result[1].options).toEqual([
+        { id: 60, value: 'Created' },
+        { id: 61, value: 'Done' },
+      ]);
+    });
+
     it('maps Baserow fields to columns', async () => {
       mockGetFields.mockResolvedValue([
         { id: 11, name: 'Name', type: 'text', primary: true, read_only: false },
@@ -123,7 +184,13 @@ describe('tablesService', () => {
   });
 
   describe('queryTableRows', () => {
-    const page = { count: 1, hasMore: false, results: [{ id: 1 }] };
+    const page = {
+      count: 1,
+      page: 1,
+      size: 100,
+      hasMore: false,
+      data: [{ id: 1 }],
+    };
 
     beforeEach(() => {
       mockGetFields.mockResolvedValue([
@@ -139,12 +206,12 @@ describe('tablesService', () => {
         filters: [
           {
             fieldName: 'Status',
-            operator: TableRowFilterOperator.equal,
+            operator: TableRowFilterOperator.EQUAL,
             value: 'open',
           },
           {
             fieldName: 'Due',
-            operator: TableRowFilterOperator.date_before,
+            operator: TableRowFilterOperator.DATE_BEFORE,
             value: '2026-01-01',
           },
         ],
@@ -177,6 +244,80 @@ describe('tablesService', () => {
       });
     });
 
+    it('validates sort and selected columns against the table and forwards them', async () => {
+      mockGetFields.mockResolvedValue([
+        { id: 1, name: 'Name', type: 'text' },
+        { id: 2, name: 'Cost', type: 'number' },
+      ]);
+      mockGetRowsPage.mockResolvedValue(page);
+
+      await tablesService.queryTableRows(projectId, 1, {
+        orderBy: [{ fieldName: 'Cost', direction: TableRowSortDirection.DESC }],
+        columns: ['Name', 'Cost'],
+      });
+
+      expect(mockGetRowsPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: [{ fieldName: 'Cost', direction: 'desc' }],
+          includeColumns: ['Name', 'Cost'],
+        }),
+      );
+    });
+
+    it('rejects a sort or selection on an unknown column before touching Tables', async () => {
+      mockGetFields.mockResolvedValue([{ id: 1, name: 'Name', type: 'text' }]);
+
+      await expect(
+        tablesService.queryTableRows(projectId, 1, {
+          orderBy: [
+            { fieldName: 'Cots', direction: TableRowSortDirection.ASC },
+          ],
+          columns: ['Name', 'Owner'],
+        }),
+      ).rejects.toMatchObject({
+        error: {
+          code: ErrorCode.VALIDATION,
+          params: {
+            message: expect.stringContaining('Unknown column(s): Cots, Owner'),
+          },
+        },
+      });
+      expect(mockGetRowsPage).not.toHaveBeenCalled();
+    });
+
+    it('requires a value for every operator except empty and not_empty', async () => {
+      await expect(
+        tablesService.queryTableRows(projectId, 1, {
+          filters: [
+            { fieldName: 'Status', operator: TableRowFilterOperator.EQUAL },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        error: {
+          code: ErrorCode.VALIDATION,
+          params: {
+            message: expect.stringContaining(
+              'A value is required for filter(s): Status (equal)',
+            ),
+          },
+        },
+      });
+      expect(mockGetRowsPage).not.toHaveBeenCalled();
+    });
+
+    it('accepts empty and not_empty without a value', async () => {
+      mockGetFields.mockResolvedValue([{ id: 1, name: 'Owner', type: 'text' }]);
+      mockGetRowsPage.mockResolvedValue(page);
+
+      await tablesService.queryTableRows(projectId, 1, {
+        filters: [
+          { fieldName: 'Owner', operator: TableRowFilterOperator.NOT_EMPTY },
+        ],
+      });
+
+      expect(mockGetRowsPage).toHaveBeenCalled();
+    });
+
     it('works with no filters at all, without looking up columns', async () => {
       mockGetRowsPage.mockResolvedValue(page);
 
@@ -194,7 +335,7 @@ describe('tablesService', () => {
           filters: [
             {
               fieldName: 'Stauts',
-              operator: TableRowFilterOperator.equal,
+              operator: TableRowFilterOperator.EQUAL,
               value: 'open',
             },
           ],
@@ -217,12 +358,12 @@ describe('tablesService', () => {
           filters: [
             {
               fieldName: 'A',
-              operator: TableRowFilterOperator.equal,
+              operator: TableRowFilterOperator.EQUAL,
               value: 1,
             },
             {
               fieldName: 'B',
-              operator: TableRowFilterOperator.equal,
+              operator: TableRowFilterOperator.EQUAL,
               value: 2,
             },
           ],

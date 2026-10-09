@@ -51,6 +51,11 @@ async function buildApp(): Promise<FastifyInstance> {
     },
     async () => [],
   );
+  app.get(
+    '/v1/tables/:id',
+    { schema: { operationId: 'Get Table', description: 'Agent only' } },
+    async () => ({}),
+  );
 
   await app.register(mcpModule);
   await app.ready();
@@ -105,7 +110,9 @@ describe('GET /v1/mcp/openapi.json', () => {
 
     expect(agentPaths).toEqual(expect.arrayContaining(chatPaths));
     expect(agentPaths).toContain('/v1/tables/');
+    expect(agentPaths).toContain('/v1/tables/{id}');
     expect(chatPaths).not.toContain('/v1/tables/');
+    expect(chatPaths).not.toContain('/v1/tables/{id}');
   });
 
   it('defaults to the agent profile, which is what an external client asks for', async () => {

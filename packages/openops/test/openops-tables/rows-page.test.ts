@@ -49,8 +49,10 @@ describe('getRowsPage', () => {
 
     expect(page).toEqual({
       count: 250,
+      page: 1,
+      size: 100,
       hasMore: true,
-      results: [{ id: 1, Name: 'a' }],
+      data: [{ id: 1, Name: 'a' }],
     });
     expect(makeOpenOpsTablesRequestMock).toHaveBeenCalledTimes(1);
     expect(makeOpenOpsTablesRequestMock).toHaveBeenCalledWith(
@@ -101,6 +103,48 @@ describe('getRowsPage', () => {
     expect(params.get('search')).toBe('prod');
     expect(params.get('page')).toBe('3');
     expect(params.get('size')).toBe('50');
+  });
+
+  it('encodes sort order and column selection, and echoes the applied page and size', async () => {
+    makeOpenOpsTablesRequestMock.mockResolvedValue({
+      count: 3,
+      next: null,
+      results: [],
+    });
+
+    const page = await getRowsPage({
+      tableId: 7,
+      tokenOrResolver: 'tok',
+      orderBy: [
+        { fieldName: 'Cost', direction: 'desc' },
+        { fieldName: 'Name', direction: 'asc' },
+      ],
+      includeColumns: ['Name', 'Cost'],
+      page: 2,
+      size: 25,
+    });
+
+    const params = requestedUrl().searchParams;
+    expect(params.get('order_by')).toBe('-Cost,Name');
+    expect(params.get('include')).toBe('Name,Cost');
+    expect(page.page).toBe(2);
+    expect(page.size).toBe(25);
+  });
+
+  it('always sends explicit page and size so the defaults are visible to Baserow', async () => {
+    makeOpenOpsTablesRequestMock.mockResolvedValue({
+      count: 0,
+      next: null,
+      results: [],
+    });
+
+    await getRowsPage({ tableId: 7, tokenOrResolver: 'tok' });
+
+    const params = requestedUrl().searchParams;
+    expect(params.get('page')).toBe('1');
+    expect(params.get('size')).toBe('100');
+    expect(params.has('order_by')).toBe(false);
+    expect(params.has('include')).toBe(false);
   });
 
   it('joins list values with commas, as Baserow expects for any-of operators', async () => {

@@ -36,6 +36,7 @@ const CHAT_OPERATIONS: Record<string, HttpMethod[]> = {
  */
 export const TABLES_OPERATIONS: Record<string, HttpMethod[]> = {
   '/v1/tables/': ['get'],
+  '/v1/tables/{id}': ['get'],
   '/v1/tables/{id}/columns': ['get'],
   '/v1/tables/{id}/rows/query': ['post'],
 };

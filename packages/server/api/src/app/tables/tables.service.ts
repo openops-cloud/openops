@@ -3,27 +3,33 @@ import {
   getAllTablesInDatabase,
   getFields,
   getRowsPage,
+  getTableById,
+  isSingleValueFilter,
   resolveTokenProvider,
+  SelectOpenOpsField,
   TablesServerContext,
   ViewFilterTypesEnum,
 } from '@openops/common';
+import { SharedSystemProp, system } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
-  QueryTableRowsRequest,
+  QueryTableRowsRequestBody,
   TableColumn,
+  TableDetails,
   TableItem,
   TableRowFilter,
   TableRowFilterOperator,
+  TableRowSortDirection,
   TableRowsPage,
   throwValidationError,
 } from '@openops/shared';
-import { projectRepo } from '../project/project-service';
+import { projectService } from '../project/project-service';
 
 async function getTablesContext(
   projectId: string,
 ): Promise<TablesServerContext> {
-  const project = await projectRepo().findOneByOrFail({ id: projectId });
+  const project = await projectService.getOneOrThrow(projectId);
   return {
     tablesDatabaseId: project.tablesDatabaseId,
     tablesDatabaseToken: project.tablesDatabaseToken,
@@ -38,8 +44,7 @@ async function assertTableInProject(
   context: TablesServerContext,
   tableId: number,
 ): Promise<void> {
-  const tables = await getAllTablesInDatabase(context);
-  if (!tables.some((table) => table.id === tableId)) {
+  if (!(await getTableById(tableId, context))) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
       params: { entityType: 'table', entityId: tableId.toString() },
@@ -47,18 +52,16 @@ async function assertTableInProject(
   }
 }
 
-// Baserow silently returns no rows for a filter on a column it does not know, which an
-// agent would read as "no data". Fail loudly with the real column names instead.
-async function assertFilterColumnsExist(
+// Baserow silently returns no rows for a filter, sort or include on a column it does not
+// know, which an agent would read as "no data". Fail loudly with the real names instead.
+async function assertColumnsExist(
   tableId: number,
   tokenOrResolver: Awaited<ReturnType<typeof resolveTokenProvider>>,
-  filters: TableRowFilter[],
+  names: string[],
 ): Promise<void> {
   const fields = await getFields(tableId, tokenOrResolver);
   const known = new Set(fields.map((field) => field.name));
-  const unknown = filters
-    .map((filter) => filter.fieldName)
-    .filter((name) => !known.has(name));
+  const unknown = [...new Set(names.filter((name) => !known.has(name)))];
 
   if (unknown.length > 0) {
     throwValidationError(
@@ -66,6 +69,36 @@ async function assertFilterColumnsExist(
         `Available columns: ${[...known].join(', ')}`,
     );
   }
+}
+
+const SELECT_COLUMN_TYPES = new Set(['single_select', 'multiple_select']);
+
+// Baserow treats a value-taking filter with no value as inactive and returns every row,
+// which an agent would read as "all rows match". Only empty/not_empty take no value.
+function assertFilterValuesPresent(filters: TableRowFilter[]): void {
+  const missing = filters
+    .filter(
+      (filter) =>
+        !isSingleValueFilter(toViewFilterType(filter.operator)) &&
+        (filter.value === undefined ||
+          filter.value === null ||
+          filter.value === ''),
+    )
+    .map((filter) => `${filter.fieldName} (${filter.operator})`);
+
+  if (missing.length > 0) {
+    throwValidationError(
+      `A value is required for filter(s): ${missing.join(', ')}. ` +
+        'Only empty and not_empty take no value.',
+    );
+  }
+}
+
+function getTableUrl(databaseId: number, tableId: number): string {
+  const frontendUrl = system
+    .getOrThrow<string>(SharedSystemProp.FRONTEND_URL)
+    .replace(/\/+$/, '');
+  return `${frontendUrl}/tables?path=/database/${databaseId}/table/${tableId}`;
 }
 
 type BaserowErrorBody = { error: string; detail?: unknown };
@@ -102,8 +135,8 @@ function rethrowBaserowClientError(error: unknown): never {
   return throwValidationError(`${body.error}: ${detail}`.trim());
 }
 
-// The shared operator enum uses Baserow's filter names, which are exactly the keys of
-// the common package's ViewFilterTypesEnum.
+// The shared operator enum's values are Baserow's filter names, which are exactly the keys
+// of the common package's ViewFilterTypesEnum.
 function toViewFilterType(
   operator: TableRowFilterOperator,
 ): ViewFilterTypesEnum {
@@ -117,6 +150,22 @@ export const tablesService = {
     return tables.map(({ id, name }) => ({ id, name }));
   },
 
+  async getTable(projectId: string, tableId: number): Promise<TableDetails> {
+    const context = await getTablesContext(projectId);
+    const table = await getTableById(tableId, context);
+    if (!table) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: { entityType: 'table', entityId: tableId.toString() },
+      });
+    }
+    return {
+      id: table.id,
+      name: table.name,
+      url: getTableUrl(context.tablesDatabaseId, table.id),
+    };
+  },
+
   async listTableColumns(
     projectId: string,
     tableId: number,
@@ -126,19 +175,27 @@ export const tablesService = {
 
     const tokenOrResolver = await resolveTokenProvider(context);
     const fields = await getFields(tableId, tokenOrResolver);
-    return fields.map(({ id, name, type, primary, read_only }) => ({
-      id,
-      name,
-      type,
-      primary: Boolean(primary),
-      readOnly: Boolean(read_only),
-    }));
+    return fields.map((field) => {
+      const column: TableColumn = {
+        id: field.id,
+        name: field.name,
+        type: field.type,
+        primary: Boolean(field.primary),
+        readOnly: Boolean(field.read_only),
+      };
+      if (SELECT_COLUMN_TYPES.has(field.type)) {
+        column.options = (
+          (field as SelectOpenOpsField).select_options ?? []
+        ).map(({ id, value }) => ({ id, value }));
+      }
+      return column;
+    });
   },
 
   async queryTableRows(
     projectId: string,
     tableId: number,
-    request: QueryTableRowsRequest,
+    request: QueryTableRowsRequestBody,
   ): Promise<TableRowsPage> {
     const filters = request.filters ?? [];
     if (filters.length > 1 && !request.filterCombinator) {
@@ -146,13 +203,19 @@ export const tablesService = {
         'filterCombinator is required when more than one filter is provided',
       );
     }
+    assertFilterValuesPresent(filters);
 
     const context = await getTablesContext(projectId);
     await assertTableInProject(context, tableId);
 
     const tokenOrResolver = await resolveTokenProvider(context);
-    if (filters.length > 0) {
-      await assertFilterColumnsExist(tableId, tokenOrResolver, filters);
+    const referencedColumns = [
+      ...filters.map((filter) => filter.fieldName),
+      ...(request.orderBy ?? []).map((sort) => sort.fieldName),
+      ...(request.columns ?? []),
+    ];
+    if (referencedColumns.length > 0) {
+      await assertColumnsExist(tableId, tokenOrResolver, referencedColumns);
     }
 
     try {
@@ -165,6 +228,11 @@ export const tablesService = {
           value: filter.value,
         })),
         filterType: request.filterCombinator as FilterType | undefined,
+        orderBy: request.orderBy?.map((sort) => ({
+          fieldName: sort.fieldName,
+          direction: sort.direction ?? TableRowSortDirection.ASC,
+        })),
+        includeColumns: request.columns,
         search: request.search,
         page: request.page,
         size: request.size,

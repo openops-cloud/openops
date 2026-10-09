@@ -61,6 +61,7 @@ export * from './lib/platform-metadata';
 export * from './lib/project';
 export * from './lib/store-entry/dto/store-entry-request';
 export * from './lib/store-entry/store-entry';
+export * from './lib/tables/dto/query-table-rows-request';
 export * from './lib/tables/table';
 export * from './lib/tag';
 export * from './lib/user';
