@@ -305,6 +305,30 @@ describe('tablesService', () => {
       expect(mockGetRowsPage).not.toHaveBeenCalled();
     });
 
+    it('treats an empty list as a missing value, since Baserow would ignore the filter', async () => {
+      await expect(
+        tablesService.queryTableRows(projectId, 1, {
+          filters: [
+            {
+              fieldName: 'Status',
+              operator: TableRowFilterOperator.SINGLE_SELECT_IS_ANY_OF,
+              value: [],
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        error: {
+          code: ErrorCode.VALIDATION,
+          params: {
+            message: expect.stringContaining(
+              'A value is required for filter(s): Status (single_select_is_any_of)',
+            ),
+          },
+        },
+      });
+      expect(mockGetRowsPage).not.toHaveBeenCalled();
+    });
+
     it('accepts empty and not_empty without a value', async () => {
       mockGetFields.mockResolvedValue([{ id: 1, name: 'Owner', type: 'text' }]);
       mockGetRowsPage.mockResolvedValue(page);

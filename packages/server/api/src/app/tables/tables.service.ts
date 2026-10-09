@@ -83,7 +83,8 @@ function assertFilterValuesPresent(filters: TableRowFilter[]): void {
         !isSingleValueFilter(toViewFilterType(filter.operator)) &&
         (filter.value === undefined ||
           filter.value === null ||
-          filter.value === ''),
+          filter.value === '' ||
+          (Array.isArray(filter.value) && filter.value.length === 0)),
     )
     .map((filter) => `${filter.fieldName} (${filter.operator})`);
 
