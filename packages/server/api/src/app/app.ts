@@ -62,6 +62,7 @@ import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
 import { slackInteractionModule } from './slack/slack-interaction-module';
 import { storeEntryModule } from './store-entry/store-entry.module';
+import { tablesModule } from './tables/tables.module';
 import { userInfoModule } from './user-info/user-info.module';
 import { userSettingsModule } from './user-settings/user-settings.module';
 import { userModule } from './user/user.module';
@@ -228,6 +229,7 @@ export const setupApp = async (
   await app.register(userSettingsModule);
   await app.register(aiModule);
   await app.register(mcpModule);
+  await app.register(tablesModule);
   await app.register(blockVariableModule);
   await app.register(benchmarkModule);
 

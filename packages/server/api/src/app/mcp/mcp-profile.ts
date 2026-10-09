@@ -29,7 +29,22 @@ const CHAT_OPERATIONS: Record<string, HttpMethod[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
+/**
+ * Read-only access to OpenOps Tables. Exposed to external agents only for now; the
+ * built-in chat still reads Tables through Baserow's own MCP endpoint (OPS-4907 tracks
+ * moving it over). Exported so the enterprise profiles can include the same surface.
+ */
+export const TABLES_OPERATIONS: Record<string, HttpMethod[]> = {
+  '/v1/tables/': ['get'],
+  '/v1/tables/{id}': ['get'],
+  '/v1/tables/{id}/columns': ['get'],
+  '/v1/tables/{id}/rows/query': ['post'],
+};
+
 export const communityMcpProfiles: McpProfiles = {
   chat: { operations: CHAT_OPERATIONS, multiProject: false },
-  agent: { operations: CHAT_OPERATIONS, multiProject: false },
+  agent: {
+    operations: { ...CHAT_OPERATIONS, ...TABLES_OPERATIONS },
+    multiProject: false,
+  },
 };

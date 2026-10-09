@@ -265,8 +265,12 @@ Profiles are named after their consumer:
 | `chat`  | the built-in AI chat   | stdio, spawned per chat request |
 | `agent` | external OAuth clients | http                            |
 
-Both are served the same read-only surface here — reading flows, runs, blocks and app
-connections — so the two names describe who is asking rather than what they get.
+Both profiles share the same core surface here — flows, runs, blocks and app connections,
+plus retrying a run and updating a connection. The `agent` profile additionally exposes
+read-only access to OpenOps Tables (`List Tables`, `Get Table`, `Get Table Columns`,
+`Query Table Rows`),
+served by `/v1/tables` and backed by the project's own Tables database token. The chat still
+reads Tables through Baserow's MCP endpoint; moving it onto the same routes is OPS-4907.
 
 The document also carries `x-openops-mcp: { multiProject: false }`, which is what tells the
 MCP server that no tool on this surface takes a project argument.
