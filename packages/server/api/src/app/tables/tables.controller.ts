@@ -13,6 +13,7 @@ import {
   TableRowFilterOperator,
   TableRowsPage,
 } from '@openops/shared';
+import { FastifyRequest } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { getProjectScopedRoutePolicy } from '../core/security/route-policies/route-security-policy-factory';
 import { tablesService } from './tables.service';
@@ -116,6 +117,11 @@ const GetTableColumnsRequest = {
 
 const QueryTableRowsRequest = {
   config: { security: tablesRoutePolicy },
+  // Every field is optional, and MCP clients send no body (or JSON null) when the agent
+  // passes only the table id. Treat that as {} so the schema defaults still apply.
+  preValidation: async (request: FastifyRequest): Promise<void> => {
+    request.body ??= {};
+  },
   schema: {
     operationId: 'Query Table Rows',
     tags: ['tables'],
