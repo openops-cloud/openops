@@ -24,6 +24,7 @@ import {
   TableRowsPage,
   throwValidationError,
 } from '@openops/shared';
+import { stripTrailingSlashes } from '../oauth/common/canonical-url';
 import { projectService } from '../project/project-service';
 
 async function getTablesContext(
@@ -95,9 +96,9 @@ function assertFilterValuesPresent(filters: TableRowFilter[]): void {
 }
 
 function getTableUrl(databaseId: number, tableId: number): string {
-  const frontendUrl = system
-    .getOrThrow<string>(SharedSystemProp.FRONTEND_URL)
-    .replace(/\/+$/, '');
+  const frontendUrl = stripTrailingSlashes(
+    system.getOrThrow<string>(SharedSystemProp.FRONTEND_URL),
+  );
   return `${frontendUrl}/tables?path=/database/${databaseId}/table/${tableId}`;
 }
 
