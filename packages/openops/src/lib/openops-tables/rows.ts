@@ -11,6 +11,7 @@ import {
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
   makeOpenOpsTablesPut,
+  makeOpenOpsTablesRequest,
 } from '../openops-tables/requests-helpers';
 import { TokenOrResolver } from './context-helpers';
 import { createAxiosHeaders } from './create-axios-headers';
@@ -33,6 +34,27 @@ export interface GetRowsParams extends RowParams {
   filters?: { fieldName: string; value: any; type: ViewFilterTypesEnum }[];
   filterType?: FilterType;
 }
+
+export interface GetRowsPageParams extends RowParams {
+  filters?: { fieldName: string; value?: unknown; type: ViewFilterTypesEnum }[];
+  filterType?: FilterType;
+  orderBy?: { fieldName: string; direction: 'asc' | 'desc' }[];
+  includeColumns?: string[];
+  search?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface RowsPage {
+  count: number;
+  page: number;
+  size: number;
+  hasMore: boolean;
+  data: Record<string, unknown>[];
+}
+
+const DEFAULT_ROWS_PAGE = 1;
+const DEFAULT_ROWS_PAGE_SIZE = 100;
 
 export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
@@ -137,6 +159,101 @@ export async function getRows(getRowsParams: GetRowsParams) {
         url,
         filters: getRowsParams.filters,
         filterType: getRowsParams.filterType,
+      });
+    },
+  );
+}
+
+// Baserow takes list operators (single_select_is_any_of, ...) as comma-separated values.
+function serializeFilterValue(value: unknown): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+  if (Array.isArray(value)) {
+    return value.map(serializeFilterValue).join(',');
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value.toString();
+  }
+  return JSON.stringify(value) ?? '';
+}
+
+/**
+ * Fetches a single page of rows. Unlike getRows, this never follows Baserow's `next`
+ * links, so callers that expose rows to an agent get a bounded response.
+ */
+export async function getRowsPage(
+  params: GetRowsPageParams,
+): Promise<RowsPage> {
+  if (
+    params.filters &&
+    params.filters.length > 1 &&
+    params.filterType == null
+  ) {
+    throw new Error('Filter type must be provided when filters are provided');
+  }
+
+  const query = new URLSearchParams();
+  query.append('user_field_names', 'true');
+  params.filters?.forEach((filter) => {
+    query.append(
+      buildSimpleFilterUrlParam(filter.fieldName, filter.type),
+      serializeFilterValue(filter.value),
+    );
+  });
+  if (params.filterType) {
+    query.append('filter_type', params.filterType);
+  }
+  if (params.orderBy && params.orderBy.length > 0) {
+    // Baserow: comma-separated field names, "-" prefix for descending.
+    query.append(
+      'order_by',
+      params.orderBy
+        .map((sort) =>
+          sort.direction === 'desc' ? `-${sort.fieldName}` : sort.fieldName,
+        )
+        .join(','),
+    );
+  }
+  if (params.includeColumns && params.includeColumns.length > 0) {
+    query.append('include', params.includeColumns.join(','));
+  }
+  if (params.search) {
+    query.append('search', params.search);
+  }
+  const page = params.page ?? DEFAULT_ROWS_PAGE;
+  const size = params.size ?? DEFAULT_ROWS_PAGE_SIZE;
+  query.append('page', `${page}`);
+  query.append('size', `${size}`);
+
+  const url = `api/database/rows/table/${params.tableId}/?${query.toString()}`;
+  const authenticationHeader = createAxiosHeaders(params.tokenOrResolver);
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const response = await makeOpenOpsTablesRequest<{
+        count: number;
+        next: string | null;
+        results: Record<string, unknown>[];
+      }>('GET', url, undefined, authenticationHeader);
+
+      return {
+        count: response.count,
+        page,
+        size,
+        hasMore: response.next !== null && response.next !== undefined,
+        data: response.results,
+      };
+    },
+    (error) => {
+      logger.error('Error while getting rows page:', {
+        error,
+        url,
+        filters: params.filters,
+        filterType: params.filterType,
       });
     },
   );

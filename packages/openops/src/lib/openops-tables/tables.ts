@@ -50,6 +50,16 @@ export async function getTableNames(
   return tables.map((t) => t.name);
 }
 
+/**
+ * Every table in the project database, including same-named ones. Use this when tables
+ * are addressed by id; getAvailableTablesInOpenopsTables is for name-based lookups.
+ */
+export async function getAllTablesInDatabase(
+  serverContext: TablesServerContext,
+): Promise<OpenOpsTable[]> {
+  return fetchAllTables(serverContext);
+}
+
 export async function getAvailableTablesInOpenopsTables(
   serverContext: TablesServerContext,
 ): Promise<OpenOpsTable[]> {
