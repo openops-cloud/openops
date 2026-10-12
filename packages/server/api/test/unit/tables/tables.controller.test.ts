@@ -230,6 +230,30 @@ describe('tablesController', () => {
       );
     });
 
+    // MCP clients send no body (or JSON null) when the agent passes only the table id.
+    it.each([
+      ['no body', {}],
+      [
+        'a JSON null body',
+        { payload: 'null', headers: { 'content-type': 'application/json' } },
+      ],
+    ])('treats %s like an empty body', async (_label, request) => {
+      mockTablesService.queryTableRows.mockResolvedValue(page);
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/v1/tables/42/rows/query',
+        ...request,
+      });
+
+      expect(response.statusCode).toBe(StatusCodes.OK);
+      expect(mockTablesService.queryTableRows).toHaveBeenCalledWith(
+        projectId,
+        42,
+        { page: 1, size: 100 },
+      );
+    });
+
     it('forwards sort order and column selection', async () => {
       mockTablesService.queryTableRows.mockResolvedValue(page);
       const body = {
