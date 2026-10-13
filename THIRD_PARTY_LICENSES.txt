@@ -428,7 +428,7 @@ The following npm packages may be included in this product:
  - @aws-crypto/sha256-browser@5.2.0
  - @aws-crypto/supports-web-crypto@5.2.0
  - @chevrotain/types@11.1.2
- - dompurify@3.4.13
+ - dompurify@3.4.16
  - gaxios@7.3.1
  - gcp-metadata@8.1.2
  - google-auth-library@10.9.1
@@ -5433,7 +5433,7 @@ The following npm packages may be included in this product:
  - @types/mdast@4.0.4
  - @types/mocha@8.2.3
  - @types/ms@2.1.0
- - @types/node@20.17.1
+ - @types/node@20.19.43
  - @types/parse-json@4.0.2
  - @types/prismjs@1.26.6
  - @types/prop-types@15.7.15
@@ -17667,37 +17667,6 @@ POSSIBILITY OF SUCH DAMAGES.
 
 -----------
 
-The following npm package may be included in this product:
-
- - moment@2.29.4
-
-This package contains the following license:
-
-Copyright (c) JS Foundation and other contributors
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
------------
-
 The following npm packages may be included in this product:
 
  - @azure/abort-controller@2.2.0
@@ -17819,6 +17788,37 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - moment@2.31.0
+
+This package contains the following license:
+
+Copyright (c) OpenJS Foundation and other contributors
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -28889,7 +28889,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @modelcontextprotocol/sdk@1.30.0
+ - @modelcontextprotocol/sdk@1.31.0
 
 This package contains the following license:
 
@@ -29956,7 +29956,7 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - undici-types@6.19.8
+ - undici-types@6.21.0
  - undici@6.29.0
  - undici@7.30.0
 
@@ -30837,16 +30837,14 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - @fastify/busboy@3.2.0
+ - @fastify/busboy@3.2.3
 
 This package contains the following license:
 
 MIT License
 
 Copyright Brian White. All rights reserved.
-Copyright (c) 2021-present The Fastify team
-
-The Fastify team members are listed at https://github.com/fastify/fastify#team.
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
