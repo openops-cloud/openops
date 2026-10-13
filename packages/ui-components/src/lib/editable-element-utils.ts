@@ -5,7 +5,7 @@
  */
 export const NO_KEY_CLASS_NAME = 'nokey';
 
-const EDITABLE_TAG_NAMES = ['INPUT', 'SELECT', 'TEXTAREA'];
+const EDITABLE_TAG_NAMES = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
 
 /**
  * Mirrors `isInputDOMNode` from @xyflow/system but takes an element instead of
@@ -17,12 +17,12 @@ const EDITABLE_TAG_NAMES = ['INPUT', 'SELECT', 'TEXTAREA'];
 export function isEditableElement(
   element: Element | null | undefined,
 ): boolean {
-  if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+  if (element?.nodeType !== Node.ELEMENT_NODE) {
     return false;
   }
 
   return (
-    EDITABLE_TAG_NAMES.includes(element.nodeName) ||
+    EDITABLE_TAG_NAMES.has(element.nodeName) ||
     element.hasAttribute('contenteditable') ||
     !!element.closest(`.${NO_KEY_CLASS_NAME}`)
   );
