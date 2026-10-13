@@ -78,6 +78,7 @@ export * from './lib/cn';
 export * from './lib/color-util';
 export * from './lib/compose-refs';
 export * from './lib/constants';
+export * from './lib/editable-element-utils';
 export * from './lib/flow-canvas-utils';
 export * from './lib/json-utils';
 export * from './lib/theme';
