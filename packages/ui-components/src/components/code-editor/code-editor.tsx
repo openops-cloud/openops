@@ -11,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 import { cn } from '../../lib/cn';
+import { NO_KEY_CLASS_NAME } from '../../lib/editable-element-utils';
 import { Theme } from '../../lib/theme';
 import { convertToString, isSourceCodeObject } from './code-utils';
 import { MonacoLanguage } from './types';
@@ -214,7 +215,14 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     return (
       <div
         ref={containerRef}
-        className={cn('h-full w-full flex flex-col gap-2', containerClassName)}
+        data-testid="editor-container"
+        className={cn(
+          // Lets the flow canvas key listeners ignore key events from the editor,
+          // see isEditableElement in editable-element-utils.
+          NO_KEY_CLASS_NAME,
+          'h-full w-full flex flex-col gap-2',
+          containerClassName,
+        )}
       >
         {shouldShowTabs && (
           <div className="flex justify-start gap-4 items-center" role="tablist">

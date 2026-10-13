@@ -19,6 +19,7 @@ import {
 import { usePrevious } from 'react-use';
 import { useKeyPress } from '../../hooks/use-key-press';
 import { clipboardUtils } from '../../lib/clipboard-utils';
+import { isEditableElement } from '../../lib/editable-element-utils';
 import {
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
@@ -278,14 +279,7 @@ export const InteractiveContextProvider = ({
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
-      const activeElement = document.activeElement;
-
-      const isEditableElement =
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement ||
-        activeElement?.hasAttribute('contenteditable');
-
-      if (isEditableElement) {
+      if (isEditableElement(document.activeElement)) {
         return;
       }
 
