@@ -56,6 +56,16 @@ async function buildApp(): Promise<FastifyInstance> {
     { schema: { operationId: 'Get Table', description: 'Agent only' } },
     async () => ({}),
   );
+  app.patch(
+    '/v1/tables/:id/rows',
+    {
+      schema: {
+        operationId: 'Update Table Rows',
+        body: Type.Object({ rows: Type.Array(Type.Object({})) }),
+      },
+    },
+    async () => ({}),
+  );
 
   await app.register(mcpModule);
   await app.ready();
@@ -113,6 +123,16 @@ describe('GET /v1/mcp/openapi.json', () => {
     expect(agentPaths).toContain('/v1/tables/{id}');
     expect(chatPaths).not.toContain('/v1/tables/');
     expect(chatPaths).not.toContain('/v1/tables/{id}');
+  });
+
+  it('gives Tables writes to the agent only', async () => {
+    const chat = await fetchDocument('?profile=chat');
+    const agent = await fetchDocument('?profile=agent');
+
+    expect(chat.paths['/v1/tables/{id}/rows']).toBeUndefined();
+    expect(Object.keys(agent.paths['/v1/tables/{id}/rows'] as object)).toEqual([
+      'patch',
+    ]);
   });
 
   it('defaults to the agent profile, which is what an external client asks for', async () => {
