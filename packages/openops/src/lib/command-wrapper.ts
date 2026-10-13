@@ -1,6 +1,10 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChildProcess } from 'child_process';
-import { execFile, ExecFileOptions, spawn } from 'node:child_process';
+import {
+  execFile,
+  ExecFileOptionsWithStringEncoding,
+  spawn,
+} from 'node:child_process';
 
 export interface CommandResult {
   stdOut: string;
@@ -34,7 +38,7 @@ export async function executeFile(
     envVariables.HOME = process.env['HOME'];
   }
 
-  const options: ExecFileOptions = {
+  const options: ExecFileOptionsWithStringEncoding = {
     env: envVariables,
   };
 
