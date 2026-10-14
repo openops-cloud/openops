@@ -6,7 +6,7 @@ import { MCP_EXTENSION_KEY } from '../../../src/app/mcp/mcp-document';
 import { mcpModule } from '../../../src/app/mcp/mcp.module';
 
 /**
- * A stand-in for the real API: one operation the agent profile claims, one the chat
+ * A stand-in for the real API: operations both profiles claim, one only the agent
  * profile claims, and one neither does.
  */
 async function buildApp(): Promise<FastifyInstance> {
@@ -37,6 +37,31 @@ async function buildApp(): Promise<FastifyInstance> {
       schema: {
         operationId: 'Execute Block Properties',
         body: Type.Object({ name: Type.String() }),
+      },
+    },
+    async () => ({}),
+  );
+  app.get(
+    '/v1/tables/',
+    {
+      schema: {
+        operationId: 'List Tables',
+        description: 'In the agent profile only',
+      },
+    },
+    async () => [],
+  );
+  app.get(
+    '/v1/tables/:id',
+    { schema: { operationId: 'Get Table', description: 'Agent only' } },
+    async () => ({}),
+  );
+  app.patch(
+    '/v1/tables/:id/rows',
+    {
+      schema: {
+        operationId: 'Update Table Rows',
+        body: Type.Object({ rows: Type.Array(Type.Object({})) }),
       },
     },
     async () => ({}),
@@ -87,10 +112,27 @@ describe('GET /v1/mcp/openapi.json', () => {
     }
   });
 
-  it('gives both profiles the same surface in this edition', async () => {
-    expect(Object.keys((await fetchDocument('?profile=agent')).paths)).toEqual(
-      Object.keys((await fetchDocument('?profile=chat')).paths),
+  it('gives the agent profile everything the chat has, plus Tables', async () => {
+    const agentPaths = Object.keys(
+      (await fetchDocument('?profile=agent')).paths,
     );
+    const chatPaths = Object.keys((await fetchDocument('?profile=chat')).paths);
+
+    expect(agentPaths).toEqual(expect.arrayContaining(chatPaths));
+    expect(agentPaths).toContain('/v1/tables/');
+    expect(agentPaths).toContain('/v1/tables/{id}');
+    expect(chatPaths).not.toContain('/v1/tables/');
+    expect(chatPaths).not.toContain('/v1/tables/{id}');
+  });
+
+  it('gives Tables writes to the agent only', async () => {
+    const chat = await fetchDocument('?profile=chat');
+    const agent = await fetchDocument('?profile=agent');
+
+    expect(chat.paths['/v1/tables/{id}/rows']).toBeUndefined();
+    expect(Object.keys(agent.paths['/v1/tables/{id}/rows'] as object)).toEqual([
+      'patch',
+    ]);
   });
 
   it('defaults to the agent profile, which is what an external client asks for', async () => {

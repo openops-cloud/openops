@@ -290,4 +290,27 @@ describe('CodeEditor', () => {
       }).not.toThrow();
     });
   });
+
+  describe('Keyboard isolation from the flow canvas', () => {
+    it('marks the container with the nokey class so canvas key listeners ignore it', () => {
+      render(<CodeEditor value={{ a: 1 }} theme="light" />);
+
+      expect(screen.getByTestId('editor-container')).toHaveClass('nokey');
+    });
+
+    it('keeps the nokey class when a custom containerClassName is provided', () => {
+      render(
+        <CodeEditor
+          value="x"
+          theme="light"
+          containerClassName="custom-container"
+        />,
+      );
+
+      expect(screen.getByTestId('editor-container')).toHaveClass(
+        'nokey',
+        'custom-container',
+      );
+    });
+  });
 });
