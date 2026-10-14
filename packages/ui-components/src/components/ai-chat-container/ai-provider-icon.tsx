@@ -1,6 +1,7 @@
 import { AiProviderEnum } from '@openops/shared';
 import { Bot } from 'lucide-react';
 import AnthropicIcon from '../../icons/anthropic.icon';
+import AtlasCloudIcon from '../../icons/atlascloud.icon';
 import CerebrasIcon from '../../icons/cerebras.icon';
 import CohereIcon from '../../icons/cohere.icon';
 import DeepInfraIcon from '../../icons/deepinfra.icon';
@@ -53,6 +54,8 @@ const AiProviderIcon = ({
       return <CohereIcon {...iconProps} />;
     case AiProviderEnum.CEREBRAS:
       return <CerebrasIcon {...iconProps} />;
+    case AiProviderEnum.ATLAS_CLOUD:
+      return <AtlasCloudIcon {...iconProps} />;
     case AiProviderEnum.DEEPINFRA:
       return <DeepInfraIcon {...iconProps} />;
     case AiProviderEnum.TOGETHER_AI:
