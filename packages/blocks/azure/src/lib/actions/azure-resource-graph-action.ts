@@ -141,12 +141,9 @@ export const azureResourceGraphAction = createAction({
     // Dynamic property: the engine passes { querySubscriptions: [...] }, like
     // `subscriptions?.['subDropdown']` in the CLI and Advisor actions. When the
     // field is switched to custom text it arrives as a string, e.g. '["id"]'.
-    const selection = tryParseJson(querySubscriptions?.['querySubscriptions']);
-    const subscriptionList = Array.isArray(selection)
-      ? (selection.filter((id) => typeof id === 'string' && id) as string[])
-      : typeof selection === 'string' && selection
-        ? [selection]
-        : undefined;
+    const subscriptionList = toSubscriptionList(
+      tryParseJson(querySubscriptions?.['querySubscriptions']),
+    );
 
     const token = await getAzureAccessToken(
       context.auth,
@@ -174,6 +171,16 @@ export const azureResourceGraphAction = createAction({
     };
   },
 });
+
+function toSubscriptionList(selection: unknown): string[] | undefined {
+  if (Array.isArray(selection)) {
+    return selection.filter((id) => typeof id === 'string' && id) as string[];
+  }
+  if (typeof selection === 'string' && selection) {
+    return [selection];
+  }
+  return undefined;
+}
 
 function splitSubscriptionListIntoBatches(
   subscriptionList?: string[],
