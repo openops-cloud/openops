@@ -1,7 +1,0 @@
-# Reviewers will be added automatically to PRs according to the files they own
-
-/.devcontainer @MarceloRGonc
-/.github @MarceloRGonc
-/assets @MarceloRGonc
-/deploy @MarceloRGonc
-
