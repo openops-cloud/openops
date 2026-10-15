@@ -15764,8 +15764,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - libmime@5.4.1
  - libmime@5.4.4
+ - libmime@5.4.6
 
 These packages each contain the following license:
 
@@ -15854,11 +15854,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
  - libbase64@1.3.0
+ - libbase64@1.3.1
 
-This package contains the following license:
+These packages each contain the following license:
 
 Copyright (c) 2014-2017 Andris Reinman
 
@@ -15932,11 +15933,12 @@ THE SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
  - libqp@2.1.1
+ - libqp@2.1.2
 
-This package contains the following license:
+These packages each contain the following license:
 
 Copyright (c) 2014-2022 Andris Reinman
 
@@ -16885,7 +16887,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - imapflow@1.6.0
+ - imapflow@2.1.2
 
 This package contains the following license:
 
@@ -22207,8 +22209,8 @@ permission of its copyright owner.
 
 The following npm packages may be included in this product:
 
- - @zone-eu/mailsplit@5.4.14
  - @zone-eu/mailsplit@5.4.17
+ - @zone-eu/mailsplit@5.4.19
 
 These packages each contain the following license:
 
@@ -23632,36 +23634,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - encoding-japanese@2.2.0
-
-This package contains the following license:
-
-MIT License
-
-Copyright (c) 2012 polygonplanet
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 -----------
 
@@ -32437,7 +32409,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - socks@2.8.9
+ - socks@2.8.10
 
 This package contains the following license:
 
