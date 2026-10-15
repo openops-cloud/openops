@@ -302,7 +302,7 @@
     "xml2js": "0.6.2",
     "yaml": "2.9.0",
     "zod": "4.4.3",
-    "zustand": "4.5.7"
+    "zustand": "5.0.15"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
