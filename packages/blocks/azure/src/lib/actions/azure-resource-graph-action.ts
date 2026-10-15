@@ -3,6 +3,7 @@ import {
   azureAuth,
   getUseHostSessionProperty,
   makeHttpRequest,
+  tryParseJson,
 } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 import { getAzureAccessToken } from '../auth/get-azure-access-token';
@@ -137,7 +138,12 @@ export const azureResourceGraphAction = createAction({
     const normalizedMax =
       typeof maxResults === 'number' ? maxResults : undefined;
 
-    const subscriptionList = querySubscriptions as string[] | undefined;
+    // Dynamic property: the engine passes { querySubscriptions: [...] }, like
+    // `subscriptions?.['subDropdown']` in the CLI and Advisor actions. When the
+    // field is switched to custom text it arrives as a string, e.g. '["id"]'.
+    const subscriptionList = toSubscriptionList(
+      tryParseJson(querySubscriptions?.['querySubscriptions']),
+    );
 
     const token = await getAzureAccessToken(
       context.auth,
@@ -165,6 +171,16 @@ export const azureResourceGraphAction = createAction({
     };
   },
 });
+
+function toSubscriptionList(selection: unknown): string[] | undefined {
+  if (Array.isArray(selection)) {
+    return selection.filter((id) => typeof id === 'string' && id) as string[];
+  }
+  if (typeof selection === 'string' && selection) {
+    return [selection];
+  }
+  return undefined;
+}
 
 function splitSubscriptionListIntoBatches(
   subscriptionList?: string[],
