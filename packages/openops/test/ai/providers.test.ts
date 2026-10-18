@@ -7,6 +7,10 @@ jest.mock('../../src/lib/ai/providers/anthropic', () => ({
   anthropicProvider: { models: ['anthropicModel'] },
 }));
 
+jest.mock('../../src/lib/ai/providers/atlascloud', () => ({
+  atlasCloudProvider: { models: ['atlasCloudModel'] },
+}));
+
 jest.mock('../../src/lib/ai/providers/azure-openai', () => ({
   azureProvider: { models: ['azureModel'] },
 }));
@@ -104,6 +108,10 @@ describe('getAvailableProvidersWithModels', () => {
         models: ['anthropicModel'],
       },
       {
+        provider: AiProviderEnum.ATLAS_CLOUD,
+        models: ['atlasCloudModel'],
+      },
+      {
         provider: AiProviderEnum.AZURE_OPENAI,
         models: ['azureModel'],
       },
@@ -161,7 +169,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(15);
+    expect(result).toHaveLength(16);
     expect(result).toEqual(expected);
   });
 });
