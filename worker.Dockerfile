@@ -23,7 +23,9 @@ ENV AZURE_EXTENSION_DIR="/opt/azure/config/cliextensions"
 RUN <<-```
     set -ex
     python3 -m venv /opt/azure/venv
-    /opt/azure/venv/bin/pip install --no-cache-dir azure-cli==2.74.0
+    # setuptools<81 keeps pkg_resources, which azure-multiapi-storage (bundled with
+    # azure-cli 2.74.0) still imports; without it every `az storage` command fails.
+    /opt/azure/venv/bin/pip install --no-cache-dir azure-cli==2.74.0 "setuptools<81"
     ln -sf /opt/azure/venv/bin/az /usr/local/bin/az
     mkdir -p /opt/azure/config/cliextensions
     az config set extension.use_dynamic_install=yes_without_prompt
