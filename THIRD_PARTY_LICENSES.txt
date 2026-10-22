@@ -14088,7 +14088,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The following npm package may be included in this product:
 
- - qs@6.16.0
+ - qs@6.16.1
 
 This package contains the following license:
 
@@ -18305,7 +18305,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 The following npm package may be included in this product:
 
- - follow-redirects@1.16.0
+ - follow-redirects@1.16.1
 
 This package contains the following license:
 
@@ -28761,7 +28761,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - zod@4.6.5
+ - zod@4.6.6
 
 This package contains the following license:
 
@@ -29374,8 +29374,8 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - undici-types@6.21.0
- - undici@6.29.0
- - undici@7.30.0
+ - undici@6.29.1
+ - undici@7.30.1
 
 These packages each contain the following license:
 
