@@ -425,7 +425,7 @@ Apache License
 The following npm packages may be included in this product:
 
  - @chevrotain/types@11.1.2
- - dompurify@3.4.16
+ - dompurify@3.4.17
  - gaxios@7.3.1
  - gcp-metadata@8.1.2
  - google-auth-library@10.9.1
@@ -6592,7 +6592,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - body-parser@2.3.0
+ - body-parser@2.4.0
  - type-is@2.1.0
 
 These packages each contain the following license:
