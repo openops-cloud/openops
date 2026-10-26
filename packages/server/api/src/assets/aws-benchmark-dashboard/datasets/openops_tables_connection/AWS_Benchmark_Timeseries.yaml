@@ -4,7 +4,6 @@ description: null
 default_endpoint: null
 offset: 0
 cache_timeout: null
-catalog: tables
 schema: public
 sql: ''
 params: null
