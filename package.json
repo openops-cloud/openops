@@ -361,7 +361,7 @@
     "@typescript-eslint/utils": "8.71.1",
     "@vitejs/plugin-react": "6.1.2",
     "@vitest/eslint-plugin": "1.6.27",
-    "@vitest/ui": "1.6.1",
+    "@vitest/ui": "5.0.3",
     "autoprefixer": "10.6.1",
     "babel-jest": "30.5.2",
     "cd": "0.3.3",
