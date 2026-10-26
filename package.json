@@ -366,7 +366,7 @@
     "babel-jest": "30.5.2",
     "cd": "0.3.3",
     "chromatic": "11.29.0",
-    "concurrently": "8.2.2",
+    "concurrently": "10.0.6",
     "esbuild": "0.28.2",
     "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
