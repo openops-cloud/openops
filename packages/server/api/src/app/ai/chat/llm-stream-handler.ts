@@ -1,4 +1,4 @@
-import { updateActiveObservation, updateActiveTrace } from '@langfuse/tracing';
+import { updateActiveObservation } from '@langfuse/tracing';
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfigParsed } from '@openops/shared';
 import { trace } from '@opentelemetry/api';
@@ -117,9 +117,6 @@ export function getLLMAsyncStream(
       updateActiveObservation({
         output: error,
         level: 'ERROR',
-      });
-      updateActiveTrace({
-        output: error,
       });
 
       trace.getActiveSpan()?.end();
