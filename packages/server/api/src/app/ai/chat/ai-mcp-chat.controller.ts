@@ -55,6 +55,8 @@ import { getBlockSystemPrompt } from './prompts.service';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
 const MAX_CHAT_NAME_LENGTH = 100;
+const CHAT_MESSAGE_TRACE_NAME = 'openops-chat-message';
+const CHAT_NAME_TRACE_NAME = 'openops-chat-name';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -198,9 +200,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
   const handleNewMessage = observe(
     async (request, reply) => {
-      const chatId = request.body.chatId;
-      const userId = request.principal.id;
-
       const frontendToolResults = extractUiToolResultsFromMessage(
         request.body.message,
       );
@@ -217,19 +216,17 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         input: messageContent,
       });
 
-      await withLangfuseSession(chatId, userId, messageContent, async () => {
-        await routeChatRequest({
-          app,
-          request,
-          newMessage: createUserMessage(messageContent),
-          isToolResultOnly,
-          frontendToolResults,
-          reply,
-        });
+      await routeChatRequest({
+        app,
+        request,
+        newMessage: createUserMessage(messageContent),
+        isToolResultOnly,
+        frontendToolResults,
+        reply,
       });
     },
     {
-      name: 'openops-chat-message',
+      name: CHAT_MESSAGE_TRACE_NAME,
       endOnExit: false,
       captureInput: false,
       captureOutput: false,
@@ -238,7 +235,16 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.post('/', NewMessageOptions, async (request, reply) => {
     try {
-      await handleNewMessage(request, reply);
+      // The session scope must wrap the observed handler so the root
+      // observation, not only its children, carries sessionId and userId.
+      await withLangfuseSession(
+        {
+          sessionId: request.body.chatId,
+          userId: request.principal.id,
+          traceName: CHAT_MESSAGE_TRACE_NAME,
+        },
+        () => handleNewMessage(request, reply),
+      );
     } finally {
       // Flush traces to Langfuse (critical for Fastify)
       const spanProcessor = getLangfuseSpanProcessor();
@@ -267,7 +273,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           .send({ name: DEFAULT_CHAT_NAME, isGenerated: false });
       }
 
-      const generated = await generateChatName(chatHistory, projectId);
+      const generated = await withLangfuseSession(
+        { sessionId: chatId, userId, traceName: CHAT_NAME_TRACE_NAME },
+        () => generateChatName(chatHistory, projectId),
+      );
 
       if (!generated.isGenerated) {
         return await reply
