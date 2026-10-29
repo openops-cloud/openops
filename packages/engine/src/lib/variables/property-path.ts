@@ -165,7 +165,7 @@ class PathParser {
       }
       return '';
     }
-    if (LINE_TERMINATORS.has(next.charCodeAt(0))) {
+    if (LINE_TERMINATORS.has(next.codePointAt(0) ?? -1)) {
       return '';
     }
     if (next in SIMPLE_ESCAPES) {
