@@ -28,6 +28,8 @@ describe('parsePropertyPath', () => {
     ["step_1['a\\nb']", ['step_1', 'a\nb']],
     ["step_1['a\\tb']", ['step_1', 'a\tb']],
     ["step_1['a\\0b']", ['step_1', 'a\0b']],
+      ['step_1[9007199254740993]', ['step_1', '9007199254740992']],
+    ['step_1[123456789012345678901234]', ['step_1', String(Number('123456789012345678901234'))]],
   ])('parses %p', (input, expected) => {
     expect(parsePropertyPath(input)).toEqual(expected);
   });
@@ -143,6 +145,15 @@ describe('resolvePropertyPath', () => {
     expect(resolvePropertyPath(scope, segments)).toEqual({ status: 'bail' });
   });
 
+  test('functions, symbols and undefined inside arrays read as null, as after JSON', () => {
+    const scope = { odd: [Symbol('x'), function named() { return 1; }, undefined, 'last'] };
+    expect(resolvePropertyPath(scope, ['odd', '0'])).toEqual({ status: 'resolved', value: null });
+    expect(resolvePropertyPath(scope, ['odd', '0', 'description'])).toEqual({ status: 'resolved', value: undefined });
+    expect(resolvePropertyPath(scope, ['odd', '1', 'name'])).toEqual({ status: 'resolved', value: undefined });
+    expect(resolvePropertyPath(scope, ['odd', '2'])).toEqual({ status: 'resolved', value: null });
+    expect(resolvePropertyPath(scope, ['odd', '3'])).toEqual({ status: 'resolved', value: 'last' });
+  });
+
   test('never returns a live reference', () => {
     const result = resolvePropertyPath(root, ['items']);
     expect(result).toEqual({ status: 'resolved', value: [5, 'a', { deep: { x: 'y' } }] });
@@ -202,6 +213,9 @@ describe('extractReferencedStepNames', () => {
     'arguments[0]',
     'st\\u0065p_1',
     '\\x73tep_1',
+      "(() => {}).constructor('return x')()",
+    'Reflect.get(globalThis, "x")',
+    '[].map.__proto__',
   ])('returns all steps for dynamic access %p', (script) => {
     expect(extractReferencedStepNames(script, stepNames)).toEqual(stepNames);
   });

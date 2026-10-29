@@ -126,14 +126,17 @@ async function createScriptSession(): Promise<ScriptSession> {
     let compiled: any;
     let outRef: any;
     try {
-      for (const [key, value] of Object.entries(globals)) {
-        // primitives transfer as-is; objects go through the memoized ExternalCopy
-        const transferable =
-          typeof value === 'object' && value !== null
-            ? externalCopyOf(value).copyInto()
-            : value;
-        await context.global.set(key, transferable);
-      }
+      await Promise.all(
+        Object.entries(globals).map(([key, value]) =>
+          // primitives transfer as-is; objects go through the memoized ExternalCopy
+          context.global.set(
+            key,
+            typeof value === 'object' && value !== null
+              ? externalCopyOf(value).copyInto()
+              : value,
+          ),
+        ),
+      );
       await polyfill.run(context);
       compiled = await isolate.compileScript(script);
       outRef = await compiled.run(context, { reference: true, promise: true });

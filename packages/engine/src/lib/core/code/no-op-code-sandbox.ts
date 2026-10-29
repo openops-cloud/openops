@@ -22,9 +22,9 @@ export const noOpCodeSandbox: CodeSandbox = {
     return fn(...args);
   },
 
-  async createScriptSession() {
+  createScriptSession() {
     let disposed = false;
-    return {
+    return Promise.resolve({
       async run(
         script: string,
         globals: Record<string, unknown>,
@@ -42,6 +42,6 @@ export const noOpCodeSandbox: CodeSandbox = {
       dispose(): void {
         disposed = true;
       },
-    };
+    });
   },
 };

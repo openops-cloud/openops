@@ -24,7 +24,7 @@ const BLOCKED_ROOTS = new Set([
 ]);
 const IDENT_START = /[A-Za-z_$]/;
 const IDENT_PART = /[A-Za-z0-9_$]/;
-const ARRAY_INDEX = /^(0|[1-9][0-9]*)$/;
+const ARRAY_INDEX = /^(0|[1-9]\d*)$/;
 const SIMPLE_ESCAPES: Record<string, string> = {
   n: '\n',
   r: '\r',
@@ -35,9 +35,11 @@ const SIMPLE_ESCAPES: Record<string, string> = {
 };
 /**
  * Scripts that can reach step outputs without naming them literally; they get every step in scope.
- * `\u` / `\x` cover identifier escapes such as `step_1`.
+ * `constructor` covers `(() => {}).constructor('return tri' + 'gger')()`; `\u` / `\x` cover
+ * identifier escapes such as `step_1`.
  */
-const DYNAMIC_ACCESS = /\b(globalThis|this|eval|Function|arguments)\b|\\[ux]/;
+const DYNAMIC_ACCESS =
+  /\b(globalThis|this|eval|Function|arguments|constructor|prototype|__proto__|Reflect|Proxy)\b|\\[ux]/;
 
 export type PropertyPathResolution =
   { status: 'resolved'; value: unknown } | { status: 'bail' };
@@ -113,11 +115,16 @@ class PathParser {
 
   private readIndex(): string | null {
     const start = this.pos;
-    while (this.pos < this.input.length && /[0-9]/.test(this.input[this.pos])) {
+    while (this.pos < this.input.length && /\d/.test(this.input[this.pos])) {
       this.pos++;
     }
     const digits = this.input.slice(start, this.pos);
-    return ARRAY_INDEX.test(digits) ? digits : null;
+    if (!ARRAY_INDEX.test(digits)) {
+      return null;
+    }
+    // a numeric literal becomes a property key through Number → String, which rounds past 2^53
+    // exactly as `obj[9007199254740993]` does in JavaScript
+    return String(Number(digits));
   }
 
   private readString(): string | null {
@@ -162,10 +169,10 @@ class PathParser {
     if (next in SIMPLE_ESCAPES) {
       return SIMPLE_ESCAPES[next];
     }
-    if (next === '0' && !/[0-9]/.test(this.input[this.pos] ?? '')) {
+    if (next === '0' && !/\d/.test(this.input[this.pos] ?? '')) {
       return '\0';
     }
-    if (/[0-9ux]/.test(next)) {
+    if (/[\dux]/.test(next)) {
       return null;
     }
     return next;
@@ -204,6 +211,67 @@ function isJsonPlain(value: object): boolean {
   return proto === Object.prototype || proto === null;
 }
 
+type Step = { next: unknown } | { bail: true };
+const BAIL: Step = { bail: true };
+
+/** One segment into an array: JSON turns holes, undefined, functions and symbols into null and drops named props. */
+function stepIntoArray(current: unknown[], segment: string): Step {
+  if (ARRAY_INDEX.test(segment)) {
+    const index = Number(segment);
+    if (index >= current.length) {
+      return { next: undefined };
+    }
+    const element = current[index];
+    const isHole = !Object.prototype.hasOwnProperty.call(current, segment);
+    const droppedByJson =
+      element === undefined ||
+      typeof element === 'function' ||
+      typeof element === 'symbol';
+    return { next: isHole || droppedByJson ? null : element };
+  }
+  if (segment !== 'length' && hasOwn(current, segment)) {
+    return BAIL;
+  }
+  return { next: Reflect.get(current, segment) };
+}
+
+/** One segment into a plain object: own enumerable data properties only, as JSON would have kept them. */
+function stepIntoPlainObject(current: object, segment: string): Step {
+  if (!hasOwn(current, segment)) {
+    return { next: Reflect.get(current, segment) };
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(current, segment);
+  // JSON skips non-enumerable properties and evaluates accessors; let the sandbox decide both
+  if (!descriptor?.enumerable || descriptor.get !== undefined) {
+    return BAIL;
+  }
+  const value = descriptor.value;
+  // own functions / symbols are dropped by JSON
+  const droppedByJson =
+    typeof value === 'function' || typeof value === 'symbol';
+  return { next: droppedByJson ? undefined : value };
+}
+
+function stepInto(current: unknown, segment: string): Step {
+  if (typeof current === 'number' && !Number.isFinite(current)) {
+    // NaN / Infinity serialize to null, and null has no properties
+    return { next: undefined };
+  }
+  if (typeof current === 'bigint') {
+    return BAIL;
+  }
+  if (typeof current === 'object' && current !== null) {
+    if (!isJsonPlain(current)) {
+      return BAIL;
+    }
+    return Array.isArray(current)
+      ? stepIntoArray(current, segment)
+      : stepIntoPlainObject(current, segment);
+  }
+  // primitives: 'abc'.length, 'abc'[0]; inherited properties of anything else
+  return { next: Reflect.get(Object(current), segment) };
+}
+
 /**
  * Walks `segments` over the live `root` and returns a JSON clone of the result, producing exactly what
  * evaluating the same path inside the sandbox over a JSON-cloned state would. Bails whenever an
@@ -219,49 +287,11 @@ export function resolvePropertyPath(
     if (isNil(current)) {
       return { status: 'resolved', value: undefined };
     }
-    if (typeof current === 'number' && !Number.isFinite(current)) {
-      // NaN / Infinity serialize to null, and null has no properties
-      return { status: 'resolved', value: undefined };
-    }
-    if (typeof current === 'bigint') {
+    const step = stepInto(current, segment);
+    if ('bail' in step) {
       return { status: 'bail' };
     }
-    if (typeof current === 'object' && current !== null) {
-      if (!isJsonPlain(current)) {
-        return { status: 'bail' };
-      }
-      if (Array.isArray(current)) {
-        if (ARRAY_INDEX.test(segment)) {
-          const index = Number(segment);
-          // holes serialize to null
-          current =
-            index < current.length && !(segment in current)
-              ? null
-              : current[index];
-          continue;
-        }
-        if (hasOwn(current, segment) && segment !== 'length') {
-          return { status: 'bail' };
-        }
-        current = Reflect.get(current, segment);
-        continue;
-      }
-      if (hasOwn(current, segment)) {
-        const descriptor = Object.getOwnPropertyDescriptor(current, segment);
-        // JSON skips non-enumerable properties and evaluates accessors; let the sandbox decide both
-        if (!descriptor?.enumerable || descriptor.get !== undefined) {
-          return { status: 'bail' };
-        }
-        const value = descriptor.value;
-        // own functions / symbols / undefined are dropped by JSON
-        current =
-          typeof value === 'function' || typeof value === 'symbol'
-            ? undefined
-            : value;
-        continue;
-      }
-    }
-    current = Reflect.get(Object(current), segment);
+    current = step.next;
   }
   return { status: 'resolved', value: cloneJson(current) };
 }

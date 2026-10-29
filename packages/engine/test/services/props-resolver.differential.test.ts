@@ -65,6 +65,14 @@ const buildState = () => {
     .upsertStep('step_3', step(ActionType.BLOCK, null))
     .upsertStep('step_4', step(ActionType.BLOCK, { arr: Object.assign([1, 2], { foo: 'bar' }), buf: Buffer.from('hi') }))
     .upsertStep('step_10', step(ActionType.BLOCK, { ten: true }))
+    .upsertStep(
+      'step_11',
+      step(ActionType.BLOCK, {
+        '9007199254740992': 'a',
+        '9007199254740993': 'b',
+        odd: [Symbol('x'), function named() { return 1; }, undefined, 'last'],
+      }),
+    )
     .upsertStep('inner', step(ActionType.BLOCK, { value: 'root-inner' }))
     .upsertStep('loop', step(ActionType.LOOP_ON_ITEMS, { item: 'b', index: 2, iterations }));
   return root.setCurrentPath(root.currentPath.loopIteration({ loopName: 'loop', iteration: 1 }));
@@ -95,6 +103,19 @@ const CORPUS = [
   'trigger.name.toUpperCase.caller',
   'trigger.items.map.name',
   'trigger.name.at.name',
+  'step_11[9007199254740993]',
+  'step_11[9007199254740992]',
+  "step_11['9007199254740993']",
+  'step_11.odd[0]',
+  'step_11.odd[0].description',
+  'step_11.odd[1].name',
+  'step_11.odd[2]',
+  'step_11.odd[2].x',
+  'step_11.odd[3]',
+  'step_11.odd.length',
+  "(() => {}).constructor('return trig' + 'ger')().name",
+  "[].map.constructor('return step_' + '10')().ten",
+  "Reflect.get(globalThis, 'trig' + 'ger').name",
   'trigger.date',
   'trigger.date.length',
   'trigger.nan',
