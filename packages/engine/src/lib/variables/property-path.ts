@@ -25,6 +25,8 @@ const BLOCKED_ROOTS = new Set([
 const IDENT_START = /[A-Za-z_$]/;
 const IDENT_PART = /[A-Za-z0-9_$]/;
 const ARRAY_INDEX = /^(0|[1-9]\d*)$/;
+// LF, LINE SEPARATOR, PARAGRAPH SEPARATOR: a backslash before any of these is a line continuation
+const LINE_TERMINATORS = new Set([0x0a, 0x2028, 0x2029]);
 const SIMPLE_ESCAPES: Record<string, string> = {
   n: '\n',
   r: '\r',
@@ -163,7 +165,7 @@ class PathParser {
       }
       return '';
     }
-    if (next === '\n' || next === ' ' || next === ' ') {
+    if (LINE_TERMINATORS.has(next.charCodeAt(0))) {
       return '';
     }
     if (next in SIMPLE_ESCAPES) {
