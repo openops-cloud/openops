@@ -38,7 +38,9 @@ const SIMPLE_ESCAPES: Record<string, string> = {
 /**
  * Scripts that can reach step outputs without naming them literally; they get every step in scope.
  * `constructor` covers `(() => {}).constructor('return tri' + 'gger')()`; `\u` / `\x` cover
- * identifier escapes such as `step_1`.
+ * identifier escapes such as `step_1`. This is a best-effort denylist: a script that assembles
+ * one of these words from pieces is not matched and gets only the steps it names literally, so it
+ * can resolve to '' where it used to see every step; it can never see more than before.
  */
 const DYNAMIC_ACCESS =
   /\b(globalThis|this|eval|Function|arguments|constructor|prototype|__proto__|Reflect|Proxy)\b|\\[ux]/;
