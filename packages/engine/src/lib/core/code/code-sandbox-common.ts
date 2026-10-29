@@ -12,6 +12,24 @@ export type CodeSandbox = {
    * Executes a script.
    */
   runScript(params: RunScriptParams): Promise<unknown>;
+
+  /**
+   * Creates a session that evaluates many scripts in one sandbox instance, each in a fresh context.
+   */
+  createScriptSession(): Promise<ScriptSession>;
+};
+
+export type ScriptSession = {
+  /**
+   * Evaluates `script` in a new context whose only globals are `globals`. Runs are serialized, so a
+   * script that exhausts the sandbox cannot affect another run. Rejects on any evaluation error.
+   */
+  run(script: string, globals: Record<string, unknown>): Promise<unknown>;
+
+  /**
+   * Releases the sandbox instance. Idempotent; later runs reject.
+   */
+  dispose(): void;
 };
 
 type RunCodeModuleParams = {

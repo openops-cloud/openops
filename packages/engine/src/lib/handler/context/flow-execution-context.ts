@@ -384,6 +384,51 @@ export class FlowExecutorContext {
     });
     return flattenedSteps;
   }
+
+  /**
+   * Step names visible from the current path: root steps plus every enclosing loop iteration.
+   * Same key set as currentState(), without materializing any output.
+   */
+  public stepNames(): string[] {
+    const names = new Set<string>();
+    for (const stepMap of this.stepMapsAlongPath()) {
+      for (const stepName of Object.keys(stepMap)) {
+        names.add(stepName);
+      }
+    }
+    return [...names];
+  }
+
+  /**
+   * The live output of `stepName` as currentState() would expose it: the innermost enclosing loop
+   * iteration that defines the step wins, a step defined with an undefined output still shadows an
+   * outer one, and nothing is read off prototypes.
+   */
+  public getStepOutputView(stepName: string): unknown {
+    const stepMaps = this.stepMapsAlongPath();
+    for (let level = stepMaps.length - 1; level >= 0; level--) {
+      if (Object.prototype.hasOwnProperty.call(stepMaps[level], stepName)) {
+        return stepMaps[level][stepName].output;
+      }
+    }
+    return undefined;
+  }
+
+  private stepMapsAlongPath(): Array<Readonly<Record<string, StepOutput>>> {
+    const stepMaps: Array<Readonly<Record<string, StepOutput>>> = [this.steps];
+    let targetMap: Readonly<Record<string, StepOutput>> = this.steps;
+    this.currentPath.path.forEach(([stepName, iteration]) => {
+      const stepOutput = targetMap[stepName];
+      if (!stepOutput?.output || stepOutput.type !== ActionType.LOOP_ON_ITEMS) {
+        throw new Error(
+          '[ExecutionState#getTargetMap] Not instance of Loop On Items step output',
+        );
+      }
+      targetMap = stepOutput.output.iterations[iteration];
+      stepMaps.push(targetMap);
+    });
+    return stepMaps;
+  }
 }
 
 function extractOutput(

@@ -1,11 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { applyFunctionToKeysAndValues, isNil, isString } from '@openops/shared';
 import { initCodeSandbox } from '../core/code/code-sandbox';
+import { ScriptSession } from '../core/code/code-sandbox-common';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { createConnectionService } from '../services/connections.service';
+import {
+  cloneJson,
+  extractReferencedStepNames,
+  parsePropertyPath,
+  resolvePropertyPath,
+} from './property-path';
 
 const VARIABLE_PATTERN = /\{\{(.*?)\}\}/g;
 const CONNECTIONS = 'connections';
+// The isolate sandbox's bootstrap redefines these when the global of that name is not a function, so a
+// step with such a name must keep resolving through the sandbox to behave as before (harmless in no-op mode).
+const SANDBOX_POLYFILL_GLOBALS = new Set([
+  'btoa',
+  'atob',
+  'btoaUtf8',
+  'atobUtf8',
+]);
 const FLATTEN_NESTED_KEYS_PATTERN = /\{\{\s*flattenNestedKeys(.*?)\}\}/g;
 
 type PropsResolverParams = {
@@ -30,45 +45,119 @@ export const createPropsResolver = ({
           censoredInput: unresolvedInput,
         };
       }
-      const currentState = executionState.currentState();
-      const resolveOptions = {
-        engineToken,
-        projectId,
-        apiUrl,
-        currentState,
-      };
-      const resolvedInput = await applyFunctionToKeysAndValues<T>(
-        unresolvedInput,
-        (token) =>
-          resolveInputAsync({
-            ...resolveOptions,
-            input: token,
-            censoredInput: false,
-          }),
-      );
-      const censoredInput = await applyFunctionToKeysAndValues<T>(
-        unresolvedInput,
-        (token) =>
-          resolveInputAsync({
-            ...resolveOptions,
-            input: token,
-            censoredInput: true,
-          }),
-      );
-      return {
-        resolvedInput,
-        censoredInput,
-      };
+      const scope = createResolveScope(executionState);
+      try {
+        const resolveOptions = {
+          engineToken,
+          projectId,
+          apiUrl,
+          scope,
+        };
+        const resolvedInput = await applyFunctionToKeysAndValues<T>(
+          unresolvedInput,
+          (token) =>
+            resolveInputAsync({
+              ...resolveOptions,
+              input: token,
+              censoredInput: false,
+            }),
+        );
+        const censoredInput = await applyFunctionToKeysAndValues<T>(
+          unresolvedInput,
+          (token) =>
+            resolveInputAsync({
+              ...resolveOptions,
+              input: token,
+              censoredInput: true,
+            }),
+        );
+        return {
+          resolvedInput,
+          censoredInput,
+        };
+      } finally {
+        await scope.dispose();
+      }
     },
   };
 };
+
+/**
+ * Everything one `resolve()` call shares between its tokens and its two passes: the step names in
+ * scope, the live and JSON-cloned step outputs (each step read and cloned at most once), and a lazily
+ * created script session for tokens that are real expressions. Nothing outlives the call, so loop
+ * `item`/`index` are always the ones upserted for the current iteration.
+ */
+type ResolveScope = {
+  stepNames: string[];
+  stepNameSet: Set<string>;
+  getLiveOutput(stepName: string): unknown;
+  getClonedOutput(stepName: string): unknown;
+  getSession(): Promise<ScriptSession>;
+  dispose(): Promise<void>;
+};
+
+class CloneFailure {
+  constructor(readonly cause: unknown) {}
+}
+
+function createResolveScope(executionState: FlowExecutorContext): ResolveScope {
+  const stepNames = executionState.stepNames();
+  const liveOutputs = new Map<string, unknown>();
+  const clonedOutputs = new Map<string, unknown>();
+  let session: Promise<ScriptSession> | undefined;
+  const scope: ResolveScope = {
+    stepNames,
+    stepNameSet: new Set(stepNames),
+    getLiveOutput(stepName) {
+      if (!liveOutputs.has(stepName)) {
+        liveOutputs.set(stepName, executionState.getStepOutputView(stepName));
+      }
+      return liveOutputs.get(stepName);
+    },
+    getClonedOutput(stepName) {
+      if (!clonedOutputs.has(stepName)) {
+        // a clone failure (cycle, BigInt, depth) is memoized too, so every token on that step pays once
+        try {
+          clonedOutputs.set(stepName, cloneJson(scope.getLiveOutput(stepName)));
+        } catch (error) {
+          clonedOutputs.set(stepName, new CloneFailure(error));
+        }
+      }
+      const cloned = clonedOutputs.get(stepName);
+      if (cloned instanceof CloneFailure) {
+        throw cloned.cause;
+      }
+      return cloned;
+    },
+    getSession() {
+      if (isNil(session)) {
+        session = initCodeSandbox().then((sandbox) =>
+          sandbox.createScriptSession(),
+        );
+      }
+      return session;
+    },
+    async dispose() {
+      if (isNil(session)) {
+        return;
+      }
+      try {
+        (await session).dispose();
+      } catch {
+        // the session failed to initialize; nothing to release
+      }
+    },
+  };
+  return scope;
+}
 
 const mergeFlattenedKeysArraysIntoOneArray = async (
   token: string,
   partsThatNeedResolving: string[],
   resolveOptions: Pick<
     ResolveInputInternalParams,
-    'engineToken' | 'projectId' | 'apiUrl' | 'currentState' | 'censoredInput'
+    'engineToken' | 'projectId' | 'apiUrl' | 'scope' | 'censoredInput'
   >,
 ) => {
   const resolvedValues: Record<string, unknown> = {};
@@ -108,7 +197,7 @@ export type PropsResolver = ReturnType<typeof createPropsResolver>;
 async function resolveInputAsync(
   params: ResolveInputInternalParams,
 ): Promise<unknown> {
-  const { input, currentState, engineToken, projectId, apiUrl, censoredInput } =
+  const { input, scope, engineToken, projectId, apiUrl, censoredInput } =
     params;
   const tokensThatNeedResolving = input.match(VARIABLE_PATTERN);
   const inputContainsOnlyOneTokenToResolve =
@@ -119,7 +208,7 @@ async function resolveInputAsync(
     engineToken,
     projectId,
     apiUrl,
-    currentState,
+    scope,
     censoredInput,
   };
 
@@ -161,12 +250,61 @@ async function resolveInputAsync(
 async function resolveSingleToken(
   params: ResolveSingleTokenParams,
 ): Promise<unknown> {
-  const { variableName, currentState } = params;
+  const { variableName, scope } = params;
   const isConnection = variableName.startsWith(CONNECTIONS);
   if (isConnection) {
     return handleConnection(params);
   }
-  return evalInScope(variableName, { ...currentState });
+  const expression = variableName.trim();
+  if (expression.length === 0) {
+    return '';
+  }
+  // Pure paths rooted at a step are read in-process; anything else (expressions, globals such as
+  // `Math.PI`, blocked segments) is evaluated in the sandbox exactly as before.
+  const segments = parsePropertyPath(expression);
+  if (
+    !isNil(segments) &&
+    scope.stepNameSet.has(segments[0]) &&
+    !SANDBOX_POLYFILL_GLOBALS.has(segments[0])
+  ) {
+    try {
+      const resolution = resolvePropertyPath(
+        scope.getLiveOutput(segments[0]),
+        segments.slice(1),
+      );
+      if (resolution.status === 'resolved') {
+        return resolution.value ?? '';
+      }
+    } catch {
+      // the live walk or the JSON clone threw (host accessor such as fn.caller, BigInt, cycle, depth):
+      // let the sandbox decide, which yields '' exactly as before
+    }
+  }
+  return evalInSession(expression, scope);
+}
+
+async function evalInSession(
+  expression: string,
+  scope: ResolveScope,
+): Promise<unknown> {
+  try {
+    const globals: Record<string, unknown> = {};
+    for (const stepName of extractReferencedStepNames(
+      expression,
+      scope.stepNames,
+    )) {
+      const value = scope.getClonedOutput(stepName);
+      // JSON drops undefined outputs, so such a step was never a global and must stay a ReferenceError
+      if (value !== undefined) {
+        globals[stepName] = value;
+      }
+    }
+    const session = await scope.getSession();
+    const result = await session.run(expression, globals);
+    return result ?? '';
+  } catch {
+    return '';
+  }
 }
 
 async function handleConnection(
@@ -232,6 +370,10 @@ function parseSquareBracketConnectionPath(variableName: string): string | null {
   return null;
 }
 
+/**
+ * Connection sub-paths keep their own throwaway sandbox run: the connection object must never be a
+ * global of the shared session, where another token of the same step could read it.
+ */
 async function evalInScope(
   js: string,
   contextAsScope: Record<string, unknown>,
@@ -272,7 +414,7 @@ async function replaceAsync(
 
 type ResolveSingleTokenParams = {
   variableName: string;
-  currentState: Record<string, unknown>;
+  scope: ResolveScope;
   engineToken: string;
   projectId: string;
   apiUrl: string;
@@ -285,7 +427,7 @@ type ResolveInputInternalParams = {
   projectId: string;
   apiUrl: string;
   censoredInput: boolean;
-  currentState: Record<string, unknown>;
+  scope: ResolveScope;
 };
 
 type ResolveInputParams = {
