@@ -13,8 +13,8 @@ import { statusProperty } from './api-filters/status-property';
 import { tagsProperty } from './api-filters/tags-property';
 import { virtualTagsProperty } from './api-filters/virtual-tags-property';
 import type { SelectedAccount } from './common/account';
-import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
-import { authenticateUserWithAnodot } from './common/auth';
+import { buildAccountApiKeyForAccount } from './common/anodot-requests-helpers';
+import { createUmbrellaSession } from './common/auth';
 import {
   addClosedAndDoneDateFilters,
   addCustomStatusFilters,
@@ -107,8 +107,6 @@ export const getRecommendationsCustomAction = createAction({
   },
   async run(context) {
     try {
-      const { authUrl, apiUrl, username, password } = context.auth;
-
       const rawAccounts = context.propsValue.accounts as unknown;
       let parsedAccounts = rawAccounts;
       if (typeof rawAccounts === 'string') {
@@ -120,23 +118,18 @@ export const getRecommendationsCustomAction = createAction({
 
       const filters = buildRecommendationsFilters(context.propsValue);
 
-      const anodotTokens = await authenticateUserWithAnodot(
-        authUrl,
-        username,
-        password,
-      );
+      const session = await createUmbrellaSession(context.auth);
 
       const result: Record<string, any> = {};
       for (const selectedAccount of accounts) {
-        const accountApiKey = buildUserAccountApiKey(
-          anodotTokens.apikey,
-          String(selectedAccount.accountKey),
-          String(selectedAccount.divisionId),
+        const accountApiKey = buildAccountApiKeyForAccount(
+          session.tokens.apikey,
+          selectedAccount,
         );
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(
-          apiUrl,
-          anodotTokens.Authorization,
+          session.apiUrl,
+          session.tokens.Authorization,
           accountApiKey,
           filters,
         );

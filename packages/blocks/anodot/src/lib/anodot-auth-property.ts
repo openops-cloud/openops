@@ -1,6 +1,19 @@
-import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
-import { AnodotTokens, authenticateUserWithAnodot } from './common/auth';
-import { getAnodotUsers } from './common/users';
+import {
+  BlockAuth,
+  BlockPropValueSchema,
+  Property,
+  Validators,
+} from '@openops/blocks-framework';
+import {
+  createUmbrellaSession,
+  otherUserManagementVersion,
+  UmbrellaAuthProps,
+  UmbrellaSession,
+  UserManagementVersion,
+} from './common/auth';
+import { listUmbrellaAccounts } from './common/umbrella-accounts';
+
+const USER_MANAGEMENT_VERSION_DISPLAY_NAME = 'User Management version';
 
 export const anadotAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Umbrella',
@@ -9,9 +22,23 @@ export const anadotAuth = BlockAuth.CustomAuth({
   description: 'The authentication to use to connect to Umbrella',
   required: true,
   props: {
+    userManagementVersion: Property.StaticDropdown({
+      displayName: USER_MANAGEMENT_VERSION_DISPLAY_NAME,
+      description:
+        'Select the User Management version of your Umbrella tenant.',
+      required: false,
+      defaultValue: '2.0',
+      options: {
+        options: [
+          { label: 'User Management 2.0', value: '2.0' },
+          { label: 'User Management 1.0', value: '1.0' },
+        ],
+      },
+    }),
     authUrl: Property.ShortText({
       displayName: 'Authentication URL',
-      description: 'The URL to use to authenticate',
+      description:
+        'The URL to use to authenticate. Only used for User Management 1.0.',
       required: true,
       validators: [Validators.url],
       defaultValue: 'https://tokenizer.mypileus.io/prod',
@@ -35,14 +62,10 @@ export const anadotAuth = BlockAuth.CustomAuth({
     }),
   },
   validate: async ({ auth }) => {
-    let anodotTokens: AnodotTokens;
+    let session: UmbrellaSession;
     try {
-      anodotTokens = await authenticateUserWithAnodot(
-        auth.authUrl,
-        auth.username,
-        auth.password,
-      );
-    } catch (e) {
+      session = await createUmbrellaSession(auth);
+    } catch {
       return {
         valid: false,
         error: 'Error validating authentication.',
@@ -50,8 +73,16 @@ export const anadotAuth = BlockAuth.CustomAuth({
     }
 
     try {
-      await getAnodotUsers(auth.apiUrl, anodotTokens);
-    } catch (e) {
+      await listUmbrellaAccounts(session);
+    } catch {
+      const otherVersion = otherUserManagementVersion(session.version);
+      if (await canListAccountsWithVersion(auth, otherVersion)) {
+        return {
+          valid: false,
+          error: `This user appears to be on User Management ${otherVersion}. Change the '${USER_MANAGEMENT_VERSION_DISPLAY_NAME}' setting.`,
+        };
+      }
+
       return {
         valid: false,
         error: 'Error validating API access.',
@@ -63,3 +94,24 @@ export const anadotAuth = BlockAuth.CustomAuth({
     };
   },
 });
+
+export type UmbrellaAuth = BlockPropValueSchema<typeof anadotAuth>;
+
+/**
+ * Probes the other User Management version end to end (login and account
+ * listing). Both steps are deliberately inside one try/catch: the selected
+ * version's login has already succeeded, so a failure here is never an
+ * authentication problem to report, only a signal that the hint does not apply.
+ */
+async function canListAccountsWithVersion(
+  auth: UmbrellaAuthProps,
+  version: UserManagementVersion,
+): Promise<boolean> {
+  try {
+    const session = await createUmbrellaSession(auth, version);
+    await listUmbrellaAccounts(session);
+    return true;
+  } catch {
+    return false;
+  }
+}

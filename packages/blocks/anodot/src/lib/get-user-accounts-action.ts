@@ -1,8 +1,8 @@
 import { createAction } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
 import { anadotAuth } from './anodot-auth-property';
-import { authenticateUserWithAnodot } from './common/auth';
-import { getAnodotUsers } from './common/users';
+import { createUmbrellaSession } from './common/auth';
+import { listRawUmbrellaAccounts } from './common/umbrella-accounts';
 
 export const getUserAccountsAction = createAction({
   auth: anadotAuth,
@@ -14,16 +14,9 @@ export const getUserAccountsAction = createAction({
   props: {},
   async run(context) {
     try {
-      const { authUrl, apiUrl, username, password } = context.auth;
+      const session = await createUmbrellaSession(context.auth);
 
-      const anodotTokens = await authenticateUserWithAnodot(
-        authUrl,
-        username,
-        password,
-      );
-      const anodotUsers = await getAnodotUsers(apiUrl, anodotTokens);
-
-      return anodotUsers.accounts;
+      return await listRawUmbrellaAccounts(session);
     } catch (error) {
       const errorMsg = `An error occurred while fetching Umbrella user accounts: ${error}`;
 
