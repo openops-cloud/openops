@@ -1,73 +1,67 @@
-const getAnodotUsersMock = jest.fn();
+const getUmbrellaAccountByIdMock = jest.fn();
 
-jest.mock('../../src/lib/common/users', () => ({
-  getAnodotUsers: getAnodotUsersMock,
+jest.mock('../../src/lib/common/umbrella-accounts', () => ({
+  getUmbrellaAccountById: getUmbrellaAccountByIdMock,
 }));
 
 import { getAccountApiKey } from '../../src/lib/common/account';
-import { AnodotTokens } from '../../src/lib/common/auth';
+import { UmbrellaSession } from '../../src/lib/common/auth';
 
 describe('getAccountApiKey', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const anodotTokens: AnodotTokens = {
-    Authorization: 'a bearer token',
-    apikey: 'an account',
+  const session: UmbrellaSession = {
+    version: '1.0',
+    apiUrl: 'some url',
+    tokens: {
+      Authorization: 'a bearer token',
+      apikey: 'an account:-1',
+    },
   };
 
-  test('should throw if failed to fetch users', async () => {
-    getAnodotUsersMock.mockRejectedValue(new Error('some error'));
+  test('should propagate lookup failures', async () => {
+    getUmbrellaAccountByIdMock.mockRejectedValue(
+      new Error('No account matching account id: 123456789 was found.'),
+    );
 
-    await expect(
-      getAccountApiKey('123456789', 'some url', anodotTokens),
-    ).rejects.toThrow('some error');
+    await expect(getAccountApiKey('123456789', session)).rejects.toThrow(
+      'No account matching account id: 123456789 was found.',
+    );
 
-    expect(getAnodotUsersMock).toHaveBeenCalledTimes(1);
-    expect(getAnodotUsersMock).toHaveBeenCalledWith('some url', anodotTokens);
+    expect(getUmbrellaAccountByIdMock).toHaveBeenCalledTimes(1);
+    expect(getUmbrellaAccountByIdMock).toHaveBeenCalledWith(
+      session,
+      '123456789',
+    );
   });
 
-  test.each([
-    [{ accounts: [] }],
-    [{}],
-    [undefined],
-    [{ accounts: [{ accountId: '2' }] }],
-  ])('should throw if no account was found', async (getUsersResult: any) => {
-    getAnodotUsersMock.mockResolvedValue(getUsersResult);
-
-    await expect(
-      getAccountApiKey('123456789', 'some url', anodotTokens),
-    ).rejects.toThrow('No account matching account id: 123456789 was found.');
-
-    expect(getAnodotUsersMock).toHaveBeenCalledTimes(1);
-    expect(getAnodotUsersMock).toHaveBeenCalledWith('some url', anodotTokens);
-  });
-
-  test('should get account from user with account id when account id exists', async () => {
-    getAnodotUsersMock.mockResolvedValue({
-      accounts: [
-        {
-          accountKey: 'account key 1',
-          divisionId: 'division id 1',
-          accountId: '123456789',
-        },
-        {
-          accountKey: 'account key 2',
-          divisionId: 'division id 2',
-          accountId: '987654321',
-        },
-      ],
+  test('should build a 1.0 key from the resolved account', async () => {
+    getUmbrellaAccountByIdMock.mockResolvedValue({
+      accountId: '987654321',
+      accountKey: 2,
+      divisionId: 0,
+      accountName: 'account 2',
     });
 
-    const result = await getAccountApiKey(
-      '987654321',
-      'some url',
-      anodotTokens,
-    );
-    expect(result).toBe('an account:account key 2:division id 2');
+    const result = await getAccountApiKey('987654321', session);
 
-    expect(getAnodotUsersMock).toHaveBeenCalledTimes(1);
-    expect(getAnodotUsersMock).toHaveBeenCalledWith('some url', anodotTokens);
+    expect(result).toBe('an account:2:0');
+  });
+
+  test('should build a 2.0 key with a blank cost center segment', async () => {
+    getUmbrellaAccountByIdMock.mockResolvedValue({
+      accountId: '225220305501',
+      accountKey: '225220305501',
+      accountName: 'BillingTransferTest',
+    });
+
+    const result = await getAccountApiKey('225220305501', {
+      ...session,
+      version: '2.0',
+    });
+
+    expect(result).toBe('an account:225220305501:');
   });
 });

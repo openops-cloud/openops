@@ -4,6 +4,11 @@ describe('block declaration tests', () => {
   test('should return block with correct authentication', () => {
     expect(anodot.auth).toMatchObject({
       props: {
+        userManagementVersion: {
+          required: false,
+          type: 'STATIC_DROPDOWN',
+          defaultValue: '2.0',
+        },
         authUrl: {
           required: true,
           type: 'SHORT_TEXT',

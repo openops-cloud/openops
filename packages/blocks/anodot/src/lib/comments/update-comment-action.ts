@@ -2,7 +2,7 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
 import { anadotAuth } from '../anodot-auth-property';
 import { getAccountApiKey } from '../common/account';
-import { authenticateUserWithAnodot } from '../common/auth';
+import { createUmbrellaSession } from '../common/auth';
 import { updateRecommendationComment } from '../common/recommendation-comments';
 
 export const updateCommentAction = createAction({
@@ -34,21 +34,12 @@ export const updateCommentAction = createAction({
       context.propsValue;
 
     try {
-      const { authUrl, apiUrl, username, password } = context.auth;
-      const anodotTokens = await authenticateUserWithAnodot(
-        authUrl,
-        username,
-        password,
-      );
-      const accountApiKey = await getAccountApiKey(
-        accountId,
-        apiUrl,
-        anodotTokens,
-      );
+      const session = await createUmbrellaSession(context.auth);
+      const accountApiKey = await getAccountApiKey(accountId, session);
 
       const result = await updateRecommendationComment(
-        apiUrl,
-        anodotTokens.Authorization,
+        session.apiUrl,
+        session.tokens.Authorization,
         accountApiKey,
         recommendationId,
         commentId,

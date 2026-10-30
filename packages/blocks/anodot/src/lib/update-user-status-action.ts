@@ -3,7 +3,7 @@ import { logger } from '@openops/server-shared';
 import { isEmpty } from '@openops/shared';
 import { anadotAuth } from './anodot-auth-property';
 import { getAccountApiKey } from './common/account';
-import { authenticateUserWithAnodot } from './common/auth';
+import { createUmbrellaSession } from './common/auth';
 import { setUserStatusForRecommendation } from './common/recommendations';
 
 export const updateUserStatusAction = createAction({
@@ -83,23 +83,13 @@ export const updateUserStatusAction = createAction({
     const { userStatus, recommendationId, accountId } = context.propsValue;
 
     try {
-      const { authUrl, apiUrl, username, password } = context.auth;
-
-      const anodotTokens = await authenticateUserWithAnodot(
-        authUrl,
-        username,
-        password,
-      );
-      const accountApiKey = await getAccountApiKey(
-        accountId,
-        apiUrl,
-        anodotTokens,
-      );
+      const session = await createUmbrellaSession(context.auth);
+      const accountApiKey = await getAccountApiKey(accountId, session);
       const actionParams = getActionParams(context);
 
       const result = await setUserStatusForRecommendation(
-        apiUrl,
-        anodotTokens.Authorization,
+        session.apiUrl,
+        session.tokens.Authorization,
         accountApiKey,
         recommendationId,
         userStatus,
