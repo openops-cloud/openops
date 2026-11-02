@@ -155,6 +155,7 @@ export const getAiTelemetrySDK = () => {
     publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
     baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
     release: system.get(SharedSystemProp.ENVIRONMENT_NAME),
+    environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
   });
 
   tracerProvider = new NodeTracerProvider({

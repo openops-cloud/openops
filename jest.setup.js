@@ -1,11 +1,3 @@
-// Mock langfuse-vercel to prevent dynamic import errors in Jest
-jest.mock('langfuse-vercel', () => ({
-  LangfuseExporter: jest.fn().mockImplementation(() => ({
-    export: jest.fn(),
-    shutdown: jest.fn(),
-  })),
-}));
-
 /**
  * Workaround for a jsdom selector-engine bug that makes Radix poppers take
  * ~8 s to open under Jest.

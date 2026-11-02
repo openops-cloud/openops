@@ -94,22 +94,35 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   deleteChatHistory: jest.fn(),
 }));
 
+// Records the order in which the Langfuse session scope and the observed
+// handler are entered, so tests can assert the root observation is created
+// inside the propagated session attributes.
+const mockLangfuseCallOrder: string[] = [];
+
 jest.mock('@openops/common', () => ({
   validateAiProviderConfig: jest.fn(),
   getLangfuseSpanProcessor: jest.fn().mockReturnValue(undefined),
-  withLangfuseSession: jest.fn((_sessionId, _userId, _input, fn) => fn()),
+  withLangfuseSession: jest.fn((_attributes, fn) => {
+    mockLangfuseCallOrder.push('session');
+    return fn();
+  }),
 }));
 
 jest.mock('@langfuse/tracing', () => ({
-  observe: jest.fn((fn) => fn),
+  observe: jest.fn((fn) => (...args: unknown[]) => {
+    mockLangfuseCallOrder.push('observe');
+    return fn(...args);
+  }),
   updateActiveObservation: jest.fn(),
-  updateActiveTrace: jest.fn(),
 }));
 
-const { validateAiProviderConfig: validateAiProviderConfigMock } =
-  jest.requireMock('@openops/common') as {
-    validateAiProviderConfig: jest.Mock;
-  };
+const {
+  validateAiProviderConfig: validateAiProviderConfigMock,
+  withLangfuseSession: withLangfuseSessionMock,
+} = jest.requireMock('@openops/common') as {
+  validateAiProviderConfig: jest.Mock;
+  withLangfuseSession: jest.Mock;
+};
 
 describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   type RouteHandler = (
@@ -348,6 +361,28 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         }),
       );
     });
+
+    it('should create the root observation inside the Langfuse session scope', async () => {
+      mockLangfuseCallOrder.length = 0;
+      const postHandler = handlers['/'];
+
+      await postHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(withLangfuseSessionMock).toHaveBeenCalledTimes(1);
+      expect(withLangfuseSessionMock).toHaveBeenCalledWith(
+        {
+          sessionId: 'test-chat-id',
+          userId: 'test-user-id',
+          traceName: 'openops-chat-message',
+        },
+        expect.any(Function),
+      );
+      expect(mockLangfuseCallOrder).toEqual(['session', 'observe']);
+      expect(routeChatRequestMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('POST /chat-name (chat name generation)', () => {
@@ -358,6 +393,38 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       handlers = {};
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
       postHandler = handlers['/chat-name'];
+    });
+
+    it('should generate the chat name inside the Langfuse session scope', async () => {
+      mockLangfuseCallOrder.length = 0;
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'user', content: 'How do I optimize AWS costs?' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockImplementation(async () => {
+        mockLangfuseCallOrder.push('generateChatName');
+        return { isGenerated: true, name: 'AWS Cost Optimization' };
+      });
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(withLangfuseSessionMock).toHaveBeenCalledWith(
+        {
+          sessionId: 'test-chat-id',
+          userId: 'test-user-id',
+          traceName: 'openops-chat-name',
+        },
+        expect.any(Function),
+      );
+      expect(mockLangfuseCallOrder).toEqual(['session', 'generateChatName']);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        isGenerated: true,
+        name: 'AWS Cost Optimization',
+      });
     });
 
     it('should return generated chat name for valid messages', async () => {
