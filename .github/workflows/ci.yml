@@ -114,7 +114,7 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7.2.1
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   check-node-version:
@@ -144,7 +144,7 @@ jobs:
         run: ./tools/check-node-version.sh --fix
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7.2.1
         with:
           file_pattern: .nvmrc
           commit_message: Sync .nvmrc with the Dockerfile node version
