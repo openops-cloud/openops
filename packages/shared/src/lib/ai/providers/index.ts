@@ -9,6 +9,7 @@ export type GetProvidersResponse = Static<typeof GetProvidersResponse>;
 
 export enum AiProviderEnum {
   ANTHROPIC = 'Anthropic',
+  ATLAS_CLOUD = 'Atlas Cloud',
   AZURE_OPENAI = 'Azure OpenAI',
   CEREBRAS = 'Cerebras',
   COHERE = 'Cohere',
