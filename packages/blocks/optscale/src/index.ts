@@ -4,6 +4,8 @@ import { getDataSourcesAction } from './lib/actions/get-data-sources-action';
 import { getEmployeesAction } from './lib/actions/get-employees-action';
 import { getOrganizationsAction } from './lib/actions/get-organizations-action';
 import { getPoolsAction } from './lib/actions/get-pools-action';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
+import { getResourceAction } from './lib/actions/get-resource-action';
 import { optscaleAuth } from './lib/auth';
 
 export const optscale = createBlock({
@@ -16,6 +18,8 @@ export const optscale = createBlock({
   actions: [
     getOrganizationsAction,
     getDataSourcesAction,
+    getRecommendationsAction,
+    getResourceAction,
     getPoolsAction,
     getEmployeesAction,
   ],
