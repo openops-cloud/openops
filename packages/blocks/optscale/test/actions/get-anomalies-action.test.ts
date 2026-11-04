@@ -4,6 +4,7 @@ import { sendOptScaleRequest } from '../../src/lib/common/make-request';
 import { auth, createContext } from './test-helpers';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 
@@ -61,6 +62,23 @@ describe('getAnomaliesAction', () => {
     );
 
     expect(result).toEqual(constraints);
+  });
+
+  test('treats an unset checkbox as only violated policies', async () => {
+    const result = await getAnomaliesAction.run(
+      createContext({ organizationId: 'org-1', hitDays: 7 }),
+    );
+
+    expect(result).toEqual([constraints[0]]);
+  });
+
+  test('rejects an invalid number of days before calling the API', async () => {
+    await expect(
+      getAnomaliesAction.run(
+        createContext({ organizationId: 'org-1', hitDays: 0 }),
+      ),
+    ).rejects.toThrow('must be a whole number of at least 1');
+    expect(sendMock).not.toHaveBeenCalled();
   });
 
   test('is a read-only action', () => {

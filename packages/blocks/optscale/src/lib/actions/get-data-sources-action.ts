@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 export const getDataSourcesAction = createAction({
@@ -20,7 +20,7 @@ export const getDataSourcesAction = createAction({
     }>({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/organizations/${context.propsValue.organizationId}/cloud_accounts`,
+      path: `/organizations/${pathSegment(context.propsValue.organizationId)}/cloud_accounts`,
       query: { details: true },
     });
 

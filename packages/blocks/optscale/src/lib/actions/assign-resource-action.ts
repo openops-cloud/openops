@@ -2,7 +2,7 @@ import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { RiskLevel } from '@openops/shared';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import {
   employeeProperty,
   organizationProperty,
@@ -44,7 +44,7 @@ export const assignResourceAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.POST,
-      path: `/organizations/${organizationId}/assignments/bulk`,
+      path: `/organizations/${pathSegment(organizationId)}/assignments/bulk`,
       body: { resource_ids: ids, pool_id: poolId, owner_id: ownerId },
     });
   },

@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 export const getPoolsAction = createAction({
@@ -19,13 +19,13 @@ export const getPoolsAction = createAction({
     const organization = await sendOptScaleRequest<{ pool_id: string }>({
       auth,
       method: HttpMethod.GET,
-      path: `/organizations/${context.propsValue.organizationId}`,
+      path: `/organizations/${pathSegment(context.propsValue.organizationId)}`,
     });
 
     return sendOptScaleRequest({
       auth,
       method: HttpMethod.GET,
-      path: `/pools/${organization.pool_id}`,
+      path: `/pools/${pathSegment(organization.pool_id)}`,
       query: { children: true, details: true },
     });
   },

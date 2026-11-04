@@ -1,5 +1,5 @@
 import { HttpMethod } from '@openops/blocks-common';
-import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { BlockAuth, Property } from '@openops/blocks-framework';
 import { sendOptScaleRequest, signIn } from './common/make-request';
 
 const markdown = `
@@ -21,10 +21,10 @@ export const optscaleAuth = BlockAuth.CustomAuth({
   props: {
     baseUrl: Property.ShortText({
       displayName: 'OptScale URL',
-      description: 'The URL of your OptScale host, without a path',
+      description:
+        'The URL of your OptScale host, without a path, for example https://my.optscale.com',
       required: true,
       defaultValue: 'https://my.optscale.com',
-      validators: [Validators.url],
     }),
     email: Property.ShortText({
       displayName: 'Email',
@@ -38,11 +38,10 @@ export const optscaleAuth = BlockAuth.CustomAuth({
   validate: async ({ auth }) => {
     try {
       await signIn(auth);
-    } catch {
+    } catch (error) {
       return {
         valid: false,
-        error:
-          'Invalid OptScale credentials or URL. Check the email, password and URL and try again.',
+        error: `Could not sign in to OptScale: ${(error as Error).message}`,
       };
     }
 
@@ -53,10 +52,12 @@ export const optscaleAuth = BlockAuth.CustomAuth({
         path: '/organizations',
         query: { limit: 1 },
       });
-    } catch {
+    } catch (error) {
       return {
         valid: false,
-        error: 'Authenticated with OptScale but could not reach the REST API.',
+        error: `Signed in to OptScale but could not reach the REST API: ${
+          (error as Error).message
+        }`,
       };
     }
 

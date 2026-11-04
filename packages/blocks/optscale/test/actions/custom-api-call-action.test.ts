@@ -22,6 +22,15 @@ describe('customApiCallAction', () => {
     );
   });
 
+  test('has an empty default URL before a connection is selected', async () => {
+    const urlProps = await (customApiCallAction.props['url'] as any).props(
+      { auth: undefined },
+      {},
+    );
+
+    expect(urlProps.url.defaultValue).toBe('');
+  });
+
   test('signs in and sends a bearer token', async () => {
     (signIn as jest.Mock).mockResolvedValue('token-1');
 

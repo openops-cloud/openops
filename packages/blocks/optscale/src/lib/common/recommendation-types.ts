@@ -145,6 +145,6 @@ export function getRecommendationCategory(
 
 export function getRecommendationTypeOptions(
   types: RecommendationType[] = RECOMMENDATION_TYPES,
-) {
+): { label: string; value: string }[] {
   return types.map(({ label, value }) => ({ label, value }));
 }

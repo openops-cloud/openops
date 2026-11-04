@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 export const getEmployeesAction = createAction({
@@ -18,7 +18,7 @@ export const getEmployeesAction = createAction({
     const { employees } = await sendOptScaleRequest<{ employees: unknown[] }>({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/organizations/${context.propsValue.organizationId}/employees`,
+      path: `/organizations/${pathSegment(context.propsValue.organizationId)}/employees`,
     });
 
     return employees;

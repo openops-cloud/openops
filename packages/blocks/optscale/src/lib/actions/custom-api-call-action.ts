@@ -21,7 +21,7 @@ export const customApiCallAction = createCustomApiCallAction({
   displayName: 'Custom OptScale API Call',
   description: 'Make a custom call to the OptScale REST API',
   auth: optscaleAuth,
-  baseUrl: (auth) => getRestApiUrl(auth as OptScaleAuth),
+  baseUrl: (auth) => (auth ? getRestApiUrl(auth as OptScaleAuth) : ''),
   authMapping: customApiCallAuthMapping,
   additionalProps: {
     documentation: Property.MarkDown({

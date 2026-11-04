@@ -6,7 +6,11 @@ import {
   expenseFilterProperties,
   toExpenseFilterQuery,
 } from '../common/expense-filters';
-import { sendOptScaleRequest } from '../common/make-request';
+import {
+  pathSegment,
+  sendOptScaleRequest,
+  toOptionalInteger,
+} from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 export const getExpensesAction = createAction({
@@ -42,12 +46,12 @@ export const getExpensesAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/clean_expenses`,
+      path: `/organizations/${pathSegment(organizationId)}/clean_expenses`,
       query: {
         ...toUnixDateRange(startDate, endDate),
         ...toExpenseFilterQuery(context.propsValue),
-        limit,
-        offset,
+        limit: toOptionalInteger(limit, 'Limit', 1),
+        offset: toOptionalInteger(offset, 'Offset', 0),
       },
     });
   },

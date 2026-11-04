@@ -1,6 +1,11 @@
 import { HttpMethod } from '@openops/blocks-common';
-import { DropdownState, Property } from '@openops/blocks-framework';
-import { OptScaleAuth, sendOptScaleRequest } from './make-request';
+import {
+  DropdownProperty,
+  DropdownState,
+  MultiSelectDropdownProperty,
+  Property,
+} from '@openops/blocks-framework';
+import { OptScaleAuth, pathSegment, sendOptScaleRequest } from './make-request';
 
 interface NamedEntity {
   id: string;
@@ -31,13 +36,17 @@ async function toDropdownState(
   }
 }
 
+type DropdownOptionsLoader = (
+  propsValue: Record<string, unknown>,
+) => Promise<DropdownState<string>>;
+
 function organizationScopedOptions(
   entityName: string,
   load: (
     auth: OptScaleAuth,
     organizationId: string,
   ) => Promise<DropdownOption[]>,
-) {
+): DropdownOptionsLoader {
   return async ({
     auth,
     organizationId,
@@ -88,7 +97,7 @@ export const loadCloudAccountOptions = organizationScopedOptions(
     }>({
       auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/cloud_accounts`,
+      path: `/organizations/${pathSegment(organizationId)}/cloud_accounts`,
     });
 
     return cloud_accounts.map((account) => ({
@@ -106,7 +115,7 @@ export const loadPoolOptions = organizationScopedOptions(
     }>({
       auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/pools`,
+      path: `/organizations/${pathSegment(organizationId)}/pools`,
     });
 
     return pools.map((pool) => ({
@@ -124,7 +133,7 @@ export const loadEmployeeOptions = organizationScopedOptions(
     }>({
       auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/employees`,
+      path: `/organizations/${pathSegment(organizationId)}/employees`,
     });
 
     return employees.map((employee) => ({
@@ -145,8 +154,8 @@ export const organizationProperty = Property.Dropdown<string, true>({
 function filterProperty(
   displayName: string,
   description: string,
-  options: typeof loadCloudAccountOptions,
-) {
+  options: DropdownOptionsLoader,
+): MultiSelectDropdownProperty<string, false> {
   return Property.MultiSelectDropdown<string, false>({
     displayName,
     description,
@@ -156,7 +165,10 @@ function filterProperty(
   });
 }
 
-export function cloudAccountsProperty() {
+export function cloudAccountsProperty(): MultiSelectDropdownProperty<
+  string,
+  false
+> {
   return filterProperty(
     'Data Sources',
     'The cloud accounts (data sources) to filter by. Leave empty to include all.',
@@ -164,7 +176,10 @@ export function cloudAccountsProperty() {
   );
 }
 
-export function poolsFilterProperty() {
+export function poolsFilterProperty(): MultiSelectDropdownProperty<
+  string,
+  false
+> {
   return filterProperty(
     'Pools',
     'The pools to filter by. Leave empty to include all.',
@@ -172,7 +187,10 @@ export function poolsFilterProperty() {
   );
 }
 
-export function ownersFilterProperty() {
+export function ownersFilterProperty(): MultiSelectDropdownProperty<
+  string,
+  false
+> {
   return filterProperty(
     'Owners',
     'The resource owners (employees) to filter by. Leave empty to include all.',
@@ -180,7 +198,10 @@ export function ownersFilterProperty() {
   );
 }
 
-export function poolProperty(displayName: string, description: string) {
+export function poolProperty(
+  displayName: string,
+  description: string,
+): DropdownProperty<string, true> {
   return Property.Dropdown<string, true>({
     displayName,
     description,
@@ -190,7 +211,10 @@ export function poolProperty(displayName: string, description: string) {
   });
 }
 
-export function employeeProperty(displayName: string, description: string) {
+export function employeeProperty(
+  displayName: string,
+  description: string,
+): DropdownProperty<string, true> {
   return Property.Dropdown<string, true>({
     displayName,
     description,

@@ -4,6 +4,7 @@ import { sendOptScaleRequest } from '../../src/lib/common/make-request';
 import { auth, createContext } from './test-helpers';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 
@@ -159,6 +160,25 @@ describe('getRecommendationsAction', () => {
         createContext({ ...baseProps, status: 'excluded' }),
       ),
     ).resolves.toEqual([]);
+  });
+
+  test('rejects an invalid limit before calling the API', async () => {
+    await expect(
+      getRecommendationsAction.run(createContext({ ...baseProps, limit: 2.5 })),
+    ).rejects.toThrow('Limit per Type must be a whole number of at least 1');
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  test('encodes the organization ID in paths', async () => {
+    mockResponses({});
+
+    await getRecommendationsAction.run(
+      createContext({ ...baseProps, organizationId: 'org/../x' }),
+    );
+
+    expect(sendMock.mock.calls[1][0].path).toBe(
+      '/organizations/org%2F..%2Fx/optimizations',
+    );
   });
 
   test('is a read-only action', () => {

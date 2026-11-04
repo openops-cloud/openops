@@ -49,24 +49,27 @@ describe('optscaleAuth', () => {
   });
 
   test('is invalid when sign-in fails', async () => {
-    (signIn as jest.Mock).mockRejectedValue(new Error('bad'));
+    (signIn as jest.Mock).mockRejectedValue(
+      new Error('OptScale API error 403 OA0037: Email or password is invalid'),
+    );
 
     const result = await optscaleAuth.validate!({ auth } as any);
 
     expect(result).toEqual({
       valid: false,
-      error: expect.stringContaining('Invalid OptScale credentials'),
+      error:
+        'Could not sign in to OptScale: OptScale API error 403 OA0037: Email or password is invalid',
     });
     expect(sendOptScaleRequest).not.toHaveBeenCalled();
   });
 
   test('is invalid when the REST API cannot be reached', async () => {
     (signIn as jest.Mock).mockResolvedValue('token');
-    (sendOptScaleRequest as jest.Mock).mockRejectedValue(new Error('bad'));
+    (sendOptScaleRequest as jest.Mock).mockRejectedValue(new Error('denied'));
 
     await expect(optscaleAuth.validate!({ auth } as any)).resolves.toEqual({
       valid: false,
-      error: expect.stringContaining('could not reach the REST API'),
+      error: 'Signed in to OptScale but could not reach the REST API: denied',
     });
   });
 });

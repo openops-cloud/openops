@@ -12,6 +12,7 @@ import {
 } from '../../src/lib/common/properties';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 

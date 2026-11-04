@@ -6,7 +6,7 @@ import {
   expenseFilterProperties,
   toExpenseFilterQuery,
 } from '../common/expense-filters';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 export const getExpensesBreakdownAction = createAction({
@@ -46,7 +46,7 @@ export const getExpensesBreakdownAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/breakdown_expenses`,
+      path: `/organizations/${pathSegment(organizationId)}/breakdown_expenses`,
       query: {
         ...toUnixDateRange(startDate, endDate),
         breakdown_by: breakdownBy,

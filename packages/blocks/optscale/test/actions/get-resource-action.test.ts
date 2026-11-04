@@ -4,6 +4,7 @@ import { sendOptScaleRequest } from '../../src/lib/common/make-request';
 import { auth, createContext } from './test-helpers';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 

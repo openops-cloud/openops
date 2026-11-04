@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 
 export const getResourceAction = createAction({
   auth: optscaleAuth,
@@ -22,9 +22,7 @@ export const getResourceAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/cloud_resources/${encodeURIComponent(
-        context.propsValue.resourceId.trim(),
-      )}`,
+      path: `/cloud_resources/${pathSegment(context.propsValue.resourceId)}`,
       query: { details: true },
     });
   },

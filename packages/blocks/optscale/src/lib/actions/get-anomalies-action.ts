@@ -1,7 +1,11 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import {
+  pathSegment,
+  sendOptScaleRequest,
+  toOptionalInteger,
+} from '../common/make-request';
 import { organizationProperty } from '../common/properties';
 
 interface OrganizationConstraint {
@@ -49,16 +53,26 @@ export const getAnomaliesAction = createAction({
   async run(context) {
     const { organizationId, types, hitDays, onlyViolated } = context.propsValue;
 
+    const hitDaysValue = toOptionalInteger(
+      hitDays,
+      'Violations From the Last N Days',
+      1,
+    );
+
     const { organization_constraints } = await sendOptScaleRequest<{
       organization_constraints: OrganizationConstraint[];
     }>({
       auth: context.auth,
       method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/organization_constraints`,
-      query: { type: types, hit_days: hitDays },
+      path: `/organizations/${pathSegment(organizationId)}/organization_constraints`,
+      query: {
+        type: types,
+        hit_days: hitDaysValue,
+      },
     });
 
-    return onlyViolated
+    // The checkbox defaults to on, so treat an unset value as on.
+    return onlyViolated !== false
       ? organization_constraints.filter(
           (constraint) => (constraint.limit_hits ?? []).length > 0,
         )

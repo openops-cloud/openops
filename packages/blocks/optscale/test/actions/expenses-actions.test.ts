@@ -5,6 +5,7 @@ import { sendOptScaleRequest } from '../../src/lib/common/make-request';
 import { auth, createContext } from './test-helpers';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 
@@ -63,6 +64,16 @@ describe('getExpensesAction', () => {
     await expect(
       getExpensesAction.run(createContext({ ...period, offset: 10 })),
     ).rejects.toThrow('Offset requires a limit');
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    [{ limit: 0 }, 'Limit must be a whole number of at least 1'],
+    [{ limit: 10, offset: -1 }, 'Offset must be a whole number of at least 0'],
+  ])('rejects invalid paging %p', async (paging, message) => {
+    await expect(
+      getExpensesAction.run(createContext({ ...period, ...paging })),
+    ).rejects.toThrow(message);
     expect(sendMock).not.toHaveBeenCalled();
   });
 

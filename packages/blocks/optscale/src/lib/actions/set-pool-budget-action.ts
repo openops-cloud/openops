@@ -2,7 +2,7 @@ import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { RiskLevel } from '@openops/shared';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import { organizationProperty, poolProperty } from '../common/properties';
 
 export const setPoolBudgetAction = createAction({
@@ -33,7 +33,7 @@ export const setPoolBudgetAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.PATCH,
-      path: `/pools/${poolId}`,
+      path: `/pools/${pathSegment(poolId)}`,
       body: { limit },
     });
   },

@@ -7,6 +7,7 @@ import { sendOptScaleRequest } from '../../src/lib/common/make-request';
 import { auth, createContext } from './test-helpers';
 
 jest.mock('../../src/lib/common/make-request', () => ({
+  ...jest.requireActual('../../src/lib/common/make-request'),
   sendOptScaleRequest: jest.fn(),
 }));
 
@@ -124,6 +125,22 @@ describe('setPoolBudgetAction', () => {
       path: '/pools/p-1',
       body: { limit: 500 },
     });
+  });
+
+  test('encodes the pool ID in the path', async () => {
+    await setPoolBudgetAction.run(
+      createContext({
+        organizationId: 'org-1',
+        poolId: 'p-1/../../organizations/x',
+        limit: 5,
+      }),
+    );
+
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/pools/p-1%2F..%2F..%2Forganizations%2Fx',
+      }),
+    );
   });
 
   test('allows removing the limit with zero', async () => {

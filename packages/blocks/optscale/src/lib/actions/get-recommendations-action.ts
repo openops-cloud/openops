@@ -1,7 +1,11 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import {
+  pathSegment,
+  sendOptScaleRequest,
+  toOptionalInteger,
+} from '../common/make-request';
 import {
   cloudAccountsProperty,
   organizationProperty,
@@ -83,23 +87,26 @@ export const getRecommendationsAction = createAction({
       minSaving,
     } = context.propsValue;
 
-    const organization = await sendOptScaleRequest<{ currency?: string }>({
-      auth,
-      method: HttpMethod.GET,
-      path: `/organizations/${organizationId}`,
-    });
+    const limitPerType = toOptionalInteger(limit, 'Limit per Type', 1);
 
-    const response = await sendOptScaleRequest<OptimizationsResponse>({
-      auth,
-      method: HttpMethod.GET,
-      path: `/organizations/${organizationId}/optimizations`,
-      query: {
-        type: recommendationTypes,
-        cloud_account_id: cloudAccountIds,
-        status,
-        limit,
-      },
-    });
+    const [organization, response] = await Promise.all([
+      sendOptScaleRequest<{ currency?: string }>({
+        auth,
+        method: HttpMethod.GET,
+        path: `/organizations/${pathSegment(organizationId)}`,
+      }),
+      sendOptScaleRequest<OptimizationsResponse>({
+        auth,
+        method: HttpMethod.GET,
+        path: `/organizations/${pathSegment(organizationId)}/optimizations`,
+        query: {
+          type: recommendationTypes,
+          cloud_account_id: cloudAccountIds,
+          status,
+          limit: limitPerType,
+        },
+      }),
+    ]);
 
     const groups = response[STATUS_RESPONSE_KEY[status]] ?? {};
 

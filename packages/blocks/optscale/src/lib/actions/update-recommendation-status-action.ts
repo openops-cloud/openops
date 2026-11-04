@@ -2,7 +2,7 @@ import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { RiskLevel } from '@openops/shared';
 import { optscaleAuth } from '../auth';
-import { sendOptScaleRequest } from '../common/make-request';
+import { pathSegment, sendOptScaleRequest } from '../common/make-request';
 import {
   getRecommendationTypeOptions,
   NON_DISMISSIBLE_RECOMMENDATION_TYPES,
@@ -60,7 +60,7 @@ export const updateRecommendationStatusAction = createAction({
     return sendOptScaleRequest({
       auth: context.auth,
       method: HttpMethod.PATCH,
-      path: `/resources/${encodeURIComponent(resourceId.trim())}/optimizations`,
+      path: `/resources/${pathSegment(resourceId)}/optimizations`,
       body: { action, recommendation: recommendationType },
     });
   },
