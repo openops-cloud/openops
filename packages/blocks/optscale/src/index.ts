@@ -1,5 +1,6 @@
 import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getAnomaliesAction } from './lib/actions/get-anomalies-action';
 import { getDataSourcesAction } from './lib/actions/get-data-sources-action';
 import { getEmployeesAction } from './lib/actions/get-employees-action';
 import { getExpensesAction } from './lib/actions/get-expenses-action';
@@ -24,6 +25,7 @@ export const optscale = createBlock({
     getResourceAction,
     getExpensesAction,
     getExpensesBreakdownAction,
+    getAnomaliesAction,
     getPoolsAction,
     getEmployeesAction,
   ],
