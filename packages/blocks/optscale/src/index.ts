@@ -1,5 +1,9 @@
 import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getDataSourcesAction } from './lib/actions/get-data-sources-action';
+import { getEmployeesAction } from './lib/actions/get-employees-action';
+import { getOrganizationsAction } from './lib/actions/get-organizations-action';
+import { getPoolsAction } from './lib/actions/get-pools-action';
 import { optscaleAuth } from './lib/auth';
 
 export const optscale = createBlock({
@@ -9,6 +13,11 @@ export const optscale = createBlock({
   logoUrl: '/blocks/optscale.svg',
   authors: ['OpenOps'],
   categories: [BlockCategory.FINOPS],
-  actions: [],
+  actions: [
+    getOrganizationsAction,
+    getDataSourcesAction,
+    getPoolsAction,
+    getEmployeesAction,
+  ],
   triggers: [],
 });
