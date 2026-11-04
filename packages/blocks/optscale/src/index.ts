@@ -1,6 +1,7 @@
 import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { assignResourceAction } from './lib/actions/assign-resource-action';
+import { customApiCallAction } from './lib/actions/custom-api-call-action';
 import { getAnomaliesAction } from './lib/actions/get-anomalies-action';
 import { getDataSourcesAction } from './lib/actions/get-data-sources-action';
 import { getEmployeesAction } from './lib/actions/get-employees-action';
@@ -34,6 +35,7 @@ export const optscale = createBlock({
     updateRecommendationStatusAction,
     assignResourceAction,
     setPoolBudgetAction,
+    customApiCallAction,
   ],
   triggers: [],
 });
