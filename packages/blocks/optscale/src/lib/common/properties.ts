@@ -142,15 +142,42 @@ export const organizationProperty = Property.Dropdown<string, true>({
   options: loadOrganizationOptions,
 });
 
-export function cloudAccountsProperty() {
+function filterProperty(
+  displayName: string,
+  description: string,
+  options: typeof loadCloudAccountOptions,
+) {
   return Property.MultiSelectDropdown<string, false>({
-    displayName: 'Data Sources',
-    description:
-      'The cloud accounts (data sources) to filter by. Leave empty to include all.',
+    displayName,
+    description,
     required: false,
     refreshers: ['auth', 'organizationId'],
-    options: loadCloudAccountOptions,
+    options,
   });
+}
+
+export function cloudAccountsProperty() {
+  return filterProperty(
+    'Data Sources',
+    'The cloud accounts (data sources) to filter by. Leave empty to include all.',
+    loadCloudAccountOptions,
+  );
+}
+
+export function poolsFilterProperty() {
+  return filterProperty(
+    'Pools',
+    'The pools to filter by. Leave empty to include all.',
+    loadPoolOptions,
+  );
+}
+
+export function ownersFilterProperty() {
+  return filterProperty(
+    'Owners',
+    'The resource owners (employees) to filter by. Leave empty to include all.',
+    loadEmployeeOptions,
+  );
 }
 
 export function poolProperty(displayName: string, description: string) {
