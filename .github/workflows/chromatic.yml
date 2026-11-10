@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN
-        uses: chromaui/action@18599f2ae5010524d496b86099c9b69a37f5d8d2 # v18.12.2
+        uses: chromaui/action@dc6182ace06884faf1d3edf73f652a80ca6dfddc # v18.13.4
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true # 👈 Required option to enable TurboSnap
