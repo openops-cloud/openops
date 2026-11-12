@@ -75,6 +75,63 @@ const um2Accounts = [
   },
 ];
 
+const unexpectedShapeMessage =
+  'Unexpected response from the Umbrella accounts endpoint: expected a list of accounts.';
+
+describe('listRawUmbrellaAccounts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getAnodotUsersMock.mockResolvedValue(um1User);
+    getUm2AccountsMock.mockResolvedValue(um2Accounts);
+  });
+
+  test('should return the provider 1.0 accounts unchanged', async () => {
+    const result = await listRawUmbrellaAccounts(session10);
+
+    expect(getAnodotUsersMock).toHaveBeenCalledWith('api-url', tokens);
+    expect(getUm2AccountsMock).not.toHaveBeenCalled();
+    expect(result).toStrictEqual(um1User.accounts);
+  });
+
+  test.each([[undefined], [{}], [{ ...um1User, accounts: undefined }]])(
+    'should return an empty list when the 1.0 user body is %p',
+    async (userBody) => {
+      getAnodotUsersMock.mockResolvedValue(userBody);
+
+      const result = await listRawUmbrellaAccounts(session10);
+
+      expect(result).toStrictEqual([]);
+    },
+  );
+
+  test('should return the provider 2.0 accounts unchanged', async () => {
+    const result = await listRawUmbrellaAccounts(session20);
+
+    expect(getUm2AccountsMock).toHaveBeenCalledWith('api-url', tokens);
+    expect(getAnodotUsersMock).not.toHaveBeenCalled();
+    expect(result).toStrictEqual(um2Accounts);
+  });
+
+  test.each([[undefined], [{}], [{ error: 'Forbidden' }], ['[]']])(
+    'should throw when the 2.0 endpoint returns %p instead of a list',
+    async (body) => {
+      getUm2AccountsMock.mockResolvedValue(body);
+
+      await expect(listRawUmbrellaAccounts(session20)).rejects.toThrow(
+        unexpectedShapeMessage,
+      );
+    },
+  );
+
+  test('should propagate provider errors', async () => {
+    getUm2AccountsMock.mockRejectedValue(new Error('Accounts service error'));
+
+    await expect(listRawUmbrellaAccounts(session20)).rejects.toThrow(
+      'Accounts service error',
+    );
+  });
+});
+
 describe('listUmbrellaAccounts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,8 +142,6 @@ describe('listUmbrellaAccounts', () => {
   test('should map 1.0 accounts keeping numeric key and division id, including 0', async () => {
     const result = await listUmbrellaAccounts(session10);
 
-    expect(getAnodotUsersMock).toHaveBeenCalledWith('api-url', tokens);
-    expect(getUm2AccountsMock).not.toHaveBeenCalled();
     expect(result).toStrictEqual([
       {
         accountId: '932213950603',
@@ -114,8 +169,6 @@ describe('listUmbrellaAccounts', () => {
   test('should map 2.0 accounts without a divisionId key', async () => {
     const result = await listUmbrellaAccounts(session20);
 
-    expect(getUm2AccountsMock).toHaveBeenCalledWith('api-url', tokens);
-    expect(getAnodotUsersMock).not.toHaveBeenCalled();
     expect(result).toStrictEqual([
       {
         accountId: '225220305501',
@@ -131,12 +184,12 @@ describe('listUmbrellaAccounts', () => {
     expect(result[0]).not.toHaveProperty('divisionId');
   });
 
-  test('should return an empty list when the 2.0 endpoint returns a non-array', async () => {
-    getUm2AccountsMock.mockResolvedValue(undefined);
+  test('should throw when the 2.0 endpoint returns a non-array', async () => {
+    getUm2AccountsMock.mockResolvedValue({ error: 'Forbidden' });
 
-    const result = await listUmbrellaAccounts(session20);
-
-    expect(result).toStrictEqual([]);
+    await expect(listUmbrellaAccounts(session20)).rejects.toThrow(
+      unexpectedShapeMessage,
+    );
   });
 
   test('should propagate provider errors', async () => {
@@ -145,26 +198,6 @@ describe('listUmbrellaAccounts', () => {
     await expect(listUmbrellaAccounts(session20)).rejects.toThrow(
       'Accounts service error',
     );
-  });
-});
-
-describe('listRawUmbrellaAccounts', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    getAnodotUsersMock.mockResolvedValue(um1User);
-    getUm2AccountsMock.mockResolvedValue(um2Accounts);
-  });
-
-  test('should return the provider 1.0 accounts unchanged', async () => {
-    const result = await listRawUmbrellaAccounts(session10);
-
-    expect(result).toStrictEqual(um1User.accounts);
-  });
-
-  test('should return the provider 2.0 accounts unchanged', async () => {
-    const result = await listRawUmbrellaAccounts(session20);
-
-    expect(result).toStrictEqual(um2Accounts);
   });
 });
 
@@ -196,7 +229,18 @@ describe('getUmbrellaAccountById', () => {
     });
   });
 
-  test('should throw the existing message when no account matches', async () => {
+  test.each([[undefined], [{}], [{ accounts: [{ accountId: '2' }] }]])(
+    'should throw the existing message when the 1.0 user body is %p',
+    async (userBody) => {
+      getAnodotUsersMock.mockResolvedValue(userBody);
+
+      await expect(
+        getUmbrellaAccountById(session10, '123456789'),
+      ).rejects.toThrow('No account matching account id: 123456789 was found.');
+    },
+  );
+
+  test('should throw the existing message when no 2.0 account matches', async () => {
     await expect(getUmbrellaAccountById(session20, 'missing')).rejects.toThrow(
       'No account matching account id: missing was found.',
     );

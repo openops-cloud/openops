@@ -13,7 +13,7 @@ import { statusProperty } from './api-filters/status-property';
 import { tagsProperty } from './api-filters/tags-property';
 import { virtualTagsProperty } from './api-filters/virtual-tags-property';
 import type { SelectedAccount } from './common/account';
-import { buildAccountApiKeyForAccount } from './common/anodot-requests-helpers';
+import { buildAccountApiKey } from './common/anodot-requests-helpers';
 import { createUmbrellaSession } from './common/auth';
 import {
   addClosedAndDoneDateFilters,
@@ -122,10 +122,7 @@ export const getRecommendationsCustomAction = createAction({
 
       const result: Record<string, any> = {};
       for (const selectedAccount of accounts) {
-        const accountApiKey = buildAccountApiKeyForAccount(
-          session.tokens.apikey,
-          selectedAccount,
-        );
+        const accountApiKey = buildAccountApiKey(session, selectedAccount);
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(
           session.apiUrl,

@@ -12,7 +12,7 @@ describe('getAccountApiKey', () => {
     jest.clearAllMocks();
   });
 
-  const session: UmbrellaSession = {
+  const session10: UmbrellaSession = {
     version: '1.0',
     apiUrl: 'some url',
     tokens: {
@@ -21,23 +21,25 @@ describe('getAccountApiKey', () => {
     },
   };
 
-  test('should propagate lookup failures', async () => {
+  const session20: UmbrellaSession = { ...session10, version: '2.0' };
+
+  test('should propagate 1.0 lookup failures', async () => {
     getUmbrellaAccountByIdMock.mockRejectedValue(
       new Error('No account matching account id: 123456789 was found.'),
     );
 
-    await expect(getAccountApiKey('123456789', session)).rejects.toThrow(
+    await expect(getAccountApiKey('123456789', session10)).rejects.toThrow(
       'No account matching account id: 123456789 was found.',
     );
 
     expect(getUmbrellaAccountByIdMock).toHaveBeenCalledTimes(1);
     expect(getUmbrellaAccountByIdMock).toHaveBeenCalledWith(
-      session,
+      session10,
       '123456789',
     );
   });
 
-  test('should build a 1.0 key from the resolved account', async () => {
+  test('should resolve the 1.0 account and build the key from its key and division', async () => {
     getUmbrellaAccountByIdMock.mockResolvedValue({
       accountId: '987654321',
       accountKey: 2,
@@ -45,23 +47,15 @@ describe('getAccountApiKey', () => {
       accountName: 'account 2',
     });
 
-    const result = await getAccountApiKey('987654321', session);
+    const result = await getAccountApiKey('987654321', session10);
 
     expect(result).toBe('an account:2:0');
   });
 
-  test('should build a 2.0 key with a blank cost center segment', async () => {
-    getUmbrellaAccountByIdMock.mockResolvedValue({
-      accountId: '225220305501',
-      accountKey: '225220305501',
-      accountName: 'BillingTransferTest',
-    });
-
-    const result = await getAccountApiKey('225220305501', {
-      ...session,
-      version: '2.0',
-    });
+  test('should build the 2.0 key from the account id without a lookup', async () => {
+    const result = await getAccountApiKey('225220305501', session20);
 
     expect(result).toBe('an account:225220305501:');
+    expect(getUmbrellaAccountByIdMock).not.toHaveBeenCalled();
   });
 });

@@ -7,7 +7,7 @@ import { customStatusProperty } from './api-filters/custom-status-property';
 import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-predefined-recommendation-property';
 import { openedRecommendationsProperty } from './api-filters/opened-recommendations-property';
 import type { SelectedAccount } from './common/account';
-import { buildAccountApiKeyForAccount } from './common/anodot-requests-helpers';
+import { buildAccountApiKey } from './common/anodot-requests-helpers';
 import { createUmbrellaSession } from './common/auth';
 import {
   addClosedAndDoneDateFilters,
@@ -71,10 +71,7 @@ export const getRecommendationsAction = createAction({
 
       const result: Record<string, any> = {};
       for (const selectedAccount of accounts) {
-        const accountApiKey = buildAccountApiKeyForAccount(
-          session.tokens.apikey,
-          selectedAccount,
-        );
+        const accountApiKey = buildAccountApiKey(session, selectedAccount);
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(
           session.apiUrl,

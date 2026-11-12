@@ -1,4 +1,5 @@
 import { AxiosHeaders } from 'axios';
+import type { UmbrellaSession } from './auth';
 import type { UmbrellaAccount } from './umbrella-accounts';
 
 export function createAnodotAuthHeaders(
@@ -13,7 +14,7 @@ export function createAnodotAuthHeaders(
 }
 
 /**
- * Builds the per-account `apikey` header value.
+ * Builds the per-account `apikey` header value from its raw segments.
  *
  * User Management 1.0 keys are `userKey:accountKey:divisionId`.
  * User Management 2.0 keys are `userKey:accountId:costCenterId`, where a blank
@@ -30,12 +31,24 @@ export function buildUserAccountApiKey(
   return `${sanitizedApiKey}:${accountKey}:${divisionId ?? ''}`;
 }
 
-export function buildAccountApiKeyForAccount(
-  apikey: string,
-  account: Pick<UmbrellaAccount, 'accountKey' | 'divisionId'>,
+/**
+ * Builds the per-account key for the session's User Management version.
+ *
+ * The version comes from the session, not from the shape of the account, so a
+ * selection persisted while the connection was on 1.0 keeps working after the
+ * connection is switched to 2.0: on 2.0 only `accountId` is used and any stale
+ * `accountKey`/`divisionId` are ignored.
+ */
+export function buildAccountApiKey(
+  session: UmbrellaSession,
+  account: Pick<UmbrellaAccount, 'accountId' | 'accountKey' | 'divisionId'>,
 ): string {
+  if (session.version === '2.0') {
+    return buildUserAccountApiKey(session.tokens.apikey, account.accountId);
+  }
+
   return buildUserAccountApiKey(
-    apikey,
+    session.tokens.apikey,
     String(account.accountKey),
     account.divisionId,
   );

@@ -67,6 +67,28 @@ describe('customAnodotApiAction', () => {
     expect(headers['apikey']).toBe('user-key:16376:0');
   });
 
+  test('should inject 2.0 headers from a persisted 1.0-shaped selection when the session is 2.0', async () => {
+    createUmbrellaSessionMock.mockResolvedValue({
+      version: '2.0',
+      apiUrl: auth.apiUrl,
+      tokens: { Authorization: 'bearer', apikey: 'user-key:-1' },
+    });
+
+    const headers = await definition.authMapping({
+      auth,
+      propsValue: {
+        selectedAccount: {
+          accountId: '932213950603',
+          accountKey: 16376,
+          divisionId: 0,
+          accountName: 'legacy selection',
+        },
+      },
+    });
+
+    expect(headers['apikey']).toBe('user-key:932213950603:');
+  });
+
   test('should inject 2.0 headers with a blank cost center segment', async () => {
     createUmbrellaSessionMock.mockResolvedValue({
       version: '2.0',

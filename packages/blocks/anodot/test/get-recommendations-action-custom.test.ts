@@ -388,6 +388,37 @@ describe('getRecommendationsCustomAction', () => {
     );
   });
 
+  test('should build a 2.0 key from a persisted 1.0-shaped selection when the session is 2.0', async () => {
+    createUmbrellaSessionMock.mockResolvedValue({
+      version: '2.0',
+      apiUrl: 'some api url',
+      tokens: { Authorization: 'a bearer token', apikey: 'an account:-1' },
+    });
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: [
+        {
+          accountId: '932213950603',
+          accountKey: 16376,
+          divisionId: 0,
+          accountName: 'legacy selection',
+        },
+      ],
+      statusFilter: 'potential_savings',
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ 'legacy selection': 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:932213950603:',
+      expect.any(Object),
+    );
+  });
+
   test('should handle regular string as accounts input', async () => {
     getAnodotRecommendationsMock.mockResolvedValue('mockResult');
     const context = createContext({

@@ -1,8 +1,9 @@
 import {
-  buildAccountApiKeyForAccount,
+  buildAccountApiKey,
   buildUserAccountApiKey,
   createAnodotAuthHeaders,
 } from '../../src/lib/common/anodot-requests-helpers';
+import { UmbrellaSession } from '../../src/lib/common/auth';
 
 describe('createAnodotAuthHeaders', () => {
   beforeEach(() => {
@@ -61,21 +62,37 @@ describe('buildUserAccountApiKey', () => {
   );
 });
 
-describe('buildAccountApiKeyForAccount', () => {
-  test('should build a 1.0 key from account key and division id', () => {
-    const result = buildAccountApiKeyForAccount('user-key:-1', {
-      accountKey: 16376,
-      divisionId: 0,
-    });
+describe('buildAccountApiKey', () => {
+  const tokens = { Authorization: 'bearer', apikey: 'user-key:-1' };
+  const session10: UmbrellaSession = { version: '1.0', apiUrl: 'api', tokens };
+  const session20: UmbrellaSession = { version: '2.0', apiUrl: 'api', tokens };
 
-    expect(result).toEqual('user-key:16376:0');
+  const legacySelection = {
+    accountId: '932213950603',
+    accountKey: 16376,
+    divisionId: 0,
+  };
+
+  const um2Selection = {
+    accountId: '225220305501',
+    accountKey: '225220305501',
+  };
+
+  test('should build a 1.0 key from account key and division id', () => {
+    expect(buildAccountApiKey(session10, legacySelection)).toEqual(
+      'user-key:16376:0',
+    );
   });
 
-  test('should build a 2.0 key with a blank cost center segment when there is no division id', () => {
-    const result = buildAccountApiKeyForAccount('user-key:-1', {
-      accountKey: '225220305501',
-    });
+  test('should build a 2.0 key from the account id with a blank cost center segment', () => {
+    expect(buildAccountApiKey(session20, um2Selection)).toEqual(
+      'user-key:225220305501:',
+    );
+  });
 
-    expect(result).toEqual('user-key:225220305501:');
+  test('should ignore a stale 1.0 key and division when the session is 2.0', () => {
+    expect(buildAccountApiKey(session20, legacySelection)).toEqual(
+      'user-key:932213950603:',
+    );
   });
 });

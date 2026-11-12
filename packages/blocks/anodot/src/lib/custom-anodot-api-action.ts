@@ -3,7 +3,7 @@ import { accountSingleSelectProperty } from './account-property';
 import { anadotAuth, UmbrellaAuth } from './anodot-auth-property';
 import { SelectedAccount } from './common/account';
 import {
-  buildAccountApiKeyForAccount,
+  buildAccountApiKey,
   createAnodotAuthHeaders,
 } from './common/anodot-requests-helpers';
 import { createUmbrellaSession } from './common/auth';
@@ -25,7 +25,7 @@ export const customAnodotApiAction = createCustomApiCallAction({
 
     return createAnodotAuthHeaders(
       session.tokens.Authorization,
-      buildAccountApiKeyForAccount(session.tokens.apikey, selectedAccount),
+      buildAccountApiKey(session, selectedAccount),
     );
   },
 });
