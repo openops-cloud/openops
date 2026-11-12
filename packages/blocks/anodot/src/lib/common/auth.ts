@@ -17,6 +17,10 @@ export type UserManagementVersion = '1.0' | '2.0';
  * The subset of the Umbrella connection the session helper needs.
  * `userManagementVersion` is optional because connections created before the
  * field existed do not carry it; those must keep behaving as 1.0.
+ *
+ * Declared structurally rather than derived from the block auth definition:
+ * `anodot-auth-property.ts` imports this module, so importing the definition
+ * here would create a circular import.
  */
 export interface UmbrellaAuthProps {
   authUrl: string;
