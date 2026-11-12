@@ -135,8 +135,8 @@ export const getRecommendationsCustomAction = createAction({
       return result;
     } catch (error) {
       throw new Error(
-        'An error occurred while requesting Anodot recommendations. Error Message: ' +
-          (error as any).response?.data?.message,
+        'An error occurred while requesting Umbrella recommendations. Error Message: ' +
+          (error as Error).message,
       );
     }
   },

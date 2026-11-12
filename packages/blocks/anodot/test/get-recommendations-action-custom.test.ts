@@ -419,6 +419,25 @@ describe('getRecommendationsCustomAction', () => {
     );
   });
 
+  test('should surface the underlying error message when the request fails', async () => {
+    getAnodotRecommendationsMock.mockRejectedValue(
+      new Error(
+        '{"code":"BAD_REQUEST","description":"Invalid account in apikey"}',
+      ),
+    );
+    const context = createContext({
+      accounts: [
+        { accountKey: 'key1', divisionId: 'div1', accountName: 'account1' },
+      ],
+      statusFilter: 'potential_savings',
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    await expect(getRecommendationsCustomAction.run(context)).rejects.toThrow(
+      'An error occurred while requesting Umbrella recommendations. Error Message: {"code":"BAD_REQUEST","description":"Invalid account in apikey"}',
+    );
+  });
+
   test('should handle regular string as accounts input', async () => {
     getAnodotRecommendationsMock.mockResolvedValue('mockResult');
     const context = createContext({
