@@ -37,8 +37,7 @@ export const anadotAuth = BlockAuth.CustomAuth({
     }),
     authUrl: Property.ShortText({
       displayName: 'Authentication URL',
-      description:
-        'The URL to use to authenticate. Only used for User Management 1.0.',
+      description: 'The URL to use to authenticate',
       required: true,
       validators: [Validators.url],
       defaultValue: 'https://tokenizer.mypileus.io/prod',
