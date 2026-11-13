@@ -1,8 +1,8 @@
-const authenticateUserWithAnodotMock = jest.fn();
+const createUmbrellaSessionMock = jest.fn();
 const getAnodotRecommendationsMock = jest.fn();
 
 jest.mock('../src/lib/common/auth', () => ({
-  authenticateUserWithAnodot: authenticateUserWithAnodotMock,
+  createUmbrellaSession: createUmbrellaSessionMock,
 }));
 
 jest.mock('../src/lib/common/recommendations', () => ({
@@ -14,9 +14,13 @@ import { getRecommendationsCustomAction } from '../src/lib/get-recommendations-a
 describe('getRecommendationsCustomAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    authenticateUserWithAnodotMock.mockResolvedValue({
-      Authorization: 'a bearer token',
-      apikey: 'an account',
+    createUmbrellaSessionMock.mockResolvedValue({
+      version: '1.0',
+      apiUrl: 'some api url',
+      tokens: {
+        Authorization: 'a bearer token',
+        apikey: 'an account',
+      },
     });
   });
 
@@ -354,6 +358,86 @@ describe('getRecommendationsCustomAction', () => {
     },
   );
 
+  test('should build a 2.0 key with a blank cost center segment for a 2.0 session', async () => {
+    createUmbrellaSessionMock.mockResolvedValue({
+      version: '2.0',
+      apiUrl: 'some api url',
+      tokens: { Authorization: 'a bearer token', apikey: 'an account:-1' },
+    });
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: [
+        {
+          accountId: '225220305501',
+          accountKey: '225220305501',
+          accountName: 'BillingTransferTest',
+        },
+      ],
+      statusFilter: 'potential_savings',
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ BillingTransferTest: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:225220305501:',
+      expect.any(Object),
+    );
+  });
+
+  test('should build a 2.0 key from a persisted 1.0-shaped selection when the session is 2.0', async () => {
+    createUmbrellaSessionMock.mockResolvedValue({
+      version: '2.0',
+      apiUrl: 'some api url',
+      tokens: { Authorization: 'a bearer token', apikey: 'an account:-1' },
+    });
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: [
+        {
+          accountId: '932213950603',
+          accountKey: 16376,
+          divisionId: 0,
+          accountName: 'legacy selection',
+        },
+      ],
+      statusFilter: 'potential_savings',
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ 'legacy selection': 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:932213950603:',
+      expect.any(Object),
+    );
+  });
+
+  test('should surface the underlying error message when the request fails', async () => {
+    getAnodotRecommendationsMock.mockRejectedValue(
+      new Error(
+        '{"code":"BAD_REQUEST","description":"Invalid account in apikey"}',
+      ),
+    );
+    const context = createContext({
+      accounts: [
+        { accountKey: 'key1', divisionId: 'div1', accountName: 'account1' },
+      ],
+      statusFilter: 'potential_savings',
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    await expect(getRecommendationsCustomAction.run(context)).rejects.toThrow(
+      'An error occurred while requesting Umbrella recommendations. Error Message: {"code":"BAD_REQUEST","description":"Invalid account in apikey"}',
+    );
+  });
+
   test('should handle regular string as accounts input', async () => {
     getAnodotRecommendationsMock.mockResolvedValue('mockResult');
     const context = createContext({
@@ -371,7 +455,7 @@ describe('getRecommendationsCustomAction', () => {
     expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
       'some api url',
       'a bearer token',
-      'an account:undefined:undefined',
+      'an account:undefined:',
       {
         open_recs_creation_date: { from: '1', to: '2' },
         status_filter: 'status',
