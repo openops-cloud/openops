@@ -1,14 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { promises as fs } from 'fs';
-import { CodeSandbox } from '../../core/code/code-sandbox-common';
+import {
+  CodeSandbox,
+  ScriptSession,
+} from '../../core/code/code-sandbox-common';
 import { BASE64_POLYFILL } from './polyfills/base64-polyfill';
 
 const BLOCK_MEMORY_LIMIT_IN_MB = system.getNumberOrThrow(
   AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB,
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SESSION_DISPOSED = 'Script session is disposed';
+
 // Check this https://github.com/laverdet/isolated-vm/issues/258#issuecomment-2134341086
 let ivmCache: any;
 const getIvm = () => {
@@ -73,6 +77,104 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
       isolate.dispose();
     }
   },
+
+  createScriptSession,
+};
+
+/**
+ * One isolate shared by many runs, each in a fresh context. Globals are copied out of the host once per
+ * value (memoized by identity, so a step output referenced by many scripts is serialized once) and
+ * copied into each context. Runs are serialized: a memory-limit kill disposes the isolate, which would
+ * reject every queued run, and concurrently alive contexts would share the isolate's memory limit.
+ */
+async function createScriptSession(): Promise<ScriptSession> {
+  const ivm = getIvm();
+  let isolate = new ivm.Isolate({ memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB });
+  let polyfill = await isolate.compileScript(BASE64_POLYFILL);
+  let disposed = false;
+  let queue: Promise<unknown> = Promise.resolve();
+  const copies: any[] = [];
+  const copiesByValue = new WeakMap<object, any>();
+
+  const externalCopyOf = (value: object): any => {
+    let copy = copiesByValue.get(value);
+    if (!copy) {
+      copy = new ivm.ExternalCopy(value);
+      copiesByValue.set(value, copy);
+      copies.push(copy);
+    }
+    return copy;
+  };
+
+  const ensureAlive = async (): Promise<void> => {
+    if (disposed) {
+      throw new Error(SESSION_DISPOSED);
+    }
+    if (isolate.isDisposed) {
+      // a previous run hit the memory limit; the host-side copies survive, only the isolate is rebuilt
+      isolate = new ivm.Isolate({ memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB });
+      polyfill = await isolate.compileScript(BASE64_POLYFILL);
+    }
+  };
+
+  const runOnce = async (
+    script: string,
+    globals: Record<string, unknown>,
+  ): Promise<unknown> => {
+    await ensureAlive();
+    const context = await isolate.createContext();
+    let compiled: any;
+    let outRef: any;
+    try {
+      await Promise.all(
+        Object.entries(globals).map(([key, value]) =>
+          // primitives transfer as-is; objects go through the memoized ExternalCopy
+          context.global.set(
+            key,
+            typeof value === 'object' && value !== null
+              ? externalCopyOf(value).copyInto()
+              : value,
+          ),
+        ),
+      );
+      await polyfill.run(context);
+      compiled = await isolate.compileScript(script);
+      outRef = await compiled.run(context, { reference: true, promise: true });
+      return await outRef.copy();
+    } finally {
+      releaseQuietly(outRef);
+      releaseQuietly(compiled);
+      releaseQuietly(context);
+    }
+  };
+
+  return {
+    run(script: string, globals: Record<string, unknown>): Promise<unknown> {
+      const result = queue.then(() => runOnce(script, globals));
+      queue = result.catch(() => undefined);
+      return result;
+    },
+    dispose(): void {
+      if (disposed) {
+        return;
+      }
+      disposed = true;
+      for (const copy of copies) {
+        releaseQuietly(copy);
+      }
+      if (!isolate.isDisposed) {
+        isolate.dispose();
+      }
+    },
+  };
+}
+
+const releaseQuietly = (handle: { release(): void } | undefined): void => {
+  try {
+    handle?.release();
+  } catch {
+    // already released with the isolate
+  }
 };
 
 const initIsolateContext = async ({
