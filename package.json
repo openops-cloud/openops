@@ -307,7 +307,7 @@
     "@faker-js/faker": "10.6.0",
     "@nx/devkit": "23.3.0",
     "@nx/esbuild": "23.3.0",
-    "@nx/eslint": "23.3.0",
+    "@nx/eslint": "24.0.3",
     "@nx/eslint-plugin": "23.3.0",
     "@nx/jest": "23.3.0",
     "@nx/js": "23.3.0",
