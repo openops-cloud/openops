@@ -314,7 +314,7 @@
     "@nx/node": "23.3.0",
     "@nx/react": "23.3.0",
     "@nx/storybook": "23.3.0",
-    "@nx/vite": "23.3.0",
+    "@nx/vite": "24.0.3",
     "@nx/vitest": "23.3.0",
     "@nx/web": "23.3.0",
     "@nx/webpack": "23.3.0",
