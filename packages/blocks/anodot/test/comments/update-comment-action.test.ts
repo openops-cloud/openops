@@ -1,9 +1,9 @@
-const authenticateUserWithAnodotMock = jest.fn();
+const createUmbrellaSessionMock = jest.fn();
 const updateRecommendationCommentMock = jest.fn();
 const getAccountApiKeyMock = jest.fn();
 
 jest.mock('../../src/lib/common/auth', () => ({
-  authenticateUserWithAnodot: authenticateUserWithAnodotMock,
+  createUmbrellaSession: createUmbrellaSessionMock,
 }));
 
 jest.mock('../../src/lib/common/recommendation-comments', () => ({
@@ -24,14 +24,16 @@ describe('updateCommentAction', () => {
     password: 'some password',
   };
 
-  const anodotTokens = {
-    Authorization: 'a bearer token',
+  const session = {
+    version: '1.0',
+    apiUrl: 'some api url',
+    tokens: { Authorization: 'a bearer token', apikey: 'user-key:-1' },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    authenticateUserWithAnodotMock.mockResolvedValue(anodotTokens);
+    createUmbrellaSessionMock.mockResolvedValue(session);
     getAccountApiKeyMock.mockResolvedValue('some account api key');
     updateRecommendationCommentMock.mockResolvedValue('great success');
   });
@@ -48,18 +50,13 @@ describe('updateCommentAction', () => {
 
     expect(result).toEqual('great success');
 
-    expect(authenticateUserWithAnodotMock).toHaveBeenCalledTimes(1);
-    expect(authenticateUserWithAnodotMock).toHaveBeenCalledWith(
-      'some url',
-      'some username',
-      'some password',
-    );
+    expect(createUmbrellaSessionMock).toHaveBeenCalledTimes(1);
+    expect(createUmbrellaSessionMock).toHaveBeenCalledWith(auth);
 
     expect(getAccountApiKeyMock).toHaveBeenCalledTimes(1);
     expect(getAccountApiKeyMock).toHaveBeenCalledWith(
       'some account id',
-      'some api url',
-      anodotTokens,
+      session,
     );
 
     expect(updateRecommendationCommentMock).toHaveBeenCalledTimes(1);

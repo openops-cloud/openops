@@ -1,9 +1,9 @@
-const authenticateUserWithAnodotMock = jest.fn();
+const createUmbrellaSessionMock = jest.fn();
 const setUserStatusForRecommendationMock = jest.fn();
 const getAccountApiKeyMock = jest.fn();
 
 jest.mock('../src/lib/common/auth', () => ({
-  authenticateUserWithAnodot: authenticateUserWithAnodotMock,
+  createUmbrellaSession: createUmbrellaSessionMock,
 }));
 
 jest.mock('../src/lib/common/recommendations', () => ({
@@ -23,9 +23,15 @@ describe('updateUserStatusAction', () => {
     apikey: 'an account',
   };
 
+  const session = {
+    version: '1.0',
+    apiUrl: 'some api url',
+    tokens,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
-    authenticateUserWithAnodotMock.mockResolvedValue(tokens);
+    createUmbrellaSessionMock.mockResolvedValue(session);
     getAccountApiKeyMock.mockResolvedValue('account api key');
   });
 
@@ -117,11 +123,8 @@ describe('updateUserStatusAction', () => {
       {},
     );
     expect(getAccountApiKeyMock).toHaveBeenCalledTimes(1);
-    expect(getAccountApiKeyMock).toHaveBeenCalledWith(
-      '123456789',
-      'some api url',
-      tokens,
-    );
+    expect(getAccountApiKeyMock).toHaveBeenCalledWith('123456789', session);
+    expect(createUmbrellaSessionMock).toHaveBeenCalledWith(auth);
   });
 
   test('should set user status with actionParams if userStatus is "exclude"', async () => {
