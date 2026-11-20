@@ -10,6 +10,7 @@ import {
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { AISDKError, generateText, LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
+import { atlasCloudProvider } from './providers/atlascloud';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
 import { cohereProvider } from './providers/cohere';
@@ -36,6 +37,7 @@ export interface AiProvider {
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.ANTHROPIC]: anthropicProvider,
+  [AiProviderEnum.ATLAS_CLOUD]: atlasCloudProvider,
   [AiProviderEnum.AZURE_OPENAI]: azureProvider,
   [AiProviderEnum.CEREBRAS]: cerebrasProvider,
   [AiProviderEnum.COHERE]: cohereProvider,
