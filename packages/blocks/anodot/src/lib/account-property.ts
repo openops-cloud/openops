@@ -1,6 +1,6 @@
 import { DropdownState, Property } from '@openops/blocks-framework';
-import { authenticateUserWithAnodot } from './common/auth';
-import { AnodotUserAccount, getAnodotUsers } from './common/users';
+import { createUmbrellaSession, UmbrellaAuthProps } from './common/auth';
+import { listUmbrellaAccounts } from './common/umbrella-accounts';
 
 export function accountProperty() {
   return Property.MultiSelectDropdown({
@@ -27,7 +27,7 @@ export function accountSingleSelectProperty() {
 }
 
 async function getAccountDropdownState(
-  auth: any,
+  auth: UmbrellaAuthProps | undefined,
 ): Promise<DropdownState<unknown>> {
   if (!auth) {
     return {
@@ -38,15 +38,10 @@ async function getAccountDropdownState(
   }
 
   try {
-    const anodotTokens = await authenticateUserWithAnodot(
-      auth.authUrl,
-      auth.username,
-      auth.password,
-    );
+    const session = await createUmbrellaSession(auth);
+    const accounts = await listUmbrellaAccounts(session);
 
-    const user = await getAnodotUsers(auth.apiUrl, anodotTokens);
-
-    if (!user || !user.accounts || user.accounts.length === 0) {
+    if (accounts.length === 0) {
       return {
         disabled: true,
         options: [],
@@ -56,14 +51,9 @@ async function getAccountDropdownState(
 
     return {
       disabled: false,
-      options: user.accounts.map((account: AnodotUserAccount) => ({
+      options: accounts.map((account) => ({
         label: account.accountName,
-        value: {
-          accountId: account.accountId,
-          accountKey: account.accountKey,
-          divisionId: account.divisionId,
-          accountName: account.accountName,
-        },
+        value: account,
       })),
     };
   } catch (error) {

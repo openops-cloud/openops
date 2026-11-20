@@ -1,43 +1,28 @@
-import { buildUserAccountApiKey } from './anodot-requests-helpers';
-import { AnodotTokens } from './auth';
-import { getAnodotUsers } from './users';
+import { buildAccountApiKey } from './anodot-requests-helpers';
+import { UmbrellaSession } from './auth';
+import { getUmbrellaAccountById, UmbrellaAccount } from './umbrella-accounts';
 
-export type SelectedAccount = {
-  accountKey: number;
-  divisionId: number;
-  accountName: string;
-};
+/**
+ * Value shape of the account dropdown options persisted in workflow steps.
+ */
+export type SelectedAccount = UmbrellaAccount;
 
+/**
+ * Builds the per-account key for an account id typed by the user.
+ *
+ * On 2.0 the key is derived from the account id alone, so no lookup is needed.
+ * On 1.0 the account must be resolved first to obtain its numeric key and
+ * division id.
+ */
 export async function getAccountApiKey(
   accountId: string,
-  apiUrl: string,
-  anodotTokens: AnodotTokens,
+  session: UmbrellaSession,
 ): Promise<string> {
-  const account = await getAccountById(accountId, apiUrl, anodotTokens);
-  const accountApiKey = buildUserAccountApiKey(
-    anodotTokens.apikey,
-    account.accountKey.toString(),
-    account.divisionId.toString(),
-  );
-
-  return accountApiKey;
-}
-
-async function getAccountById(
-  accountId: string,
-  apiUrl: string,
-  anodotTokens: AnodotTokens,
-): Promise<{ accountKey: number; divisionId: number }> {
-  const user = await getAnodotUsers(apiUrl, anodotTokens);
-
-  const account = user?.accounts?.find((user) => user.accountId === accountId);
-
-  if (!account) {
-    throw new Error(`No account matching account id: ${accountId} was found.`);
+  if (session.version === '2.0') {
+    return buildAccountApiKey(session, { accountId, accountKey: accountId });
   }
 
-  return {
-    accountKey: account.accountKey,
-    divisionId: account.divisionId,
-  };
+  const account = await getUmbrellaAccountById(session, accountId);
+
+  return buildAccountApiKey(session, account);
 }

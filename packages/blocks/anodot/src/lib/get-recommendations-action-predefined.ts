@@ -7,8 +7,8 @@ import { customStatusProperty } from './api-filters/custom-status-property';
 import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-predefined-recommendation-property';
 import { openedRecommendationsProperty } from './api-filters/opened-recommendations-property';
 import type { SelectedAccount } from './common/account';
-import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
-import { authenticateUserWithAnodot } from './common/auth';
+import { buildAccountApiKey } from './common/anodot-requests-helpers';
+import { createUmbrellaSession } from './common/auth';
 import {
   addClosedAndDoneDateFilters,
   addCustomStatusFilters,
@@ -37,8 +37,6 @@ export const getRecommendationsAction = createAction({
   },
   async run(context) {
     try {
-      const { authUrl, apiUrl, username, password } = context.auth;
-
       const rawAccounts = context.propsValue.accounts as unknown;
       let parsedAccounts = rawAccounts;
       if (typeof rawAccounts === 'string') {
@@ -69,23 +67,15 @@ export const getRecommendationsAction = createAction({
         });
       }
 
-      const anodotTokens = await authenticateUserWithAnodot(
-        authUrl,
-        username,
-        password,
-      );
+      const session = await createUmbrellaSession(context.auth);
 
       const result: Record<string, any> = {};
       for (const selectedAccount of accounts) {
-        const accountApiKey = buildUserAccountApiKey(
-          anodotTokens.apikey,
-          String(selectedAccount.accountKey),
-          String(selectedAccount.divisionId),
-        );
+        const accountApiKey = buildAccountApiKey(session, selectedAccount);
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(
-          apiUrl,
-          anodotTokens.Authorization,
+          session.apiUrl,
+          session.tokens.Authorization,
           accountApiKey,
           filters,
         );
@@ -94,8 +84,8 @@ export const getRecommendationsAction = createAction({
       return result;
     } catch (error) {
       throw new Error(
-        'An error occurred while requesting Anodot recommendations. Error Message: ' +
-          (error as any).response?.data?.message,
+        'An error occurred while requesting Umbrella recommendations. Error Message: ' +
+          (error as Error).message,
       );
     }
   },
