@@ -36274,7 +36274,7 @@ THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - postcss@8.5.32
+ - postcss@8.5.33
 
 This package contains the following license:
 
