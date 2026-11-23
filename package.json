@@ -277,7 +277,7 @@
     "socket.io": "4.8.4",
     "socket.io-client": "4.8.4",
     "sqlite3": "6.0.1",
-    "ssh2-sftp-client": "9.1.0",
+    "ssh2-sftp-client": "12.1.1",
     "string-strip-html": "8.5.0",
     "subsink": "1.0.2",
     "tailwind-merge": "2.6.1",
