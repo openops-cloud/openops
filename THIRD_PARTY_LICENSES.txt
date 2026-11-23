@@ -24983,12 +24983,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
  - @fastify/formbody@8.0.2
- - @fastify/rate-limit@10.3.0
 
-These packages each contain the following license:
+This package contains the following license:
 
 MIT License
 
@@ -25485,6 +25484,7 @@ The following npm packages may be included in this product:
 
  - @fastify/basic-auth@6.3.1
  - @fastify/cors@11.3.1
+ - @fastify/rate-limit@11.2.2
 
 These packages each contain the following license:
 
