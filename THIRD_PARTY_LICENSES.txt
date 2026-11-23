@@ -30102,7 +30102,7 @@ The following npm packages may be included in this product:
  - mimic-response@3.1.0
  - open@10.1.0
  - open@7.4.2
- - p-limit@3.1.0
+ - p-limit@7.3.3
  - parse-json@5.2.0
  - run-applescript@7.0.0
  - sort-on@7.0.0
@@ -30113,7 +30113,7 @@ The following npm packages may be included in this product:
  - type-fest@5.10.0
  - wrap-ansi@7.0.0
  - wrap-ansi@8.1.0
- - yocto-queue@0.1.0
+ - yocto-queue@1.2.2
 
 These packages each contain the following license:
 
