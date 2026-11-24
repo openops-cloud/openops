@@ -35,7 +35,7 @@ jobs:
 
       - name: Get GitHub App token
         id: app_token
-        uses: actions/create-github-app-token@v3.3.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           client-id: ${{ vars.AGENT_GITHUB_APP_ID }}
           private-key: ${{ secrets.AGENT_GITHUB_APP_PEM }}
@@ -78,7 +78,7 @@ jobs:
           # the MCP github tools are authenticated separately and do not cover
           # raw `gh` invocations.
           GH_TOKEN: ${{ steps.app_token.outputs.token }}
-        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        uses: anthropics/claude-code-action@e5812cd75691ca7bbfc57c0ecf4441db3a1ab7dd # v1.0.281
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app_token.outputs.token }}
