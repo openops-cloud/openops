@@ -23013,7 +23013,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
- - ret@0.5.0
+ - ret@0.5.1
 
 This package contains the following license:
 
@@ -24096,7 +24096,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - fastify@5.12.7
+ - fastify@5.12.8
 
 This package contains the following license:
 
@@ -24735,7 +24735,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - find-my-way@9.9.0
+ - find-my-way@9.10.2
 
 This package contains the following license:
 
@@ -26036,7 +26036,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - safe-regex2@5.1.1
+ - safe-regex2@5.1.2
 
 This package contains the following license:
 
