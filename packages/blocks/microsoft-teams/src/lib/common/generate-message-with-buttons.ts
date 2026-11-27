@@ -1,9 +1,8 @@
-export type TeamsMessageAction = {
+import { ButtonFormSettings } from '@openops/common';
+
+export type TeamsMessageAction = ButtonFormSettings & {
   buttonText: string;
   buttonStyle: string;
-  followUpQuestion?: string;
-  answerFormat?: string;
-  noAnswerOption?: string;
 };
 
 export type TeamsMessageButton = TeamsMessageAction & { resumeUrl?: string };

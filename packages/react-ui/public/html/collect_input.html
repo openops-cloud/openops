@@ -10,11 +10,14 @@
       body {
         font-family: 'Satoshi', sans-serif;
         margin: 0;
-        padding: 0;
+        /* Keeps the logo and the last button off the window edges when the
+           form is taller than the window. */
+        padding: 32px 0;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        min-height: 100vh;
         background-color: #f9f9f9;
         color: #333;
         text-align: center;
@@ -48,7 +51,9 @@
         margin-bottom: 6px;
       }
 
-      input {
+      input,
+      select,
+      textarea {
         width: 100%;
         box-sizing: border-box;
         padding: 10px 12px;
@@ -56,12 +61,61 @@
         font-family: inherit;
         border: 1px solid #ccc;
         border-radius: 6px;
-        margin-bottom: 8px;
       }
 
-      input:focus {
+      select {
+        background-color: #fff;
+        color: #333;
+      }
+
+      /* The "Select…" entry is not an answer, so it reads as a placeholder. */
+      select.empty {
+        color: #767676;
+      }
+
+      select.empty option {
+        color: #333;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
         outline: none;
         border-color: #6e41e2;
+      }
+
+      .subtitle {
+        margin: 0 0 24px;
+        font-size: 0.95rem;
+        color: #666;
+        overflow-wrap: anywhere;
+      }
+
+      .field {
+        margin-bottom: 16px;
+      }
+
+      /* The hint and the error sit close to their own input, and well apart
+         from the next field. */
+      .field .invalid,
+      .field .invalid:focus {
+        border-color: #c0392b;
+      }
+
+      .required-mark {
+        color: #c0392b;
+        margin-left: 2px;
+      }
+
+      .hint {
+        margin: 6px 0 0;
+        text-align: left;
+        font-size: 0.85rem;
+        color: #666;
       }
 
       .error {
@@ -69,7 +123,11 @@
         text-align: left;
         color: #c0392b;
         font-size: 0.85rem;
-        margin-bottom: 8px;
+        margin: 6px 0 0;
+      }
+
+      #input-form > button {
+        margin-top: 8px;
       }
 
       button {
@@ -126,11 +184,7 @@
 
       <div id="form-view">
         <form id="input-form" novalidate>
-          <label class="field-label" for="input-value" id="input-label"
-            >Your answer</label
-          >
-          <input id="input-value" type="text" maxlength="254" />
-          <p class="error" id="input-error">Please enter a valid value.</p>
+          <div id="fields"></div>
           <button type="submit">Submit</button>
         </form>
         <div id="skip-section" class="hidden">
@@ -163,17 +217,31 @@
       const searchParams = new URLSearchParams(window.location.search);
       const redirectUrl = searchParams.get('redirectUrl');
       const isTest = searchParams.get('isTest') === 'true';
-      const question = (searchParams.get('question') || '').trim();
 
-      const ANSWER_FORMATS = ['text', 'email', 'number'];
-      const rawFormat = searchParams.get('format') || 'text';
-      const answerFormat = ANSWER_FORMATS.includes(rawFormat)
-        ? rawFormat
-        : 'text';
-
-      // The answer travels back as a fixed resume query param, surfaced in the
-      // step output as parameters.answer.
-      const ANSWER_PARAM = 'answer';
+      const FIELD_TYPES = new Set([
+        'text',
+        'email',
+        'number',
+        'select',
+        'textarea',
+      ]);
+      const LEGACY_ANSWER_FORMATS = new Set(['text', 'email', 'number']);
+      // Mirrors the reserved names in follow-up-form.ts: the resume link
+      // already uses them for routing.
+      const RESERVED_FIELD_NAMES = new Set([
+        'button',
+        'path',
+        'executionCorrelationId',
+        'isTest',
+        'actionClicked',
+        'actionType',
+        'userName',
+        '__proto__',
+        'constructor',
+        'prototype',
+      ]);
+      const FIELD_NAME_REGEX = /^[A-Za-z]\w{0,39}$/;
+      const MAX_LENGTH = { textarea: 1000, default: 254 };
 
       const EMAIL_REGEX = /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/;
       const RESUME_PATH_REGEX = /\/v1\/flow-runs\/[^/]+\/requests\/[^/]+$/;
@@ -181,8 +249,8 @@
       const formView = document.getElementById('form-view');
       const doneView = document.getElementById('done-view');
       const invalidView = document.getElementById('invalid-view');
-      const inputField = document.getElementById('input-value');
-      const inputError = document.getElementById('input-error');
+      const inputForm = document.getElementById('input-form');
+      const fieldsContainer = document.getElementById('fields');
 
       function parseResumeUrl(value) {
         if (!value) {
@@ -200,7 +268,76 @@
         }
       }
 
-      const resumeUrl = parseResumeUrl(redirectUrl);
+      // Text read from the link; anything that is not text counts as absent.
+      function textOf(value) {
+        return typeof value === 'string' ? value.trim() : '';
+      }
+
+      function isValidField(field) {
+        return (
+          field &&
+          typeof field.name === 'string' &&
+          FIELD_NAME_REGEX.test(field.name) &&
+          !RESERVED_FIELD_NAMES.has(field.name) &&
+          typeof field.label === 'string' &&
+          field.label.trim() !== '' &&
+          FIELD_TYPES.has(field.type) &&
+          (field.type !== 'select' ||
+            (Array.isArray(field.options) &&
+              field.options.length > 0 &&
+              field.options.every((option) => typeof option === 'string')))
+        );
+      }
+
+      function isValidForm(form) {
+        const fields = form && Array.isArray(form.fields) ? form.fields : [];
+        const names = fields.map((field) => field && field.name);
+        const hasDuplicates = new Set(names).size !== names.length;
+        return (
+          fields.length > 0 && !hasDuplicates && fields.every(isValidField)
+        );
+      }
+
+      function decodeBase64Url(value) {
+        const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
+        const binary = atob(base64);
+        const bytes = Uint8Array.from(binary, (char) => char.codePointAt(0));
+        return new TextDecoder().decode(bytes);
+      }
+
+      // A form link carries the whole form as base64url JSON in `form`.
+      function readFormFromLink(encodedForm) {
+        try {
+          const form = JSON.parse(decodeBase64Url(encodedForm));
+          return isValidForm(form) ? form : null;
+        } catch {
+          return null;
+        }
+      }
+
+      // Messages sent before forms existed carry a single question in the
+      // link instead, answered as `answer`.
+      // TODO: remove once those messages have expired (the step's wait
+      // timeout, 3 days by default).
+      function readQuestionFromLink() {
+        const question = (searchParams.get('question') || '').trim();
+        if (!question) {
+          return null;
+        }
+        const rawFormat = searchParams.get('format') || 'text';
+        return {
+          title: (searchParams.get('title') || '').trim(),
+          fields: [
+            {
+              name: 'answer',
+              label: question,
+              type: LEGACY_ANSWER_FORMATS.has(rawFormat) ? rawFormat : 'text',
+              required: true,
+            },
+          ],
+          skipLabel: (searchParams.get('noAnswerOption') || '').trim(),
+        };
+      }
 
       function showDone(title) {
         formView.classList.add('hidden');
@@ -213,42 +350,176 @@
         }, 20000);
       }
 
-      function isValidAnswer(value) {
-        if (!value || value.length > 254) {
-          return false;
+      function createControl(field, id) {
+        let control;
+        if (field.type === 'select') {
+          control = document.createElement('select');
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = 'Select…';
+          control.appendChild(placeholder);
+          field.options.forEach((value) => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            control.appendChild(option);
+          });
+        } else if (field.type === 'textarea') {
+          control = document.createElement('textarea');
+          control.rows = 4;
+          control.maxLength = MAX_LENGTH.textarea;
+        } else {
+          control = document.createElement('input');
+          control.type = field.type;
+          control.maxLength = MAX_LENGTH.default;
         }
-        if (answerFormat === 'email') {
-          return EMAIL_REGEX.test(value);
-        }
-        if (answerFormat === 'number') {
-          return Number.isFinite(Number(value));
-        }
-        return true;
+        control.id = id;
+        control.name = field.name;
+        return control;
       }
 
-      if (!resumeUrl || !question) {
+      // Returns what is wrong with an answer, or '' when it is fine.
+      function validationMessage(field, value, control) {
+        // A number input reports text it cannot read as an empty value.
+        if (field.type === 'number' && control.validity?.badInput) {
+          return 'Enter a number.';
+        }
+        if (!value) {
+          return field.required === false ? '' : 'This field is required.';
+        }
+        // A dropdown value comes from the list, so only typed text has a
+        // length limit.
+        if (field.type === 'select') {
+          return field.options.includes(value)
+            ? ''
+            : 'Choose one of the listed values.';
+        }
+        const maxLength =
+          field.type === 'textarea' ? MAX_LENGTH.textarea : MAX_LENGTH.default;
+        if (value.length > maxLength) {
+          return `Use at most ${maxLength} characters.`;
+        }
+        if (field.type === 'email' && !EMAIL_REGEX.test(value)) {
+          return 'Enter a valid email address.';
+        }
+        if (field.type === 'number' && !Number.isFinite(Number(value))) {
+          return 'Enter a number.';
+        }
+        return '';
+      }
+
+      // Shows or clears the error of one field and returns whether it is valid.
+      function checkField({ field, control, error }) {
+        const message = validationMessage(field, control.value.trim(), control);
+        error.textContent = message;
+        error.style.display = message ? 'block' : 'none';
+        control.classList.toggle('invalid', Boolean(message));
+        if (message) {
+          control.setAttribute('aria-invalid', 'true');
+        } else {
+          control.removeAttribute('aria-invalid');
+        }
+        return !message;
+      }
+
+      // Required marks only appear on forms with several fields, so the
+      // single-question form looks as it always has.
+      function renderField(field, index, showRequiredMark) {
+        const id = `field-${index}`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'field';
+
+        const label = document.createElement('label');
+        label.className = 'field-label';
+        label.htmlFor = id;
+        label.textContent = field.label;
+        if (showRequiredMark && field.required !== false) {
+          const mark = document.createElement('span');
+          mark.className = 'required-mark';
+          mark.setAttribute('aria-hidden', 'true');
+          mark.textContent = '*';
+          label.appendChild(mark);
+        }
+        wrapper.appendChild(label);
+
+        const control = createControl(field, id);
+        // The form has novalidate, so this only tells assistive technology
+        // that the field is required; the page shows its own errors.
+        control.required = field.required !== false;
+        wrapper.appendChild(control);
+
+        const describedBy = [];
+        if (textOf(field.hint)) {
+          const hint = document.createElement('p');
+          hint.className = 'hint';
+          hint.id = `${id}-hint`;
+          hint.textContent = field.hint;
+          wrapper.appendChild(hint);
+          describedBy.push(hint.id);
+        }
+
+        const error = document.createElement('p');
+        error.className = 'error';
+        error.id = `${id}-error`;
+        error.setAttribute('aria-live', 'polite');
+        wrapper.appendChild(error);
+        describedBy.push(error.id);
+        control.setAttribute('aria-describedby', describedBy.join(' '));
+
+        const input = { field, control, error };
+        // Once an error is showing, it follows the answer as it is corrected
+        // rather than staying until the next submit.
+        const recheck = () => {
+          if (control.tagName === 'SELECT') {
+            control.classList.toggle('empty', !control.value);
+          }
+          if (error.style.display === 'block') {
+            checkField(input);
+          }
+        };
+        control.addEventListener('input', recheck);
+        control.addEventListener('change', recheck);
+        if (control.tagName === 'SELECT') {
+          control.classList.add('empty');
+        }
+
+        fieldsContainer.appendChild(wrapper);
+        return input;
+      }
+
+      const resumeUrl = parseResumeUrl(redirectUrl);
+
+      function showInvalid() {
         formView.classList.add('hidden');
         invalidView.classList.remove('hidden');
-      } else if (isTest) {
-        showDone(
-          'Test succeeded! Actions are disabled in test mode and are only available when running the entire workflow.',
-        );
-      } else {
-        document.getElementById('input-label').textContent = question;
-        inputField.type = answerFormat;
-        document.title = question;
+      }
 
-        const title = (searchParams.get('title') || '').trim();
+      function renderForm(form) {
+        const title = textOf(form.title);
+        document.title = title || form.fields[0].label;
         if (title) {
           const titleEl = document.createElement('h2');
           titleEl.textContent = title;
-          formView.insertBefore(titleEl, document.getElementById('input-form'));
-          document.title = title;
+          inputForm.before(titleEl);
+        }
+        const subtitle = textOf(form.subtitle);
+        if (subtitle) {
+          const subtitleEl = document.createElement('p');
+          subtitleEl.className = 'subtitle';
+          subtitleEl.textContent = subtitle;
+          inputForm.before(subtitleEl);
         }
 
-        function fireResume(value) {
+        const showRequiredMark = form.fields.length > 1;
+        const inputs = form.fields.map((field, index) =>
+          renderField(field, index, showRequiredMark),
+        );
+
+        function fireResume(answers) {
           const target = new URL(resumeUrl);
-          target.searchParams.set(ANSWER_PARAM, value);
+          Object.entries(answers).forEach(([name, value]) => {
+            target.searchParams.set(name, value);
+          });
           const iframe = document.createElement('iframe');
           iframe.src = target.toString();
           iframe.style.display = 'none';
@@ -256,31 +527,65 @@
           showDone();
         }
 
-        document
-          .getElementById('input-form')
-          .addEventListener('submit', (event) => {
-            event.preventDefault();
-            const value = inputField.value.trim();
-            if (!isValidAnswer(value)) {
-              inputError.style.display = 'block';
-              return;
+        inputForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const answers = {};
+          let firstInvalid = null;
+          inputs.forEach((input) => {
+            const isValid = checkField(input);
+            if (!isValid && !firstInvalid) {
+              firstInvalid = input.control;
             }
-            inputError.style.display = 'none';
-            fireResume(value);
+            answers[input.field.name] = input.control.value.trim();
           });
+          if (firstInvalid) {
+            firstInvalid.focus();
+            return;
+          }
+          fireResume(answers);
+        });
 
-        const noAnswerOption = (
-          searchParams.get('noAnswerOption') || ''
-        ).trim();
-        if (noAnswerOption) {
+        const skipLabel = textOf(form.skipLabel);
+        if (skipLabel) {
           const skipButton = document.getElementById('skip-button');
-          skipButton.textContent = noAnswerOption;
+          skipButton.textContent = skipLabel;
           document.getElementById('skip-section').classList.remove('hidden');
+          // Skipping sends every field back empty, as the single-question
+          // form has always done with `answer`.
           skipButton.addEventListener('click', () => {
-            fireResume('');
+            const emptyAnswers = {};
+            form.fields.forEach((field) => {
+              emptyAnswers[field.name] = '';
+            });
+            fireResume(emptyAnswers);
           });
         }
       }
+
+      function start() {
+        if (!resumeUrl) {
+          showInvalid();
+          return;
+        }
+        if (isTest) {
+          showDone(
+            'Test succeeded! Actions are disabled in test mode and are only available when running the entire workflow.',
+          );
+          return;
+        }
+
+        const encodedForm = searchParams.get('form');
+        const form = encodedForm
+          ? readFormFromLink(encodedForm)
+          : readQuestionFromLink();
+        if (!form) {
+          showInvalid();
+          return;
+        }
+        renderForm(form);
+      }
+
+      start();
     </script>
   </body>
 </html>

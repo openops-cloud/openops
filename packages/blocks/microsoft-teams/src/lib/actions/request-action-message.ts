@@ -4,7 +4,11 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
-import { buildWrapperUrl } from '@openops/common';
+import {
+  buildWrapperUrl,
+  followUpFormProperty,
+  resolveButtonForm,
+} from '@openops/common';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
 import { chatExists } from '../common/chat-exists';
@@ -69,31 +73,7 @@ export const requestActionMessageAction = createAction({
             ],
           },
         }),
-        followUpQuestion: Property.ShortText({
-          displayName: 'Follow-up question',
-          description:
-            'Optionally ask a follow-up question in a popup window when this button is clicked.',
-          required: false,
-        }),
-        answerFormat: Property.StaticDropdown({
-          displayName: 'Answer format',
-          description: 'Only used when a follow-up question is set.',
-          required: false,
-          defaultValue: 'text',
-          options: {
-            options: [
-              { label: 'Text', value: 'text' },
-              { label: 'Email', value: 'email' },
-              { label: 'Number', value: 'number' },
-            ],
-          },
-        }),
-        noAnswerOption: Property.ShortText({
-          displayName: 'No answer option',
-          description:
-            "Optional text for a secondary choice when the person can't answer.",
-          required: false,
-        }),
+        followUpForm: followUpFormProperty,
       },
     }),
     timeoutInDays: Property.Number({
@@ -146,33 +126,32 @@ export const requestActionMessageAction = createAction({
         .getOrThrow(SharedSystemProp.FRONTEND_URL)
         .replace(/\/$/, '');
 
-      const preparedActions: TeamsMessageButton[] = actions.map((action) => {
-        const resumeUrl = context.generateResumeUrl(
-          {
-            queryParams: {
-              executionCorrelationId: context.run.pauseId,
-              button: action.buttonText,
+      // Resolved before anything is sent, so an invalid form fails the step
+      // instead of reaching the recipient.
+      const forms = actions.map((action) => resolveButtonForm(action, header));
+
+      const preparedActions: TeamsMessageButton[] = actions.map(
+        (action, index) => {
+          const resumeUrl = context.generateResumeUrl(
+            {
+              queryParams: {
+                executionCorrelationId: context.run.pauseId,
+                button: action.buttonText,
+              },
             },
-          },
-          apiUrl,
-        );
-        return {
-          ...action,
-          resumeUrl: buildWrapperUrl({
-            frontendUrl,
-            isTest: context.run.isTest,
-            resumeUrl,
-            followUp: action.followUpQuestion
-              ? {
-                  question: action.followUpQuestion,
-                  answerFormat: action.answerFormat,
-                  noAnswerOption: action.noAnswerOption,
-                  title: header,
-                }
-              : undefined,
-          }),
-        };
-      });
+            apiUrl,
+          );
+          return {
+            ...action,
+            resumeUrl: buildWrapperUrl({
+              frontendUrl,
+              isTest: context.run.isTest,
+              resumeUrl,
+              form: forms[index],
+            }),
+          };
+        },
+      );
 
       const result = await sendChatOrChannelMessage({
         accessToken: context.auth.access_token,

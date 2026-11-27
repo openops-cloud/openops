@@ -3,6 +3,7 @@ import {
   Property,
   Validators,
 } from '@openops/blocks-framework';
+import { followUpFormProperty } from '@openops/common';
 import { getSlackChannels, getSlackUsers } from './slack-api-request';
 
 export const slackChannel = Property.Dropdown({
@@ -158,31 +159,7 @@ export const actions = Property.Array({
       description: '',
       required: false,
     }),
-    followUpQuestion: Property.ShortText({
-      displayName: 'Follow-up question',
-      description:
-        'Optionally ask a follow-up question in a popup window when this button is clicked.',
-      required: false,
-    }),
-    answerFormat: Property.StaticDropdown({
-      displayName: 'Answer format',
-      description: 'Only used when a follow-up question is set.',
-      required: false,
-      defaultValue: 'text',
-      options: {
-        options: [
-          { label: 'Text', value: 'text' },
-          { label: 'Email', value: 'email' },
-          { label: 'Number', value: 'number' },
-        ],
-      },
-    }),
-    noAnswerOption: Property.ShortText({
-      displayName: 'No answer option',
-      description:
-        "Optional text for a secondary choice when the person can't answer.",
-      required: false,
-    }),
+    followUpForm: followUpFormProperty,
   },
 });
 

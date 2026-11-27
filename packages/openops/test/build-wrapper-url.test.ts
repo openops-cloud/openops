@@ -1,4 +1,5 @@
 import { buildWrapperUrl } from '../src/lib/build-wrapper-url';
+import { parseFollowUpForm } from '../src/lib/follow-up-form';
 
 const baseParams = {
   frontendUrl: 'https://app.openops.com',
@@ -9,8 +10,28 @@ const baseParams = {
 
 const encodedResumeUrl = encodeURIComponent(baseParams.resumeUrl);
 
+const form = parseFollowUpForm({
+  title: 'Request an exception',
+  subtitle: 'sqlserver-rds-dev',
+  fields: [
+    {
+      name: 'reason',
+      label: 'Exception reason',
+      type: 'select',
+      options: ['VendorSet', 'Decommissioning'],
+    },
+    { name: 'justification', label: 'Justification', type: 'textarea' },
+  ],
+});
+
+// Mirrors how collect_input.html reads the form param.
+function readForm(url: string): { title?: string } {
+  const encoded = new URL(url).searchParams.get('form') ?? '';
+  return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+}
+
 describe('buildWrapperUrl', () => {
-  test('uses the default resume page when no follow-up question is given', () => {
+  test('uses the resume page for a button without a form', () => {
     const url = buildWrapperUrl(baseParams);
 
     expect(url).toBe(
@@ -18,84 +39,48 @@ describe('buildWrapperUrl', () => {
     );
   });
 
-  test('uses the collect-input page when a follow-up question is given', () => {
-    const url = buildWrapperUrl({
-      ...baseParams,
-      followUp: {
-        question: "What is the correct owner's email?",
-        answerFormat: 'email',
-      },
-    });
+  test('uses the collect-input page and carries the whole form in one param', () => {
+    const url = buildWrapperUrl({ ...baseParams, form });
 
     const parsed = new URL(url);
     expect(parsed.origin).toBe('https://app.openops.com');
     expect(parsed.pathname).toBe('/html/collect_input.html');
-    expect(parsed.searchParams.get('question')).toBe(
-      "What is the correct owner's email?",
-    );
-    expect(parsed.searchParams.get('format')).toBe('email');
-    expect(parsed.searchParams.get('isTest')).toBe('false');
+    expect([...parsed.searchParams.keys()]).toEqual([
+      'isTest',
+      'form',
+      'redirectUrl',
+    ]);
+    expect(parsed.searchParams.get('form')).toMatch(/^[A-Za-z0-9_-]+$/);
     expect(parsed.searchParams.get('redirectUrl')).toBe(baseParams.resumeUrl);
+    expect(readForm(url)).toEqual(form);
   });
 
-  test('includes the message header as the form title when given', () => {
+  test('keeps non-Latin text intact', () => {
     const url = buildWrapperUrl({
       ...baseParams,
-      followUp: {
-        question: 'Who owns this?',
-        title: 'Cost savings opportunity: vol-123',
-      },
+      form: { ...form, subtitle: 'ресурс – 資源' },
     });
 
-    expect(new URL(url).searchParams.get('title')).toBe(
-      'Cost savings opportunity: vol-123',
+    expect(readForm(url)).toEqual({ ...form, subtitle: 'ресурс – 資源' });
+  });
+
+  test('cuts a long form heading so the link stays within Slack limits', () => {
+    const url = buildWrapperUrl({
+      ...baseParams,
+      form: { ...form, title: 'x'.repeat(400) },
+    });
+
+    const title = readForm(url).title ?? '';
+    expect(title).toHaveLength(150);
+    expect(title.endsWith('…')).toBe(true);
+  });
+
+  test.each([true, false])('passes isTest=%p through', (isTest) => {
+    expect(buildWrapperUrl({ ...baseParams, isTest })).toContain(
+      `isTest=${isTest}`,
     );
-  });
-
-  test('includes the no-answer option when given', () => {
-    const url = buildWrapperUrl({
-      ...baseParams,
-      followUp: {
-        question: "What is the correct owner's email?",
-        noAnswerOption: "I don't know the owner",
-      },
-    });
-
-    expect(new URL(url).searchParams.get('noAnswerOption')).toBe(
-      "I don't know the owner",
+    expect(buildWrapperUrl({ ...baseParams, isTest, form })).toContain(
+      `isTest=${isTest}`,
     );
-  });
-
-  test('omits the no-answer option param when not given', () => {
-    const url = buildWrapperUrl({
-      ...baseParams,
-      followUp: { question: 'Why was this dismissed?' },
-    });
-
-    expect(new URL(url).searchParams.has('noAnswerOption')).toBe(false);
-  });
-
-  test('ignores a follow-up with an empty question', () => {
-    const url = buildWrapperUrl({
-      ...baseParams,
-      followUp: { question: '   ' },
-    });
-
-    expect(url).toContain('/html/resume_execution.html?');
-  });
-
-  test('defaults the answer format to text for unknown formats', () => {
-    const url = buildWrapperUrl({
-      ...baseParams,
-      followUp: { question: 'Why?', answerFormat: 'dropdown' },
-    });
-
-    expect(new URL(url).searchParams.get('format')).toBe('text');
-  });
-
-  test('passes isTest through', () => {
-    const url = buildWrapperUrl({ ...baseParams, isTest: true });
-
-    expect(url).toContain('isTest=true');
   });
 });
