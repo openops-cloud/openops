@@ -1,58 +1,51 @@
+import { encodeFollowUpForm, FollowUpForm } from './follow-up-form';
+
 const RESUME_PAGE = 'resume_execution.html';
 const COLLECT_INPUT_PAGE = 'collect_input.html';
 
-const ANSWER_FORMATS = new Set(['text', 'email', 'number']);
-const DEFAULT_ANSWER_FORMAT = 'text';
+// Slack rejects a whole message when one of its button URLs is longer than
+// this. It is the strictest limit known for a channel, so anything that
+// sizes a form (the Slack block, a settings check) should use it.
+export const MAX_BUTTON_URL_LENGTH = 3000;
 
-export type ButtonFollowUp = {
-  question: string;
-  answerFormat?: string;
-  noAnswerOption?: string;
-  title?: string;
-};
+// The heading is display-only on the form; cutting it keeps the link well
+// under MAX_BUTTON_URL_LENGTH.
+const MAX_TITLE_LENGTH = 150;
 
-// The collect-input page sends the answer back as the `answer` resume query
-// param, surfaced in the step output as parameters.answer.
+function cutTitle(title: string): string {
+  return title.length > MAX_TITLE_LENGTH
+    ? `${title.slice(0, MAX_TITLE_LENGTH - 1)}…`
+    : title;
+}
+
+// Builds the link behind a message button. A button with a form opens the
+// collect-input page, which reads the whole form from the link and sends
+// each answer back as a resume query param, surfaced in the step output as
+// parameters.<field name>. Any other button opens the page that resumes the
+// flow directly.
 export function buildWrapperUrl({
   frontendUrl,
   isTest,
   resumeUrl,
-  followUp,
+  form,
 }: {
   frontendUrl: string;
   isTest: boolean;
   resumeUrl: string;
-  followUp?: ButtonFollowUp;
+  form?: FollowUpForm;
 }): string {
-  const question = followUp?.question?.trim();
-
-  if (!question) {
-    return `${frontendUrl}/html/${RESUME_PAGE}?isTest=${isTest}&redirectUrl=${encodeURIComponent(
-      resumeUrl,
-    )}`;
+  if (form) {
+    const params = new URLSearchParams({
+      isTest: String(isTest),
+      form: encodeFollowUpForm(
+        form.title ? { ...form, title: cutTitle(form.title) } : form,
+      ),
+      redirectUrl: resumeUrl,
+    });
+    return `${frontendUrl}/html/${COLLECT_INPUT_PAGE}?${params.toString()}`;
   }
 
-  const format =
-    followUp?.answerFormat && ANSWER_FORMATS.has(followUp.answerFormat)
-      ? followUp.answerFormat
-      : DEFAULT_ANSWER_FORMAT;
-
-  const params = new URLSearchParams({
-    isTest: String(isTest),
-    question,
-    format,
-    redirectUrl: resumeUrl,
-  });
-
-  const noAnswerOption = followUp?.noAnswerOption?.trim();
-  if (noAnswerOption) {
-    params.set('noAnswerOption', noAnswerOption);
-  }
-
-  const title = followUp?.title?.trim();
-  if (title) {
-    params.set('title', title);
-  }
-
-  return `${frontendUrl}/html/${COLLECT_INPUT_PAGE}?${params.toString()}`;
+  return `${frontendUrl}/html/${RESUME_PAGE}?isTest=${isTest}&redirectUrl=${encodeURIComponent(
+    resumeUrl,
+  )}`;
 }

@@ -343,7 +343,7 @@ describe('requestActionMessageAction', () => {
     );
   });
 
-  describe('follow-up question buttons', () => {
+  describe('follow-up question buttons from flows built before forms existed', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
@@ -386,10 +386,22 @@ describe('requestActionMessageAction', () => {
 
       expect(followUpButton.url).toContain('/html/collect_input.html?');
       const params = new URL(followUpButton.url).searchParams;
-      expect(params.get('question')).toBe("What is the correct owner's email?");
-      expect(params.get('format')).toBe('email');
-      expect(params.get('noAnswerOption')).toBe("I don't know the owner");
-      expect(params.get('title')).toBe('Header Text');
+      const form = JSON.parse(
+        Buffer.from(params.get('form') ?? '', 'base64url').toString('utf8'),
+      );
+      expect(params.has('question')).toBe(false);
+      expect(form).toEqual({
+        title: 'Header Text',
+        fields: [
+          {
+            name: 'answer',
+            label: "What is the correct owner's email?",
+            type: 'email',
+            required: true,
+          },
+        ],
+        skipLabel: "I don't know the owner",
+      });
       expect(params.get('redirectUrl')).toContain(
         'executionCorrelationId=pause_123',
       );
@@ -438,6 +450,136 @@ describe('requestActionMessageAction', () => {
         value: ':game_die: Reroll',
         displayText: '🎲 Reroll',
       });
+    });
+  });
+
+  describe('follow-up form buttons', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      waitForInteractionMock.mockImplementation(async (messageObj: any) =>
+        Promise.resolve({ ...messageObj }),
+      );
+      slackSendMessageMock.mockImplementation(async (message: any) =>
+        Promise.resolve(message),
+      );
+    });
+
+    const exceptionForm = {
+      title: 'Request an exception',
+      fields: [
+        {
+          name: 'reason',
+          label: 'Exception reason',
+          type: 'select',
+          options: ['VendorSet'],
+        },
+        { name: 'justification', label: 'Justification', type: 'textarea' },
+      ],
+    };
+
+    function buildContextWithForm(followUpForm: unknown): any {
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.propsValue.actions.push({
+        buttonText: 'Add exception',
+        buttonStyle: '',
+        followUpForm,
+      });
+      mockContext.run.isTest = false;
+      mockContext.generateResumeUrl.mockImplementation(
+        ({ queryParams }: any) =>
+          `https://example.com/resume?${new URLSearchParams(queryParams)}`,
+      );
+      return mockContext;
+    }
+
+    function readForm(url: string): any {
+      const encoded = new URL(url).searchParams.get('form') ?? '';
+      return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+    }
+
+    function formButtonUrl(result: any): string {
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      return actionBlock.elements[1].url;
+    }
+
+    test('should give the form button a collect_input url carrying the form', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const result = (await requestActionMessageAction.run(
+        buildContextWithForm(exceptionForm),
+      )) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      expect(actionBlock.elements[0].url).not.toBeDefined();
+      expect(formButtonUrl(result)).toContain('/html/collect_input.html?');
+      expect(readForm(formButtonUrl(result))).toEqual({
+        title: 'Request an exception',
+        fields: [
+          {
+            name: 'reason',
+            label: 'Exception reason',
+            type: 'select',
+            options: ['VendorSet'],
+            required: true,
+          },
+          {
+            name: 'justification',
+            label: 'Justification',
+            type: 'textarea',
+            required: true,
+          },
+        ],
+      });
+      expect(result.eventPayload.followUpActions).toEqual(['Add exception']);
+    });
+
+    test('should not add a heading to a form that has no title', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const result = (await requestActionMessageAction.run(
+        buildContextWithForm({ ...exceptionForm, title: undefined }),
+      )) as any;
+
+      expect(readForm(formButtonUrl(result)).title).toBeUndefined();
+    });
+
+    test('should fail before sending when the form makes the button link longer than Slack allows', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+      const options = Array.from({ length: 200 }, (_, i) => `Reason-${i}`);
+
+      await expect(
+        requestActionMessageAction.run(
+          buildContextWithForm({
+            fields: [
+              { name: 'reason', label: 'Reason', type: 'select', options },
+            ],
+          }),
+        ),
+      ).rejects.toThrow(
+        /The link of button "Add exception" is too long for Slack \(\d+ of 3000 characters\)\. Shorten its follow-up form/,
+      );
+      expect(slackSendMessageMock).not.toHaveBeenCalled();
+    });
+
+    test('should treat an empty form setting as a plain button', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      const result = (await requestActionMessageAction.run(
+        buildContextWithForm({}),
+      )) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      expect(actionBlock.elements[1].url).not.toBeDefined();
+      expect(result.eventPayload.followUpActions).toEqual([]);
+    });
+
+    test('should fail before sending when the form is invalid', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+
+      await expect(
+        requestActionMessageAction.run(buildContextWithForm({ fields: [] })),
+      ).rejects.toThrow(/Invalid follow-up form/);
+      expect(slackSendMessageMock).not.toHaveBeenCalled();
     });
   });
 

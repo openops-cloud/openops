@@ -1,5 +1,11 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
-import { buildWrapperUrl } from '@openops/common';
+import {
+  buildWrapperUrl,
+  ButtonFormSettings,
+  FollowUpForm,
+  MAX_BUTTON_URL_LENGTH,
+  resolveButtonForm,
+} from '@openops/common';
 import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
@@ -112,9 +118,14 @@ const sendMessageAskingForAction = async (
   const enableSlackInteractions =
     system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
 
+  // Resolved before anything is sent, so an invalid form fails the step
+  // instead of reaching the recipient.
+  actions.forEach((action: SlackActionDefinition) => {
+    action.form = resolveButtonForm(action, headerText);
+  });
+
   const buttonsNeedingUrl = actions.filter(
-    (action: SlackActionDefinition) =>
-      !enableSlackInteractions || action.followUpQuestion,
+    (action: SlackActionDefinition) => !enableSlackInteractions || action.form,
   );
 
   if (buttonsNeedingUrl.length) {
@@ -123,7 +134,7 @@ const sendMessageAskingForAction = async (
       .getOrThrow(SharedSystemProp.FRONTEND_URL)
       .replace(/\/$/, '');
 
-    buttonsNeedingUrl.forEach((action: SlackActionDefinition) => {
+    for (const action of buttonsNeedingUrl as SlackActionDefinition[]) {
       const resumeUrl = context.generateResumeUrl(
         {
           queryParams: {
@@ -140,22 +151,25 @@ const sendMessageAskingForAction = async (
         frontendUrl,
         isTest: context.run.isTest,
         resumeUrl,
-        followUp: action.followUpQuestion
-          ? {
-              question: action.followUpQuestion,
-              answerFormat: action.answerFormat,
-              noAnswerOption: action.noAnswerOption,
-              title: headerText,
-            }
-          : undefined,
+        form: action.form,
       });
-    });
+      // Slack rejects the whole message when a button URL is longer, so the
+      // recipient would get nothing; fail the step with the reason instead.
+      if (action.url.length > MAX_BUTTON_URL_LENGTH) {
+        const advice = action.form
+          ? ' Shorten its follow-up form, for example the list of options.'
+          : '';
+        throw new Error(
+          `The link of button "${action.buttonText}" is too long for Slack (${action.url.length} of ${MAX_BUTTON_URL_LENGTH} characters).${advice}`,
+        );
+      }
+    }
   }
 
   // Stored normalized because Slack interaction payloads return button text
   // in emoji-shortcode form, which is what the interactions endpoint compares.
   const followUpActions = actions
-    .filter((action: SlackActionDefinition) => action.followUpQuestion)
+    .filter((action: SlackActionDefinition) => action.form)
     .map((action: SlackActionDefinition) =>
       normalizeEmojiString(action.buttonText),
     );
@@ -203,14 +217,12 @@ interface ConfirmationPrompt {
   confirm: SlackText;
 }
 
-interface SlackActionDefinition {
+interface SlackActionDefinition extends ButtonFormSettings {
   buttonText: string;
   buttonStyle: string;
   confirmationPrompt: boolean;
   confirmationPromptText: string;
-  followUpQuestion?: string;
-  answerFormat?: string;
-  noAnswerOption?: string;
+  form?: FollowUpForm;
   url?: string;
 }
 
