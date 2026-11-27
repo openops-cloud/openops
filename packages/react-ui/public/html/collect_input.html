@@ -218,11 +218,17 @@
       const redirectUrl = searchParams.get('redirectUrl');
       const isTest = searchParams.get('isTest') === 'true';
 
-      const FIELD_TYPES = ['text', 'email', 'number', 'select', 'textarea'];
-      const LEGACY_ANSWER_FORMATS = ['text', 'email', 'number'];
+      const FIELD_TYPES = new Set([
+        'text',
+        'email',
+        'number',
+        'select',
+        'textarea',
+      ]);
+      const LEGACY_ANSWER_FORMATS = new Set(['text', 'email', 'number']);
       // Mirrors the reserved names in follow-up-form.ts: the resume link
       // already uses them for routing.
-      const RESERVED_FIELD_NAMES = [
+      const RESERVED_FIELD_NAMES = new Set([
         'button',
         'path',
         'executionCorrelationId',
@@ -233,8 +239,8 @@
         '__proto__',
         'constructor',
         'prototype',
-      ];
-      const FIELD_NAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{0,39}$/;
+      ]);
+      const FIELD_NAME_REGEX = /^[A-Za-z]\w{0,39}$/;
       const MAX_LENGTH = { textarea: 1000, default: 254 };
 
       const EMAIL_REGEX = /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/;
@@ -272,10 +278,10 @@
           field &&
           typeof field.name === 'string' &&
           FIELD_NAME_REGEX.test(field.name) &&
-          !RESERVED_FIELD_NAMES.includes(field.name) &&
+          !RESERVED_FIELD_NAMES.has(field.name) &&
           typeof field.label === 'string' &&
           field.label.trim() !== '' &&
-          FIELD_TYPES.includes(field.type) &&
+          FIELD_TYPES.has(field.type) &&
           (field.type !== 'select' ||
             (Array.isArray(field.options) &&
               field.options.length > 0 &&
@@ -293,9 +299,9 @@
       }
 
       function decodeBase64Url(value) {
-        const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+        const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
         const binary = atob(base64);
-        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        const bytes = Uint8Array.from(binary, (char) => char.codePointAt(0));
         return new TextDecoder().decode(bytes);
       }
 
@@ -325,9 +331,7 @@
             {
               name: 'answer',
               label: question,
-              type: LEGACY_ANSWER_FORMATS.includes(rawFormat)
-                ? rawFormat
-                : 'text',
+              type: LEGACY_ANSWER_FORMATS.has(rawFormat) ? rawFormat : 'text',
               required: true,
             },
           ],
@@ -492,14 +496,14 @@
         if (title) {
           const titleEl = document.createElement('h2');
           titleEl.textContent = title;
-          formView.insertBefore(titleEl, inputForm);
+          inputForm.before(titleEl);
         }
         const subtitle = textOf(form.subtitle);
         if (subtitle) {
           const subtitleEl = document.createElement('p');
           subtitleEl.className = 'subtitle';
           subtitleEl.textContent = subtitle;
-          formView.insertBefore(subtitleEl, inputForm);
+          inputForm.before(subtitleEl);
         }
 
         const showRequiredMark = form.fields.length > 1;

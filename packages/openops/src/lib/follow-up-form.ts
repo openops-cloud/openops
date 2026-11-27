@@ -46,7 +46,7 @@ export const RESERVED_FOLLOW_UP_FIELD_NAMES = new Set([
 type RawField = Partial<Record<keyof FollowUpFormField, unknown>>;
 type RawForm = Partial<Record<keyof FollowUpForm, unknown>>;
 
-const FIELD_NAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{0,39}$/;
+const FIELD_NAME_REGEX = /^[A-Za-z]\w{0,39}$/;
 const MAX_FIELDS = 10;
 
 function fail(reason: string): never {
@@ -126,7 +126,7 @@ export function parseFollowUpForm(value: unknown): FollowUpForm {
     fail(`it can have at most ${MAX_FIELDS} fields`);
   }
 
-  const fields = raw.fields.map(parseField);
+  const fields = raw.fields.map((field, index) => parseField(field, index));
   const names = fields.map((field) => field.name);
   const duplicate = names.find((name, i) => names.indexOf(name) !== i);
   if (duplicate) {
