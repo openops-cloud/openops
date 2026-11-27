@@ -310,6 +310,25 @@ describe('collect_input.html', () => {
     expect(resumedWith(document)).toMatchObject({ value: valid });
   });
 
+  test('accepts a dropdown value longer than the limit for typed text', () => {
+    const longOption = 'x'.repeat(300);
+    const document = openForm({
+      fields: [
+        {
+          name: 'reason',
+          label: 'Reason',
+          type: 'select',
+          options: [longOption],
+        },
+      ],
+    });
+    control(document, 'reason').value = longOption;
+
+    submit(document);
+
+    expect(resumedWith(document)).toMatchObject({ reason: longOption });
+  });
+
   describe('with a link sent before forms existed', () => {
     const legacyUrl = `${ORIGIN}/html/collect_input.html?${new URLSearchParams({
       isTest: 'false',

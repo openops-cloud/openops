@@ -387,6 +387,13 @@
         if (!value) {
           return field.required === false ? '' : 'This field is required.';
         }
+        // A dropdown value comes from the list, so only typed text has a
+        // length limit.
+        if (field.type === 'select') {
+          return field.options.includes(value)
+            ? ''
+            : 'Choose one of the listed values.';
+        }
         const maxLength =
           field.type === 'textarea' ? MAX_LENGTH.textarea : MAX_LENGTH.default;
         if (value.length > maxLength) {
@@ -397,9 +404,6 @@
         }
         if (field.type === 'number' && !Number.isFinite(Number(value))) {
           return 'Enter a number.';
-        }
-        if (field.type === 'select' && !field.options.includes(value)) {
-          return 'Choose one of the listed values.';
         }
         return '';
       }
